@@ -34,11 +34,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The app displays a dark-themed shell with the black/white grid layout and accent color variables (blue, red, green, yellow) defined
   3. TypeScript compilation passes with strict mode enabled
   4. The project structure has clear directories for components, hooks, stores, and API modules
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Scaffold Vite project, dark theme, AppShell with floating overlay regions
 
 ### Phase 2: Base Map
 **Goal**: Users see an interactive 2.5D map of Iran and can navigate it freely
@@ -176,7 +175,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffolding & Theme | 0/? | Not started | - |
+| 1. Project Scaffolding & Theme | 0/1 | Not started | - |
 | 2. Base Map | 0/? | Not started | - |
 | 3. API Proxy | 0/? | Not started | - |
 | 4. Flight Data Feed | 0/? | Not started | - |
