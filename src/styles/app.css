@@ -1,1 +1,48 @@
-/* Theme tokens added in Task 2 */
+@import "tailwindcss";
+
+@theme {
+  /* Accent colors with semantic meaning */
+  --color-accent-blue: oklch(0.623 0.214 259.1);
+  --color-accent-red: oklch(0.577 0.245 27.33);
+  --color-accent-green: oklch(0.723 0.219 149.58);
+  --color-accent-yellow: oklch(0.795 0.184 86.05);
+
+  /* Surface colors for overlays */
+  --color-surface: oklch(0.145 0 0);
+  --color-surface-elevated: oklch(0.185 0 0);
+  --color-surface-overlay: oklch(0.165 0 0 / 85%);
+
+  /* Text colors */
+  --color-text-primary: oklch(0.95 0 0);
+  --color-text-secondary: oklch(0.7 0 0);
+  --color-text-muted: oklch(0.5 0 0);
+
+  /* Border */
+  --color-border: oklch(1 0 0 / 10%);
+  --color-border-accent: oklch(1 0 0 / 20%);
+
+  /* Z-index scale */
+  --z-map: 0;
+  --z-overlay: 10;
+  --z-panel: 20;
+  --z-controls: 30;
+  --z-modal: 40;
+
+  /* Layout dimensions */
+  --width-detail-panel: 320px;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
