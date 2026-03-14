@@ -111,9 +111,9 @@ export function BaseMap() {
           type="hillshade"
           source="terrain-dem"
           paint={{
-            'hillshade-exaggeration': 0.3,
+            'hillshade-exaggeration': 0.6,
             'hillshade-shadow-color': '#000000',
-            'hillshade-highlight-color': '#222222',
+            'hillshade-highlight-color': '#444444',
           }}
         />
         <NavigationControl

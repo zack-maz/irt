@@ -2,7 +2,7 @@ export const INITIAL_VIEW_STATE = {
   longitude: 53.7,
   latitude: 32.4,
   zoom: 5.5,
-  pitch: 35,
+  pitch: 50,
   bearing: 0,
 };
 
@@ -16,7 +16,7 @@ export const TERRAIN_SOURCE_TILES = [
 ];
 export const TERRAIN_ENCODING = 'terrarium' as const;
 
-export const TERRAIN_CONFIG = { source: 'terrain-dem', exaggeration: 1.5 };
+export const TERRAIN_CONFIG = { source: 'terrain-dem', exaggeration: 3.0 };
 
 // CARTO Dark Matter layer IDs for style customization
 export const ROAD_LABEL_LAYERS = [
