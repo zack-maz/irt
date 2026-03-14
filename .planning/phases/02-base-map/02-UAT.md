@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 02-base-map
 source: [02-01-SUMMARY.md, 02-02-PLAN.md must_haves]
 started: 2026-03-14T23:00:00Z
@@ -86,25 +86,38 @@ skipped: 0
   reason: "User reported: I'm not seeing any mountain range bumps"
   severity: major
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "DEM tile source URL in constants.ts points to MapLibre demo tileset (jaxa_terrainrgb_N047E011) which only covers the European Alps. All terrain tile requests for Iran return HTTP 404."
+  artifacts:
+    - path: "src/components/map/constants.ts"
+      issue: "TERRAIN_SOURCE_URL points to Alps-only demo tileset"
+  missing:
+    - "Replace demo terrain URL with global DEM tileset (AWS Terrarium tiles or MapTiler)"
+  debug_session: ".planning/debug/terrain-bumps-not-visible.md"
 - truth: "Loading screen pulse animation ripples across entire screen while map loads"
   status: failed
   reason: "User reported: Make the pulse ripple across the entire screen while loading"
   severity: minor
   test: 12
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Current animation is a tiny 12px dot with Tailwind animate-pulse (opacity oscillation only). No scale/ripple keyframes exist. User wants full-screen expanding ripple rings."
+  artifacts:
+    - path: "src/components/map/MapLoadingScreen.tsx"
+      issue: "Inner element is a small dot with animate-pulse instead of full-screen ripple"
+    - path: "src/styles/app.css"
+      issue: "No custom @keyframes ripple animation defined"
+  missing:
+    - "Add @keyframes ripple with scale + opacity animation to app.css"
+    - "Replace small dot with expanding ripple ring elements in MapLoadingScreen"
   debug_session: ""
 - truth: "A subtle dark gradient frames the viewport edges, giving a looking through a scope feel"
   status: failed
   reason: "User reported: No subtle gradient. If you make one, keep it very faint"
   severity: minor
   test: 11
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "MapVignette rendered before Map component in BaseMap.tsx DOM order. MapLibre's positioned container (.maplibregl-map) paints on top of earlier siblings, occluding the vignette despite z-index."
+  artifacts:
+    - path: "src/components/map/BaseMap.tsx"
+      issue: "MapVignette at line 89 rendered before Map (lines 90-127) — should be after"
+  missing:
+    - "Move MapVignette after the closing Map tag in BaseMap.tsx"
+    - "Ensure vignette gradient is very faint per user preference"
+  debug_session: ".planning/debug/vignette-not-visible.md"
