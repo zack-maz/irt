@@ -12,10 +12,10 @@ This roadmap delivers a personal real-time intelligence dashboard for monitoring
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Project Scaffolding & Theme** - React/Vite/TypeScript project with dark theme layout shell
-- [ ] **Phase 2: Base Map** - Interactive 2.5D map of Iran with pan, zoom, rotate
+- [x] **Phase 1: Project Scaffolding & Theme** - React/Vite/TypeScript project with dark theme layout shell
+- [x] **Phase 2: Base Map** - Interactive 2.5D map of Iran with pan, zoom, rotate
 - [ ] **Phase 3: API Proxy** - Express backend for CORS handling, API key management, data normalization
-- [ ] **Phase 4: Flight Data Feed** - Live flight tracking via OpenSky Network with ~5s refresh
+- [x] **Phase 4: Flight Data Feed** - Live flight tracking via OpenSky Network with ~5s refresh (completed 2026-03-15)
 - [ ] **Phase 5: Entity Rendering** - Type-specific entity markers on the map
 - [ ] **Phase 6: Ship & Conflict Data Feeds** - AIS ship tracking and ACLED conflict event data
 - [ ] **Phase 7: Layer Controls & News Toggle** - Layer visibility toggles and news content control
@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Vite project, dark theme, AppShell with floating overlay regions
+- [x] 01-01-PLAN.md — Scaffold Vite project, dark theme, AppShell with floating overlay regions
 
 ### Phase 2: Base Map
 **Goal**: Users see an interactive 2.5D map of Iran and can navigate it freely
@@ -47,11 +47,12 @@ Plans:
   1. A 2.5D map renders centered on Iran using Deck.gl + MapLibre with the dark base style
   2. User can pan, zoom, and rotate/tilt the map smoothly with mouse and keyboard
   3. The map fills the main content area of the dark-themed layout
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Install map deps, create mapStore + DeckGLOverlay + test mocks + Wave 0 stubs
-- [ ] 02-02-PLAN.md — Build BaseMap with overlays (vignette, loading, coords, compass), wire into AppShell
+- [x] 02-01-PLAN.md — Install map deps, create mapStore + DeckGLOverlay + test mocks + Wave 0 stubs
+- [x] 02-02-PLAN.md — Build BaseMap with overlays (vignette, loading, coords, compass), wire into AppShell
+- [x] 02-03-PLAN.md — Fix terrain tiles (global DEM), full-screen ripple loading, faint vignette (UAT gap closure)
 
 ### Phase 3: API Proxy
 **Goal**: A backend proxy handles all external API calls, shielding the frontend from CORS issues and API key exposure
@@ -62,11 +63,12 @@ Plans:
   2. API keys are stored in environment variables and never exposed to the browser
   3. Proxy returns normalized data in a common `MapEntity` format
   4. CORS headers are correctly set so the React frontend can fetch from the proxy without errors
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [x] 03-01-PLAN.md — Server foundation: Express 5 scaffold, MapEntity types, config, cache, dev workflow
+- [x] 03-02-PLAN.md — Data adapters: OpenSky, AISStream, ACLED with routes, normalization, and tests
+- [ ] 03-03-PLAN.md — Fix eager config crash and missing .env dev script failure (UAT gap closure)
 
 ### Phase 4: Flight Data Feed
 **Goal**: Live flight positions in the Iran region stream into the application at near-real-time refresh rates
@@ -77,10 +79,11 @@ Plans:
   2. Data refreshes approximately every 5 seconds without manual user action
   3. Flight data is stored in the Zustand state and available for rendering
   4. Stale or dropped connections are handled gracefully (auto-retry, no crash)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Server-side: onGround filter, unidentified flag, cache-first route optimization
+- [ ] 04-02-PLAN.md — Frontend: Zustand flight store, polling hook with tab visibility, Vite dev proxy
 
 ### Phase 5: Entity Rendering
 **Goal**: All data entities appear on the map as visually distinct, type-specific markers
@@ -176,10 +179,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffolding & Theme | 0/1 | Not started | - |
-| 2. Base Map | 0/2 | Not started | - |
-| 3. API Proxy | 0/? | Not started | - |
-| 4. Flight Data Feed | 0/? | Not started | - |
+| 1. Project Scaffolding & Theme | 1/1 | Complete | 2026-03-14 |
+| 2. Base Map | 3/3 | Complete | 2026-03-14 |
+| 3. API Proxy | 2/3 | In progress (gap closure) | - |
+| 4. Flight Data Feed | 0/2 | Complete    | 2026-03-15 |
 | 5. Entity Rendering | 0/? | Not started | - |
 | 6. Ship & Conflict Data Feeds | 0/? | Not started | - |
 | 7. Layer Controls & News Toggle | 0/? | Not started | - |

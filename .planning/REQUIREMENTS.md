@@ -7,12 +7,12 @@
 
 ### Map & Visualization
 
-- [ ] **MAP-01**: Interactive 2.5D dark map with pan, zoom, rotate (Deck.gl + MapLibre)
+- [x] **MAP-01**: Interactive 2.5D dark map with pan, zoom, rotate (Deck.gl + MapLibre)
 - [ ] **MAP-02**: Entity markers with type-specific icons (ships, flights, missiles, drones)
 
 ### Data Feeds
 
-- [ ] **DATA-01**: Flight tracking via OpenSky/ADS-B (~5s refresh)
+- [x] **DATA-01**: Flight tracking via OpenSky/ADS-B (~5s refresh)
 - [ ] **DATA-02**: Ship tracking via AIS data (~30-60s refresh)
 - [ ] **DATA-03**: Conflict event data via ACLED API (1-5 min polling)
 
@@ -29,7 +29,7 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Express API proxy for CORS handling, API key management, and data normalization
+- [x] **INFRA-01**: Express API proxy for CORS handling, API key management, and data normalization
 - [x] **INFRA-02**: Dark theme with clean grid layout (black/white primary, blue/red/green/yellow accents only)
 
 ## v2 Requirements
@@ -69,9 +69,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | Phase 2 | Pending |
+| MAP-01 | Phase 2 | Complete |
 | MAP-02 | Phase 5 | Pending |
-| DATA-01 | Phase 4 | Pending |
+| DATA-01 | Phase 4 | Complete |
 | DATA-02 | Phase 6 | Pending |
 | DATA-03 | Phase 6 | Pending |
 | CTRL-01 | Phase 7 | Pending |
@@ -79,7 +79,7 @@
 | CTRL-03 | Phase 9 | Pending |
 | CTRL-04 | Phase 7 | Pending |
 | STAT-01 | Phase 10 | Pending |
-| INFRA-01 | Phase 3 | Pending |
+| INFRA-01 | Phase 3 | Complete |
 | INFRA-02 | Phase 1 | Complete |
 
 **Coverage:**

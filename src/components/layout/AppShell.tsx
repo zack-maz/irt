@@ -3,8 +3,12 @@ import { CountersSlot } from '@/components/layout/CountersSlot';
 import { LayerTogglesSlot } from '@/components/layout/LayerTogglesSlot';
 import { FiltersSlot } from '@/components/layout/FiltersSlot';
 import { DetailPanelSlot } from '@/components/layout/DetailPanelSlot';
+import { BaseMap } from '@/components/map/BaseMap';
+import { useFlightPolling } from '@/hooks/useFlightPolling';
 
 export function AppShell() {
+  useFlightPolling();
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">
       {/* Map container - fills viewport */}
@@ -12,8 +16,7 @@ export function AppShell() {
         data-testid="map-container"
         className="absolute inset-0 z-[var(--z-map)]"
       >
-        {/* Map component will be injected here in Phase 2 */}
-        <div className="h-full w-full bg-surface" />
+        <BaseMap />
       </div>
 
       {/* Top-left: Title */}
