@@ -9,15 +9,20 @@ const flightCache = new EntityCache<FlightEntity[]>(CACHE_TTL.flights);
 export const flightsRouter = Router();
 
 flightsRouter.get('/', async (_req, res) => {
+  // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
+  const cached = flightCache.get();
+  if (cached && !cached.stale) {
+    return res.json(cached);
+  }
+
   try {
     const flights = await fetchFlights(IRAN_BBOX);
     flightCache.set(flights);
     res.json({ data: flights, stale: false, lastFresh: Date.now() });
   } catch (err) {
     console.error('[flights] upstream error:', (err as Error).message);
-    const cached = flightCache.get();
     if (cached) {
-      res.json(cached);
+      res.json(cached); // Serve stale cache on error
     } else {
       throw err; // Express 5 catches and forwards to errorHandler
     }
