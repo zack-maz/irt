@@ -4,15 +4,28 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
-### Phase 3: API Proxy (Planned)
-- Express 5 backend with CORS handling and API key management
+## [v0.3.0] - 2026-03-15
+
+### Phase 3: API Proxy
+
+#### Added
+- Express 5 server on port 3001 with health check endpoint
 - MapEntity discriminated union types (flight, ship, missile, drone)
-- OpenSky adapter (OAuth2, ~15s polling, bbox filter)
-- AISStream adapter (WebSocket, real-time ship data)
-- ACLED adapter (conflict events, last 7 days)
-- In-memory cache with staleness indicators
-- Separate endpoints: /api/flights, /api/ships, /api/events
+- OpenSky Network adapter with OAuth2 client credentials and bbox filtering
+- AISStream adapter with WebSocket connection for real-time ship data
+- ACLED adapter for conflict events (last 7 days)
+- In-memory entity cache with configurable TTLs per data source
+- Security middleware: rate limiting, CORS, Helmet headers
+- Environment-based configuration with .env support
+- Routes: `/api/flights`, `/api/ships`, `/api/events`
+- 37 server tests (adapters, cache, security, types)
 - Concurrent dev workflow (Vite + Express via concurrently)
+
+#### Fixed
+- Handle Blob WebSocket messages in AISStream adapter
+- Use `node --import tsx/esm` for dev scripts (ESM compatibility)
+- Remove eager `loadConfig()` from server startup to prevent crashes with missing .env
+- Use `--env-file-if-exists` flag to tolerate missing .env file
 
 ## [v0.2.0] - 2026-03-14
 

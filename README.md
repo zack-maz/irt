@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of Iran with CARTO Dark Matter tiles, 3D terrain (AWS Terrarium DEM), compass control, coordinate readout, scale bar, vignette effect, and ripple loading animation. Dark-themed layout shell with floating overlay regions.
+Interactive 2.5D map of Iran with CARTO Dark Matter tiles, 3D terrain (AWS Terrarium DEM), compass control, coordinate readout, scale bar, vignette effect, and ripple loading animation. Express API proxy serving normalized data from OpenSky, AISStream, and ACLED. 67 tests passing.
 
-**Next up:** Express API proxy for external data sources (OpenSky, AISStream, ACLED).
+**Next up:** Flight data feed — live flight tracking on the map (~15s refresh).
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@ Interactive 2.5D map of Iran with CARTO Dark Matter tiles, 3D terrain (AWS Terra
 | Styling | Tailwind CSS v4 (dark theme, CSS-first @theme) |
 | State | Zustand 5 |
 | Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
-| Backend | Express 5 (API proxy — planned) |
+| Backend | Express 5 (API proxy, port 3001) |
 | Data Sources | OpenSky Network, AISStream.io, ACLED |
 | Testing | Vitest + Testing Library |
 
@@ -41,6 +41,16 @@ src/
 ├── styles/         # Global CSS, animations
 ├── types/          # TypeScript interfaces
 └── __tests__/      # Component and store tests
+server/
+├── adapters/       # OpenSky, AISStream, ACLED data adapters
+├── cache/          # In-memory entity cache with TTL
+├── routes/         # /api/flights, /api/ships, /api/events
+├── middleware/      # Error handler
+├── __tests__/      # Adapter, cache, security, and type tests
+├── config.ts       # Environment-based configuration
+├── constants.ts    # Bbox, cache TTLs, polling intervals
+├── types.ts        # MapEntity discriminated union
+└── index.ts        # Express server entry point
 ```
 
 ## Design
@@ -53,7 +63,9 @@ src/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests
+npx vitest run              # Run all tests (67 tests)
+npx vitest run src/         # Frontend tests only
+npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode
 ```
 

@@ -93,7 +93,7 @@ interface MapEntityBase {
 
 1. **Project Scaffolding & Theme** — Dark-themed React/Vite shell ✓
 2. **Base Map** — Interactive 2.5D map centered on Iran ✓
-3. **API Proxy** — Express backend for CORS + API key management (planned)
+3. **API Proxy** — Express backend for CORS + API key management ✓
 4. **Flight Data Feed** — Live flight tracking (~15s refresh)
 5. **Entity Rendering** — Type-specific markers on map
 6. **Ship & Conflict Data Feeds** — AIS ships + ACLED events

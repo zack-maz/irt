@@ -1,11 +1,11 @@
 # Iran Conflict Monitor — Project Status
 
-**Last updated:** 2026-03-14
+**Last updated:** 2026-03-15
 
 ## Progress
 
 ```
-[████░░░░░░░░░░░░░░░░] 2/10 phases complete (20%)
+[██████░░░░░░░░░░░░░░] 3/10 phases complete (30%)
 ```
 
 ## Phase Status
@@ -14,7 +14,7 @@
 |-------|------|--------|------|
 | 1 | Project Scaffolding & Theme | Done | 2026-03-14 |
 | 2 | Base Map | Done | 2026-03-14 |
-| 3 | API Proxy | Planned (2 plans ready) | — |
+| 3 | API Proxy | Done | 2026-03-15 |
 | 4 | Flight Data Feed | Not started | — |
 | 5 | Entity Rendering | Not started | — |
 | 6 | Ship & Conflict Data Feeds | Not started | — |
@@ -25,7 +25,7 @@
 
 ## Current Focus
 
-**Phase 3: API Proxy** — Express 5 backend for CORS handling, API key management, and data normalization into MapEntity format. Requires OpenSky, AISStream.io, and ACLED API accounts.
+**Phase 4: Flight Data Feed** — Connect frontend to the Express API proxy, display live flight positions on the map with ~15s refresh polling.
 
 ## What's Been Built
 
@@ -49,6 +49,19 @@
 - DeckGLOverlay bridge component via MapboxOverlay + useControl hook
 - Zustand map store for map state (loaded, cursor position)
 - 30 tests passing
+
+### Phase 3: API Proxy (Complete)
+- Express 5 server on port 3001 with health check endpoint
+- OpenSky Network adapter (OAuth2, bbox-filtered flight positions)
+- AISStream adapter (WebSocket, real-time ship tracking)
+- ACLED adapter (conflict events, last 7 days)
+- MapEntity discriminated union types (flight, ship, missile, drone)
+- In-memory entity cache with configurable TTLs
+- Security: rate limiting, CORS, Helmet headers
+- Environment-based configuration with .env support
+- Routes: `/api/flights`, `/api/ships`, `/api/events`
+- 37 server tests (adapters, cache, security, types)
+- 67 total tests passing
 
 ## Blockers
 

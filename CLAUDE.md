@@ -25,7 +25,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 
 ## Testing
 
-- **Framework**: Vitest with jsdom (frontend), node (server — planned)
+- **Framework**: Vitest with jsdom (frontend), node (server)
 - **Run**: `npx vitest run` (all), `npx vitest run server/` (server only)
 - **Mocks**: `src/test/__mocks__/` for WebGL-dependent libraries
 - **Stubs**: `it.todo()` for unimplemented test stubs
