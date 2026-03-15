@@ -4,6 +4,22 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-03-15
+
+### Phase 4: Flight Data Feed
+
+#### Added
+- Zustand flight store with connection health tracking (connected/stale/error/loading)
+- `useFlightPolling` hook with recursive setTimeout (5s interval)
+- Tab visibility awareness: polling pauses when hidden, immediate fetch on resume
+- Stale data tracking with `lastFresh` timestamp and 60s drop threshold
+- `unidentified` flag on FlightEntity for hex-only/no-callsign flights
+- Cache-first server route to conserve OpenSky API credits
+- onGround flight filtering at adapter level (airborne only)
+- Vite dev proxy forwarding `/api` to Express on port 3001
+- Flight polling wired into AppShell on mount
+- 15 new tests (6 store, 5 polling hook, 3 adapter, 1 cache-first)
+
 ## [v0.3.0] - 2026-03-15
 
 ### Phase 3: API Proxy
