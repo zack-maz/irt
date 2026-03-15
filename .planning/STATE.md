@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-15T15:53:40.994Z"
-last_activity: 2026-03-15 -- Phase 3 Plan 03 completed (gap closure)
+status: in-progress
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-15T16:22:22Z"
+last_activity: 2026-03-15 -- Phase 4 Plan 01 completed (flight pipeline fixes)
 progress:
   total_phases: 10
   completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 9
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 3: API Proxy -- COMPLETE (including gap closure). Phase 4 next.
+**Current focus:** Phase 4: Flight Data Feed -- Plan 01 complete. Plan 02 (frontend polling) next.
 
 ## Current Position
 
-Phase: 3 of 10 (API Proxy) -- COMPLETE
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 3 complete. All API proxy endpoints functional, startup issues fixed.
-Last activity: 2026-03-15 -- Phase 3 Plan 03 completed (gap closure)
+Phase: 4 of 10 (Flight Data Feed)
+Plan: 1 of 2 in current phase (COMPLETE)
+Status: Plan 01 complete. onGround filter, unidentified flag, cache-first route. Plan 02 next.
+Last activity: 2026-03-15 -- Phase 4 Plan 01 completed (flight pipeline fixes)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 4.6min
-- Total execution time: 0.53 hours
+- Total plans completed: 8
+- Average duration: 4.4min
+- Total execution time: 0.58 hours
 
 **By Phase:**
 
@@ -46,10 +46,11 @@ Progress: [██████████] 100%
 | 1. Project Scaffolding & Theme | 1 | 5min | 5min |
 | 2. Base Map | 3 | 14min | 4.7min |
 | 3. API Proxy | 3 | 11min | 3.7min |
+| 4. Flight Data Feed | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4min), 02-03 (7min), 03-01 (4min), 03-02 (5min), 03-03 (2min)
-- Trend: Stable
+- Last 5 plans: 02-03 (7min), 03-01 (4min), 03-02 (5min), 03-03 (2min), 04-01 (3min)
+- Trend: Stable/improving
 
 *Updated after each plan completion*
 
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - Inline process.env reads for PORT/CORS_ORIGIN instead of getServerConfig() helper -- simpler, no unnecessary abstraction
 - Node --env-file-if-exists=.env flag (Node 22.14+) instead of dotenv dependency for optional .env loading
 - Guard connectAISStream() with env var presence check -- explicit opt-in for optional services
+- onGround filter as early return null in normalizeFlightState for efficiency
+- unidentified flag derived from empty trimmed callsign at adapter level
+- Cache-first route pattern: check cache freshness before upstream call, conserve API credits
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T15:53:40.985Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-flight-data-feed/04-CONTEXT.md
+Last session: 2026-03-15T16:22:22Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-flight-data-feed/04-02-PLAN.md
