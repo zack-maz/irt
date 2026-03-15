@@ -48,6 +48,13 @@ skipped: 2
   reason: "User reported: Make the icons bigger as I zoom in. It's hard to tell"
   severity: minor
   test: 2
-  artifacts: []
-  missing: []
+  root_cause: "All IconLayers use sizeUnits: 'pixels' with fixed getSize values (14px for flights). Icons stay the same pixel size at every zoom level. Need zoom-responsive sizing via sizeMinPixels/sizeMaxPixels with sizeUnits: 'meters', or a zoom-based sizeScale."
+  artifacts:
+    - path: "src/hooks/useEntityLayers.ts"
+      issue: "sizeUnits: 'pixels' with static getSize — no zoom scaling"
+    - path: "src/components/map/layers/constants.ts"
+      issue: "ICON_SIZE values are fixed pixel sizes with no zoom config"
+  missing:
+    - "Switch to sizeUnits: 'meters' or add zoom-dependent sizeScale"
+    - "Add sizeMinPixels/sizeMaxPixels to prevent icons from becoming too small or too large"
   debug_session: ""
