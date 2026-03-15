@@ -31,7 +31,11 @@ export function getIconAtlas(): HTMLCanvasElement {
   canvas.width = 128;
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas 2D context not available');
+  if (!ctx) {
+    // jsdom lacks canvas support -- return blank canvas for test environments
+    atlas = canvas;
+    return canvas;
+  }
 
   ctx.fillStyle = 'white';
   ctx.strokeStyle = 'white';

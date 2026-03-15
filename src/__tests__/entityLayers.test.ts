@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import { altitudeToOpacity, ENTITY_COLORS, ICON_SIZE, PULSE_CONFIG } from '@/components/map/layers/constants';
 import { ICON_MAPPING } from '@/components/map/layers/icons';
 import { useUIStore } from '@/stores/uiStore';
+import { useFlightStore } from '@/stores/flightStore';
+import { useEntityLayers } from '@/hooks/useEntityLayers';
+import type { FlightEntity } from '@/types/entities';
+import type { IconLayer } from '@deck.gl/layers';
 
 describe('Entity Layer Constants', () => {
   describe('altitudeToOpacity', () => {
@@ -118,5 +123,141 @@ describe('uiStore pulseEnabled', () => {
     expect(useUIStore.getState().pulseEnabled).toBe(false);
     useUIStore.getState().togglePulse();
     expect(useUIStore.getState().pulseEnabled).toBe(true);
+  });
+});
+
+// --- Task 2: useEntityLayers hook tests ---
+
+const mockRegularFlight: FlightEntity = {
+  id: 'flight-abc123',
+  type: 'flight',
+  lat: 32.0,
+  lng: 51.0,
+  timestamp: Date.now(),
+  label: 'QTR123',
+  data: {
+    icao24: 'abc123',
+    callsign: 'QTR123',
+    originCountry: 'Qatar',
+    velocity: 250,
+    heading: 90,
+    altitude: 10000,
+    onGround: false,
+    verticalRate: 0,
+    unidentified: false,
+  },
+};
+
+const mockUnidentifiedFlight: FlightEntity = {
+  id: 'flight-def456',
+  type: 'flight',
+  lat: 33.0,
+  lng: 52.0,
+  timestamp: Date.now(),
+  label: 'DEF456',
+  data: {
+    icao24: 'def456',
+    callsign: '',
+    originCountry: 'Unknown',
+    velocity: 300,
+    heading: null,
+    altitude: null,
+    onGround: false,
+    verticalRate: null,
+    unidentified: true,
+  },
+};
+
+describe('useEntityLayers', () => {
+  beforeEach(() => {
+    useFlightStore.setState({
+      flights: [mockRegularFlight, mockUnidentifiedFlight],
+      connectionStatus: 'connected',
+      lastFetchAt: Date.now(),
+      lastFresh: Date.now(),
+      flightCount: 2,
+    });
+    useUIStore.setState({ pulseEnabled: true });
+  });
+
+  it('returns an array of 4 layers', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    expect(result.current).toHaveLength(4);
+  });
+
+  it('returns layers in order: ships, flights, drones, missiles', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const ids = result.current.map((l: IconLayer) => l.id);
+    expect(ids).toEqual(['ships', 'flights', 'drones', 'missiles']);
+  });
+
+  it('flight layer uses sizeUnits pixels', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    expect(flightLayer.props.sizeUnits).toBe('pixels');
+  });
+
+  it('flight layer getAngle negates heading', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    const getAngle = flightLayer.props.getAngle as (d: FlightEntity) => number;
+    expect(getAngle(mockRegularFlight)).toBe(-90);
+  });
+
+  it('flight layer getAngle returns 0 for null heading', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    const getAngle = flightLayer.props.getAngle as (d: FlightEntity) => number;
+    expect(getAngle(mockUnidentifiedFlight)).toBe(0);
+  });
+
+  it('flight layer getColor returns green for regular flights', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    const getColor = flightLayer.props.getColor as (d: FlightEntity) => number[];
+    const color = getColor(mockRegularFlight);
+    expect(color[0]).toBe(34);  // R
+    expect(color[1]).toBe(197); // G
+    expect(color[2]).toBe(94);  // B
+    // Alpha varies by altitude -- should be >0
+    expect(color[3]).toBeGreaterThan(0);
+  });
+
+  it('flight layer getColor returns yellow for unidentified flights', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    const getColor = flightLayer.props.getColor as (d: FlightEntity) => number[];
+    const color = getColor(mockUnidentifiedFlight);
+    expect(color[0]).toBe(234); // R
+    expect(color[1]).toBe(179); // G
+    expect(color[2]).toBe(8);   // B
+  });
+
+  it('all layers have sizeUnits pixels', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    for (const layer of result.current) {
+      expect((layer as IconLayer).props.sizeUnits).toBe('pixels');
+    }
+  });
+
+  it('ship/drone/missile layers have empty data arrays', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const [ships, _flights, drones, missiles] = result.current as IconLayer[];
+    expect(ships.props.data).toEqual([]);
+    expect(drones.props.data).toEqual([]);
+    expect(missiles.props.data).toEqual([]);
+  });
+
+  it('all layer IDs are unique', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const ids = result.current.map((l: IconLayer) => l.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('null/empty flights produce layer with empty data', () => {
+    useFlightStore.setState({ flights: [], flightCount: 0 });
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    expect(flightLayer.props.data).toEqual([]);
   });
 });
