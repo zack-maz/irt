@@ -22,6 +22,7 @@ export interface FlightEntity extends MapEntityBase {
     altitude: number | null; // meters
     onGround: boolean;
     verticalRate: number | null; // m/s
+    unidentified: boolean; // true when callsign is empty (hex-only, often military)
   };
 }
 

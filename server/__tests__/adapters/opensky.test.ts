@@ -37,6 +37,48 @@ const validState = [
   0,           // [17] category
 ];
 
+const groundState = [
+  'gnd789',    // [0] icao24
+  'GND5678 ',  // [1] callsign
+  'Iran',      // [2] origin_country
+  1700000000,  // [3] time_position
+  1700000005,  // [4] last_contact
+  51.5,        // [5] longitude
+  35.6,        // [6] latitude
+  0,           // [7] baro_altitude
+  true,        // [8] on_ground -- ON GROUND
+  0,           // [9] velocity
+  0,           // [10] true_track
+  0,           // [11] vertical_rate
+  null,        // [12] sensors
+  null,        // [13] geo_altitude
+  null,        // [14] squawk
+  false,       // [15] spi
+  0,           // [16] position_source
+  0,           // [17] category
+];
+
+const noCallsignState = [
+  'mil456',    // [0] icao24
+  '   ',       // [1] callsign (blank -- military/unidentified)
+  'Unknown',   // [2] origin_country
+  1700000000,  // [3] time_position
+  1700000005,  // [4] last_contact
+  52.0,        // [5] longitude
+  36.0,        // [6] latitude
+  12000,       // [7] baro_altitude
+  false,       // [8] on_ground
+  300,         // [9] velocity
+  90,          // [10] true_track
+  0,           // [11] vertical_rate
+  null,        // [12] sensors
+  12200,       // [13] geo_altitude
+  null,        // [14] squawk
+  false,       // [15] spi
+  0,           // [16] position_source
+  0,           // [17] category
+];
+
 const nullLatLngState = [
   'def456',   // [0] icao24
   'TEST ',    // [1] callsign
@@ -194,6 +236,56 @@ describe('OpenSky Adapter', () => {
     expect(serialized).not.toContain('test-client-id');
     expect(serialized).not.toContain('test-client-secret');
     expect(serialized).not.toContain('test-token');
+  });
+
+  it('filters out ground traffic (onGround=true)', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'test-token', expires_in: 1800 }),
+    });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ time: 1700000000, states: [groundState] }),
+    });
+
+    const bbox = { south: 25, north: 40, west: 44, east: 63.5 };
+    const flights = await fetchFlights(bbox);
+
+    expect(flights).toHaveLength(0);
+  });
+
+  it('flags flights with empty callsign as unidentified', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'test-token', expires_in: 1800 }),
+    });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ time: 1700000000, states: [noCallsignState] }),
+    });
+
+    const bbox = { south: 25, north: 40, west: 44, east: 63.5 };
+    const flights = await fetchFlights(bbox);
+
+    expect(flights).toHaveLength(1);
+    expect(flights[0].data.unidentified).toBe(true);
+  });
+
+  it('flags flights with valid callsign as not unidentified', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'test-token', expires_in: 1800 }),
+    });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ time: 1700000000, states: [validState] }),
+    });
+
+    const bbox = { south: 25, north: 40, west: 44, east: 63.5 };
+    const flights = await fetchFlights(bbox);
+
+    expect(flights).toHaveLength(1);
+    expect(flights[0].data.unidentified).toBe(false);
   });
 
   it('uses callsign as label, falling back to icao24 when callsign is empty', async () => {
