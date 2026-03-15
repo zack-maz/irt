@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-15T03:40:19.000Z"
-last_activity: 2026-03-14 -- Phase 3 Plan 01 completed (server foundation)
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-15T03:48:19.000Z"
+last_activity: 2026-03-14 -- Phase 3 complete (API Proxy)
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 3: API Proxy -- Plan 01 complete, Plan 02 next
+**Current focus:** Phase 3: API Proxy -- COMPLETE. Phase 4 next.
 
 ## Current Position
 
-Phase: 3 of 10 (API Proxy)
-Plan: 1 of 2 in current phase (COMPLETE)
-Status: Plan 01 (server foundation) complete, Plan 02 (data adapters) next
-Last activity: 2026-03-14 -- Phase 3 Plan 01 completed (server foundation)
+Phase: 3 of 10 (API Proxy) -- COMPLETE
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase 3 complete. All three API proxy endpoints functional.
+Last activity: 2026-03-14 -- Phase 3 Plan 02 completed (data adapters)
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 5min
-- Total execution time: 0.38 hours
+- Total execution time: 0.47 hours
 
 **By Phase:**
 
@@ -45,10 +45,10 @@ Progress: [████████░░] 83%
 |-------|-------|-------|----------|
 | 1. Project Scaffolding & Theme | 1 | 5min | 5min |
 | 2. Base Map | 3 | 14min | 4.7min |
-| 3. API Proxy | 1 | 4min | 4min |
+| 3. API Proxy | 2 | 9min | 4.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5min), 02-01 (3min), 02-02 (4min), 02-03 (7min), 03-01 (4min)
+- Last 5 plans: 02-01 (3min), 02-02 (4min), 02-03 (7min), 03-01 (4min), 03-02 (5min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -85,6 +85,9 @@ Recent decisions affecting current work:
 - createApp() factory pattern for Express app to enable test isolation
 - erasableSyntaxOnly compatibility: explicit field + constructor assignment instead of parameter properties
 - vitest-environment node directive per test file instead of workspace config
+- UTC date formatting in ACLED adapter to avoid timezone-dependent date drift
+- Mock adapter modules in security tests instead of mocking fetch globally, to test actual HTTP responses
+- AISStream reconnect uses simple 5s setTimeout (not exponential backoff) matching plan spec
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T03:40:19.000Z
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-api-proxy/03-01-SUMMARY.md
+Last session: 2026-03-15T03:48:19.000Z
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-api-proxy/03-02-SUMMARY.md
