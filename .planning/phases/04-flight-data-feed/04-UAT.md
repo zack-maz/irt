@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 04-flight-data-feed
 source: 04-01-SUMMARY.md, 04-02-SUMMARY.md
 started: 2026-03-15T17:00:00Z
@@ -54,10 +54,15 @@ skipped: 0
 ## Gaps
 
 - truth: "Some flights have data.unidentified: true (empty/hex-only callsign) and others have data.unidentified: false"
-  status: failed
+  status: data_dependent
   reason: "User reported: They all are unidentified: false"
   severity: minor
   test: 2
-  artifacts: []
+  root_cause: "Data-dependent — all flights in Iran bbox had callsigns at test time. Code is correct: `callsign === ''` after trim. Unit tests confirm both true/false cases work (opensky.test.ts lines 257-289)."
+  artifacts:
+    - path: "server/adapters/opensky.ts"
+      issue: "No code issue — unidentified flag logic is correct"
+    - path: "server/__tests__/adapters/opensky.test.ts"
+      issue: "Both true and false cases covered by unit tests"
   missing: []
   debug_session: ""
