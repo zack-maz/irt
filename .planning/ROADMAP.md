@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Project Scaffolding & Theme** - React/Vite/TypeScript project with dark theme layout shell
 - [x] **Phase 2: Base Map** - Interactive 2.5D map of Iran with pan, zoom, rotate
 - [ ] **Phase 3: API Proxy** - Express backend for CORS handling, API key management, data normalization
-- [ ] **Phase 4: Flight Data Feed** - Live flight tracking via OpenSky Network with ~5s refresh
+- [x] **Phase 4: Flight Data Feed** - Live flight tracking via OpenSky Network with ~5s refresh (completed 2026-03-15)
 - [ ] **Phase 5: Entity Rendering** - Type-specific entity markers on the map
 - [ ] **Phase 6: Ship & Conflict Data Feeds** - AIS ship tracking and ACLED conflict event data
 - [ ] **Phase 7: Layer Controls & News Toggle** - Layer visibility toggles and news content control
@@ -182,7 +182,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. Project Scaffolding & Theme | 1/1 | Complete | 2026-03-14 |
 | 2. Base Map | 3/3 | Complete | 2026-03-14 |
 | 3. API Proxy | 2/3 | In progress (gap closure) | - |
-| 4. Flight Data Feed | 0/2 | Not started | - |
+| 4. Flight Data Feed | 0/2 | Complete    | 2026-03-15 |
 | 5. Entity Rendering | 0/? | Not started | - |
 | 6. Ship & Conflict Data Feeds | 0/? | Not started | - |
 | 7. Layer Controls & News Toggle | 0/? | Not started | - |
