@@ -57,7 +57,9 @@ describe('useFlightPolling', () => {
     vi.unstubAllGlobals();
   });
 
-  it('calls fetch with source=opensky on mount (default)', async () => {
+  it('calls fetch with source=opensky on mount when activeSource is opensky', async () => {
+    useFlightStore.setState({ activeSource: 'opensky' });
+
     const { useFlightPolling } = await import('@/hooks/useFlightPolling');
     renderHook(() => useFlightPolling());
 
@@ -109,6 +111,37 @@ describe('useFlightPolling', () => {
 
     // After 260s total -- should have polled again
     await vi.advanceTimersByTimeAsync(255000);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('fetches /api/flights?source=adsblol for adsblol source', async () => {
+    useFlightStore.setState({ activeSource: 'adsblol' });
+
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    renderHook(() => useFlightPolling());
+
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith('/api/flights?source=adsblol');
+  });
+
+  it('uses 30s interval for adsblol source', async () => {
+    useFlightStore.setState({ activeSource: 'adsblol' });
+
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    renderHook(() => useFlightPolling());
+
+    // Initial fetch
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // After 5s (OpenSky interval) -- should NOT poll again
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // After 30s total -- should have polled again
+    await vi.advanceTimersByTimeAsync(25000);
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
