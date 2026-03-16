@@ -1,3 +1,5 @@
+export type FlightSource = 'opensky' | 'adsb';
+
 export interface UIState {
   isDetailPanelOpen: boolean;
   isCountersCollapsed: boolean;
