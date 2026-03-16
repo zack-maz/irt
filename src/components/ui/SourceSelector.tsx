@@ -4,12 +4,15 @@ import type { ConnectionStatus } from '@/stores/flightStore';
 import type { FlightSource } from '@/types/ui';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
+type SourceConfig = Record<FlightSource, { configured: boolean }>;
+
 const SOURCE_LABELS: Record<FlightSource, string> = {
   opensky: 'OpenSky',
   adsb: 'ADS-B Exchange',
+  adsblol: 'adsb.lol',
 };
 
-const SOURCES: FlightSource[] = ['opensky', 'adsb'];
+const SOURCES: FlightSource[] = ['opensky', 'adsb', 'adsblol'];
 
 const STATUS_DOT_CLASS: Record<ConnectionStatus, string> = {
   connected: 'bg-accent-green',
@@ -41,7 +44,16 @@ export function SourceSelector() {
   const setActiveSource = useFlightStore(s => s.setActiveSource);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [sourceConfig, setSourceConfig] = useState<SourceConfig | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch source configuration once on mount
+  useEffect(() => {
+    fetch('/api/sources')
+      .then(res => res.json())
+      .then((data: SourceConfig) => setSourceConfig(data))
+      .catch(() => { /* silently fail -- optimistic defaults */ });
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -89,31 +101,41 @@ export function SourceSelector() {
         {/* Dropdown options */}
         {isOpen && (
           <div className="mt-2 border-t border-border pt-2">
-            {SOURCES.map(source => (
-              <button
-                key={source}
-                role="option"
-                aria-selected={source === activeSource}
-                onClick={() => handleSelect(source)}
-                className={`flex w-full items-center gap-2 rounded px-2 py-1 text-sm ${
-                  source === activeSource
-                    ? 'text-accent-blue'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {source === activeSource && (
-                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-                {source !== activeSource && <span className="inline-block w-3" />}
-                <span>{SOURCE_LABELS[source]}</span>
-              </button>
-            ))}
+            {SOURCES.map(source => {
+              const isConfigured = sourceConfig?.[source]?.configured ?? true;
+
+              return (
+                <button
+                  key={source}
+                  role="option"
+                  aria-selected={source === activeSource}
+                  aria-disabled={!isConfigured || undefined}
+                  onClick={() => isConfigured && handleSelect(source)}
+                  className={`flex w-full items-center gap-2 rounded px-2 py-1 text-sm ${
+                    !isConfigured
+                      ? 'cursor-not-allowed text-text-muted'
+                      : source === activeSource
+                        ? 'text-accent-blue'
+                        : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {source === activeSource && (
+                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                  {source !== activeSource && <span className="inline-block w-3" />}
+                  <span>{SOURCE_LABELS[source]}</span>
+                  {!isConfigured && (
+                    <span className="ml-auto text-[10px] text-text-muted">(API key required)</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
 
