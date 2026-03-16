@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-03-16T19:44:00.539Z"
-last_activity: 2026-03-16 -- Phase 7 Plan 01 completed (server-side adsb.lol integration)
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-16T19:50:39.211Z"
+last_activity: 2026-03-16 -- Phase 7 Plan 02 completed (frontend adsb.lol integration)
 progress:
   total_phases: 12
-  completed_phases: 5
+  completed_phases: 7
   total_plans: 16
-  completed_plans: 14
-  percent: 88
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 7: adsb.lol Data Source -- IN PROGRESS. Plan 01 complete (server-side integration).
+**Current focus:** Phase 7: adsb.lol Data Source -- COMPLETE. Both plans done (server + frontend).
 
 ## Current Position
 
-Phase: 7 of 12 (adsb.lol Data Source) -- IN PROGRESS
-Plan: 1 of 2 in current phase (Plan 01 complete, Plan 02 remaining)
-Status: Server-side adsb.lol integration complete. Shared V2 normalizer, 3-source dispatch, /api/sources endpoint ready.
-Last activity: 2026-03-16 -- Phase 7 Plan 01 completed (server-side adsb.lol integration)
+Phase: 7 of 12 (adsb.lol Data Source) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Full adsb.lol integration complete. Server adapter, 3-source dispatch, frontend SourceSelector with 3 options and disabled state.
+Last activity: 2026-03-16 -- Phase 7 Plan 02 completed (frontend adsb.lol integration)
 
-Progress: [█████████░] 88%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 3.7min
-- Total execution time: 0.87 hours
+- Total plans completed: 16
+- Average duration: 3.6min
+- Total execution time: 0.96 hours
 
 **By Phase:**
 
@@ -49,14 +49,15 @@ Progress: [█████████░] 88%
 | 4. Flight Data Feed | 2 | 5min | 2.5min |
 | 5. Entity Rendering | 2 | 19min | 9.5min |
 | 6. ADS-B Exchange | 1/3 | 3min | 3min |
-| 7. adsb.lol | 1/2 | 5min | 5min |
+| 7. adsb.lol | 2/2 | 8min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2min), 05-01 (4min), 05-02 (15min), 06-02 (3min), 07-01 (5min)
+- Last 5 plans: 05-01 (4min), 05-02 (15min), 06-02 (3min), 07-01 (5min), 07-02 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
 | Phase 07 P01 | 5min | 2 tasks | 14 files |
+| Phase 07 P02 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Recent decisions affecting current work:
 - [Phase 07]: adsblol as default flight source (no API key required, best out-of-box experience)
 - [Phase 07]: 30s cache TTL for adsb.lol (respectful of community API)
 - [Phase 07]: parseSource/getCache/getFetcher helper pattern for clean 3-source dispatch
+- [Phase 07]: Record-based INTERVAL_MAP for polling intervals instead of ternary chain
+- [Phase 07]: Optimistic defaults (all sources enabled) until /api/sources responds
+- [Phase 07]: aria-disabled attribute on unconfigured source options for accessibility
 
 ### Pending Todos
 
@@ -139,6 +143,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:43:53.920Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-03-16T19:50:18.090Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
