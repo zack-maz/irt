@@ -64,3 +64,13 @@ export interface CacheResponse<T> {
   stale: boolean;
   lastFresh: number; // Unix ms of last successful fetch
 }
+
+export type FlightSource = 'opensky' | 'adsb';
+
+export class RateLimitError extends Error {
+  name: string;
+  constructor(message: string) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
