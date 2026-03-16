@@ -18,11 +18,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Flight Data Feed** - Live flight tracking via OpenSky Network with ~5s refresh (completed 2026-03-15)
 - [x] **Phase 5: Entity Rendering** - Type-specific entity markers on the map (completed 2026-03-15)
 - [ ] **Phase 6: ADS-B Exchange Data Source** - ADS-B Exchange as alternative flight data source with UI toggle to switch between OpenSky and ADS-B
-- [ ] **Phase 7: Ship & Conflict Data Feeds** - AIS ship tracking and ACLED conflict event data
-- [ ] **Phase 8: Layer Controls & News Toggle** - Layer visibility toggles and news content control
-- [ ] **Phase 9: Detail Panel** - Click-to-inspect panel showing live entity stats
-- [ ] **Phase 10: Smart Filters** - Advanced filtering by nationality, speed, altitude, proximity, date range
-- [ ] **Phase 11: Analytics Dashboard** - Running counters for strikes, sorties, and intercepts
+- [ ] **Phase 7: adsb.lol Data Source** - adsb.lol as third flight data source (free, no API key, 30s polling)
+- [ ] **Phase 8: Ship & Conflict Data Feeds** - AIS ship tracking and ACLED conflict event data
+- [ ] **Phase 9: Layer Controls & News Toggle** - Layer visibility toggles and news content control
+- [ ] **Phase 10: Detail Panel** - Click-to-inspect panel showing live entity stats
+- [ ] **Phase 11: Smart Filters** - Advanced filtering by nationality, speed, altitude, proximity, date range
+- [ ] **Phase 12: Analytics Dashboard** - Running counters for strikes, sorties, and intercepts
 
 ## Phase Details
 
@@ -117,7 +118,23 @@ Plans:
 - [ ] 06-02-PLAN.md — Frontend flightStore source awareness, polling hook refactor for source-specific URL/interval
 - [ ] 06-03-PLAN.md — SourceSelector UI dropdown with connection status badge, AppShell wiring
 
-### Phase 7: Ship & Conflict Data Feeds
+### Phase 7: adsb.lol Data Source
+**Goal**: Users can select adsb.lol as a third flight data source — free, no API key, community-driven, 30s polling
+**Depends on**: Phase 6
+**Requirements**: DATA-04
+**Success Criteria** (what must be TRUE):
+  1. adsb.lol is integrated as a third flight data source via the server proxy (same V2 response format as ADS-B Exchange)
+  2. The SourceSelector dropdown shows three options: OpenSky, ADS-B Exchange, adsb.lol
+  3. No API key is required — adsb.lol is free and unauthenticated
+  4. Polling interval is 30 seconds (respectful of community API with dynamic rate limits)
+  5. Same 250 NM radius geographic query from Iran center as ADS-B Exchange
+**Plans**: 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Server-side: shared V2 normalizer extraction, adsb-lol adapter, /api/sources endpoint, route dispatch for 3 sources
+- [ ] 07-02-PLAN.md — Frontend: FlightSource type extension, store default to adsblol, 30s polling, SourceSelector with 3 options and disabled state
+
+### Phase 8: Ship & Conflict Data Feeds
 **Goal**: Ship positions and conflict events flow into the application alongside flight data
 **Depends on**: Phase 3, Phase 5
 **Requirements**: DATA-02, DATA-03
@@ -129,12 +146,12 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
 
-### Phase 8: Layer Controls & News Toggle
+### Phase 9: Layer Controls & News Toggle
 **Goal**: Users can show or hide entire categories of data and control non-statistical content visibility
-**Depends on**: Phase 7
+**Depends on**: Phase 8
 **Requirements**: CTRL-01, CTRL-04
 **Success Criteria** (what must be TRUE):
   1. Toggle buttons exist for each entity type: ships, flights, missiles, drones
@@ -144,11 +161,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 09-01: TBD
 
-### Phase 9: Detail Panel
+### Phase 10: Detail Panel
 **Goal**: Users can click any entity on the map and see its live stats in a detail panel
-**Depends on**: Phase 8
+**Depends on**: Phase 9
 **Requirements**: CTRL-02
 **Success Criteria** (what must be TRUE):
   1. Clicking an entity on the map opens a detail panel showing live stats (speed, heading, origin, coordinates, metadata)
@@ -158,11 +175,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 10-01: TBD
 
-### Phase 10: Smart Filters
+### Phase 11: Smart Filters
 **Goal**: Users can narrow the displayed data using advanced multi-criteria filters
-**Depends on**: Phase 9
+**Depends on**: Phase 10
 **Requirements**: CTRL-03
 **Success Criteria** (what must be TRUE):
   1. Filter controls exist for nationality, speed range, altitude range, proximity radius, and date range
@@ -173,12 +190,12 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 11-01: TBD
+- [ ] 11-02: TBD
 
-### Phase 11: Analytics Dashboard
+### Phase 12: Analytics Dashboard
 **Goal**: Users see running numerical counters that summarize conflict activity at a glance
-**Depends on**: Phase 10
+**Depends on**: Phase 11
 **Requirements**: STAT-01
 **Success Criteria** (what must be TRUE):
   1. A counters dashboard displays running tallies for strikes, sorties, and intercepts
@@ -187,12 +204,12 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 12-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 (Phases 2 and 3 can execute in parallel as they are independent.)
 
 | Phase | Plans Complete | Status | Completed |
@@ -201,10 +218,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Base Map | 3/3 | Complete | 2026-03-14 |
 | 3. API Proxy | 2/3 | In progress (gap closure) | - |
 | 4. Flight Data Feed | 0/2 | Complete | 2026-03-15 |
-| 5. Entity Rendering | 2/2 | Complete   | 2026-03-16 |
+| 5. Entity Rendering | 2/2 | Complete | 2026-03-16 |
 | 6. ADS-B Exchange Data Source | 0/3 | Not started | - |
-| 7. Ship & Conflict Data Feeds | 0/? | Not started | - |
-| 8. Layer Controls & News Toggle | 0/? | Not started | - |
-| 9. Detail Panel | 0/? | Not started | - |
-| 10. Smart Filters | 0/? | Not started | - |
-| 11. Analytics Dashboard | 0/? | Not started | - |
+| 7. adsb.lol Data Source | 0/2 | Not started | - |
+| 8. Ship & Conflict Data Feeds | 0/? | Not started | - |
+| 9. Layer Controls & News Toggle | 0/? | Not started | - |
+| 10. Detail Panel | 0/? | Not started | - |
+| 11. Smart Filters | 0/? | Not started | - |
+| 12. Analytics Dashboard | 0/? | Not started | - |
