@@ -3,6 +3,7 @@ import { CountersSlot } from '@/components/layout/CountersSlot';
 import { LayerTogglesSlot } from '@/components/layout/LayerTogglesSlot';
 import { FiltersSlot } from '@/components/layout/FiltersSlot';
 import { DetailPanelSlot } from '@/components/layout/DetailPanelSlot';
+import { SourceSelector } from '@/components/ui/SourceSelector';
 import { BaseMap } from '@/components/map/BaseMap';
 import { useFlightPolling } from '@/hooks/useFlightPolling';
 
@@ -24,8 +25,9 @@ export function AppShell() {
         <TitleSlot />
       </div>
 
-      {/* Top-right: Counters + Layer toggles */}
+      {/* Top-right: Source selector + Counters + Layer toggles */}
       <div className="absolute top-4 right-4 z-[var(--z-controls)] flex flex-col items-end gap-2">
+        <SourceSelector />
         <CountersSlot />
         <LayerTogglesSlot />
       </div>
