@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useFlightStore } from '@/stores/flightStore';
 
 // Mock localStorage
@@ -15,10 +15,29 @@ const localStorageMock = (() => {
   };
 })();
 
+// Default source config: all configured
+const allConfigured = {
+  opensky: { configured: true },
+  adsb: { configured: true },
+  adsblol: { configured: true },
+};
+
+function mockFetchResponse(data: unknown) {
+  return vi.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(data),
+    }),
+  );
+}
+
 describe('SourceSelector', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', localStorageMock);
     localStorageMock.clear();
+
+    // Default: all sources configured
+    vi.stubGlobal('fetch', mockFetchResponse(allConfigured));
 
     useFlightStore.setState({
       flights: [],
@@ -55,6 +74,13 @@ describe('SourceSelector', () => {
     expect(screen.getByText('ADS-B Exchange')).toBeInTheDocument();
   });
 
+  it('renders adsb.lol label when adsblol is active', async () => {
+    useFlightStore.setState({ activeSource: 'adsblol' });
+    await renderSelector();
+
+    expect(screen.getByText('adsb.lol')).toBeInTheDocument();
+  });
+
   it('clicking the button toggles dropdown open/closed', async () => {
     await renderSelector();
 
@@ -65,11 +91,22 @@ describe('SourceSelector', () => {
 
     // Click to open
     fireEvent.click(button);
-    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')).toHaveLength(3);
 
     // Click again to close
     fireEvent.click(button);
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
+  it('shows 3 options in dropdown', async () => {
+    await renderSelector();
+
+    fireEvent.click(screen.getByRole('combobox'));
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(options[0].textContent).toContain('OpenSky');
+    expect(options[1].textContent).toContain('ADS-B Exchange');
+    expect(options[2].textContent).toContain('adsb.lol');
   });
 
   it('selecting a different source calls setActiveSource and closes dropdown', async () => {
@@ -163,11 +200,100 @@ describe('SourceSelector', () => {
 
     // Open dropdown
     fireEvent.click(screen.getByRole('combobox'));
-    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')).toHaveLength(3);
 
     // Click outside (on document body)
     fireEvent.mouseDown(document.body);
 
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
+  // --- New disabled-state tests ---
+
+  it('disabled source has aria-disabled and "(API key required)" hint', async () => {
+    vi.stubGlobal('fetch', mockFetchResponse({
+      opensky: { configured: false },
+      adsb: { configured: true },
+      adsblol: { configured: true },
+    }));
+
+    await renderSelector();
+
+    // Wait for /api/sources fetch to resolve
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('combobox'));
+      const options = screen.getAllByRole('option');
+      const openskyOption = options.find(o => o.textContent?.includes('OpenSky'));
+      expect(openskyOption).toBeDefined();
+      expect(openskyOption!.getAttribute('aria-disabled')).toBe('true');
+      expect(openskyOption!.textContent).toContain('(API key required)');
+    });
+  });
+
+  it('clicking disabled source does not call setActiveSource', async () => {
+    const setActiveSource = vi.fn();
+    useFlightStore.setState({ setActiveSource, activeSource: 'adsblol' });
+
+    vi.stubGlobal('fetch', mockFetchResponse({
+      opensky: { configured: false },
+      adsb: { configured: true },
+      adsblol: { configured: true },
+    }));
+
+    await renderSelector();
+
+    // Wait for source config to load
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('combobox'));
+      const options = screen.getAllByRole('option');
+      const openskyOption = options.find(o => o.textContent?.includes('OpenSky'));
+      expect(openskyOption!.getAttribute('aria-disabled')).toBe('true');
+    });
+
+    // Click the disabled OpenSky option
+    const options = screen.getAllByRole('option');
+    const openskyOption = options.find(o => o.textContent?.includes('OpenSky'));
+    fireEvent.click(openskyOption!);
+
+    // Should NOT have called setActiveSource
+    expect(setActiveSource).not.toHaveBeenCalled();
+
+    // Dropdown should still be open
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+  });
+
+  it('adsb.lol option is never disabled', async () => {
+    vi.stubGlobal('fetch', mockFetchResponse({
+      opensky: { configured: false },
+      adsb: { configured: false },
+      adsblol: { configured: true },
+    }));
+
+    await renderSelector();
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('combobox'));
+      const options = screen.getAllByRole('option');
+      const adsblolOption = options.find(o => o.textContent?.includes('adsb.lol'));
+      expect(adsblolOption).toBeDefined();
+      expect(adsblolOption!.getAttribute('aria-disabled')).not.toBe('true');
+    });
+  });
+
+  it('works with optimistic defaults before /api/sources responds', async () => {
+    // Mock fetch to never resolve (pending promise)
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
+
+    await renderSelector();
+
+    // Open dropdown immediately -- all options should be clickable
+    fireEvent.click(screen.getByRole('combobox'));
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(3);
+
+    // None should be disabled (optimistic default: all configured)
+    for (const option of options) {
+      expect(option.getAttribute('aria-disabled')).not.toBe('true');
+    }
   });
 });
