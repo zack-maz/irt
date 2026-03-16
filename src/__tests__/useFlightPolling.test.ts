@@ -1,9 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, cleanup } from '@testing-library/react';
+import { renderHook, cleanup, act } from '@testing-library/react';
 import { useFlightStore } from '@/stores/flightStore';
 
-// Must be imported after store since the hook depends on it
-// The actual hook will be imported dynamically after we set up mocks
+// Mock localStorage for flightStore's loadPersistedSource
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] ?? null),
+    setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+    removeItem: vi.fn((key: string) => { delete store[key]; }),
+    clear: vi.fn(() => { store = {}; }),
+    get length() { return Object.keys(store).length; },
+    key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
+  };
+})();
 
 const mockResponse = {
   data: [],
@@ -16,6 +26,8 @@ describe('useFlightPolling', () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.stubGlobal('localStorage', localStorageMock);
+    localStorageMock.clear();
 
     // Reset flight store
     useFlightStore.setState({
@@ -24,6 +36,7 @@ describe('useFlightPolling', () => {
       lastFetchAt: null,
       lastFresh: null,
       flightCount: 0,
+      activeSource: 'opensky',
     });
 
     // Mock fetch
@@ -44,7 +57,7 @@ describe('useFlightPolling', () => {
     vi.unstubAllGlobals();
   });
 
-  it('calls fetch once on mount', async () => {
+  it('calls fetch with source=opensky on mount (default)', async () => {
     const { useFlightPolling } = await import('@/hooks/useFlightPolling');
     renderHook(() => useFlightPolling());
 
@@ -52,10 +65,22 @@ describe('useFlightPolling', () => {
     await vi.advanceTimersByTimeAsync(0);
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith('/api/flights');
+    expect(mockFetch).toHaveBeenCalledWith('/api/flights?source=opensky');
   });
 
-  it('polls again after POLL_INTERVAL (5000ms)', async () => {
+  it('fetches /api/flights?source=adsb when activeSource is adsb', async () => {
+    useFlightStore.setState({ activeSource: 'adsb' });
+
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    renderHook(() => useFlightPolling());
+
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith('/api/flights?source=adsb');
+  });
+
+  it('polls again after OPENSKY_POLL_INTERVAL (5000ms) for opensky', async () => {
     const { useFlightPolling } = await import('@/hooks/useFlightPolling');
     renderHook(() => useFlightPolling());
 
@@ -66,6 +91,67 @@ describe('useFlightPolling', () => {
     // Advance past poll interval
     await vi.advanceTimersByTimeAsync(5000);
     expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('polls at ADSB_POLL_INTERVAL (260000ms) for adsb source', async () => {
+    useFlightStore.setState({ activeSource: 'adsb' });
+
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    renderHook(() => useFlightPolling());
+
+    // Initial fetch
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // After 5s (OpenSky interval) -- should NOT poll again
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // After 260s total -- should have polled again
+    await vi.advanceTimersByTimeAsync(255000);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('restarts polling when activeSource changes in the store', async () => {
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    const { rerender } = renderHook(() => useFlightPolling());
+
+    // Initial fetch with opensky
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith('/api/flights?source=opensky');
+
+    // Change source -- this triggers re-render due to selector
+    act(() => {
+      useFlightStore.getState().setActiveSource('adsb');
+    });
+    rerender();
+
+    // New effect runs, immediate fetch with new source
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockFetch).toHaveBeenCalledWith('/api/flights?source=adsb');
+  });
+
+  it('rate limited response propagates rateLimited flag to store', async () => {
+    const rateLimitedResponse = {
+      data: [{ id: 'flight-1', type: 'flight', lat: 32, lng: 53, timestamp: Date.now(), label: 'TEST', data: {} }],
+      stale: true,
+      lastFresh: Date.now(),
+      rateLimited: true,
+    };
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(rateLimitedResponse),
+    });
+
+    const { useFlightPolling } = await import('@/hooks/useFlightPolling');
+    renderHook(() => useFlightPolling());
+
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useFlightStore.getState();
+    expect(state.connectionStatus).toBe('rate_limited');
   });
 
   it('pauses polling when tab becomes hidden', async () => {
