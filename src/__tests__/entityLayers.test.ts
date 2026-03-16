@@ -56,19 +56,19 @@ describe('Entity Layer Constants', () => {
 
   describe('ICON_SIZE', () => {
     it('flight has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.flight).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
+      expect(ICON_SIZE.flight).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
     });
 
     it('ship has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.ship).toEqual({ meters: 600, minPixels: 5, maxPixels: 36 });
+      expect(ICON_SIZE.ship).toEqual({ meters: 1800, minPixels: 12, maxPixels: 84 });
     });
 
     it('drone has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.drone).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
+      expect(ICON_SIZE.drone).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
     });
 
     it('missile has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.missile).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
+      expect(ICON_SIZE.missile).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
     });
   });
 
