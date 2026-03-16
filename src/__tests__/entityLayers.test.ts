@@ -55,20 +55,20 @@ describe('Entity Layer Constants', () => {
   });
 
   describe('ICON_SIZE', () => {
-    it('flight is 14', () => {
-      expect(ICON_SIZE.flight).toBe(14);
+    it('flight has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.flight).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
     });
 
-    it('ship is 12', () => {
-      expect(ICON_SIZE.ship).toBe(12);
+    it('ship has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.ship).toEqual({ meters: 600, minPixels: 5, maxPixels: 36 });
     });
 
-    it('drone is 14', () => {
-      expect(ICON_SIZE.drone).toBe(14);
+    it('drone has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.drone).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
     });
 
-    it('missile is 14', () => {
-      expect(ICON_SIZE.missile).toBe(14);
+    it('missile has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.missile).toEqual({ meters: 800, minPixels: 6, maxPixels: 40 });
     });
   });
 
@@ -191,10 +191,10 @@ describe('useEntityLayers', () => {
     expect(ids).toEqual(['ships', 'flights', 'drones', 'missiles']);
   });
 
-  it('flight layer uses sizeUnits pixels', () => {
+  it('flight layer uses sizeUnits meters', () => {
     const { result } = renderHook(() => useEntityLayers());
     const flightLayer = result.current[1] as IconLayer;
-    expect(flightLayer.props.sizeUnits).toBe('pixels');
+    expect(flightLayer.props.sizeUnits).toBe('meters');
   });
 
   it('flight layer getAngle negates heading', () => {
@@ -233,11 +233,26 @@ describe('useEntityLayers', () => {
     expect(color[2]).toBe(8);   // B
   });
 
-  it('all layers have sizeUnits pixels', () => {
+  it('all layers have sizeUnits meters', () => {
     const { result } = renderHook(() => useEntityLayers());
     for (const layer of result.current) {
-      expect((layer as IconLayer).props.sizeUnits).toBe('pixels');
+      expect((layer as IconLayer).props.sizeUnits).toBe('meters');
     }
+  });
+
+  it('all layers have sizeMinPixels and sizeMaxPixels set', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    for (const layer of result.current) {
+      const props = (layer as IconLayer).props;
+      expect(props.sizeMinPixels).toBeGreaterThan(0);
+      expect(props.sizeMaxPixels).toBeGreaterThan(0);
+    }
+  });
+
+  it('flight layer getSize returns ICON_SIZE.flight.meters', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const flightLayer = result.current[1] as IconLayer;
+    expect(flightLayer.props.getSize).toBe(ICON_SIZE.flight.meters);
   });
 
   it('ship/drone/missile layers have empty data arrays', () => {
