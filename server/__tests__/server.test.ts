@@ -28,10 +28,18 @@ vi.mock('../config.js', () => ({
   },
 }));
 
-// Mock OpenSky adapter for flight route tests
+// Mock adapters for flight route tests
 const mockFetchFlights = vi.fn();
 vi.mock('../adapters/opensky.js', () => ({
   fetchFlights: (...args: unknown[]) => mockFetchFlights(...args),
+}));
+
+vi.mock('../adapters/adsb-exchange.js', () => ({
+  fetchFlights: vi.fn(async () => []),
+}));
+
+vi.mock('../adapters/adsb-lol.js', () => ({
+  fetchFlights: vi.fn(async () => []),
 }));
 
 let server: Server;
@@ -111,8 +119,11 @@ describe('Flights route cache-first behavior', () => {
   });
 
   it('serves cached data on second request without calling upstream again', async () => {
-    // First request: should call upstream fetchFlights
-    const res1 = await fetch(`${baseUrl}/api/flights`);
+    process.env.OPENSKY_CLIENT_ID = 'test-id';
+    process.env.OPENSKY_CLIENT_SECRET = 'test-secret';
+
+    // First request: should call upstream fetchFlights (explicit opensky source)
+    const res1 = await fetch(`${baseUrl}/api/flights?source=opensky`);
     expect(res1.status).toBe(200);
     const body1 = (await res1.json()) as { data: FlightEntity[]; stale: boolean };
     expect(body1.data).toHaveLength(1);
@@ -120,7 +131,7 @@ describe('Flights route cache-first behavior', () => {
     expect(mockFetchFlights).toHaveBeenCalledTimes(1);
 
     // Second request: should serve from cache (no upstream call)
-    const res2 = await fetch(`${baseUrl}/api/flights`);
+    const res2 = await fetch(`${baseUrl}/api/flights?source=opensky`);
     expect(res2.status).toBe(200);
     const body2 = (await res2.json()) as { data: FlightEntity[]; stale: boolean };
     expect(body2.data).toHaveLength(1);
@@ -128,5 +139,8 @@ describe('Flights route cache-first behavior', () => {
 
     // fetchFlights should NOT have been called again
     expect(mockFetchFlights).toHaveBeenCalledTimes(1);
+
+    delete process.env.OPENSKY_CLIENT_ID;
+    delete process.env.OPENSKY_CLIENT_SECRET;
   });
 });

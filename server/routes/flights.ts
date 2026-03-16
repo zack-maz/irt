@@ -2,22 +2,51 @@ import { Router } from 'express';
 import { EntityCache } from '../cache/entityCache.js';
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
 import { fetchFlights as fetchAdsbExchange } from '../adapters/adsb-exchange.js';
+import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
 import { IRAN_BBOX, CACHE_TTL } from '../constants.js';
 import { RateLimitError } from '../types.js';
 import type { FlightEntity, FlightSource } from '../types.js';
 
 const openskyCache = new EntityCache<FlightEntity[]>(CACHE_TTL.flights);
 const adsbCache = new EntityCache<FlightEntity[]>(CACHE_TTL.adsbFlights);
+const adsblolCache = new EntityCache<FlightEntity[]>(CACHE_TTL.adsblolFlights);
+
+function parseSource(raw: unknown): FlightSource {
+  if (raw === 'opensky') return 'opensky';
+  if (raw === 'adsb') return 'adsb';
+  if (raw === 'adsblol') return 'adsblol';
+  return 'adsblol';
+}
+
+function getCache(source: FlightSource): EntityCache<FlightEntity[]> {
+  switch (source) {
+    case 'opensky': return openskyCache;
+    case 'adsb': return adsbCache;
+    case 'adsblol': return adsblolCache;
+  }
+}
+
+function getFetcher(source: FlightSource): () => Promise<FlightEntity[]> {
+  switch (source) {
+    case 'opensky': return () => fetchOpenSky(IRAN_BBOX);
+    case 'adsb': return fetchAdsbExchange;
+    case 'adsblol': return fetchAdsbLol;
+  }
+}
 
 export const flightsRouter = Router();
 
 flightsRouter.get('/', async (req, res) => {
-  const source: FlightSource = req.query.source === 'adsb' ? 'adsb' : 'opensky';
-  const cache = source === 'adsb' ? adsbCache : openskyCache;
+  const source = parseSource(req.query.source);
+  const cache = getCache(source);
 
-  // For ADS-B source, check API key is configured
+  // Credential checks for sources that require API keys
   if (source === 'adsb' && !process.env.ADSB_EXCHANGE_API_KEY) {
     return res.status(503).json({ error: 'ADS-B Exchange API key not configured' });
+  }
+
+  if (source === 'opensky' && !(process.env.OPENSKY_CLIENT_ID && process.env.OPENSKY_CLIENT_SECRET)) {
+    return res.status(503).json({ error: 'OpenSky credentials not configured' });
   }
 
   // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
@@ -27,9 +56,7 @@ flightsRouter.get('/', async (req, res) => {
   }
 
   try {
-    const flights = source === 'adsb'
-      ? await fetchAdsbExchange()
-      : await fetchOpenSky(IRAN_BBOX);
+    const flights = await getFetcher(source)();
 
     cache.set(flights);
     res.json({ data: flights, stale: false, lastFresh: Date.now() });

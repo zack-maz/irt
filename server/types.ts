@@ -65,7 +65,7 @@ export interface CacheResponse<T> {
   lastFresh: number; // Unix ms of last successful fetch
 }
 
-export type FlightSource = 'opensky' | 'adsb';
+export type FlightSource = 'opensky' | 'adsb' | 'adsblol';
 
 export class RateLimitError extends Error {
   name: string;

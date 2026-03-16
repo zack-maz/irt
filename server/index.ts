@@ -4,6 +4,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { flightsRouter } from './routes/flights.js';
 import { shipsRouter } from './routes/ships.js';
 import { eventsRouter } from './routes/events.js';
+import { sourcesRouter } from './routes/sources.js';
 import { connectAISStream } from './adapters/aisstream.js';
 
 export function createApp() {
@@ -21,6 +22,7 @@ export function createApp() {
   app.use('/api/flights', flightsRouter);
   app.use('/api/ships', shipsRouter);
   app.use('/api/events', eventsRouter);
+  app.use('/api/sources', sourcesRouter);
 
   // Error handler -- must be after routes
   app.use(errorHandler);

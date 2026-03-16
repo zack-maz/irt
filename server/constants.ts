@@ -24,6 +24,7 @@ export const FPM_TO_MS = 0.00508; // feet per minute to meters per second
 export const CACHE_TTL = {
   flights: 10_000, // 10s -- OpenSky polling interval
   adsbFlights: 260_000, // 260s -- same as ADS-B Exchange poll interval
+  adsblolFlights: 30_000, // 30s -- adsb.lol community API (respectful polling)
   ships: 0, // N/A for WebSocket push
   events: 300_000, // 5min -- ACLED has 24-48h inherent delay
 } as const;
