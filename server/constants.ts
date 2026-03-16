@@ -1,16 +1,17 @@
 import type { BoundingBox } from './types.js';
 
-// Iran + immediate neighboring waters (Persian Gulf, Gulf of Oman, Caspian Sea)
+// Greater Middle East: Iran + neighbors (Iraq, Turkey, Saudi, UAE, Pakistan, Afghanistan)
+// Persian Gulf, Gulf of Oman, Caspian Sea, Red Sea approaches
 export const IRAN_BBOX: BoundingBox = {
-  south: 25.0,
-  north: 40.0,
-  west: 44.0,
-  east: 63.5,
+  south: 15.0,
+  north: 42.0,
+  west: 30.0,
+  east: 70.0,
 };
 
-// ADS-B Exchange center point for 250 NM radius query (covers core Iran airspace)
-export const IRAN_CENTER = { lat: 32.5, lon: 53.75 } as const;
-export const ADSB_RADIUS_NM = 250;
+// ADS-B Exchange/adsb.lol center point for radius query (centered on region)
+export const IRAN_CENTER = { lat: 30.0, lon: 50.0 } as const;
+export const ADSB_RADIUS_NM = 500;
 
 // ADS-B Exchange polling interval: 10K requests/month / 30 days => ~260s per poll
 export const ADSB_POLL_INTERVAL = 260_000;
