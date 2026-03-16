@@ -4,6 +4,8 @@ import { OverlayPanel } from '@/components/ui/OverlayPanel';
 export function FiltersSlot() {
   const isExpanded = useUIStore((s) => s.isFiltersExpanded);
   const toggleFilters = useUIStore((s) => s.toggleFilters);
+  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
+  const toggleGroundTraffic = useUIStore((s) => s.toggleGroundTraffic);
 
   return (
     <div data-testid="filters-slot">
@@ -17,7 +19,15 @@ export function FiltersSlot() {
         </button>
         {isExpanded && (
           <div className="mt-2 space-y-1">
-            <p className="text-sm text-text-muted">No filters configured</p>
+            <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showGroundTraffic}
+                onChange={toggleGroundTraffic}
+                className="accent-emerald-500"
+              />
+              Show ground traffic
+            </label>
           </div>
         )}
       </OverlayPanel>

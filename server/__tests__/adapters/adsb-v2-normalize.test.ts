@@ -58,9 +58,13 @@ describe('ADS-B V2 Shared Normalizer', () => {
     expect(normalizeAircraft(noLon as any)).toBeNull();
   });
 
-  it('returns null when alt_baro is the string "ground"', () => {
+  it('includes ground aircraft with onGround=true and null altitude', () => {
     const ground = { ...validAircraft, alt_baro: 'ground' as const };
-    expect(normalizeAircraft(ground)).toBeNull();
+    const result = normalizeAircraft(ground);
+
+    expect(result).not.toBeNull();
+    expect(result!.data.onGround).toBe(true);
+    expect(result!.data.altitude).toBeNull();
   });
 
   it('sets unidentified=true when flight field is empty', () => {

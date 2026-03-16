@@ -238,7 +238,7 @@ describe('OpenSky Adapter', () => {
     expect(serialized).not.toContain('test-token');
   });
 
-  it('filters out ground traffic (onGround=true)', async () => {
+  it('includes ground traffic with onGround=true', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ access_token: 'test-token', expires_in: 1800 }),
@@ -251,7 +251,8 @@ describe('OpenSky Adapter', () => {
     const bbox = { south: 25, north: 40, west: 44, east: 63.5 };
     const flights = await fetchFlights(bbox);
 
-    expect(flights).toHaveLength(0);
+    expect(flights).toHaveLength(1);
+    expect(flights[0].data.onGround).toBe(true);
   });
 
   it('flags flights with empty callsign as unidentified', async () => {
@@ -286,6 +287,22 @@ describe('OpenSky Adapter', () => {
 
     expect(flights).toHaveLength(1);
     expect(flights[0].data.unidentified).toBe(false);
+  });
+
+  it('throws RateLimitError on 429 response', async () => {
+    const { RateLimitError } = await import('../../types.js');
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: 'test-token', expires_in: 1800 }),
+    });
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+    });
+
+    const bbox = { south: 25, north: 40, west: 44, east: 63.5 };
+    await expect(fetchFlights(bbox)).rejects.toThrow(RateLimitError);
   });
 
   it('uses callsign as label, falling back to icao24 when callsign is empty', async () => {

@@ -1,4 +1,5 @@
 import { config } from '../config.js';
+import { RateLimitError } from '../types.js';
 import type { FlightEntity, BoundingBox } from '../types.js';
 
 const OPENSKY_TOKEN_URL =
@@ -48,9 +49,7 @@ function normalizeFlightState(state: unknown[]): FlightEntity | null {
   // Filter out entries with no position (can't render on map)
   if (lat == null || lng == null) return null;
 
-  // Filter out ground traffic -- only airborne flights are relevant
   const onGround = (state[8] as boolean) ?? false;
-  if (onGround) return null;
 
   const icao24 = state[0] as string;
   const callsign = typeof state[1] === 'string' ? state[1].trim() : '';
@@ -69,7 +68,7 @@ function normalizeFlightState(state: unknown[]): FlightEntity | null {
       velocity: (state[9] as number | null) ?? null,
       heading: (state[10] as number | null) ?? null,
       altitude: (state[7] as number | null) ?? null,
-      onGround: false, // always false after ground filter
+      onGround,
       verticalRate: (state[11] as number | null) ?? null,
       unidentified: callsign === '', // hex-only flights (often military)
     },
@@ -85,6 +84,10 @@ export async function fetchFlights(bbox: BoundingBox): Promise<FlightEntity[]> {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+  if (res.status === 429) {
+    throw new RateLimitError('OpenSky rate limit exceeded');
+  }
 
   if (!res.ok) {
     throw new Error(`OpenSky API request failed: ${res.status}`);

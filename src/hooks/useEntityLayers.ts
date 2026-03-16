@@ -16,8 +16,14 @@ import type { FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/enti
  * Includes pulse animation for unidentified flights, throttled to ~15fps.
  */
 export function useEntityLayers() {
-  const flights = useFlightStore((s) => s.flights);
+  const allFlights = useFlightStore((s) => s.flights);
   const pulseEnabled = useUIStore((s) => s.pulseEnabled);
+  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
+
+  const flights = useMemo(
+    () => showGroundTraffic ? allFlights : allFlights.filter((f) => !f.data.onGround),
+    [allFlights, showGroundTraffic],
+  );
 
   // Pulse animation state
   const [pulseOpacity, setPulseOpacity] = useState(1.0);

@@ -27,8 +27,8 @@ export interface AdsbResponse {
 
 export function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
   if (ac.lat == null || ac.lon == null) return null;
-  if (ac.alt_baro === 'ground') return null;
 
+  const onGround = ac.alt_baro === 'ground';
   const callsign = typeof ac.flight === 'string' ? ac.flight.trim() : '';
   const cleanHex = ac.hex.replace(/^~/, '');
 
@@ -45,8 +45,8 @@ export function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
       originCountry: '',
       velocity: ac.gs != null ? ac.gs * KNOTS_TO_MS : null,
       heading: ac.track ?? null,
-      altitude: ac.alt_baro != null ? (ac.alt_baro as number) * FEET_TO_METERS : null,
-      onGround: false,
+      altitude: typeof ac.alt_baro === 'number' ? ac.alt_baro * FEET_TO_METERS : null,
+      onGround,
       verticalRate: ac.baro_rate != null ? ac.baro_rate * FPM_TO_MS : null,
       unidentified: callsign === '',
     },

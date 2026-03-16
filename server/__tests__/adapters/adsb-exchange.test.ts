@@ -61,7 +61,7 @@ describe('ADS-B Exchange Adapter', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, options] = mockFetch.mock.calls[0];
       expect(url).toContain('adsbexchange-com1.p.rapidapi.com');
-      expect(url).toContain('/v2/lat/32.5/lon/53.75/dist/250/');
+      expect(url).toContain('/v2/lat/30/lon/50/dist/500/');
       expect(options.headers['X-RapidAPI-Key']).toBe('test-api-key');
       expect(options.headers['X-RapidAPI-Host']).toBe('adsbexchange-com1.p.rapidapi.com');
     });
@@ -88,7 +88,7 @@ describe('ADS-B Exchange Adapter', () => {
       await expect(fetchFlights()).rejects.toThrow('ADS-B Exchange API error: 500');
     });
 
-    it('filters and normalizes aircraft from response', async () => {
+    it('normalizes aircraft and includes ground traffic', async () => {
       const groundAircraft = { ...validAircraft, hex: 'gnd001', alt_baro: 'ground' as const };
       const noPosition = { ...validAircraft, hex: 'nop001', lat: undefined, lon: undefined };
 
@@ -104,8 +104,11 @@ describe('ADS-B Exchange Adapter', () => {
       });
 
       const flights = await fetchFlights();
-      expect(flights).toHaveLength(1);
+      expect(flights).toHaveLength(2); // valid + ground, not no-position
       expect(flights[0].data.icao24).toBe('a9cee9');
+      expect(flights[0].data.onGround).toBe(false);
+      expect(flights[1].data.icao24).toBe('gnd001');
+      expect(flights[1].data.onGround).toBe(true);
     });
 
     it('returns empty array when ac is null', async () => {

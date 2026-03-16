@@ -5,9 +5,11 @@ export interface UIState {
   isCountersCollapsed: boolean;
   isFiltersExpanded: boolean;
   pulseEnabled: boolean;
+  showGroundTraffic: boolean;
   openDetailPanel: () => void;
   closeDetailPanel: () => void;
   toggleCounters: () => void;
   toggleFilters: () => void;
   togglePulse: () => void;
+  toggleGroundTraffic: () => void;
 }

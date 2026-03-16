@@ -52,7 +52,7 @@ describe('adsb.lol Adapter', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toBe('https://api.adsb.lol/v2/lat/32.5/lon/53.75/dist/250');
+    expect(url).toBe('https://api.adsb.lol/v2/lat/30/lon/50/dist/500');
     // No trailing slash
     expect(url).not.toMatch(/\/$/);
     // No auth headers -- should be called with just the URL (no options) or empty headers
@@ -107,7 +107,7 @@ describe('adsb.lol Adapter', () => {
     expect(flights).toHaveLength(0);
   });
 
-  it('filters and normalizes aircraft from response', async () => {
+  it('normalizes aircraft and includes ground traffic', async () => {
     const groundAircraft = { ...validAircraft, hex: 'gnd001', alt_baro: 'ground' as const };
     const noPosition = { ...validAircraft, hex: 'nop001', lat: undefined, lon: undefined };
 
@@ -123,7 +123,10 @@ describe('adsb.lol Adapter', () => {
     });
 
     const flights = await fetchFlights();
-    expect(flights).toHaveLength(1);
+    expect(flights).toHaveLength(2); // valid + ground, not no-position
     expect(flights[0].data.icao24).toBe('a9cee9');
+    expect(flights[0].data.onGround).toBe(false);
+    expect(flights[1].data.icao24).toBe('gnd001');
+    expect(flights[1].data.onGround).toBe(true);
   });
 });
