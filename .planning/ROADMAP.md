@@ -110,10 +110,12 @@ Plans:
   2. A toggle button in the UI switches the active flight data source between OpenSky and ADS-B Exchange
   3. Switching sources replaces flight data seamlessly — same entity rendering, same polling cadence
   4. If ADS-B Exchange rate limits are hit, the user is informed via a visible status message
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — Server-side ADS-B Exchange adapter, route dispatch with per-source caching, rate limit handling
+- [ ] 06-02-PLAN.md — Frontend flightStore source awareness, polling hook refactor for source-specific URL/interval
+- [ ] 06-03-PLAN.md — SourceSelector UI dropdown with connection status badge, AppShell wiring
 
 ### Phase 7: Ship & Conflict Data Feeds
 **Goal**: Ship positions and conflict events flow into the application alongside flight data
@@ -200,7 +202,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. API Proxy | 2/3 | In progress (gap closure) | - |
 | 4. Flight Data Feed | 0/2 | Complete | 2026-03-15 |
 | 5. Entity Rendering | 2/2 | Complete   | 2026-03-16 |
-| 6. ADS-B Exchange Data Source | 0/? | Not started | - |
+| 6. ADS-B Exchange Data Source | 0/3 | Not started | - |
 | 7. Ship & Conflict Data Feeds | 0/? | Not started | - |
 | 8. Layer Controls & News Toggle | 0/? | Not started | - |
 | 9. Detail Panel | 0/? | Not started | - |
