@@ -12,7 +12,8 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Tailwind CSS v4** — CSS-first `@theme` configuration, no tailwind.config.js
 - **Z-index** — scale defined as CSS custom properties for consistent overlay layering
 - **Commits** — conventional commits format (`feat(phase):`, `fix(phase):`, `docs(phase):`)
-- **Branches** — feature branches, never commit to main directly
+- **Branches** — one feature branch per phase (`feature/XX-description`), never commit to main directly
+- **Phase boundaries** — before starting a new phase: commit, push, merge previous phase to main, update all docs, then create new branch from main
 - **TypeScript** — pinned to ~5.9.3 to avoid TS 6.0 breaking changes
 
 ## Map Patterns
