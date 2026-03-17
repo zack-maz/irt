@@ -1,10 +1,18 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock adm-zip module
+// Mock adm-zip module with a constructable class
+const mockGetEntries = vi.fn();
 vi.mock('adm-zip', () => {
   return {
-    default: vi.fn(),
+    default: class MockAdmZip {
+      constructor(_buf: Buffer) {
+        // no-op
+      }
+      getEntries() {
+        return mockGetEntries();
+      }
+    },
   };
 });
 
@@ -226,18 +234,12 @@ describe('GDELT Adapter', () => {
 
   describe('fetchEvents (integration)', () => {
     it('orchestrates fetch->unzip->parse->filter->normalize end-to-end', async () => {
-      const AdmZip = (await import('adm-zip')).default;
-      const MockAdmZip = AdmZip as unknown as ReturnType<typeof vi.fn>;
-
-      // Mock AdmZip instance
-      const mockZipInstance = {
-        getEntries: vi.fn().mockReturnValue([
-          {
-            getData: vi.fn().mockReturnValue(Buffer.from(sampleCsv, 'utf8')),
-          },
-        ]),
-      };
-      MockAdmZip.mockImplementation(() => mockZipInstance);
+      // Configure mock AdmZip to return our sample CSV
+      mockGetEntries.mockReturnValue([
+        {
+          getData: () => Buffer.from(sampleCsv, 'utf8'),
+        },
+      ]);
 
       // 1. lastupdate.txt fetch
       mockFetch.mockResolvedValueOnce({
