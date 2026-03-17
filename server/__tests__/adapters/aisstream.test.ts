@@ -112,7 +112,7 @@ describe('AISStream Adapter', () => {
     const subscription = JSON.parse(ws.sentMessages[0]);
     expect(subscription.APIKey).toBe('test-ais-api-key');
     expect(subscription.BoundingBoxes).toEqual([
-      [[15.0, 30.0], [42.0, 70.0]],
+      [[5.0, 30.0], [42.0, 70.0]],
     ]);
     expect(subscription.FilterMessageTypes).toEqual(['PositionReport']);
   });

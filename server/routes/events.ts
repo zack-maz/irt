@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EntityCache } from '../cache/entityCache.js';
-import { fetchEvents } from '../adapters/acled.js';
+import { fetchEvents } from '../adapters/gdelt.js';
 import { CACHE_TTL } from '../constants.js';
 import type { ConflictEventEntity } from '../types.js';
 

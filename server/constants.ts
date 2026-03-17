@@ -1,9 +1,9 @@
 import type { BoundingBox } from './types.js';
 
-// Greater Middle East: Iran + neighbors (Iraq, Turkey, Saudi, UAE, Pakistan, Afghanistan)
-// Persian Gulf, Gulf of Oman, Caspian Sea, Red Sea approaches
+// Greater Middle East + Arabian Sea: Iran + neighbors, Indian Ocean shipping lanes
+// Persian Gulf, Gulf of Oman, Caspian Sea, Red Sea, Arabian Sea
 export const IRAN_BBOX: BoundingBox = {
-  south: 15.0,
+  south: 5.0,
   north: 42.0,
   west: 30.0,
   east: 70.0,
@@ -27,5 +27,5 @@ export const CACHE_TTL = {
   adsbFlights: 260_000, // 260s -- same as ADS-B Exchange poll interval
   adsblolFlights: 30_000, // 30s -- adsb.lol community API (respectful polling)
   ships: 0, // N/A for WebSocket push
-  events: 300_000, // 5min -- ACLED has 24-48h inherent delay
+  events: 900_000, // 15min -- GDELT updates every 15 minutes
 } as const;

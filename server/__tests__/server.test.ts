@@ -42,6 +42,14 @@ vi.mock('../adapters/adsb-lol.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
 
+vi.mock('../adapters/gdelt.js', () => ({
+  fetchEvents: vi.fn(async () => []),
+}));
+
+vi.mock('../adapters/acled.js', () => ({
+  fetchEvents: vi.fn(async () => []),
+}));
+
 let server: Server;
 let baseUrl: string;
 

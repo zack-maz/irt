@@ -38,8 +38,8 @@ export function loadConfig(): AppConfig {
       apiKey: required('AISSTREAM_API_KEY'),
     },
     acled: {
-      email: required('ACLED_EMAIL'),
-      password: required('ACLED_PASSWORD'),
+      email: process.env.ACLED_EMAIL ?? '',
+      password: process.env.ACLED_PASSWORD ?? '',
     },
   };
 }
