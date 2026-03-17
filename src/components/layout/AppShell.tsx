@@ -3,12 +3,16 @@ import { CountersSlot } from '@/components/layout/CountersSlot';
 import { LayerTogglesSlot } from '@/components/layout/LayerTogglesSlot';
 import { FiltersSlot } from '@/components/layout/FiltersSlot';
 import { DetailPanelSlot } from '@/components/layout/DetailPanelSlot';
-import { SourceSelector } from '@/components/ui/SourceSelector';
+import { StatusPanel } from '@/components/ui/StatusPanel';
 import { BaseMap } from '@/components/map/BaseMap';
 import { useFlightPolling } from '@/hooks/useFlightPolling';
+import { useShipPolling } from '@/hooks/useShipPolling';
+import { useEventPolling } from '@/hooks/useEventPolling';
 
 export function AppShell() {
   useFlightPolling();
+  useShipPolling();
+  useEventPolling();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">
@@ -25,9 +29,9 @@ export function AppShell() {
         <TitleSlot />
       </div>
 
-      {/* Top-right: Source selector + Counters + Layer toggles */}
+      {/* Top-right: Status panel + Counters + Layer toggles */}
       <div className="absolute top-4 right-4 z-[var(--z-controls)] flex flex-col items-end gap-2">
-        <SourceSelector />
+        <StatusPanel />
         <CountersSlot />
         <LayerTogglesSlot />
       </div>

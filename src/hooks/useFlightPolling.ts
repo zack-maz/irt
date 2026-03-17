@@ -27,14 +27,19 @@ export function useFlightPolling(): void {
   useEffect(() => {
     const url = `/api/flights?source=${activeSource}`;
     const interval = INTERVAL_MAP[activeSource];
+    // Guard against StrictMode double-mount and visibility-change races:
+    // cleanup sets cancelled=true so in-flight fetches discard their responses
+    let cancelled = false;
 
     const fetchFlights = async (): Promise<void> => {
+      if (cancelled) return;
       try {
         const res = await fetch(url);
+        if (cancelled) return;
         const data: CacheResponse<FlightEntity[]> & { rateLimited?: boolean } = await res.json();
         setFlightData(data);
       } catch {
-        setError();
+        if (!cancelled) setError();
       }
     };
 
@@ -46,6 +51,7 @@ export function useFlightPolling(): void {
     };
 
     const schedulePoll = (): void => {
+      if (cancelled) return;
       timeoutRef.current = setTimeout(async () => {
         await fetchFlights();
         checkStaleness();
@@ -71,6 +77,7 @@ export function useFlightPolling(): void {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      cancelled = true;
       if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;

@@ -31,4 +31,14 @@ describe('AppShell', () => {
     render(<AppShell />);
     expect(screen.getByTestId('detail-panel-slot')).toBeInTheDocument();
   });
+
+  it('renders StatusPanel instead of SourceSelector', () => {
+    render(<AppShell />);
+    expect(screen.getByTestId('status-dot-flights')).toBeInTheDocument();
+  });
+
+  it('does not render SourceSelector', () => {
+    render(<AppShell />);
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
 });
