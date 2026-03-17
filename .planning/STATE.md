@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 08.1-01-PLAN.md
-last_updated: "2026-03-17T22:24:19Z"
-last_activity: 2026-03-17 -- Phase 08.1 Plan 01 completed (GDELT adapter with TDD)
+stopped_at: Completed 08.1-02-PLAN.md
+last_updated: "2026-03-17T22:30:01Z"
+last_activity: 2026-03-17 -- Phase 08.1 Plan 02 completed (GDELT route wiring + polling intervals)
 progress:
   total_phases: 12
   completed_phases: 7
   total_plans: 21
-  completed_plans: 18
+  completed_plans: 19
   percent: 90
 ---
 
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ## Current Position
 
 Phase: 08.1 (Add GDELT as Default Conflict Event Source) -- IN PROGRESS
-Plan: 1 of 3 in current phase (Plan 01 complete)
-Status: GDELT adapter created with TDD (18 tests passing). Route wiring and polling interval update remaining.
-Last activity: 2026-03-17 -- Phase 08.1 Plan 01 completed (GDELT adapter with TDD)
+Plan: 2 of 3 in current phase (Plans 01-02 complete)
+Status: GDELT adapter wired into events route with 15-min polling. StatusPanel UI remaining.
+Last activity: 2026-03-17 -- Phase 08.1 Plan 02 completed (GDELT route wiring + polling intervals)
 
 Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 3.7min
-- Total execution time: 1.11 hours
+- Total plans completed: 19
+- Average duration: 3.6min
+- Total execution time: 1.14 hours
 
 **By Phase:**
 
@@ -51,10 +51,10 @@ Progress: [█████████░] 90%
 | 6. ADS-B Exchange | 1/3 | 3min | 3min |
 | 7. adsb.lol | 2/2 | 8min | 4min |
 | 8. Ship & Conflict Data | 1/2 | 6min | 6min |
-| 8.1 GDELT Default Source | 1/3 | 3min | 3min |
+| 8.1 GDELT Default Source | 2/3 | 6min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (3min), 07-01 (5min), 07-02 (3min), 08-01 (6min), 08.1-01 (3min)
+- Last 5 plans: 07-01 (5min), 07-02 (3min), 08-01 (6min), 08.1-01 (3min), 08.1-02 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -62,6 +62,7 @@ Progress: [█████████░] 90%
 | Phase 07 P02 | 3min | 2 tasks | 7 files |
 | Phase 08 P01 | 6min | 2 tasks | 12 files |
 | Phase 08.1 P01 | 3min | 2 tasks | 4 files |
+| Phase 08.1 P02 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,8 @@ Recent decisions affecting current work:
 - [Phase 08.1]: FIPS 10-4 country codes (IZ not IQ, TU not TR, IS not IL) for GDELT filtering
 - [Phase 08.1]: CAMEO classification: 18->drone, 19/20->missile
 - [Phase 08.1]: Tab delimiter for GDELT CSV parsing despite .CSV extension
+- [Phase 08.1]: ACLED credentials optional via nullish coalescing (preserves config shape for future use)
+- [Phase 08.1]: 15-minute intervals (900s) for both cache TTL and frontend polling to match GDELT update cadence
 
 ### Roadmap Evolution
 
@@ -164,6 +167,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:24:19Z
-Stopped at: Completed 08.1-01-PLAN.md
-Resume file: .planning/phases/08.1-add-gdelt-as-default-conflict-event-source/08.1-02-PLAN.md
+Last session: 2026-03-17T22:30:01Z
+Stopped at: Completed 08.1-02-PLAN.md
+Resume file: .planning/phases/08.1-add-gdelt-as-default-conflict-event-source/08.1-03-PLAN.md
