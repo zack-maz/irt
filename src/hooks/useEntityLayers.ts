@@ -67,7 +67,7 @@ export function useEntityLayers() {
     data: ships,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
-    getIcon: () => 'diamond',
+    getIcon: () => 'chevron',
     getPosition: (d: ShipEntity) => [d.lng, d.lat],
     getSize: ICON_SIZE.ship.meters,
     sizeUnits: 'meters' as const,

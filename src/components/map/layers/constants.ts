@@ -2,19 +2,19 @@
 
 /** RGB color tuples for entity types */
 export const ENTITY_COLORS = {
-  flight: [34, 197, 94] as const,           // #22c55e green
-  flightUnidentified: [234, 179, 8] as const, // #eab308 yellow
-  ship: [59, 130, 246] as const,             // #3b82f6 blue
+  flight: [234, 179, 8] as const,            // #eab308 yellow
+  flightUnidentified: [239, 68, 68] as const, // #ef4444 red
+  ship: [156, 163, 175] as const,            // #9ca3af gray
   drone: [239, 68, 68] as const,             // #ef4444 red
   missile: [239, 68, 68] as const,           // #ef4444 red
 } as const;
 
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */
 export const ICON_SIZE = {
-  flight:  { meters: 2400, minPixels: 15, maxPixels: 96 },
-  ship:    { meters: 1800, minPixels: 12, maxPixels: 84 },
-  drone:   { meters: 2400, minPixels: 15, maxPixels: 96 },
-  missile: { meters: 2400, minPixels: 15, maxPixels: 96 },
+  flight:  { meters: 8000, minPixels: 24, maxPixels: 160 },
+  ship:    { meters: 8000, minPixels: 24, maxPixels: 160 },
+  drone:   { meters: 8000, minPixels: 24, maxPixels: 160 },
+  missile: { meters: 8000, minPixels: 24, maxPixels: 160 },
 } as const;
 
 /** Pulse animation config for unidentified flights */

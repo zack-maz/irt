@@ -35,16 +35,16 @@ describe('Entity Layer Constants', () => {
   });
 
   describe('ENTITY_COLORS', () => {
-    it('flight is green [34, 197, 94]', () => {
-      expect(ENTITY_COLORS.flight).toEqual([34, 197, 94]);
+    it('flight is yellow [234, 179, 8]', () => {
+      expect(ENTITY_COLORS.flight).toEqual([234, 179, 8]);
     });
 
-    it('flightUnidentified is yellow [234, 179, 8]', () => {
-      expect(ENTITY_COLORS.flightUnidentified).toEqual([234, 179, 8]);
+    it('flightUnidentified is red [239, 68, 68]', () => {
+      expect(ENTITY_COLORS.flightUnidentified).toEqual([239, 68, 68]);
     });
 
-    it('ship is blue [59, 130, 246]', () => {
-      expect(ENTITY_COLORS.ship).toEqual([59, 130, 246]);
+    it('ship is gray [156, 163, 175]', () => {
+      expect(ENTITY_COLORS.ship).toEqual([156, 163, 175]);
     });
 
     it('drone is red [239, 68, 68]', () => {
@@ -58,19 +58,19 @@ describe('Entity Layer Constants', () => {
 
   describe('ICON_SIZE', () => {
     it('flight has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.flight).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
+      expect(ICON_SIZE.flight).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
 
     it('ship has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.ship).toEqual({ meters: 1800, minPixels: 12, maxPixels: 84 });
+      expect(ICON_SIZE.ship).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
 
     it('drone has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.drone).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
+      expect(ICON_SIZE.drone).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
 
     it('missile has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.missile).toEqual({ meters: 2400, minPixels: 15, maxPixels: 96 });
+      expect(ICON_SIZE.missile).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
   });
 
@@ -267,26 +267,26 @@ describe('useEntityLayers', () => {
     expect(getAngle(mockUnidentifiedFlight)).toBe(0);
   });
 
-  it('flight layer getColor returns green for regular flights', () => {
+  it('flight layer getColor returns yellow for regular flights', () => {
     const { result } = renderHook(() => useEntityLayers());
     const flightLayer = result.current[1] as IconLayer;
     const getColor = flightLayer.props.getColor as (d: FlightEntity) => number[];
     const color = getColor(mockRegularFlight);
-    expect(color[0]).toBe(34);  // R
-    expect(color[1]).toBe(197); // G
-    expect(color[2]).toBe(94);  // B
+    expect(color[0]).toBe(234); // R
+    expect(color[1]).toBe(179); // G
+    expect(color[2]).toBe(8);   // B
     // Alpha varies by altitude -- should be >0
     expect(color[3]).toBeGreaterThan(0);
   });
 
-  it('flight layer getColor returns yellow for unidentified flights', () => {
+  it('flight layer getColor returns red for unidentified flights', () => {
     const { result } = renderHook(() => useEntityLayers());
     const flightLayer = result.current[1] as IconLayer;
     const getColor = flightLayer.props.getColor as (d: FlightEntity) => number[];
     const color = getColor(mockUnidentifiedFlight);
-    expect(color[0]).toBe(234); // R
-    expect(color[1]).toBe(179); // G
-    expect(color[2]).toBe(8);   // B
+    expect(color[0]).toBe(239); // R
+    expect(color[1]).toBe(68);  // G
+    expect(color[2]).toBe(68);  // B
   });
 
   it('all layers have sizeUnits meters', () => {
