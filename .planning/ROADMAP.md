@@ -163,7 +163,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08.1-01-PLAN.md — GDELT v2 adapter with TDD (fetch, unzip, parse, filter, normalize)
+- [x] 08.1-01-PLAN.md — GDELT v2 adapter with TDD (fetch, unzip, parse, filter, normalize)
 - [ ] 08.1-02-PLAN.md — Wire GDELT into system (route swap, config fix, cache/polling interval updates)
 
 ### Phase 9: Layer Controls & News Toggle
@@ -239,7 +239,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. ADS-B Exchange Data Source | 0/3 | Not started | - |
 | 7. adsb.lol Data Source | 0/2 | Not started | - |
 | 8. Ship & Conflict Data Feeds | 0/2 | Not started | - |
-| 08.1. GDELT Event Source | 0/2 | Not started | - |
+| 08.1. GDELT Event Source | 1/2 | In progress | - |
 | 9. Layer Controls & News Toggle | 0/? | Not started | - |
 | 10. Detail Panel | 0/? | Not started | - |
 | 11. Smart Filters | 0/? | Not started | - |

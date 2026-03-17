@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-17T02:09:00Z"
-last_activity: 2026-03-17 -- Phase 8 Plan 01 completed (ship/event stores, polling, entity layers)
+stopped_at: Completed 08.1-01-PLAN.md
+last_updated: "2026-03-17T22:24:19Z"
+last_activity: 2026-03-17 -- Phase 08.1 Plan 01 completed (GDELT adapter with TDD)
 progress:
   total_phases: 12
   completed_phases: 7
-  total_plans: 18
-  completed_plans: 17
-  percent: 89
+  total_plans: 21
+  completed_plans: 18
+  percent: 90
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 8: Ship and conflict event data feeds -- stores, polling, entity layer wiring.
+**Current focus:** Phase 08.1: Add GDELT as default conflict event source -- replace ACLED with free, real-time GDELT data.
 
 ## Current Position
 
-Phase: 8 of 12 (Ship & Conflict Data Feeds) -- IN PROGRESS
-Plan: 1 of 2 in current phase (Plan 01 complete)
-Status: Ship/event stores, polling hooks, dynamic entity layers, and ACLED multi-country expansion complete. Plan 02 (AppShell wiring) remaining.
-Last activity: 2026-03-17 -- Phase 8 Plan 01 completed (ship/event stores, polling, entity layers)
+Phase: 08.1 (Add GDELT as Default Conflict Event Source) -- IN PROGRESS
+Plan: 1 of 3 in current phase (Plan 01 complete)
+Status: GDELT adapter created with TDD (18 tests passing). Route wiring and polling interval update remaining.
+Last activity: 2026-03-17 -- Phase 08.1 Plan 01 completed (GDELT adapter with TDD)
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 3.8min
-- Total execution time: 1.06 hours
+- Total plans completed: 18
+- Average duration: 3.7min
+- Total execution time: 1.11 hours
 
 **By Phase:**
 
@@ -51,15 +51,17 @@ Progress: [█████████░] 89%
 | 6. ADS-B Exchange | 1/3 | 3min | 3min |
 | 7. adsb.lol | 2/2 | 8min | 4min |
 | 8. Ship & Conflict Data | 1/2 | 6min | 6min |
+| 8.1 GDELT Default Source | 1/3 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (15min), 06-02 (3min), 07-01 (5min), 07-02 (3min), 08-01 (6min)
+- Last 5 plans: 06-02 (3min), 07-01 (5min), 07-02 (3min), 08-01 (6min), 08.1-01 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
 | Phase 07 P01 | 5min | 2 tasks | 14 files |
 | Phase 07 P02 | 3min | 2 tasks | 7 files |
 | Phase 08 P01 | 6min | 2 tasks | 12 files |
+| Phase 08.1 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -140,6 +142,15 @@ Recent decisions affecting current work:
 - [Phase 08]: No stale clearing for conflict events (historical ACLED data never goes stale)
 - [Phase 08]: Separate useMemo per entity layer with individual deps for efficient re-rendering
 - [Phase 08]: ACLED expanded to 16 pipe-separated countries for Greater Middle East coverage
+- [Phase 08.1]: adm-zip for ZIP decompression (zlib cannot handle ZIP archives, only gzip/deflate)
+- [Phase 08.1]: HTTP (not HTTPS) for GDELT URLs due to TLS cert issues on data.gdeltproject.org
+- [Phase 08.1]: FIPS 10-4 country codes (IZ not IQ, TU not TR, IS not IL) for GDELT filtering
+- [Phase 08.1]: CAMEO classification: 18->drone, 19/20->missile
+- [Phase 08.1]: Tab delimiter for GDELT CSV parsing despite .CSV extension
+
+### Roadmap Evolution
+
+- Phase 08.1 inserted after Phase 08: Add GDELT as default conflict event source (URGENT)
 
 ### Pending Todos
 
@@ -153,6 +164,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T02:09:00Z
-Stopped at: Completed 08-01-PLAN.md
-Resume file: .planning/phases/08-ship-conflict-data-feeds/08-02-PLAN.md
+Last session: 2026-03-17T22:24:19Z
+Stopped at: Completed 08.1-01-PLAN.md
+Resume file: .planning/phases/08.1-add-gdelt-as-default-conflict-event-source/08.1-02-PLAN.md
