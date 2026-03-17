@@ -149,6 +149,23 @@ Plans:
 - [ ] 08-01-PLAN.md — Ship/event stores, polling hooks, entity layer wiring, ACLED country expansion
 - [ ] 08-02-PLAN.md — HUD status panel replacing SourceSelector, AppShell wiring of all three polling hooks
 
+### Phase 08.1: Add GDELT as default conflict event source (INSERTED)
+
+**Goal:** GDELT v2 replaces ACLED as the default conflict event source -- free, no auth, 15-minute update cycle
+**Requirements**: DATA-03
+**Depends on:** Phase 8
+**Success Criteria** (what must be TRUE):
+  1. Conflict events are fetched from GDELT v2 exports (not ACLED) via the server proxy
+  2. Events are filtered to Middle East conflict codes (CAMEO 18/19/20) and normalized to ConflictEventEntity[]
+  3. Server starts without ACLED credentials (no crash)
+  4. Event polling interval is 15 minutes (matching GDELT update cycle)
+  5. All existing tests pass with updated data source
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08.1-01-PLAN.md — GDELT v2 adapter with TDD (fetch, unzip, parse, filter, normalize)
+- [ ] 08.1-02-PLAN.md — Wire GDELT into system (route swap, config fix, cache/polling interval updates)
+
 ### Phase 9: Layer Controls & News Toggle
 **Goal**: Users can show or hide entire categories of data and control non-statistical content visibility
 **Depends on**: Phase 8
@@ -222,6 +239,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. ADS-B Exchange Data Source | 0/3 | Not started | - |
 | 7. adsb.lol Data Source | 0/2 | Not started | - |
 | 8. Ship & Conflict Data Feeds | 0/2 | Not started | - |
+| 08.1. GDELT Event Source | 0/2 | Not started | - |
 | 9. Layer Controls & News Toggle | 0/? | Not started | - |
 | 10. Detail Panel | 0/? | Not started | - |
 | 11. Smart Filters | 0/? | Not started | - |
