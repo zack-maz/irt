@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
+status: GDELT adapter wired into events route with 15-min polling. StatusPanel UI remaining.
 stopped_at: Completed 08.1-02-PLAN.md
-last_updated: "2026-03-17T22:30:01Z"
+last_updated: "2026-03-17T22:35:01.707Z"
 last_activity: 2026-03-17 -- Phase 08.1 Plan 02 completed (GDELT route wiring + polling intervals)
 progress:
-  total_phases: 12
+  total_phases: 13
   completed_phases: 7
-  total_plans: 21
-  completed_plans: 19
+  total_plans: 20
+  completed_plans: 18
   percent: 90
 ---
 
