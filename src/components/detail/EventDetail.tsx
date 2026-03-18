@@ -1,4 +1,5 @@
 import type { ConflictEventEntity } from '@/types/entities';
+import { EVENT_TYPE_LABELS } from '@/types/ui';
 import { DetailValue } from './DetailValue';
 
 interface EventDetailProps {
@@ -8,7 +9,7 @@ interface EventDetailProps {
 export function EventDetail({ entity }: EventDetailProps) {
   const d = entity.data;
   const date = new Date(entity.timestamp).toISOString().slice(0, 10);
-  const typeLabel = entity.type === 'drone' ? 'Drone' : 'Missile';
+  const typeLabel = EVENT_TYPE_LABELS[entity.type] ?? entity.type;
 
   return (
     <div className="flex flex-col gap-1">
@@ -19,7 +20,7 @@ export function EventDetail({ entity }: EventDetailProps) {
       <DetailValue label="Event Type" value={d.eventType || '--'} />
       <DetailValue label="Sub-Type" value={d.subEventType || '--'} />
       <DetailValue label="CAMEO Code" value={d.cameoCode || '--'} />
-      <DetailValue label="Goldstein" value={d.goldsteinScale.toFixed(1)} />
+      <DetailValue label="Goldstein" value={d.goldsteinScale != null ? String(d.goldsteinScale) : '--'} />
 
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
         Location
@@ -42,13 +43,13 @@ export function EventDetail({ entity }: EventDetailProps) {
       {d.source && (
         <div className="flex items-center justify-between px-3 py-1">
           <span className="text-[10px] uppercase tracking-wider text-text-muted">
-            Source Link
+            Article
           </span>
           <a
             href={d.source}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 text-xs underline"
+            className="text-xs text-accent hover:underline"
           >
             View source
           </a>

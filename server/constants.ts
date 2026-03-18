@@ -1,17 +1,17 @@
 import type { BoundingBox } from './types.js';
 
-// Greater Middle East + Arabian Sea: Iran + neighbors, Indian Ocean shipping lanes
-// Persian Gulf, Gulf of Oman, Caspian Sea, Red Sea, Arabian Sea
+// Greater Middle East + Mediterranean + Arabian Sea
+// Covers full visible map area for ship/event subscriptions
 export const IRAN_BBOX: BoundingBox = {
-  south: 5.0,
-  north: 42.0,
-  west: 30.0,
-  east: 70.0,
+  south: 0.0,
+  north: 50.0,
+  west: 20.0,
+  east: 80.0,
 };
 
 // ADS-B Exchange/adsb.lol center point for radius query (centered on region)
-export const IRAN_CENTER = { lat: 30.0, lon: 50.0 } as const;
-export const ADSB_RADIUS_NM = 500;
+export const IRAN_CENTER = { lat: 28.0, lon: 45.0 } as const;
+export const ADSB_RADIUS_NM = 1200;
 
 // ADS-B Exchange polling interval: 10K requests/month / 30 days => ~260s per poll
 export const ADSB_POLL_INTERVAL = 260_000;

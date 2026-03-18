@@ -1,5 +1,6 @@
 import { useRef, useLayoutEffect, useState } from 'react';
 import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import { isConflictEventType, EVENT_TYPE_LABELS } from '@/types/ui';
 
 interface EntityTooltipProps {
   entity: MapEntity;
@@ -11,21 +12,19 @@ const MARGIN = 8;
 
 function FlightContent({ entity }: { entity: FlightEntity }) {
   const d = entity.data;
-  const alt = d.altitude != null ? `${Math.round(d.altitude)}m` : '—';
-  const speed = d.velocity != null ? `${Math.round(d.velocity)}m/s` : '—';
-  const heading = d.heading != null ? `${Math.round(d.heading)}°` : '—';
-  const vRate = d.verticalRate != null ? `${d.verticalRate > 0 ? '+' : ''}${d.verticalRate.toFixed(1)}m/s` : '—';
+  const alt = d.altitude != null ? `${Math.round(d.altitude)}m` : '--';
+  const speed = d.velocity != null ? `${Math.round(d.velocity)}m/s` : '--';
+  const heading = d.heading != null ? `${Math.round(d.heading)}deg` : '--';
 
   return (
     <>
       <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>Flight</span>
       <br /><strong>{d.callsign || d.icao24}</strong>
       {d.callsign && <><br />ICAO: {d.icao24}</>}
-      <br />Origin: {d.originCountry || '—'}
+      <br />Origin: {d.originCountry || '--'}
       <br />Altitude: {alt}
       <br />Speed: {speed}
       <br />Heading: {heading}
-      <br />V/S: {vRate}
       <br />Status: {d.onGround ? 'Ground' : 'Airborne'}
       {d.unidentified && <><br /><span style={{ color: '#ef4444' }}>Unidentified</span></>}
     </>
@@ -52,22 +51,15 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
 
   return (
     <>
-      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>{entity.type === 'drone' ? 'Drone' : 'Missile'}</span>
-      <br /><strong>{d.eventType}</strong>
+      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>
+        {EVENT_TYPE_LABELS[entity.type] ?? entity.type}
+      </span>
+      <br /><strong>{d.eventType || 'Unknown'}</strong>
       {d.locationName && <><br />Location: {d.locationName}</>}
       {d.actor1 && <><br />Actor 1: {d.actor1}</>}
       {d.actor2 && <><br />Actor 2: {d.actor2}</>}
       <br />Date: {date}
-      <br />CAMEO: {d.cameoCode}
-      <br />Goldstein: {d.goldsteinScale.toFixed(1)}
-      {d.source && (
-        <>
-          <br />
-          <a href={d.source} target="_blank" rel="noopener" style={{ color: '#60a5fa' }}>
-            Source
-          </a>
-        </>
-      )}
+      {d.cameoCode && <><br />CAMEO: {d.cameoCode}</>}
     </>
   );
 }
@@ -122,7 +114,7 @@ export function EntityTooltip({ entity, x, y }: EntityTooltipProps) {
     >
       {entity.type === 'flight' && <FlightContent entity={entity as FlightEntity} />}
       {entity.type === 'ship' && <ShipContent entity={entity as ShipEntity} />}
-      {(entity.type === 'drone' || entity.type === 'missile') && <EventContent entity={entity as ConflictEventEntity} />}
+      {isConflictEventType(entity.type) && <EventContent entity={entity as ConflictEventEntity} />}
     </div>
   );
 }

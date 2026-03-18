@@ -6,7 +6,7 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-export const MAX_BOUNDS: [number, number, number, number] = [30, 5, 70, 45]; // [west, south, east, north]
+export const MAX_BOUNDS: [number, number, number, number] = [20, 0, 80, 50]; // [west, south, east, north]
 
 export const MAP_STYLE =
   'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';

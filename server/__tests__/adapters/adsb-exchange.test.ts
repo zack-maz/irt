@@ -61,7 +61,7 @@ describe('ADS-B Exchange Adapter', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, options] = mockFetch.mock.calls[0];
       expect(url).toContain('adsbexchange-com1.p.rapidapi.com');
-      expect(url).toContain('/v2/lat/30/lon/50/dist/500/');
+      expect(url).toContain('/v2/lat/28/lon/45/dist/1200/');
       expect(options.headers['X-RapidAPI-Key']).toBe('test-api-key');
       expect(options.headers['X-RapidAPI-Host']).toBe('adsbexchange-com1.p.rapidapi.com');
     });

@@ -12,7 +12,7 @@ vi.mock('../../config.js', () => ({
 }));
 
 // Sample ACLED event record
-const sampleMissileEvent = {
+const sampleShellingEvent = {
   event_id_cnty: 'IRN12345',
   event_date: '2026-03-10',
   event_type: 'Explosions/Remote violence',
@@ -23,12 +23,12 @@ const sampleMissileEvent = {
   latitude: '35.6892',
   longitude: '51.3890',
   fatalities: '3',
-  notes: 'Missile strike reported in Tehran area',
+  notes: 'Shelling reported in Tehran area',
   source: 'Reuters',
   geo_precision: '1',
 };
 
-const sampleDroneEvent = {
+const sampleAirstrikeEvent = {
   event_id_cnty: 'IRN12346',
   event_date: '2026-03-11',
   event_type: 'Explosions/Remote violence',
@@ -39,7 +39,7 @@ const sampleDroneEvent = {
   latitude: '32.6546',
   longitude: '51.6680',
   fatalities: '0',
-  notes: 'Drone strike reported near Isfahan',
+  notes: 'Airstrike reported near Isfahan',
   source: 'ISNA',
   geo_precision: '2',
 };
@@ -77,7 +77,7 @@ describe('ACLED Adapter', () => {
     // Events request
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 200, success: true, data: [sampleMissileEvent] }),
+      json: async () => ({ status: 200, success: true, data: [sampleShellingEvent] }),
     });
 
     const events = await fetchEvents();
@@ -85,7 +85,7 @@ describe('ACLED Adapter', () => {
     expect(events).toHaveLength(1);
     const event = events[0];
     expect(event.id).toBe('event-IRN12345');
-    expect(event.type).toBe('missile');
+    expect(event.type).toBe('shelling');
     expect(event.lat).toBe(35.6892);
     expect(event.lng).toBe(51.389);
     expect(event.label).toContain('Explosions/Remote violence');
@@ -94,36 +94,36 @@ describe('ACLED Adapter', () => {
     expect(event.data.fatalities).toBe(3);
     expect(event.data.actor1).toBe('Military Forces of Iran');
     expect(event.data.actor2).toBe('Unidentified Armed Group');
-    expect(event.data.notes).toBe('Missile strike reported in Tehran area');
+    expect(event.data.notes).toBe('Shelling reported in Tehran area');
     expect(event.data.source).toBe('Reuters');
   });
 
-  it('classifies "Shelling/artillery/missile attack" as missile type', async () => {
+  it('classifies "Shelling/artillery/missile attack" as shelling type', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ access_token: 'acled-token', expires_in: 86400 }),
     });
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 200, success: true, data: [sampleMissileEvent] }),
+      json: async () => ({ status: 200, success: true, data: [sampleShellingEvent] }),
     });
 
     const events = await fetchEvents();
-    expect(events[0].type).toBe('missile');
+    expect(events[0].type).toBe('shelling');
   });
 
-  it('classifies "Air/drone strike" as drone type', async () => {
+  it('classifies "Air/drone strike" as airstrike type', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ access_token: 'acled-token', expires_in: 86400 }),
     });
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 200, success: true, data: [sampleDroneEvent] }),
+      json: async () => ({ status: 200, success: true, data: [sampleAirstrikeEvent] }),
     });
 
     const events = await fetchEvents();
-    expect(events[0].type).toBe('drone');
+    expect(events[0].type).toBe('airstrike');
   });
 
   it('requests last 7 days of Greater Middle East data (16 countries)', async () => {
@@ -184,7 +184,7 @@ describe('ACLED Adapter', () => {
     });
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 200, success: true, data: [sampleMissileEvent, sampleDroneEvent] }),
+      json: async () => ({ status: 200, success: true, data: [sampleShellingEvent, sampleAirstrikeEvent] }),
     });
 
     const events = await fetchEvents();

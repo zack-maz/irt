@@ -107,7 +107,7 @@ const sampleCsv = [
 describe('GDELT Adapter', () => {
   let getExportUrl: typeof import('../adapters/gdelt.js').getExportUrl;
   let parseAndFilter: typeof import('../adapters/gdelt.js').parseAndFilter;
-  let classifyByCAMEO: typeof import('../adapters/gdelt.js').classifyByCAMEO;
+  let classifyByBaseCode: typeof import('../adapters/gdelt.js').classifyByBaseCode;
   let normalizeGdeltEvent: typeof import('../adapters/gdelt.js').normalizeGdeltEvent;
   let fetchEvents: typeof import('../adapters/gdelt.js').fetchEvents;
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -120,7 +120,7 @@ describe('GDELT Adapter', () => {
     const mod = await import('../adapters/gdelt.js');
     getExportUrl = mod.getExportUrl;
     parseAndFilter = mod.parseAndFilter;
-    classifyByCAMEO = mod.classifyByCAMEO;
+    classifyByBaseCode = mod.classifyByBaseCode;
     normalizeGdeltEvent = mod.normalizeGdeltEvent;
     fetchEvents = mod.fetchEvents;
   });
@@ -215,21 +215,69 @@ describe('GDELT Adapter', () => {
     });
   });
 
-  describe('classifyByCAMEO', () => {
-    it('returns drone for root code 18', () => {
-      expect(classifyByCAMEO('18', '183')).toBe('drone');
+  describe('classifyByBaseCode', () => {
+    it('returns airstrike for base code 195', () => {
+      expect(classifyByBaseCode('195', '19')).toBe('airstrike');
     });
 
-    it('returns missile for root code 19', () => {
-      expect(classifyByCAMEO('19', '190')).toBe('missile');
+    it('returns ground_combat for base code 190', () => {
+      expect(classifyByBaseCode('190', '19')).toBe('ground_combat');
     });
 
-    it('returns missile for root code 20', () => {
-      expect(classifyByCAMEO('20', '201')).toBe('missile');
+    it('returns ground_combat for base code 193', () => {
+      expect(classifyByBaseCode('193', '19')).toBe('ground_combat');
     });
 
-    it('returns missile as fallback for unknown root codes', () => {
-      expect(classifyByCAMEO('99', '990')).toBe('missile');
+    it('returns shelling for base code 194', () => {
+      expect(classifyByBaseCode('194', '19')).toBe('shelling');
+    });
+
+    it('returns bombing for base code 183', () => {
+      expect(classifyByBaseCode('183', '18')).toBe('bombing');
+    });
+
+    it('returns assassination for base code 185', () => {
+      expect(classifyByBaseCode('185', '18')).toBe('assassination');
+    });
+
+    it('returns abduction for base code 181', () => {
+      expect(classifyByBaseCode('181', '18')).toBe('abduction');
+    });
+
+    it('returns assault for base code 180', () => {
+      expect(classifyByBaseCode('180', '18')).toBe('assault');
+    });
+
+    it('returns blockade for base code 191', () => {
+      expect(classifyByBaseCode('191', '19')).toBe('blockade');
+    });
+
+    it('returns ceasefire_violation for base code 196', () => {
+      expect(classifyByBaseCode('196', '19')).toBe('ceasefire_violation');
+    });
+
+    it('returns mass_violence for base code 200', () => {
+      expect(classifyByBaseCode('200', '20')).toBe('mass_violence');
+    });
+
+    it('returns wmd for base code 204', () => {
+      expect(classifyByBaseCode('204', '20')).toBe('wmd');
+    });
+
+    it('falls back to assault for unmapped root 18 codes', () => {
+      expect(classifyByBaseCode('187', '18')).toBe('assault');
+    });
+
+    it('falls back to ground_combat for unmapped root 19 codes', () => {
+      expect(classifyByBaseCode('199', '19')).toBe('ground_combat');
+    });
+
+    it('falls back to mass_violence for unmapped root 20 codes', () => {
+      expect(classifyByBaseCode('209', '20')).toBe('mass_violence');
+    });
+
+    it('falls back to assault for completely unknown codes', () => {
+      expect(classifyByBaseCode('990', '99')).toBe('assault');
     });
   });
 
@@ -239,11 +287,11 @@ describe('GDELT Adapter', () => {
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
 
       expect(entity.id).toBe('gdelt-1234567890');
-      expect(entity.type).toBe('missile');
+      expect(entity.type).toBe('ground_combat');
       expect(entity.lat).toBe(35.6892);
       expect(entity.lng).toBe(51.389);
-      expect(entity.label).toBe('Tehran, Tehran, Iran: Armed conflict');
-      expect(entity.data.eventType).toBe('Armed conflict');
+      expect(entity.label).toBe('Tehran, Tehran, Iran: Conventional military force');
+      expect(entity.data.eventType).toBe('Conventional military force');
       expect(entity.data.subEventType).toBe('CAMEO 190');
       expect(entity.data.fatalities).toBe(0);
       expect(entity.data.source).toBe('https://reuters.com/article/123');
@@ -343,14 +391,14 @@ describe('GDELT Adapter', () => {
       // Should get only the 2 valid Middle East conflict events
       expect(events).toHaveLength(2);
 
-      // First event: Iran missile (root code 19)
+      // First event: Iran ground_combat (base code 190)
       expect(events[0].id).toBe('gdelt-1234567890');
-      expect(events[0].type).toBe('missile');
+      expect(events[0].type).toBe('ground_combat');
       expect(events[0].lat).toBe(35.6892);
 
-      // Second event: Syria drone (root code 18)
+      // Second event: Syria bombing (base code 183)
       expect(events[1].id).toBe('gdelt-9876543210');
-      expect(events[1].type).toBe('drone');
+      expect(events[1].type).toBe('bombing');
       expect(events[1].lat).toBe(33.5138);
 
       // Verify fetch was called twice (lastupdate + ZIP download)

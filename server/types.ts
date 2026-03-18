@@ -9,7 +9,20 @@ export interface MapEntityBase {
   label: string;
 }
 
-export type EntityType = 'flight' | 'ship' | 'missile' | 'drone';
+export type ConflictEventType =
+  | 'airstrike'
+  | 'ground_combat'
+  | 'shelling'
+  | 'bombing'
+  | 'assassination'
+  | 'abduction'
+  | 'assault'
+  | 'blockade'
+  | 'ceasefire_violation'
+  | 'mass_violence'
+  | 'wmd';
+
+export type EntityType = 'flight' | 'ship' | ConflictEventType;
 
 export interface FlightEntity extends MapEntityBase {
   type: 'flight';
@@ -38,10 +51,10 @@ export interface ShipEntity extends MapEntityBase {
 }
 
 export interface ConflictEventEntity extends MapEntityBase {
-  type: 'missile' | 'drone';
+  type: ConflictEventType;
   data: {
-    eventType: string; // ACLED event_type
-    subEventType: string; // ACLED sub_event_type
+    eventType: string; // Human-readable CAMEO description
+    subEventType: string; // "CAMEO <code>"
     fatalities: number;
     actor1: string;
     actor2: string;

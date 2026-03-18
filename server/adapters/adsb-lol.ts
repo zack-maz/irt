@@ -5,13 +5,14 @@ import { normalizeAircraft } from './adsb-v2-normalize.js';
 import type { AdsbResponse } from './adsb-v2-normalize.js';
 
 const BASE_URL = 'https://api.adsb.lol';
+const FETCH_TIMEOUT = 10_000;
 
 export async function fetchFlights(): Promise<FlightEntity[]> {
   const start = Date.now();
 
   const url = `${BASE_URL}/v2/lat/${IRAN_CENTER.lat}/lon/${IRAN_CENTER.lon}/dist/${ADSB_RADIUS_NM}`;
 
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
 
   if (res.status === 429) {
     throw new RateLimitError('adsb.lol rate limit exceeded');

@@ -35,9 +35,10 @@ describe('uiStore', () => {
       showGroundTraffic: false,
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
-      showNews: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
     });
   });
 
@@ -75,9 +76,10 @@ describe('uiStore layer toggles', () => {
     useUIStore.setState({
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
-      showNews: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
       pulseEnabled: true,
       showGroundTraffic: false,
     });
@@ -92,16 +94,20 @@ describe('uiStore layer toggles', () => {
       expect(useUIStore.getState().showShips).toBe(true);
     });
 
-    it('showDrones defaults to true', () => {
-      expect(useUIStore.getState().showDrones).toBe(true);
+    it('showAirstrikes defaults to true', () => {
+      expect(useUIStore.getState().showAirstrikes).toBe(true);
     });
 
-    it('showMissiles defaults to true', () => {
-      expect(useUIStore.getState().showMissiles).toBe(true);
+    it('showGroundCombat defaults to true', () => {
+      expect(useUIStore.getState().showGroundCombat).toBe(true);
     });
 
-    it('showNews defaults to true', () => {
-      expect(useUIStore.getState().showNews).toBe(true);
+    it('showTargeted defaults to true', () => {
+      expect(useUIStore.getState().showTargeted).toBe(true);
+    });
+
+    it('showOtherConflict defaults to true', () => {
+      expect(useUIStore.getState().showOtherConflict).toBe(true);
     });
   });
 
@@ -122,28 +128,36 @@ describe('uiStore layer toggles', () => {
       expect(useUIStore.getState().showShips).toBe(true);
     });
 
-    it('toggleDrones flips showDrones', () => {
-      expect(useUIStore.getState().showDrones).toBe(true);
-      useUIStore.getState().toggleDrones();
-      expect(useUIStore.getState().showDrones).toBe(false);
-      useUIStore.getState().toggleDrones();
-      expect(useUIStore.getState().showDrones).toBe(true);
+    it('toggleAirstrikes flips showAirstrikes', () => {
+      expect(useUIStore.getState().showAirstrikes).toBe(true);
+      useUIStore.getState().toggleAirstrikes();
+      expect(useUIStore.getState().showAirstrikes).toBe(false);
+      useUIStore.getState().toggleAirstrikes();
+      expect(useUIStore.getState().showAirstrikes).toBe(true);
     });
 
-    it('toggleMissiles flips showMissiles', () => {
-      expect(useUIStore.getState().showMissiles).toBe(true);
-      useUIStore.getState().toggleMissiles();
-      expect(useUIStore.getState().showMissiles).toBe(false);
-      useUIStore.getState().toggleMissiles();
-      expect(useUIStore.getState().showMissiles).toBe(true);
+    it('toggleGroundCombat flips showGroundCombat', () => {
+      expect(useUIStore.getState().showGroundCombat).toBe(true);
+      useUIStore.getState().toggleGroundCombat();
+      expect(useUIStore.getState().showGroundCombat).toBe(false);
+      useUIStore.getState().toggleGroundCombat();
+      expect(useUIStore.getState().showGroundCombat).toBe(true);
     });
 
-    it('toggleNews flips showNews', () => {
-      expect(useUIStore.getState().showNews).toBe(true);
-      useUIStore.getState().toggleNews();
-      expect(useUIStore.getState().showNews).toBe(false);
-      useUIStore.getState().toggleNews();
-      expect(useUIStore.getState().showNews).toBe(true);
+    it('toggleTargeted flips showTargeted', () => {
+      expect(useUIStore.getState().showTargeted).toBe(true);
+      useUIStore.getState().toggleTargeted();
+      expect(useUIStore.getState().showTargeted).toBe(false);
+      useUIStore.getState().toggleTargeted();
+      expect(useUIStore.getState().showTargeted).toBe(true);
+    });
+
+    it('toggleOtherConflict flips showOtherConflict', () => {
+      expect(useUIStore.getState().showOtherConflict).toBe(true);
+      useUIStore.getState().toggleOtherConflict();
+      expect(useUIStore.getState().showOtherConflict).toBe(false);
+      useUIStore.getState().toggleOtherConflict();
+      expect(useUIStore.getState().showOtherConflict).toBe(true);
     });
   });
 
@@ -171,16 +185,16 @@ describe('uiStore layer toggles', () => {
       const customToggles = {
         ...LAYER_TOGGLE_DEFAULTS,
         showFlights: false,
-        showNews: false,
+        showAirstrikes: false,
       };
       storageMock[STORAGE_KEY] = JSON.stringify(customToggles);
 
       const loaded = loadPersistedToggles();
       expect(loaded.showFlights).toBe(false);
-      expect(loaded.showNews).toBe(false);
+      expect(loaded.showAirstrikes).toBe(false);
       // Defaults for unmodified keys
       expect(loaded.showShips).toBe(true);
-      expect(loaded.showDrones).toBe(true);
+      expect(loaded.showGroundCombat).toBe(true);
     });
 
     it('corrupted localStorage does not crash, falls back to defaults', () => {
@@ -195,8 +209,23 @@ describe('uiStore layer toggles', () => {
       const loaded = loadPersistedToggles();
       expect(loaded.showFlights).toBe(false);
       expect(loaded.showShips).toBe(true); // default
-      expect(loaded.showNews).toBe(true); // default
+      expect(loaded.showAirstrikes).toBe(true); // default
       expect(loaded.pulseEnabled).toBe(true); // default
+    });
+
+    it('migrates old showDrones/showMissiles localStorage to full defaults', () => {
+      storageMock[STORAGE_KEY] = JSON.stringify({
+        showFlights: false,
+        showDrones: true,
+        showMissiles: false,
+      });
+      const loaded = loadPersistedToggles();
+      // Old schema detected — discard everything, return full defaults
+      expect(loaded.showAirstrikes).toBe(true);
+      expect(loaded.showGroundCombat).toBe(true);
+      expect(loaded.showTargeted).toBe(true);
+      expect(loaded.showOtherConflict).toBe(true);
+      expect(loaded.showFlights).toBe(true); // defaults, NOT preserved
     });
   });
 });

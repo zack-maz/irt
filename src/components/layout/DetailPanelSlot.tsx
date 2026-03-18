@@ -5,28 +5,27 @@ import { FlightDetail } from '@/components/detail/FlightDetail';
 import { ShipDetail } from '@/components/detail/ShipDetail';
 import { EventDetail } from '@/components/detail/EventDetail';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
+import { isConflictEventType, CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type { FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
 
 /** Maps entity type to the ENTITY_DOT_COLORS key */
 function getDotColor(type: string): string {
-  switch (type) {
-    case 'flight': return ENTITY_DOT_COLORS.flights;
-    case 'ship': return ENTITY_DOT_COLORS.ships;
-    case 'drone': return ENTITY_DOT_COLORS.drones;
-    case 'missile': return ENTITY_DOT_COLORS.missiles;
-    default: return '#9ca3af';
+  if (type === 'flight') return ENTITY_DOT_COLORS.flights;
+  if (type === 'ship') return ENTITY_DOT_COLORS.ships;
+  if (isConflictEventType(type)) {
+    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
+    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
+    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.targeted;
+    return ENTITY_DOT_COLORS.otherConflict;
   }
+  return '#9ca3af';
 }
 
 /** Maps entity type to display label */
 function getTypeLabel(type: string): string {
-  switch (type) {
-    case 'flight': return 'FLIGHT';
-    case 'ship': return 'SHIP';
-    case 'drone': return 'DRONE';
-    case 'missile': return 'MISSILE';
-    default: return type.toUpperCase();
-  }
+  if (type === 'flight') return 'FLIGHT';
+  if (type === 'ship') return 'SHIP';
+  return (EVENT_TYPE_LABELS[type] ?? type).toUpperCase();
 }
 
 /** Gets the display name for an entity */
@@ -40,12 +39,13 @@ function getEntityName(entity: { type: string; data: Record<string, unknown> }):
       const d = entity.data as ShipEntity['data'];
       return d.shipName || String(d.mmsi);
     }
-    case 'drone':
-    case 'missile': {
-      const d = entity.data as ConflictEventEntity['data'];
-      return d.eventType;
+    default: {
+      if (isConflictEventType(entity.type)) {
+        const d = entity.data as ConflictEventEntity['data'];
+        return d.eventType;
+      }
+      return '';
     }
-    default: return '';
   }
 }
 
@@ -164,7 +164,7 @@ export function DetailPanelSlot() {
               {entity.type === 'ship' && (
                 <ShipDetail entity={entity as ShipEntity} />
               )}
-              {(entity.type === 'drone' || entity.type === 'missile') && (
+              {isConflictEventType(entity.type) && (
                 <EventDetail entity={entity as ConflictEventEntity} />
               )}
 

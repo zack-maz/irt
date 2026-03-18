@@ -8,7 +8,12 @@ export function loadPersistedToggles(): LayerToggles {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return { ...LAYER_TOGGLE_DEFAULTS, ...JSON.parse(stored) };
+      const parsed = JSON.parse(stored);
+      // Migration: discard old schema if it has showDrones/showMissiles/showNews
+      if ('showDrones' in parsed || 'showMissiles' in parsed || 'showNews' in parsed) {
+        return { ...LAYER_TOGGLE_DEFAULTS };
+      }
+      return { ...LAYER_TOGGLE_DEFAULTS, ...parsed };
     }
   } catch { /* localStorage unavailable or corrupted JSON */ }
   return { ...LAYER_TOGGLE_DEFAULTS };
@@ -22,11 +27,12 @@ function getToggles(state: UIState): LayerToggles {
   return {
     showFlights: state.showFlights,
     showShips: state.showShips,
-    showDrones: state.showDrones,
-    showMissiles: state.showMissiles,
+    showAirstrikes: state.showAirstrikes,
+    showGroundCombat: state.showGroundCombat,
+    showTargeted: state.showTargeted,
+    showOtherConflict: state.showOtherConflict,
     showGroundTraffic: state.showGroundTraffic,
     pulseEnabled: state.pulseEnabled,
-    showNews: state.showNews,
   };
 }
 
@@ -34,19 +40,24 @@ const initial = loadPersistedToggles();
 
 export const useUIStore = create<UIState>()((set, get) => ({
   isDetailPanelOpen: false,
+  isStatusCollapsed: false,
   isCountersCollapsed: false,
+  isLayersCollapsed: false,
   pulseEnabled: initial.pulseEnabled,
   showGroundTraffic: initial.showGroundTraffic,
   showFlights: initial.showFlights,
   showShips: initial.showShips,
-  showDrones: initial.showDrones,
-  showMissiles: initial.showMissiles,
-  showNews: initial.showNews,
+  showAirstrikes: initial.showAirstrikes,
+  showGroundCombat: initial.showGroundCombat,
+  showTargeted: initial.showTargeted,
+  showOtherConflict: initial.showOtherConflict,
   selectedEntityId: null,
   hoveredEntityId: null,
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
   closeDetailPanel: () => set({ isDetailPanelOpen: false }),
+  toggleStatus: () => set((s) => ({ isStatusCollapsed: !s.isStatusCollapsed })),
   toggleCounters: () => set((s) => ({ isCountersCollapsed: !s.isCountersCollapsed })),
+  toggleLayers: () => set((s) => ({ isLayersCollapsed: !s.isLayersCollapsed })),
   togglePulse: () => {
     set((s) => ({ pulseEnabled: !s.pulseEnabled }));
     persistToggles(getToggles(get()));
@@ -63,16 +74,20 @@ export const useUIStore = create<UIState>()((set, get) => ({
     set((s) => ({ showShips: !s.showShips }));
     persistToggles(getToggles(get()));
   },
-  toggleDrones: () => {
-    set((s) => ({ showDrones: !s.showDrones }));
+  toggleAirstrikes: () => {
+    set((s) => ({ showAirstrikes: !s.showAirstrikes }));
     persistToggles(getToggles(get()));
   },
-  toggleMissiles: () => {
-    set((s) => ({ showMissiles: !s.showMissiles }));
+  toggleGroundCombat: () => {
+    set((s) => ({ showGroundCombat: !s.showGroundCombat }));
     persistToggles(getToggles(get()));
   },
-  toggleNews: () => {
-    set((s) => ({ showNews: !s.showNews }));
+  toggleTargeted: () => {
+    set((s) => ({ showTargeted: !s.showTargeted }));
+    persistToggles(getToggles(get()));
+  },
+  toggleOtherConflict: () => {
+    set((s) => ({ showOtherConflict: !s.showOtherConflict }));
     persistToggles(getToggles(get()));
   },
   selectEntity: (id) => set({ selectedEntityId: id }),

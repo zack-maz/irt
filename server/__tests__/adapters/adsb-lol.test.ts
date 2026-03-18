@@ -52,11 +52,12 @@ describe('adsb.lol Adapter', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toBe('https://api.adsb.lol/v2/lat/30/lon/50/dist/500');
+    expect(url).toBe('https://api.adsb.lol/v2/lat/28/lon/45/dist/1200');
     // No trailing slash
     expect(url).not.toMatch(/\/$/);
-    // No auth headers -- should be called with just the URL (no options) or empty headers
-    expect(options).toBeUndefined();
+    // No auth headers -- only signal for timeout
+    expect(options?.headers).toBeUndefined();
+    expect(options?.signal).toBeDefined();
   });
 
   it('throws RateLimitError on 429 response', async () => {

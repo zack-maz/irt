@@ -5,6 +5,7 @@ import { useEventStore } from '@/stores/eventStore';
 import { useUIStore } from '@/stores/uiStore';
 import { StatusPanel } from '@/components/ui/StatusPanel';
 import type { FlightEntity, ConflictEventEntity } from '@/types/entities';
+import type { ConflictEventType } from '@/types/ui';
 
 function makeFlight(id: string, onGround: boolean): FlightEntity {
   return {
@@ -13,7 +14,7 @@ function makeFlight(id: string, onGround: boolean): FlightEntity {
   };
 }
 
-function makeEvent(id: string, type: 'drone' | 'missile'): ConflictEventEntity {
+function makeEvent(id: string, type: ConflictEventType): ConflictEventEntity {
   return {
     id, type, lat: 32, lng: 51, timestamp: Date.now(), label: id,
     data: { eventType: '', subEventType: '', fatalities: 0, actor1: '', actor2: '', notes: '', source: '', goldsteinScale: 0, locationName: '', cameoCode: '' },
@@ -23,22 +24,24 @@ function makeEvent(id: string, type: 'drone' | 'missile'): ConflictEventEntity {
 const airborne = [makeFlight('f1', false), makeFlight('f2', false), makeFlight('f3', false)];
 const ground = [makeFlight('g1', true), makeFlight('g2', true)];
 const allFlights = [...airborne, ...ground];
-const drones = [makeEvent('d1', 'drone'), makeEvent('d2', 'drone')];
-const missiles = [makeEvent('m1', 'missile')];
-const allEvents = [...drones, ...missiles];
+const airstrikes = [makeEvent('a1', 'airstrike'), makeEvent('a2', 'airstrike')];
+const groundCombat = [makeEvent('gc1', 'ground_combat')];
+const targeted = [makeEvent('t1', 'assassination')];
+const otherConflict = [makeEvent('o1', 'blockade')];
+const allEvents = [...airstrikes, ...groundCombat, ...targeted, ...otherConflict];
 
 describe('StatusPanel', () => {
   beforeEach(() => {
     useFlightStore.setState({ connectionStatus: 'connected', flights: [], flightCount: 0 });
     useShipStore.setState({ connectionStatus: 'connected', shipCount: 0 });
     useEventStore.setState({ connectionStatus: 'connected', events: [], eventCount: 0 });
-    useUIStore.setState({ showFlights: true, showGroundTraffic: false, showShips: true, showDrones: true, showMissiles: true });
+    useUIStore.setState({ showFlights: true, showGroundTraffic: false, showShips: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true, showOtherConflict: true });
   });
 
   it('renders three feed lines (flights, ships, events)', () => {
     useFlightStore.setState({ flights: airborne, flightCount: 3 });
     useShipStore.setState({ shipCount: 42 });
-    useEventStore.setState({ events: drones, eventCount: 2 });
+    useEventStore.setState({ events: airstrikes, eventCount: 2 });
 
     render(<StatusPanel />);
 
@@ -132,29 +135,36 @@ describe('StatusPanel', () => {
     expect(screen.queryByText('42')).not.toBeInTheDocument();
   });
 
-  it('counts only drones when showMissiles is OFF', () => {
-    useEventStore.setState({ events: allEvents, eventCount: 3 });
-    useUIStore.setState({ showDrones: true, showMissiles: false });
+  it('counts all events when all conflict toggles are ON', () => {
+    useEventStore.setState({ events: allEvents, eventCount: 5 });
     render(<StatusPanel />);
 
-    // 2 drones only
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 
-  it('counts only missiles when showDrones is OFF', () => {
-    useEventStore.setState({ events: allEvents, eventCount: 3 });
-    useUIStore.setState({ showDrones: false, showMissiles: true });
+  it('excludes airstrikes when showAirstrikes is OFF', () => {
+    useEventStore.setState({ events: allEvents, eventCount: 5 });
+    useUIStore.setState({ showAirstrikes: false });
     render(<StatusPanel />);
 
-    // 1 missile only
-    expect(screen.getByText('1')).toBeInTheDocument();
+    // 5 total - 2 airstrikes = 3
+    expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  it('shows 0 for events when both showDrones and showMissiles are OFF', () => {
-    useEventStore.setState({ events: allEvents, eventCount: 3 });
-    useUIStore.setState({ showDrones: false, showMissiles: false });
+  it('excludes ground combat when showGroundCombat is OFF', () => {
+    useEventStore.setState({ events: allEvents, eventCount: 5 });
+    useUIStore.setState({ showGroundCombat: false });
     render(<StatusPanel />);
 
-    expect(screen.queryByText('3')).not.toBeInTheDocument();
+    // 5 total - 1 ground_combat = 4
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+
+  it('shows 0 for events when all conflict toggles are OFF', () => {
+    useEventStore.setState({ events: allEvents, eventCount: 5 });
+    useUIStore.setState({ showAirstrikes: false, showGroundCombat: false, showTargeted: false, showOtherConflict: false });
+    render(<StatusPanel />);
+
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
   });
 });

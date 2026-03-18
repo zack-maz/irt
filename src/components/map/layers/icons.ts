@@ -9,27 +9,29 @@ interface IconEntry {
   mask: boolean;
 }
 
-/** Icon mapping for the 5 entity shapes */
+/** Icon mapping for the 7 entity shapes */
 export const ICON_MAPPING: Record<string, IconEntry> = {
   chevron:        { x: 0,   y: 0, width: 32, height: 32, mask: true },
   diamond:        { x: 32,  y: 0, width: 32, height: 32, mask: true },
   starburst:      { x: 64,  y: 0, width: 32, height: 32, mask: true },
   xmark:          { x: 96,  y: 0, width: 32, height: 32, mask: true },
   chevronGround:  { x: 128, y: 0, width: 32, height: 32, mask: true },
+  explosion:      { x: 160, y: 0, width: 32, height: 32, mask: true },
+  crosshair:      { x: 192, y: 0, width: 32, height: 32, mask: true },
 };
 
 /** Cached atlas canvas */
 let atlas: HTMLCanvasElement | null = null;
 
 /**
- * Lazily generates a 128x32 canvas icon atlas with 4 white shapes.
+ * Lazily generates a 224x32 canvas icon atlas with 7 white shapes.
  * All shapes drawn white -- Deck.gl mask mode tints via getColor.
  */
 export function getIconAtlas(): HTMLCanvasElement {
   if (atlas) return atlas;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 160;
+  canvas.width = 224;
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -76,8 +78,8 @@ export function getIconAtlas(): HTMLCanvasElement {
   ctx.closePath();
   ctx.fill();
 
-  // Icon 3 (offset 96): X mark -- two crossed lines
-  ctx.lineWidth = 3;
+  // Icon 3 (offset 96): X mark -- two crossed lines (wide for easier picking)
+  ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(102, 6);
@@ -109,6 +111,43 @@ export function getIconAtlas(): HTMLCanvasElement {
     ctx.stroke();
   }
   ctx.restore();
+
+  // Icon 5 (offset 160): Explosion -- radiating burst (8-point, uneven rays)
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'white';
+  const cx5 = 176;
+  const cy5 = 16;
+  ctx.beginPath();
+  for (let i = 0; i < 16; i++) {
+    const angle = (Math.PI / 8) * i - Math.PI / 2;
+    const r = i % 2 === 0 ? 14 : 7;
+    const x = cx5 + r * Math.cos(angle);
+    const y = cy5 + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // Icon 6 (offset 192): Crosshair -- targeting reticle
+  const cx6 = 208;
+  const cy6 = 16;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  // Circle
+  ctx.beginPath();
+  ctx.arc(cx6, cy6, 8, 0, Math.PI * 2);
+  ctx.stroke();
+  // Horizontal line
+  ctx.beginPath();
+  ctx.moveTo(cx6 - 13, cy6);
+  ctx.lineTo(cx6 + 13, cy6);
+  ctx.stroke();
+  // Vertical line
+  ctx.beginPath();
+  ctx.moveTo(cx6, cy6 - 13);
+  ctx.lineTo(cx6, cy6 + 13);
+  ctx.stroke();
 
   atlas = canvas;
   return canvas;

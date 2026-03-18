@@ -15,6 +15,7 @@ import { EntityTooltip } from './EntityTooltip';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
+import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity } from '@/types/entities';
 import {
   INITIAL_VIEW_STATE,
@@ -48,7 +49,10 @@ export function BaseMap() {
   const openDetailPanel = useUIStore((s) => s.openDetailPanel);
   const closeDetailPanel = useUIStore((s) => s.closeDetailPanel);
   const hoverEntity = useUIStore((s) => s.hoverEntity);
-  const showNews = useUIStore((s) => s.showNews);
+  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
+  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
+  const showTargeted = useUIStore((s) => s.showTargeted);
+  const showOtherConflict = useUIStore((s) => s.showOtherConflict);
   const entityLayers = useEntityLayers();
 
   const [hover, setHover] = useState<HoverState | null>(null);
@@ -133,11 +137,18 @@ export function BaseMap() {
     [setCursorPosition],
   );
 
-  // Hover tooltip only (pinned tooltip replaced by detail panel)
-  // Event entities (drone/missile) only show tooltips when News toggle is ON
-  const isEventEntity = (e: MapEntity) => e.type === 'drone' || e.type === 'missile';
+  // Tooltip gating — conflict events only show when their category toggle is ON
+  function isEntityTooltipVisible(entity: MapEntity): boolean {
+    if (!isConflictEventType(entity.type)) return true;
+    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(entity.type)) return showAirstrikes;
+    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(entity.type)) return showGroundCombat;
+    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(entity.type)) return showTargeted;
+    if ((CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(entity.type)) return showOtherConflict;
+    return true;
+  }
+
   const rawTooltipEntity = hover?.entity ?? null;
-  const tooltipEntity = rawTooltipEntity && isEventEntity(rawTooltipEntity) && !showNews
+  const tooltipEntity = rawTooltipEntity && !isEntityTooltipVisible(rawTooltipEntity)
     ? null
     : rawTooltipEntity;
   const tooltipPos = hover

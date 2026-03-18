@@ -6,16 +6,20 @@ const mockState = {
   showGroundTraffic: false,
   pulseEnabled: true,
   showShips: true,
-  showDrones: true,
-  showMissiles: true,
-  showNews: true,
+  showAirstrikes: true,
+  showGroundCombat: true,
+  showTargeted: true,
+  showOtherConflict: true,
+  isLayersCollapsed: false,
   toggleFlights: vi.fn(),
   toggleGroundTraffic: vi.fn(),
   togglePulse: vi.fn(),
   toggleShips: vi.fn(),
-  toggleDrones: vi.fn(),
-  toggleMissiles: vi.fn(),
-  toggleNews: vi.fn(),
+  toggleAirstrikes: vi.fn(),
+  toggleGroundCombat: vi.fn(),
+  toggleTargeted: vi.fn(),
+  toggleOtherConflict: vi.fn(),
+  toggleLayers: vi.fn(),
 };
 
 vi.mock('@/stores/uiStore', () => ({
@@ -32,9 +36,11 @@ describe('LayerTogglesSlot', () => {
     mockState.showGroundTraffic = false;
     mockState.pulseEnabled = true;
     mockState.showShips = true;
-    mockState.showDrones = true;
-    mockState.showMissiles = true;
-    mockState.showNews = true;
+    mockState.showAirstrikes = true;
+    mockState.showGroundCombat = true;
+    mockState.showTargeted = true;
+    mockState.showOtherConflict = true;
+    mockState.isLayersCollapsed = false;
   });
 
   it('renders "Layers" header text', () => {
@@ -42,10 +48,10 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 7 toggle row buttons', () => {
+  it('renders 8 toggle row buttons', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(7);
+    expect(switches).toHaveLength(8);
   });
 
   it('each button has role="switch" and aria-checked', () => {
@@ -61,7 +67,7 @@ describe('LayerTogglesSlot', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
     const labels = switches.map((btn) => btn.textContent?.trim());
-    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Drones', 'Missiles', 'News']);
+    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Airstrikes', 'Ground Combat', 'Targeted', 'Other Conflict']);
   });
 
   it('clicking Flights toggle calls toggleFlights', () => {
@@ -76,20 +82,38 @@ describe('LayerTogglesSlot', () => {
     expect(mockState.toggleShips).toHaveBeenCalledOnce();
   });
 
-  it('clicking News toggle calls toggleNews', () => {
+  it('clicking Airstrikes toggle calls toggleAirstrikes', () => {
     render(<LayerTogglesSlot />);
-    fireEvent.click(screen.getByLabelText('Toggle News visibility'));
-    expect(mockState.toggleNews).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByLabelText('Toggle Airstrikes visibility'));
+    expect(mockState.toggleAirstrikes).toHaveBeenCalledOnce();
+  });
+
+  it('clicking Ground Combat toggle calls toggleGroundCombat', () => {
+    render(<LayerTogglesSlot />);
+    fireEvent.click(screen.getByLabelText('Toggle Ground Combat visibility'));
+    expect(mockState.toggleGroundCombat).toHaveBeenCalledOnce();
+  });
+
+  it('clicking Targeted toggle calls toggleTargeted', () => {
+    render(<LayerTogglesSlot />);
+    fireEvent.click(screen.getByLabelText('Toggle Targeted visibility'));
+    expect(mockState.toggleTargeted).toHaveBeenCalledOnce();
+  });
+
+  it('clicking Other Conflict toggle calls toggleOtherConflict', () => {
+    render(<LayerTogglesSlot />);
+    fireEvent.click(screen.getByLabelText('Toggle Other Conflict visibility'));
+    expect(mockState.toggleOtherConflict).toHaveBeenCalledOnce();
   });
 
   it('inactive toggle has opacity-40 class', () => {
     // showGroundTraffic is false by default
-    mockState.showNews = false;
+    mockState.showAirstrikes = false;
     render(<LayerTogglesSlot />);
     const groundBtn = screen.getByLabelText('Toggle Ground visibility');
     expect(groundBtn.className).toContain('opacity-40');
-    const newsBtn = screen.getByLabelText('Toggle News visibility');
-    expect(newsBtn.className).toContain('opacity-40');
+    const airstrikeBtn = screen.getByLabelText('Toggle Airstrikes visibility');
+    expect(airstrikeBtn.className).toContain('opacity-40');
   });
 
   it('active toggle has opacity-100 class', () => {

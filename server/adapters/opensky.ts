@@ -5,6 +5,7 @@ import type { FlightEntity, BoundingBox } from '../types.js';
 const OPENSKY_TOKEN_URL =
   'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
 const OPENSKY_API_URL = 'https://opensky-network.org/api';
+const FETCH_TIMEOUT = 10_000; // 10s timeout to prevent hung connections
 
 // Token cache (25-minute TTL, safe margin under 30-minute expiry)
 let cachedToken: { token: string; expiresAt: number } | null = null;
@@ -24,9 +25,11 @@ async function getOAuthToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT),
   });
 
   if (!res.ok) {
+    cachedToken = null; // Clear stale token on auth failure
     throw new Error(`OpenSky OAuth2 token request failed: ${res.status}`);
   }
 
@@ -83,6 +86,7 @@ export async function fetchFlights(bbox: BoundingBox): Promise<FlightEntity[]> {
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT),
   });
 
   if (res.status === 429) {

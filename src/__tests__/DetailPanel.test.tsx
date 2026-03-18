@@ -43,16 +43,16 @@ const mockShip: ShipEntity = {
   },
 };
 
-const mockDrone: ConflictEventEntity = {
-  id: 'event-drone-1',
-  type: 'drone',
+const mockAirstrike: ConflictEventEntity = {
+  id: 'event-airstrike-1',
+  type: 'airstrike',
   lat: 32.654321,
   lng: 51.123456,
   timestamp: Date.now(),
-  label: 'Air/drone strike',
+  label: 'Aerial weapons',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Air/drone strike',
+    eventType: 'Aerial weapons',
+    subEventType: 'CAMEO 195',
     fatalities: 0,
     actor1: 'Unknown',
     actor2: 'Iran',
@@ -60,7 +60,7 @@ const mockDrone: ConflictEventEntity = {
     source: 'https://example.com/article',
     goldsteinScale: -5.0,
     locationName: 'Isfahan, Iran',
-    cameoCode: '183',
+    cameoCode: '195',
   },
 };
 
@@ -104,16 +104,17 @@ describe('DetailPanelSlot', () => {
     expect(screen.getAllByText('EVER GIVEN').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders event type when drone selected', () => {
-    useEventStore.setState({ events: [mockDrone] });
-    useUIStore.setState({ selectedEntityId: 'event-drone-1', isDetailPanelOpen: true });
+  it('renders event type when airstrike selected', () => {
+    useEventStore.setState({ events: [mockAirstrike] });
+    useUIStore.setState({ selectedEntityId: 'event-airstrike-1', isDetailPanelOpen: true });
 
     render(<DetailPanelSlot />);
 
-    // Drone appears in header type label + EventDetail type field
-    expect(screen.getAllByText('Drone').length).toBeGreaterThanOrEqual(1);
+    // AIRSTRIKE appears in header type label
+    const header = screen.getByTestId('detail-panel-header');
+    expect(header).toHaveTextContent('AIRSTRIKE');
     // Event type appears in header name + EventDetail event type field
-    expect(screen.getAllByText('Explosions/Remote violence').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Aerial weapons').length).toBeGreaterThanOrEqual(1);
   });
 
   it('header shows type label and entity name', () => {

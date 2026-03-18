@@ -4,6 +4,7 @@ export type {
   FlightEntity,
   ShipEntity,
   ConflictEventEntity,
+  ConflictEventType,
   EntityType,
   MapEntityBase,
   BoundingBox,

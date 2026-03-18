@@ -43,15 +43,15 @@ const mockShip: ShipEntity = {
 };
 
 const mockEvent: ConflictEventEntity = {
-  id: 'event-drone-1',
-  type: 'drone',
+  id: 'event-airstrike-1',
+  type: 'airstrike',
   lat: 32.65,
   lng: 51.67,
   timestamp: Date.now(),
-  label: 'Air/drone strike',
+  label: 'Aerial weapons',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Air/drone strike',
+    eventType: 'Aerial weapons',
+    subEventType: 'CAMEO 195',
     fatalities: 0,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -59,7 +59,7 @@ const mockEvent: ConflictEventEntity = {
     source: 'https://example.com',
     goldsteinScale: -5.0,
     locationName: 'Isfahan, Iran',
-    cameoCode: '183',
+    cameoCode: '195',
   },
 };
 
@@ -99,7 +99,7 @@ describe('useSelectedEntity', () => {
 
   it('finds an event entity by ID across eventStore', () => {
     useEventStore.setState({ events: [mockEvent] });
-    useUIStore.setState({ selectedEntityId: 'event-drone-1' });
+    useUIStore.setState({ selectedEntityId: 'event-airstrike-1' });
 
     const { result } = renderHook(() => useSelectedEntity());
     expect(result.current.entity).toEqual(mockEvent);

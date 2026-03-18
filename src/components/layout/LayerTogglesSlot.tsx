@@ -31,36 +31,62 @@ function ToggleRow({ color, label, active, onToggle, indent = false }: ToggleRow
 }
 
 export function LayerTogglesSlot() {
+  const isCollapsed = useUIStore((s) => s.isLayersCollapsed);
+  const toggleLayers = useUIStore((s) => s.toggleLayers);
+
   const showFlights = useUIStore((s) => s.showFlights);
   const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
   const pulseEnabled = useUIStore((s) => s.pulseEnabled);
   const showShips = useUIStore((s) => s.showShips);
-  const showDrones = useUIStore((s) => s.showDrones);
-  const showMissiles = useUIStore((s) => s.showMissiles);
-  const showNews = useUIStore((s) => s.showNews);
+  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
+  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
+  const showTargeted = useUIStore((s) => s.showTargeted);
+  const showOtherConflict = useUIStore((s) => s.showOtherConflict);
 
   const toggleFlights = useUIStore((s) => s.toggleFlights);
   const toggleGroundTraffic = useUIStore((s) => s.toggleGroundTraffic);
   const togglePulse = useUIStore((s) => s.togglePulse);
   const toggleShips = useUIStore((s) => s.toggleShips);
-  const toggleDrones = useUIStore((s) => s.toggleDrones);
-  const toggleMissiles = useUIStore((s) => s.toggleMissiles);
-  const toggleNews = useUIStore((s) => s.toggleNews);
+  const toggleAirstrikes = useUIStore((s) => s.toggleAirstrikes);
+  const toggleGroundCombat = useUIStore((s) => s.toggleGroundCombat);
+  const toggleTargeted = useUIStore((s) => s.toggleTargeted);
+  const toggleOtherConflict = useUIStore((s) => s.toggleOtherConflict);
 
   return (
     <div data-testid="layer-toggles-slot">
       <OverlayPanel>
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Layers
-          </span>
-          <ToggleRow color={ENTITY_DOT_COLORS.flights} label="Flights" active={showFlights} onToggle={toggleFlights} />
-          <ToggleRow color={ENTITY_DOT_COLORS.ground} label="Ground" active={showGroundTraffic} onToggle={toggleGroundTraffic} indent />
-          <ToggleRow color={ENTITY_DOT_COLORS.unidentified} label="Unidentified" active={pulseEnabled} onToggle={togglePulse} indent />
-          <ToggleRow color={ENTITY_DOT_COLORS.ships} label="Ships" active={showShips} onToggle={toggleShips} />
-          <ToggleRow color={ENTITY_DOT_COLORS.drones} label="Drones" active={showDrones} onToggle={toggleDrones} />
-          <ToggleRow color={ENTITY_DOT_COLORS.missiles} label="Missiles" active={showMissiles} onToggle={toggleMissiles} />
-          <ToggleRow color={ENTITY_DOT_COLORS.news} label="News" active={showNews} onToggle={toggleNews} />
+          <button
+            onClick={toggleLayers}
+            className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary"
+          >
+            <span>Layers</span>
+            <span className="text-text-muted">{isCollapsed ? '+' : '-'}</span>
+          </button>
+          {!isCollapsed && (
+            <>
+              <ToggleRow color={ENTITY_DOT_COLORS.flights} label="Flights" active={showFlights} onToggle={toggleFlights} />
+              <ToggleRow color={ENTITY_DOT_COLORS.ground} label="Ground" active={showGroundTraffic} onToggle={toggleGroundTraffic} indent />
+              <ToggleRow color={ENTITY_DOT_COLORS.unidentified} label="Unidentified" active={pulseEnabled} onToggle={togglePulse} indent />
+              <ToggleRow color={ENTITY_DOT_COLORS.ships} label="Ships" active={showShips} onToggle={toggleShips} />
+              <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Airstrikes" active={showAirstrikes} onToggle={toggleAirstrikes} />
+              <ToggleRow color={ENTITY_DOT_COLORS.groundCombat} label="Ground Combat" active={showGroundCombat} onToggle={toggleGroundCombat} />
+              <ToggleRow color={ENTITY_DOT_COLORS.targeted} label="Targeted" active={showTargeted} onToggle={toggleTargeted} />
+              <ToggleRow color={ENTITY_DOT_COLORS.otherConflict} label="Other Conflict" active={showOtherConflict} onToggle={toggleOtherConflict} />
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  document.cookie.split(';').forEach((c) => {
+                    document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                  });
+                  window.location.reload();
+                }}
+                className="mt-2 text-[10px] text-red-400 hover:text-red-300 opacity-60 hover:opacity-100 transition-opacity"
+              >
+                Clear cache & reload
+              </button>
+            </>
+          )}
         </div>
       </OverlayPanel>
     </div>

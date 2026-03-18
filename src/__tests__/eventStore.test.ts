@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useEventStore } from '@/stores/eventStore';
 import type { ConflictEventEntity, CacheResponse } from '@/types/entities';
 
-const mockDroneEvent: ConflictEventEntity = {
+const mockAirstrikeEvent: ConflictEventEntity = {
   id: 'event-IRN001',
-  type: 'drone',
+  type: 'airstrike',
   lat: 32.6546,
   lng: 51.668,
   timestamp: Date.now(),
-  label: 'Air/drone strike',
+  label: 'Aerial weapons',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Air/drone strike',
+    eventType: 'Aerial weapons',
+    subEventType: 'CAMEO 195',
     fatalities: 0,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -19,20 +19,20 @@ const mockDroneEvent: ConflictEventEntity = {
     source: 'ISNA',
     goldsteinScale: -5.0,
     locationName: 'Isfahan, Iran',
-    cameoCode: '183',
+    cameoCode: '195',
   },
 };
 
-const mockMissileEvent: ConflictEventEntity = {
+const mockGroundCombatEvent: ConflictEventEntity = {
   id: 'event-IRN002',
-  type: 'missile',
+  type: 'ground_combat',
   lat: 35.6892,
   lng: 51.389,
   timestamp: Date.now(),
-  label: 'Shelling/artillery/missile attack',
+  label: 'Conventional military force',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Shelling/artillery/missile attack',
+    eventType: 'Conventional military force',
+    subEventType: 'CAMEO 190',
     fatalities: 3,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -65,7 +65,7 @@ describe('eventStore', () => {
 
   it('setEventData with non-stale response sets connected status', () => {
     const response: CacheResponse<ConflictEventEntity[]> = {
-      data: [mockDroneEvent, mockMissileEvent],
+      data: [mockAirstrikeEvent, mockGroundCombatEvent],
       stale: false,
       lastFresh: Date.now(),
     };
@@ -73,7 +73,7 @@ describe('eventStore', () => {
     useEventStore.getState().setEventData(response);
 
     const state = useEventStore.getState();
-    expect(state.events).toEqual([mockDroneEvent, mockMissileEvent]);
+    expect(state.events).toEqual([mockAirstrikeEvent, mockGroundCombatEvent]);
     expect(state.eventCount).toBe(2);
     expect(state.connectionStatus).toBe('connected');
     expect(state.lastFetchAt).not.toBeNull();
@@ -81,7 +81,7 @@ describe('eventStore', () => {
 
   it('setEventData with stale response sets status to stale', () => {
     const staleResponse: CacheResponse<ConflictEventEntity[]> = {
-      data: [mockDroneEvent],
+      data: [mockAirstrikeEvent],
       stale: true,
       lastFresh: Date.now(),
     };

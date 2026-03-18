@@ -5,27 +5,32 @@ export const ENTITY_COLORS = {
   flight: [234, 179, 8] as const,            // #eab308 yellow
   flightUnidentified: [239, 68, 68] as const, // #ef4444 red
   ship: [156, 163, 175] as const,            // #9ca3af gray
-  drone: [239, 68, 68] as const,             // #ef4444 red
-  missile: [239, 68, 68] as const,           // #ef4444 red
+  airstrike: [255, 59, 48] as const,         // #ff3b30 red
+  groundCombat: [239, 68, 68] as const,      // #ef4444 red
+  targeted: [139, 30, 30] as const,          // #8b1e1e dark red
+  otherConflict: [239, 68, 68] as const,     // #ef4444 red
 } as const;
 
 /** CSS hex color strings for toggle row dots */
 export const ENTITY_DOT_COLORS = {
   flights: '#eab308',
   ships: '#9ca3af',
-  drones: '#ef4444',
-  missiles: '#ef4444',
+  airstrikes: '#ff3b30',
+  groundCombat: '#ef4444',
+  targeted: '#8b1e1e',
+  otherConflict: '#ef4444',
   ground: '#eab308',
   unidentified: '#ef4444',
-  news: '#60a5fa',
 } as const;
 
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */
 export const ICON_SIZE = {
-  flight:  { meters: 8000, minPixels: 24, maxPixels: 160 },
-  ship:    { meters: 8000, minPixels: 24, maxPixels: 160 },
-  drone:   { meters: 8000, minPixels: 24, maxPixels: 160 },
-  missile: { meters: 8000, minPixels: 24, maxPixels: 160 },
+  flight:        { meters: 8000, minPixels: 24, maxPixels: 160 },
+  ship:          { meters: 8000, minPixels: 24, maxPixels: 160 },
+  airstrike:     { meters: 8000, minPixels: 24, maxPixels: 160 },
+  groundCombat:  { meters: 8000, minPixels: 24, maxPixels: 160 },
+  targeted:      { meters: 8000, minPixels: 24, maxPixels: 160 },
+  otherConflict: { meters: 8000, minPixels: 24, maxPixels: 160 },
 } as const;
 
 /** Pulse animation config for unidentified flights */

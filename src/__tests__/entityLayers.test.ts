@@ -47,12 +47,20 @@ describe('Entity Layer Constants', () => {
       expect(ENTITY_COLORS.ship).toEqual([156, 163, 175]);
     });
 
-    it('drone is red [239, 68, 68]', () => {
-      expect(ENTITY_COLORS.drone).toEqual([239, 68, 68]);
+    it('airstrike is red [255, 59, 48]', () => {
+      expect(ENTITY_COLORS.airstrike).toEqual([255, 59, 48]);
     });
 
-    it('missile is red [239, 68, 68]', () => {
-      expect(ENTITY_COLORS.missile).toEqual([239, 68, 68]);
+    it('groundCombat is red [239, 68, 68]', () => {
+      expect(ENTITY_COLORS.groundCombat).toEqual([239, 68, 68]);
+    });
+
+    it('targeted is dark red [139, 30, 30]', () => {
+      expect(ENTITY_COLORS.targeted).toEqual([139, 30, 30]);
+    });
+
+    it('otherConflict is red [239, 68, 68]', () => {
+      expect(ENTITY_COLORS.otherConflict).toEqual([239, 68, 68]);
     });
   });
 
@@ -65,12 +73,20 @@ describe('Entity Layer Constants', () => {
       expect(ICON_SIZE.ship).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
 
-    it('drone has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.drone).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
+    it('airstrike has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.airstrike).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
 
-    it('missile has meters, minPixels, and maxPixels properties', () => {
-      expect(ICON_SIZE.missile).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
+    it('groundCombat has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.groundCombat).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
+    });
+
+    it('targeted has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.targeted).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
+    });
+
+    it('otherConflict has meters, minPixels, and maxPixels properties', () => {
+      expect(ICON_SIZE.otherConflict).toEqual({ meters: 8000, minPixels: 24, maxPixels: 160 });
     });
   });
 
@@ -84,9 +100,9 @@ describe('Entity Layer Constants', () => {
 });
 
 describe('Icon Mapping', () => {
-  const expectedKeys = ['chevron', 'chevronGround', 'diamond', 'starburst', 'xmark'] as const;
+  const expectedKeys = ['chevron', 'chevronGround', 'crosshair', 'diamond', 'explosion', 'starburst', 'xmark'] as const;
 
-  it('has all 5 icon keys', () => {
+  it('has all 7 icon keys', () => {
     expect(Object.keys(ICON_MAPPING).sort()).toEqual([...expectedKeys].sort());
   });
 
@@ -146,16 +162,16 @@ const mockShip: ShipEntity = {
   },
 };
 
-const mockDroneEvent: ConflictEventEntity = {
+const mockAirstrikeEvent: ConflictEventEntity = {
   id: 'event-IRN001',
-  type: 'drone',
+  type: 'airstrike',
   lat: 32.6546,
   lng: 51.668,
   timestamp: Date.now(),
-  label: 'Air/drone strike',
+  label: 'Aerial weapons',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Air/drone strike',
+    eventType: 'Aerial weapons',
+    subEventType: 'CAMEO 195',
     fatalities: 0,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -163,20 +179,20 @@ const mockDroneEvent: ConflictEventEntity = {
     source: 'ISNA',
     goldsteinScale: -5.0,
     locationName: 'Isfahan, Iran',
-    cameoCode: '183',
+    cameoCode: '195',
   },
 };
 
-const mockMissileEvent: ConflictEventEntity = {
+const mockGroundCombatEvent: ConflictEventEntity = {
   id: 'event-IRN002',
-  type: 'missile',
+  type: 'ground_combat',
   lat: 35.6892,
   lng: 51.389,
   timestamp: Date.now(),
-  label: 'Shelling/artillery/missile attack',
+  label: 'Conventional military force',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Shelling/artillery/missile attack',
+    eventType: 'Conventional military force',
+    subEventType: 'CAMEO 190',
     fatalities: 3,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -185,6 +201,48 @@ const mockMissileEvent: ConflictEventEntity = {
     goldsteinScale: -9.5,
     locationName: 'Tehran, Iran',
     cameoCode: '190',
+  },
+};
+
+const mockTargetedEvent: ConflictEventEntity = {
+  id: 'event-IRN003',
+  type: 'assassination',
+  lat: 33.0,
+  lng: 52.0,
+  timestamp: Date.now(),
+  label: 'Assassination',
+  data: {
+    eventType: 'Assassination',
+    subEventType: 'CAMEO 186',
+    fatalities: 1,
+    actor1: 'Unknown',
+    actor2: 'Unknown',
+    notes: '',
+    source: 'Reuters',
+    goldsteinScale: -8.0,
+    locationName: 'Shiraz, Iran',
+    cameoCode: '186',
+  },
+};
+
+const mockOtherEvent: ConflictEventEntity = {
+  id: 'event-IRN004',
+  type: 'blockade',
+  lat: 34.0,
+  lng: 53.0,
+  timestamp: Date.now(),
+  label: 'Blockade',
+  data: {
+    eventType: 'Blockade / movement restriction',
+    subEventType: 'CAMEO 191',
+    fatalities: 0,
+    actor1: 'Unknown',
+    actor2: 'Unknown',
+    notes: '',
+    source: 'AP',
+    goldsteinScale: -4.0,
+    locationName: 'Bandar Abbas, Iran',
+    cameoCode: '191',
   },
 };
 
@@ -258,26 +316,28 @@ describe('useEntityLayers', () => {
       flightCount: 2,
     });
     useShipStore.setState({ ships: [mockShip], shipCount: 1 });
-    useEventStore.setState({ events: [mockDroneEvent, mockMissileEvent], eventCount: 2 });
+    useEventStore.setState({ events: [mockAirstrikeEvent, mockGroundCombatEvent, mockTargetedEvent, mockOtherEvent], eventCount: 4 });
     useUIStore.setState({
       pulseEnabled: true,
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
       showGroundTraffic: false,
     });
   });
 
-  it('returns an array of 6 layers', () => {
+  it('returns an array of 8 layers', () => {
     const { result } = renderHook(() => useEntityLayers());
-    expect(result.current).toHaveLength(6);
+    expect(result.current).toHaveLength(8);
   });
 
-  it('returns layers in order: ships, flights, drones, missiles, entity-glow, entity-highlight', () => {
+  it('returns layers in order: ships, flights, airstrikes, groundCombat, targeted, otherConflict, entity-glow, entity-highlight', () => {
     const { result } = renderHook(() => useEntityLayers());
     const ids = result.current.map((l: { id: string }) => l.id);
-    expect(ids).toEqual(['ships', 'flights', 'drones', 'missiles', 'entity-glow', 'entity-highlight']);
+    expect(ids).toEqual(['ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'otherConflict', 'entity-glow', 'entity-highlight']);
   });
 
   it('flight layer uses sizeUnits meters', () => {
@@ -352,26 +412,44 @@ describe('useEntityLayers', () => {
     expect(shipLayer.props.data).toHaveLength(1);
   });
 
-  it('drone layer contains filtered drone events', () => {
+  it('airstrike layer contains filtered airstrike events', () => {
     const { result } = renderHook(() => useEntityLayers());
-    const droneLayer = result.current[2] as IconLayer;
-    expect(droneLayer.props.data).toHaveLength(1);
+    const airstrikeLayer = result.current.find((l: IconLayer) => l.id === 'airstrikes') as IconLayer;
+    expect(airstrikeLayer.props.data).toHaveLength(1);
   });
 
-  it('missile layer contains filtered missile events', () => {
+  it('groundCombat layer contains filtered ground combat events', () => {
     const { result } = renderHook(() => useEntityLayers());
-    const missileLayer = result.current[3] as IconLayer;
-    expect(missileLayer.props.data).toHaveLength(1);
+    const gcLayer = result.current.find((l: IconLayer) => l.id === 'groundCombat') as IconLayer;
+    expect(gcLayer.props.data).toHaveLength(1);
   });
 
-  it('ship/drone/missile layers are empty when stores are empty', () => {
+  it('targeted layer contains filtered targeted events', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const tLayer = result.current.find((l: IconLayer) => l.id === 'targeted') as IconLayer;
+    expect(tLayer.props.data).toHaveLength(1);
+  });
+
+  it('otherConflict layer contains filtered other conflict events', () => {
+    const { result } = renderHook(() => useEntityLayers());
+    const ocLayer = result.current.find((l: IconLayer) => l.id === 'otherConflict') as IconLayer;
+    expect(ocLayer.props.data).toHaveLength(1);
+  });
+
+  it('ship/event layers are empty when stores are empty', () => {
     useShipStore.setState({ ships: [], shipCount: 0 });
     useEventStore.setState({ events: [], eventCount: 0 });
     const { result } = renderHook(() => useEntityLayers());
-    const [ships, _flights, drones, missiles] = result.current as IconLayer[];
+    const ships = result.current.find((l: IconLayer) => l.id === 'ships') as IconLayer;
+    const airstrikes = result.current.find((l: IconLayer) => l.id === 'airstrikes') as IconLayer;
+    const groundCombat = result.current.find((l: IconLayer) => l.id === 'groundCombat') as IconLayer;
+    const targeted = result.current.find((l: IconLayer) => l.id === 'targeted') as IconLayer;
+    const otherConflict = result.current.find((l: IconLayer) => l.id === 'otherConflict') as IconLayer;
     expect(ships.props.data).toEqual([]);
-    expect(drones.props.data).toEqual([]);
-    expect(missiles.props.data).toEqual([]);
+    expect(airstrikes.props.data).toEqual([]);
+    expect(groundCombat.props.data).toEqual([]);
+    expect(targeted.props.data).toEqual([]);
+    expect(otherConflict.props.data).toEqual([]);
   });
 
   it('all layer IDs are unique', () => {
@@ -398,13 +476,15 @@ describe('useEntityLayers layer visibility toggles', () => {
       flightCount: 3,
     });
     useShipStore.setState({ ships: [mockShip], shipCount: 1 });
-    useEventStore.setState({ events: [mockDroneEvent, mockMissileEvent], eventCount: 2 });
+    useEventStore.setState({ events: [mockAirstrikeEvent, mockGroundCombatEvent, mockTargetedEvent, mockOtherEvent], eventCount: 4 });
     useUIStore.setState({
       pulseEnabled: true,
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
       showGroundTraffic: false,
     });
   });
@@ -423,18 +503,32 @@ describe('useEntityLayers layer visibility toggles', () => {
     expect(shipLayer.props.visible).toBe(false);
   });
 
-  it('showDrones=false hides drone layer via visible prop', () => {
-    useUIStore.setState({ showDrones: false });
+  it('showAirstrikes=false hides airstrike layer via visible prop', () => {
+    useUIStore.setState({ showAirstrikes: false });
     const { result } = renderHook(() => useEntityLayers());
-    const droneLayer = result.current.find((l: IconLayer) => l.id === 'drones') as IconLayer;
-    expect(droneLayer.props.visible).toBe(false);
+    const airstrikeLayer = result.current.find((l: IconLayer) => l.id === 'airstrikes') as IconLayer;
+    expect(airstrikeLayer.props.visible).toBe(false);
   });
 
-  it('showMissiles=false hides missile layer via visible prop', () => {
-    useUIStore.setState({ showMissiles: false });
+  it('showGroundCombat=false hides groundCombat layer via visible prop', () => {
+    useUIStore.setState({ showGroundCombat: false });
     const { result } = renderHook(() => useEntityLayers());
-    const missileLayer = result.current.find((l: IconLayer) => l.id === 'missiles') as IconLayer;
-    expect(missileLayer.props.visible).toBe(false);
+    const gcLayer = result.current.find((l: IconLayer) => l.id === 'groundCombat') as IconLayer;
+    expect(gcLayer.props.visible).toBe(false);
+  });
+
+  it('showTargeted=false hides targeted layer via visible prop', () => {
+    useUIStore.setState({ showTargeted: false });
+    const { result } = renderHook(() => useEntityLayers());
+    const tLayer = result.current.find((l: IconLayer) => l.id === 'targeted') as IconLayer;
+    expect(tLayer.props.visible).toBe(false);
+  });
+
+  it('showOtherConflict=false hides otherConflict layer via visible prop', () => {
+    useUIStore.setState({ showOtherConflict: false });
+    const { result } = renderHook(() => useEntityLayers());
+    const ocLayer = result.current.find((l: IconLayer) => l.id === 'otherConflict') as IconLayer;
+    expect(ocLayer.props.visible).toBe(false);
   });
 
   it('showFlights=false + showGroundTraffic=true still includes flight layer with only ground flights', () => {
@@ -448,22 +542,22 @@ describe('useEntityLayers layer visibility toggles', () => {
     expect(data[0].data.onGround).toBe(true);
   });
 
-  it('all toggles ON returns 6 layers including glow and highlight', () => {
+  it('all toggles ON returns 8 layers including glow and highlight', () => {
     const { result } = renderHook(() => useEntityLayers());
-    expect(result.current).toHaveLength(6);
+    expect(result.current).toHaveLength(8);
     const ids = result.current.map((l: { id: string }) => l.id);
-    expect(ids).toEqual(['ships', 'flights', 'drones', 'missiles', 'entity-glow', 'entity-highlight']);
+    expect(ids).toEqual(['ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'otherConflict', 'entity-glow', 'entity-highlight']);
   });
 
-  it('drone layer has pickable=true', () => {
+  it('airstrike layer has pickable=true', () => {
     const { result } = renderHook(() => useEntityLayers());
-    const droneLayer = result.current.find((l: IconLayer) => l.id === 'drones') as IconLayer;
-    expect(droneLayer.props.pickable).toBe(true);
+    const airstrikeLayer = result.current.find((l: IconLayer) => l.id === 'airstrikes') as IconLayer;
+    expect(airstrikeLayer.props.pickable).toBe(true);
   });
 
-  it('missile layer has pickable=true', () => {
+  it('groundCombat layer has pickable=true', () => {
     const { result } = renderHook(() => useEntityLayers());
-    const missileLayer = result.current.find((l: IconLayer) => l.id === 'missiles') as IconLayer;
-    expect(missileLayer.props.pickable).toBe(true);
+    const gcLayer = result.current.find((l: IconLayer) => l.id === 'groundCombat') as IconLayer;
+    expect(gcLayer.props.pickable).toBe(true);
   });
 });

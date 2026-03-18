@@ -3,6 +3,7 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useUIStore } from '@/stores/uiStore';
+import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
 function useUtcClock() {
@@ -42,6 +43,8 @@ function FeedLine({ status, count, label }: { status: FeedStatus; count: number;
 
 export function StatusPanel() {
   const utc = useUtcClock();
+  const isCollapsed = useUIStore((s) => s.isStatusCollapsed);
+  const toggleStatus = useUIStore((s) => s.toggleStatus);
   const flightStatus = useFlightStore((s) => s.connectionStatus);
   const flights = useFlightStore((s) => s.flights);
   const shipStatus = useShipStore((s) => s.connectionStatus);
@@ -52,8 +55,10 @@ export function StatusPanel() {
   const showFlights = useUIStore((s) => s.showFlights);
   const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
   const showShips = useUIStore((s) => s.showShips);
-  const showDrones = useUIStore((s) => s.showDrones);
-  const showMissiles = useUIStore((s) => s.showMissiles);
+  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
+  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
+  const showTargeted = useUIStore((s) => s.showTargeted);
+  const showOtherConflict = useUIStore((s) => s.showOtherConflict);
 
   let visibleFlights = 0;
   if (showFlights && showGroundTraffic) visibleFlights = flights.length;
@@ -63,19 +68,34 @@ export function StatusPanel() {
   const visibleShips = showShips ? shipCount : 0;
 
   let visibleEvents = 0;
-  if (showDrones) visibleEvents += events.filter((e) => e.type === 'drone').length;
-  if (showMissiles) visibleEvents += events.filter((e) => e.type === 'missile').length;
+  if (showAirstrikes) visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)).length;
+  if (showGroundCombat) visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)).length;
+  if (showTargeted) visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)).length;
+  if (showOtherConflict) visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(e.type)).length;
 
   return (
     <OverlayPanel className="min-w-[140px]">
-      <div className="flex flex-col gap-1">
-        <span data-testid="utc-clock" className="text-xs text-text-secondary tabular-nums tracking-wide">
-          {utc}
-        </span>
-        <FeedLine status={flightStatus} count={visibleFlights} label="flights" />
-        <FeedLine status={shipStatus} count={visibleShips} label="ships" />
-        <FeedLine status={eventStatus} count={visibleEvents} label="events" />
-      </div>
+      <button
+        onClick={toggleStatus}
+        className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary"
+      >
+        <span>Status</span>
+        <span className="text-text-muted">{isCollapsed ? '+' : '-'}</span>
+      </button>
+      {!isCollapsed && (
+        <div className="mt-2 flex flex-col gap-1">
+          <span data-testid="utc-clock" className="text-xs text-text-secondary tabular-nums tracking-wide">
+            {utc}
+          </span>
+          <FeedLine status={flightStatus} count={visibleFlights} label="flights" />
+          <FeedLine status={shipStatus} count={visibleShips} label="ships" />
+          <FeedLine status={eventStatus} count={visibleEvents} label="events" />
+        </div>
+      )}
     </OverlayPanel>
   );
 }

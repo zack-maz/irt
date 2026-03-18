@@ -1,7 +1,7 @@
 /**
  * BaseMap component tests
  * Covers MAP-01a (renders inside container), MAP-01d (hides road labels on load),
- * and tooltip gating via showNews toggle.
+ * and tooltip gating via conflict toggle groups.
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
@@ -82,16 +82,16 @@ describe('BaseMap', () => {
   });
 });
 
-const mockDroneEntity: ConflictEventEntity = {
-  id: 'event-drone-1',
-  type: 'drone',
+const mockAirstrikeEntity: ConflictEventEntity = {
+  id: 'event-airstrike-1',
+  type: 'airstrike',
   lat: 32.65,
   lng: 51.67,
   timestamp: Date.now(),
-  label: 'Air/drone strike',
+  label: 'Aerial weapons',
   data: {
-    eventType: 'Explosions/Remote violence',
-    subEventType: 'Air/drone strike',
+    eventType: 'Aerial weapons',
+    subEventType: 'CAMEO 195',
     fatalities: 0,
     actor1: 'Unknown',
     actor2: 'Unknown',
@@ -99,7 +99,7 @@ const mockDroneEntity: ConflictEventEntity = {
     source: 'https://example.com',
     goldsteinScale: -5.0,
     locationName: 'Isfahan, Iran',
-    cameoCode: '183',
+    cameoCode: '195',
   },
 };
 
@@ -155,11 +155,12 @@ describe('BaseMap click handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useUIStore.setState({
-      showNews: true,
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
       showGroundTraffic: false,
       selectedEntityId: null,
       hoveredEntityId: null,
@@ -195,33 +196,34 @@ describe('BaseMap tooltip gating', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useUIStore.setState({
-      showNews: true,
       showFlights: true,
       showShips: true,
-      showDrones: true,
-      showMissiles: true,
+      showAirstrikes: true,
+      showGroundCombat: true,
+      showTargeted: true,
+      showOtherConflict: true,
       showGroundTraffic: false,
       selectedEntityId: null,
       hoveredEntityId: null,
     });
   });
 
-  it('shows tooltip for drone entity when showNews is ON', () => {
+  it('shows tooltip for airstrike entity when showAirstrikes is ON', () => {
     render(<BaseMap />);
-    simulateHover(mockDroneEntity);
-    expect(screen.getByText('Explosions/Remote violence')).toBeTruthy();
+    simulateHover(mockAirstrikeEntity);
+    expect(screen.getByText('Aerial weapons')).toBeTruthy();
     expect(screen.getByText('Isfahan, Iran', { exact: false })).toBeTruthy();
   });
 
-  it('hides tooltip for drone entity when showNews is OFF', () => {
-    useUIStore.setState({ showNews: false });
+  it('hides tooltip for airstrike entity when showAirstrikes is OFF', () => {
+    useUIStore.setState({ showAirstrikes: false });
     render(<BaseMap />);
-    simulateHover(mockDroneEntity);
-    expect(screen.queryByText('Explosions/Remote violence')).toBeNull();
+    simulateHover(mockAirstrikeEntity);
+    expect(screen.queryByText('Aerial weapons')).toBeNull();
   });
 
-  it('still shows tooltip for flight entity when showNews is OFF', () => {
-    useUIStore.setState({ showNews: false });
+  it('still shows tooltip for flight entity when showAirstrikes is OFF', () => {
+    useUIStore.setState({ showAirstrikes: false });
     render(<BaseMap />);
     simulateHover(mockFlight);
     expect(screen.getByText('QTR123')).toBeTruthy();
@@ -229,9 +231,9 @@ describe('BaseMap tooltip gating', () => {
 
   it('clears tooltip when hover moves off entity', () => {
     render(<BaseMap />);
-    simulateHover(mockDroneEntity);
-    expect(screen.getByText('Explosions/Remote violence')).toBeTruthy();
+    simulateHover(mockAirstrikeEntity);
+    expect(screen.getByText('Aerial weapons')).toBeTruthy();
     simulateHoverClear();
-    expect(screen.queryByText('Explosions/Remote violence')).toBeNull();
+    expect(screen.queryByText('Aerial weapons')).toBeNull();
   });
 });

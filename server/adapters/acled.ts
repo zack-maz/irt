@@ -1,5 +1,5 @@
 import { config } from '../config.js';
-import type { ConflictEventEntity } from '../types.js';
+import type { ConflictEventEntity, ConflictEventType } from '../types.js';
 
 const ACLED_TOKEN_URL = 'https://acleddata.com/oauth/token';
 const ACLED_API_URL = 'https://acleddata.com/api';
@@ -42,13 +42,15 @@ async function getACLEDToken(): Promise<string> {
   return cachedToken.token;
 }
 
-function classifyEventType(subEventType: string): 'missile' | 'drone' {
+function classifyEventType(subEventType: string): ConflictEventType {
   const lower = subEventType.toLowerCase();
-  if (lower.includes('drone') || lower.includes('air')) return 'drone';
-  if (lower.includes('shelling') || lower.includes('artillery') || lower.includes('missile'))
-    return 'missile';
-  // Default to missile for other conflict types
-  return 'missile';
+  if (lower.includes('drone') || lower.includes('air')) return 'airstrike';
+  if (lower.includes('shelling') || lower.includes('artillery')) return 'shelling';
+  if (lower.includes('missile')) return 'ground_combat';
+  if (lower.includes('assassination')) return 'assassination';
+  if (lower.includes('abduction') || lower.includes('kidnap')) return 'abduction';
+  // Default to assault for other conflict types
+  return 'assault';
 }
 
 function normalizeEvent(event: Record<string, unknown>): ConflictEventEntity {

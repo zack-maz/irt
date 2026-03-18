@@ -80,19 +80,45 @@ async function downloadAndUnzip(url: string): Promise<string> {
   return entries[0].getData().toString('utf8');
 }
 
+import type { ConflictEventType } from '../types.js';
+
+const BASE_CODE_MAP: Record<string, ConflictEventType> = {
+  '180': 'assault',
+  '181': 'abduction',
+  '182': 'assault',
+  '183': 'bombing',
+  '184': 'assault',
+  '185': 'assassination',
+  '186': 'assassination',
+  '190': 'ground_combat',
+  '191': 'blockade',
+  '192': 'ground_combat',
+  '193': 'ground_combat',
+  '194': 'shelling',
+  '195': 'airstrike',
+  '196': 'ceasefire_violation',
+  '200': 'mass_violence',
+  '201': 'mass_violence',
+  '202': 'mass_violence',
+  '203': 'mass_violence',
+  '204': 'wmd',
+};
+
+const ROOT_FALLBACK: Record<string, ConflictEventType> = {
+  '18': 'assault',
+  '19': 'ground_combat',
+  '20': 'mass_violence',
+};
+
 /**
- * Classify CAMEO root code to entity type.
- * 18 (Assault) -> drone, 19 (Fight) -> missile, 20 (Mass violence) -> missile
+ * Classify CAMEO base code to ConflictEventType.
+ * Falls back by root code for unmapped base codes.
  */
-export function classifyByCAMEO(
+export function classifyByBaseCode(
+  eventBaseCode: string,
   eventRootCode: string,
-  _eventCode: string,
-): 'missile' | 'drone' {
-  if (eventRootCode === '18') return 'drone';
-  if (eventRootCode === '19') return 'missile';
-  if (eventRootCode === '20') return 'missile';
-  // Fallback (should not reach here with proper filtering)
-  return 'missile';
+): ConflictEventType {
+  return BASE_CODE_MAP[eventBaseCode] ?? ROOT_FALLBACK[eventRootCode] ?? 'assault';
 }
 
 /**
@@ -105,14 +131,33 @@ function parseSqlDate(sqlDate: string): number {
   return new Date(year, month, day).getTime();
 }
 
+const BASE_CODE_DESCRIPTIONS: Record<string, string> = {
+  '180': 'Unconventional violence',
+  '181': 'Abduction / hostage-taking',
+  '182': 'Physical assault',
+  '183': 'Bombing',
+  '184': 'Use as human shield',
+  '185': 'Assassination attempt',
+  '186': 'Assassination',
+  '190': 'Conventional military force',
+  '191': 'Blockade / movement restriction',
+  '192': 'Territorial occupation',
+  '193': 'Small arms / light weapons',
+  '194': 'Artillery / tank support',
+  '195': 'Aerial weapons',
+  '196': 'Ceasefire violation',
+  '200': 'Unconventional mass violence',
+  '201': 'Mass expulsion',
+  '202': 'Mass killings',
+  '203': 'Ethnic cleansing',
+  '204': 'Weapons of mass destruction',
+};
+
 /**
- * Return human-readable label for a CAMEO root code.
+ * Return human-readable label for a CAMEO base code.
  */
-function describeEvent(eventRootCode: string): string {
-  if (eventRootCode === '18') return 'Assault';
-  if (eventRootCode === '19') return 'Armed conflict';
-  if (eventRootCode === '20') return 'Mass violence';
-  return 'Unknown conflict';
+function describeEvent(eventBaseCode: string): string {
+  return BASE_CODE_DESCRIPTIONS[eventBaseCode] ?? 'Unknown conflict';
 }
 
 /**
@@ -123,19 +168,20 @@ export function normalizeGdeltEvent(
   lat: number,
   lng: number,
 ): ConflictEventEntity {
+  const eventBaseCode = cols[COL.EventBaseCode];
   const eventRootCode = cols[COL.EventRootCode];
   const eventCode = cols[COL.EventCode];
   const sqlDate = cols[COL.SQLDATE];
 
   return {
     id: `gdelt-${cols[COL.GLOBALEVENTID]}`,
-    type: classifyByCAMEO(eventRootCode, eventCode),
+    type: classifyByBaseCode(eventBaseCode, eventRootCode),
     lat,
     lng,
     timestamp: parseSqlDate(sqlDate),
-    label: `${cols[COL.ActionGeo_FullName]}: ${describeEvent(eventRootCode)}`,
+    label: `${cols[COL.ActionGeo_FullName]}: ${describeEvent(eventBaseCode)}`,
     data: {
-      eventType: describeEvent(eventRootCode),
+      eventType: describeEvent(eventBaseCode),
       subEventType: `CAMEO ${eventCode}`,
       fatalities: 0, // GDELT does not track fatalities
       actor1: cols[COL.Actor1Name] || '',

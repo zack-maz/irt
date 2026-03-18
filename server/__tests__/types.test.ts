@@ -81,44 +81,50 @@ describe('MapEntity types', () => {
     expect(ship.data.speedOverGround).toBe(12.5);
   });
 
-  it('ConflictEventEntity has type "missile" or "drone"', () => {
-    const missile: ConflictEventEntity = {
+  it('ConflictEventEntity has ConflictEventType', () => {
+    const groundCombat: ConflictEventEntity = {
       id: 'event-IRN001',
-      type: 'missile',
+      type: 'ground_combat',
       lat: 33.5,
       lng: 48.2,
       timestamp: Date.now(),
-      label: 'Missile strike near border',
+      label: 'Conventional military force',
       data: {
-        eventType: 'Explosions/Remote violence',
-        subEventType: 'Shelling/artillery/missile attack',
+        eventType: 'Conventional military force',
+        subEventType: 'CAMEO 190',
         fatalities: 0,
         actor1: 'Military Forces of Iran',
         actor2: '',
-        notes: 'Reported missile launch detected',
-        source: 'ACLED',
+        notes: 'Reported military engagement',
+        source: 'GDELT',
+        goldsteinScale: -9.5,
+        locationName: 'Tehran, Iran',
+        cameoCode: '190',
       },
     };
-    expect(missile.type).toBe('missile');
+    expect(groundCombat.type).toBe('ground_combat');
 
-    const drone: ConflictEventEntity = {
+    const airstrike: ConflictEventEntity = {
       id: 'event-IRN002',
-      type: 'drone',
+      type: 'airstrike',
       lat: 34.0,
       lng: 50.1,
       timestamp: Date.now(),
-      label: 'Drone strike',
+      label: 'Aerial weapons',
       data: {
-        eventType: 'Explosions/Remote violence',
-        subEventType: 'Air/drone strike',
+        eventType: 'Aerial weapons',
+        subEventType: 'CAMEO 195',
         fatalities: 3,
         actor1: 'Unknown',
         actor2: 'Civilians',
-        notes: 'Drone strike reported',
-        source: 'ACLED',
+        notes: 'Airstrike reported',
+        source: 'GDELT',
+        goldsteinScale: -8.0,
+        locationName: 'Isfahan, Iran',
+        cameoCode: '195',
       },
     };
-    expect(drone.type).toBe('drone');
+    expect(airstrike.type).toBe('airstrike');
   });
 
   it('MapEntity discriminated union narrows by type', () => {
@@ -167,8 +173,8 @@ describe('MapEntity types', () => {
         case 'ship':
           expect(entity.data.mmsi).toBeDefined();
           break;
-        case 'missile':
-        case 'drone':
+        case 'ground_combat':
+        case 'airstrike':
           expect(entity.data.eventType).toBeDefined();
           break;
       }
@@ -199,8 +205,8 @@ describe('MapEntity types', () => {
     expect(typeof response.lastFresh).toBe('number');
   });
 
-  it('EntityType includes all four types', () => {
-    const types: EntityType[] = ['flight', 'ship', 'missile', 'drone'];
-    expect(types).toHaveLength(4);
+  it('EntityType includes all conflict event types plus flight and ship', () => {
+    const types: EntityType[] = ['flight', 'ship', 'airstrike', 'ground_combat', 'shelling', 'bombing', 'assassination', 'abduction', 'assault', 'blockade', 'ceasefire_violation', 'mass_violence', 'wmd'];
+    expect(types).toHaveLength(13);
   });
 });
