@@ -4,6 +4,35 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v0.10.0] - 2026-03-18
+
+### Phase 10: Detail Panel & GDELT Event Reclassification
+
+#### Added
+- Detail panel: 360px right-side slide-out with per-type content (FlightDetail, ShipDetail, EventDetail)
+- Flight detail with dual units (ft/m, kn/m-s, ft-min/m-s) and data source label
+- Event detail with Goldstein scale, CAMEO code, actors, "View source" link
+- Flash-on-change animation for data values (DetailValue component)
+- Cross-store entity lookup hook (useSelectedEntity) with lost contact tracking
+- Copy-to-clipboard for coordinates with 2s "Copied!" feedback
+- Lost contact state: grayscale overlay with "LOST CONTACT" banner
+- Relative timestamp ticking "Updated Xs ago" every second
+- 11 CAMEO-based ConflictEventType categories replacing drone/missile split
+- 4 conflict toggle groups: Airstrikes, Ground Combat, Targeted, Other Conflict
+- New map icons: explosion (8-point burst) and crosshair (targeting reticle)
+- localStorage migration for old showDrones/showMissiles/showNews keys
+- 365 tests passing
+
+#### Fixed
+- Unidentified flights now take precedence over Ground filter (visible when Ground OFF if pulse ON)
+- Empty map click preserves detail panel selection (explicit close required)
+
+#### Changed
+- Entity types: `drone`/`missile` replaced with 11 granular ConflictEventType values
+- Layer toggles: Drones/Missiles/News replaced with Airstrikes/Ground Combat/Targeted/Other Conflict
+- Tooltip gating: per-category conflict toggles replace single showNews toggle
+- GDELT classifier: classifyByBaseCode uses 3-digit EventBaseCode instead of root code
+
 ## [v0.9.0] - 2026-03-17
 
 ### Phase 9: Layer Controls & News Toggle

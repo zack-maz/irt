@@ -37,7 +37,9 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - `src/components/map/BaseMap.tsx` — main map component with all overlays
 - `src/components/layout/AppShell.tsx` — root layout shell (wires all three polling hooks)
 - `src/components/ui/StatusPanel.tsx` — HUD status panel (visible entity counts + connection dots)
-- `src/components/layout/LayerTogglesSlot.tsx` — layer toggle panel (7 rows)
+- `src/components/layout/LayerTogglesSlot.tsx` — layer toggle panel (8 rows)
+- `src/components/layout/DetailPanelSlot.tsx` — right-side detail panel (360px slide-out)
+- `src/hooks/useSelectedEntity.ts` — cross-store entity lookup with lost contact tracking
 - `src/components/map/EntityTooltip.tsx` — hover/click tooltip for all entity types
 - `src/stores/mapStore.ts` — map state (loaded, cursor position)
 - `src/stores/uiStore.ts` — UI state (panels, toggles)
@@ -47,7 +49,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 ## Data Model (Phase 3+)
 
 - **MapEntity** — discriminated union with minimal shared fields (`id`, `type`, `lat`, `lng`, `timestamp`, `label`) + nested type-specific data
-- **Entity types**: `flight`, `ship`, `missile`, `drone`
+- **Entity types**: `flight`, `ship`, plus 11 `ConflictEventType` values
 - **FlightEntity.data** — includes `unidentified: boolean` flag for hex-only/no-callsign flights
 - **API endpoints**: `/api/flights`, `/api/ships`, `/api/events` (separate, independent caching)
 - **IRAN_BBOX** — covers Greater Middle East (south:15, north:42, west:30, east:70), not just Iran
@@ -80,32 +82,51 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Event store** — `src/stores/eventStore.ts` with no stale clearing (historical data)
 - **Polling hooks** — `useShipPolling` (30s), `useEventPolling` (900s / 15 min)
 - **AppShell** — wires all three: `useFlightPolling()`, `useShipPolling()`, `useEventPolling()`
-- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships gray (#9ca3af), events red (#ef4444)
-- **Entity icons** — flights/ships use chevron, events use starburst (drone) and xmark (missile)
+- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships gray (#9ca3af), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
+- **Entity icons** — flights/ships use chevron, airstrikes use starburst, ground combat uses explosion, targeted uses crosshair, other conflict uses xmark
 - **Icon sizing** — 8000m base with minPixels:24, maxPixels:160 for zoom-responsive scaling
 
-## Conflict Event Data (Phase 8.1)
+## Conflict Event Data (Phase 8.1+)
 
 - **GDELT v2** — default conflict event source (free, no auth, 15-min updates)
 - **ACLED** — adapter preserved in `server/adapters/acled.ts` but not active (requires account approval)
 - **GDELT adapter** — `server/adapters/gdelt.ts`, fetches lastupdate.txt → downloads ZIP → parses CSV → filters Middle East conflicts
 - **GDELT endpoint** — `http://data.gdeltproject.org/gdeltv2/lastupdate.txt` (HTTP, not HTTPS — TLS cert issues)
-- **CAMEO codes** — 18x (assault) → drone, 19x/20x (military force) → missile
+- **ConflictEventType** — 11 CAMEO-based types: `airstrike`, `ground_combat`, `shelling`, `bombing`, `assassination`, `abduction`, `assault`, `blockade`, `ceasefire_violation`, `mass_violence`, `wmd`
+- **classifyByBaseCode** — maps CAMEO EventBaseCode (3-digit) → ConflictEventType, with root code fallback
+- **CONFLICT_TOGGLE_GROUPS** — 4 groups: showAirstrikes (`airstrike`), showGroundCombat (`ground_combat`, `shelling`, `bombing`), showTargeted (`assassination`, `abduction`), showOtherConflict (rest)
+- **isConflictEventType** — type guard derived from CONFLICT_TOGGLE_GROUPS (single source of truth)
+- **EVENT_TYPE_LABELS** — human-readable display labels for all 11 types
 - **FIPS codes** — GDELT uses FIPS 10-4 (IZ=Iraq, TU=Turkey, IS=Israel), not ISO
 - **adm-zip** — required for ZIP decompression (Node zlib only handles gzip/deflate)
-- **No UI toggle** — GDELT is the only active event source, no switching exposed
 - **Deduplication** — GDELT rows deduplicated by date+CAMEO+lat/lng, keeping highest NumMentions row
 
-## Layer Controls & Tooltips (Phase 9)
+## Layer Controls & Tooltips (Phase 9-10)
 
-- **LayerTogglesSlot** — `src/components/layout/LayerTogglesSlot.tsx`, 7 toggle rows in OverlayPanel
-- **Toggle rows** — Flights, Ground (indented), Unidentified (indented), Ships, Drones, Missiles, News
+- **LayerTogglesSlot** — `src/components/layout/LayerTogglesSlot.tsx`, 8 toggle rows in OverlayPanel
+- **Toggle rows** — Flights, Ground (indented), Unidentified (indented), Ships, Airstrikes, Ground Combat, Targeted, Other Conflict
 - **Toggle behavior** — opacity dims to 40% when OFF, smooth transition, persisted to localStorage
 - **Layer visibility** — `useEntityLayers` sets `visible` prop per toggle; ground/airborne filtering in `useMemo`
-- **News toggle** — gates event tooltips in BaseMap (showNews OFF hides drone/missile tooltips, flights/ships unaffected)
+- **Unidentified filter precedence** — unidentified flights stay visible when Ground is OFF (if pulse toggle ON)
+- **Conflict toggle gating** — per-category toggles gate tooltips (replaces old showNews toggle)
 - **EntityTooltip** — `src/components/map/EntityTooltip.tsx`, renders per-type content (flight metadata, ship AIS, GDELT event data with source link)
 - **Hover/highlight** — glow (2x, alpha 60) + highlight (1.2x, full alpha) layers with `pickable: false` to prevent blink
 - **Active entity dimming** — non-active entities dim to alpha 80; active entity stays full opacity (no alpha=0)
 - **StatusPanel counts** — derived from actual entity arrays filtered by toggle state and entity type
-- **showNews default** — `true` (News ON by default)
 - **Zoom controls** — NavigationControl showZoom enabled
+- **localStorage migration** — old showDrones/showMissiles/showNews keys auto-detected and reset to new defaults
+
+## Detail Panel (Phase 10)
+
+- **DetailPanelSlot** — `src/components/layout/DetailPanelSlot.tsx`, 360px right-side slide-out
+- **Per-type content** — FlightDetail, ShipDetail, EventDetail with section headings
+- **FlightDetail** — dual units (ft/m, kn/m-s, ft-min/m-s), data source from flightStore.activeSource
+- **ShipDetail** — name, MMSI, speed, course, heading, "AISStream" source
+- **EventDetail** — type label (EVENT_TYPE_LABELS), CAMEO code, Goldstein scale, actors, "GDELT v2" source, "View source" link
+- **DetailValue** — `src/components/detail/DetailValue.tsx`, reusable value cell with flash-on-change animation
+- **useSelectedEntity** — `src/hooks/useSelectedEntity.ts`, cross-store lookup with lost contact tracking via useRef
+- **Dismiss** — Close button (×) and Escape key both call closeDetailPanel + selectEntity(null)
+- **Copy coordinates** — clipboard button with 2s "Copied!" feedback
+- **Lost contact** — grayscale + opacity-50 overlay with "LOST CONTACT" banner when entity disappears
+- **Relative timestamp** — "Updated Xs ago" ticking every second
+- **Instant swap** — content changes on entity switch, slide animation only on open/close

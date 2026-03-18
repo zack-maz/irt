@@ -1,11 +1,11 @@
 # Iran Conflict Monitor — Project Status
 
-**Last updated:** 2026-03-17
+**Last updated:** 2026-03-18
 
 ## Progress
 
 ```
-[██████████████████░░] 9/10 phases complete (90%)
+[████████████████████] 10/10 phases complete (100%)
 ```
 
 ## Phase Status
@@ -22,11 +22,12 @@
 | 8 | Ship & Conflict Data | Done | 2026-03-16 |
 | 8.1 | GDELT Conflict Events | Done | 2026-03-17 |
 | 9 | Layer Controls & News Toggle | Done | 2026-03-17 |
-| 10 | Detail Panel | Not started | — |
+| 10 | Detail Panel & Event Reclassification | Done | 2026-03-18 |
+| 11 | Hierarchical Event Toggles & UI Polish | Not started | — |
 
 ## Current Focus
 
-**Phase 10: Detail Panel** — Click-to-inspect entities with live stats and metadata.
+**Phase 11: Hierarchical Event Toggles & UI Polish** — Master "Events" toggle with sub-toggles per category, darker unidentified flight color.
 
 ## What's Been Built
 
@@ -64,12 +65,20 @@
 - Event deduplication by date/code/location
 
 ### Phase 9: Layer Controls & News Toggle (Complete)
-- Layer toggles panel: Flights, Ground, Unidentified, Ships, Drones, Missiles, News
-- EntityTooltip with per-type content and GDELT metadata (actors, CAMEO, Goldstein, source link)
-- News toggle gates event tooltips; hover glow/highlight feedback
+- Layer toggles panel with hover glow/highlight feedback
+- EntityTooltip with per-type content and GDELT metadata
 - StatusPanel counts reflect only visible entities per toggle and type
 - Zoom +/- controls, localStorage persistence for all toggles
-- 309 tests passing
+
+### Phase 10: Detail Panel & Event Reclassification (Complete)
+- Detail panel: 360px right-side slide-out with FlightDetail, ShipDetail, EventDetail
+- Flash-on-change values, "Updated Xs ago" ticker, lost contact state
+- Copy-to-clipboard coordinates, Escape/close dismiss
+- 11 CAMEO-based ConflictEventType categories (airstrike, ground_combat, shelling, etc.)
+- 4 conflict toggle groups replacing Drones/Missiles/News
+- New explosion and crosshair map icons
+- Unidentified flight filter takes precedence over Ground filter
+- 365 tests passing
 
 ## Blockers
 
@@ -85,7 +94,8 @@ None.
 | GDELT v2 over ACLED | Free, no auth required, 15-min updates, global coverage |
 | GDELT deduplication | Same event appears multiple times with different actors; keep highest-mention row |
 | pickable: false on glow/highlight | Prevents hover blink from layer picking interference |
-| showNews default ON | Users expect tooltips visible by default |
+| CAMEO-based event types | 11 granular types replace fabricated drone/missile split — maps directly to GDELT data |
+| Unidentified filter precedence | Unidentified flights are high-interest — should always show regardless of Ground toggle |
 
 ## Repository
 

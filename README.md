@@ -1,6 +1,6 @@
 # Iran Conflict Monitor
 
-A personal real-time intelligence dashboard for monitoring the Iran conflict. Displays a 2.5D map of Iran with live data points for ships, flights, missiles, and drones sourced from public APIs. Prioritizes concrete mathematical data — movement vectors, strike counts, timelines, force posture — over qualitative news reporting.
+A personal real-time intelligence dashboard for monitoring the Iran conflict. Displays a 2.5D map of the Greater Middle East with live flights, ships, and conflict events sourced from public APIs. Prioritizes concrete mathematical data — movement vectors, strike counts, timelines, force posture — over qualitative news reporting.
 
 ## Quick Start
 
@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), and conflict events (GDELT). Layer toggles, entity tooltips with GDELT metadata, hover/click highlighting, and a real-time status HUD. 309 tests passing.
+Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), and conflict events (GDELT). Layer toggles with 4 conflict categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, and a real-time status HUD. 365 tests passing.
 
-**Next up:** Detail panel — click-to-inspect with live stats.
+**Next up:** Phase 11 — hierarchical event layer toggles, UI polish.
 
 ## Tech Stack
 
@@ -64,7 +64,7 @@ server/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (309 tests)
+npx vitest run              # Run all tests (365 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode
