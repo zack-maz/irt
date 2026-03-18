@@ -9,6 +9,17 @@ export const ENTITY_COLORS = {
   missile: [239, 68, 68] as const,           // #ef4444 red
 } as const;
 
+/** CSS hex color strings for toggle row dots */
+export const ENTITY_DOT_COLORS = {
+  flights: '#eab308',
+  ships: '#9ca3af',
+  drones: '#ef4444',
+  missiles: '#ef4444',
+  ground: '#eab308',
+  pulse: '#ef4444',
+  news: '#60a5fa',
+} as const;
+
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */
 export const ICON_SIZE = {
   flight:  { meters: 8000, minPixels: 24, maxPixels: 160 },
