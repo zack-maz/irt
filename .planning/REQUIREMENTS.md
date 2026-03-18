@@ -18,10 +18,10 @@
 
 ### Controls & Filtering
 
-- [ ] **CTRL-01**: Layer toggles to show/hide each entity type (ships, flights, missiles, drones)
+- [x] **CTRL-01**: Layer toggles to show/hide each entity type (ships, flights, missiles, drones)
 - [ ] **CTRL-02**: Detail panel on entity click showing live stats (speed, heading, origin, metadata)
 - [ ] **CTRL-03**: Smart filters by nationality, speed, altitude, proximity, and date range
-- [ ] **CTRL-04**: Non-statistical news hidden by default with toggle to reveal
+- [x] **CTRL-04**: Non-statistical news hidden by default with toggle to reveal
 
 ### Analytics
 
@@ -74,10 +74,10 @@
 | DATA-01 | Phase 4 | Complete |
 | DATA-02 | Phase 8 | Complete |
 | DATA-03 | Phase 8 | Complete |
-| CTRL-01 | Phase 7 | Pending |
+| CTRL-01 | Phase 7 | Complete |
 | CTRL-02 | Phase 8 | Pending |
 | CTRL-03 | Phase 9 | Pending |
-| CTRL-04 | Phase 7 | Pending |
+| CTRL-04 | Phase 7 | Complete |
 | STAT-01 | Phase 10 | Pending |
 | INFRA-01 | Phase 3 | Complete |
 | INFRA-02 | Phase 1 | Complete |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: GDELT adapter wired into events route with 15-min polling. StatusPanel UI remaining.
-stopped_at: Phase 9 context gathered
-last_updated: "2026-03-17T23:03:44.681Z"
-last_activity: 2026-03-17 -- Phase 08.1 Plan 02 completed (GDELT route wiring + polling intervals)
+status: Layer toggle state and GDELT metadata passthrough complete. UI panel next.
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-18T00:30:43Z"
+last_activity: 2026-03-18 -- Phase 09 Plan 01 completed (layer toggle state + GDELT metadata)
 progress:
   total_phases: 13
   completed_phases: 7
-  total_plans: 20
-  completed_plans: 18
-  percent: 90
+  total_plans: 22
+  completed_plans: 19
+  percent: 86
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 08.1: Add GDELT as default conflict event source -- replace ACLED with free, real-time GDELT data.
+**Current focus:** Phase 09: Layer Controls & News Toggle -- add layer visibility toggles and news panel.
 
 ## Current Position
 
-Phase: 08.1 (Add GDELT as Default Conflict Event Source) -- IN PROGRESS
-Plan: 2 of 3 in current phase (Plans 01-02 complete)
-Status: GDELT adapter wired into events route with 15-min polling. StatusPanel UI remaining.
-Last activity: 2026-03-17 -- Phase 08.1 Plan 02 completed (GDELT route wiring + polling intervals)
+Phase: 09 (Layer Controls & News Toggle) -- IN PROGRESS
+Plan: 1 of 2 in current phase (Plan 01 complete)
+Status: Layer toggle state and GDELT metadata passthrough complete. UI panel next.
+Last activity: 2026-03-18 -- Phase 09 Plan 01 completed (layer toggle state + GDELT metadata)
 
-Progress: [█████████░] 90%
+Progress: [████████░░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: 3.6min
-- Total execution time: 1.14 hours
+- Total plans completed: 20
+- Average duration: 4.0min
+- Total execution time: 1.34 hours
 
 **By Phase:**
 
@@ -52,9 +52,10 @@ Progress: [█████████░] 90%
 | 7. adsb.lol | 2/2 | 8min | 4min |
 | 8. Ship & Conflict Data | 1/2 | 6min | 6min |
 | 8.1 GDELT Default Source | 2/3 | 6min | 3min |
+| 9. Layer Controls & News | 1/2 | 12min | 12min |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (5min), 07-02 (3min), 08-01 (6min), 08.1-01 (3min), 08.1-02 (3min)
+- Last 5 plans: 07-02 (3min), 08-01 (6min), 08.1-01 (3min), 08.1-02 (3min), 09-01 (12min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -63,6 +64,7 @@ Progress: [█████████░] 90%
 | Phase 08 P01 | 6min | 2 tasks | 12 files |
 | Phase 08.1 P01 | 3min | 2 tasks | 4 files |
 | Phase 08.1 P02 | 3min | 2 tasks | 8 files |
+| Phase 09 P01 | 12min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -150,6 +152,10 @@ Recent decisions affecting current work:
 - [Phase 08.1]: Tab delimiter for GDELT CSV parsing despite .CSV extension
 - [Phase 08.1]: ACLED credentials optional via nullish coalescing (preserves config shape for future use)
 - [Phase 08.1]: 15-minute intervals (900s) for both cache TTL and frontend polling to match GDELT update cadence
+- [Phase 09]: All 7 layer toggles persist atomically under single 'layerToggles' localStorage key
+- [Phase 09]: showFlights and showGroundTraffic are fully independent (2x2 matrix: both ON, flights-only, ground-only, none)
+- [Phase 09]: showNews defaults to false per CTRL-04, all entity toggles default to true
+- [Phase 09]: Drone and missile layers set pickable=true preemptively for tooltip support
 
 ### Roadmap Evolution
 
@@ -167,6 +173,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:03:44.671Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-layer-controls-news-toggle/09-CONTEXT.md
+Last session: 2026-03-18T00:30:43Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: .planning/phases/09-layer-controls-news-toggle/09-01-SUMMARY.md
