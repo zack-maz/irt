@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Detail panel fully implemented with per-type content, dismiss, clipboard, lost contact, relative time.
-stopped_at: Phase 11 context gathered
-last_updated: "2026-03-18T17:36:36.919Z"
-last_activity: 2026-03-18 -- Phase 10 Plan 02 completed (detail panel content)
+status: Filter data layer complete (store, predicate, haversine). Ready for Plan 02 integration.
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-18T18:01:44Z"
+last_activity: 2026-03-18 -- Phase 11 Plan 01 completed (filter data layer)
 progress:
   total_phases: 13
   completed_phases: 8
   total_plans: 24
-  completed_plans: 21
+  completed_plans: 22
   percent: 92
 ---
 
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 10: Detail Panel -- COMPLETE. Ready for phase boundary merge.
+**Current focus:** Phase 11: Smart Filters -- Plan 01 complete, 2 remaining.
 
 ## Current Position
 
-Phase: 10 (Detail Panel) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Detail panel fully implemented with per-type content, dismiss, clipboard, lost contact, relative time.
-Last activity: 2026-03-18 -- Phase 10 Plan 02 completed (detail panel content)
+Phase: 11 (Smart Filters)
+Plan: 1 of 3 in current phase
+Status: Filter data layer complete (store, predicate, haversine). Ready for Plan 02 integration.
+Last activity: 2026-03-18 -- Phase 11 Plan 01 completed (filter data layer)
 
 Progress: [█████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 3.9min
-- Total execution time: 1.46 hours
+- Total execution time: 1.53 hours
 
 **By Phase:**
 
@@ -54,9 +54,10 @@ Progress: [█████████░] 92%
 | 8.1 GDELT Default Source | 2/3 | 6min | 3min |
 | 9. Layer Controls & News | 1/2 | 12min | 12min |
 | 10. Detail Panel | 2/2 | 7min | 3.5min |
+| 11. Smart Filters | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 08.1-01 (3min), 08.1-02 (3min), 09-01 (12min), 10-01 (4min), 10-02 (3min)
+- Last 5 plans: 08.1-02 (3min), 09-01 (12min), 10-01 (4min), 10-02 (3min), 11-01 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -68,6 +69,7 @@ Progress: [█████████░] 92%
 | Phase 09 P01 | 12min | 2 tasks | 11 files |
 | Phase 10 P01 | 4min | 2 tasks | 9 files |
 | Phase 10 P02 | 3min | 2 tasks | 5 files |
+| Phase 11 P01 | 4min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -167,6 +169,10 @@ Recent decisions affecting current work:
 - [Phase 10]: Copy-to-clipboard with 2s "Copied!" feedback timeout
 - [Phase 10]: Lost contact banner + content grayout (opacity-50 grayscale) preserving last-known data
 - [Phase 10]: Panel slides from right side (top-0 right-0, translate-x-full when hidden) with border-l
+- [Phase 11]: Filter store uses no localStorage persistence (transient state per user decision)
+- [Phase 11]: clearFilter(proximity) resets both pin AND radius to default 100km
+- [Phase 11]: Pure entityPassesFilters predicate: non-applicable filters include (not exclude) the entity
+- [Phase 11]: Null/unknown velocity/altitude pass through range filters (include unknowns)
 
 ### Roadmap Evolution
 
@@ -184,6 +190,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:36:36.910Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-smart-filters/11-CONTEXT.md
+Last session: 2026-03-18T18:01:44Z
+Stopped at: Completed 11-01-PLAN.md
+Resume file: .planning/phases/11-smart-filters/11-01-SUMMARY.md
