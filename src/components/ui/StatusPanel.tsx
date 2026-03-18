@@ -3,6 +3,7 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
@@ -46,11 +47,11 @@ export function StatusPanel() {
   const isCollapsed = useUIStore((s) => s.isStatusCollapsed);
   const toggleStatus = useUIStore((s) => s.toggleStatus);
   const flightStatus = useFlightStore((s) => s.connectionStatus);
-  const flights = useFlightStore((s) => s.flights);
   const shipStatus = useShipStore((s) => s.connectionStatus);
-  const shipCount = useShipStore((s) => s.shipCount);
   const eventStatus = useEventStore((s) => s.connectionStatus);
-  const events = useEventStore((s) => s.events);
+
+  // Use filtered entities (applies filter store predicates)
+  const { flights, ships: filteredShips, events } = useFilteredEntities();
 
   const showFlights = useUIStore((s) => s.showFlights);
   const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
@@ -60,13 +61,15 @@ export function StatusPanel() {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
+
+  // Count = entities passing BOTH filters AND toggles
   const visibleFlights = flights.filter((f) => {
     if (f.data.unidentified) return pulseEnabled;
     if (f.data.onGround) return showGroundTraffic;
     return showFlights;
   }).length;
 
-  const visibleShips = showShips ? shipCount : 0;
+  const visibleShips = showShips ? filteredShips.length : 0;
 
   let visibleEvents = 0;
   if (showEvents) {
