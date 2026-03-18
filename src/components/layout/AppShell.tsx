@@ -30,10 +30,10 @@ export function AppShell() {
         <StatusPanel />
         <CountersSlot />
         <LayerTogglesSlot />
-        <FilterPanelSlot />
       </div>
 
-      {/* Right edge: Detail panel (hidden by default) */}
+      {/* Right side: Filter panel + Detail panel */}
+      <FilterPanelSlot />
       <DetailPanelSlot />
     </div>
   );

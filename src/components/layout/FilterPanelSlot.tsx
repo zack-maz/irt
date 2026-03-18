@@ -46,6 +46,7 @@ function SectionHeader({
 
 export function FilterPanelSlot() {
   const isCollapsed = useUIStore((s) => s.isFiltersCollapsed);
+  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
   const toggleFilters = useUIStore((s) => s.toggleFilters);
 
   const flightCountries = useFilterStore((s) => s.flightCountries);
@@ -108,7 +109,10 @@ export function FilterPanelSlot() {
   const isDateActive = dateStart !== null || dateEnd !== null;
 
   return (
-    <div data-testid="filter-panel-slot">
+    <div
+      data-testid="filter-panel-slot"
+      className={`absolute top-4 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out max-h-[calc(100vh-2rem)] overflow-y-auto ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
+    >
       <OverlayPanel>
         <div className="flex flex-col gap-1">
           <button
