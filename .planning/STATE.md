@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-18T03:58:29.262Z"
-last_activity: 2026-03-18 -- Phase 09 Plan 01 completed (layer toggle state + GDELT metadata)
+status: in-progress
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-03-18T04:17:06Z"
+last_activity: 2026-03-18 -- Phase 10 Plan 01 completed (detail panel foundation)
 progress:
   total_phases: 13
   completed_phases: 7
-  total_plans: 22
-  completed_plans: 19
-  percent: 86
+  total_plans: 24
+  completed_plans: 21
+  percent: 87
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 09: Layer Controls & News Toggle -- add layer visibility toggles and news panel.
+**Current focus:** Phase 10: Detail Panel -- entity detail panel with cross-store lookup and live data.
 
 ## Current Position
 
-Phase: 09 (Layer Controls & News Toggle) -- IN PROGRESS
+Phase: 10 (Detail Panel) -- IN PROGRESS
 Plan: 1 of 2 in current phase (Plan 01 complete)
-Status: Layer toggle state and GDELT metadata passthrough complete. UI panel next.
-Last activity: 2026-03-18 -- Phase 09 Plan 01 completed (layer toggle state + GDELT metadata)
+Status: Detail panel foundation complete. Panel content assembly next.
+Last activity: 2026-03-18 -- Phase 10 Plan 01 completed (detail panel foundation)
 
-Progress: [████████░░] 86%
+Progress: [████████░░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 4.0min
-- Total execution time: 1.34 hours
+- Total execution time: 1.41 hours
 
 **By Phase:**
 
@@ -53,9 +53,10 @@ Progress: [████████░░] 86%
 | 8. Ship & Conflict Data | 1/2 | 6min | 6min |
 | 8.1 GDELT Default Source | 2/3 | 6min | 3min |
 | 9. Layer Controls & News | 1/2 | 12min | 12min |
+| 10. Detail Panel | 1/2 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (3min), 08-01 (6min), 08.1-01 (3min), 08.1-02 (3min), 09-01 (12min)
+- Last 5 plans: 08-01 (6min), 08.1-01 (3min), 08.1-02 (3min), 09-01 (12min), 10-01 (4min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -65,6 +66,7 @@ Progress: [████████░░] 86%
 | Phase 08.1 P01 | 3min | 2 tasks | 4 files |
 | Phase 08.1 P02 | 3min | 2 tasks | 8 files |
 | Phase 09 P01 | 12min | 2 tasks | 11 files |
+| Phase 10 P01 | 4min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -156,6 +158,10 @@ Recent decisions affecting current work:
 - [Phase 09]: showFlights and showGroundTraffic are fully independent (2x2 matrix: both ON, flights-only, ground-only, none)
 - [Phase 09]: showNews defaults to false per CTRL-04, all entity toggles default to true
 - [Phase 09]: Drone and missile layers set pickable=true preemptively for tooltip support
+- [Phase 10]: Empty map click does NOT dismiss detail panel -- panel persists until explicitly closed
+- [Phase 10]: Removed pinned tooltip (clickState) in favor of detail panel for selected entity display
+- [Phase 10]: Hover tooltip remains for quick entity identification, detail panel for deep inspection
+- [Phase 10]: useRef for last-known entity tracking to survive store updates without extra renders
 
 ### Roadmap Evolution
 
@@ -173,6 +179,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T03:58:29.258Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-detail-panel/10-CONTEXT.md
+Last session: 2026-03-18T04:17:06Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: .planning/phases/10-detail-panel/10-02-PLAN.md
