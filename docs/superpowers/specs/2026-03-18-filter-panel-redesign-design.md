@@ -8,7 +8,7 @@ The current filter panel lives in the top-left overlay stack and gets cut off at
 
 ### Layout
 
-- Move `FilterPanelSlot` from the top-left stack to absolute position `top-4 right-4`
+- Move `FilterPanelSlot` from the top-left stack to absolute position `top-4 right-4`, z-index `z-[var(--z-controls)]` (30, matches other interactive overlays)
 - When the detail panel is open, animate `right` to `calc(var(--width-detail-panel) + 1rem)` so the filter panel sits adjacent to it
 - When the detail panel closes, `right` transitions back to `1rem`
 - Transition: `transition-[right] duration-300 ease-in-out` (matches detail panel's slide animation)
@@ -74,13 +74,14 @@ Update `FilterKey` union type to match new field names: `'flightCountry' | 'even
 
 **Action signatures** (duplicated per scope, not parameterized):
 
-- `addFlightCountry(country: string)`, `removeFlightCountry(country: string)`
-- `addEventCountry(country: string)`, `removeEventCountry(country: string)`
+- `setFlightCountries(countries: string[])`, `addFlightCountry(country: string)`, `removeFlightCountry(country: string)`
+- `setEventCountries(countries: string[])`, `addEventCountry(country: string)`, `removeEventCountry(country: string)`
 - `setFlightSpeedRange(min: number | null, max: number | null)`
 - `setShipSpeedRange(min: number | null, max: number | null)`
 - `setAltitudeRange(min, max)` — unchanged
 - `setDateRange(start, end)` — unchanged
-- Proximity actions — unchanged
+- `isSettingPin` / `setSettingPin(v: boolean)` — unchanged
+- Proximity actions (`setProximityPin`, `setProximityRadius`) — unchanged
 
 **`clearFilter` mapping:**
 
@@ -117,7 +118,7 @@ With corresponding toggle actions.
 
 ### Component Changes
 
-- **`FilterPanelSlot`** — Remove from top-left stack in `AppShell`. Render as independent absolutely-positioned element. Restructure internals with collapsible entity sections. Read `isDetailPanelOpen` from uiStore to compute `right` offset.
+- **`FilterPanelSlot`** — Remove from top-left stack in `AppShell`. Render as independent absolutely-positioned element. Outer `div` gets absolute positioning; inner `OverlayPanel` wrapper stays for visual styling (dark glass). Restructure internals with collapsible entity sections. Read `isDetailPanelOpen` from uiStore to compute `right` offset.
 - **`AppShell`** — Remove `<FilterPanelSlot />` from the top-left flex column. Add it as a sibling to `<DetailPanelSlot />` (both absolutely positioned).
 - **`CountryFilter`** — Reused twice with different props. Flight instance: `availableCountries` derived from `originCountry` of flight entities only. Event instance: `availableCountries` derived from `actor1`/`actor2` of event entities only (these are actor names like "ISRAEL", not ISO codes).
 - **`RangeSlider`** — Reused for flight speed (0-700 kn), flight altitude (0-60000 ft), and ship speed (0-30 kn).
@@ -130,7 +131,9 @@ Update the shallow selector to pull the renamed/new filter fields:
 
 `flightCountries`, `eventCountries`, `flightSpeedMin`, `flightSpeedMax`, `shipSpeedMin`, `shipSpeedMax`, `altitudeMin`, `altitudeMax`, `proximityPin`, `proximityRadiusKm`, `dateStart`, `dateEnd`
 
-`entityPassesFilters` continues to accept the full `FilterState` interface. No structural change — hook still returns `{ flights, ships, events }`.
+`entityPassesFilters` continues to accept the full `FilterState` interface by type. The implementation changes to read the renamed/scoped fields, but the call-site pattern is unchanged. Hook still returns `{ flights, ships, events }`.
+
+The existing `as Parameters<typeof entityPassesFilters>[1]` cast in the hook stays — the `FilterState` type change propagates through it automatically.
 
 ### Test Updates
 
@@ -139,3 +142,7 @@ Update the shallow selector to pull the renamed/new filter fields:
 - `FilterPanel.test.tsx` — Update for new panel structure, entity sections, positioning
 - `entityLayers.test.ts` — Minimal changes (useFilteredEntities interface unchanged)
 - `StatusPanel.test.tsx` — No changes expected (consumes useFilteredEntities output)
+
+### Cleanup
+
+- Delete `src/components/layout/FiltersSlot.tsx` — dead legacy file from Phase 1, references nonexistent `isFiltersExpanded` on UIState
