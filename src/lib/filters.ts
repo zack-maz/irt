@@ -45,12 +45,13 @@ export function entityPassesFilters(
   // ── Flight speed filter ────────────────────────────────────────────
   if (filters.flightSpeedMin !== null || filters.flightSpeedMax !== null) {
     if (entity.type === 'flight') {
-      if (entity.data.velocity !== null) {
-        const knots = entity.data.velocity * KNOTS_PER_MS;
+      // Grounded flights: treat null velocity as 0; airborne: null = unknown → pass
+      const velocity = entity.data.velocity ?? (entity.data.onGround ? 0 : null);
+      if (velocity !== null) {
+        const knots = velocity * KNOTS_PER_MS;
         if (filters.flightSpeedMin !== null && knots < filters.flightSpeedMin) return false;
         if (filters.flightSpeedMax !== null && knots > filters.flightSpeedMax) return false;
       }
-      // null velocity = unknown → pass through
     }
     // Ships and events: always pass flight speed filter
   }
@@ -68,12 +69,13 @@ export function entityPassesFilters(
   // ── Altitude filter ─────────────────────────────────────────────────
   if (filters.altitudeMin !== null || filters.altitudeMax !== null) {
     if (entity.type === 'flight') {
-      if (entity.data.altitude !== null) {
-        const feet = entity.data.altitude * FEET_PER_METER;
+      // Grounded flights: treat null altitude as 0; airborne: null = unknown → pass
+      const altitude = entity.data.altitude ?? (entity.data.onGround ? 0 : null);
+      if (altitude !== null) {
+        const feet = altitude * FEET_PER_METER;
         if (filters.altitudeMin !== null && feet < filters.altitudeMin) return false;
         if (filters.altitudeMax !== null && feet > filters.altitudeMax) return false;
       }
-      // null altitude = unknown → pass through
     }
     // Ships and events: always pass (no altitude)
   }

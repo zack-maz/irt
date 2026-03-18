@@ -198,9 +198,19 @@ describe('entityPassesFilters', () => {
       expect(entityPassesFilters(makeFlight({ velocity: 300 }), filters)).toBe(false);
     });
 
-    it('flight with null velocity passes (unknown = include)', () => {
+    it('airborne flight with null velocity passes (unknown = include)', () => {
       const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
-      expect(entityPassesFilters(makeFlight({ velocity: null }), filters)).toBe(true);
+      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: false }), filters)).toBe(true);
+    });
+
+    it('grounded flight with null velocity treated as 0 (fails speed min)', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: 10, flightSpeedMax: null };
+      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: true }), filters)).toBe(false);
+    });
+
+    it('grounded flight with velocity 0 fails speed min', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: 10, flightSpeedMax: null };
+      expect(entityPassesFilters(makeFlight({ velocity: 0, onGround: true }), filters)).toBe(false);
     });
 
     it('ship always passes flight speed filter', () => {
@@ -269,9 +279,19 @@ describe('entityPassesFilters', () => {
       expect(entityPassesFilters(makeFlight({ altitude: 15000 }), filters)).toBe(false);
     });
 
-    it('flight with null altitude passes (unknown = include)', () => {
+    it('airborne flight with null altitude passes (unknown = include)', () => {
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
-      expect(entityPassesFilters(makeFlight({ altitude: null }), filters)).toBe(true);
+      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: false }), filters)).toBe(true);
+    });
+
+    it('grounded flight with null altitude treated as 0 (fails altitude min)', () => {
+      const filters = { ...makeDefaults(), altitudeMin: 500, altitudeMax: null };
+      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: true }), filters)).toBe(false);
+    });
+
+    it('grounded flight with altitude 0 fails altitude min', () => {
+      const filters = { ...makeDefaults(), altitudeMin: 500, altitudeMax: null };
+      expect(entityPassesFilters(makeFlight({ altitude: 0, onGround: true }), filters)).toBe(false);
     });
 
     it('ship always passes altitude filter (no altitude)', () => {
