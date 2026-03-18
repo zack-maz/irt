@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Filter data layer complete (store, predicate, haversine). Ready for Plan 02 integration.
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-18T18:01:44Z"
+status: completed
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-03-18T18:20:29.468Z"
 last_activity: 2026-03-18 -- Phase 11 Plan 01 completed (filter data layer)
 progress:
   total_phases: 13
   completed_phases: 8
-  total_plans: 24
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 23
   percent: 92
 ---
 
@@ -70,6 +70,7 @@ Progress: [█████████░] 92%
 | Phase 10 P01 | 4min | 2 tasks | 9 files |
 | Phase 10 P02 | 3min | 2 tasks | 5 files |
 | Phase 11 P01 | 4min | 2 tasks | 8 files |
+| Phase 11 P03 | 14min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,10 @@ Recent decisions affecting current work:
 - [Phase 11]: clearFilter(proximity) resets both pin AND radius to default 100km
 - [Phase 11]: Pure entityPassesFilters predicate: non-applicable filters include (not exclude) the entity
 - [Phase 11]: Null/unknown velocity/altitude pass through range filters (include unknowns)
+- [Phase 11]: Native dual-range inputs with CSS pointer-events trick for filter sliders (no library)
+- [Phase 11]: Datalist-based country autocomplete (native browser UX)
+- [Phase 11]: isSettingPin mode pattern: crosshair cursor + DeckGLOverlay guard + Map onClick for pin placement
+- [Phase 11]: Consolidated showOtherConflict into showGroundCombat (3 toggle groups, 3 event layers)
 
 ### Roadmap Evolution
 
@@ -190,6 +195,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T18:01:44Z
-Stopped at: Completed 11-01-PLAN.md
-Resume file: .planning/phases/11-smart-filters/11-01-SUMMARY.md
+Last session: 2026-03-18T18:20:29.460Z
+Stopped at: Completed 11-03-PLAN.md
+Resume file: None
