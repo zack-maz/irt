@@ -44,7 +44,6 @@ export function LayerTogglesSlot() {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
-
   const toggleFlights = useUIStore((s) => s.toggleFlights);
   const toggleGroundTraffic = useUIStore((s) => s.toggleGroundTraffic);
   const togglePulse = useUIStore((s) => s.togglePulse);
@@ -53,7 +52,6 @@ export function LayerTogglesSlot() {
   const toggleAirstrikes = useUIStore((s) => s.toggleAirstrikes);
   const toggleGroundCombat = useUIStore((s) => s.toggleGroundCombat);
   const toggleTargeted = useUIStore((s) => s.toggleTargeted);
-
   return (
     <div data-testid="layer-toggles-slot">
       <OverlayPanel>

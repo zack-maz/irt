@@ -10,7 +10,7 @@ export function loadPersistedToggles(): LayerToggles {
     if (stored) {
       const parsed = JSON.parse(stored);
       // Migration: discard old schema if it has showDrones/showMissiles/showNews
-      if ('showDrones' in parsed || 'showMissiles' in parsed || 'showNews' in parsed) {
+      if ('showDrones' in parsed || 'showMissiles' in parsed || 'showNews' in parsed || 'showOtherConflict' in parsed) {
         return { ...LAYER_TOGGLE_DEFAULTS };
       }
       return { ...LAYER_TOGGLE_DEFAULTS, ...parsed };
@@ -31,7 +31,6 @@ function getToggles(state: UIState): LayerToggles {
     showAirstrikes: state.showAirstrikes,
     showGroundCombat: state.showGroundCombat,
     showTargeted: state.showTargeted,
-    showOtherConflict: state.showOtherConflict,
     showGroundTraffic: state.showGroundTraffic,
     pulseEnabled: state.pulseEnabled,
   };
@@ -53,7 +52,6 @@ export const useUIStore = create<UIState>()((set, get) => ({
   showAirstrikes: initial.showAirstrikes,
   showGroundCombat: initial.showGroundCombat,
   showTargeted: initial.showTargeted,
-  showOtherConflict: initial.showOtherConflict,
   selectedEntityId: null,
   hoveredEntityId: null,
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
@@ -92,10 +90,6 @@ export const useUIStore = create<UIState>()((set, get) => ({
   },
   toggleTargeted: () => {
     set((s) => ({ showTargeted: !s.showTargeted }));
-    persistToggles(getToggles(get()));
-  },
-  toggleOtherConflict: () => {
-    set((s) => ({ showOtherConflict: !s.showOtherConflict }));
     persistToggles(getToggles(get()));
   },
   selectEntity: (id) => set({ selectedEntityId: id }),

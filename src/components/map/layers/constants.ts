@@ -8,7 +8,6 @@ export const ENTITY_COLORS = {
   airstrike: [255, 59, 48] as const,         // #ff3b30 red
   groundCombat: [239, 68, 68] as const,      // #ef4444 red
   targeted: [139, 30, 30] as const,          // #8b1e1e dark red
-  otherConflict: [239, 68, 68] as const,    // #ef4444 red
 } as const;
 
 /** CSS hex color strings for toggle row dots */
@@ -18,7 +17,6 @@ export const ENTITY_DOT_COLORS = {
   airstrikes: '#ff3b30',
   groundCombat: '#ef4444',
   targeted: '#8b1e1e',
-  otherConflict: '#ef4444',
   ground: '#eab308',
   unidentified: '#b91c1c',
 } as const;
@@ -30,7 +28,6 @@ export const ICON_SIZE = {
   airstrike:     { meters: 8000, minPixels: 24, maxPixels: 160 },
   groundCombat:  { meters: 8000, minPixels: 24, maxPixels: 160 },
   targeted:      { meters: 8000, minPixels: 24, maxPixels: 160 },
-  otherConflict: { meters: 8000, minPixels: 24, maxPixels: 160 },
 } as const;
 
 /** Pulse animation config for unidentified flights */

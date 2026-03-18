@@ -14,6 +14,7 @@ import { DeckGLOverlay } from './DeckGLOverlay';
 import { EntityTooltip } from './EntityTooltip';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity } from '@/types/entities';
@@ -53,6 +54,9 @@ export function BaseMap() {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
+  const isSettingPin = useFilterStore((s) => s.isSettingPin);
+  const setProximityPin = useFilterStore((s) => s.setProximityPin);
+  const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
 
   const [hover, setHover] = useState<HoverState | null>(null);
@@ -73,6 +77,8 @@ export function BaseMap() {
 
   const handleDeckClick = useCallback(
     (info: PickingInfo) => {
+      // Suppress entity selection when placing a proximity pin
+      if (useFilterStore.getState().isSettingPin) return;
       if (!info.object) {
         // Empty map click does NOT dismiss panel -- panel persists until explicitly closed
         return;
@@ -168,8 +174,15 @@ export function BaseMap() {
         maxPitch={60}
         doubleClickZoom={false}
         terrain={TERRAIN_CONFIG}
+        cursor={isSettingPin ? 'crosshair' : undefined}
         onLoad={handleLoad}
         onMouseMove={handleMouseMove}
+        onClick={(e) => {
+          if (isSettingPin) {
+            setProximityPin({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+            setSettingPin(false);
+          }
+        }}
       >
         <Source
           id="terrain-dem"

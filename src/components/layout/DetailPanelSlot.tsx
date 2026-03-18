@@ -16,7 +16,7 @@ function getDotColor(type: string): string {
     if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
     if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
     if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.targeted;
-    return ENTITY_DOT_COLORS.otherConflict;
+    return ENTITY_DOT_COLORS.groundCombat;
   }
   return '#9ca3af';
 }
