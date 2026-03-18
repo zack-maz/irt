@@ -44,7 +44,7 @@ describe('StatusPanel', () => {
     useShipStore.setState({ connectionStatus: 'connected', ships: [], shipCount: 0 });
     useEventStore.setState({ connectionStatus: 'connected', events: [], eventCount: 0 });
     useUIStore.setState({ showFlights: true, showGroundTraffic: false, showShips: true, showEvents: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true });
-    useFilterStore.setState({ selectedCountries: [], speedMin: null, speedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: null, dateEnd: null, isSettingPin: false });
+    useFilterStore.setState({ flightCountries: [], eventCountries: [], flightSpeedMin: null, flightSpeedMax: null, shipSpeedMin: null, shipSpeedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: null, dateEnd: null, isSettingPin: false });
   });
 
   it('renders three feed lines (flights, ships, events)', () => {
@@ -192,7 +192,7 @@ describe('StatusPanel', () => {
       const iranFlights = [makeFlight('f1', false, 'Iran'), makeFlight('f2', false, 'Iran')];
       const qatarFlight = [makeFlight('f3', false, 'Qatar')];
       useFlightStore.setState({ flights: [...iranFlights, ...qatarFlight], flightCount: 3 });
-      useFilterStore.setState({ selectedCountries: ['Iran'] });
+      useFilterStore.setState({ flightCountries: ['Iran'] });
       render(<StatusPanel />);
 
       // Only 2 Iran flights pass the country filter

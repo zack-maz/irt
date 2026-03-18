@@ -48,12 +48,18 @@ export function FilterPanelSlot() {
   const isCollapsed = useUIStore((s) => s.isFiltersCollapsed);
   const toggleFilters = useUIStore((s) => s.toggleFilters);
 
-  const selectedCountries = useFilterStore((s) => s.selectedCountries);
-  const addCountry = useFilterStore((s) => s.addCountry);
-  const removeCountry = useFilterStore((s) => s.removeCountry);
-  const speedMin = useFilterStore((s) => s.speedMin);
-  const speedMax = useFilterStore((s) => s.speedMax);
-  const setSpeedRange = useFilterStore((s) => s.setSpeedRange);
+  const flightCountries = useFilterStore((s) => s.flightCountries);
+  const addFlightCountry = useFilterStore((s) => s.addFlightCountry);
+  const removeFlightCountry = useFilterStore((s) => s.removeFlightCountry);
+  const eventCountries = useFilterStore((s) => s.eventCountries);
+  const addEventCountry = useFilterStore((s) => s.addEventCountry);
+  const removeEventCountry = useFilterStore((s) => s.removeEventCountry);
+  const flightSpeedMin = useFilterStore((s) => s.flightSpeedMin);
+  const flightSpeedMax = useFilterStore((s) => s.flightSpeedMax);
+  const setFlightSpeedRange = useFilterStore((s) => s.setFlightSpeedRange);
+  const shipSpeedMin = useFilterStore((s) => s.shipSpeedMin);
+  const shipSpeedMax = useFilterStore((s) => s.shipSpeedMax);
+  const setShipSpeedRange = useFilterStore((s) => s.setShipSpeedRange);
   const altitudeMin = useFilterStore((s) => s.altitudeMin);
   const altitudeMax = useFilterStore((s) => s.altitudeMax);
   const setAltitudeRange = useFilterStore((s) => s.setAltitudeRange);
@@ -75,21 +81,28 @@ export function FilterPanelSlot() {
   // Derive available countries from current entity data
   const flights = useFlightStore((s) => s.flights);
   const events = useEventStore((s) => s.events);
-  const availableCountries = useMemo(() => {
+  const availableFlightCountries = useMemo(() => {
     const set = new Set<string>();
     flights.forEach((f) => {
       if (f.data.originCountry) set.add(f.data.originCountry);
     });
+    return Array.from(set).sort();
+  }, [flights]);
+
+  const availableEventCountries = useMemo(() => {
+    const set = new Set<string>();
     events.forEach((e) => {
       if (e.data.actor1) set.add(e.data.actor1);
       if (e.data.actor2) set.add(e.data.actor2);
     });
     return Array.from(set).sort();
-  }, [flights, events]);
+  }, [events]);
 
   // Active state per filter
-  const isCountryActive = selectedCountries.length > 0;
-  const isSpeedActive = speedMin !== null || speedMax !== null;
+  const isFlightCountryActive = flightCountries.length > 0;
+  const isEventCountryActive = eventCountries.length > 0;
+  const isFlightSpeedActive = flightSpeedMin !== null || flightSpeedMax !== null;
+  const isShipSpeedActive = shipSpeedMin !== null || shipSpeedMax !== null;
   const isAltitudeActive = altitudeMin !== null || altitudeMax !== null;
   const isProximityActive = proximityPin !== null;
   const isDateActive = dateStart !== null || dateEnd !== null;
@@ -112,33 +125,49 @@ export function FilterPanelSlot() {
           </button>
           {!isCollapsed && (
             <div className="mt-1 flex flex-col gap-3">
-              {/* Country */}
+              {/* Proximity (global) */}
               <div>
-                <SectionHeader label="Country" active={isCountryActive} filterKey="country" onClear={clearFilter} />
+                <SectionHeader label="Proximity" active={isProximityActive} filterKey="proximity" onClear={clearFilter} />
                 <div className="mt-1">
-                  <CountryFilter
-                    selectedCountries={selectedCountries}
-                    onAdd={addCountry}
-                    onRemove={removeCountry}
-                    availableCountries={availableCountries}
+                  <ProximityFilter
+                    pin={proximityPin}
+                    radiusKm={proximityRadiusKm}
+                    isSettingPin={isSettingPin}
+                    onSetPin={setProximityPin}
+                    onClearPin={() => clearFilter('proximity')}
+                    onRadiusChange={setProximityRadius}
+                    onStartSettingPin={() => setSettingPin(true)}
                   />
                 </div>
               </div>
 
-              {/* Speed */}
+              {/* Flight Country */}
               <div>
-                <SectionHeader label="Speed" active={isSpeedActive} filterKey="speed" onClear={clearFilter} />
+                <SectionHeader label="Flight Country" active={isFlightCountryActive} filterKey="flightCountry" onClear={clearFilter} />
+                <div className="mt-1">
+                  <CountryFilter
+                    selectedCountries={flightCountries}
+                    onAdd={addFlightCountry}
+                    onRemove={removeFlightCountry}
+                    availableCountries={availableFlightCountries}
+                  />
+                </div>
+              </div>
+
+              {/* Flight Speed */}
+              <div>
+                <SectionHeader label="Flight Speed" active={isFlightSpeedActive} filterKey="flightSpeed" onClear={clearFilter} />
                 <div className="mt-1">
                   <RangeSlider
-                    label="Speed"
+                    label="Flight Speed"
                     min={0}
                     max={700}
                     step={10}
                     unit="kn"
-                    valueMin={speedMin}
-                    valueMax={speedMax}
-                    onChangeMin={(v) => setSpeedRange(v, speedMax)}
-                    onChangeMax={(v) => setSpeedRange(speedMin, v)}
+                    valueMin={flightSpeedMin}
+                    valueMax={flightSpeedMax}
+                    onChangeMin={(v) => setFlightSpeedRange(v, flightSpeedMax)}
+                    onChangeMax={(v) => setFlightSpeedRange(flightSpeedMin, v)}
                   />
                 </div>
               </div>
@@ -161,18 +190,33 @@ export function FilterPanelSlot() {
                 </div>
               </div>
 
-              {/* Proximity */}
+              {/* Ship Speed */}
               <div>
-                <SectionHeader label="Proximity" active={isProximityActive} filterKey="proximity" onClear={clearFilter} />
+                <SectionHeader label="Ship Speed" active={isShipSpeedActive} filterKey="shipSpeed" onClear={clearFilter} />
                 <div className="mt-1">
-                  <ProximityFilter
-                    pin={proximityPin}
-                    radiusKm={proximityRadiusKm}
-                    isSettingPin={isSettingPin}
-                    onSetPin={setProximityPin}
-                    onClearPin={() => clearFilter('proximity')}
-                    onRadiusChange={setProximityRadius}
-                    onStartSettingPin={() => setSettingPin(true)}
+                  <RangeSlider
+                    label="Ship Speed"
+                    min={0}
+                    max={30}
+                    step={1}
+                    unit="kn"
+                    valueMin={shipSpeedMin}
+                    valueMax={shipSpeedMax}
+                    onChangeMin={(v) => setShipSpeedRange(v, shipSpeedMax)}
+                    onChangeMax={(v) => setShipSpeedRange(shipSpeedMin, v)}
+                  />
+                </div>
+              </div>
+
+              {/* Event Country */}
+              <div>
+                <SectionHeader label="Event Country" active={isEventCountryActive} filterKey="eventCountry" onClear={clearFilter} />
+                <div className="mt-1">
+                  <CountryFilter
+                    selectedCountries={eventCountries}
+                    onAdd={addEventCountry}
+                    onRemove={removeEventCountry}
+                    availableCountries={availableEventCountries}
                   />
                 </div>
               </div>

@@ -65,6 +65,9 @@ export interface UIState {
   isCountersCollapsed: boolean;
   isLayersCollapsed: boolean;
   isFiltersCollapsed: boolean;
+  isFlightFiltersOpen: boolean;
+  isShipFiltersOpen: boolean;
+  isEventFiltersOpen: boolean;
   pulseEnabled: boolean;
   showGroundTraffic: boolean;
   showFlights: boolean;
@@ -81,6 +84,9 @@ export interface UIState {
   toggleCounters: () => void;
   toggleLayers: () => void;
   toggleFilters: () => void;
+  toggleFlightFilters: () => void;
+  toggleShipFilters: () => void;
+  toggleEventFilters: () => void;
   togglePulse: () => void;
   toggleGroundTraffic: () => void;
   toggleFlights: () => void;

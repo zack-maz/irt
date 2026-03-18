@@ -80,7 +80,7 @@ function resetStores() {
   useShipStore.setState({ ships: [mockShip], shipCount: 1 });
   useEventStore.setState({ events: [mockAirstrikeEvent, mockGroundCombatEvent, mockTargetedEvent, mockOtherEvent], eventCount: 4 });
   useUIStore.setState({ pulseEnabled: true, showFlights: true, showShips: true, showEvents: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true, showGroundTraffic: false });
-  useFilterStore.setState({ selectedCountries: [], speedMin: null, speedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: null, dateEnd: null, isSettingPin: false });
+  useFilterStore.setState({ flightCountries: [], eventCountries: [], flightSpeedMin: null, flightSpeedMax: null, shipSpeedMin: null, shipSpeedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: null, dateEnd: null, isSettingPin: false });
 }
 
 describe('useEntityLayers', () => {
@@ -180,6 +180,6 @@ describe('useEntityLayers proximity circle', () => {
 
 describe('useEntityLayers with filters', () => {
   beforeEach(resetStores);
-  it('country filter reduces visible flights', () => { useFilterStore.setState({ selectedCountries: ['Iran'] }); const { result } = renderHook(() => useEntityLayers()); expect(((result.current.find((l: IconLayer) => l.id === 'flights') as IconLayer).props.data as FlightEntity[]).length).toBe(0); });
+  it('country filter reduces visible flights', () => { useFilterStore.setState({ flightCountries: ['Iran'] }); const { result } = renderHook(() => useEntityLayers()); expect(((result.current.find((l: IconLayer) => l.id === 'flights') as IconLayer).props.data as FlightEntity[]).length).toBe(0); });
   it('ships visible with altitude filter', () => { useFilterStore.setState({ altitudeMin: 5000 }); const { result } = renderHook(() => useEntityLayers()); expect((result.current.find((l: IconLayer) => l.id === 'ships') as IconLayer).props.data).toHaveLength(1); });
 });

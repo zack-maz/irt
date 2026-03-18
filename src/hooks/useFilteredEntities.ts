@@ -23,9 +23,12 @@ export function useFilteredEntities(): {
 
   const filters = useFilterStore(
     useShallow((s) => ({
-      selectedCountries: s.selectedCountries,
-      speedMin: s.speedMin,
-      speedMax: s.speedMax,
+      flightCountries: s.flightCountries,
+      eventCountries: s.eventCountries,
+      flightSpeedMin: s.flightSpeedMin,
+      flightSpeedMax: s.flightSpeedMax,
+      shipSpeedMin: s.shipSpeedMin,
+      shipSpeedMax: s.shipSpeedMax,
       altitudeMin: s.altitudeMin,
       altitudeMax: s.altitudeMax,
       proximityPin: s.proximityPin,

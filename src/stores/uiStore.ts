@@ -44,6 +44,9 @@ export const useUIStore = create<UIState>()((set, get) => ({
   isCountersCollapsed: false,
   isLayersCollapsed: false,
   isFiltersCollapsed: true,
+  isFlightFiltersOpen: true,
+  isShipFiltersOpen: true,
+  isEventFiltersOpen: true,
   pulseEnabled: initial.pulseEnabled,
   showGroundTraffic: initial.showGroundTraffic,
   showFlights: initial.showFlights,
@@ -60,6 +63,9 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleCounters: () => set((s) => ({ isCountersCollapsed: !s.isCountersCollapsed })),
   toggleLayers: () => set((s) => ({ isLayersCollapsed: !s.isLayersCollapsed })),
   toggleFilters: () => set((s) => ({ isFiltersCollapsed: !s.isFiltersCollapsed })),
+  toggleFlightFilters: () => set((s) => ({ isFlightFiltersOpen: !s.isFlightFiltersOpen })),
+  toggleShipFilters: () => set((s) => ({ isShipFiltersOpen: !s.isShipFiltersOpen })),
+  toggleEventFilters: () => set((s) => ({ isEventFiltersOpen: !s.isEventFiltersOpen })),
   togglePulse: () => {
     set((s) => ({ pulseEnabled: !s.pulseEnabled }));
     persistToggles(getToggles(get()));
