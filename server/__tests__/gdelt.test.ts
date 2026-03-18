@@ -30,9 +30,12 @@ function makeGdeltRow(overrides: Partial<Record<number, string>> = {}): string {
   // Defaults for a valid Iran conflict event (EventRootCode 19)
   cols[0] = '1234567890'; // GLOBALEVENTID
   cols[1] = '20260315';   // SQLDATE
+  cols[6] = 'IRANIAN GOVERNMENT'; // Actor1Name
+  cols[16] = 'IRAQ';       // Actor2Name
   cols[26] = '190';        // EventCode
   cols[27] = '190';        // EventBaseCode
   cols[28] = '19';         // EventRootCode
+  cols[30] = '-9.5';       // GoldsteinScale
   cols[52] = 'Tehran, Tehran, Iran'; // ActionGeo_FullName
   cols[53] = 'IR';         // ActionGeo_CountryCode (FIPS)
   cols[56] = '35.6892';    // ActionGeo_Lat
@@ -208,8 +211,8 @@ describe('GDELT Adapter', () => {
       expect(entity.data.subEventType).toBe('CAMEO 190');
       expect(entity.data.fatalities).toBe(0);
       expect(entity.data.source).toBe('https://reuters.com/article/123');
-      expect(entity.data.actor1).toBe('');
-      expect(entity.data.actor2).toBe('');
+      expect(entity.data.actor1).toBe('IRANIAN GOVERNMENT');
+      expect(entity.data.actor2).toBe('IRAQ');
       expect(entity.data.notes).toBe('');
     });
 
@@ -229,6 +232,52 @@ describe('GDELT Adapter', () => {
       cols[60] = '';
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
       expect(entity.data.source).toBe('');
+    });
+
+    it('passes through Actor1Name from column 6', () => {
+      const cols = validIranMissileRow.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actor1).toBe('IRANIAN GOVERNMENT');
+    });
+
+    it('passes through Actor2Name from column 16', () => {
+      const cols = validIranMissileRow.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actor2).toBe('IRAQ');
+    });
+
+    it('passes through GoldsteinScale as a number', () => {
+      const cols = validIranMissileRow.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.goldsteinScale).toBe(-9.5);
+      expect(typeof entity.data.goldsteinScale).toBe('number');
+    });
+
+    it('passes through ActionGeo_FullName as locationName', () => {
+      const cols = validIranMissileRow.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.locationName).toBe('Tehran, Tehran, Iran');
+    });
+
+    it('passes through EventCode as cameoCode', () => {
+      const cols = validIranMissileRow.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.cameoCode).toBe('190');
+    });
+
+    it('missing actor names default to empty string', () => {
+      const row = makeGdeltRow({ 6: '', 16: '' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actor1).toBe('');
+      expect(entity.data.actor2).toBe('');
+    });
+
+    it('invalid GoldsteinScale defaults to 0', () => {
+      const row = makeGdeltRow({ 30: 'not-a-number' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.goldsteinScale).toBe(0);
     });
   });
 
