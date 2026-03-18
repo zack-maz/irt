@@ -9,9 +9,12 @@ import type { FlightEntity, ShipEntity, ConflictEventEntity } from '../../server
 
 function makeDefaults(): FilterState {
   return {
-    selectedCountries: [],
-    speedMin: null,
-    speedMax: null,
+    flightCountries: [],
+    eventCountries: [],
+    flightSpeedMin: null,
+    flightSpeedMax: null,
+    shipSpeedMin: null,
+    shipSpeedMax: null,
     altitudeMin: null,
     altitudeMax: null,
     proximityPin: null,
@@ -20,10 +23,14 @@ function makeDefaults(): FilterState {
     dateEnd: null,
     isSettingPin: false,
     // Actions (unused by pure function, but satisfy the type)
-    setCountries: () => {},
-    addCountry: () => {},
-    removeCountry: () => {},
-    setSpeedRange: () => {},
+    setFlightCountries: () => {},
+    addFlightCountry: () => {},
+    removeFlightCountry: () => {},
+    setEventCountries: () => {},
+    addEventCountry: () => {},
+    removeEventCountry: () => {},
+    setFlightSpeedRange: () => {},
+    setShipSpeedRange: () => {},
     setAltitudeRange: () => {},
     setProximityPin: () => {},
     setProximityRadius: () => {},
@@ -121,110 +128,143 @@ describe('entityPassesFilters', () => {
     });
   });
 
-  describe('country filter', () => {
+  describe('flight country filter', () => {
     it('flight with matching originCountry passes', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['Iran'] };
+      const filters = { ...makeDefaults(), flightCountries: ['Iran'] };
       expect(entityPassesFilters(makeFlight({ originCountry: 'Iran' }), filters)).toBe(true);
     });
 
     it('flight with non-matching originCountry fails', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['Iran'] };
+      const filters = { ...makeDefaults(), flightCountries: ['Iran'] };
       expect(entityPassesFilters(makeFlight({ originCountry: 'Turkey' }), filters)).toBe(false);
     });
 
     it('country match is case-insensitive for flights', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['iran'] };
+      const filters = { ...makeDefaults(), flightCountries: ['iran'] };
       expect(entityPassesFilters(makeFlight({ originCountry: 'Iran' }), filters)).toBe(true);
     });
 
-    it('ship always passes country filter (no nationality in AIS)', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['Iran'] };
+    it('ship always passes flight country filter', () => {
+      const filters = { ...makeDefaults(), flightCountries: ['Iran'] };
       expect(entityPassesFilters(makeShip(), filters)).toBe(true);
     });
 
+    it('event always passes flight country filter', () => {
+      const filters = { ...makeDefaults(), flightCountries: ['Iran'] };
+      expect(entityPassesFilters(makeEvent(), filters)).toBe(true);
+    });
+  });
+
+  describe('event country filter', () => {
     it('event with actor1 containing selected country passes (case-insensitive)', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['IRAN'] };
+      const filters = { ...makeDefaults(), eventCountries: ['IRAN'] };
       expect(entityPassesFilters(makeEvent({ actor1: 'IRAN GOVERNMENT' }), filters)).toBe(true);
     });
 
     it('event with actor2 containing selected country passes', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['Israel'] };
+      const filters = { ...makeDefaults(), eventCountries: ['Israel'] };
       expect(entityPassesFilters(makeEvent({ actor2: 'ISRAEL MILITARY' }), filters)).toBe(true);
     });
 
     it('event with neither actor matching fails', () => {
-      const filters = { ...makeDefaults(), selectedCountries: ['Syria'] };
+      const filters = { ...makeDefaults(), eventCountries: ['Syria'] };
       expect(entityPassesFilters(makeEvent({ actor1: 'IRAN', actor2: 'IRAQ' }), filters)).toBe(false);
+    });
+
+    it('flight always passes event country filter', () => {
+      const filters = { ...makeDefaults(), eventCountries: ['IRAN'] };
+      expect(entityPassesFilters(makeFlight(), filters)).toBe(true);
+    });
+
+    it('ship always passes event country filter', () => {
+      const filters = { ...makeDefaults(), eventCountries: ['IRAN'] };
+      expect(entityPassesFilters(makeShip(), filters)).toBe(true);
     });
   });
 
-  describe('speed filter', () => {
+  describe('flight speed filter', () => {
     it('flight within speed range passes (velocity in m/s, filter in knots)', () => {
-      // 150 m/s = ~291 knots, filter 200-400 knots
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: 400 };
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
       expect(entityPassesFilters(makeFlight({ velocity: 150 }), filters)).toBe(true);
     });
 
     it('flight below speed range fails', () => {
-      // 50 m/s = ~97 knots, filter 200-400 knots
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: 400 };
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
       expect(entityPassesFilters(makeFlight({ velocity: 50 }), filters)).toBe(false);
     });
 
     it('flight above speed range fails', () => {
-      // 300 m/s = ~583 knots, filter 200-400 knots
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: 400 };
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
       expect(entityPassesFilters(makeFlight({ velocity: 300 }), filters)).toBe(false);
     });
 
     it('flight with null velocity passes (unknown = include)', () => {
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: 400 };
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
       expect(entityPassesFilters(makeFlight({ velocity: null }), filters)).toBe(true);
     });
 
-    it('ship within speed range passes (already in knots)', () => {
-      const filters = { ...makeDefaults(), speedMin: 10, speedMax: 30 };
-      expect(entityPassesFilters(makeShip({ speedOverGround: 25 }), filters)).toBe(true);
+    it('ship always passes flight speed filter', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
+      expect(entityPassesFilters(makeShip(), filters)).toBe(true);
     });
 
-    it('ship below speed range fails', () => {
-      const filters = { ...makeDefaults(), speedMin: 10, speedMax: 30 };
-      expect(entityPassesFilters(makeShip({ speedOverGround: 5 }), filters)).toBe(false);
-    });
-
-    it('event always passes speed filter (no speed data)', () => {
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: 400 };
+    it('event always passes flight speed filter', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
       expect(entityPassesFilters(makeEvent(), filters)).toBe(true);
     });
 
-    it('speed filter with only min set works', () => {
-      const filters = { ...makeDefaults(), speedMin: 200, speedMax: null };
+    it('flight speed filter with only min set works', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: null };
       expect(entityPassesFilters(makeFlight({ velocity: 150 }), filters)).toBe(true); // 291kn > 200
       expect(entityPassesFilters(makeFlight({ velocity: 50 }), filters)).toBe(false); // 97kn < 200
     });
 
-    it('speed filter with only max set works', () => {
-      const filters = { ...makeDefaults(), speedMin: null, speedMax: 100 };
+    it('flight speed filter with only max set works', () => {
+      const filters = { ...makeDefaults(), flightSpeedMin: null, flightSpeedMax: 100 };
       expect(entityPassesFilters(makeFlight({ velocity: 50 }), filters)).toBe(true); // 97kn < 100
       expect(entityPassesFilters(makeFlight({ velocity: 150 }), filters)).toBe(false); // 291kn > 100
     });
   });
 
+  describe('ship speed filter', () => {
+    it('ship within speed range passes (already in knots)', () => {
+      const filters = { ...makeDefaults(), shipSpeedMin: 10, shipSpeedMax: 25 };
+      expect(entityPassesFilters(makeShip({ speedOverGround: 15 }), filters)).toBe(true);
+    });
+
+    it('ship below speed range fails', () => {
+      const filters = { ...makeDefaults(), shipSpeedMin: 10, shipSpeedMax: 25 };
+      expect(entityPassesFilters(makeShip({ speedOverGround: 5 }), filters)).toBe(false);
+    });
+
+    it('ship above speed range fails', () => {
+      const filters = { ...makeDefaults(), shipSpeedMin: 10, shipSpeedMax: 25 };
+      expect(entityPassesFilters(makeShip({ speedOverGround: 30 }), filters)).toBe(false);
+    });
+
+    it('flight always passes ship speed filter', () => {
+      const filters = { ...makeDefaults(), shipSpeedMin: 10, shipSpeedMax: 25 };
+      expect(entityPassesFilters(makeFlight(), filters)).toBe(true);
+    });
+
+    it('event always passes ship speed filter', () => {
+      const filters = { ...makeDefaults(), shipSpeedMin: 10, shipSpeedMax: 25 };
+      expect(entityPassesFilters(makeEvent(), filters)).toBe(true);
+    });
+  });
+
   describe('altitude filter', () => {
     it('flight within altitude range passes (altitude in meters, filter in feet)', () => {
-      // 5000m = ~16404ft, filter 10000-40000ft
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
       expect(entityPassesFilters(makeFlight({ altitude: 5000 }), filters)).toBe(true);
     });
 
     it('flight below altitude range fails', () => {
-      // 2000m = ~6562ft, filter 10000-40000ft
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
       expect(entityPassesFilters(makeFlight({ altitude: 2000 }), filters)).toBe(false);
     });
 
     it('flight above altitude range fails', () => {
-      // 15000m = ~49213ft, filter 10000-40000ft
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
       expect(entityPassesFilters(makeFlight({ altitude: 15000 }), filters)).toBe(false);
     });
@@ -247,13 +287,11 @@ describe('entityPassesFilters', () => {
 
   describe('proximity filter', () => {
     it('entity within radius passes', () => {
-      // Pin at (35, 51), entity at (35.5, 51.5) -- within 100km
       const filters = { ...makeDefaults(), proximityPin: { lat: 35, lng: 51 }, proximityRadiusKm: 100 };
       expect(entityPassesFilters(makeFlight({ lat: 35.5, lng: 51.5 }), filters)).toBe(true);
     });
 
     it('entity outside radius fails', () => {
-      // Pin at (35, 51), entity at (40, 60) -- well outside 100km
       const filters = { ...makeDefaults(), proximityPin: { lat: 35, lng: 51 }, proximityRadiusKm: 100 };
       expect(entityPassesFilters(makeFlight({ lat: 40, lng: 60 }), filters)).toBe(false);
     });
@@ -317,37 +355,59 @@ describe('entityPassesFilters', () => {
     it('flight must pass ALL applicable filters', () => {
       const filters = {
         ...makeDefaults(),
-        selectedCountries: ['Iran'],
-        speedMin: 200,
-        speedMax: 400,
+        flightCountries: ['Iran'],
+        flightSpeedMin: 200,
+        flightSpeedMax: 400,
         altitudeMin: 10000,
         altitudeMax: 40000,
       };
-      // Iran, 150 m/s (291kn), 5000m (16404ft) -- passes all
       expect(entityPassesFilters(makeFlight({ originCountry: 'Iran', velocity: 150, altitude: 5000 }), filters)).toBe(true);
     });
 
     it('entity failing any one applicable filter is excluded', () => {
       const filters = {
         ...makeDefaults(),
-        selectedCountries: ['Iran'],
-        speedMin: 200,
-        speedMax: 400,
+        flightCountries: ['Iran'],
+        flightSpeedMin: 200,
+        flightSpeedMax: 400,
       };
-      // Turkey origin -- fails country filter even though speed is fine
       expect(entityPassesFilters(makeFlight({ originCountry: 'Turkey', velocity: 150 }), filters)).toBe(false);
     });
 
     it('flight fails when speed passes but altitude fails', () => {
       const filters = {
         ...makeDefaults(),
-        speedMin: 200,
-        speedMax: 400,
+        flightSpeedMin: 200,
+        flightSpeedMax: 400,
         altitudeMin: 10000,
         altitudeMax: 40000,
       };
-      // 150 m/s (291kn) passes speed, 2000m (6562ft) fails altitude
       expect(entityPassesFilters(makeFlight({ velocity: 150, altitude: 2000 }), filters)).toBe(false);
+    });
+
+    it('ships pass through flight-scoped filters', () => {
+      const filters = {
+        ...makeDefaults(),
+        flightCountries: ['Iran'],
+        flightSpeedMin: 200,
+        flightSpeedMax: 400,
+        altitudeMin: 10000,
+        altitudeMax: 40000,
+      };
+      expect(entityPassesFilters(makeShip(), filters)).toBe(true);
+    });
+
+    it('events pass through speed and altitude filters', () => {
+      const filters = {
+        ...makeDefaults(),
+        flightSpeedMin: 200,
+        flightSpeedMax: 400,
+        shipSpeedMin: 10,
+        shipSpeedMax: 25,
+        altitudeMin: 10000,
+        altitudeMax: 40000,
+      };
+      expect(entityPassesFilters(makeEvent(), filters)).toBe(true);
     });
   });
 

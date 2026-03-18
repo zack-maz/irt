@@ -8,6 +8,7 @@ export const FEET_PER_METER = 3.28084;
 
 /**
  * Pure predicate: returns true if the entity passes ALL active filters.
+ * Filters are entity-scoped: flight filters only affect flights, etc.
  * Non-applicable filters include (not exclude) the entity.
  * Unknown/null values pass through range filters.
  */
@@ -15,41 +16,53 @@ export function entityPassesFilters(
   entity: MapEntity,
   filters: FilterState,
 ): boolean {
-  // ── Country filter ──────────────────────────────────────────────────
-  if (filters.selectedCountries.length > 0) {
+  // ── Flight country filter ──────────────────────────────────────────
+  if (filters.flightCountries.length > 0) {
     if (entity.type === 'flight') {
       const origin = entity.data.originCountry.toLowerCase();
-      const match = filters.selectedCountries.some(
+      const match = filters.flightCountries.some(
         (c) => c.toLowerCase() === origin,
       );
       if (!match) return false;
-    } else if (isConflictEventType(entity.type)) {
+    }
+    // Ships and events: always pass flight country filter
+  }
+
+  // ── Event country filter ───────────────────────────────────────────
+  if (filters.eventCountries.length > 0) {
+    if (isConflictEventType(entity.type)) {
       const a1 = entity.data.actor1.toLowerCase();
       const a2 = entity.data.actor2.toLowerCase();
-      const match = filters.selectedCountries.some((c) => {
+      const match = filters.eventCountries.some((c) => {
         const cl = c.toLowerCase();
         return a1.includes(cl) || a2.includes(cl);
       });
       if (!match) return false;
     }
-    // Ships: always pass (no nationality in AIS)
+    // Flights and ships: always pass event country filter
   }
 
-  // ── Speed filter ────────────────────────────────────────────────────
-  if (filters.speedMin !== null || filters.speedMax !== null) {
+  // ── Flight speed filter ────────────────────────────────────────────
+  if (filters.flightSpeedMin !== null || filters.flightSpeedMax !== null) {
     if (entity.type === 'flight') {
       if (entity.data.velocity !== null) {
         const knots = entity.data.velocity * KNOTS_PER_MS;
-        if (filters.speedMin !== null && knots < filters.speedMin) return false;
-        if (filters.speedMax !== null && knots > filters.speedMax) return false;
+        if (filters.flightSpeedMin !== null && knots < filters.flightSpeedMin) return false;
+        if (filters.flightSpeedMax !== null && knots > filters.flightSpeedMax) return false;
       }
       // null velocity = unknown → pass through
-    } else if (entity.type === 'ship') {
-      const knots = entity.data.speedOverGround;
-      if (filters.speedMin !== null && knots < filters.speedMin) return false;
-      if (filters.speedMax !== null && knots > filters.speedMax) return false;
     }
-    // Conflict events: always pass (no speed data)
+    // Ships and events: always pass flight speed filter
+  }
+
+  // ── Ship speed filter ──────────────────────────────────────────────
+  if (filters.shipSpeedMin !== null || filters.shipSpeedMax !== null) {
+    if (entity.type === 'ship') {
+      const knots = entity.data.speedOverGround;
+      if (filters.shipSpeedMin !== null && knots < filters.shipSpeedMin) return false;
+      if (filters.shipSpeedMax !== null && knots > filters.shipSpeedMax) return false;
+    }
+    // Flights and events: always pass ship speed filter
   }
 
   // ── Altitude filter ─────────────────────────────────────────────────
