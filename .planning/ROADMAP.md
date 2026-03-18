@@ -243,6 +243,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Ship & Conflict Data Feeds | 0/2 | Not started | - |
 | 08.1. GDELT Event Source | 2/2 | Complete    | 2026-03-17 |
 | 9. Layer Controls & News Toggle | 0/2 | Not started | - |
-| 10. Detail Panel | 2/2 | Complete   | 2026-03-18 |
+| 10. Detail Panel | 2/2 | Complete    | 2026-03-18 |
 | 11. Smart Filters | 0/? | Not started | - |
 | 12. Analytics Dashboard | 0/? | Not started | - |
