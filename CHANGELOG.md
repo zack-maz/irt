@@ -4,6 +4,30 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v0.9.0] - 2026-03-17
+
+### Phase 9: Layer Controls & News Toggle
+
+#### Added
+- Layer toggles panel with 7 rows: Flights, Ground, Unidentified, Ships, Drones, Missiles, News
+- Toggle opacity dimming (40% when OFF) with smooth transitions and localStorage persistence
+- EntityTooltip component with per-type content (flight metadata, ship AIS data, GDELT event details)
+- News toggle gates event tooltips (drone/missile hover tooltips hidden when News OFF)
+- GDELT event deduplication by date/CAMEO code/location, keeping highest-mention row
+- StatusPanel counts reflect only visible entities filtered by toggle state and entity type
+- Zoom +/- controls enabled on NavigationControl
+- Hover glow (2x) and highlight (1.2x) layers for active entity feedback
+- 309 tests passing
+
+#### Fixed
+- Hover blink caused by glow/highlight layers intercepting picks (set pickable: false)
+- Hover blink caused by active entity alpha=0 breaking deck.gl picking (keep full opacity)
+- Duplicate GDELT markers for same real-world event with different actor fields
+
+#### Changed
+- "Pulse" toggle renamed to "Unidentified" for clarity
+- showNews defaults to true (News ON by default)
+
 ## [v0.4.0] - 2026-03-15
 
 ### Phase 4: Flight Data Feed

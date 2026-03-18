@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of Iran with CARTO Dark Matter tiles, 3D terrain (AWS Terrarium DEM), compass control, coordinate readout, scale bar, vignette effect, and ripple loading animation. Express API proxy serving normalized data from OpenSky, AISStream, and ACLED. Live flight data feed with 5s polling, tab-aware pause/resume, and connection health tracking. 82 tests passing.
+Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), and conflict events (GDELT). Layer toggles, entity tooltips with GDELT metadata, hover/click highlighting, and a real-time status HUD. 309 tests passing.
 
-**Next up:** Entity rendering — type-specific markers on the map.
+**Next up:** Detail panel — click-to-inspect with live stats.
 
 ## Tech Stack
 
@@ -26,7 +26,7 @@ Interactive 2.5D map of Iran with CARTO Dark Matter tiles, 3D terrain (AWS Terra
 | State | Zustand 5 |
 | Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
 | Backend | Express 5 (API proxy, port 3001) |
-| Data Sources | OpenSky Network, AISStream.io, ACLED |
+| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2 |
 | Testing | Vitest + Testing Library |
 
 ## Project Structure
@@ -64,7 +64,7 @@ server/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (82 tests)
+npx vitest run              # Run all tests (309 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode

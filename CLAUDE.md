@@ -36,7 +36,9 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - `src/components/map/constants.ts` — map configuration (terrain, bounds, styles)
 - `src/components/map/BaseMap.tsx` — main map component with all overlays
 - `src/components/layout/AppShell.tsx` — root layout shell (wires all three polling hooks)
-- `src/components/ui/StatusPanel.tsx` — HUD status panel (flights/ships/events counts + connection dots)
+- `src/components/ui/StatusPanel.tsx` — HUD status panel (visible entity counts + connection dots)
+- `src/components/layout/LayerTogglesSlot.tsx` — layer toggle panel (7 rows)
+- `src/components/map/EntityTooltip.tsx` — hover/click tooltip for all entity types
 - `src/stores/mapStore.ts` — map state (loaded, cursor position)
 - `src/stores/uiStore.ts` — UI state (panels, toggles)
 - `src/stores/flightStore.ts` — flight data state (entities, connection health, metadata)
@@ -92,3 +94,18 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **FIPS codes** — GDELT uses FIPS 10-4 (IZ=Iraq, TU=Turkey, IS=Israel), not ISO
 - **adm-zip** — required for ZIP decompression (Node zlib only handles gzip/deflate)
 - **No UI toggle** — GDELT is the only active event source, no switching exposed
+- **Deduplication** — GDELT rows deduplicated by date+CAMEO+lat/lng, keeping highest NumMentions row
+
+## Layer Controls & Tooltips (Phase 9)
+
+- **LayerTogglesSlot** — `src/components/layout/LayerTogglesSlot.tsx`, 7 toggle rows in OverlayPanel
+- **Toggle rows** — Flights, Ground (indented), Unidentified (indented), Ships, Drones, Missiles, News
+- **Toggle behavior** — opacity dims to 40% when OFF, smooth transition, persisted to localStorage
+- **Layer visibility** — `useEntityLayers` sets `visible` prop per toggle; ground/airborne filtering in `useMemo`
+- **News toggle** — gates event tooltips in BaseMap (showNews OFF hides drone/missile tooltips, flights/ships unaffected)
+- **EntityTooltip** — `src/components/map/EntityTooltip.tsx`, renders per-type content (flight metadata, ship AIS, GDELT event data with source link)
+- **Hover/highlight** — glow (2x, alpha 60) + highlight (1.2x, full alpha) layers with `pickable: false` to prevent blink
+- **Active entity dimming** — non-active entities dim to alpha 80; active entity stays full opacity (no alpha=0)
+- **StatusPanel counts** — derived from actual entity arrays filtered by toggle state and entity type
+- **showNews default** — `true` (News ON by default)
+- **Zoom controls** — NavigationControl showZoom enabled

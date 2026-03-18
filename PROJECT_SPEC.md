@@ -17,7 +17,7 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 | State | Zustand 5 (curried create pattern) |
 | Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
 | Backend | Express 5 (API proxy, port 3001) |
-| Data Sources | OpenSky Network (OAuth2), AISStream.io (WebSocket), ACLED |
+| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2 |
 | Testing | Vitest + Testing Library |
 | Dev Tooling | tsx watch (server), concurrently (parallel dev) |
 
@@ -94,13 +94,13 @@ interface MapEntityBase {
 1. **Project Scaffolding & Theme** — Dark-themed React/Vite shell ✓
 2. **Base Map** — Interactive 2.5D map centered on Iran ✓
 3. **API Proxy** — Express backend for CORS + API key management ✓
-4. **Flight Data Feed** — Live flight tracking (~15s refresh)
-5. **Entity Rendering** — Type-specific markers on map
-6. **Ship & Conflict Data Feeds** — AIS ships + ACLED events
-7. **Layer Controls & News Toggle** — Category visibility toggles
-8. **Detail Panel** — Click-to-inspect with live stats
-9. **Smart Filters** — Multi-criteria filtering (nationality, speed, altitude, etc.)
-10. **Analytics Dashboard** — Running counters for strikes, sorties, intercepts
+4. **Flight Data Feed** — Live flight tracking (multi-source) ✓
+5. **Entity Rendering** — Type-specific markers on map ✓
+6. **Multi-Source Flight Data** — OpenSky, ADS-B Exchange, adsb.lol ✓
+7. **StatusPanel & Source Config** — HUD with health dots ✓
+8. **Ship & Conflict Data** — AIS ships + GDELT events ✓
+9. **Layer Controls & News Toggle** — Category toggles, entity tooltips ✓
+10. **Detail Panel** — Click-to-inspect with live stats
 
 ## Constraints
 
