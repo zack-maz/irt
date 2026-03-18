@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 8: Ship & Conflict Data Feeds** - AIS ship tracking and ACLED conflict event data
 - [ ] **Phase 9: Layer Controls & News Toggle** - Layer visibility toggles and news content control
 - [x] **Phase 10: Detail Panel** - Click-to-inspect panel showing live entity stats (completed 2026-03-18)
-- [ ] **Phase 11: Smart Filters** - Advanced filtering by nationality, speed, altitude, proximity, date range
+- [x] **Phase 11: Smart Filters** - Advanced filtering by nationality, speed, altitude, proximity, date range (completed 2026-03-18)
 - [ ] **Phase 12: Analytics Dashboard** - Running counters for strikes, sorties, and intercepts
 
 ## Phase Details
@@ -209,9 +209,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Filter store, types, haversine utility, pure filter predicate with TDD
-- [ ] 11-02-PLAN.md — useFilteredEntities hook, useEntityLayers refactor, StatusPanel filter awareness, proximity circle layer
-- [ ] 11-03-PLAN.md — Filter panel UI (country, speed, altitude, proximity, date), BaseMap pin placement, AppShell wiring
+- [x] 11-01-PLAN.md — Filter store, types, haversine utility, pure filter predicate with TDD
+- [x] 11-02-PLAN.md — useFilteredEntities hook, useEntityLayers refactor, StatusPanel filter awareness, proximity circle layer
+- [x] 11-03-PLAN.md — Filter panel UI (country, speed, altitude, proximity, date), BaseMap pin placement, AppShell wiring
 
 ### Phase 12: Analytics Dashboard
 **Goal**: Users see running numerical counters that summarize conflict activity at a glance
@@ -245,5 +245,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 08.1. GDELT Event Source | 2/2 | Complete    | 2026-03-17 |
 | 9. Layer Controls & News Toggle | 0/2 | Not started | - |
 | 10. Detail Panel | 2/2 | Complete    | 2026-03-18 |
-| 11. Smart Filters | 2/3 | In Progress|  |
+| 11. Smart Filters | 3/3 | Complete | 2026-03-18 |
 | 12. Analytics Dashboard | 0/? | Not started | - |
