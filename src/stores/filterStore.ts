@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useUIStore } from '@/stores/uiStore';
 
 export interface ProximityPin {
   lat: number;
@@ -6,6 +7,25 @@ export interface ProximityPin {
 }
 
 export type FilterKey = 'flightCountry' | 'eventCountry' | 'flightSpeed' | 'shipSpeed' | 'altitude' | 'proximity' | 'date';
+
+export type Granularity = 'minute' | 'hour' | 'day';
+
+export interface SavedToggles {
+  showFlights: boolean;
+  showGroundTraffic: boolean;
+  pulseEnabled: boolean;
+  showShips: boolean;
+}
+
+const STEP_MS: Record<Granularity, number> = {
+  minute: 60 * 1000,
+  hour: 60 * 60 * 1000,
+  day: 24 * 60 * 60 * 1000,
+};
+
+function snapToStep(ts: number, step: number): number {
+  return Math.floor(ts / step) * step;
+}
 
 export interface FilterState {
   // State
@@ -22,6 +42,8 @@ export interface FilterState {
   dateStart: number | null;
   dateEnd: number | null;
   isSettingPin: boolean;
+  granularity: Granularity;
+  savedToggles: SavedToggles | null;
 
   // Actions
   setFlightCountries: (countries: string[]) => void;
@@ -37,6 +59,8 @@ export interface FilterState {
   setProximityRadius: (km: number) => void;
   setDateRange: (start: number | null, end: number | null) => void;
   setSettingPin: (v: boolean) => void;
+  setGranularity: (g: Granularity) => void;
+  isCustomRangeActive: () => boolean;
   clearFilter: (filter: FilterKey) => void;
   clearAll: () => void;
   activeFilterCount: () => number;
@@ -56,6 +80,8 @@ const DEFAULTS = {
   dateStart: null as number | null,
   dateEnd: null as number | null,
   isSettingPin: false,
+  granularity: 'hour' as Granularity,
+  savedToggles: null as SavedToggles | null,
 };
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
@@ -97,9 +123,51 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
 
   setProximityRadius: (km) => set({ proximityRadiusKm: km }),
 
-  setDateRange: (start, end) => set({ dateStart: start, dateEnd: end }),
+  setDateRange: (start, end) => {
+    const prev = get();
+    set({ dateStart: start, dateEnd: end });
+
+    // Auto-activate: end went from null to non-null
+    if (end !== null && prev.savedToggles === null) {
+      const ui = useUIStore.getState();
+      set({
+        savedToggles: {
+          showFlights: ui.showFlights,
+          showGroundTraffic: ui.showGroundTraffic,
+          pulseEnabled: ui.pulseEnabled,
+          showShips: ui.showShips,
+        },
+      });
+      useUIStore.setState({
+        showFlights: false,
+        showGroundTraffic: false,
+        pulseEnabled: false,
+        showShips: false,
+      });
+    }
+
+    // Auto-deactivate: end went from non-null to null
+    if (end === null && prev.savedToggles !== null) {
+      useUIStore.setState({ ...prev.savedToggles });
+      set({ savedToggles: null });
+    }
+  },
 
   setSettingPin: (v) => set({ isSettingPin: v }),
+
+  setGranularity: (g) => {
+    const { dateStart, dateEnd } = get();
+    const step = STEP_MS[g];
+    let newStart = dateStart !== null ? snapToStep(dateStart, step) : null;
+    let newEnd = dateEnd !== null ? snapToStep(dateEnd, step) : null;
+    // Clamp start to end if snapping reversed them
+    if (newStart !== null && newEnd !== null && newStart > newEnd) {
+      newStart = newEnd;
+    }
+    set({ granularity: g, dateStart: newStart, dateEnd: newEnd });
+  },
+
+  isCustomRangeActive: () => get().savedToggles !== null,
 
   clearFilter: (filter) => {
     switch (filter) {
@@ -121,13 +189,24 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       case 'proximity':
         set({ proximityPin: null, proximityRadiusKm: 100 });
         break;
-      case 'date':
-        set({ dateStart: null, dateEnd: null });
+      case 'date': {
+        const { savedToggles } = get();
+        if (savedToggles !== null) {
+          useUIStore.setState({ ...savedToggles });
+        }
+        set({ dateStart: null, dateEnd: null, savedToggles: null });
         break;
+      }
     }
   },
 
-  clearAll: () => set({ ...DEFAULTS }),
+  clearAll: () => {
+    const { savedToggles } = get();
+    if (savedToggles !== null) {
+      useUIStore.setState({ ...savedToggles });
+    }
+    set({ ...DEFAULTS });
+  },
 
   activeFilterCount: () => {
     const s = get();

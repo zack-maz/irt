@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useFilterStore } from '@/stores/filterStore';
+import { useUIStore } from '@/stores/uiStore';
 
 describe('filterStore', () => {
   beforeEach(() => {
@@ -49,6 +50,14 @@ describe('filterStore', () => {
 
     it('isSettingPin defaults to false', () => {
       expect(useFilterStore.getState().isSettingPin).toBe(false);
+    });
+
+    it('granularity defaults to hour', () => {
+      expect(useFilterStore.getState().granularity).toBe('hour');
+    });
+
+    it('savedToggles defaults to null', () => {
+      expect(useFilterStore.getState().savedToggles).toBeNull();
     });
   });
 
@@ -244,6 +253,123 @@ describe('filterStore', () => {
       expect(s.dateStart).toBeNull();
       expect(s.dateEnd).toBeNull();
       expect(s.isSettingPin).toBe(false);
+    });
+  });
+
+  describe('granularity', () => {
+    it('setGranularity updates granularity', () => {
+      useFilterStore.getState().setGranularity('minute');
+      expect(useFilterStore.getState().granularity).toBe('minute');
+    });
+
+    it('setGranularity snaps dateStart to new step boundary', () => {
+      // Set a dateStart at an odd timestamp
+      const oddTs = Date.UTC(2026, 2, 10, 14, 37, 22); // Mar 10 14:37:22
+      useFilterStore.getState().setDateRange(oddTs, null);
+      useFilterStore.getState().setGranularity('hour');
+      const s = useFilterStore.getState();
+      // Should snap to Mar 10 14:00:00 (floor to hour)
+      expect(s.dateStart).toBe(Date.UTC(2026, 2, 10, 14, 0, 0));
+    });
+
+    it('setGranularity snaps dateEnd to new step boundary', () => {
+      const oddTs = Date.UTC(2026, 2, 10, 14, 37, 22);
+      useFilterStore.getState().setDateRange(null, oddTs);
+      useFilterStore.getState().setGranularity('day');
+      const s = useFilterStore.getState();
+      // Should snap to Mar 10 00:00:00 (floor to day)
+      expect(s.dateEnd).toBe(Date.UTC(2026, 2, 10, 0, 0, 0));
+    });
+
+    it('setGranularity clamps start to end if snapping makes start > end', () => {
+      const start = Date.UTC(2026, 2, 10, 23, 30, 0);
+      const end = Date.UTC(2026, 2, 10, 23, 45, 0);
+      useFilterStore.getState().setDateRange(start, end);
+      // Switching to day: start snaps to Mar 10, end snaps to Mar 10 — equal is fine
+      useFilterStore.getState().setGranularity('day');
+      const s = useFilterStore.getState();
+      expect(s.dateStart! <= s.dateEnd!).toBe(true);
+    });
+  });
+
+  describe('custom range activation', () => {
+    beforeEach(() => {
+      // Reset uiStore toggles to known state
+      useUIStore.setState({
+        showFlights: true,
+        showGroundTraffic: false,
+        pulseEnabled: true,
+        showShips: true,
+      });
+    });
+
+    it('setDateRange with non-null end auto-activates custom range', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      expect(useFilterStore.getState().savedToggles).not.toBeNull();
+    });
+
+    it('activating custom range snapshots and suppresses flight/ship toggles', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      // uiStore toggles should be suppressed
+      const ui = useUIStore.getState();
+      expect(ui.showFlights).toBe(false);
+      expect(ui.showGroundTraffic).toBe(false);
+      expect(ui.pulseEnabled).toBe(false);
+      expect(ui.showShips).toBe(false);
+      // Snapshot should contain original values
+      const saved = useFilterStore.getState().savedToggles;
+      expect(saved).toEqual({
+        showFlights: true,
+        showGroundTraffic: false,
+        pulseEnabled: true,
+        showShips: true,
+      });
+    });
+
+    it('setDateRange with null end auto-deactivates and restores toggles', () => {
+      useFilterStore.getState().setDateRange(1000, 2000); // activate
+      useFilterStore.getState().setDateRange(1000, null); // deactivate
+      expect(useFilterStore.getState().savedToggles).toBeNull();
+      const ui = useUIStore.getState();
+      expect(ui.showFlights).toBe(true);
+      expect(ui.showGroundTraffic).toBe(false);
+      expect(ui.pulseEnabled).toBe(true);
+      expect(ui.showShips).toBe(true);
+    });
+
+    it('moving start handle while custom range active does not re-snapshot', () => {
+      useFilterStore.getState().setDateRange(1000, 2000); // activate
+      // Manually change a toggle to verify snapshot is not overwritten
+      useUIStore.setState({ showFlights: true }); // would be different if re-snapshotted
+      useFilterStore.getState().setDateRange(500, 2000); // move start only
+      const saved = useFilterStore.getState().savedToggles;
+      // Still original snapshot
+      expect(saved?.showFlights).toBe(true);
+    });
+
+    it('isCustomRangeActive returns true when savedToggles is not null', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      expect(useFilterStore.getState().isCustomRangeActive()).toBe(true);
+    });
+
+    it('isCustomRangeActive returns false when savedToggles is null', () => {
+      expect(useFilterStore.getState().isCustomRangeActive()).toBe(false);
+    });
+
+    it('clearFilter(date) deactivates custom range and restores toggles', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      useFilterStore.getState().clearFilter('date');
+      expect(useFilterStore.getState().savedToggles).toBeNull();
+      expect(useUIStore.getState().showFlights).toBe(true);
+      expect(useUIStore.getState().showShips).toBe(true);
+    });
+
+    it('clearAll deactivates custom range and restores toggles', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      useFilterStore.getState().clearAll();
+      expect(useFilterStore.getState().savedToggles).toBeNull();
+      expect(useUIStore.getState().showFlights).toBe(true);
+      expect(useUIStore.getState().showShips).toBe(true);
     });
   });
 
