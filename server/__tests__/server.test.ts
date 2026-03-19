@@ -44,6 +44,7 @@ vi.mock('../adapters/adsb-lol.js', () => ({
 
 vi.mock('../adapters/gdelt.js', () => ({
   fetchEvents: vi.fn(async () => []),
+  backfillEvents: vi.fn(async () => []),
 }));
 
 vi.mock('../adapters/acled.js', () => ({

@@ -252,3 +252,86 @@ export async function fetchEvents(): Promise<ConflictEventEntity[]> {
   );
   return events;
 }
+
+const GDELT_MASTER_URL =
+  'http://data.gdeltproject.org/gdeltv2/masterfilelist.txt';
+
+/**
+ * Build a YYYYMMDD string from a UTC timestamp (ms).
+ */
+function toGdeltDateStr(ts: number): string {
+  const d = new Date(ts);
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}${mm}${dd}`;
+}
+
+/**
+ * Fetch and parse the GDELT master file list, returning export ZIP URLs
+ * for all 15-minute intervals within the given date range [fromTs, toTs].
+ */
+async function getMasterUrls(fromTs: number, toTs: number): Promise<string[]> {
+  const res = await fetch(GDELT_MASTER_URL);
+  if (!res.ok) {
+    throw new Error(`GDELT masterfilelist.txt failed: ${res.status}`);
+  }
+  const text = await res.text();
+  const fromStr = toGdeltDateStr(fromTs);
+  const toStr = toGdeltDateStr(toTs);
+
+  const urls: string[] = [];
+  for (const line of text.trim().split('\n')) {
+    if (!line.includes('.export.CSV.zip')) continue;
+    const parts = line.trim().split(' ');
+    const url = parts[2];
+    if (!url) continue;
+    // Extract YYYYMMDD from filename like 20260228153000.export.CSV.zip
+    const match = url.match(/\/(\d{8})\d{6}\.export/);
+    if (!match) continue;
+    const dateStr = match[1];
+    if (dateStr >= fromStr && dateStr <= toStr) {
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+/**
+ * Fetch GDELT v2 events for the past `days` days by downloading all
+ * 15-minute export files from the master list in that window.
+ * Returns deduplicated, normalized ConflictEventEntity[].
+ */
+export async function backfillEvents(days: number): Promise<ConflictEventEntity[]> {
+  const toTs = Date.now();
+  const fromTs = toTs - days * 24 * 60 * 60 * 1000;
+  const start = Date.now();
+
+  console.log(`[gdelt] backfill: fetching master file list for ${days} days`);
+  const urls = await getMasterUrls(fromTs, toTs);
+  console.log(`[gdelt] backfill: found ${urls.length} export files`);
+
+  // Merge-dedup across all fetched CSVs using a Map keyed by entity id
+  const merged = new Map<string, ConflictEventEntity>();
+
+  // Fetch files sequentially to be respectful of GDELT's free service
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      const csv = await downloadAndUnzip(urls[i]);
+      const events = parseAndFilter(csv);
+      for (const e of events) {
+        if (!merged.has(e.id)) {
+          merged.set(e.id, e);
+        }
+      }
+    } catch (err) {
+      console.warn(`[gdelt] backfill: skipped ${urls[i]}: ${(err as Error).message}`);
+    }
+  }
+
+  const result = Array.from(merged.values());
+  console.log(
+    `[gdelt] backfill: loaded ${result.length} events from ${urls.length} files in ${Date.now() - start}ms`,
+  );
+  return result;
+}
