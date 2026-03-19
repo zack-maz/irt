@@ -102,6 +102,9 @@ export function FilterPanelSlot() {
   const clearFilter = useFilterStore((s) => s.clearFilter);
   const clearAll = useFilterStore((s) => s.clearAll);
   const activeFilterCount = useFilterStore((s) => s.activeFilterCount);
+  const granularity = useFilterStore((s) => s.granularity);
+  const setGranularity = useFilterStore((s) => s.setGranularity);
+  const customRangeActive = useFilterStore((s) => s.savedToggles !== null);
 
   const activeCount = activeFilterCount();
 
@@ -270,7 +273,10 @@ export function FilterPanelSlot() {
                         <DateRangeFilter
                           dateStart={dateStart}
                           dateEnd={dateEnd}
+                          granularity={granularity}
+                          isCustomRangeActive={customRangeActive}
                           onDateRange={setDateRange}
+                          onGranularity={setGranularity}
                         />
                       </div>
                     </div>
