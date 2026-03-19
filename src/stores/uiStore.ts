@@ -83,7 +83,12 @@ export const useUIStore = create<UIState>()((set, get) => ({
     persistToggles(getToggles(get()));
   },
   toggleEvents: () => {
-    set((s) => ({ showEvents: !s.showEvents }));
+    const wasOff = !get().showEvents;
+    if (wasOff) {
+      set({ showEvents: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true });
+    } else {
+      set({ showEvents: false });
+    }
     persistToggles(getToggles(get()));
   },
   toggleAirstrikes: () => {

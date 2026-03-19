@@ -161,6 +161,53 @@ describe('uiStore layer toggles', () => {
       expect(useUIStore.getState().showTargeted).toBe(true);
     });
 
+    it('toggleEvents ON fans out to enable all sub-toggles', () => {
+      // Start with events OFF and sub-toggles OFF
+      useUIStore.setState({
+        showEvents: false,
+        showAirstrikes: false,
+        showGroundCombat: false,
+        showTargeted: false,
+      });
+      useUIStore.getState().toggleEvents(); // turns ON
+      const s = useUIStore.getState();
+      expect(s.showEvents).toBe(true);
+      expect(s.showAirstrikes).toBe(true);
+      expect(s.showGroundCombat).toBe(true);
+      expect(s.showTargeted).toBe(true);
+    });
+
+    it('toggleEvents ON fan-out persists all sub-toggles to localStorage', () => {
+      useUIStore.setState({
+        showEvents: false,
+        showAirstrikes: false,
+        showGroundCombat: false,
+        showTargeted: false,
+      });
+      useUIStore.getState().toggleEvents();
+      const stored = JSON.parse(storageMock[STORAGE_KEY]);
+      expect(stored.showEvents).toBe(true);
+      expect(stored.showAirstrikes).toBe(true);
+      expect(stored.showGroundCombat).toBe(true);
+      expect(stored.showTargeted).toBe(true);
+    });
+
+    it('toggleEvents OFF does not change sub-toggles', () => {
+      useUIStore.setState({
+        showEvents: true,
+        showAirstrikes: true,
+        showGroundCombat: false,
+        showTargeted: true,
+      });
+      useUIStore.getState().toggleEvents(); // turns OFF
+      const s = useUIStore.getState();
+      expect(s.showEvents).toBe(false);
+      // Sub-toggles unchanged
+      expect(s.showAirstrikes).toBe(true);
+      expect(s.showGroundCombat).toBe(false);
+      expect(s.showTargeted).toBe(true);
+    });
+
   });
 
   describe('localStorage persistence', () => {
