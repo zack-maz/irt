@@ -42,9 +42,9 @@
 **Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 13-01-PLAN.md — Redis cache module + flights route migration
-- [ ] 13-02-PLAN.md — AISStream on-demand rewrite + ships route migration
-- [ ] 13-03-PLAN.md — Events route Redis accumulator + server cleanup
+- [x] 13-01-PLAN.md — Redis cache module + flights route migration
+- [x] 13-02-PLAN.md — AISStream on-demand rewrite + ships route migration
+- [x] 13-03-PLAN.md — Events route Redis accumulator + server cleanup
 
 ### Phase 14: Vercel Deployment
 **Goal**: Deploy the application to Vercel with serverless functions
@@ -72,5 +72,5 @@ Plans:
 | 10. Detail Panel | v0.9 | 2/2 | Complete | 2026-03-18 |
 | 11. Smart Filters | v0.9 | 3/3 | Complete | 2026-03-18 |
 | 12. Analytics Dashboard | v0.9 | 1/1 | Complete | 2026-03-19 |
-| 13. Serverless Cache Migration | 3/3 | Complete   | 2026-03-20 | - |
+| 13. Serverless Cache Migration | v1.0 | 3/3 | Complete | 2026-03-20 |
 | 14. Vercel Deployment | v1.0 | 0/0 | Not started | - |
