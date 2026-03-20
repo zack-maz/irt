@@ -80,6 +80,26 @@ describe('FilterPanelSlot', () => {
     expect(screen.getByTestId('filter-panel-slot')).toBeInTheDocument();
   });
 
+  it('shows "Showing last 24h" label when default window is active and Events expanded', () => {
+    useUIStore.setState({ isFiltersCollapsed: false, isEventFiltersOpen: true });
+    // Default state: dateStart=null, dateEnd=null -> isDefaultWindowActive=true
+    render(<FilterPanelSlot />);
+    expect(screen.getByText('Showing last 24h')).toBeInTheDocument();
+  });
+
+  it('hides "Showing last 24h" label when custom date range is set', () => {
+    useUIStore.setState({ isFiltersCollapsed: false, isEventFiltersOpen: true });
+    useFilterStore.setState({ dateStart: Date.now() - 86400000 });
+    render(<FilterPanelSlot />);
+    expect(screen.queryByText('Showing last 24h')).not.toBeInTheDocument();
+  });
+
+  it('hides "Showing last 24h" label when Events section is collapsed', () => {
+    useUIStore.setState({ isFiltersCollapsed: false, isEventFiltersOpen: false });
+    render(<FilterPanelSlot />);
+    expect(screen.queryByText('Showing last 24h')).not.toBeInTheDocument();
+  });
+
   it('update filter field names: flightCountries, eventCountries are used', () => {
     useFilterStore.setState({ flightCountries: ['Iran'], eventCountries: ['ISRAEL'] });
     useUIStore.setState({ isFiltersCollapsed: false });

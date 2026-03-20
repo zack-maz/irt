@@ -105,6 +105,7 @@ export function FilterPanelSlot() {
   const granularity = useFilterStore((s) => s.granularity);
   const setGranularity = useFilterStore((s) => s.setGranularity);
   const customRangeActive = useFilterStore((s) => s.savedToggles !== null);
+  const isDefaultWindowActive = useFilterStore((s) => s.isDefaultWindowActive)();
 
   const activeCount = activeFilterCount();
 
@@ -269,6 +270,9 @@ export function FilterPanelSlot() {
                     </div>
                     <div>
                       <SectionHeader label="Date Range" active={isDateActive} filterKey="date" onClear={clearFilter} />
+                      {isDefaultWindowActive && (
+                        <div className="mt-0.5 text-[10px] italic text-text-muted">Showing last 24h</div>
+                      )}
                       <div className="mt-1">
                         <DateRangeFilter
                           dateStart={dateStart}
