@@ -24,7 +24,7 @@ const SITE_ICON_MAP: Record<string, string> = {
   naval: 'siteNaval',
   oil: 'siteOil',
   airbase: 'siteAirbase',
-  dam: 'siteDam',
+  desalination: 'siteDesalination',
   port: 'sitePort',
 };
 
@@ -43,12 +43,12 @@ function getIconForEntity(entity: MapEntity | SiteEntity): string {
   }
 }
 
-function getColorForEntity(entity: MapEntity | SiteEntity): [number, number, number] {
+function getColorForEntity(entity: MapEntity | SiteEntity, attackMap?: Map<string, boolean>): [number, number, number] {
   switch (entity.type) {
     case 'flight': return (entity as FlightEntity).data.unidentified
       ? [...ENTITY_COLORS.flightUnidentified] : [...ENTITY_COLORS.flight];
     case 'ship': return [...ENTITY_COLORS.ship];
-    case 'site': return [...ENTITY_COLORS.siteHealthy];
+    case 'site': return (attackMap?.get(entity.id) ? [...ENTITY_COLORS.siteAttacked] : [...ENTITY_COLORS.siteHealthy]);
     case 'airstrike': return [...ENTITY_COLORS.airstrike];
     case 'ground_combat':
     case 'shelling':
@@ -93,8 +93,9 @@ export function useEntityLayers() {
   const showNaval = useUIStore((s) => s.showNaval);
   const showOil = useUIStore((s) => s.showOil);
   const showAirbase = useUIStore((s) => s.showAirbase);
-  const showDam = useUIStore((s) => s.showDam);
+  const showDesalination = useUIStore((s) => s.showDesalination);
   const showPort = useUIStore((s) => s.showPort);
+  const showHitOnly = useUIStore((s) => s.showHitOnly);
   const selectedEntityId = useUIStore((s) => s.selectedEntityId);
   const hoveredEntityId = useUIStore((s) => s.hoveredEntityId);
 
@@ -128,8 +129,8 @@ export function useEntityLayers() {
     events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)),
     [events]);
 
-  // Visible sites filtered by sub-toggles
-  const visibleSites = useMemo(() => {
+  // Sites filtered by type sub-toggles
+  const toggleFilteredSites = useMemo(() => {
     if (!showSites) return [];
     return sites.filter(s => {
       switch (s.siteType) {
@@ -137,21 +138,27 @@ export function useEntityLayers() {
         case 'naval': return showNaval;
         case 'oil': return showOil;
         case 'airbase': return showAirbase;
-        case 'dam': return showDam;
+        case 'desalination': return showDesalination;
         case 'port': return showPort;
       }
     });
-  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDam, showPort]);
+  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort]);
 
-  // Compute attack status for all visible sites
+  // Compute attack status for all toggle-filtered sites
   const siteAttackMap = useMemo(() => {
     const map = new Map<string, boolean>();
-    for (const site of visibleSites) {
+    for (const site of toggleFilteredSites) {
       const status = computeAttackStatus(site, allEvents, dateStart, dateEnd);
       map.set(site.id, status.isAttacked);
     }
     return map;
-  }, [visibleSites, allEvents, dateStart, dateEnd]);
+  }, [toggleFilteredSites, allEvents, dateStart, dateEnd]);
+
+  // Apply hit-only filter: when enabled, only show attacked sites
+  const visibleSites = useMemo(() => {
+    if (!showHitOnly) return toggleFilteredSites;
+    return toggleFilteredSites.filter(s => siteAttackMap.get(s.id));
+  }, [toggleFilteredSites, showHitOnly, siteAttackMap]);
 
   // Pulse animation state
   const [pulseOpacity, setPulseOpacity] = useState(1.0);
@@ -372,10 +379,10 @@ export function useEntityLayers() {
     sizeMinPixels: ICON_SIZE.flight.minPixels * 2.0,
     sizeMaxPixels: ICON_SIZE.flight.maxPixels * 2.0,
     getAngle: (d: AnyEntity) => getAngleForEntity(d),
-    getColor: (d: AnyEntity) => [...getColorForEntity(d), 60],
+    getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 60],
     billboard: false,
     pickable: false,
-  }), [activeEntity]);
+  }), [activeEntity, siteAttackMap]);
 
   // Highlight layer for active entity
   const highlightLayer = useMemo(() => new IconLayer<AnyEntity>({
@@ -391,10 +398,10 @@ export function useEntityLayers() {
     sizeMinPixels: ICON_SIZE.flight.minPixels * 1.2,
     sizeMaxPixels: ICON_SIZE.flight.maxPixels * 1.2,
     getAngle: (d: AnyEntity) => getAngleForEntity(d),
-    getColor: (d: AnyEntity) => [...getColorForEntity(d), 255],
+    getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 255],
     billboard: false,
     pickable: false,
-  }), [activeEntity]);
+  }), [activeEntity, siteAttackMap]);
 
   return [proximityCircleLayer, shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, siteLayer, glowLayer, highlightLayer];
 }

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
+import { useSiteStore } from '@/stores/siteStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { StatusPanel } from '@/components/ui/StatusPanel';
@@ -43,11 +44,12 @@ describe('StatusPanel', () => {
     useFlightStore.setState({ connectionStatus: 'connected', flights: [], flightCount: 0 });
     useShipStore.setState({ connectionStatus: 'connected', ships: [], shipCount: 0 });
     useEventStore.setState({ connectionStatus: 'connected', events: [], eventCount: 0 });
-    useUIStore.setState({ showFlights: true, showGroundTraffic: false, showShips: true, showEvents: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true });
+    useSiteStore.setState({ connectionStatus: 'idle', sites: [], siteCount: 0 });
+    useUIStore.setState({ showFlights: true, showGroundTraffic: false, showShips: true, showEvents: true, showAirstrikes: true, showGroundCombat: true, showTargeted: true, showSites: true });
     useFilterStore.setState({ flightCountries: [], eventCountries: [], flightSpeedMin: null, flightSpeedMax: null, shipSpeedMin: null, shipSpeedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: null, dateEnd: null, isSettingPin: false });
   });
 
-  it('renders three feed lines (flights, ships, events)', () => {
+  it('renders four feed lines (flights, ships, events, sites)', () => {
     useFlightStore.setState({ flights: airborne, flightCount: 3 });
     const ships = Array.from({ length: 5 }, (_, i) => makeShip(`s${i}`, 100000 + i));
     useShipStore.setState({ ships, shipCount: 5 });
@@ -87,12 +89,13 @@ describe('StatusPanel', () => {
 
   it('shows gray pulsing dot and dash for loading status', () => {
     useFlightStore.setState({ connectionStatus: 'loading', flights: [], flightCount: 0 });
+    useSiteStore.setState({ connectionStatus: 'connected', sites: [], siteCount: 0 });
     render(<StatusPanel />);
 
     const dot = screen.getByTestId('status-dot-flights');
     expect(dot.className).toContain('bg-text-muted');
     expect(dot.className).toContain('animate-pulse');
-    expect(screen.getByText('\u2014')).toBeInTheDocument();
+    expect(screen.getAllByText('\u2014').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows red dot for rate_limited status', () => {

@@ -81,7 +81,7 @@ export interface CacheResponse<T> {
   lastFresh: number; // Unix ms of last successful fetch
 }
 
-export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'dam' | 'port';
+export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'desalination' | 'port';
 
 export interface SiteEntity {
   id: string; // "site-{osmId}"

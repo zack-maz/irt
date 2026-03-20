@@ -28,12 +28,13 @@ describe('Entity Layer Constants', () => {
     it('targeted is dark red', () => { expect(ENTITY_COLORS.targeted).toEqual([139, 30, 30]); });
   });
   describe('ICON_SIZE', () => {
-    const expected = { meters: 8000, minPixels: 24, maxPixels: 160 };
-    it('flight', () => { expect(ICON_SIZE.flight).toEqual(expected); });
-    it('ship', () => { expect(ICON_SIZE.ship).toEqual(expected); });
-    it('airstrike', () => { expect(ICON_SIZE.airstrike).toEqual(expected); });
-    it('groundCombat', () => { expect(ICON_SIZE.groundCombat).toEqual(expected); });
-    it('targeted', () => { expect(ICON_SIZE.targeted).toEqual(expected); });
+    const movingExpected = { meters: 4000, minPixels: 24, maxPixels: 160 };
+    const eventExpected = { meters: 3000, minPixels: 16, maxPixels: 120 };
+    it('flight', () => { expect(ICON_SIZE.flight).toEqual(movingExpected); });
+    it('ship', () => { expect(ICON_SIZE.ship).toEqual(movingExpected); });
+    it('airstrike', () => { expect(ICON_SIZE.airstrike).toEqual(eventExpected); });
+    it('groundCombat', () => { expect(ICON_SIZE.groundCombat).toEqual(eventExpected); });
+    it('targeted', () => { expect(ICON_SIZE.targeted).toEqual(eventExpected); });
   });
   describe('PULSE_CONFIG', () => {
     it('has correct config', () => {
@@ -45,7 +46,7 @@ describe('Entity Layer Constants', () => {
 });
 
 describe('Icon Mapping', () => {
-  const expectedKeys = ['chevron', 'chevronGround', 'crosshair', 'diamond', 'explosion', 'starburst', 'xmark', 'siteNuclear', 'siteNaval', 'siteOil', 'siteAirbase', 'siteDam', 'sitePort'] as const;
+  const expectedKeys = ['chevron', 'chevronGround', 'crosshair', 'diamond', 'explosion', 'starburst', 'xmark', 'siteNuclear', 'siteNaval', 'siteOil', 'siteAirbase', 'siteDesalination', 'sitePort'] as const;
   it('has all 13 icon keys', () => { expect(Object.keys(ICON_MAPPING).sort()).toEqual([...expectedKeys].sort()); });
   for (const key of expectedKeys) {
     it(`${key} has mask: true`, () => { expect(ICON_MAPPING[key].mask).toBe(true); });

@@ -5,7 +5,7 @@ import { SITES_CACHE_TTL } from '../constants.js';
 import type { SiteEntity } from '../types.js';
 
 /** Redis key for all cached infrastructure sites */
-const SITES_KEY = 'sites:all';
+const SITES_KEY = 'sites:v2';
 
 /** Logical TTL in ms -- 24 hours for static site data */
 const LOGICAL_TTL_MS = SITES_CACHE_TTL;

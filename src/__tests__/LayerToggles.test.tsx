@@ -15,8 +15,9 @@ const mockState = {
   showNaval: true,
   showOil: true,
   showAirbase: true,
-  showDam: true,
+  showDesalination: true,
   showPort: true,
+  showHitOnly: false,
   isLayersCollapsed: false,
   toggleFlights: vi.fn(),
   toggleGroundTraffic: vi.fn(),
@@ -31,8 +32,9 @@ const mockState = {
   toggleNaval: vi.fn(),
   toggleOil: vi.fn(),
   toggleAirbase: vi.fn(),
-  toggleDam: vi.fn(),
+  toggleDesalination: vi.fn(),
   togglePort: vi.fn(),
+  toggleHitOnly: vi.fn(),
   toggleLayers: vi.fn(),
 };
 
@@ -68,8 +70,9 @@ describe('LayerTogglesSlot', () => {
     mockState.showNaval = true;
     mockState.showOil = true;
     mockState.showAirbase = true;
-    mockState.showDam = true;
+    mockState.showDesalination = true;
     mockState.showPort = true;
+    mockState.showHitOnly = false;
     mockState.isLayersCollapsed = false;
   });
 
@@ -78,10 +81,10 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 15 toggle row buttons', () => {
+  it('renders 16 toggle row buttons', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(15);
+    expect(switches).toHaveLength(16);
   });
 
   it('each button has role="switch" and aria-checked', () => {
@@ -97,7 +100,7 @@ describe('LayerTogglesSlot', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
     const labels = switches.map((btn) => btn.textContent?.trim());
-    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Events', 'Airstrikes', 'Ground Combat', 'Targeted', 'Sites', 'Nuclear', 'Naval', 'Oil', 'Airbase', 'Dam', 'Port']);
+    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Events', 'Airstrikes', 'Ground Combat', 'Targeted', 'Sites', 'Nuclear', 'Naval', 'Oil', 'Airbase', 'Desalination', 'Port', 'Hit Only']);
   });
 
   it('clicking Flights toggle calls toggleFlights', () => {

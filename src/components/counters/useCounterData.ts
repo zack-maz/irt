@@ -1,8 +1,12 @@
 import { useMemo } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
+import { useSiteStore } from '@/stores/siteStore';
+import { useEventStore } from '@/stores/eventStore';
+import { useFilterStore } from '@/stores/filterStore';
+import { computeAttackStatus } from '@/lib/attackStatus';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
-import type { FlightEntity, ConflictEventEntity } from '@/types/entities';
+import type { FlightEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 
 export interface CounterValues {
   iranianFlights: number;
@@ -11,6 +15,7 @@ export interface CounterValues {
   groundCombat: number;
   targeted: number;
   fatalities: number;
+  hitSites: number;
 }
 
 const AIRSTRIKE_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showAirstrikes;
@@ -35,8 +40,20 @@ export function useCounterData(): CounterValues {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
+  const showSites = useUIStore((s) => s.showSites);
+  const showNuclear = useUIStore((s) => s.showNuclear);
+  const showNaval = useUIStore((s) => s.showNaval);
+  const showOil = useUIStore((s) => s.showOil);
+  const showAirbase = useUIStore((s) => s.showAirbase);
+  const showDesalination = useUIStore((s) => s.showDesalination);
+  const showPort = useUIStore((s) => s.showPort);
 
   const { flights: filteredFlights, events: filteredEvents } = useFilteredEntities();
+
+  const sites = useSiteStore((s) => s.sites);
+  const allEvents = useEventStore((s) => s.events);
+  const dateStart = useFilterStore((s) => s.dateStart);
+  const dateEnd = useFilterStore((s) => s.dateEnd);
 
   return useMemo(() => {
     // Visible flights: smart filters + toggle gating (matches useEntityLayers logic)
@@ -72,6 +89,26 @@ export function useCounterData(): CounterValues {
       fatalities += sumFatalitiesByGroup(filteredEvents, TARGETED_TYPES);
     }
 
-    return { iranianFlights, unidentifiedFlights, airstrikes, groundCombat, targeted, fatalities };
-  }, [filteredFlights, filteredEvents, showFlights, showGroundTraffic, pulseEnabled, showEvents, showAirstrikes, showGroundCombat, showTargeted]);
+    // Hit sites: visible sites with attack status
+    let hitSites = 0;
+    if (showSites) {
+      const visibleSites = sites.filter((s: SiteEntity) => {
+        switch (s.siteType) {
+          case 'nuclear': return showNuclear;
+          case 'naval': return showNaval;
+          case 'oil': return showOil;
+          case 'airbase': return showAirbase;
+          case 'desalination': return showDesalination;
+          case 'port': return showPort;
+        }
+      });
+      for (const site of visibleSites) {
+        if (computeAttackStatus(site, allEvents, dateStart, dateEnd).isAttacked) {
+          hitSites++;
+        }
+      }
+    }
+
+    return { iranianFlights, unidentifiedFlights, airstrikes, groundCombat, targeted, fatalities, hitSites };
+  }, [filteredFlights, filteredEvents, showFlights, showGroundTraffic, pulseEnabled, showEvents, showAirstrikes, showGroundCombat, showTargeted, sites, allEvents, dateStart, dateEnd, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort]);
 }

@@ -58,15 +58,17 @@ export function LayerTogglesSlot() {
   const showNaval = useUIStore((s) => s.showNaval);
   const showOil = useUIStore((s) => s.showOil);
   const showAirbase = useUIStore((s) => s.showAirbase);
-  const showDam = useUIStore((s) => s.showDam);
+  const showDesalination = useUIStore((s) => s.showDesalination);
   const showPort = useUIStore((s) => s.showPort);
+  const showHitOnly = useUIStore((s) => s.showHitOnly);
   const toggleSites = useUIStore((s) => s.toggleSites);
   const toggleNuclear = useUIStore((s) => s.toggleNuclear);
   const toggleNaval = useUIStore((s) => s.toggleNaval);
   const toggleOil = useUIStore((s) => s.toggleOil);
   const toggleAirbase = useUIStore((s) => s.toggleAirbase);
-  const toggleDam = useUIStore((s) => s.toggleDam);
+  const toggleDesalination = useUIStore((s) => s.toggleDesalination);
   const togglePort = useUIStore((s) => s.togglePort);
+  const toggleHitOnly = useUIStore((s) => s.toggleHitOnly);
   const customRangeLock = useFilterStore((s) => s.savedToggles !== null);
   return (
     <div data-testid="layer-toggles-slot">
@@ -94,8 +96,9 @@ export function LayerTogglesSlot() {
               <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Naval" active={showNaval} onToggle={toggleNaval} indent disabled={!showSites} />
               <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Oil" active={showOil} onToggle={toggleOil} indent disabled={!showSites} />
               <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Airbase" active={showAirbase} onToggle={toggleAirbase} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Dam" active={showDam} onToggle={toggleDam} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Desalination" active={showDesalination} onToggle={toggleDesalination} indent disabled={!showSites} />
               <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Port" active={showPort} onToggle={togglePort} indent disabled={!showSites} />
+              <ToggleRow color="#f97316" label="Hit Only" active={showHitOnly} onToggle={toggleHitOnly} indent disabled={!showSites} />
               <button
                 onClick={() => {
                   localStorage.clear();

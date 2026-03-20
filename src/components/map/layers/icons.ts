@@ -22,7 +22,7 @@ export const ICON_MAPPING: Record<string, IconEntry> = {
   siteNaval:      { x: 256, y: 0, width: 32, height: 32, mask: true },
   siteOil:        { x: 288, y: 0, width: 32, height: 32, mask: true },
   siteAirbase:    { x: 320, y: 0, width: 32, height: 32, mask: true },
-  siteDam:        { x: 352, y: 0, width: 32, height: 32, mask: true },
+  siteDesalination: { x: 352, y: 0, width: 32, height: 32, mask: true },
   sitePort:       { x: 384, y: 0, width: 32, height: 32, mask: true },
 };
 
@@ -262,18 +262,16 @@ export function getIconAtlas(): HTMLCanvasElement {
   ctx.closePath();
   ctx.fill();
 
-  // Icon 11 (offset 352): Water Waves/Dam -- three wavy lines
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  for (const wy of [10, 16, 22]) {
-    ctx.beginPath();
-    ctx.moveTo(354, wy);
-    ctx.quadraticCurveTo(358, wy - 4, 362, wy);
-    ctx.quadraticCurveTo(366, wy + 4, 370, wy);
-    ctx.quadraticCurveTo(374, wy - 4, 378, wy);
-    ctx.stroke();
-  }
+  // Icon 11 (offset 352): Water Droplet/Desalination -- teardrop shape
+  ctx.fillStyle = 'white';
+  const cx11 = 368;
+  ctx.beginPath();
+  ctx.moveTo(cx11, 4); // top point
+  ctx.bezierCurveTo(cx11 - 2, 10, cx11 - 10, 16, cx11 - 10, 21);
+  ctx.arc(cx11, 21, 10, Math.PI, 0, false); // bottom semicircle
+  ctx.bezierCurveTo(cx11 + 10, 16, cx11 + 2, 10, cx11, 4);
+  ctx.closePath();
+  ctx.fill();
 
   // Icon 12 (offset 384): Helm Wheel/Port -- ship's wheel
   ctx.strokeStyle = 'white';

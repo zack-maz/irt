@@ -10,7 +10,7 @@ export function loadPersistedToggles(): LayerToggles {
     if (stored) {
       const parsed = JSON.parse(stored);
       // Migration: discard old schema if it has showDrones/showMissiles/showNews
-      if ('showDrones' in parsed || 'showMissiles' in parsed || 'showNews' in parsed || 'showOtherConflict' in parsed) {
+      if ('showDrones' in parsed || 'showMissiles' in parsed || 'showNews' in parsed || 'showOtherConflict' in parsed || 'showDam' in parsed) {
         return { ...LAYER_TOGGLE_DEFAULTS };
       }
       return { ...LAYER_TOGGLE_DEFAULTS, ...parsed };
@@ -38,8 +38,9 @@ function getToggles(state: UIState): LayerToggles {
     showNaval: state.showNaval,
     showOil: state.showOil,
     showAirbase: state.showAirbase,
-    showDam: state.showDam,
+    showDesalination: state.showDesalination,
     showPort: state.showPort,
+    showHitOnly: state.showHitOnly,
   };
 }
 
@@ -67,8 +68,9 @@ export const useUIStore = create<UIState>()((set, get) => ({
   showNaval: initial.showNaval,
   showOil: initial.showOil,
   showAirbase: initial.showAirbase,
-  showDam: initial.showDam,
+  showDesalination: initial.showDesalination,
   showPort: initial.showPort,
+  showHitOnly: initial.showHitOnly,
   selectedEntityId: null,
   hoveredEntityId: null,
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
@@ -120,7 +122,7 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleSites: () => {
     const wasOff = !get().showSites;
     if (wasOff) {
-      set({ showSites: true, showNuclear: true, showNaval: true, showOil: true, showAirbase: true, showDam: true, showPort: true });
+      set({ showSites: true, showNuclear: true, showNaval: true, showOil: true, showAirbase: true, showDesalination: true, showPort: true });
     } else {
       set({ showSites: false });
     }
@@ -142,12 +144,16 @@ export const useUIStore = create<UIState>()((set, get) => ({
     set((s) => ({ showAirbase: !s.showAirbase }));
     persistToggles(getToggles(get()));
   },
-  toggleDam: () => {
-    set((s) => ({ showDam: !s.showDam }));
+  toggleDesalination: () => {
+    set((s) => ({ showDesalination: !s.showDesalination }));
     persistToggles(getToggles(get()));
   },
   togglePort: () => {
     set((s) => ({ showPort: !s.showPort }));
+    persistToggles(getToggles(get()));
+  },
+  toggleHitOnly: () => {
+    set((s) => ({ showHitOnly: !s.showHitOnly }));
     persistToggles(getToggles(get()));
   },
   selectEntity: (id) => set({ selectedEntityId: id }),

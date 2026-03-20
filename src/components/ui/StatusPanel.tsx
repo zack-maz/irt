@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
+import { useSiteStore } from '@/stores/siteStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
@@ -49,6 +50,8 @@ export function StatusPanel() {
   const flightStatus = useFlightStore((s) => s.connectionStatus);
   const shipStatus = useShipStore((s) => s.connectionStatus);
   const eventStatus = useEventStore((s) => s.connectionStatus);
+  const siteConnectionStatus = useSiteStore((s) => s.connectionStatus);
+  const siteStatus: FeedStatus = siteConnectionStatus === 'idle' ? 'loading' : siteConnectionStatus;
 
   // Use filtered entities (applies filter store predicates)
   const { flights, ships: filteredShips, events } = useFilteredEntities();
@@ -61,6 +64,10 @@ export function StatusPanel() {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
+  const showSites = useUIStore((s) => s.showSites);
+
+  const sites = useSiteStore((s) => s.sites);
+  const visibleSites = showSites ? sites.length : 0;
 
   // Count = entities passing BOTH filters AND toggles
   const visibleFlights = flights.filter((f) => {
@@ -98,6 +105,7 @@ export function StatusPanel() {
           <FeedLine status={flightStatus} count={visibleFlights} label="flights" />
           <FeedLine status={shipStatus} count={visibleShips} label="ships" />
           <FeedLine status={eventStatus} count={visibleEvents} label="events" />
+          <FeedLine status={siteStatus} count={visibleSites} label="sites" />
         </div>
       )}
     </OverlayPanel>

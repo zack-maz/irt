@@ -39,6 +39,15 @@ export function CountersSlot() {
               <CounterRow label="Targeted" value={counters.targeted} />
               <CounterRow label="Fatalities" value={counters.fatalities} />
             </div>
+
+            <div className="border-t border-border my-1.5" />
+
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+              Sites
+            </div>
+            <div className="mt-0.5 space-y-0.5">
+              <CounterRow label="Hit Sites" value={counters.hitSites} />
+            </div>
           </div>
         )}
       </OverlayPanel>

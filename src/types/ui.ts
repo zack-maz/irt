@@ -51,8 +51,9 @@ export interface LayerToggles {
   showNaval: boolean;
   showOil: boolean;
   showAirbase: boolean;
-  showDam: boolean;
+  showDesalination: boolean;
   showPort: boolean;
+  showHitOnly: boolean;
 }
 
 export const LAYER_TOGGLE_DEFAULTS: LayerToggles = {
@@ -69,8 +70,9 @@ export const LAYER_TOGGLE_DEFAULTS: LayerToggles = {
   showNaval: true,
   showOil: true,
   showAirbase: true,
-  showDam: true,
+  showDesalination: true,
   showPort: true,
+  showHitOnly: false,
 };
 
 export interface UIState {
@@ -95,8 +97,9 @@ export interface UIState {
   showNaval: boolean;
   showOil: boolean;
   showAirbase: boolean;
-  showDam: boolean;
+  showDesalination: boolean;
   showPort: boolean;
+  showHitOnly: boolean;
   selectedEntityId: string | null;
   hoveredEntityId: string | null;
   openDetailPanel: () => void;
@@ -121,8 +124,9 @@ export interface UIState {
   toggleNaval: () => void;
   toggleOil: () => void;
   toggleAirbase: () => void;
-  toggleDam: () => void;
+  toggleDesalination: () => void;
   togglePort: () => void;
+  toggleHitOnly: () => void;
   selectEntity: (id: string | null) => void;
   hoverEntity: (id: string | null) => void;
 }
@@ -133,6 +137,6 @@ export const SITE_TYPE_LABELS: Record<string, string> = {
   naval: 'Naval',
   oil: 'Oil Refinery',
   airbase: 'Airbase',
-  dam: 'Dam',
+  desalination: 'Desalination',
   port: 'Port',
 };
