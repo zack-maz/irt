@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Server } from 'http';
 import type { FlightEntity } from '../../types.js';
+import type { CacheResponse } from '../../types.js';
 
 const mockOpenSkyFlights: FlightEntity[] = [
   {
@@ -69,10 +70,18 @@ const mockAdsbLolFlights: FlightEntity[] = [
   },
 ];
 
-// Module-level mock functions that persist across vi.resetModules()
+// Module-level mock functions that persist across tests
 const mockFetchOpenSky = vi.fn(async (): Promise<FlightEntity[]> => mockOpenSkyFlights);
 const mockFetchAdsb = vi.fn(async (): Promise<FlightEntity[]> => mockAdsbFlights);
 const mockFetchAdsbLol = vi.fn(async (): Promise<FlightEntity[]> => mockAdsbLolFlights);
+
+// In-memory store backing the Redis mock
+interface CacheEntry<T> {
+  data: T;
+  fetchedAt: number;
+}
+
+const redisStore = new Map<string, CacheEntry<unknown>>();
 
 // Mock config module
 vi.mock('../../config.js', () => ({
@@ -114,11 +123,28 @@ vi.mock('../../adapters/acled.js', () => ({
   fetchEvents: vi.fn(async () => []),
 }));
 
+// Mock Redis cache module with in-memory store
+vi.mock('../../cache/redis.js', () => ({
+  redis: {},
+  cacheGet: vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  }),
+  cacheSet: vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  }),
+}));
+
 describe('Flight Route Dispatch', () => {
   let server: Server;
   let baseUrl: string;
 
   beforeEach(async () => {
+    // Clear the mock Redis store for fresh cache per test
+    redisStore.clear();
+
     // Set credential env vars for tests
     process.env.ADSB_EXCHANGE_API_KEY = 'test-adsb-key';
     process.env.OPENSKY_CLIENT_ID = 'test-opensky-id';
@@ -131,9 +157,6 @@ describe('Flight Route Dispatch', () => {
     mockFetchAdsb.mockImplementation(async () => mockAdsbFlights);
     mockFetchAdsbLol.mockClear();
     mockFetchAdsbLol.mockImplementation(async () => mockAdsbLolFlights);
-
-    // Reset modules to get fresh cache instances per test
-    vi.resetModules();
 
     const { createApp } = await import('../../index.js');
     const app = createApp();
@@ -252,11 +275,11 @@ describe('Flight Route Dispatch', () => {
     const res1 = await fetch(`${baseUrl}/api/flights?source=adsb`);
     expect(res1.ok).toBe(true);
 
-    // Advance time past TTL to make cache stale (260s + 1s)
-    const originalNow = Date.now;
-    let timeOffset = 0;
-    Date.now = () => originalNow() + timeOffset;
-    timeOffset = 261_000;
+    // Manually set the fetchedAt in the past to make cache stale
+    const entry = redisStore.get('flights:adsb');
+    if (entry) {
+      entry.fetchedAt = Date.now() - 261_000; // past ADS-B TTL (260s)
+    }
 
     // Now cache is stale, adapter will be called but throws RateLimitError
     mockFetchAdsb.mockRejectedValueOnce(new RateLimitError('Rate limit exceeded'));
@@ -267,8 +290,6 @@ describe('Flight Route Dispatch', () => {
     expect(res2.ok).toBe(true);
     expect(body2.rateLimited).toBe(true);
     expect(body2.data[0].data.icao24).toBe('def456');
-
-    Date.now = originalNow;
   });
 
   it('returns 503 when ADS-B source requested but API key not set', async () => {

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { EntityCache } from '../cache/entityCache.js';
+import { cacheGet, cacheSet } from '../cache/redis.js';
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
 import { fetchFlights as fetchAdsbExchange } from '../adapters/adsb-exchange.js';
 import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
@@ -7,23 +7,25 @@ import { IRAN_BBOX, CACHE_TTL } from '../constants.js';
 import { RateLimitError } from '../types.js';
 import type { FlightEntity, FlightSource } from '../types.js';
 
-const openskyCache = new EntityCache<FlightEntity[]>(CACHE_TTL.flights);
-const adsbCache = new EntityCache<FlightEntity[]>(CACHE_TTL.adsbFlights);
-const adsblolCache = new EntityCache<FlightEntity[]>(CACHE_TTL.adsblolFlights);
+/** Redis key per flight source */
+const CACHE_KEYS: Record<FlightSource, string> = {
+  opensky: 'flights:opensky',
+  adsb: 'flights:adsb',
+  adsblol: 'flights:adsblol',
+};
+
+/** Logical TTL (ms) -- used to compute staleness */
+const LOGICAL_TTLS: Record<FlightSource, number> = {
+  opensky: CACHE_TTL.flights,
+  adsb: CACHE_TTL.adsbFlights,
+  adsblol: CACHE_TTL.adsblolFlights,
+};
 
 function parseSource(raw: unknown): FlightSource {
   if (raw === 'opensky') return 'opensky';
   if (raw === 'adsb') return 'adsb';
   if (raw === 'adsblol') return 'adsblol';
   return 'adsblol';
-}
-
-function getCache(source: FlightSource): EntityCache<FlightEntity[]> {
-  switch (source) {
-    case 'opensky': return openskyCache;
-    case 'adsb': return adsbCache;
-    case 'adsblol': return adsblolCache;
-  }
 }
 
 function getFetcher(source: FlightSource): () => Promise<FlightEntity[]> {
@@ -38,7 +40,9 @@ export const flightsRouter = Router();
 
 flightsRouter.get('/', async (req, res) => {
   const source = parseSource(req.query.source);
-  const cache = getCache(source);
+  const cacheKey = CACHE_KEYS[source];
+  const logicalTtl = LOGICAL_TTLS[source];
+  const redisTtl = Math.ceil((logicalTtl * 10) / 1000); // 10x multiplier, ms → seconds
 
   // Credential checks for sources that require API keys
   if (source === 'adsb' && !process.env.ADSB_EXCHANGE_API_KEY) {
@@ -50,7 +54,7 @@ flightsRouter.get('/', async (req, res) => {
   }
 
   // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
-  const cached = cache.get();
+  const cached = await cacheGet<FlightEntity[]>(cacheKey, logicalTtl);
   if (cached && !cached.stale) {
     return res.json(cached);
   }
@@ -58,7 +62,7 @@ flightsRouter.get('/', async (req, res) => {
   try {
     const flights = await getFetcher(source)();
 
-    cache.set(flights);
+    await cacheSet(cacheKey, flights, redisTtl);
     res.json({ data: flights, stale: false, lastFresh: Date.now() });
   } catch (err) {
     console.error(`[flights:${source}] upstream error:`, (err as Error).message);
