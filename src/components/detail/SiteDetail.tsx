@@ -15,12 +15,11 @@ const MAX_VISIBLE_ATTACKS = 5;
 
 export function SiteDetail({ entity }: SiteDetailProps) {
   const events = useEventStore((s) => s.events);
-  const dateStart = useFilterStore((s) => s.dateStart);
   const dateEnd = useFilterStore((s) => s.dateEnd);
   const selectEntity = useUIStore((s) => s.selectEntity);
   const openDetailPanel = useUIStore((s) => s.openDetailPanel);
 
-  const attack = computeAttackStatus(entity, events, dateStart, dateEnd);
+  const attack = computeAttackStatus(entity, events, dateEnd);
   const typeLabel = SITE_TYPE_LABELS[entity.siteType] ?? entity.siteType;
   const osmUrl = `https://www.openstreetmap.org/?mlat=${entity.lat}&mlon=${entity.lng}#map=15/${entity.lat}/${entity.lng}`;
 

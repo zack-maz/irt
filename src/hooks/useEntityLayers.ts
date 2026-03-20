@@ -103,8 +103,7 @@ export function useEntityLayers() {
   const proximityPin = useFilterStore((s) => s.proximityPin);
   const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
 
-  // Date range for attack status computation
-  const dateStart = useFilterStore((s) => s.dateStart);
+  // Date range end for attack status computation (start is irrelevant — once hit, stays hit)
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
   // Active entity = hovered (preview) or selected (pinned)
@@ -148,11 +147,11 @@ export function useEntityLayers() {
   const siteAttackMap = useMemo(() => {
     const map = new Map<string, boolean>();
     for (const site of toggleFilteredSites) {
-      const status = computeAttackStatus(site, allEvents, dateStart, dateEnd);
+      const status = computeAttackStatus(site, allEvents, dateEnd);
       map.set(site.id, status.isAttacked);
     }
     return map;
-  }, [toggleFilteredSites, allEvents, dateStart, dateEnd]);
+  }, [toggleFilteredSites, allEvents, dateEnd]);
 
   // Apply hit-only filter: when enabled, only show attacked sites
   const visibleSites = useMemo(() => {

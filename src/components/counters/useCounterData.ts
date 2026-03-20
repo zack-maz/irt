@@ -52,7 +52,6 @@ export function useCounterData(): CounterValues {
 
   const sites = useSiteStore((s) => s.sites);
   const allEvents = useEventStore((s) => s.events);
-  const dateStart = useFilterStore((s) => s.dateStart);
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
   return useMemo(() => {
@@ -103,12 +102,12 @@ export function useCounterData(): CounterValues {
         }
       });
       for (const site of visibleSites) {
-        if (computeAttackStatus(site, allEvents, dateStart, dateEnd).isAttacked) {
+        if (computeAttackStatus(site, allEvents, dateEnd).isAttacked) {
           hitSites++;
         }
       }
     }
 
     return { iranianFlights, unidentifiedFlights, airstrikes, groundCombat, targeted, fatalities, hitSites };
-  }, [filteredFlights, filteredEvents, showFlights, showGroundTraffic, pulseEnabled, showEvents, showAirstrikes, showGroundCombat, showTargeted, sites, allEvents, dateStart, dateEnd, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort]);
+  }, [filteredFlights, filteredEvents, showFlights, showGroundTraffic, pulseEnabled, showEvents, showAirstrikes, showGroundCombat, showTargeted, sites, allEvents, dateEnd, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort]);
 }

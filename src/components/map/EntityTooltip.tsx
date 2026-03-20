@@ -69,9 +69,8 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
 
 function SiteContent({ entity }: { entity: SiteEntity }) {
   const events = useEventStore((s) => s.events);
-  const dateStart = useFilterStore((s) => s.dateStart);
   const dateEnd = useFilterStore((s) => s.dateEnd);
-  const attack = computeAttackStatus(entity, events, dateStart, dateEnd);
+  const attack = computeAttackStatus(entity, events, dateEnd);
   const typeLabel = SITE_TYPE_LABELS[entity.siteType] ?? entity.siteType;
 
   return (

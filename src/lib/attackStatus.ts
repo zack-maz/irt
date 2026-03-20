@@ -22,18 +22,17 @@ export interface AttackStatus {
 /**
  * Computes proximity-based attack status for a site against conflict events.
  * Uses all events from the event store (including backfilled data).
- * dateStart/dateEnd params from filterStore support temporal rewinding.
+ * Only dateEnd is used: a site stays orange as long as the end time is after
+ * the attack occurred. dateStart is ignored — once hit, it stays hit.
  */
 export function computeAttackStatus(
   site: SiteEntity,
   events: ConflictEventEntity[],
-  dateStart: number | null,
   dateEnd: number | null,
 ): AttackStatus {
   // Coarse bbox pre-filter (~0.025 degrees is roughly 2km+)
   const COARSE_DEG = 0.025;
   const attacks = events.filter(e => {
-    if (dateStart !== null && e.timestamp < dateStart) return false;
     if (dateEnd !== null && e.timestamp > dateEnd) return false;
     // Coarse filter first
     if (Math.abs(e.lat - site.lat) > COARSE_DEG || Math.abs(e.lng - site.lng) > COARSE_DEG) return false;
