@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 current_plan: —
-status: defining requirements
-stopped_at: —
+status: ready to plan
+stopped_at: roadmap created
 last_updated: "2026-03-19T00:00:00.000Z"
 progress:
   total_phases: 6
@@ -20,14 +20,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 15 Key Sites Overlay — starting v1.1 Intelligence Layer
+**Current focus:** Phase 15 Key Sites Overlay
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 15 of 20 (Key Sites Overlay) -- first phase of v1.1
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-19 — Milestone v1.1 started
+Status: Ready to plan
+Last activity: 2026-03-19 -- Roadmap created for v1.1 Intelligence Layer
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.1)
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -42,11 +59,13 @@ None.
 
 ### Blockers/Concerns
 
-- Overpass API rate limits may require caching strategy (handled: 24h cache)
-- Yahoo Finance scraping may break without notice (graceful degradation in plan)
+- Overpass API rate limits may require caching strategy (mitigated: 24h cache + split queries)
+- Yahoo Finance v8 chart API is unofficial (mitigated: graceful degradation + provider interface)
 - GDELT DOC API noise filtering must be tuned for conflict relevance
+- Redis command budget at ~92% capacity after 6 polling sources (monitor during Phase 18)
 
 ## Session Continuity
 
 Last session: 2026-03-19
-Stopped at: Milestone v1.1 initialized — requirements defining
+Stopped at: v1.1 roadmap created -- ready to plan Phase 15
+Resume file: None
