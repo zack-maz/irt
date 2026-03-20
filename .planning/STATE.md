@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Deployment
 status: executing
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-03-20T00:19:15.609Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-03-20T00:25:05.000Z"
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -19,13 +19,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 13 serverless cache migration (Plan 01 complete, Plans 02-03 remaining)
+**Current focus:** Phase 13 serverless cache migration (Plans 01-02 complete, Plan 03 remaining)
 
 ## Current Position
 
 Milestone: v1.0 Deployment
 Phase: 13-serverless-cache-migration
-Current Plan: 2 of 3
+Current Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Current Plan: 2 of 3
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 13    | 01   | 3min     | 2     | 6     |
+| 13    | 02   | 3min     | 2     | 6     |
 
 ## Accumulated Context
 
@@ -48,6 +49,8 @@ Full decision history archived in milestones/v0.9-ROADMAP.md STATE section.
 - [13-01] Upstash Redis with REST-based client for serverless compatibility
 - [13-01] Redis hard TTL = 10x logical TTL for stale-but-servable fallback data
 - [13-01] CacheEntry<T> stores {data, fetchedAt} for staleness computation
+- [13-02] On-demand WebSocket pattern: connect, collect for N ms, close (no persistent connections)
+- [13-02] Ship merge/prune: fresh ships merged with cached by ID, 10 min stale threshold
 
 ### Pending Todos
 
@@ -60,6 +63,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T00:18:22Z
-Stopped at: Completed 13-01-PLAN.md
-Resume file: .planning/phases/13-serverless-cache-migration/13-02-PLAN.md
+Last session: 2026-03-20T00:25:05Z
+Stopped at: Completed 13-02-PLAN.md
+Resume file: .planning/phases/13-serverless-cache-migration/13-03-PLAN.md

@@ -27,7 +27,7 @@
 
 ### v1.0 Deployment (Phases 13-14)
 
-- [ ] **Phase 13: Serverless Cache Migration** — Replace in-memory caches with Upstash Redis for stateless serverless compatibility
+- [x] **Phase 13: Serverless Cache Migration** — Replace in-memory caches with Upstash Redis for stateless serverless compatibility (completed 2026-03-20)
 - [ ] **Phase 14: Vercel Deployment** — Add Vercel entry points, vercel.json, and deploy
 
 ### Phase 13: Serverless Cache Migration
@@ -39,7 +39,7 @@
   3. AISStream connection is on-demand (connect-collect-close per request) instead of persistent
   4. Server still runs locally with `app.listen()` for development
   5. Existing API response shapes (CacheResponse<T>) are preserved
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 13-01-PLAN.md — Redis cache module + flights route migration
@@ -72,5 +72,5 @@ Plans:
 | 10. Detail Panel | v0.9 | 2/2 | Complete | 2026-03-18 |
 | 11. Smart Filters | v0.9 | 3/3 | Complete | 2026-03-18 |
 | 12. Analytics Dashboard | v0.9 | 1/1 | Complete | 2026-03-19 |
-| 13. Serverless Cache Migration | 1/3 | In Progress|  | - |
+| 13. Serverless Cache Migration | 3/3 | Complete   | 2026-03-20 | - |
 | 14. Vercel Deployment | v1.0 | 0/0 | Not started | - |
