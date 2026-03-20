@@ -1,12 +1,4 @@
-// Environment variable validation and configuration
-
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required env var: ${name}`);
-  }
-  return value;
-}
+// Environment variable configuration — all API keys optional for serverless deployment
 
 export interface AppConfig {
   port: number;
@@ -29,13 +21,13 @@ let _config: AppConfig | null = null;
 export function loadConfig(): AppConfig {
   return {
     port: Number(process.env.PORT ?? 3001),
-    corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+    corsOrigin: process.env.CORS_ORIGIN ?? '*',
     opensky: {
-      clientId: required('OPENSKY_CLIENT_ID'),
-      clientSecret: required('OPENSKY_CLIENT_SECRET'),
+      clientId: process.env.OPENSKY_CLIENT_ID ?? '',
+      clientSecret: process.env.OPENSKY_CLIENT_SECRET ?? '',
     },
     aisstream: {
-      apiKey: required('AISSTREAM_API_KEY'),
+      apiKey: process.env.AISSTREAM_API_KEY ?? '',
     },
     acled: {
       email: process.env.ACLED_EMAIL ?? '',

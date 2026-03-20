@@ -14,25 +14,30 @@ const redisStore = new Map<string, CacheEntry<unknown>>();
 vi.mock('../config.js', () => ({
   loadConfig: () => ({
     port: 0,
-    corsOrigin: 'http://localhost:5173',
-    opensky: { clientId: 'test', clientSecret: 'test' },
-    aisstream: { apiKey: 'test' },
-    acled: { email: 'test', password: 'test' },
+    corsOrigin: '*',
+    opensky: { clientId: '', clientSecret: '' },
+    aisstream: { apiKey: '' },
+    acled: { email: '', password: '' },
   }),
   getConfig: () => ({
     port: 0,
-    corsOrigin: 'http://localhost:5173',
-    opensky: { clientId: 'test', clientSecret: 'test' },
-    aisstream: { apiKey: 'test' },
-    acled: { email: 'test', password: 'test' },
+    corsOrigin: '*',
+    opensky: { clientId: '', clientSecret: '' },
+    aisstream: { apiKey: '' },
+    acled: { email: '', password: '' },
   }),
   config: {
     port: 0,
-    corsOrigin: 'http://localhost:5173',
-    opensky: { clientId: 'test', clientSecret: 'test' },
-    aisstream: { apiKey: 'test' },
-    acled: { email: 'test', password: 'test' },
+    corsOrigin: '*',
+    opensky: { clientId: '', clientSecret: '' },
+    aisstream: { apiKey: '' },
+    acled: { email: '', password: '' },
   },
+}));
+
+// Mock rate limiter -- pass through for server tests
+vi.mock('../middleware/rateLimit.js', () => ({
+  rateLimitMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 // Mock adapters for flight route tests
@@ -114,13 +119,20 @@ describe('Express server', () => {
     expect(res.status).toBe(404);
   });
 
-  it('CORS Access-Control-Allow-Origin header is set for configured origin', async () => {
+  it('CORS Access-Control-Allow-Origin defaults to * when CORS_ORIGIN not set', async () => {
     const res = await fetch(`${baseUrl}/health`, {
-      headers: { Origin: 'http://localhost:5173' },
+      headers: { Origin: 'http://example.com' },
     });
-    expect(res.headers.get('access-control-allow-origin')).toBe(
-      'http://localhost:5173'
-    );
+    expect(res.headers.get('access-control-allow-origin')).toBe('*');
+  });
+
+  it('server boots without OpenSky/AISStream API keys', async () => {
+    // The server is already running with empty string API keys (via mock config)
+    // Verify it responds normally
+    const res = await fetch(`${baseUrl}/health`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual({ status: 'ok' });
   });
 });
 
