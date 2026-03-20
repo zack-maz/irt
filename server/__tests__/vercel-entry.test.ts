@@ -63,8 +63,8 @@ let server: Server;
 let baseUrl: string;
 
 beforeAll(async () => {
-  const mod = await import('../../api/index.js');
-  const app = mod.default;
+  const { createApp } = await import('../index.js');
+  const app = createApp();
 
   await new Promise<void>((resolve) => {
     server = app.listen(0, () => {
@@ -85,14 +85,14 @@ afterAll(async () => {
   }
 });
 
-describe('Vercel entry point (api/index.ts)', () => {
+describe('Vercel entry point (server/vercel-entry.ts)', () => {
   it('has a default export', async () => {
-    const mod = await import('../../api/index.js');
+    const mod = await import('../vercel-entry.js');
     expect(mod.default).toBeDefined();
   });
 
-  it('default export is a function (Express app)', async () => {
-    const mod = await import('../../api/index.js');
+  it('default export is a function (handler)', async () => {
+    const mod = await import('../vercel-entry.js');
     expect(typeof mod.default).toBe('function');
   });
 

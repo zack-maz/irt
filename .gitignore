@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+api/*.mjs
+api/*.js
 dist-ssr
 *.local
 
@@ -30,3 +32,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*.local
