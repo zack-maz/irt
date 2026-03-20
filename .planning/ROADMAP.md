@@ -39,7 +39,7 @@
 
 - [x] **Phase 15: Key Sites Overlay** - Infrastructure sites (nuclear, naval, oil, airbase, dam, port) on the map with per-type toggles and click-to-inspect (completed 2026-03-20)
 - [x] **Phase 16: News Feed** - Multi-source news pipeline (GDELT DOC + BBC RSS + Al Jazeera RSS) with conflict filtering and deduplication (completed 2026-03-20)
-- [ ] **Phase 17: Notification Center** - Severity-scored conflict notifications with proximity alerts, news matching, and 24h event default
+- [x] **Phase 17: Notification Center** - Severity-scored conflict notifications with proximity alerts, news matching, and 24h event default (completed 2026-03-20)
 - [ ] **Phase 18: Oil Markets Tracker** - Oil/energy price panel (Brent, WTI, XLE, USO, XOM) with sparkline trends
 - [ ] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy
 - [ ] **Phase 20: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.1
@@ -84,12 +84,12 @@ Plans:
   3. Each notification card shows 1-3 matched news headlines from the news feed (temporal + geographic/keyword matching)
   4. User receives proximity alerts when tracked flights or ships approach key sites within 50km
   5. Map shows only the last 24 hours of conflict events by default when no custom date filter is active
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
-- [ ] 17-01-PLAN.md -- Data layer: GDELT numMentions/numSources extension, severity scoring, news matching, time grouping libs
-- [ ] 17-02-PLAN.md -- 24h default event window in useFilteredEntities with "Showing last 24h" label
-- [ ] 17-03-PLAN.md -- Notification UI: store, bell icon, dropdown drawer, time-grouped event cards with news matching
-- [ ] 17-04-PLAN.md -- Proximity alerts: useProximityAlerts hook, map overlay with expand/collapse warning icons
+- [x] 17-01-PLAN.md -- Data layer: GDELT numMentions/numSources extension, severity scoring, news matching, time grouping libs
+- [x] 17-02-PLAN.md -- 24h default event window in useFilteredEntities with "Showing last 24h" label
+- [x] 17-03-PLAN.md -- Notification UI: store, bell icon, dropdown drawer, time-grouped event cards with news matching
+- [x] 17-04-PLAN.md -- Proximity alerts: useProximityAlerts hook, map overlay with expand/collapse warning icons
 
 ### Phase 18: Oil Markets Tracker
 **Goal**: Users can monitor oil and energy market prices alongside conflict data to draw their own correlations
@@ -146,7 +146,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 14. Vercel Deployment | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 15. Key Sites Overlay | 2/2 | Complete    | 2026-03-20 | - |
 | 16. News Feed | 3/3 | Complete    | 2026-03-20 | - |
-| 17. Notification Center | 3/4 | In Progress|  | - |
+| 17. Notification Center | 4/4 | Complete   | 2026-03-20 | - |
 | 18. Oil Markets Tracker | v1.1 | 0/TBD | Not started | - |
 | 19. Search, Filter & UI Cleanup | v1.1 | 0/TBD | Not started | - |
 | 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |

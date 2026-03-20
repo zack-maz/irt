@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: in-progress
-stopped_at: Completed 17-04 (proximity alerts)
-last_updated: "2026-03-20T22:25:43Z"
-last_activity: 2026-03-20 -- Completed Phase 17 Plan 04 (proximity alerts)
+stopped_at: Completed 17-03 (notification center UI)
+last_updated: "2026-03-20T22:35:04Z"
+last_activity: 2026-03-20 -- Completed Phase 17 Plan 03 (notification center UI) -- all 4 plans done
 progress:
   total_phases: 6
   completed_phases: 2
@@ -27,17 +27,17 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 
 Phase: 17 of 20 (Notification Center)
 Plan: 04 of 04 complete
-Status: Proximity alerts implemented -- phase 17 complete
-Last activity: 2026-03-20 -- Completed Phase 17 Plan 04 (proximity alerts)
+Status: Phase 17 fully complete (all 4 plans: data layer, 24h window, notification UI, proximity alerts)
+Last activity: 2026-03-20 -- Completed Phase 17 Plan 03 (notification center UI) -- all 4 plans done
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v1.1)
+- Total plans completed: 7 (v1.1)
 - Average duration: 5min
-- Total execution time: 30min
+- Total execution time: 36min
 
 **By Phase:**
 
@@ -45,10 +45,11 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 15 | 2/2 | 15min | 7.5min |
 | 16 | 3/3 | 12min | 4min |
-| 17 | 4/4 | 7min | 1.75min |
+| 17 | 4/4 | 13min | 3.25min |
 
 *Updated after each plan completion*
 | Phase 17 P01 | 3min | 1 tasks | 8 files |
+| Phase 17 P03 | 6min | 2 tasks | 9 files |
 | Phase 17 P04 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
@@ -78,6 +79,10 @@ Progress: [██████████] 100%
 - **17-02:** isDefaultWindowActive is a pure derived getter (dateStart===null && dateEnd===null, no new stored state)
 - **17-02:** 24h window applies to both events AND news clusters (per locked decision scope)
 - **17-02:** useFilteredEntities return type extended to include clusters (backward-compatible)
+- **17-03:** FlyToHandler as null-rendering child of Map (uses useMap hook) for notification fly-to
+- **17-03:** NotificationBell absolute positioning with detail panel offset matching FilterPanelSlot pattern
+- **17-03:** readIds persisted to localStorage as JSON array, loaded on store init with try/catch safety
+- **17-03:** markRead is idempotent (no-op if already read, prevents double-decrement)
 - **17-04:** Pure computeProximityAlerts function exported separately from hook for testability
 - **17-04:** HTML overlay via map.project() chosen over deck.gl layer for easy expand/collapse with React state
 - **17-04:** RAF-throttled move event subscription prevents excessive re-renders during pan/zoom
@@ -99,6 +104,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T22:25:43Z
-Stopped at: Completed 17-04 (proximity alerts)
-Resume file: .planning/phases/17-notification-center/17-04-SUMMARY.md
+Last session: 2026-03-20T22:35:04Z
+Stopped at: Completed 17-03 (notification center UI) -- Phase 17 fully complete
+Resume file: .planning/phases/17-notification-center/17-03-SUMMARY.md
