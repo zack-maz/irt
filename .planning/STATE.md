@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: in-progress
-stopped_at: Completed 17-02 (24h default event window)
-last_updated: "2026-03-20T22:22:57Z"
+status: 24h default event window implemented
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-03-20T22:25:42.066Z"
 last_activity: 2026-03-20 -- Completed Phase 17 Plan 02 (24h default event window)
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
-  percent: 100
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -48,6 +48,7 @@ Progress: [██████░░░░] 67%
 | 17 | 1/4 | 3min | 3min |
 
 *Updated after each plan completion*
+| Phase 17 P01 | 3min | 1 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,10 @@ Progress: [██████░░░░] 67%
 - **16-02:** 15-min polling interval matches GDELT DOC update frequency and server cache TTL
 - **16-03:** GDELT sourcelang:english appended as inline query modifier (not separate param)
 - **16-03:** RSS country mapping uses static config per feed (not runtime detection)
+- **17-01:** numMentions/numSources as optional ConflictEventEntity.data fields (backward compat)
+- **17-01:** Severity formula: typeWeight * log2(1+mentions) * log2(1+sources) * recencyDecay (~24h half-life)
+- **17-01:** News matching uses 3-signal relevance: temporal (24h), geographic (100km haversine), keyword overlap
+- **17-01:** parseInt || undefined for GDELT fields to distinguish missing from zero
 - **17-02:** isDefaultWindowActive is a pure derived getter (dateStart===null && dateEnd===null, no new stored state)
 - **17-02:** 24h window applies to both events AND news clusters (per locked decision scope)
 - **17-02:** useFilteredEntities return type extended to include clusters (backward-compatible)
@@ -89,6 +94,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T22:22:57Z
-Stopped at: Completed 17-02 (24h default event window)
-Resume file: .planning/phases/17-notification-center/17-02-SUMMARY.md
+Last session: 2026-03-20T22:25:42.059Z
+Stopped at: Completed 17-01-PLAN.md
+Resume file: None

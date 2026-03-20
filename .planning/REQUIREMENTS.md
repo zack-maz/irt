@@ -22,8 +22,8 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 ### Notifications
 
 - [ ] **NOTF-01**: User can see a bell icon with unread count badge in the top-right corner
-- [ ] **NOTF-02**: User can open a notification drawer showing severity-scored conflict events (type weight × log mentions × log sources × recency decay)
-- [ ] **NOTF-03**: User sees 1-3 matched news headlines on each notification card (temporal + geographic/keyword matching)
+- [x] **NOTF-02**: User can open a notification drawer showing severity-scored conflict events (type weight × log mentions × log sources × recency decay)
+- [x] **NOTF-03**: User sees 1-3 matched news headlines on each notification card (temporal + geographic/keyword matching)
 - [ ] **NOTF-04**: User receives proximity alerts when tracked entities (flights, ships) approach key sites within 50km
 - [x] **NOTF-05**: Map shows only last 24h of conflict events by default when no custom date filter is set
 
@@ -83,8 +83,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NEWS-02 | Phase 16 | Complete |
 | NEWS-03 | Phase 16 | Complete |
 | NOTF-01 | Phase 17 | Pending |
-| NOTF-02 | Phase 17 | Pending |
-| NOTF-03 | Phase 17 | Pending |
+| NOTF-02 | Phase 17 | Complete |
+| NOTF-03 | Phase 17 | Complete |
 | NOTF-04 | Phase 17 | Pending |
 | NOTF-05 | Phase 17 | Complete |
 | MRKT-01 | Phase 18 | Pending |
