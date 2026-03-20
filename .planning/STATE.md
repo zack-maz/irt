@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Deployment
-current_plan: 4 of 4
-status: unknown
-stopped_at: Phase 14 context gathered
-last_updated: "2026-03-20T02:05:53.490Z"
+current_plan: 1 of 2
+status: in-progress
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-03-20T02:40:34.885Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 13 serverless cache migration complete (all 4 plans done, including backfill gap closure)
+**Current focus:** Phase 14 Vercel deployment -- server hardening complete (plan 1/2), ready for Vercel config
 
 ## Current Position
 
 Milestone: v1.0 Deployment
-Phase: 13-serverless-cache-migration
-Current Plan: 4 of 4
+Phase: 14-vercel-deployment
+Current Plan: 1 of 2
 
 ## Performance Metrics
 
@@ -41,6 +41,7 @@ Current Plan: 4 of 4
 | 13    | 02   | 3min     | 2     | 6     |
 | 13    | 03   | 4min     | 2     | 5     |
 | 13    | 04   | 3min     | 1     | 2     |
+| 14    | 01   | 12min    | 2     | 10    |
 
 ## Accumulated Context
 
@@ -59,6 +60,9 @@ Full decision history archived in milestones/v0.9-ROADMAP.md STATE section.
 - [13-03] EntityCache deleted -- all routes now use Redis cacheGet/cacheSet
 - [13-04] Lazy backfill on cache miss with 1-hour cooldown via Redis timestamp
 - [13-04] Backfill failure is non-fatal -- route continues with fetchEvents data
+- [14-01] All API keys optional with ?? '' fallback for serverless cold start
+- [14-01] CORS defaults to wildcard * (production-first; local dev overrides via .env)
+- [14-01] Rate limiting 60 req/60s sliding window per IP on /api/* only
 
 ### Pending Todos
 
@@ -71,6 +75,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T02:05:53.482Z
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-vercel-deployment/14-CONTEXT.md
+Last session: 2026-03-20T02:39:17Z
+Stopped at: Completed 14-01-PLAN.md
+Resume file: .planning/phases/14-vercel-deployment/14-01-SUMMARY.md
