@@ -68,10 +68,11 @@ Plans:
   1. Server endpoint returns news articles merged from GDELT DOC API, BBC RSS, and Al Jazeera RSS
   2. Non-conflict articles are filtered out by keyword whitelist (Iran, Israel, airstrike, military, etc.)
   3. Duplicate articles (same URL across sources) appear only once in the feed
-**Plans:** 2/2 plans complete
+**Plans:** 3 plans (2 complete + 1 gap closure)
 Plans:
-- [ ] 16-01-PLAN.md -- Server pipeline: NewsArticle/NewsCluster types, GDELT DOC adapter, RSS adapter, keyword filter, dedup/clustering, cache-first /api/news route
-- [ ] 16-02-PLAN.md -- Client integration: newsStore, useNewsPolling hook, AppShell wiring
+- [x] 16-01-PLAN.md -- Server pipeline: NewsArticle/NewsCluster types, GDELT DOC adapter, RSS adapter, keyword filter, dedup/clustering, cache-first /api/news route
+- [x] 16-02-PLAN.md -- Client integration: newsStore, useNewsPolling hook, AppShell wiring
+- [ ] 16-03-PLAN.md -- Gap closure: add sourceCountry metadata to articles, filter GDELT to English-only
 
 ### Phase 17: Notification Center
 **Goal**: Users receive proactive, severity-ranked intelligence alerts about conflict events, proximity threats, and correlated news
@@ -139,7 +140,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 13. Serverless Cache Migration | v1.0 | 4/4 | Complete | 2026-03-20 |
 | 14. Vercel Deployment | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 15. Key Sites Overlay | 2/2 | Complete    | 2026-03-20 | - |
-| 16. News Feed | 2/2 | Complete    | 2026-03-20 | - |
+| 16. News Feed | 2/3 | Gap closure | 2026-03-20 | - |
 | 17. Notification Center | v1.1 | 0/TBD | Not started | - |
 | 18. Oil Markets Tracker | v1.1 | 0/TBD | Not started | - |
 | 19. Search, Filter & UI Cleanup | v1.1 | 0/TBD | Not started | - |
