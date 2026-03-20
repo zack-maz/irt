@@ -41,6 +41,7 @@ export const COL = {
   EventRootCode: 28,
   GoldsteinScale: 30,
   NumMentions: 31,
+  NumSources: 32,
   ActionGeo_FullName: 52,
   ActionGeo_CountryCode: 53,
   ActionGeo_Lat: 56,
@@ -191,6 +192,8 @@ export function normalizeGdeltEvent(
       goldsteinScale: parseFloat(cols[COL.GoldsteinScale]) || 0,
       locationName: cols[COL.ActionGeo_FullName] || '',
       cameoCode: eventCode,
+      numMentions: parseInt(cols[COL.NumMentions], 10) || undefined,
+      numSources: parseInt(cols[COL.NumSources], 10) || undefined,
     },
   };
 }

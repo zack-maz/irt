@@ -363,6 +363,30 @@ describe('GDELT Adapter', () => {
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
       expect(entity.data.goldsteinScale).toBe(0);
     });
+
+    it('includes numMentions and numSources when columns contain valid numbers', () => {
+      const row = makeGdeltRow({ 31: '42', 32: '7' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.numMentions).toBe(42);
+      expect(entity.data.numSources).toBe(7);
+    });
+
+    it('numMentions and numSources are undefined when columns are empty', () => {
+      const row = makeGdeltRow({ 31: '', 32: '' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.numMentions).toBeUndefined();
+      expect(entity.data.numSources).toBeUndefined();
+    });
+
+    it('numMentions and numSources are undefined when columns are non-numeric', () => {
+      const row = makeGdeltRow({ 31: 'abc', 32: 'xyz' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.numMentions).toBeUndefined();
+      expect(entity.data.numSources).toBeUndefined();
+    });
   });
 
   describe('fetchEvents (integration)', () => {
