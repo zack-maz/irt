@@ -83,6 +83,11 @@ interface CacheEntry<T> {
 
 const redisStore = new Map<string, CacheEntry<unknown>>();
 
+// Mock rate limiter -- pass through for route tests
+vi.mock('../../middleware/rateLimit.js', () => ({
+  rateLimitMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
 // Mock config module
 vi.mock('../../config.js', () => ({
   config: {

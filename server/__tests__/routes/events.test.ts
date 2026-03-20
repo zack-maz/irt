@@ -51,6 +51,11 @@ const rawRedisStore = new Map<string, unknown>();
 const mockFetchEvents = vi.fn(async (): Promise<ConflictEventEntity[]> => []);
 const mockBackfillEvents = vi.fn(async (): Promise<ConflictEventEntity[]> => []);
 
+// Mock rate limiter -- pass through for route tests
+vi.mock('../../middleware/rateLimit.js', () => ({
+  rateLimitMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
 // Mock config
 vi.mock('../../config.js', () => ({
   config: {

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { errorHandler } from './middleware/errorHandler.js';
+import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { flightsRouter } from './routes/flights.js';
 import { shipsRouter } from './routes/ships.js';
 import { eventsRouter } from './routes/events.js';
@@ -8,13 +9,16 @@ import { sourcesRouter } from './routes/sources.js';
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173' }));
+  app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*' }));
   app.use(express.json());
 
   // Health check
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
+
+  // Rate limiting on API routes only (not /health)
+  app.use('/api', rateLimitMiddleware);
 
   // Data source routes
   app.use('/api/flights', flightsRouter);

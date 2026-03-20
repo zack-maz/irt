@@ -2,6 +2,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Server } from 'http';
 
+// Mock rate limiter -- pass through for route tests
+vi.mock('../../middleware/rateLimit.js', () => ({
+  rateLimitMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
 // Mock all adapter modules to prevent real network calls
 vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
