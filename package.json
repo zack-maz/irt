@@ -17,6 +17,7 @@
     "@deck.gl/mapbox": "^9.2.11",
     "@deck.gl/react": "^9.2.11",
     "@tailwindcss/vite": "^4.2.1",
+    "@upstash/redis": "^1.37.0",
     "@vis.gl/react-maplibre": "^8.1.0",
     "adm-zip": "^0.5.16",
     "cors": "^2.8.6",
