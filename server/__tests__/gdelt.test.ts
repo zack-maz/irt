@@ -304,11 +304,11 @@ describe('GDELT Adapter', () => {
       const cols = validIranMissileRow.split('\t');
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
 
-      // 20260315 -> March 15, 2026
+      // 20260315 -> March 15, 2026 midnight UTC
       const date = new Date(entity.timestamp);
-      expect(date.getFullYear()).toBe(2026);
-      expect(date.getMonth()).toBe(2); // 0-indexed, March = 2
-      expect(date.getDate()).toBe(15);
+      expect(date.getUTCFullYear()).toBe(2026);
+      expect(date.getUTCMonth()).toBe(2); // 0-indexed, March = 2
+      expect(date.getUTCDate()).toBe(15);
     });
 
     it('handles empty SOURCEURL gracefully', () => {

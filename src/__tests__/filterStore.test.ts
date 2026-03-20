@@ -42,7 +42,7 @@ describe('filterStore', () => {
       expect(useFilterStore.getState().proximityRadiusKm).toBe(100);
     });
 
-    it('dateStart/dateEnd default to null', () => {
+    it('dateStart defaults to null, dateEnd defaults to null', () => {
       const s = useFilterStore.getState();
       expect(s.dateStart).toBeNull();
       expect(s.dateEnd).toBeNull();
@@ -217,7 +217,7 @@ describe('filterStore', () => {
       expect(useFilterStore.getState().proximityRadiusKm).toBe(100);
     });
 
-    it('clearFilter(date) resets dateStart/dateEnd to null', () => {
+    it('clearFilter(date) resets dateStart and dateEnd to null', () => {
       useFilterStore.getState().setDateRange(1000, 2000);
       useFilterStore.getState().clearFilter('date');
       const s = useFilterStore.getState();
@@ -326,15 +326,23 @@ describe('filterStore', () => {
       });
     });
 
-    it('setDateRange with null end auto-deactivates and restores toggles', () => {
+    it('setDateRange with both null auto-deactivates and restores toggles', () => {
       useFilterStore.getState().setDateRange(1000, 2000); // activate
-      useFilterStore.getState().setDateRange(1000, null); // deactivate
+      useFilterStore.getState().setDateRange(null, null); // deactivate
       expect(useFilterStore.getState().savedToggles).toBeNull();
       const ui = useUIStore.getState();
       expect(ui.showFlights).toBe(true);
       expect(ui.showGroundTraffic).toBe(false);
       expect(ui.pulseEnabled).toBe(true);
       expect(ui.showShips).toBe(true);
+    });
+
+    it('setDateRange with start non-null and end null stays active', () => {
+      useFilterStore.getState().setDateRange(1000, 2000); // activate
+      useFilterStore.getState().setDateRange(1000, null); // end removed but start remains
+      expect(useFilterStore.getState().savedToggles).not.toBeNull();
+      const ui = useUIStore.getState();
+      expect(ui.showFlights).toBe(false); // still paused
     });
 
     it('moving start handle while custom range active does not re-snapshot', () => {

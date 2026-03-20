@@ -118,8 +118,11 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
     const prev = get();
     set({ dateStart: start, dateEnd: end });
 
-    // Auto-activate: end went from null to non-null
-    if (end !== null && prev.savedToggles === null) {
+    const isCustom = start !== null || end !== null;
+    const wasCustom = prev.savedToggles !== null;
+
+    // Auto-activate: entering custom date range (either slider moved)
+    if (isCustom && !wasCustom) {
       const ui = useUIStore.getState();
       set({
         savedToggles: {
@@ -137,8 +140,8 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       });
     }
 
-    // Auto-deactivate: end went from non-null to null
-    if (end === null && prev.savedToggles !== null) {
+    // Auto-deactivate: both sliders back to defaults
+    if (!isCustom && wasCustom) {
       useUIStore.setState({ ...prev.savedToggles });
       set({ savedToggles: null });
     }

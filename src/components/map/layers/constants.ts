@@ -25,9 +25,9 @@ export const ENTITY_DOT_COLORS = {
 export const ICON_SIZE = {
   flight:        { meters: 8000, minPixels: 24, maxPixels: 160 },
   ship:          { meters: 8000, minPixels: 24, maxPixels: 160 },
-  airstrike:     { meters: 8000, minPixels: 24, maxPixels: 160 },
-  groundCombat:  { meters: 8000, minPixels: 24, maxPixels: 160 },
-  targeted:      { meters: 8000, minPixels: 24, maxPixels: 160 },
+  airstrike:     { meters: 5000, minPixels: 16, maxPixels: 120 },
+  groundCombat:  { meters: 5000, minPixels: 16, maxPixels: 120 },
+  targeted:      { meters: 5000, minPixels: 16, maxPixels: 120 },
 } as const;
 
 /** Pulse animation config for unidentified flights */

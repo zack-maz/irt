@@ -128,7 +128,7 @@ function parseSqlDate(sqlDate: string): number {
   const year = parseInt(sqlDate.slice(0, 4), 10);
   const month = parseInt(sqlDate.slice(4, 6), 10) - 1; // 0-indexed
   const day = parseInt(sqlDate.slice(6, 8), 10);
-  return new Date(year, month, day).getTime();
+  return Date.UTC(year, month, day);
 }
 
 const BASE_CODE_DESCRIPTIONS: Record<string, string> = {
@@ -253,85 +253,73 @@ export async function fetchEvents(): Promise<ConflictEventEntity[]> {
   return events;
 }
 
-const GDELT_MASTER_URL =
-  'http://data.gdeltproject.org/gdeltv2/masterfilelist.txt';
-
 /**
- * Build a YYYYMMDD string from a UTC timestamp (ms).
+ * Generate GDELT v2 export URLs for a date range, sampling 4 times per day
+ * (00:00, 06:00, 12:00, 18:00 UTC). Constructs URLs directly from the
+ * predictable filename pattern — no master file list download needed.
  */
-function toGdeltDateStr(ts: number): string {
-  const d = new Date(ts);
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}${mm}${dd}`;
-}
-
-/**
- * Fetch and parse the GDELT master file list, returning export ZIP URLs
- * for all 15-minute intervals within the given date range [fromTs, toTs].
- */
-async function getMasterUrls(fromTs: number, toTs: number): Promise<string[]> {
-  const res = await fetch(GDELT_MASTER_URL);
-  if (!res.ok) {
-    throw new Error(`GDELT masterfilelist.txt failed: ${res.status}`);
-  }
-  const text = await res.text();
-  const fromStr = toGdeltDateStr(fromTs);
-  const toStr = toGdeltDateStr(toTs);
-
+function generateBackfillUrls(fromTs: number, toTs: number): string[] {
   const urls: string[] = [];
-  for (const line of text.trim().split('\n')) {
-    if (!line.includes('.export.CSV.zip')) continue;
-    const parts = line.trim().split(' ');
-    const url = parts[2];
-    if (!url) continue;
-    // Extract YYYYMMDD from filename like 20260228153000.export.CSV.zip
-    const match = url.match(/\/(\d{8})\d{6}\.export/);
-    if (!match) continue;
-    const dateStr = match[1];
-    if (dateStr >= fromStr && dateStr <= toStr) {
-      urls.push(url);
-    }
+  const SIX_HOURS = 6 * 60 * 60 * 1000;
+  const start = new Date(fromTs);
+  start.setUTCHours(0, 0, 0, 0);
+  let cursor = start.getTime();
+
+  while (cursor <= toTs) {
+    const d = new Date(cursor);
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    urls.push(
+      `http://data.gdeltproject.org/gdeltv2/${yyyy}${mm}${dd}${hh}0000.export.CSV.zip`,
+    );
+    cursor += SIX_HOURS;
   }
+
   return urls;
 }
 
 /**
- * Fetch GDELT v2 events for the past `days` days by downloading all
- * 15-minute export files from the master list in that window.
- * Returns deduplicated, normalized ConflictEventEntity[].
+ * Fetch GDELT v2 events for the past `days` days by downloading export files
+ * sampled every 6 hours. Uses direct URL construction (no master file list)
+ * and batched concurrent downloads for speed.
  */
 export async function backfillEvents(days: number): Promise<ConflictEventEntity[]> {
   const toTs = Date.now();
   const fromTs = toTs - days * 24 * 60 * 60 * 1000;
   const start = Date.now();
 
-  console.log(`[gdelt] backfill: fetching master file list for ${days} days`);
-  const urls = await getMasterUrls(fromTs, toTs);
-  console.log(`[gdelt] backfill: found ${urls.length} export files`);
+  const urls = generateBackfillUrls(fromTs, toTs);
+  console.log(`[gdelt] backfill: ${urls.length} files for ${days} days (4/day sampling)`);
 
-  // Merge-dedup across all fetched CSVs using a Map keyed by entity id
   const merged = new Map<string, ConflictEventEntity>();
+  const BATCH_SIZE = 5;
 
-  // Fetch files sequentially to be respectful of GDELT's free service
-  for (let i = 0; i < urls.length; i++) {
-    try {
-      const csv = await downloadAndUnzip(urls[i]);
-      const events = parseAndFilter(csv);
-      for (const e of events) {
-        if (!merged.has(e.id)) {
-          merged.set(e.id, e);
+  for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+    const batch = urls.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map(async (url) => {
+        const csv = await downloadAndUnzip(url);
+        return parseAndFilter(csv);
+      }),
+    );
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        for (const e of result.value) {
+          if (!merged.has(e.id)) {
+            merged.set(e.id, e);
+          }
         }
       }
-    } catch (err) {
-      console.warn(`[gdelt] backfill: skipped ${urls[i]}: ${(err as Error).message}`);
+      // Silently skip failed downloads (404s, timeouts)
     }
   }
 
-  const result = Array.from(merged.values());
+  const events = Array.from(merged.values());
   console.log(
-    `[gdelt] backfill: loaded ${result.length} events from ${urls.length} files in ${Date.now() - start}ms`,
+    `[gdelt] backfill: loaded ${events.length} events from ${urls.length} files in ${Date.now() - start}ms`,
   );
-  return result;
+  return events;
 }

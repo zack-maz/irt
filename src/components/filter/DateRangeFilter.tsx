@@ -1,8 +1,9 @@
-import { useId, useMemo } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { WAR_START, STEP_MS, snapToStep } from '@/lib/constants';
 import type { Granularity } from '@/stores/filterStore';
 
 const NOW_THRESHOLD_MS = 60_000; // 60s
+const THUMB_SIZE = 14; // px — matches CSS
 
 const GRANULARITY_LABELS: { key: Granularity; label: string }[] = [
   { key: 'minute', label: 'Min' },
@@ -18,6 +19,10 @@ function formatLabel(ts: number, granularity: Granularity): string {
   const h = String(d.getUTCHours()).padStart(2, '0');
   const m = String(d.getUTCMinutes()).padStart(2, '0');
   return `${month} ${day} ${h}:${m}`;
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v));
 }
 
 interface DateRangeFilterProps {
@@ -37,7 +42,8 @@ export function DateRangeFilter({
   onDateRange,
   onGranularity,
 }: DateRangeFilterProps) {
-  const id = useId();
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef<'lo' | 'hi' | null>(null);
   const now = Date.now();
   const step = STEP_MS[granularity];
 
@@ -46,10 +52,10 @@ export function DateRangeFilter({
   const sliderMax = snapToStep(now, step);
 
   // Current handle values
-  const lo = dateStart ?? snapToStep(now - 60 * 60 * 1000, step);
+  const lo = dateStart ?? sliderMin;
   const hi = dateEnd ?? sliderMax;
 
-  // Positions for filled track
+  // Positions as percentages
   const range = sliderMax - sliderMin || 1;
   const loPercent = ((lo - sliderMin) / range) * 100;
   const hiPercent = ((hi - sliderMin) / range) * 100;
@@ -60,22 +66,77 @@ export function DateRangeFilter({
     return formatLabel(hi, granularity);
   }, [dateEnd, hi, granularity]);
 
-  const handleStartChange = (raw: number) => {
-    const snapped = snapToStep(raw, step);
-    const clamped = Math.min(snapped, hi);
-    onDateRange(clamped, dateEnd);
-  };
+  /** Convert a pointer clientX to a snapped timestamp */
+  const pointerToValue = useCallback(
+    (clientX: number): number => {
+      const track = trackRef.current;
+      if (!track) return sliderMin;
+      const rect = track.getBoundingClientRect();
+      const pct = clamp((clientX - rect.left) / rect.width, 0, 1);
+      const raw = sliderMin + pct * range;
+      return snapToStep(raw, step);
+    },
+    [sliderMin, range, step],
+  );
 
-  const handleEndChange = (raw: number) => {
-    const snapped = snapToStep(raw, step);
-    const clamped = Math.max(snapped, lo);
-    // If within threshold of now, treat as "now" (deactivate custom range)
-    if (sliderMax - clamped < NOW_THRESHOLD_MS) {
-      onDateRange(dateStart, null);
-    } else {
-      onDateRange(dateStart, clamped);
-    }
-  };
+  const commitLo = useCallback(
+    (val: number) => {
+      const clamped = Math.min(val, hi - step); // enforce minimum 1-step gap
+      const newStart = Math.max(clamped, sliderMin);
+      // At far-left (WAR_START) → null means "no start bound"
+      onDateRange(newStart <= sliderMin ? null : newStart, dateEnd);
+    },
+    [hi, step, sliderMin, dateEnd, onDateRange],
+  );
+
+  const commitHi = useCallback(
+    (val: number) => {
+      const clamped = Math.max(val, lo + step); // enforce minimum 1-step gap
+      if (sliderMax - clamped < NOW_THRESHOLD_MS) {
+        onDateRange(dateStart, null);
+      } else {
+        onDateRange(dateStart, clamped);
+      }
+    },
+    [lo, step, sliderMax, dateStart, onDateRange],
+  );
+
+  const onPointerMove = useCallback(
+    (e: PointerEvent) => {
+      const val = pointerToValue(e.clientX);
+      if (dragging.current === 'lo') commitLo(val);
+      else if (dragging.current === 'hi') commitHi(val);
+    },
+    [pointerToValue, commitLo, commitHi],
+  );
+
+  const onPointerUp = useCallback(() => {
+    dragging.current = null;
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+  }, [onPointerMove]);
+
+  const startDrag = useCallback(
+    (which: 'lo' | 'hi') => (e: React.PointerEvent) => {
+      e.preventDefault();
+      dragging.current = which;
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+    },
+    [onPointerMove, onPointerUp],
+  );
+
+  /** Click on the track to move the nearest thumb */
+  const onTrackClick = useCallback(
+    (e: React.MouseEvent) => {
+      const val = pointerToValue(e.clientX);
+      const distLo = Math.abs(val - lo);
+      const distHi = Math.abs(val - hi);
+      if (distLo <= distHi) commitLo(val);
+      else commitHi(val);
+    },
+    [pointerToValue, lo, hi, commitLo, commitHi],
+  );
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -96,8 +157,14 @@ export function DateRangeFilter({
         ))}
       </div>
 
-      {/* Dual-handle slider */}
-      <div className="relative h-5">
+      {/* Custom dual-handle slider */}
+      <div
+        ref={trackRef}
+        className="relative h-5 cursor-pointer select-none touch-none"
+        onClick={onTrackClick}
+        role="group"
+        aria-label="Date range slider"
+      >
         {/* Track background */}
         <div className="absolute top-[9px] h-[3px] w-full rounded-full bg-border" />
         {/* Active range highlight */}
@@ -105,29 +172,39 @@ export function DateRangeFilter({
           className="absolute top-[9px] h-[3px] rounded-full bg-accent-blue/40"
           style={{ left: `${loPercent}%`, width: `${hiPercent - loPercent}%` }}
         />
-        {/* Start handle */}
-        <input
-          id={`${id}-start`}
-          type="range"
-          min={sliderMin}
-          max={sliderMax}
-          step={step}
-          value={lo}
-          onChange={(e) => handleStartChange(Number(e.target.value))}
-          className="range-thumb absolute top-0 h-5 w-full appearance-none bg-transparent"
+        {/* Start thumb */}
+        <div
+          onPointerDown={startDrag('lo')}
+          role="slider"
           aria-label="Date range start"
+          aria-valuemin={sliderMin}
+          aria-valuemax={sliderMax}
+          aria-valuenow={lo}
+          tabIndex={0}
+          className="absolute top-[3px] rounded-full bg-accent-blue border-2 border-surface cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+          style={{
+            width: THUMB_SIZE,
+            height: THUMB_SIZE,
+            left: `calc(${loPercent}% - ${THUMB_SIZE / 2}px)`,
+            zIndex: 4,
+          }}
         />
-        {/* End handle */}
-        <input
-          id={`${id}-end`}
-          type="range"
-          min={sliderMin}
-          max={sliderMax}
-          step={step}
-          value={hi}
-          onChange={(e) => handleEndChange(Number(e.target.value))}
-          className="range-thumb range-thumb-top absolute top-0 h-5 w-full appearance-none bg-transparent"
+        {/* End thumb */}
+        <div
+          onPointerDown={startDrag('hi')}
+          role="slider"
           aria-label="Date range end"
+          aria-valuemin={sliderMin}
+          aria-valuemax={sliderMax}
+          aria-valuenow={hi}
+          tabIndex={0}
+          className="absolute top-[3px] rounded-full bg-accent-blue border-2 border-surface cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+          style={{
+            width: THUMB_SIZE,
+            height: THUMB_SIZE,
+            left: `calc(${hiPercent}% - ${THUMB_SIZE / 2}px)`,
+            zIndex: 3,
+          }}
         />
       </div>
 

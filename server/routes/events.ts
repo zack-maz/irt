@@ -31,9 +31,13 @@ async function shouldBackfill(): Promise<boolean> {
 
 export const eventsRouter = Router();
 
-eventsRouter.get('/', async (_req, res) => {
-  // Check cache first
-  const cached = await cacheGet<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
+eventsRouter.get('/', async (req, res) => {
+  const forceBackfill = req.query.backfill === 'true';
+
+  // Check cache first (skip on forced backfill)
+  const cached = forceBackfill
+    ? null
+    : await cacheGet<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
 
   if (cached && !cached.stale) {
     return res.json(cached);
@@ -50,8 +54,8 @@ eventsRouter.get('/', async (_req, res) => {
       }
     }
 
-    // Lazy backfill: on cache miss (no accumulated data), seed historical events
-    if (!cached && (await shouldBackfill())) {
+    // Lazy backfill: seed historical events when cache is empty or forced
+    if ((!cached || forceBackfill) && (forceBackfill || (await shouldBackfill()))) {
       try {
         const backfillDays = Math.ceil((Date.now() - WAR_START) / 86_400_000);
         const backfillData = await backfillEvents(backfillDays);

@@ -12,21 +12,7 @@ describe('FilterPanelSlot', () => {
       isShipFiltersOpen: true,
       isEventFiltersOpen: true,
     });
-    useFilterStore.setState({
-      flightCountries: [],
-      eventCountries: [],
-      flightSpeedMin: null,
-      flightSpeedMax: null,
-      shipSpeedMin: null,
-      shipSpeedMax: null,
-      altitudeMin: null,
-      altitudeMax: null,
-      proximityPin: null,
-      proximityRadiusKm: 100,
-      dateStart: null,
-      dateEnd: null,
-      isSettingPin: false,
-    });
+    useFilterStore.getState().clearAll();
   });
 
   it('renders collapsed by default with "Filters" header', () => {
