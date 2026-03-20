@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-03-20T19:28:30.696Z"
-last_activity: 2026-03-20 -- Completed Phase 16 Plan 02 (client news infrastructure)
+stopped_at: Completed 16-03-PLAN.md
+last_updated: "2026-03-20T19:52:29Z"
+last_activity: 2026-03-20 -- Completed Phase 16 Plan 03 (sourceCountry and English filter gap closure)
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 5
+  completed_plans: 5
   percent: 100
 ---
 
@@ -26,25 +26,25 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 16 of 20 (News Feed)
-Plan: 02 of 02 complete
-Status: Phase 16 complete -- news pipeline + client infrastructure ready
-Last activity: 2026-03-20 -- Completed Phase 16 Plan 02 (client news infrastructure)
+Plan: 03 of 03 complete
+Status: Phase 16 complete -- news pipeline + client infrastructure + UAT gap closure
+Last activity: 2026-03-20 -- Completed Phase 16 Plan 03 (sourceCountry and English filter gap closure)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v1.1)
-- Average duration: 6min
-- Total execution time: 24min
+- Total plans completed: 5 (v1.1)
+- Average duration: 5.4min
+- Total execution time: 27min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 15 | 2/2 | 15min | 7.5min |
-| 16 | 2/2 | 9min | 4.5min |
+| 16 | 3/3 | 12min | 4min |
 
 *Updated after each plan completion*
 
@@ -66,6 +66,8 @@ Progress: [██████████] 100%
 - **16-02:** newsStore ConnectionStatus defined locally (same type as eventStore) to avoid cross-store coupling
 - **16-02:** articleCount derived field sums articles across all clusters for aggregate stats
 - **16-02:** 15-min polling interval matches GDELT DOC update frequency and server cache TTL
+- **16-03:** GDELT sourcelang:english appended as inline query modifier (not separate param)
+- **16-03:** RSS country mapping uses static config per feed (not runtime detection)
 
 Decisions are logged in PROJECT.md Key Decisions table.
 Full v0.9 + v1.0 decision history archived in previous STATE.md.
@@ -83,6 +85,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T19:23:33Z
-Stopped at: Completed 16-02-PLAN.md
-Resume file: .planning/phases/16-news-feed/16-02-SUMMARY.md
+Last session: 2026-03-20T19:48:49Z
+Stopped at: Completed 16-03-PLAN.md
+Resume file: .planning/phases/16-news-feed/16-03-SUMMARY.md
