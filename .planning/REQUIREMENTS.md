@@ -9,7 +9,7 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 
 ### Key Sites
 
-- [ ] **SITE-01**: User can see key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, port) on the map via Overpass API with distinct icons per type
+- [x] **SITE-01**: User can see key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, port) on the map via Overpass API with distinct icons per type
 - [ ] **SITE-02**: User can toggle site visibility per type (parent toggle + 6 sub-toggles: nuclear, oil, naval, airbase, dam, port)
 - [ ] **SITE-03**: User can click a site marker to inspect its details (name, type, coordinates, operator, OSM link) in the detail panel
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SITE-01 | Phase 15 | Pending |
+| SITE-01 | Phase 15 | Complete |
 | SITE-02 | Phase 15 | Pending |
 | SITE-03 | Phase 15 | Pending |
 | NEWS-01 | Phase 16 | Pending |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: planning
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-20T15:38:47.760Z"
-last_activity: 2026-03-19 -- Roadmap created for v1.1 Intelligence Layer
+status: executing
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-03-20T16:21:09Z"
+last_activity: 2026-03-20 -- Completed Phase 15 Plan 01 (data pipeline)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 8
 ---
 
 # Project State
@@ -26,30 +26,35 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 15 of 20 (Key Sites Overlay) -- first phase of v1.1
-Plan: —
-Status: Ready to plan
-Last activity: 2026-03-19 -- Roadmap created for v1.1 Intelligence Layer
+Plan: 01 of 02 complete
+Status: Executing -- Plan 01 complete, Plan 02 next
+Last activity: 2026-03-20 -- Completed Phase 15 Plan 01 (data pipeline)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [#░░░░░░░░░] 8%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v1.1)
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1 (v1.1)
+- Average duration: 4min
+- Total execution time: 4min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 15 | 1/2 | 4min | 4min |
 
 *Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
+
+- **15-01:** SiteEntity separate from MapEntity union (static reference data, different lifecycle)
+- **15-01:** Single fetch on mount via useSiteFetch (no polling -- sites are static infrastructure)
+- **15-01:** SiteConnectionStatus includes 'idle' state for pre-fetch (unlike polling stores)
+- **15-01:** Overpass QL union query fetches all 6 site types in one request with fallback URL
 
 Decisions are logged in PROJECT.md Key Decisions table.
 Full v0.9 + v1.0 decision history archived in previous STATE.md.
@@ -67,6 +72,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T15:38:47.751Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-key-sites-overlay/15-CONTEXT.md
+Last session: 2026-03-20T16:21:09Z
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-key-sites-overlay/15-02-PLAN.md

@@ -55,7 +55,7 @@
   2. User can toggle site visibility with a parent toggle and 6 individual sub-toggles per site type
   3. User can click any site marker and see its details (name, type, coordinates, operator, OSM link) in the detail panel
   4. Sites persist across page reloads without re-fetching (24h cache)
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 15-01-PLAN.md -- Server data pipeline: SiteEntity types, Overpass adapter, /api/sites route with 24h Redis cache, siteStore, useSiteFetch hook
 - [ ] 15-02-PLAN.md -- Client rendering: icon atlas extension, site IconLayer with attack coloring, toggle controls, tooltip, SiteDetail panel
@@ -135,7 +135,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 12. Analytics Dashboard | v0.9 | 1/1 | Complete | 2026-03-19 |
 | 13. Serverless Cache Migration | v1.0 | 4/4 | Complete | 2026-03-20 |
 | 14. Vercel Deployment | v1.0 | 2/2 | Complete | 2026-03-20 |
-| 15. Key Sites Overlay | v1.1 | 0/2 | Not started | - |
+| 15. Key Sites Overlay | 1/2 | In Progress|  | - |
 | 16. News Feed | v1.1 | 0/TBD | Not started | - |
 | 17. Notification Center | v1.1 | 0/TBD | Not started | - |
 | 18. Oil Markets Tracker | v1.1 | 0/TBD | Not started | - |
