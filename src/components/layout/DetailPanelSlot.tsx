@@ -4,14 +4,16 @@ import { useSelectedEntity } from '@/hooks/useSelectedEntity';
 import { FlightDetail } from '@/components/detail/FlightDetail';
 import { ShipDetail } from '@/components/detail/ShipDetail';
 import { EventDetail } from '@/components/detail/EventDetail';
+import { SiteDetail } from '@/components/detail/SiteDetail';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
-import { isConflictEventType, CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
-import type { FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import { isConflictEventType, CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS, SITE_TYPE_LABELS } from '@/types/ui';
+import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 
 /** Maps entity type to the ENTITY_DOT_COLORS key */
 function getDotColor(type: string): string {
   if (type === 'flight') return ENTITY_DOT_COLORS.flights;
   if (type === 'ship') return ENTITY_DOT_COLORS.ships;
+  if (type === 'site') return ENTITY_DOT_COLORS.sites;
   if (isConflictEventType(type)) {
     if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
     if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
@@ -25,23 +27,27 @@ function getDotColor(type: string): string {
 function getTypeLabel(type: string): string {
   if (type === 'flight') return 'FLIGHT';
   if (type === 'ship') return 'SHIP';
+  if (type === 'site') return 'SITE';
   return (EVENT_TYPE_LABELS[type] ?? type).toUpperCase();
 }
 
 /** Gets the display name for an entity */
-function getEntityName(entity: { type: string; data: Record<string, unknown> }): string {
+function getEntityName(entity: { type: string; [key: string]: unknown }): string {
   switch (entity.type) {
     case 'flight': {
-      const d = entity.data as FlightEntity['data'];
+      const d = (entity as FlightEntity).data;
       return d.callsign || d.icao24;
     }
     case 'ship': {
-      const d = entity.data as ShipEntity['data'];
+      const d = (entity as ShipEntity).data;
       return d.shipName || String(d.mmsi);
+    }
+    case 'site': {
+      return (entity as SiteEntity).label || 'Unknown Site';
     }
     default: {
       if (isConflictEventType(entity.type)) {
-        const d = entity.data as ConflictEventEntity['data'];
+        const d = (entity as ConflictEventEntity).data;
         return d.eventType;
       }
       return '';
@@ -166,6 +172,9 @@ export function DetailPanelSlot() {
               )}
               {isConflictEventType(entity.type) && (
                 <EventDetail entity={entity as ConflictEventEntity} />
+              )}
+              {entity.type === 'site' && (
+                <SiteDetail entity={entity as SiteEntity} />
               )}
 
               {/* Coordinates with copy button */}

@@ -1,9 +1,12 @@
 import { useRef, useLayoutEffect, useState } from 'react';
-import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
-import { isConflictEventType, EVENT_TYPE_LABELS } from '@/types/ui';
+import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
+import { isConflictEventType, EVENT_TYPE_LABELS, SITE_TYPE_LABELS } from '@/types/ui';
+import { useEventStore } from '@/stores/eventStore';
+import { useFilterStore } from '@/stores/filterStore';
+import { computeAttackStatus } from '@/lib/attackStatus';
 
 interface EntityTooltipProps {
-  entity: MapEntity;
+  entity: MapEntity | SiteEntity;
   x: number;
   y: number;
 }
@@ -64,6 +67,26 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
   );
 }
 
+function SiteContent({ entity }: { entity: SiteEntity }) {
+  const events = useEventStore((s) => s.events);
+  const dateStart = useFilterStore((s) => s.dateStart);
+  const dateEnd = useFilterStore((s) => s.dateEnd);
+  const attack = computeAttackStatus(entity, events, dateStart, dateEnd);
+  const typeLabel = SITE_TYPE_LABELS[entity.siteType] ?? entity.siteType;
+
+  return (
+    <>
+      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>{typeLabel}</span>
+      <br /><strong>{entity.label}</strong>
+      {entity.operator && <><br />Operator: {entity.operator}</>}
+      <br />Status: <span style={{ color: attack.isAttacked ? '#f97316' : '#22c55e' }}>
+        {attack.isAttacked ? `Attacked (${attack.attackCount} events)` : 'Healthy'}
+      </span>
+      {attack.latestAttackDate && <><br />Last attack: {new Date(attack.latestAttackDate).toISOString().slice(0, 10)}</>}
+    </>
+  );
+}
+
 export function EntityTooltip({ entity, x, y }: EntityTooltipProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: x + 12, top: y + 12 });
@@ -115,6 +138,7 @@ export function EntityTooltip({ entity, x, y }: EntityTooltipProps) {
       {entity.type === 'flight' && <FlightContent entity={entity as FlightEntity} />}
       {entity.type === 'ship' && <ShipContent entity={entity as ShipEntity} />}
       {isConflictEventType(entity.type) && <EventContent entity={entity as ConflictEventEntity} />}
+      {entity.type === 'site' && <SiteContent entity={entity as SiteEntity} />}
     </div>
   );
 }

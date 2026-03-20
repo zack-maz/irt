@@ -53,6 +53,20 @@ export function LayerTogglesSlot() {
   const toggleAirstrikes = useUIStore((s) => s.toggleAirstrikes);
   const toggleGroundCombat = useUIStore((s) => s.toggleGroundCombat);
   const toggleTargeted = useUIStore((s) => s.toggleTargeted);
+  const showSites = useUIStore((s) => s.showSites);
+  const showNuclear = useUIStore((s) => s.showNuclear);
+  const showNaval = useUIStore((s) => s.showNaval);
+  const showOil = useUIStore((s) => s.showOil);
+  const showAirbase = useUIStore((s) => s.showAirbase);
+  const showDam = useUIStore((s) => s.showDam);
+  const showPort = useUIStore((s) => s.showPort);
+  const toggleSites = useUIStore((s) => s.toggleSites);
+  const toggleNuclear = useUIStore((s) => s.toggleNuclear);
+  const toggleNaval = useUIStore((s) => s.toggleNaval);
+  const toggleOil = useUIStore((s) => s.toggleOil);
+  const toggleAirbase = useUIStore((s) => s.toggleAirbase);
+  const toggleDam = useUIStore((s) => s.toggleDam);
+  const togglePort = useUIStore((s) => s.togglePort);
   const customRangeLock = useFilterStore((s) => s.savedToggles !== null);
   return (
     <div data-testid="layer-toggles-slot">
@@ -75,6 +89,13 @@ export function LayerTogglesSlot() {
               <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Airstrikes" active={showAirstrikes} onToggle={toggleAirstrikes} indent disabled={!showEvents} />
               <ToggleRow color={ENTITY_DOT_COLORS.groundCombat} label="Ground Combat" active={showGroundCombat} onToggle={toggleGroundCombat} indent disabled={!showEvents} />
               <ToggleRow color={ENTITY_DOT_COLORS.targeted} label="Targeted" active={showTargeted} onToggle={toggleTargeted} indent disabled={!showEvents} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Sites" active={showSites} onToggle={toggleSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Nuclear" active={showNuclear} onToggle={toggleNuclear} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Naval" active={showNaval} onToggle={toggleNaval} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Oil" active={showOil} onToggle={toggleOil} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Airbase" active={showAirbase} onToggle={toggleAirbase} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Dam" active={showDam} onToggle={toggleDam} indent disabled={!showSites} />
+              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Port" active={showPort} onToggle={togglePort} indent disabled={!showSites} />
               <button
                 onClick={() => {
                   localStorage.clear();

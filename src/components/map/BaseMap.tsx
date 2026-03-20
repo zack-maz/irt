@@ -17,7 +17,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
-import type { MapEntity } from '@/types/entities';
+import type { MapEntity, SiteEntity } from '@/types/entities';
 import {
   INITIAL_VIEW_STATE,
   MAX_BOUNDS,
@@ -36,7 +36,7 @@ import { CoordinateReadout } from './CoordinateReadout';
 import { CompassControl } from './CompassControl';
 
 interface HoverState {
-  entity: MapEntity;
+  entity: MapEntity | SiteEntity;
   x: number;
   y: number;
 }
@@ -68,7 +68,7 @@ export function BaseMap() {
         hoverEntity(null);
         return;
       }
-      const entity = info.object as MapEntity;
+      const entity = info.object as MapEntity | SiteEntity;
       setHover({ entity, x: info.x, y: info.y });
       hoverEntity(entity.id);
     },
@@ -83,7 +83,7 @@ export function BaseMap() {
         // Empty map click does NOT dismiss panel -- panel persists until explicitly closed
         return;
       }
-      const entity = info.object as MapEntity;
+      const entity = info.object as MapEntity | SiteEntity;
       if (selectedEntityId === entity.id) {
         // Re-click same entity: deselect and close panel
         selectEntity(null);
@@ -144,7 +144,7 @@ export function BaseMap() {
   );
 
   // Tooltip gating — conflict events only show when master + category toggle are ON
-  function isEntityTooltipVisible(entity: MapEntity): boolean {
+  function isEntityTooltipVisible(entity: MapEntity | SiteEntity): boolean {
     if (!isConflictEventType(entity.type)) return true;
     if (!showEvents) return false;
     if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(entity.type)) return showAirstrikes;

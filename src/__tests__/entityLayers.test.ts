@@ -85,10 +85,10 @@ function resetStores() {
 
 describe('useEntityLayers', () => {
   beforeEach(resetStores);
-  it('returns 8 layers', () => { const { result } = renderHook(() => useEntityLayers()); expect(result.current).toHaveLength(8); });
+  it('returns 9 layers', () => { const { result } = renderHook(() => useEntityLayers()); expect(result.current).toHaveLength(9); });
   it('returns layers in correct order', () => {
     const { result } = renderHook(() => useEntityLayers());
-    expect(result.current.map((l: { id: string }) => l.id)).toEqual(['proximity-circle', 'ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'entity-glow', 'entity-highlight']);
+    expect(result.current.map((l: { id: string }) => l.id)).toEqual(['proximity-circle', 'ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'site-icons', 'entity-glow', 'entity-highlight']);
   });
   it('flight layer uses sizeUnits meters', () => { const { result } = renderHook(() => useEntityLayers()); expect((result.current.find((l: { id: string }) => l.id === 'flights') as IconLayer).props.sizeUnits).toBe('meters'); });
   it('flight layer getAngle negates heading', () => { const { result } = renderHook(() => useEntityLayers()); expect(((result.current.find((l: { id: string }) => l.id === 'flights') as IconLayer).props.getAngle as (d: FlightEntity) => number)(mockRegularFlight)).toBe(-90); });
@@ -161,9 +161,9 @@ describe('useEntityLayers visibility toggles', () => {
     const data = (result.current.find((l: IconLayer) => l.id === 'flights') as IconLayer).props.data as FlightEntity[];
     expect(data).toHaveLength(1); expect(data[0].data.unidentified).toBe(true);
   });
-  it('all toggles ON returns 8 layers', () => {
-    const { result } = renderHook(() => useEntityLayers()); expect(result.current).toHaveLength(8);
-    expect(result.current.map((l: { id: string }) => l.id)).toEqual(['proximity-circle', 'ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'entity-glow', 'entity-highlight']);
+  it('all toggles ON returns 9 layers', () => {
+    const { result } = renderHook(() => useEntityLayers()); expect(result.current).toHaveLength(9);
+    expect(result.current.map((l: { id: string }) => l.id)).toEqual(['proximity-circle', 'ships', 'flights', 'airstrikes', 'groundCombat', 'targeted', 'site-icons', 'entity-glow', 'entity-highlight']);
   });
   it('airstrike layer has pickable=true', () => { const { result } = renderHook(() => useEntityLayers()); expect((result.current.find((l: IconLayer) => l.id === 'airstrikes') as IconLayer).props.pickable).toBe(true); });
   it('groundCombat layer has pickable=true', () => { const { result } = renderHook(() => useEntityLayers()); expect((result.current.find((l: IconLayer) => l.id === 'groundCombat') as IconLayer).props.pickable).toBe(true); });

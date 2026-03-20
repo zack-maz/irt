@@ -10,6 +10,13 @@ const mockState = {
   showAirstrikes: true,
   showGroundCombat: true,
   showTargeted: true,
+  showSites: true,
+  showNuclear: true,
+  showNaval: true,
+  showOil: true,
+  showAirbase: true,
+  showDam: true,
+  showPort: true,
   isLayersCollapsed: false,
   toggleFlights: vi.fn(),
   toggleGroundTraffic: vi.fn(),
@@ -19,6 +26,13 @@ const mockState = {
   toggleAirstrikes: vi.fn(),
   toggleGroundCombat: vi.fn(),
   toggleTargeted: vi.fn(),
+  toggleSites: vi.fn(),
+  toggleNuclear: vi.fn(),
+  toggleNaval: vi.fn(),
+  toggleOil: vi.fn(),
+  toggleAirbase: vi.fn(),
+  toggleDam: vi.fn(),
+  togglePort: vi.fn(),
   toggleLayers: vi.fn(),
 };
 
@@ -49,6 +63,13 @@ describe('LayerTogglesSlot', () => {
     mockState.showAirstrikes = true;
     mockState.showGroundCombat = true;
     mockState.showTargeted = true;
+    mockState.showSites = true;
+    mockState.showNuclear = true;
+    mockState.showNaval = true;
+    mockState.showOil = true;
+    mockState.showAirbase = true;
+    mockState.showDam = true;
+    mockState.showPort = true;
     mockState.isLayersCollapsed = false;
   });
 
@@ -57,10 +78,10 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 8 toggle row buttons', () => {
+  it('renders 15 toggle row buttons', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(8);
+    expect(switches).toHaveLength(15);
   });
 
   it('each button has role="switch" and aria-checked', () => {
@@ -76,7 +97,7 @@ describe('LayerTogglesSlot', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
     const labels = switches.map((btn) => btn.textContent?.trim());
-    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Events', 'Airstrikes', 'Ground Combat', 'Targeted']);
+    expect(labels).toEqual(['Flights', 'Ground', 'Unidentified', 'Ships', 'Events', 'Airstrikes', 'Ground Combat', 'Targeted', 'Sites', 'Nuclear', 'Naval', 'Oil', 'Airbase', 'Dam', 'Port']);
   });
 
   it('clicking Flights toggle calls toggleFlights', () => {

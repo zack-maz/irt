@@ -3,16 +3,17 @@ import { useUIStore } from '@/stores/uiStore';
 import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
-import type { MapEntity } from '@/types/entities';
+import { useSiteStore } from '@/stores/siteStore';
+import type { MapEntity, SiteEntity } from '@/types/entities';
 
 export interface SelectedEntityResult {
-  entity: MapEntity | null;
+  entity: MapEntity | SiteEntity | null;
   isLost: boolean;
   lastSeen: number;
 }
 
 interface LastKnown {
-  entity: MapEntity;
+  entity: MapEntity | SiteEntity;
   lastSeen: number;
 }
 
@@ -21,6 +22,7 @@ export function useSelectedEntity(): SelectedEntityResult {
   const flights = useFlightStore((s) => s.flights);
   const ships = useShipStore((s) => s.ships);
   const events = useEventStore((s) => s.events);
+  const sites = useSiteStore((s) => s.sites);
 
   const lastKnownRef = useRef<LastKnown | null>(null);
 
@@ -36,6 +38,7 @@ export function useSelectedEntity(): SelectedEntityResult {
       flights.find((f) => f.id === selectedId) ??
       ships.find((s) => s.id === selectedId) ??
       events.find((e) => e.id === selectedId) ??
+      sites.find((s) => s.id === selectedId) ??
       null;
 
     if (found) {
@@ -55,5 +58,5 @@ export function useSelectedEntity(): SelectedEntityResult {
 
     // No entity found and no last-known (shouldn't normally happen)
     return { entity: null, isLost: false, lastSeen: 0 };
-  }, [selectedId, flights, ships, events]);
+  }, [selectedId, flights, ships, events, sites]);
 }

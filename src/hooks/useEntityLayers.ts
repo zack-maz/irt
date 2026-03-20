@@ -3,6 +3,9 @@ import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
+import { useSiteStore } from '@/stores/siteStore';
+import { useEventStore } from '@/stores/eventStore';
+import { computeAttackStatus } from '@/lib/attackStatus';
 import {
   ENTITY_COLORS,
   ICON_SIZE,
@@ -11,14 +14,25 @@ import {
 } from '@/components/map/layers/constants';
 import { getIconAtlas, ICON_MAPPING } from '@/components/map/layers/icons';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
-import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 
 const DIM_ALPHA = 40;
 
-function getIconForEntity(entity: MapEntity): string {
+/** Maps siteType to icon atlas key */
+const SITE_ICON_MAP: Record<string, string> = {
+  nuclear: 'siteNuclear',
+  naval: 'siteNaval',
+  oil: 'siteOil',
+  airbase: 'siteAirbase',
+  dam: 'siteDam',
+  port: 'sitePort',
+};
+
+function getIconForEntity(entity: MapEntity | SiteEntity): string {
   switch (entity.type) {
     case 'flight': return (entity as FlightEntity).data.onGround ? 'chevronGround' : 'chevron';
     case 'ship': return 'chevron';
+    case 'site': return SITE_ICON_MAP[(entity as SiteEntity).siteType] ?? 'diamond';
     case 'airstrike': return 'starburst';
     case 'ground_combat':
     case 'shelling':
@@ -29,11 +43,12 @@ function getIconForEntity(entity: MapEntity): string {
   }
 }
 
-function getColorForEntity(entity: MapEntity): [number, number, number] {
+function getColorForEntity(entity: MapEntity | SiteEntity): [number, number, number] {
   switch (entity.type) {
     case 'flight': return (entity as FlightEntity).data.unidentified
       ? [...ENTITY_COLORS.flightUnidentified] : [...ENTITY_COLORS.flight];
     case 'ship': return [...ENTITY_COLORS.ship];
+    case 'site': return [...ENTITY_COLORS.siteHealthy];
     case 'airstrike': return [...ENTITY_COLORS.airstrike];
     case 'ground_combat':
     case 'shelling':
@@ -44,7 +59,7 @@ function getColorForEntity(entity: MapEntity): [number, number, number] {
   }
 }
 
-function getAngleForEntity(entity: MapEntity): number {
+function getAngleForEntity(entity: MapEntity | SiteEntity): number {
   switch (entity.type) {
     case 'flight': return (entity as FlightEntity).data.heading === null ? 0 : -(entity as FlightEntity).data.heading!;
     case 'ship': return -((entity as ShipEntity).data.courseOverGround ?? 0);
@@ -61,6 +76,10 @@ export function useEntityLayers() {
   // Consume filtered arrays (not raw store data)
   const { flights: allFlights, ships, events } = useFilteredEntities();
 
+  // Site data (static, not filtered)
+  const sites = useSiteStore((s) => s.sites);
+  const allEvents = useEventStore((s) => s.events);
+
   const pulseEnabled = useUIStore((s) => s.pulseEnabled);
   const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
   const showFlights = useUIStore((s) => s.showFlights);
@@ -69,12 +88,23 @@ export function useEntityLayers() {
   const showAirstrikes = useUIStore((s) => s.showAirstrikes);
   const showGroundCombat = useUIStore((s) => s.showGroundCombat);
   const showTargeted = useUIStore((s) => s.showTargeted);
+  const showSites = useUIStore((s) => s.showSites);
+  const showNuclear = useUIStore((s) => s.showNuclear);
+  const showNaval = useUIStore((s) => s.showNaval);
+  const showOil = useUIStore((s) => s.showOil);
+  const showAirbase = useUIStore((s) => s.showAirbase);
+  const showDam = useUIStore((s) => s.showDam);
+  const showPort = useUIStore((s) => s.showPort);
   const selectedEntityId = useUIStore((s) => s.selectedEntityId);
   const hoveredEntityId = useUIStore((s) => s.hoveredEntityId);
 
   // Proximity circle state
   const proximityPin = useFilterStore((s) => s.proximityPin);
   const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
+
+  // Date range for attack status computation
+  const dateStart = useFilterStore((s) => s.dateStart);
+  const dateEnd = useFilterStore((s) => s.dateEnd);
 
   // Active entity = hovered (preview) or selected (pinned)
   const activeId = hoveredEntityId ?? selectedEntityId;
@@ -97,6 +127,31 @@ export function useEntityLayers() {
   const targetedEvents = useMemo(() =>
     events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)),
     [events]);
+
+  // Visible sites filtered by sub-toggles
+  const visibleSites = useMemo(() => {
+    if (!showSites) return [];
+    return sites.filter(s => {
+      switch (s.siteType) {
+        case 'nuclear': return showNuclear;
+        case 'naval': return showNaval;
+        case 'oil': return showOil;
+        case 'airbase': return showAirbase;
+        case 'dam': return showDam;
+        case 'port': return showPort;
+      }
+    });
+  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDam, showPort]);
+
+  // Compute attack status for all visible sites
+  const siteAttackMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const site of visibleSites) {
+      const status = computeAttackStatus(site, allEvents, dateStart, dateEnd);
+      map.set(site.id, status.isAttacked);
+    }
+    return map;
+  }, [visibleSites, allEvents, dateStart, dateEnd]);
 
   // Pulse animation state
   const [pulseOpacity, setPulseOpacity] = useState(1.0);
@@ -267,52 +322,79 @@ export function useEntityLayers() {
     },
   }), [flights, pulseOpacity, showAnyFlights, activeId]);
 
+  // Site layer
+  const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
+    id: 'site-icons',
+    visible: showSites,
+    data: visibleSites,
+    iconAtlas: getIconAtlas(),
+    iconMapping: ICON_MAPPING,
+    getIcon: (d: SiteEntity) => SITE_ICON_MAP[d.siteType] ?? 'diamond',
+    getPosition: (d: SiteEntity) => [d.lng, d.lat],
+    getSize: ICON_SIZE.site.meters,
+    sizeUnits: 'meters' as const,
+    sizeMinPixels: ICON_SIZE.site.minPixels,
+    sizeMaxPixels: ICON_SIZE.site.maxPixels,
+    getAngle: () => 0,
+    getColor: (d: SiteEntity) => {
+      const attacked = siteAttackMap.get(d.id) ?? false;
+      const [r, g, b] = attacked ? ENTITY_COLORS.siteAttacked : ENTITY_COLORS.siteHealthy;
+      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+      return [r, g, b, 255];
+    },
+    billboard: false,
+    pickable: true,
+    updateTriggers: { getColor: [activeId, siteAttackMap] },
+  }), [visibleSites, showSites, activeId, siteAttackMap]);
+
   // Find active entity across all data sources
-  const activeEntity = useMemo<MapEntity | null>(() => {
+  const activeEntity = useMemo<MapEntity | SiteEntity | null>(() => {
     if (!activeId) return null;
     return flights.find((f) => f.id === activeId)
       ?? ships.find((s) => s.id === activeId)
       ?? events.find((e) => e.id === activeId)
+      ?? visibleSites.find((s) => s.id === activeId)
       ?? null;
-  }, [activeId, flights, ships, events]);
+  }, [activeId, flights, ships, events, visibleSites]);
 
   // Glow layer for active entity
-  const glowLayer = useMemo(() => new IconLayer<MapEntity>({
+  type AnyEntity = MapEntity | SiteEntity;
+  const glowLayer = useMemo(() => new IconLayer<AnyEntity>({
     id: 'entity-glow',
     visible: !!activeEntity,
     data: activeEntity ? [activeEntity] : [],
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
-    getIcon: (d: MapEntity) => getIconForEntity(d),
-    getPosition: (d: MapEntity) => [d.lng, d.lat],
+    getIcon: (d: AnyEntity) => getIconForEntity(d),
+    getPosition: (d: AnyEntity) => [d.lng, d.lat],
     getSize: ICON_SIZE.flight.meters * 2.0,
     sizeUnits: 'meters' as const,
     sizeMinPixels: ICON_SIZE.flight.minPixels * 2.0,
     sizeMaxPixels: ICON_SIZE.flight.maxPixels * 2.0,
-    getAngle: (d: MapEntity) => getAngleForEntity(d),
-    getColor: (d: MapEntity) => [...getColorForEntity(d), 60],
+    getAngle: (d: AnyEntity) => getAngleForEntity(d),
+    getColor: (d: AnyEntity) => [...getColorForEntity(d), 60],
     billboard: false,
     pickable: false,
   }), [activeEntity]);
 
   // Highlight layer for active entity
-  const highlightLayer = useMemo(() => new IconLayer<MapEntity>({
+  const highlightLayer = useMemo(() => new IconLayer<AnyEntity>({
     id: 'entity-highlight',
     visible: !!activeEntity,
     data: activeEntity ? [activeEntity] : [],
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
-    getIcon: (d: MapEntity) => getIconForEntity(d),
-    getPosition: (d: MapEntity) => [d.lng, d.lat],
+    getIcon: (d: AnyEntity) => getIconForEntity(d),
+    getPosition: (d: AnyEntity) => [d.lng, d.lat],
     getSize: ICON_SIZE.flight.meters * 1.2,
     sizeUnits: 'meters' as const,
     sizeMinPixels: ICON_SIZE.flight.minPixels * 1.2,
     sizeMaxPixels: ICON_SIZE.flight.maxPixels * 1.2,
-    getAngle: (d: MapEntity) => getAngleForEntity(d),
-    getColor: (d: MapEntity) => [...getColorForEntity(d), 255],
+    getAngle: (d: AnyEntity) => getAngleForEntity(d),
+    getColor: (d: AnyEntity) => [...getColorForEntity(d), 255],
     billboard: false,
     pickable: false,
   }), [activeEntity]);
 
-  return [proximityCircleLayer, shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, glowLayer, highlightLayer];
+  return [proximityCircleLayer, shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, siteLayer, glowLayer, highlightLayer];
 }
