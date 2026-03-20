@@ -96,11 +96,32 @@ New "Key Sites" toggle row in LayerTogglesSlot, with 6 indented sub-toggles:
 
 Same opacity-dim pattern as existing sub-toggles.
 
+### SiteEntity Type
+
+```typescript
+interface SiteEntity extends MapEntityBase {
+  type: 'site';
+  data: {
+    siteType: 'nuclear' | 'oil_refinery' | 'naval_base' | 'airbase' | 'dam' | 'port';
+    osmId: string;
+    osmUrl: string;     // https://www.openstreetmap.org/node/{id}
+    operator?: string;
+  };
+}
+```
+
+`'site'` is added to `EntityType` in `server/types.ts` alongside `'flight'` and `'ship'`. `SiteEntity` is added to the `MapEntity` discriminated union in the shared types. Phase 15 also updates `useSelectedEntity` to search `siteStore` alongside the existing three stores. The existing detail panel renders a new `SiteDetail` component for `type === 'site'`.
+
 ### Caching
 
 - Redis key: `sites:osm`
 - TTL: 24h (OSM data changes slowly)
-- `useSitePolling` hook: fetch once at startup + every 24h
+- `useSitePolling` hook: fetch once at startup, then every 24h via recursive setTimeout
+- **Tab visibility:** on visibility resume, check `Date.now() - lastFetchedAt > 24h`; if stale, fetch immediately. Otherwise skip (unlike flight/ship hooks which always re-fetch on visibility resume).
+
+### LayerTogglesSlot Overflow Note
+
+Adding 6 site sub-toggles brings the total toggle rows to ~15. This will overflow at minimum viewport heights. Phase 15 adds the toggles; Phase 18 redesigns the panel layout (scrollable or collapsible sections) to accommodate the full row count.
 
 ---
 
@@ -129,8 +150,10 @@ interface NewsItem {
 
 ### Noise Filter
 
-Drop articles where title contains none of (case-insensitive):
+Drop articles where **title + description combined** contain none of (case-insensitive):
 `Iran`, `Israel`, `Iraq`, `Syria`, `Gaza`, `Lebanon`, `Hezbollah`, `IRGC`, `airstrike`, `missile`, `strike`, `attack`, `military`, `conflict`
+
+Checking title+description (not title-only) prevents false negatives from articles titled around troop movements, named operations, or diplomatic events that omit explicit conflict keywords from the headline.
 
 ### Caching
 
@@ -192,12 +215,16 @@ Each notification card gets matched headlines from `newsStore`:
 - Haversine distance: flight or ship within 50km of a key site → inject notification
 - `type_weight = 8` for proximity alerts
 - Deduplicated by `siteId + entityId`, 30min cooldown to prevent spam
+- **Separation from server notifications:** `/api/notifications` returns top 10 scored server events. Proximity alerts are maintained as a separate `proximityAlerts` array in `notificationStore` and rendered as a distinct section in the drawer ("Proximity Alerts") above the main event list. They do not compete with the top-10 server cap and are not re-scored server-side.
 
 ### 24h Event Default (cross-cutting)
 
-- `filterStore` initializes `dateStart = Date.now() - 24 * 60 * 60 * 1000`
-- Map event layer shows last 24h by default
-- User can expand via existing date range slider
+The existing `filterStore` treats any non-null `dateStart` as "custom range mode" — which hides flights and ships. To avoid this side-effect, `DEFAULT_EVENT_WINDOW_MS = 86_400_000` is defined as a plain module-level constant in `filterStore.ts` (not a store field). The event rendering layer uses this constant as a soft lower bound when `dateStart` is `null`. Custom range mode activation logic is unchanged — it only triggers when the user explicitly sets `dateStart` via the slider.
+
+- `filterStore.dateStart` stays `null` at init — no custom-range suppression, flights and ships unaffected
+- Map event layer reads `DEFAULT_EVENT_WINDOW_MS` when `dateStart === null` to filter events
+- User expands the window via the date range slider (sets `dateStart`, activates custom-range mode as before)
+- `clearAll()` in Phase 18 resets user filters only — `DEFAULT_EVENT_WINDOW_MS` is a constant, not a store field, so it is unaffected by Reset All
 - Notification drawer: already 24h scoped — consistent
 
 ### UI — Bell Icon + Drawer
@@ -209,12 +236,14 @@ Each notification card gets matched headlines from `newsStore`:
 
 **Notification drawer:**
 - 360px wide, slides in from right
-- When both detail panel and notification drawer open: detail panel shifts left (no overlap)
+- **Panel coexistence:** when both notification drawer and detail panel are open simultaneously, detail panel translates left by 360px (matching drawer width) via a CSS custom property `--notification-drawer-offset`. The detail panel's existing `translate-x` animation is updated to account for this offset. Z-index: notification drawer = same level as detail panel; bell icon = above both.
+- **Escape key:** closes whichever panel was opened most recently (LIFO). If both are open, first Escape closes notification drawer, second closes detail panel.
 - Each card: event type badge, location, relative timestamp, severity bar (visual), 1–3 news headline links
+- Proximity alerts rendered as a separate section above server-scored events
 - "Clear all" button
 - "Last updated Xs ago" footer
 
-**`/api/notifications`** pre-scores and returns sorted list — no client-side scoring.
+**`/api/notifications`** pre-scores and returns sorted server events — no client-side re-scoring of server events. Proximity alerts are client-side only (see above).
 
 ---
 
@@ -234,6 +263,12 @@ Each notification card gets matched headlines from `newsStore`:
 - **Reset All** button — clears all filters to defaults
 - Collapse empty/inactive sections by default
 - Fix known UX issues: slider behavior, label truncation
+- **Remove Minute granularity** from the date range slider — `STEP_MS` record and `snapToStep` retain only `Hr` and `Day` options. The `Min` granularity toggle button is removed from the UI.
+
+### LayerTogglesSlot Redesign
+
+- Make the toggles panel scrollable or collapsible to accommodate the full ~15 row count introduced by Phase 15's site sub-toggles
+- Address any overflow at minimum 1280px viewport height
 
 ### Layout Audit
 
@@ -250,7 +285,7 @@ Each notification card gets matched headlines from `newsStore`:
 Overpass API  →  /api/sites  →  Redis(24h)  →  siteStore  →  IconLayer
 GDELT DOC + BBC RSS + AJ RSS  →  /api/news  →  Redis(15min)  →  newsStore
 eventStore + newsStore + siteStore  →  /api/notifications  →  notificationStore  →  Bell + Drawer
-filterStore.dateStart = now-24h  →  event layer + notification drawer (default 24h window)
+DEFAULT_EVENT_WINDOW_MS (module constant, 86_400_000)  →  event layer soft lower bound (dateStart stays null at init)
 All entity stores  →  global search index  →  search bar dropdown
 ```
 
