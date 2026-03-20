@@ -8,6 +8,18 @@ A personal real-time intelligence dashboard for monitoring the Iran conflict and
 
 Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map — numbers over narratives.
 
+## Current Milestone: v1.1 Intelligence Layer
+
+**Goal:** Add key infrastructure sites overlay, news feed, notification center with severity scoring, oil markets tracker, search/filter/UI cleanup, and production deploy sync.
+
+**Target features:**
+- Key infrastructure sites overlay (nuclear, naval, oil, airbase, dam, port) via Overpass API
+- Multi-source news feed (GDELT DOC + BBC + Al Jazeera) with noise filtering
+- Notification center with severity scoring, news matching, and proximity alerts
+- Oil markets tracker (Brent, WTI, XLE, USO, XOM) with sparklines
+- Search bar, filter panel improvements, and UI cleanup
+- Production review and deploy sync
+
 ## Requirements
 
 ### Validated
@@ -24,16 +36,16 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 - ✓ Non-statistical news hidden by default with toggle — v0.9
 - ✓ Dark theme with clean grid layout (black/white, accent colors) — v0.9
 - ✓ Express API proxy for CORS, API key management, data normalization — v0.9
+- ✓ Upstash Redis cache + Vercel serverless deployment — v1.0
 
 ### Active
 
-- [ ] Timeline display (event timestamps, intervals, escalation patterns)
-- [ ] Force posture display (carrier groups, air defense coverage zones)
-- [ ] 2.5D hexagonal density columns for strike/event hotspots
-- [ ] Trajectory arc rendering for flight and missile paths
-- [ ] User-saved snapshots stored as local JSON files
-- [ ] Real-time position interpolation (smooth entity movement between polls)
-- [ ] Data freshness indicators per entity (visual staleness cues)
+- [ ] Key infrastructure sites overlay (nuclear, naval, oil, airbase, dam, port) via Overpass API
+- [ ] Multi-source news feed with conflict noise filtering (GDELT DOC, BBC, Al Jazeera)
+- [ ] Notification center with severity scoring, news matching, and 24h event default
+- [ ] Oil markets tracker with sparkline charts (Brent, WTI, XLE, USO, XOM)
+- [ ] Global search bar with entity filtering
+- [ ] Filter panel improvements (Reset All, grouped sections) and UI cleanup
 
 ### Out of Scope
 
@@ -78,4 +90,4 @@ Brainstorm document: docs/brainstorms/2026-03-13-iran-conflict-monitor-brainstor
 | TypeScript pinned to ~5.9.3 | Avoid TS 6.0 breaking changes | ✓ Good — stable build |
 
 ---
-*Last updated: 2026-03-19 after v0.9 milestone*
+*Last updated: 2026-03-19 after v1.1 milestone start*
