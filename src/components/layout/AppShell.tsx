@@ -10,6 +10,7 @@ import { useShipPolling } from '@/hooks/useShipPolling';
 import { useEventPolling } from '@/hooks/useEventPolling';
 import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export function AppShell() {
   useFlightPolling();
@@ -17,6 +18,7 @@ export function AppShell() {
   useEventPolling();
   useSiteFetch();
   useNewsPolling();
+  useNotifications();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">
