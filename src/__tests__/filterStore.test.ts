@@ -381,6 +381,34 @@ describe('filterStore', () => {
     });
   });
 
+  describe('24h default event window', () => {
+    it('isDefaultWindowActive returns true when dateStart=null and dateEnd=null', () => {
+      const s = useFilterStore.getState();
+      expect(s.isDefaultWindowActive()).toBe(true);
+    });
+
+    it('isDefaultWindowActive returns false when dateStart is non-null', () => {
+      useFilterStore.getState().setDateRange(Date.now() - 86400000, null);
+      expect(useFilterStore.getState().isDefaultWindowActive()).toBe(false);
+    });
+
+    it('isDefaultWindowActive returns false when dateEnd is non-null', () => {
+      useFilterStore.getState().setDateRange(null, Date.now());
+      expect(useFilterStore.getState().isDefaultWindowActive()).toBe(false);
+    });
+
+    it('isDefaultWindowActive returns false when both dateStart and dateEnd are non-null', () => {
+      useFilterStore.getState().setDateRange(Date.now() - 86400000, Date.now());
+      expect(useFilterStore.getState().isDefaultWindowActive()).toBe(false);
+    });
+
+    it('isDefaultWindowActive returns true after clearing date range', () => {
+      useFilterStore.getState().setDateRange(1000, 2000);
+      useFilterStore.getState().clearFilter('date');
+      expect(useFilterStore.getState().isDefaultWindowActive()).toBe(true);
+    });
+  });
+
   describe('activeFilterCount', () => {
     it('returns 0 when no filters are active', () => {
       expect(useFilterStore.getState().activeFilterCount()).toBe(0);

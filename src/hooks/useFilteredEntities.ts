@@ -3,23 +3,31 @@ import { useShallow } from 'zustand/react/shallow';
 import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
+import { useNewsStore } from '@/stores/newsStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { entityPassesFilters } from '@/lib/filters';
-import type { FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type { FlightEntity, ShipEntity, ConflictEventEntity, NewsCluster } from '@/types/entities';
+
+/** 24 hours in milliseconds */
+export const DEFAULT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Returns flight, ship, and event arrays filtered through the active filter predicates.
- * Consumes raw store data and applies entityPassesFilters using current filter state.
+ * Returns flight, ship, event, and news cluster arrays filtered through the active filter predicates.
+ * When no custom date range is active (isDefaultWindowActive), events and news clusters
+ * are filtered to the last 24 hours. Flights and ships are never affected by this default window.
  * Uses useShallow for the filter selector to avoid reference inequality re-renders.
  */
 export function useFilteredEntities(): {
   flights: FlightEntity[];
   ships: ShipEntity[];
   events: ConflictEventEntity[];
+  clusters: NewsCluster[];
 } {
   const rawFlights = useFlightStore((s) => s.flights);
   const rawShips = useShipStore((s) => s.ships);
   const rawEvents = useEventStore((s) => s.events);
+  const rawClusters = useNewsStore((s) => s.clusters);
+  const isDefaultWindowActive = useFilterStore((s) => s.isDefaultWindowActive)();
 
   const filters = useFilterStore(
     useShallow((s) => ({
@@ -48,10 +56,22 @@ export function useFilteredEntities(): {
     [rawShips, filters],
   );
 
-  const events = useMemo(
-    () => rawEvents.filter((e) => entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1])),
-    [rawEvents, filters],
-  );
+  const events = useMemo(() => {
+    let filtered = rawEvents.filter((e) => entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]));
+    if (isDefaultWindowActive) {
+      const cutoff = Date.now() - DEFAULT_WINDOW_MS;
+      filtered = filtered.filter((e) => e.timestamp >= cutoff);
+    }
+    return filtered;
+  }, [rawEvents, filters, isDefaultWindowActive]);
 
-  return { flights, ships, events };
+  const clusters = useMemo(() => {
+    if (isDefaultWindowActive) {
+      const cutoff = Date.now() - DEFAULT_WINDOW_MS;
+      return rawClusters.filter((c) => c.lastUpdated >= cutoff);
+    }
+    return rawClusters;
+  }, [rawClusters, isDefaultWindowActive]);
+
+  return { flights, ships, events, clusters };
 }

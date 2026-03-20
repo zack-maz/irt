@@ -52,6 +52,7 @@ export interface FilterState {
   setSettingPin: (v: boolean) => void;
   setGranularity: (g: Granularity) => void;
   isCustomRangeActive: () => boolean;
+  isDefaultWindowActive: () => boolean;
   clearFilter: (filter: FilterKey) => void;
   clearAll: () => void;
   activeFilterCount: () => number;
@@ -162,6 +163,8 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   },
 
   isCustomRangeActive: () => get().savedToggles !== null,
+
+  isDefaultWindowActive: () => get().dateStart === null && get().dateEnd === null,
 
   clearFilter: (filter) => {
     switch (filter) {
