@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Map,
   Source,
   Layer,
   NavigationControl,
   ScaleControl,
+  useMap,
 } from '@vis.gl/react-maplibre';
 import type { MapEvent } from '@vis.gl/react-maplibre';
 import type { PickingInfo } from '@deck.gl/core';
@@ -15,6 +16,7 @@ import { EntityTooltip } from './EntityTooltip';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity, SiteEntity } from '@/types/entities';
@@ -35,6 +37,25 @@ import { MapVignette } from './MapVignette';
 import { CoordinateReadout } from './CoordinateReadout';
 import { CompassControl } from './CompassControl';
 import { ProximityAlertOverlay } from './ProximityAlertOverlay';
+
+/** Watches notificationStore.flyToTarget and animates the map. Renders null. */
+function FlyToHandler() {
+  const { current: map } = useMap();
+  const flyToTarget = useNotificationStore((s) => s.flyToTarget);
+  const setFlyToTarget = useNotificationStore((s) => s.setFlyToTarget);
+
+  useEffect(() => {
+    if (!flyToTarget || !map) return;
+    map.flyTo({
+      center: [flyToTarget.lng, flyToTarget.lat],
+      zoom: flyToTarget.zoom,
+      duration: 1500,
+    });
+    setFlyToTarget(null);
+  }, [flyToTarget, map, setFlyToTarget]);
+
+  return null;
+}
 
 interface HoverState {
   entity: MapEntity | SiteEntity;
@@ -217,6 +238,7 @@ export function BaseMap() {
         />
         <CompassControl />
         <ProximityAlertOverlay />
+        <FlyToHandler />
       </Map>
       <MapVignette />
       <div className="absolute bottom-8 right-14 z-[var(--z-controls)]">

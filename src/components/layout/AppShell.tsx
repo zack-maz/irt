@@ -11,6 +11,7 @@ import { useEventPolling } from '@/hooks/useEventPolling';
 import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
 import { useNotifications } from '@/hooks/useNotifications';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 
 export function AppShell() {
   useFlightPolling();
@@ -37,6 +38,9 @@ export function AppShell() {
         <CountersSlot />
         <LayerTogglesSlot />
       </div>
+
+      {/* Top-right: Notification bell */}
+      <NotificationBell />
 
       {/* Right side: Filter panel + Detail panel */}
       <FilterPanelSlot />
