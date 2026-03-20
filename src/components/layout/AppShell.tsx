@@ -8,11 +8,13 @@ import { BaseMap } from '@/components/map/BaseMap';
 import { useFlightPolling } from '@/hooks/useFlightPolling';
 import { useShipPolling } from '@/hooks/useShipPolling';
 import { useEventPolling } from '@/hooks/useEventPolling';
+import { useSiteFetch } from '@/hooks/useSiteFetch';
 
 export function AppShell() {
   useFlightPolling();
   useShipPolling();
   useEventPolling();
+  useSiteFetch();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">
