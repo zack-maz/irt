@@ -146,7 +146,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 14. Vercel Deployment | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 15. Key Sites Overlay | 2/2 | Complete    | 2026-03-20 | - |
 | 16. News Feed | 3/3 | Complete    | 2026-03-20 | - |
-| 17. Notification Center | 4/4 | Complete   | 2026-03-20 | - |
+| 17. Notification Center | 4/4 | Complete    | 2026-03-20 | - |
 | 18. Oil Markets Tracker | v1.1 | 0/TBD | Not started | - |
 | 19. Search, Filter & UI Cleanup | v1.1 | 0/TBD | Not started | - |
 | 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |
