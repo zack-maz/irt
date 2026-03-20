@@ -1,21 +1,13 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock config module
-vi.mock('../../config.js', () => ({
-  config: {
-    aisstream: {
-      apiKey: 'test-ais-api-key',
-    },
-  },
-}));
-
 // Fake WebSocket class for testing
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
   url: string;
   listeners: Record<string, Array<(event: unknown) => void>> = {};
   sentMessages: string[] = [];
+  closeCallCount = 0;
 
   constructor(url: string) {
     this.url = url;
@@ -31,6 +23,10 @@ class FakeWebSocket {
     this.sentMessages.push(data);
   }
 
+  close(): void {
+    this.closeCallCount++;
+  }
+
   // Simulate server events
   simulateOpen(): void {
     for (const handler of this.listeners['open'] ?? []) {
@@ -44,9 +40,9 @@ class FakeWebSocket {
     }
   }
 
-  simulateClose(): void {
-    for (const handler of this.listeners['close'] ?? []) {
-      handler({});
+  simulateError(error?: unknown): void {
+    for (const handler of this.listeners['error'] ?? []) {
+      handler(error ?? new Error('WebSocket error'));
     }
   }
 }
@@ -73,33 +69,32 @@ const samplePositionReport = {
   },
 };
 
-describe('AISStream Adapter', () => {
-  let getShips: typeof import('../../adapters/aisstream.js').getShips;
-  let getLastMessageTime: typeof import('../../adapters/aisstream.js').getLastMessageTime;
-  let connectAISStream: typeof import('../../adapters/aisstream.js').connectAISStream;
+describe('AISStream Adapter - collectShips()', () => {
+  let collectShips: typeof import('../../adapters/aisstream.js').collectShips;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-15T00:00:00Z'));
     FakeWebSocket.instances = [];
     vi.stubGlobal('WebSocket', FakeWebSocket);
-    vi.stubGlobal('setTimeout', vi.fn());
+    process.env.AISSTREAM_API_KEY = 'test-key';
+    delete process.env.AISSTREAM_COLLECT_MS;
 
     // Reset module state between tests
     vi.resetModules();
     const mod = await import('../../adapters/aisstream.js');
-    getShips = mod.getShips;
-    getLastMessageTime = mod.getLastMessageTime;
-    connectAISStream = mod.connectAISStream;
+    collectShips = mod.collectShips;
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    delete process.env.AISSTREAM_API_KEY;
+    delete process.env.AISSTREAM_COLLECT_MS;
   });
 
-  it('sends subscription with correct bbox and API key on open', () => {
-    connectAISStream();
+  it('sends correct subscription with API key and bbox on open', async () => {
+    const promise = collectShips();
 
     expect(FakeWebSocket.instances).toHaveLength(1);
     const ws = FakeWebSocket.instances[0];
@@ -110,20 +105,26 @@ describe('AISStream Adapter', () => {
 
     expect(ws.sentMessages).toHaveLength(1);
     const subscription = JSON.parse(ws.sentMessages[0]);
-    expect(subscription.APIKey).toBe('test-ais-api-key');
+    expect(subscription.APIKey).toBe('test-key');
     expect(subscription.BoundingBoxes).toEqual([
       [[0.0, 20.0], [50.0, 80.0]],
     ]);
     expect(subscription.FilterMessageTypes).toEqual(['PositionReport']);
+
+    // Let the collect window expire to resolve
+    await vi.advanceTimersByTimeAsync(5000);
+    await promise;
   });
 
-  it('normalizes PositionReport messages to ShipEntity and stores in Map', () => {
-    connectAISStream();
+  it('normalizes PositionReport to ShipEntity correctly', async () => {
+    const promise = collectShips();
     const ws = FakeWebSocket.instances[0];
     ws.simulateOpen();
     ws.simulateMessage(samplePositionReport);
 
-    const ships = getShips();
+    await vi.advanceTimersByTimeAsync(5000);
+    const ships = await promise;
+
     expect(ships).toHaveLength(1);
     const ship = ships[0];
     expect(ship.id).toBe('ship-123456789');
@@ -138,12 +139,40 @@ describe('AISStream Adapter', () => {
     expect(ship.data.trueHeading).toBe(175);
   });
 
-  it('getShips() returns all stored ships', () => {
-    connectAISStream();
+  it('deduplicates by MMSI (later message overwrites earlier)', async () => {
+    const promise = collectShips();
     const ws = FakeWebSocket.instances[0];
     ws.simulateOpen();
 
-    // Add two different ships
+    // First message
+    ws.simulateMessage(samplePositionReport);
+
+    // Same MMSI, updated position
+    ws.simulateMessage({
+      ...samplePositionReport,
+      Message: {
+        PositionReport: {
+          ...samplePositionReport.Message.PositionReport,
+          Latitude: 28.0,
+          Longitude: 53.0,
+        },
+      },
+    });
+
+    await vi.advanceTimersByTimeAsync(5000);
+    const ships = await promise;
+
+    expect(ships).toHaveLength(1);
+    expect(ships[0].lat).toBe(28.0);
+    expect(ships[0].lng).toBe(53.0);
+  });
+
+  it('resolves after AISSTREAM_COLLECT_MS timeout with collected ships', async () => {
+    const promise = collectShips();
+    const ws = FakeWebSocket.instances[0];
+    ws.simulateOpen();
+
+    // Send two different ships
     ws.simulateMessage(samplePositionReport);
     ws.simulateMessage({
       ...samplePositionReport,
@@ -162,57 +191,46 @@ describe('AISStream Adapter', () => {
       },
     });
 
-    const ships = getShips();
+    await vi.advanceTimersByTimeAsync(5000);
+    const ships = await promise;
+
     expect(ships).toHaveLength(2);
+    expect(ws.closeCallCount).toBe(1); // WebSocket closed after collect window
   });
 
-  it('upserts duplicate MMSI entries', () => {
-    connectAISStream();
+  it('rejects on WebSocket error', async () => {
+    const promise = collectShips();
     const ws = FakeWebSocket.instances[0];
-    ws.simulateOpen();
 
-    ws.simulateMessage(samplePositionReport);
-    expect(getShips()).toHaveLength(1);
-    expect(getShips()[0].lat).toBe(27.5);
+    ws.simulateError(new Error('Connection refused'));
 
-    // Same MMSI, new position
-    ws.simulateMessage({
-      ...samplePositionReport,
-      Message: {
-        PositionReport: {
-          ...samplePositionReport.Message.PositionReport,
-          Latitude: 28.0,
-          Longitude: 53.0,
-        },
-      },
-    });
-
-    const ships = getShips();
-    expect(ships).toHaveLength(1); // Still 1 ship
-    expect(ships[0].lat).toBe(28.0); // Updated position
+    await expect(promise).rejects.toThrow('AISStream WebSocket connection failed');
   });
 
-  it('getLastMessageTime() returns timestamp of most recent message', () => {
-    expect(getLastMessageTime()).toBe(0); // No messages yet
+  it('throws when AISSTREAM_API_KEY is not set', async () => {
+    delete process.env.AISSTREAM_API_KEY;
+    // Need to reimport since env is checked at call time
+    vi.resetModules();
+    const mod = await import('../../adapters/aisstream.js');
 
-    connectAISStream();
-    const ws = FakeWebSocket.instances[0];
+    await expect(mod.collectShips()).rejects.toThrow('AISSTREAM_API_KEY');
+  });
+
+  it('respects custom AISSTREAM_COLLECT_MS env var', async () => {
+    process.env.AISSTREAM_COLLECT_MS = '2000';
+    vi.resetModules();
+    const mod = await import('../../adapters/aisstream.js');
+
+    const promise = mod.collectShips();
+    const ws = FakeWebSocket.instances[FakeWebSocket.instances.length - 1];
     ws.simulateOpen();
     ws.simulateMessage(samplePositionReport);
 
-    expect(getLastMessageTime()).toBeGreaterThan(0);
-  });
+    // Advance only 2000ms (custom value), should resolve
+    await vi.advanceTimersByTimeAsync(2000);
+    const ships = await promise;
 
-  it('reconnects on WebSocket close with 5-second delay', () => {
-    connectAISStream();
-    const ws = FakeWebSocket.instances[0];
-    ws.simulateOpen();
-    ws.simulateClose();
-
-    const mockSetTimeout = vi.mocked(globalThis.setTimeout);
-    expect(mockSetTimeout).toHaveBeenCalledWith(
-      expect.any(Function),
-      5000,
-    );
+    expect(ships).toHaveLength(1);
+    expect(ws.closeCallCount).toBe(1);
   });
 });
