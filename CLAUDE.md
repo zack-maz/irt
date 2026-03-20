@@ -35,7 +35,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 
 - `src/components/map/constants.ts` — map configuration (terrain, bounds, styles)
 - `src/components/map/BaseMap.tsx` — main map component with all overlays
-- `src/components/layout/AppShell.tsx` — root layout shell (wires all three polling hooks)
+- `src/components/layout/AppShell.tsx` — root layout shell (wires all four polling hooks)
 - `src/components/ui/StatusPanel.tsx` — HUD status panel (visible entity counts + connection dots)
 - `src/components/layout/LayerTogglesSlot.tsx` — layer toggle panel (8 rows)
 - `src/components/layout/DetailPanelSlot.tsx` — right-side detail panel (360px slide-out)
@@ -46,6 +46,8 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - `src/stores/flightStore.ts` — flight data state (entities, connection health, metadata)
 - `src/hooks/useFlightPolling.ts` — 5s recursive setTimeout with tab visibility awareness
 - `src/stores/siteStore.ts` — site data state (entities, connection health)
+- `src/stores/newsStore.ts` — news data state (clusters, connection health)
+- `src/hooks/useNewsPolling.ts` — 15-min recursive setTimeout for news polling
 - `src/hooks/useSiteFetch.ts` — one-time site fetch on mount
 - `src/lib/attackStatus.ts` — cross-references sites with nearby GDELT events
 
@@ -54,7 +56,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **MapEntity** — discriminated union with minimal shared fields (`id`, `type`, `lat`, `lng`, `timestamp`, `label`) + nested type-specific data
 - **Entity types**: `flight`, `ship`, plus 11 `ConflictEventType` values, plus `site` (separate from MapEntity union)
 - **FlightEntity.data** — includes `unidentified: boolean` flag for hex-only/no-callsign flights
-- **API endpoints**: `/api/flights`, `/api/ships`, `/api/events`, `/api/sites` (separate, independent caching)
+- **API endpoints**: `/api/flights`, `/api/ships`, `/api/events`, `/api/sites`, `/api/news` (separate, independent caching)
 - **IRAN_BBOX** — covers Greater Middle East (south:15, north:42, west:30, east:70), not just Iran
 - **IRAN_CENTER** — (30.0, 50.0) with 500 NM radius for ADS-B queries
 
@@ -148,7 +150,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 
 - **Upstash Redis** — REST-based client (`@upstash/redis`) for serverless compatibility
 - **CacheEntry<T>** — stores `{data, fetchedAt}` for staleness computation; hard Redis TTL = 10x logical TTL
-- **Cache keys** — `flights:SOURCE`, `ships:ais`, `events:gdelt`, `sites:overpass`
+- **Cache keys** — `flights:SOURCE`, `ships:ais`, `events:gdelt`, `sites:overpass`, `news:gdelt`
 - **Redis module** — `server/cache/redis.ts` exports `cacheGet<T>`, `cacheSet<T>`, `redis` instance
 - **AISStream on-demand** — connect, collect for N ms, close per request (no persistent WebSocket)
 - **Ship merge/prune** — fresh ships merged with cached by MMSI, 10 min stale threshold
@@ -184,6 +186,20 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **SiteDetail** — detail panel with site type, operator, coordinates, attack status
 - **siteStore** — `src/stores/siteStore.ts` with `SiteConnectionStatus` including `'idle'` state
 - **CONFLICT_TOGGLE_GROUPS** — simplified to 3 groups (showOtherConflict types merged into showGroundCombat)
+
+## News Feed (Phase 16)
+
+- **GDELT DOC adapter** — `server/adapters/gdelt-doc.ts`, fetches GDELT DOC 2.0 ArtList mode for conflict news articles
+- **RSS adapter** — `server/adapters/rss.ts`, fetches from 5 feeds (BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye)
+- **NewsArticle** — `server/types.ts`, includes `sourceCountry?: string` field populated from GDELT `sourcecountry` or RSS feed config
+- **English filter** — GDELT queries include `sourcelang:english` inline modifier
+- **Keyword filter** — `server/lib/newsFilter.ts`, conflict-relevant keyword filtering
+- **Dedup/clustering** — `server/lib/newsClustering.ts`, Jaccard similarity (threshold 0.8, 5-token min) with 7-day sliding window
+- **Cache** — `news:gdelt` Redis key, 15-min TTL matching GDELT DOC update frequency
+- **Route** — `/api/news` returns `CacheResponse<NewsCluster[]>`
+- **newsStore** — `src/stores/newsStore.ts`, Zustand store with ConnectionStatus
+- **useNewsPolling** — `src/hooks/useNewsPolling.ts`, 15-min polling interval
+- **RSS_FEEDS** — each entry has `country` field for sourceCountry tagging
 
 ## Date Range Filter (Phase 11+13)
 

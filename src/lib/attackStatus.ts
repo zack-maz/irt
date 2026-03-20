@@ -1,6 +1,6 @@
 import type { SiteEntity, ConflictEventEntity } from '@/types/entities';
 
-const ATTACK_RADIUS_KM = 2;
+const ATTACK_RADIUS_KM = 5;
 
 function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -30,8 +30,8 @@ export function computeAttackStatus(
   events: ConflictEventEntity[],
   dateEnd: number | null,
 ): AttackStatus {
-  // Coarse bbox pre-filter (~0.025 degrees is roughly 2km+)
-  const COARSE_DEG = 0.025;
+  // Coarse bbox pre-filter (~0.05 degrees is roughly 5km+)
+  const COARSE_DEG = 0.05;
   const attacks = events.filter(e => {
     if (dateEnd !== null && e.timestamp > dateEnd) return false;
     // Coarse filter first

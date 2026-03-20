@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "functions": {
-    "api/vercel-entry.mjs": {
+    "api/vercel-entry.js": {
       "maxDuration": 60
     }
   },
