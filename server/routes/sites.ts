@@ -1,0 +1,37 @@
+import { Router } from 'express';
+import { cacheGet, cacheSet } from '../cache/redis.js';
+import { fetchSites } from '../adapters/overpass.js';
+import { SITES_CACHE_TTL } from '../constants.js';
+import type { SiteEntity } from '../types.js';
+
+/** Redis key for all cached infrastructure sites */
+const SITES_KEY = 'sites:all';
+
+/** Logical TTL in ms -- 24 hours for static site data */
+const LOGICAL_TTL_MS = SITES_CACHE_TTL;
+
+/** Hard Redis TTL in seconds -- 3 days fallback window */
+const REDIS_TTL_SEC = 259_200;
+
+export const sitesRouter = Router();
+
+sitesRouter.get('/', async (_req, res) => {
+  const cached = await cacheGet<SiteEntity[]>(SITES_KEY, LOGICAL_TTL_MS);
+
+  if (cached && !cached.stale) {
+    return res.json(cached);
+  }
+
+  try {
+    const sites = await fetchSites();
+    await cacheSet(SITES_KEY, sites, REDIS_TTL_SEC);
+    res.json({ data: sites, stale: false, lastFresh: Date.now() });
+  } catch (err) {
+    console.error('[sites] Overpass error:', (err as Error).message);
+    if (cached) {
+      res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
+    } else {
+      throw err; // Express 5 catches and forwards to errorHandler
+    }
+  }
+});

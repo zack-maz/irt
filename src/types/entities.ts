@@ -9,4 +9,6 @@ export type {
   MapEntityBase,
   BoundingBox,
   CacheResponse,
+  SiteEntity,
+  SiteType,
 } from '../../server/types.js';

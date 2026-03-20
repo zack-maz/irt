@@ -81,6 +81,19 @@ export interface CacheResponse<T> {
   lastFresh: number; // Unix ms of last successful fetch
 }
 
+export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'dam' | 'port';
+
+export interface SiteEntity {
+  id: string; // "site-{osmId}"
+  type: 'site';
+  siteType: SiteType;
+  lat: number;
+  lng: number;
+  label: string; // OSM name tag
+  operator?: string; // OSM operator tag
+  osmId: number;
+}
+
 export type FlightSource = 'opensky' | 'adsb' | 'adsblol';
 
 export class RateLimitError extends Error {

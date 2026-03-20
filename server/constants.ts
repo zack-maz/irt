@@ -24,6 +24,9 @@ export const KNOTS_TO_MS = 0.514444;
 export const FEET_TO_METERS = 0.3048;
 export const FPM_TO_MS = 0.00508; // feet per minute to meters per second
 
+// Sites cache TTL (24 hours -- static infrastructure data)
+export const SITES_CACHE_TTL = 86_400_000;
+
 // Cache TTL values per data source (milliseconds)
 export const CACHE_TTL = {
   flights: 10_000, // 10s -- OpenSky polling interval
