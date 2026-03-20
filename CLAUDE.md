@@ -59,7 +59,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 
 - **Polling** — recursive `setTimeout` (not `setInterval`) to avoid overlapping async fetches
 - **Tab visibility** — polling pauses on `document.visibilitychange` hidden, immediate fetch on visible
-- **Cache-first route** — server checks `flightCache.get()` before upstream OpenSky call to conserve API credits
+- **Cache-first route** — server checks Redis cache before upstream call to conserve API credits
 - **Connection state** — `ConnectionStatus` type: `'connected' | 'stale' | 'error' | 'loading'`
 - **Stale threshold** — 60s of no fresh data → clear flights entirely (prevents showing dangerously outdated positions)
 - **Full replace** — each poll replaces entire flights array atomically (no merge-by-ID)
@@ -84,7 +84,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **AppShell** — wires all three: `useFlightPolling()`, `useShipPolling()`, `useEventPolling()`
 - **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships gray (#9ca3af), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
 - **Entity icons** — flights/ships use chevron, airstrikes use starburst, ground combat uses explosion, targeted uses crosshair, other conflict uses xmark
-- **Icon sizing** — 8000m base with minPixels:24, maxPixels:160 for zoom-responsive scaling
+- **Icon sizing** — flights/ships 8000m base (minPixels:24, maxPixels:160); events 5000m base (minPixels:16, maxPixels:120)
 
 ## Conflict Event Data (Phase 8.1+)
 
@@ -140,3 +140,26 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Flight counters** — Iranian (originCountry === 'Iran'), Unidentified (data.unidentified flag); gated by showFlights/showGroundTraffic/pulseEnabled
 - **Event counters** — Airstrikes, Ground Combat, Targeted, Fatalities; gated by showEvents + per-category toggles
 - **Delta animation** — `@keyframes delta-fade` in app.css, 3s ease-out forwards via `animate-delta` class
+
+## Serverless Cache (Phase 13)
+
+- **Upstash Redis** — REST-based client (`@upstash/redis`) for serverless compatibility
+- **CacheEntry<T>** — stores `{data, fetchedAt}` for staleness computation; hard Redis TTL = 10x logical TTL
+- **Cache keys** — `flights:SOURCE`, `ships:ais`, `events:gdelt`
+- **Redis module** — `server/cache/redis.ts` exports `cacheGet<T>`, `cacheSet<T>`, `redis` instance
+- **AISStream on-demand** — connect, collect for N ms, close per request (no persistent WebSocket)
+- **Ship merge/prune** — fresh ships merged with cached by MMSI, 10 min stale threshold
+- **Events accumulator** — merge-by-ID upsert with WAR_START pruning
+- **GDELT backfill** — lazy on-demand via `backfillEvents()` on cache miss; direct URL construction (4 files/day sampling), batched concurrent downloads; `?backfill=true` query param forces re-run
+- **Backfill cooldown** — 1 hour via `events:backfill-ts` Redis key
+- **parseSqlDate** — uses `Date.UTC()` (not local time) for consistent timestamp comparisons
+
+## Date Range Filter (Phase 11+13)
+
+- **filterStore** — `dateStart: null` and `dateEnd: null` defaults (no filtering)
+- **Custom range mode** — activates when either dateStart or dateEnd becomes non-null; saves and suppresses flight/ship toggles
+- **Deactivation** — both must return to null (via Clear button or slider reset)
+- **Lo slider at WAR_START** — sends `null` dateStart (no lower bound)
+- **Hi slider at "now"** — sends `null` dateEnd (NOW_THRESHOLD_MS = 60s snap)
+- **DateRangeFilter** — custom pointer-based dual-thumb slider with granularity toggle (Min/Hr/Day)
+- **Granularity** — `STEP_MS` record, `snapToStep` floors timestamps to step boundary
