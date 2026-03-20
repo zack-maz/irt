@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v0.9 MVP** — Phases 1-12 (shipped 2026-03-19)
+- ✅ **v1.0 Deployment** — Phases 13-14 (shipped 2026-03-20)
 
 ## Phases
 
@@ -79,5 +80,5 @@ Plans:
 | 10. Detail Panel | v0.9 | 2/2 | Complete | 2026-03-18 |
 | 11. Smart Filters | v0.9 | 3/3 | Complete | 2026-03-18 |
 | 12. Analytics Dashboard | v0.9 | 1/1 | Complete | 2026-03-19 |
-| 13. Serverless Cache Migration | 4/4 | Complete   | 2026-03-20 | 2026-03-20 |
-| 14. Vercel Deployment | 2/2 | Complete    | 2026-03-20 | 2026-03-20 |
+| 13. Serverless Cache Migration | v1.0 | 4/4 | Complete | 2026-03-20 |
+| 14. Vercel Deployment | v1.0 | 2/2 | Complete | 2026-03-20 |

@@ -4,6 +4,37 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v1.0.0] - 2026-03-20
+
+### Phase 14: Vercel Deployment
+
+#### Added
+- Vercel serverless entry point (`server/vercel.ts`) with tsup bundling
+- `vercel.json` configuration routing SPA + API functions
+- Rate limiting middleware (configurable per-route limits)
+- Graceful config: server boots without crashing when optional API keys are absent
+- Node engine pin (>=20) in package.json
+
+#### Changed
+- Express app extracted to `createApp()` factory in `server/app.ts`
+- TypeScript build excludes test files from production bundle
+
+### Phase 13: Serverless Cache Migration
+
+#### Added
+- Upstash Redis cache (`@upstash/redis`) replacing in-memory EntityCache
+- `CacheEntry<T>` pattern with `fetchedAt` for staleness computation (hard TTL = 10x logical TTL)
+- AISStream on-demand connection model (connect-collect-close per request)
+- Ship merge/prune by MMSI with 10-min stale threshold
+- Events accumulator with merge-by-ID upsert and WAR_START pruning
+- GDELT backfill: lazy on-demand via direct URL construction, 4 files/day sampling, 1hr cooldown
+- `parseSqlDate` using `Date.UTC()` for consistent timestamp comparisons
+- 556 tests passing
+
+#### Removed
+- In-memory EntityCache class (replaced by Redis)
+- Persistent WebSocket connection for AISStream
+
 ## [v0.12.0] - 2026-03-18
 
 ### Phase 12: Analytics Dashboard

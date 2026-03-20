@@ -154,6 +154,16 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Backfill cooldown** — 1 hour via `events:backfill-ts` Redis key
 - **parseSqlDate** — uses `Date.UTC()` (not local time) for consistent timestamp comparisons
 
+## Vercel Deployment (Phase 14)
+
+- **Entry point** — `server/vercel.ts` exports Express app via `createApp()` factory in `server/app.ts`
+- **Bundle** — tsup bundles `server/vercel.ts` → `dist-server/vercel.cjs` (CommonJS for Vercel)
+- **vercel.json** — rewrites `/api/*` → serverless function, everything else → SPA `index.html`
+- **Rate limiting** — `express-rate-limit` middleware in `server/middleware/rateLimiter.ts`
+- **Graceful config** — `loadConfig()` returns defaults for missing env vars instead of throwing
+- **Node engine** — pinned `>=20` in package.json
+- **Build** — `npm run build` runs Vite (frontend) + tsup (server) + tsc (typecheck)
+
 ## Date Range Filter (Phase 11+13)
 
 - **filterStore** — `dateStart: null` and `dateEnd: null` defaults (no filtering)

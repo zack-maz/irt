@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), and conflict events (GDELT). Layer toggles with 4 conflict categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, and a real-time status HUD. 365 tests passing.
+Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), and conflict events (GDELT). Layer toggles with 4 conflict categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, smart filters (nationality, speed, altitude, proximity, date range), analytics counters dashboard, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 556 tests passing.
 
-**Next up:** Phase 11 — hierarchical event layer toggles, UI polish.
+**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20
 
 ## Tech Stack
 
@@ -26,6 +26,8 @@ Interactive 2.5D map of the Greater Middle East with live flights (3 sources), s
 | State | Zustand 5 |
 | Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
 | Backend | Express 5 (API proxy, port 3001) |
+| Cache | Upstash Redis (serverless-compatible) |
+| Hosting | Vercel (serverless functions + CDN) |
 | Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2 |
 | Testing | Vitest + Testing Library |
 
@@ -43,15 +45,17 @@ src/
 ├── types/          # TypeScript interfaces
 └── __tests__/      # Component and store tests
 server/
-├── adapters/       # OpenSky, AISStream, ACLED data adapters
-├── cache/          # In-memory entity cache with TTL
-├── routes/         # /api/flights, /api/ships, /api/events
-├── middleware/      # Error handler
+├── adapters/       # OpenSky, ADS-B Exchange, adsb.lol, AISStream, GDELT adapters
+├── cache/          # Upstash Redis cache module (cacheGet/cacheSet)
+├── routes/         # /api/flights, /api/ships, /api/events, /api/sources
+├── middleware/      # Error handler, rate limiting
 ├── __tests__/      # Adapter, cache, security, and type tests
-├── config.ts       # Environment-based configuration
+├── config.ts       # Environment-based configuration (graceful degradation)
 ├── constants.ts    # Bbox, cache TTLs, polling intervals
 ├── types.ts        # MapEntity discriminated union
-└── index.ts        # Express server entry point
+├── app.ts          # Express app factory (createApp)
+├── vercel.ts       # Vercel serverless entry point
+└── index.ts        # Local dev server entry point
 ```
 
 ## Design
@@ -64,7 +68,7 @@ server/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (365 tests)
+npx vitest run              # Run all tests (556 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode

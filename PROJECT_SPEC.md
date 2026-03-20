@@ -17,9 +17,11 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 | State | Zustand 5 (curried create pattern) |
 | Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
 | Backend | Express 5 (API proxy, port 3001) |
+| Cache | Upstash Redis (serverless-compatible) |
+| Hosting | Vercel (serverless functions + CDN) |
 | Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2 |
 | Testing | Vitest + Testing Library |
-| Dev Tooling | tsx watch (server), concurrently (parallel dev) |
+| Dev Tooling | tsx watch (server), concurrently (parallel dev), tsup (bundling) |
 
 ## Architecture
 
@@ -45,11 +47,12 @@ Browser (React SPA) — port 5173
   │   └── Analytics counters
   └── Zustand stores (mapStore, uiStore, entity stores)
 
-Express API Proxy — port 3001
-  ├── /api/flights → OpenSky Network (OAuth2, ~15s polling)
-  ├── /api/ships → AISStream.io (WebSocket, real-time push)
-  └── /api/events → ACLED (last 7 days, 1-5 min polling)
-  └── In-memory cache with staleness indicators
+Express API Proxy — port 3001 (local) / Vercel serverless (prod)
+  ├── /api/flights → OpenSky / ADS-B Exchange / adsb.lol
+  ├── /api/ships → AISStream.io (on-demand connect-collect-close)
+  ├── /api/events → GDELT v2 (15-min updates)
+  ├── /api/sources → per-source configuration status
+  └── Upstash Redis cache with staleness indicators
 ```
 
 ## Data Model
@@ -89,7 +92,7 @@ interface MapEntityBase {
 - **Map**: CARTO Dark Matter, terrain exaggeration 3.0, pitch 50 degrees
 - **News**: Non-statistical content hidden by default with toggle
 
-## Features (10 Phases)
+## Features (14 Phases)
 
 1. **Project Scaffolding & Theme** — Dark-themed React/Vite shell ✓
 2. **Base Map** — Interactive 2.5D map centered on Iran ✓
@@ -100,7 +103,11 @@ interface MapEntityBase {
 7. **StatusPanel & Source Config** — HUD with health dots ✓
 8. **Ship & Conflict Data** — AIS ships + GDELT events ✓
 9. **Layer Controls & News Toggle** — Category toggles, entity tooltips ✓
-10. **Detail Panel** — Click-to-inspect with live stats
+10. **Detail Panel** — Click-to-inspect with live stats ✓
+11. **Smart Filters** — Nationality, speed, altitude, proximity, date range ✓
+12. **Analytics Dashboard** — Visibility-aware counters with delta animations ✓
+13. **Serverless Cache Migration** — Upstash Redis for stateless deployment ✓
+14. **Vercel Deployment** — Serverless functions + CDN hosting ✓
 
 ## Constraints
 

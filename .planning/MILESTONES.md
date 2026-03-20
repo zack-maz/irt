@@ -23,3 +23,17 @@
 
 ---
 
+## v1.0 Deployment (Shipped: 2026-03-20)
+
+**Phases:** 2 (13-14) | **Plans:** 6/6 complete | **Commits:** ~15
+**Lines of code:** 13,637 TypeScript/CSS | **Timeline:** 2 days (2026-03-19 → 2026-03-20)
+
+**Key accomplishments:**
+1. Upstash Redis cache replacing all in-memory caches for serverless compatibility
+2. AISStream on-demand connection model (connect-collect-close per request)
+3. GDELT backfill with lazy on-demand historical data loading
+4. Vercel deployment with serverless functions + CDN-served SPA
+5. Rate limiting and graceful degradation for missing API keys
+
+---
+
