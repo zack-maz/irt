@@ -1,78 +1,61 @@
 import { Router } from 'express';
-import { readFileSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
-import { WAR_START } from '../constants.js';
+import { cacheGet, cacheSet } from '../cache/redis.js';
+import { fetchEvents } from '../adapters/gdelt.js';
+import { WAR_START, CACHE_TTL } from '../constants.js';
 import type { ConflictEventEntity } from '../types.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const BACKFILL_STATE_PATH = join(__dirname, '..', '.backfill-state.json');
+/** Redis key for accumulated GDELT events */
+const EVENTS_KEY = 'events:gdelt';
 
-function getLastBackfillTs(): number {
-  try {
-    const data = JSON.parse(readFileSync(BACKFILL_STATE_PATH, 'utf8'));
-    return data.lastBackfillTs ?? WAR_START;
-  } catch {
-    return WAR_START;
-  }
-}
+/** Logical TTL in ms -- used to compute staleness (15 minutes) */
+const LOGICAL_TTL_MS = CACHE_TTL.events;
 
-function saveLastBackfillTs(ts: number): void {
-  try {
-    writeFileSync(BACKFILL_STATE_PATH, JSON.stringify({ lastBackfillTs: ts }));
-  } catch { /* silently fail */ }
-}
-
-/** Accumulated events map, keyed by entity ID */
-const eventMap = new Map<string, ConflictEventEntity>();
-
-/** Merge new events into accumulator and prune events before war start */
-function mergeEvents(incoming: ConflictEventEntity[]): ConflictEventEntity[] {
-  for (const event of incoming) {
-    eventMap.set(event.id, event);
-  }
-  for (const [id, event] of eventMap) {
-    if (event.timestamp < WAR_START) {
-      eventMap.delete(id);
-    }
-  }
-  return Array.from(eventMap.values());
-}
+/** Hard Redis TTL in seconds -- 10x logical TTL (2.5 hours) for stale-but-servable data */
+const REDIS_TTL_SEC = 9000;
 
 export const eventsRouter = Router();
 
 eventsRouter.get('/', async (_req, res) => {
+  // Check cache first
+  const cached = await cacheGet<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
+
+  if (cached && !cached.stale) {
+    return res.json(cached);
+  }
+
   try {
     const fresh = await fetchEvents();
-    const all = mergeEvents(fresh);
-    res.json({ data: all, stale: false, lastFresh: Date.now() });
+
+    // Merge: seed with cached data (if any), then overwrite with fresh events
+    const eventMap = new Map<string, ConflictEventEntity>();
+    if (cached) {
+      for (const event of cached.data) {
+        eventMap.set(event.id, event);
+      }
+    }
+    for (const event of fresh) {
+      eventMap.set(event.id, event);
+    }
+
+    // Prune events with timestamp before WAR_START
+    for (const [id, event] of eventMap) {
+      if (event.timestamp < WAR_START) {
+        eventMap.delete(id);
+      }
+    }
+
+    const merged = Array.from(eventMap.values());
+    await cacheSet(EVENTS_KEY, merged, REDIS_TTL_SEC);
+    res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {
     console.error('[events] upstream error:', (err as Error).message);
-    if (eventMap.size > 0) {
+
+    if (cached) {
       // Prune stale entries even on error
-      for (const [id, event] of eventMap) {
-        if (event.timestamp < WAR_START) eventMap.delete(id);
-      }
-      res.json({ data: Array.from(eventMap.values()), stale: true, lastFresh: Date.now() });
+      const pruned = cached.data.filter((e) => e.timestamp >= WAR_START);
+      res.json({ data: pruned, stale: true, lastFresh: cached.lastFresh });
     } else {
-      throw err;
+      throw err; // Express 5 catches and forwards to errorHandler
     }
   }
 });
-
-// Incremental backfill on startup
-const lastTs = getLastBackfillTs();
-const backfillDays = Math.ceil((Date.now() - lastTs) / (24 * 60 * 60 * 1000));
-
-if (backfillDays > 0) {
-  backfillEvents(backfillDays)
-    .then((events) => {
-      mergeEvents(events);
-      saveLastBackfillTs(Date.now());
-      console.log(`[events] backfill loaded ${eventMap.size} events (${backfillDays} days from ${new Date(lastTs).toISOString()})`);
-    })
-    .catch((err) => {
-      console.error('[events] backfill failed:', (err as Error).message);
-    });
-}
