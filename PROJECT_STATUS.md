@@ -7,7 +7,7 @@
 ```
 v0.9 MVP:              [████████████████████] 12/12 phases (shipped 2026-03-19)
 v1.0 Deployment:       [████████████████████]  2/2  phases (shipped 2026-03-20)
-v1.1 Intelligence Layer: [██                  ]  1/6  phases (in progress)
+v1.1 Intelligence Layer: [██████████          ]  3/6  phases (in progress)
 ```
 
 ## Phase Status
@@ -30,10 +30,12 @@ v1.1 Intelligence Layer: [██                  ]  1/6  phases (in progress)
 | 13 | Serverless Cache Migration | v1.0 | Done | 2026-03-20 |
 | 14 | Vercel Deployment | v1.0 | Done | 2026-03-20 |
 | 15 | Key Sites Overlay | v1.1 | Done | 2026-03-20 |
+| 16 | News Feed | v1.1 | Done | 2026-03-20 |
+| 17 | Notification Center | v1.1 | Done | 2026-03-20 |
 
 ## Current Focus
 
-Phase 15 (Key Sites Overlay) complete. Next: Phase 16+ of v1.1 Intelligence Layer milestone.
+Phase 17 (Notification Center) complete. Next: Phase 18 (Oil Markets Tracker).
 
 ## What's Been Built
 
@@ -70,6 +72,10 @@ Phase 15 (Key Sites Overlay) complete. Next: Phase 16+ of v1.1 Intelligence Laye
 ### v1.1 Intelligence Layer (Phase 15+)
 
 **Phase 15: Key Sites Overlay** — Overpass/OSM adapter for key infrastructure (nuclear, naval, oil, airbase, desalination, port). SiteEntity type, siteStore, one-time fetch with Redis cache. Site IconLayer with 6 category toggles, attack status detection (orange glow for recently-hit sites), tooltip and SiteDetail panel. 571 tests passing.
+
+**Phase 16: News Feed** — GDELT DOC 2.0 + 5 RSS feeds (BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye) with conflict keyword filtering, Jaccard dedup/clustering, sourceCountry tagging, English-only GDELT filter. newsStore + 15-min polling. 618 tests passing.
+
+**Phase 17: Notification Center** — Severity-scored conflict notifications (type weight × log mentions × log sources × recency decay), news headline matching (temporal + geographic/keyword), proximity alerts for flights/ships approaching key sites within 50km, 24h default event window, notification bell with unread badge and dropdown. 647 tests passing.
 
 ## Blockers
 

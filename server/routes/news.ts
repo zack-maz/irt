@@ -16,9 +16,13 @@ const NEWS_FEED_KEY = 'news:feed';
 
 export const newsRouter = Router();
 
-newsRouter.get('/', async (_req, res) => {
-  // 1. Check cache first
-  const cached = await cacheGet<NewsCluster[]>(NEWS_FEED_KEY, NEWS_CACHE_TTL);
+newsRouter.get('/', async (req, res) => {
+  const forceRefresh = req.query.refresh === 'true';
+
+  // 1. Check cache first (skip on force refresh)
+  const cached = forceRefresh
+    ? null
+    : await cacheGet<NewsCluster[]>(NEWS_FEED_KEY, NEWS_CACHE_TTL);
   if (cached && !cached.stale) {
     return res.json(cached);
   }

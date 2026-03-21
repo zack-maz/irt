@@ -4,6 +4,49 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v1.1.0-alpha.3] - 2026-03-20
+
+### Phase 17: Notification Center
+
+#### Added
+- Severity scoring library (`src/lib/severity.ts`) — type weight × log(mentions) × log(sources) × recency decay
+- News matching library (`src/lib/newsMatching.ts`) — temporal + geographic/keyword correlation between GDELT events and news clusters
+- Time grouping library (`src/lib/timeGroup.ts`) — groups notifications into "Last hour", "Last 6 hours", "Last 24 hours"
+- Notification store (`src/stores/notificationStore.ts`) — derives scored notifications from eventStore + newsStore with flyToTarget action
+- `useNotifications` hook — connects stores, derives notifications, provides mark-read and fly-to actions
+- NotificationBell component (`src/components/layout/NotificationBell.tsx`) — bell icon with unread badge count
+- NotificationDropdown component — time-grouped notification cards with news headline previews
+- NotificationCard component — severity-scored card with event type, matched news, click-to-fly-to-event
+- `useProximityAlerts` hook — detects flights/ships within 50km of key sites, fires proximity notifications
+- ProximityAlertOverlay component — animated warning badges on map at alert locations with expand/collapse
+- 24h default event window in `useFilteredEntities` when no custom date filter is active
+- "Showing last 24h" label in FilterPanelSlot
+- `numMentions` and `numSources` fields added to GDELT event pipeline
+- `useSiteImage` hook — ArcGIS satellite thumbnail URLs for site detail panels
+- 647 tests passing (29 new)
+
+#### Changed
+- EventDetail, FlightDetail, SiteDetail panels gain satellite imagery and enhanced formatting
+- News keyword filter upgraded with word-boundary matching and ambiguous-keyword gating
+- Port icon changed from helm wheel to bollard (cleaner at small sizes)
+- Proximity alert badges sized down for less visual clutter
+
+## [v1.1.0-alpha.2] - 2026-03-20
+
+### Phase 16: News Feed
+
+#### Added
+- GDELT DOC 2.0 adapter (`server/adapters/gdelt-doc.ts`) for conflict news articles
+- RSS adapter (`server/adapters/rss.ts`) — 5 feeds: BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye
+- Conflict keyword filter (`server/lib/newsFilter.ts`) with whitelist matching
+- Jaccard dedup/clustering (`server/lib/newsClustering.ts`) — 0.8 similarity threshold, 7-day sliding window
+- `/api/news` route with Redis cache (15-min TTL)
+- `newsStore` Zustand store with ConnectionStatus tracking
+- `useNewsPolling` hook — 15-min recursive setTimeout
+- `sourceCountry` metadata tagging from GDELT `sourcecountry` field and RSS feed config
+- English-only filter for GDELT DOC queries (`sourcelang:english`)
+- 618 tests passing
+
 ## [v1.1.0-alpha.1] - 2026-03-20
 
 ### Phase 15: Key Sites Overlay

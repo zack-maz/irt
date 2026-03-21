@@ -5,6 +5,7 @@ import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
 import { computeAttackStatus } from '@/lib/attackStatus';
+import { useSiteImage } from '@/hooks/useSiteImage';
 import { DetailValue } from './DetailValue';
 
 interface SiteDetailProps {
@@ -22,12 +23,27 @@ export function SiteDetail({ entity }: SiteDetailProps) {
   const attack = computeAttackStatus(entity, events, dateEnd);
   const typeLabel = SITE_TYPE_LABELS[entity.siteType] ?? entity.siteType;
   const osmUrl = `https://www.openstreetmap.org/?mlat=${entity.lat}&mlon=${entity.lng}#map=15/${entity.lat}/${entity.lng}`;
+  const imageUrl = useSiteImage(entity.lat, entity.lng);
 
   const [showAll, setShowAll] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const visibleAttacks = showAll ? attack.attacks : attack.attacks.slice(0, MAX_VISIBLE_ATTACKS);
 
   return (
     <div className="flex flex-col gap-1">
+      {/* Site thumbnail */}
+      {imageUrl && !imgError && (
+        <div className="relative -mx-3 -mt-1 mb-2 overflow-hidden rounded-b-lg">
+          <img
+            src={imageUrl}
+            alt={entity.label}
+            onError={() => setImgError(true)}
+            className="h-36 w-full object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[var(--color-surface-overlay)] to-transparent" />
+        </div>
+      )}
+
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-0">
         Site Info
       </h3>

@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), conflict events (GDELT), news feed (GDELT DOC + RSS), and key infrastructure sites (Overpass/OSM). Layer toggles with 4 conflict categories + 6 site categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, smart filters (nationality, speed, altitude, proximity, date range), analytics counters dashboard, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 618 tests passing.
+Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), conflict events (GDELT), news feed (GDELT DOC + RSS), and key infrastructure sites (Overpass/OSM). Layer toggles with 4 conflict categories + 6 site categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, smart filters (nationality, speed, altitude, proximity, date range), analytics counters dashboard, severity-scored notification center with proximity alerts, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 647 tests passing.
 
-**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20 | v1.1 Intelligence Layer in progress (Phase 16 complete)
+**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20 | v1.1 Intelligence Layer in progress (Phase 17 complete)
 
 ## Tech Stack
 
@@ -68,7 +68,7 @@ server/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (618 tests)
+npx vitest run              # Run all tests (647 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode

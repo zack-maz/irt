@@ -141,7 +141,7 @@ export function FilterPanelSlot() {
   return (
     <div
       data-testid="filter-panel-slot"
-      className={`absolute top-4 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out max-h-[calc(100vh-2rem)] overflow-y-auto ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
+      className={`absolute top-14 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out max-h-[calc(100vh-4.5rem)] overflow-y-auto ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
     >
       <OverlayPanel>
         <div className="flex flex-col gap-1">

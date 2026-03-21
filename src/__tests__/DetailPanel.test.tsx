@@ -74,7 +74,7 @@ describe('DetailPanelSlot', () => {
       selectedEntityId: null,
       isDetailPanelOpen: false,
     });
-    useFlightStore.setState({ flights: [], activeSource: 'adsblol' as const });
+    useFlightStore.setState({ flights: [], activeSource: 'opensky' as const });
     useShipStore.setState({ ships: [] });
     useEventStore.setState({ events: [] });
   });

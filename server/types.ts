@@ -93,6 +93,7 @@ export interface SiteEntity {
   lng: number;
   label: string; // OSM name tag
   operator?: string; // OSM operator tag
+  wikidata?: string; // Wikidata QID (e.g. "Q83459") for thumbnail lookup
   osmId: number;
 }
 

@@ -111,6 +111,10 @@ export function useEntityLayers() {
 
   const flights = useMemo(() => {
     return allFlights.filter((f) => {
+      // Exclude European flights: Greek-registered, west of Turkey, or Balkans
+      if (f.data.originCountry === 'Greece') return false;
+      if (f.lng < 25) return false;
+      if (f.lat > 42 && f.lng < 30) return false;
       // Mutually exclusive: unidentified first, then ground, then regular
       if (f.data.unidentified) return pulseEnabled;
       if (f.data.onGround) return showGroundTraffic;

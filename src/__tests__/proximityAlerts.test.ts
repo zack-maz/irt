@@ -63,7 +63,7 @@ describe('computeProximityAlerts', () => {
     expect(result).toEqual([]);
   });
 
-  it('returns alert when unidentified flight is within 50km of a site', () => {
+  it('returns alert when unidentified flight is within 25km of a site', () => {
     // Same lat/lng as site = 0km distance
     const flights = [
       makeFlight({
@@ -87,15 +87,30 @@ describe('computeProximityAlerts', () => {
       flightLabel: 'UNKNOWN',
       heading: 270,
     });
-    expect(result[0].distanceKm).toBeLessThanOrEqual(50);
+    expect(result[0].distanceKm).toBeLessThanOrEqual(25);
   });
 
-  it('does NOT return alert when flight is > 50km away', () => {
-    // ~111km apart (1 degree latitude difference)
+  it('does NOT return alert when unidentified flight is on the ground', () => {
+    const flights = [
+      makeFlight({
+        id: 'uid-ground',
+        lat: 32.0,
+        lng: 51.0,
+        label: 'GROUNDED',
+        data: { unidentified: true, onGround: true, heading: 0 },
+      } as Partial<FlightEntity>),
+    ];
+    const sites = [makeSite()];
+    const result = computeProximityAlerts(flights, sites);
+    expect(result).toEqual([]);
+  });
+
+  it('does NOT return alert when flight is > 25km away', () => {
+    // ~33km apart (0.3 degree latitude difference)
     const flights = [
       makeFlight({
         id: 'uid-far',
-        lat: 33.0,
+        lat: 32.3,
         lng: 51.0,
         label: 'FAR',
         data: { unidentified: true, heading: 0 },
@@ -165,13 +180,13 @@ describe('computeProximityAlerts', () => {
   it('returns alerts sorted by distanceKm ascending', () => {
     const sites = [
       makeSite({ id: 'site-near', lat: 32.0, lng: 51.0, label: 'Near Site' }),
-      makeSite({ id: 'site-far', lat: 32.3, lng: 51.0, label: 'Far Site' }),
+      makeSite({ id: 'site-far', lat: 32.2, lng: 51.0, label: 'Far Site' }),
     ];
-    // Flight at 32.1 is ~11km from site-near, ~22km from site-far
+    // Flight at 32.05 is ~5.5km from site-near, ~16.7km from site-far
     const flights = [
       makeFlight({
         id: 'uid-1',
-        lat: 32.1,
+        lat: 32.05,
         lng: 51.0,
         label: 'ALERT',
         data: { unidentified: true, heading: 0 },

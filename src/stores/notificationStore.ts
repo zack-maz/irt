@@ -1,18 +1,15 @@
 import { create } from 'zustand';
-import type { ConflictEventType } from '@/types/ui';
-import type { MatchedHeadline } from '@/lib/newsMatching';
 
 export interface Notification {
-  id: string;
-  eventId: string;
-  type: ConflictEventType;
-  label: string;
-  locationName: string;
-  lat: number;
-  lng: number;
-  timestamp: number;
-  score: number; // Severity score (internal sort, not displayed)
-  matchedNews: MatchedHeadline[];
+  id: string; // cluster ID
+  title: string;
+  url: string;
+  source: string; // primary article source
+  sourceCount: number; // distinct sources in cluster
+  articleCount: number; // total articles in cluster
+  keywords: string[];
+  timestamp: number; // cluster firstSeen
+  lastUpdated: number;
 }
 
 export interface FlyToTarget {
@@ -69,8 +66,26 @@ export const useNotificationStore = create<NotificationState>()((set, get) => ({
 
   setNotifications: (notifications) => {
     const { readIds } = get();
-    const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
-    set({ notifications, unreadCount });
+    // Prune readIds that no longer match any current notification
+    const currentIds = new Set(notifications.map((n) => n.id));
+    let pruned = false;
+    const nextReadIds = new Set<string>();
+    for (const id of readIds) {
+      if (currentIds.has(id)) {
+        nextReadIds.add(id);
+      } else {
+        pruned = true;
+      }
+    }
+    if (pruned) {
+      persistReadIds(nextReadIds);
+    }
+    const unreadCount = notifications.filter((n) => !nextReadIds.has(n.id)).length;
+    set({
+      notifications,
+      unreadCount,
+      ...(pruned ? { readIds: nextReadIds } : {}),
+    });
   },
 
   markRead: (id) => {

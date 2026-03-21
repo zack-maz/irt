@@ -180,7 +180,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Country filtering** — Overpass area union with `ISO3166-1` tags for Middle East countries
 - **Attack status** — `src/lib/attackStatus.ts` cross-references site locations with recent GDELT events within 5km radius
 - **Site toggles** — 6 category toggles (Nuclear, Naval, Oil, Airbase, Desalination, Port) + "Hit Only" filter
-- **Site icons** — 6 distinct icons: nuclear hazard, anchor, oil drop, jet, water drop, crane
+- **Site icons** — 6 distinct icons: nuclear hazard, anchor, oil drop, jet, water drop, bollard
 - **Site colors** — healthy green (#22c55e), attacked orange (#f97316)
 - **Icon sizing** — sites 2000m base (minPixels:12, maxPixels:80); flights/ships reduced to 4000m; events to 3000m
 - **SiteDetail** — detail panel with site type, operator, coordinates, attack status
@@ -200,6 +200,24 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **newsStore** — `src/stores/newsStore.ts`, Zustand store with ConnectionStatus
 - **useNewsPolling** — `src/hooks/useNewsPolling.ts`, 15-min polling interval
 - **RSS_FEEDS** — each entry has `country` field for sourceCountry tagging
+
+## Notification Center (Phase 17)
+
+- **Severity scoring** — `src/lib/severity.ts`, formula: typeWeight × log(mentions+1) × log(sources+1) × recencyDecay
+- **Type weights** — airstrike 10, wmd 10, ground_combat 8, shelling 8, bombing 8, mass_violence 9, assassination 7, others 3-5
+- **Recency decay** — exponential decay over 24h (halfLife = 6h)
+- **News matching** — `src/lib/newsMatching.ts`, correlates GDELT events with news clusters by temporal proximity (±6h) + geographic/keyword overlap
+- **Time grouping** — `src/lib/timeGroup.ts`, buckets: "Last hour", "Last 6 hours", "Last 24 hours"
+- **notificationStore** — `src/stores/notificationStore.ts`, derives scored notifications from eventStore + newsStore
+- **useNotifications** — `src/hooks/useNotifications.ts`, connects stores, derives notifications, provides mark-read and fly-to actions
+- **NotificationBell** — `src/components/layout/NotificationBell.tsx`, bell icon with unread badge, click opens dropdown
+- **NotificationCard** — `src/components/notifications/NotificationCard.tsx`, severity-scored card with event type and matched news headlines
+- **Proximity alerts** — `src/hooks/useProximityAlerts.ts`, detects flights/ships within 50km of key sites
+- **ProximityAlertOverlay** — `src/components/map/ProximityAlertOverlay.tsx`, animated warning badges on map with expand/collapse popover
+- **24h default window** — `useFilteredEntities` applies 24h recency filter when no custom date range is active
+- **Fly-to-event** — clicking notification flies map to event coordinates and opens detail panel
+- **useSiteImage** — `src/hooks/useSiteImage.ts`, ArcGIS World Imagery tile URLs for satellite thumbnails
+- **Dev score display** — NotificationCard shows severity score in dev mode only (hidden in production)
 
 ## Date Range Filter (Phase 11+13)
 

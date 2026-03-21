@@ -273,27 +273,19 @@ export function getIconAtlas(): HTMLCanvasElement {
   ctx.closePath();
   ctx.fill();
 
-  // Icon 12 (offset 384): Helm Wheel/Port -- ship's wheel
+  // Icon 12 (offset 384): Bollard/Port -- mooring post
+  ctx.fillStyle = 'white';
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 2;
   const cx12 = 400;
-  const cy12 = 16;
-  // Outer circle
+  // Rounded cap
   ctx.beginPath();
-  ctx.arc(cx12, cy12, 12, 0, Math.PI * 2);
-  ctx.stroke();
-  // Inner circle
-  ctx.beginPath();
-  ctx.arc(cx12, cy12, 4, 0, Math.PI * 2);
-  ctx.stroke();
-  // 8 spokes at 45-degree intervals
-  for (let i = 0; i < 8; i++) {
-    const a = (i * Math.PI) / 4;
-    ctx.beginPath();
-    ctx.moveTo(cx12 + 4 * Math.cos(a), cy12 + 4 * Math.sin(a));
-    ctx.lineTo(cx12 + 12 * Math.cos(a), cy12 + 12 * Math.sin(a));
-    ctx.stroke();
-  }
+  ctx.arc(cx12, 10, 6, Math.PI, 0);
+  ctx.fill();
+  // Post body
+  ctx.fillRect(cx12 - 4, 10, 8, 12);
+  // Base plate
+  ctx.fillRect(cx12 - 8, 22, 16, 4);
 
   atlas = canvas;
   return canvas;

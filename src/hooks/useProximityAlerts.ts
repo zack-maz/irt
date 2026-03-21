@@ -4,8 +4,8 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useSiteStore } from '@/stores/siteStore';
 import { haversineKm } from '@/lib/geo';
 
-const PROXIMITY_THRESHOLD_KM = 50;
-const COARSE_DEG = 0.5; // ~50km coarse bbox pre-filter
+const PROXIMITY_THRESHOLD_KM = 25;
+const COARSE_DEG = 0.25; // ~25km coarse bbox pre-filter
 
 export interface ProximityAlert {
   siteId: string;
@@ -24,8 +24,10 @@ export function computeProximityAlerts(
   flights: FlightEntity[],
   sites: SiteEntity[],
 ): ProximityAlert[] {
-  // Filter to unidentified flights only
-  const unidentified = flights.filter((f) => f.data.unidentified === true);
+  // Filter to unidentified airborne flights only
+  const unidentified = flights.filter(
+    (f) => f.data.unidentified === true && !f.data.onGround,
+  );
   if (unidentified.length === 0 || sites.length === 0) return [];
 
   // For each site, find the closest unidentified flight within threshold

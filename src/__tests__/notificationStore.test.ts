@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useNotificationStore } from '@/stores/notificationStore';
 import type { Notification } from '@/stores/notificationStore';
-import type { ConflictEventType } from '@/types/ui';
 
 // Mock localStorage
 const storage: Record<string, string> = {};
@@ -14,32 +13,28 @@ vi.stubGlobal('localStorage', {
 function makeNotification(id: string, overrides: Partial<Notification> = {}): Notification {
   return {
     id,
-    eventId: id,
-    type: 'airstrike' as ConflictEventType,
-    label: `Event ${id}`,
-    locationName: 'Tehran, Iran',
-    lat: 35.69,
-    lng: 51.39,
+    title: `Breaking news ${id}`,
+    url: `https://example.com/${id}`,
+    source: 'BBC',
+    sourceCount: 2,
+    articleCount: 3,
+    keywords: ['airstrike', 'iran'],
     timestamp: Date.now(),
-    score: 10,
-    matchedNews: [],
+    lastUpdated: Date.now(),
     ...overrides,
   };
 }
 
 describe('notificationStore', () => {
   beforeEach(() => {
-    // Reset store state between tests
     const store = useNotificationStore.getState();
     store.setNotifications([]);
-    // Clear readIds by setting new empty ones
     useNotificationStore.setState({ readIds: new Set(), unreadCount: 0, isDropdownOpen: false, flyToTarget: null });
-    // Clear localStorage
     Object.keys(storage).forEach((k) => delete storage[k]);
   });
 
   it('setNotifications updates notifications and computes correct unreadCount', () => {
-    const notifications = [makeNotification('e1'), makeNotification('e2'), makeNotification('e3')];
+    const notifications = [makeNotification('n1'), makeNotification('n2'), makeNotification('n3')];
     useNotificationStore.getState().setNotifications(notifications);
 
     const state = useNotificationStore.getState();
@@ -48,65 +43,79 @@ describe('notificationStore', () => {
   });
 
   it('markRead adds id to readIds and decrements count', () => {
-    const notifications = [makeNotification('e1'), makeNotification('e2')];
+    const notifications = [makeNotification('n1'), makeNotification('n2')];
     useNotificationStore.getState().setNotifications(notifications);
 
-    useNotificationStore.getState().markRead('e1');
+    useNotificationStore.getState().markRead('n1');
 
     const state = useNotificationStore.getState();
-    expect(state.readIds.has('e1')).toBe(true);
+    expect(state.readIds.has('n1')).toBe(true);
     expect(state.unreadCount).toBe(1);
   });
 
   it('markRead persists to localStorage', () => {
-    const notifications = [makeNotification('e1')];
+    const notifications = [makeNotification('n1')];
     useNotificationStore.getState().setNotifications(notifications);
 
-    useNotificationStore.getState().markRead('e1');
+    useNotificationStore.getState().markRead('n1');
 
     const stored = JSON.parse(storage['notificationReadIds']);
-    expect(stored).toContain('e1');
+    expect(stored).toContain('n1');
   });
 
   it('markRead is idempotent (does not double-decrement)', () => {
-    const notifications = [makeNotification('e1'), makeNotification('e2')];
+    const notifications = [makeNotification('n1'), makeNotification('n2')];
     useNotificationStore.getState().setNotifications(notifications);
 
-    useNotificationStore.getState().markRead('e1');
-    useNotificationStore.getState().markRead('e1'); // second call
+    useNotificationStore.getState().markRead('n1');
+    useNotificationStore.getState().markRead('n1');
 
     expect(useNotificationStore.getState().unreadCount).toBe(1);
   });
 
   it('markAllRead sets unreadCount to 0 and persists', () => {
-    const notifications = [makeNotification('e1'), makeNotification('e2'), makeNotification('e3')];
+    const notifications = [makeNotification('n1'), makeNotification('n2'), makeNotification('n3')];
     useNotificationStore.getState().setNotifications(notifications);
 
     useNotificationStore.getState().markAllRead();
 
     const state = useNotificationStore.getState();
     expect(state.unreadCount).toBe(0);
-    expect(state.readIds.has('e1')).toBe(true);
-    expect(state.readIds.has('e2')).toBe(true);
-    expect(state.readIds.has('e3')).toBe(true);
+    expect(state.readIds.has('n1')).toBe(true);
+    expect(state.readIds.has('n2')).toBe(true);
+    expect(state.readIds.has('n3')).toBe(true);
 
     const stored = JSON.parse(storage['notificationReadIds']);
-    expect(stored).toContain('e1');
-    expect(stored).toContain('e2');
-    expect(stored).toContain('e3');
+    expect(stored).toContain('n1');
+    expect(stored).toContain('n2');
+    expect(stored).toContain('n3');
   });
 
   it('readIds survive setNotifications (stale read state)', () => {
-    const notifications = [makeNotification('e1'), makeNotification('e2')];
+    const notifications = [makeNotification('n1'), makeNotification('n2')];
     useNotificationStore.getState().setNotifications(notifications);
-    useNotificationStore.getState().markRead('e1');
+    useNotificationStore.getState().markRead('n1');
 
-    // Simulate a poll cycle delivering the same events again
+    // Simulate a poll cycle delivering the same clusters again
     useNotificationStore.getState().setNotifications(notifications);
 
     const state = useNotificationStore.getState();
-    expect(state.readIds.has('e1')).toBe(true);
-    expect(state.unreadCount).toBe(1); // only e2 is unread
+    expect(state.readIds.has('n1')).toBe(true);
+    expect(state.unreadCount).toBe(1);
+  });
+
+  it('prunes readIds for notifications that no longer exist', () => {
+    const notifications = [makeNotification('n1'), makeNotification('n2')];
+    useNotificationStore.getState().setNotifications(notifications);
+    useNotificationStore.getState().markRead('n1');
+    useNotificationStore.getState().markRead('n2');
+
+    // New poll cycle without n1
+    useNotificationStore.getState().setNotifications([makeNotification('n2')]);
+
+    const state = useNotificationStore.getState();
+    expect(state.readIds.has('n1')).toBe(false);
+    expect(state.readIds.has('n2')).toBe(true);
   });
 
   it('toggleDropdown toggles isDropdownOpen', () => {
@@ -120,7 +129,7 @@ describe('notificationStore', () => {
   });
 
   it('closeDropdown sets isDropdownOpen to false', () => {
-    useNotificationStore.getState().toggleDropdown(); // open
+    useNotificationStore.getState().toggleDropdown();
     useNotificationStore.getState().closeDropdown();
     expect(useNotificationStore.getState().isDropdownOpen).toBe(false);
   });

@@ -20,8 +20,8 @@ function AlertIcon({
     <div
       className="absolute"
       style={{
-        left: screenX - 12,
-        top: screenY - 12,
+        left: screenX - 8,
+        top: screenY - 8,
         zIndex: 'var(--z-controls)',
         pointerEvents: 'auto',
       }}
@@ -32,7 +32,7 @@ function AlertIcon({
           e.stopPropagation();
           onToggle();
         }}
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-black shadow-md animate-pulse hover:animate-none hover:bg-amber-400 transition-colors"
+        className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[8px] font-bold text-black shadow-md animate-pulse hover:animate-none hover:bg-amber-400 transition-colors"
         title={`Proximity alert: ${alert.siteLabel}`}
         aria-label={`Proximity alert at ${alert.siteLabel}`}
       >
@@ -41,24 +41,24 @@ function AlertIcon({
 
       {/* Expanded: detail card */}
       {isExpanded && (
-        <div className="absolute left-8 top-0 w-48 rounded-lg border border-amber-500/50 bg-[var(--color-surface-overlay)]/95 p-2 text-[11px] shadow-lg backdrop-blur-sm">
-          <div className="mb-1 flex items-center justify-between">
-            <span className="font-semibold text-amber-400">PROXIMITY ALERT</span>
+        <div className="absolute left-5 top-0 w-36 rounded-md border border-amber-500/50 bg-[var(--color-surface-overlay)]/95 px-1.5 py-1 text-[9px] shadow-lg backdrop-blur-sm">
+          <div className="mb-0.5 flex items-center justify-between">
+            <span className="font-semibold text-amber-400 text-[9px]">PROXIMITY ALERT</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onToggle();
               }}
-              className="ml-2 text-[10px] text-text-secondary hover:text-text-primary"
+              className="ml-1 text-[8px] text-text-secondary hover:text-text-primary"
               aria-label="Close alert details"
             >
               {'\u2715'}
             </button>
           </div>
-          <div className="mb-1 truncate font-medium text-text-primary">
+          <div className="mb-0.5 truncate font-medium text-text-primary">
             {alert.siteLabel}
           </div>
-          <div className="space-y-0.5 text-text-secondary">
+          <div className="space-y-px text-text-secondary">
             <div>
               <span className="text-text-tertiary">Flight:</span>{' '}
               <span className="text-text-primary">{alert.flightLabel}</span>
@@ -99,8 +99,12 @@ export function ProximityAlertOverlay() {
     if (!mapRef) return;
     const map = mapRef.getMap();
     map.on('move', handleMapMove);
+    // Collapse expanded alert on any map click
+    const handleMapClick = () => setExpandedSiteId(null);
+    map.on('click', handleMapClick);
     return () => {
       map.off('move', handleMapMove);
+      map.off('click', handleMapClick);
       cancelAnimationFrame(rafRef.current);
     };
   }, [mapRef, handleMapMove]);

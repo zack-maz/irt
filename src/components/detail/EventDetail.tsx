@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { ConflictEventEntity } from '@/types/entities';
 import { EVENT_TYPE_LABELS } from '@/types/ui';
+import { useSiteImage } from '@/hooks/useSiteImage';
 import { DetailValue } from './DetailValue';
 
 interface EventDetailProps {
@@ -10,9 +12,24 @@ export function EventDetail({ entity }: EventDetailProps) {
   const d = entity.data;
   const date = new Date(entity.timestamp).toISOString().slice(0, 10);
   const typeLabel = EVENT_TYPE_LABELS[entity.type] ?? entity.type;
+  const imageUrl = useSiteImage(entity.lat, entity.lng);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="flex flex-col gap-1">
+      {/* Satellite thumbnail */}
+      {!imgError && (
+        <div className="relative -mx-3 -mt-1 mb-2 overflow-hidden rounded-b-lg">
+          <img
+            src={imageUrl}
+            alt={d.locationName || 'Event location'}
+            onError={() => setImgError(true)}
+            className="h-36 w-full object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[var(--color-surface-overlay)] to-transparent" />
+        </div>
+      )}
+
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-0">
         Event
       </h3>

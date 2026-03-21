@@ -1,43 +1,67 @@
 import { useEffect } from 'react';
-import { useEventStore } from '@/stores/eventStore';
 import { useNewsStore } from '@/stores/newsStore';
 import { useNotificationStore } from '@/stores/notificationStore';
-import { computeSeverityScore } from '@/lib/severity';
-import { matchNewsToEvent } from '@/lib/newsMatching';
 import type { Notification } from '@/stores/notificationStore';
+import type { NewsCluster } from '@/types/entities';
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+/** Minimum distinct sources for a cluster to qualify as "major". */
+const MIN_SOURCES = 2;
+
+/** Minimum keyword count on primary article to qualify single-source clusters. */
+const MIN_KEYWORDS_SINGLE_SOURCE = 3;
 
 /**
- * Derives notifications from eventStore + newsStore.
- * Scores each event, matches news, and pushes into notificationStore.
+ * Count distinct source names across all articles in a cluster.
+ */
+function countDistinctSources(cluster: NewsCluster): number {
+  const sources = new Set<string>();
+  for (const article of cluster.articles) {
+    sources.add(article.source);
+  }
+  return sources.size;
+}
+
+/**
+ * Filter clusters to only "major" news:
+ * - Multi-source: 2+ distinct sources in the cluster, OR
+ * - High keyword density: primary article has 3+ conflict keywords
+ */
+function isMajorCluster(cluster: NewsCluster): boolean {
+  if (countDistinctSources(cluster) >= MIN_SOURCES) return true;
+  if (cluster.primaryArticle.keywords.length >= MIN_KEYWORDS_SINGLE_SOURCE) return true;
+  return false;
+}
+
+/**
+ * Derives notifications from newsStore clusters.
+ * Only major news releases (multi-source or high keyword density) become notifications.
  * Call once in AppShell alongside other polling hooks.
  */
 export function useNotifications(): void {
-  const events = useEventStore((s) => s.events);
   const clusters = useNewsStore((s) => s.clusters);
   const setNotifications = useNotificationStore((s) => s.setNotifications);
 
   useEffect(() => {
-    const cutoff = Date.now() - WEEK_MS;
-    const recentEvents = events.filter((e) => e.timestamp >= cutoff);
+    const major = clusters.filter(isMajorCluster);
 
-    const notifications: Notification[] = recentEvents.map((event) => ({
-      id: event.id,
-      eventId: event.id,
-      type: event.type,
-      label: event.label,
-      locationName: event.data.locationName,
-      lat: event.lat,
-      lng: event.lng,
-      timestamp: event.timestamp,
-      score: computeSeverityScore(event),
-      matchedNews: matchNewsToEvent(event, clusters),
-    }));
+    const notifications: Notification[] = major.map((cluster) => {
+      const sourceCount = countDistinctSources(cluster);
+      return {
+        id: cluster.id,
+        title: cluster.primaryArticle.title,
+        url: cluster.primaryArticle.url,
+        source: cluster.primaryArticle.source,
+        sourceCount,
+        articleCount: cluster.articles.length,
+        keywords: cluster.primaryArticle.keywords,
+        timestamp: cluster.firstSeen,
+        lastUpdated: cluster.lastUpdated,
+      };
+    });
 
-    // Sort by score descending (time grouping happens in UI)
-    notifications.sort((a, b) => b.score - a.score);
+    // Sort by lastUpdated descending (most recent activity first)
+    notifications.sort((a, b) => b.lastUpdated - a.lastUpdated);
 
     setNotifications(notifications);
-  }, [events, clusters, setNotifications]);
+  }, [clusters, setNotifications]);
 }

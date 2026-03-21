@@ -64,6 +64,52 @@ describe('newsFilter', () => {
       expect(result).toContain('military');
       expect(result.length).toBeGreaterThanOrEqual(3);
     });
+
+    it('uses word boundary matching — "war" does not match "forward" or "warned"', () => {
+      const result = matchesKeywords({ title: 'Stocks moved forward as traders warned of volatility' });
+      expect(result).toEqual([]);
+    });
+
+    it('uses word boundary matching — "iran" does not match "irana"', () => {
+      const result = matchesKeywords({ title: 'The city of Tirana announces new transit plan' });
+      expect(result).toEqual([]);
+    });
+
+    it('rejects articles matching exclusion patterns (new year celebrations)', () => {
+      const result = matchesKeywords({
+        title: 'Fireworks light up Tehran sky for New Year celebration',
+        summary: 'Thousands gather to celebrate the holiday with rocket-shaped fireworks',
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('rejects articles matching exclusion patterns (sports)', () => {
+      const result = matchesKeywords({
+        title: 'Iran football match ends in dramatic victory at World Cup',
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('ambiguous keywords alone do not pass filter', () => {
+      const result = matchesKeywords({ title: 'Clock tower strike heard across town' });
+      expect(result).toEqual([]);
+    });
+
+    it('ambiguous keywords pass when accompanied by non-ambiguous keyword', () => {
+      const result = matchesKeywords({ title: 'Military strike hits supply depot' });
+      expect(result).toContain('military');
+      expect(result).toContain('strike');
+    });
+
+    it('ambiguous "rocket" alone does not pass', () => {
+      const result = matchesKeywords({ title: 'Model rocket club launches new design' });
+      expect(result).toEqual([]);
+    });
+
+    it('ambiguous "attack" alone does not pass', () => {
+      const result = matchesKeywords({ title: 'Bear attack reported in national park' });
+      expect(result).toEqual([]);
+    });
   });
 
   describe('filterConflictArticles', () => {

@@ -1,20 +1,19 @@
 import type { NewsArticle } from '../types.js';
 
 /**
- * Broad geopolitical keyword whitelist for conflict relevance filtering.
- * Articles must match at least one keyword in title or summary to pass.
+ * Conflict-relevant keywords matched with word boundaries.
+ * Multi-word phrases use plain `includes` (boundaries implicit).
  */
 export const CONFLICT_KEYWORDS = new Set([
   // Military terms
   'airstrike',
   'missile',
-  'bomb',
+  'bombing',
   'strike',
   'troops',
   'drone',
   'casualties',
   'military',
-  'attack',
   'combat',
   'offensive',
   'artillery',
@@ -24,10 +23,14 @@ export const CONFLICT_KEYWORDS = new Set([
   'defense',
   'weapon',
   'nuclear',
-  'raid',
   'shelling',
   'rocket',
   'interceptor',
+  'militia',
+  'ammunition',
+  'warplane',
+  'airstrike',
+  'airstrikes',
   // Diplomatic terms
   'sanctions',
   'negotiations',
@@ -66,7 +69,7 @@ export const CONFLICT_KEYWORDS = new Set([
   'persian gulf',
   'red sea',
   // Conflict terms
-  'war',
+  'warfare',
   'conflict',
   'invasion',
   'blockade',
@@ -75,13 +78,74 @@ export const CONFLICT_KEYWORDS = new Set([
   'refugee',
   'humanitarian',
   'civilian',
-  'killed',
   'wounded',
   'destroyed',
 ]);
 
 /**
- * Check article text against the conflict keyword whitelist.
+ * Ambiguous keywords that only count as a match when a second
+ * (non-ambiguous) keyword also appears in the same article.
+ * These fire too often on their own (e.g. "clock strikes midnight",
+ * "rocket fireworks", "heart attack", "killed in car crash").
+ */
+const AMBIGUOUS_KEYWORDS = new Set([
+  'strike',
+  'attack',
+  'bomb',
+  'rocket',
+  'killed',
+  'raid',
+  'war',
+  'offensive',
+]);
+
+/**
+ * Exclusion patterns — if any match, the article is rejected regardless
+ * of keyword hits. Guards against celebratory / sports / entertainment
+ * false positives.
+ */
+const EXCLUSION_PATTERNS = [
+  'new year',
+  'firework',
+  'fireworks',
+  'celebration',
+  'celebrate',
+  'festival',
+  'holiday',
+  'parade',
+  'super bowl',
+  'world cup',
+  'box office',
+  'movie premiere',
+  'concert',
+  'cricket',
+  'basketball',
+  'football match',
+  'stock market',
+  'ipo',
+  'earnings report',
+  'fashion week',
+];
+
+/** Pre-compiled word-boundary regex cache */
+const keywordRegexCache = new Map<string, RegExp>();
+
+function getKeywordRegex(keyword: string): RegExp {
+  let re = keywordRegexCache.get(keyword);
+  if (!re) {
+    // Multi-word phrases don't need \b on interior spaces
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    re = new RegExp(`\\b${escaped}\\b`, 'i');
+    keywordRegexCache.set(keyword, re);
+  }
+  return re;
+}
+
+/**
+ * Check article text against the conflict keyword whitelist using
+ * word-boundary matching. Ambiguous keywords only count when
+ * accompanied by at least one non-ambiguous keyword.
+ *
  * @returns Array of matched keywords (empty = not conflict-relevant)
  */
 export function matchesKeywords(article: {
@@ -89,12 +153,34 @@ export function matchesKeywords(article: {
   summary?: string;
 }): string[] {
   const text = `${article.title} ${article.summary ?? ''}`.toLowerCase();
+
+  // Reject if any exclusion pattern matches
+  for (const pattern of EXCLUSION_PATTERNS) {
+    if (text.includes(pattern)) {
+      return [];
+    }
+  }
+
   const matched: string[] = [];
+  let hasNonAmbiguous = false;
+  let hasAmbiguous = false;
+  const ambiguousHits: string[] = [];
 
   for (const keyword of CONFLICT_KEYWORDS) {
-    if (text.includes(keyword)) {
-      matched.push(keyword);
+    if (getKeywordRegex(keyword).test(text)) {
+      if (AMBIGUOUS_KEYWORDS.has(keyword)) {
+        hasAmbiguous = true;
+        ambiguousHits.push(keyword);
+      } else {
+        hasNonAmbiguous = true;
+        matched.push(keyword);
+      }
     }
+  }
+
+  // Ambiguous keywords only included when a non-ambiguous keyword also matched
+  if (hasAmbiguous && hasNonAmbiguous) {
+    matched.push(...ambiguousHits);
   }
 
   return matched;

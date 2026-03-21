@@ -26,12 +26,12 @@ export const ENTITY_DOT_COLORS = {
 
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */
 export const ICON_SIZE = {
-  flight: { meters: 4000, minPixels: 24, maxPixels: 160 },
-  ship: { meters: 4000, minPixels: 24, maxPixels: 160 },
-  airstrike: { meters: 3000, minPixels: 16, maxPixels: 120 },
-  groundCombat: { meters: 3000, minPixels: 16, maxPixels: 120 },
-  targeted: { meters: 3000, minPixels: 16, maxPixels: 120 },
-  site: { meters: 2000, minPixels: 12, maxPixels: 80 },
+  flight: { meters: 1000, minPixels: 16, maxPixels: 120 },
+  ship: { meters: 1000, minPixels: 16, maxPixels: 120 },
+  airstrike: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  groundCombat: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  targeted: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  site: { meters: 1000, minPixels: 12, maxPixels: 80 },
 } as const;
 
 /** Pulse animation config for unidentified flights */

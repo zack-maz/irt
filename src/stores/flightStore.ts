@@ -4,20 +4,6 @@ import type { FlightSource } from '@/types/ui';
 
 export type ConnectionStatus = 'connected' | 'stale' | 'error' | 'loading' | 'rate_limited';
 
-const STORAGE_KEY = 'flight-source';
-
-function loadPersistedSource(): FlightSource {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'opensky' || stored === 'adsb' || stored === 'adsblol') return stored;
-  } catch { /* localStorage unavailable */ }
-  return 'adsblol';
-}
-
-function persistSource(source: FlightSource): void {
-  try { localStorage.setItem(STORAGE_KEY, source); } catch { /* silently fail */ }
-}
-
 interface FlightState {
   flights: FlightEntity[];
   connectionStatus: ConnectionStatus;
@@ -29,7 +15,6 @@ interface FlightState {
   setError: () => void;
   setLoading: () => void;
   clearStaleData: () => void;
-  setActiveSource: (source: FlightSource) => void;
 }
 
 export const useFlightStore = create<FlightState>()((set, get) => ({
@@ -38,7 +23,7 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
   lastFetchAt: null,
   lastFresh: null,
   flightCount: 0,
-  activeSource: loadPersistedSource(),
+  activeSource: 'opensky' as const,
 
   setFlightData: (response) =>
     set({
@@ -57,16 +42,4 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
 
   clearStaleData: () =>
     set({ flights: [], flightCount: 0, connectionStatus: 'error' }),
-
-  setActiveSource: (source) => {
-    persistSource(source);
-    set({
-      activeSource: source,
-      flights: [],
-      flightCount: 0,
-      connectionStatus: 'loading',
-      lastFetchAt: null,
-      lastFresh: null,
-    });
-  },
 }));

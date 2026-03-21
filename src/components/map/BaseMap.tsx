@@ -102,7 +102,9 @@ export function BaseMap() {
       // Suppress entity selection when placing a proximity pin
       if (useFilterStore.getState().isSettingPin) return;
       if (!info.object) {
-        // Empty map click does NOT dismiss panel -- panel persists until explicitly closed
+        // Empty map click dismisses detail panel and selection
+        selectEntity(null);
+        closeDetailPanel();
         return;
       }
       const entity = info.object as MapEntity | SiteEntity;

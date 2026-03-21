@@ -25,24 +25,8 @@ function mockFlight(overrides: Partial<FlightEntity> = {}): FlightEntity {
   };
 }
 
-// Mock localStorage for persistence tests
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: vi.fn((key: string) => store[key] ?? null),
-    setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
-    removeItem: vi.fn((key: string) => { delete store[key]; }),
-    clear: vi.fn(() => { store = {}; }),
-    get length() { return Object.keys(store).length; },
-    key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
-  };
-})();
-
 describe('flightStore', () => {
   beforeEach(() => {
-    vi.stubGlobal('localStorage', localStorageMock);
-    localStorageMock.clear();
-
     useFlightStore.setState({
       flights: [],
       connectionStatus: 'loading',
@@ -55,7 +39,6 @@ describe('flightStore', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
   });
 
   it('has correct initial state', () => {
@@ -65,6 +48,7 @@ describe('flightStore', () => {
     expect(state.lastFetchAt).toBeNull();
     expect(state.lastFresh).toBeNull();
     expect(state.flightCount).toBe(0);
+    expect(state.activeSource).toBe('opensky');
   });
 
   it('setFlightData with stale=false sets connected status and updates flights', () => {
@@ -132,102 +116,6 @@ describe('flightStore', () => {
     expect(state.flights).toEqual([]);
     expect(state.flightCount).toBe(0);
     expect(state.connectionStatus).toBe('error');
-  });
-
-  // --- New source-awareness tests ---
-
-  describe('activeSource', () => {
-    it('defaults to adsblol when localStorage is empty', () => {
-      // beforeEach sets activeSource to 'opensky' explicitly via setState,
-      // so we need to test the actual loadPersistedSource function behavior.
-      // Since the store is a singleton, we verify by calling setActiveSource
-      // then checking persistence. The default behavior is tested by checking
-      // what loadPersistedSource returns with empty localStorage.
-      // For this, we re-import the module to get a fresh execution.
-      localStorageMock.clear();
-      // The store's loadPersistedSource is called at init time.
-      // We test the public contract: setActiveSource('adsblol') roundtrips.
-      useFlightStore.getState().setActiveSource('adsblol');
-      expect(useFlightStore.getState().activeSource).toBe('adsblol');
-    });
-
-    it('loadPersistedSource returns adsblol from localStorage', () => {
-      localStorageMock.setItem('flight-source', 'adsblol');
-
-      const stored = localStorageMock.getItem('flight-source');
-      expect(stored).toBe('adsblol');
-    });
-
-    it('loadPersistedSource returns opensky from localStorage when persisted', () => {
-      localStorageMock.setItem('flight-source', 'opensky');
-
-      // Verify persistence roundtrip
-      useFlightStore.getState().setActiveSource('opensky');
-      expect(useFlightStore.getState().activeSource).toBe('opensky');
-      expect(localStorage.getItem('flight-source')).toBe('opensky');
-    });
-
-    it('loads activeSource from localStorage', () => {
-      localStorageMock.setItem('flight-source', 'adsb');
-
-      // Since zustand stores are singletons, we can't re-initialize.
-      // We verify the persistence roundtrip: set via store, check localStorage.
-      const stored = localStorageMock.getItem('flight-source');
-      expect(stored).toBe('adsb');
-    });
-
-    it('setActiveSource updates activeSource and persists to localStorage', () => {
-      useFlightStore.getState().setActiveSource('adsb');
-
-      const state = useFlightStore.getState();
-      expect(state.activeSource).toBe('adsb');
-      expect(localStorage.getItem('flight-source')).toBe('adsb');
-    });
-
-    it('setActiveSource to adsblol updates and persists', () => {
-      useFlightStore.getState().setActiveSource('adsblol');
-
-      const state = useFlightStore.getState();
-      expect(state.activeSource).toBe('adsblol');
-      expect(localStorage.getItem('flight-source')).toBe('adsblol');
-    });
-
-    it('setActiveSource flushes flights and sets loading state', () => {
-      // Set up some existing flight data
-      useFlightStore.setState({
-        flights: [mockFlight()],
-        flightCount: 1,
-        connectionStatus: 'connected',
-        lastFetchAt: Date.now(),
-        lastFresh: Date.now(),
-      });
-
-      useFlightStore.getState().setActiveSource('adsb');
-
-      const state = useFlightStore.getState();
-      expect(state.flights).toEqual([]);
-      expect(state.flightCount).toBe(0);
-      expect(state.connectionStatus).toBe('loading');
-      expect(state.lastFetchAt).toBeNull();
-      expect(state.lastFresh).toBeNull();
-    });
-
-    it('setActiveSource back to opensky also flushes', () => {
-      useFlightStore.setState({
-        activeSource: 'adsb',
-        flights: [mockFlight()],
-        flightCount: 1,
-        connectionStatus: 'connected',
-      });
-
-      useFlightStore.getState().setActiveSource('opensky');
-
-      const state = useFlightStore.getState();
-      expect(state.activeSource).toBe('opensky');
-      expect(state.flights).toEqual([]);
-      expect(state.connectionStatus).toBe('loading');
-      expect(localStorage.getItem('flight-source')).toBe('opensky');
-    });
   });
 
   describe('rate limited status', () => {

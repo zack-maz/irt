@@ -28,8 +28,8 @@ describe('Entity Layer Constants', () => {
     it('targeted is dark red', () => { expect(ENTITY_COLORS.targeted).toEqual([139, 30, 30]); });
   });
   describe('ICON_SIZE', () => {
-    const movingExpected = { meters: 4000, minPixels: 24, maxPixels: 160 };
-    const eventExpected = { meters: 3000, minPixels: 16, maxPixels: 120 };
+    const movingExpected = { meters: 1000, minPixels: 16, maxPixels: 120 };
+    const eventExpected = { meters: 1500, minPixels: 16, maxPixels: 120 };
     it('flight', () => { expect(ICON_SIZE.flight).toEqual(movingExpected); });
     it('ship', () => { expect(ICON_SIZE.ship).toEqual(movingExpected); });
     it('airstrike', () => { expect(ICON_SIZE.airstrike).toEqual(eventExpected); });

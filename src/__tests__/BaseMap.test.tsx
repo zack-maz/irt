@@ -168,12 +168,12 @@ describe('BaseMap click handler', () => {
     });
   });
 
-  it('does not clear selectedEntityId on empty map click', () => {
+  it('clears selection and closes detail panel on empty map click', () => {
     useUIStore.setState({ selectedEntityId: 'flight-abc', isDetailPanelOpen: true });
     render(<BaseMap />);
     simulateEmptyClick();
-    expect(useUIStore.getState().selectedEntityId).toBe('flight-abc');
-    expect(useUIStore.getState().isDetailPanelOpen).toBe(true);
+    expect(useUIStore.getState().selectedEntityId).toBeNull();
+    expect(useUIStore.getState().isDetailPanelOpen).toBe(false);
   });
 
   it('clicking entity opens detail panel', () => {

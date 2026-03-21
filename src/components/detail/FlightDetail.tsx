@@ -1,5 +1,4 @@
 import type { FlightEntity } from '@/types/entities';
-import { useFlightStore } from '@/stores/flightStore';
 import { DetailValue } from './DetailValue';
 
 // Unit conversion constants
@@ -7,18 +6,11 @@ const MS_TO_KNOTS = 1.94384;
 const M_TO_FT = 3.28084;
 const MS_TO_FTMIN = 196.85;
 
-const SOURCE_LABELS: Record<string, string> = {
-  opensky: 'OpenSky',
-  adsb: 'ADS-B Exchange',
-  adsblol: 'adsb.lol',
-};
-
 interface FlightDetailProps {
   entity: FlightEntity;
 }
 
 export function FlightDetail({ entity }: FlightDetailProps) {
-  const activeSource = useFlightStore((s) => s.activeSource);
   const d = entity.data;
 
   const speed = d.velocity != null
@@ -70,7 +62,7 @@ export function FlightDetail({ entity }: FlightDetailProps) {
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
         Source
       </h3>
-      <DetailValue label="Data Source" value={SOURCE_LABELS[activeSource] ?? activeSource} />
+      <DetailValue label="Data Source" value="OpenSky" />
     </div>
   );
 }
