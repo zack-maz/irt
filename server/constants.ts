@@ -37,6 +37,10 @@ export const CACHE_TTL = {
   news: 900_000, // 15min -- news feed TTL
 } as const;
 
+// Markets cache TTL (5 minutes -- matches client polling interval)
+export const MARKETS_CACHE_TTL = 300_000; // 5 min logical TTL
+export const MARKETS_REDIS_TTL_SEC = 3000; // 50 min hard TTL (10x logical)
+
 // News aggregation constants
 export const NEWS_CACHE_TTL = 900_000; // 15 min logical TTL
 export const NEWS_REDIS_TTL_SEC = 9000; // 2.5h hard TTL (10x logical)

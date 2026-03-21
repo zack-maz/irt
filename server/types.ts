@@ -122,6 +122,29 @@ export interface NewsCluster {
 
 export type FlightSource = 'opensky' | 'adsb' | 'adsblol';
 
+export interface MarketQuote {
+  symbol: string;           // "BZ=F", "CL=F", "XLE", "USO", "XOM"
+  displayName: string;      // "Brent", "WTI", "XLE", "USO", "XOM"
+  price: number;            // regularMarketPrice
+  previousClose: number;    // For delta calculation
+  change: number;           // price - previousClose
+  changePercent: number;    // ((price - previousClose) / previousClose) * 100
+  currency: string;         // "USD"
+  marketOpen: boolean;      // Derived from currentTradingPeriod.regular
+  lastTradeTime: number;    // Unix ms
+  history: {
+    timestamps: number[];   // Unix ms
+    closes: number[];       // Daily close prices (nulls filtered)
+    highs: number[];        // Daily high prices (nulls filtered)
+    lows: number[];         // Daily low prices (nulls filtered)
+  };
+}
+
+export interface MarketSnapshot {
+  quotes: MarketQuote[];
+  fetchedAt: number;
+}
+
 export class RateLimitError extends Error {
   name: string;
   constructor(message: string) {
