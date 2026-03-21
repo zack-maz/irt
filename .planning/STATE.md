@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Phase 18 context gathered
-last_updated: "2026-03-21T18:38:59.363Z"
-last_activity: 2026-03-20 -- Completed Phase 17 Plan 03 (notification center UI) -- all 4 plans done
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-03-21T21:12:28.535Z"
+last_activity: 2026-03-21 -- Completed Phase 18 Plan 01 (oil markets data pipeline)
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_plans: 11
+  completed_plans: 10
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 17 Notification Center
+**Current focus:** Phase 18 Oil Markets Tracker
 
 ## Current Position
 
-Phase: 17 of 20 (Notification Center)
-Plan: 04 of 04 complete
-Status: Phase 17 fully complete (all 4 plans: data layer, 24h window, notification UI, proximity alerts)
-Last activity: 2026-03-20 -- Completed Phase 17 Plan 03 (notification center UI) -- all 4 plans done
+Phase: 18 of 20 (Oil Markets Tracker)
+Plan: 01 of 02 complete
+Status: Plan 01 complete (server-side data pipeline: Yahoo Finance adapter, /api/markets route, types)
+Last activity: 2026-03-21 -- Completed Phase 18 Plan 01 (oil markets data pipeline)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100%
 | Phase 17 P01 | 3min | 1 tasks | 8 files |
 | Phase 17 P03 | 6min | 2 tasks | 9 files |
 | Phase 17 P04 | 4min | 2 tasks | 4 files |
+| Phase 18 P01 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,11 @@ Progress: [██████████] 100%
 - **17-04:** RAF-throttled move event subscription prevents excessive re-renders during pan/zoom
 - **17-04:** Coarse 0.5 degree bbox pre-filter reuses attackStatus.ts pattern at 50km scale
 
+- **18-01:** Yahoo Finance v8 chart API with User-Agent header for bot detection avoidance
+- **18-01:** Per-ticker fault isolation via Promise.allSettled (0-5 partial results)
+- **18-01:** 5-min logical cache TTL matching planned client polling interval
+- **18-01:** MarketQuote re-exported from src/types/entities.ts for frontend consumption
+
 Decisions are logged in PROJECT.md Key Decisions table.
 Full v0.9 + v1.0 decision history archived in previous STATE.md.
 
@@ -104,6 +110,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T18:38:59.360Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-oil-markets-tracker/18-CONTEXT.md
+Last session: 2026-03-21T21:12:28.518Z
+Stopped at: Completed 18-01-PLAN.md
+Resume file: None
