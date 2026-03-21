@@ -12,6 +12,21 @@ export const DISPLAY_NAMES: Record<string, string> = {
   XOM: 'XOM',
 };
 
+/** Valid market timeframe ranges */
+export type MarketRange = '1d' | '5d' | '1mo' | 'ytd';
+
+/** Yahoo Finance range/interval mapping */
+const RANGE_CONFIG: Record<MarketRange, { range: string; interval: string }> = {
+  '1d': { range: '1d', interval: '5m' },
+  '5d': { range: '5d', interval: '1d' },
+  '1mo': { range: '1mo', interval: '1d' },
+  ytd: { range: 'ytd', interval: '1d' },
+};
+
+export function isValidRange(value: string): value is MarketRange {
+  return value in RANGE_CONFIG;
+}
+
 /** Shape of the Yahoo Finance v8 chart API response */
 interface YahooChartResponse {
   chart: {
@@ -46,9 +61,10 @@ interface YahooChartResponse {
  * Fetch a single ticker's chart data from Yahoo Finance v8 API.
  * Returns null on any failure (non-ok status, missing data, parse error).
  */
-async function fetchTicker(symbol: string): Promise<MarketQuote | null> {
+async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<MarketQuote | null> {
   try {
-    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d&includePrePost=false`;
+    const cfg = RANGE_CONFIG[range];
+    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${cfg.range}&interval=${cfg.interval}&includePrePost=false`;
 
     const resp = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' },
@@ -130,8 +146,8 @@ async function fetchTicker(symbol: string): Promise<MarketQuote | null> {
  * Fetch all tickers in parallel with per-ticker fault isolation.
  * Returns 0-5 MarketQuotes depending on individual ticker success.
  */
-export async function fetchMarkets(): Promise<MarketQuote[]> {
-  const results = await Promise.allSettled(TICKERS.map(fetchTicker));
+export async function fetchMarkets(range: MarketRange = '1d'): Promise<MarketQuote[]> {
+  const results = await Promise.allSettled(TICKERS.map((t) => fetchTicker(t, range)));
 
   return results
     .filter(

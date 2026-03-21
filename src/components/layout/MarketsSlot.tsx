@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMarketStore } from '@/stores/marketStore';
-import type { ConnectionStatus } from '@/stores/marketStore';
+import type { ConnectionStatus, MarketRange } from '@/stores/marketStore';
 import { useUIStore } from '@/stores/uiStore';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 import { MarketRow } from '@/components/markets/MarketRow';
@@ -11,6 +11,13 @@ const STATUS_DOT_CLASS: Record<ConnectionStatus, string> = {
   error: 'bg-accent-red',
   loading: 'bg-text-muted animate-pulse',
 };
+
+const RANGES: { value: MarketRange; label: string }[] = [
+  { value: '1d', label: '1D' },
+  { value: '5d', label: '1W' },
+  { value: '1mo', label: '1M' },
+  { value: 'ytd', label: 'YTD' },
+];
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -31,6 +38,8 @@ function persistBool(key: string, value: boolean): void {
 export function MarketsSlot() {
   const quotes = useMarketStore((s) => s.quotes);
   const connectionStatus = useMarketStore((s) => s.connectionStatus);
+  const range = useMarketStore((s) => s.range);
+  const setRange = useMarketStore((s) => s.setRange);
   const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
 
   const [isCollapsed, setIsCollapsed] = useState(() => readBool('markets-collapsed', false));
@@ -95,23 +104,43 @@ export function MarketsSlot() {
 
         {/* Body */}
         {!isCollapsed && (
-          <div className="mt-2 flex flex-col">
-            {quotes.length > 0 ? (
-              quotes.map((q) => (
-                <MarketRow
-                  key={q.symbol}
-                  quote={q}
-                  showPercent={showPercent}
-                  isExpanded={expandedSymbol === q.symbol}
-                  onToggle={() =>
-                    setExpandedSymbol((prev) => (prev === q.symbol ? null : q.symbol))
-                  }
-                />
-              ))
-            ) : connectionStatus !== 'loading' ? (
-              <span className="text-xs text-text-muted">No data</span>
-            ) : null}
-          </div>
+          <>
+            {/* Timeframe selector */}
+            <div className="mt-1.5 flex gap-0.5">
+              {RANGES.map((r) => (
+                <button
+                  key={r.value}
+                  onClick={() => setRange(r.value)}
+                  className={`flex-1 text-[10px] py-0.5 rounded transition-colors ${
+                    range === r.value
+                      ? 'bg-white/10 text-text-primary font-semibold'
+                      : 'text-text-muted hover:bg-white/5 hover:text-text-secondary'
+                  }`}
+                  aria-label={`Show ${r.label} timeframe`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-1.5 flex flex-col">
+              {quotes.length > 0 ? (
+                quotes.map((q) => (
+                  <MarketRow
+                    key={q.symbol}
+                    quote={q}
+                    showPercent={showPercent}
+                    isExpanded={expandedSymbol === q.symbol}
+                    onToggle={() =>
+                      setExpandedSymbol((prev) => (prev === q.symbol ? null : q.symbol))
+                    }
+                  />
+                ))
+              ) : connectionStatus !== 'loading' ? (
+                <span className="text-xs text-text-muted">No data</span>
+              ) : null}
+            </div>
+          </>
         )}
       </OverlayPanel>
     </div>

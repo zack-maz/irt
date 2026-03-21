@@ -16,9 +16,13 @@ const priceFmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 });
 
-function getDayLabel(timestamp: number): string {
+function getTimeLabel(timestamp: number, count: number): string {
   const d = new Date(timestamp);
-  return d.toLocaleDateString('en-US', { weekday: 'short' });
+  // If many data points (intraday), show time; otherwise show day name
+  if (count > 10) {
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export function ExpandedChart({ quote }: ExpandedChartProps) {
@@ -76,7 +80,7 @@ export function ExpandedChart({ quote }: ExpandedChartProps) {
   for (let i = 0; i < xLabelCount; i++) {
     const idx = Math.round((i / (xLabelCount - 1)) * (timestamps.length - 1));
     xLabels.push({
-      label: getDayLabel(timestamps[idx]),
+      label: getTimeLabel(timestamps[idx], timestamps.length),
       x: scaleX(idx),
     });
   }

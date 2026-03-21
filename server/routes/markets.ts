@@ -1,31 +1,33 @@
 import { Router } from 'express';
 import { cacheGet, cacheSet } from '../cache/redis.js';
-import { fetchMarkets } from '../adapters/yahoo-finance.js';
+import { fetchMarkets, isValidRange } from '../adapters/yahoo-finance.js';
 import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../constants.js';
 import type { MarketQuote } from '../types.js';
 
-/** Redis key for market data */
-const MARKETS_KEY = 'markets:yahoo';
-
 export const marketsRouter = Router();
 
-marketsRouter.get('/', async (_req, res) => {
+marketsRouter.get('/', async (req, res) => {
+  const rangeParam = typeof req.query.range === 'string' ? req.query.range : '1d';
+  const range = isValidRange(rangeParam) ? rangeParam : '1d';
+
+  const cacheKey = `markets:yahoo:${range}`;
+
   // 1. Check cache first
-  const cached = await cacheGet<MarketQuote[]>(MARKETS_KEY, MARKETS_CACHE_TTL);
+  const cached = await cacheGet<MarketQuote[]>(cacheKey, MARKETS_CACHE_TTL);
   if (cached && !cached.stale) {
     return res.json(cached);
   }
 
   try {
     // 2. Fetch fresh data from Yahoo Finance
-    const quotes = await fetchMarkets();
+    const quotes = await fetchMarkets(range);
 
     if (quotes.length > 0) {
       // 3. Cache the fresh data
-      await cacheSet(MARKETS_KEY, quotes, MARKETS_REDIS_TTL_SEC);
+      await cacheSet(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
 
       console.log(
-        `[markets] fetched ${quotes.length}/${5} tickers: ${quotes.map((q) => q.symbol).join(', ')}`,
+        `[markets] fetched ${quotes.length}/${5} tickers (${range}): ${quotes.map((q) => q.symbol).join(', ')}`,
       );
 
       // 4. Return fresh response

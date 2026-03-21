@@ -7,6 +7,7 @@ export const MARKET_POLL_INTERVAL = 300_000; // 5 minutes
 export function useMarketPolling(): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const range = useMarketStore((s) => s.range);
   const setMarketData = useMarketStore((s) => s.setMarketData);
   const setError = useMarketStore((s) => s.setError);
   const setLoading = useMarketStore((s) => s.setLoading);
@@ -17,7 +18,7 @@ export function useMarketPolling(): void {
     const fetchMarkets = async (): Promise<void> => {
       if (cancelled) return;
       try {
-        const res = await fetch('/api/markets');
+        const res = await fetch(`/api/markets?range=${range}`);
         if (cancelled) return;
         const data: CacheResponse<MarketQuote[]> = await res.json();
         setMarketData(data);
@@ -59,5 +60,5 @@ export function useMarketPolling(): void {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [setMarketData, setError, setLoading]);
+  }, [range, setMarketData, setError, setLoading]);
 }
