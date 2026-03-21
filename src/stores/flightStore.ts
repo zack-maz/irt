@@ -12,6 +12,7 @@ interface FlightState {
   flightCount: number;
   activeSource: FlightSource;
   setFlightData: (response: CacheResponse<FlightEntity[]> & { rateLimited?: boolean }) => void;
+  setActiveSource: (source: FlightSource) => void;
   setError: () => void;
   setLoading: () => void;
   clearStaleData: () => void;
@@ -23,7 +24,7 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
   lastFetchAt: null,
   lastFresh: null,
   flightCount: 0,
-  activeSource: 'opensky' as const,
+  activeSource: 'adsblol' as const,
 
   setFlightData: (response) =>
     set({
@@ -35,6 +36,9 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
       lastFetchAt: Date.now(),
       lastFresh: response.stale ? get().lastFresh : Date.now(),
     }),
+
+  setActiveSource: (source) =>
+    set({ activeSource: source, flights: [], flightCount: 0, connectionStatus: 'loading' }),
 
   setError: () => set({ connectionStatus: 'error' }),
 

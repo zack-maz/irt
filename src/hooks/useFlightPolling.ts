@@ -8,6 +8,7 @@ export const STALE_THRESHOLD = 60_000;
 
 export function useFlightPolling(): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeSource = useFlightStore((s) => s.activeSource);
 
   const setFlightData = useFlightStore((s) => s.setFlightData);
   const setError = useFlightStore((s) => s.setError);
@@ -15,7 +16,7 @@ export function useFlightPolling(): void {
   const clearStaleData = useFlightStore((s) => s.clearStaleData);
 
   useEffect(() => {
-    const url = '/api/flights?source=opensky';
+    const url = `/api/flights?source=${activeSource}`;
     let cancelled = false;
 
     const fetchFlights = async (): Promise<void> => {
@@ -72,5 +73,5 @@ export function useFlightPolling(): void {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [activeSource]);
 }

@@ -49,3 +49,9 @@ export async function cacheSet<T>(
   const entry: CacheEntry<T> = { data, fetchedAt: Date.now() };
   await redis.set(key, entry, { ex: redisTtlSec });
 }
+
+/** Delete a cache key. Returns true if the key existed. */
+export async function cacheDel(key: string): Promise<boolean> {
+  const deleted = await redis.del(key);
+  return deleted > 0;
+}

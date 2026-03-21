@@ -95,8 +95,15 @@ describe('ADS-B V2 Shared Normalizer', () => {
     expect(result!.data.icao24).toBe('~abc123');
   });
 
-  it('sets originCountry to empty string', () => {
+  it('resolves originCountry from ICAO hex prefix', () => {
     const result = normalizeAircraft(validAircraft);
+    // a9cee9 falls in USA range (A00000-AFFFFF)
+    expect(result!.data.originCountry).toBe('USA');
+  });
+
+  it('returns empty originCountry for unknown hex prefix', () => {
+    const unknown = { ...validAircraft, hex: 'ffffff' };
+    const result = normalizeAircraft(unknown);
     expect(result!.data.originCountry).toBe('');
   });
 

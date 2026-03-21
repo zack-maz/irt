@@ -4,6 +4,7 @@ import {
   FEET_TO_METERS,
   FPM_TO_MS,
 } from '../constants.js';
+import { icaoToCountry } from '../lib/icaoCountry.js';
 
 export interface AdsbAircraft {
   hex: string;
@@ -42,7 +43,7 @@ export function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
     data: {
       icao24: ac.hex,
       callsign: callsign || ac.hex,
-      originCountry: '',
+      originCountry: icaoToCountry(ac.hex),
       velocity: ac.gs != null ? ac.gs * KNOTS_TO_MS : null,
       heading: ac.track ?? null,
       altitude: typeof ac.alt_baro === 'number' ? ac.alt_baro * FEET_TO_METERS : null,

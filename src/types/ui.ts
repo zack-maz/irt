@@ -1,4 +1,4 @@
-export type FlightSource = 'opensky';
+export type FlightSource = 'opensky' | 'adsb' | 'adsblol';
 
 // Re-export for frontend convenience
 export type { ConflictEventType } from '../../server/types.js';
