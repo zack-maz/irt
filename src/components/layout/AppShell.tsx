@@ -10,8 +10,10 @@ import { useShipPolling } from '@/hooks/useShipPolling';
 import { useEventPolling } from '@/hooks/useEventPolling';
 import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
+import { useMarketPolling } from '@/hooks/useMarketPolling';
 import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationBell } from '@/components/layout/NotificationBell';
+import { MarketsSlot } from '@/components/layout/MarketsSlot';
 
 export function AppShell() {
   useFlightPolling();
@@ -19,6 +21,7 @@ export function AppShell() {
   useEventPolling();
   useSiteFetch();
   useNewsPolling();
+  useMarketPolling();
   useNotifications();
 
   return (
@@ -39,8 +42,9 @@ export function AppShell() {
         <LayerTogglesSlot />
       </div>
 
-      {/* Top-right: Notification bell */}
+      {/* Top-right: Notification bell + Markets panel */}
       <NotificationBell />
+      <MarketsSlot />
 
       {/* Right side: Filter panel + Detail panel */}
       <FilterPanelSlot />
