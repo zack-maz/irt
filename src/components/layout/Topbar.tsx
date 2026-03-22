@@ -1,5 +1,7 @@
 import { StatusDropdown } from '@/components/layout/StatusDropdown';
 import { NotificationBell } from '@/components/layout/NotificationBell';
+import { SearchModal } from '@/components/search/SearchModal';
+import { useSearchStore } from '@/stores/searchStore';
 
 export function Topbar() {
   return (
@@ -10,11 +12,12 @@ export function Topbar() {
       {/* Left: Status dropdown with title */}
       <StatusDropdown />
 
-      {/* Center: Search hint (wired in Plan 02) */}
+      {/* Center: Search hint */}
       <button
         data-testid="topbar-search-hint"
         className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-text-muted hover:bg-white/5 transition-colors"
         aria-label="Open search"
+        onClick={() => useSearchStore.getState().openSearchModal()}
       >
         <svg
           viewBox="0 0 24 24"
@@ -37,6 +40,9 @@ export function Topbar() {
       <div className="flex items-center">
         <NotificationBell />
       </div>
+
+      {/* Search modal overlay (z-modal renders above everything) */}
+      <SearchModal />
     </header>
   );
 }
