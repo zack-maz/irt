@@ -50,10 +50,10 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 
 ### Counter Dropdowns
 
-- [ ] **CNTR-01**: User can click a counter row to expand a dropdown showing individual entities with label + key metric per type
+- [x] **CNTR-01**: User can click a counter row to expand a dropdown showing individual entities with label + key metric per type
 - [ ] **CNTR-02**: Only one counter row can be expanded at a time (accordion behavior)
 - [ ] **CNTR-03**: User can click an entity in the dropdown to fly the map to it and open the detail panel
-- [ ] **CNTR-04**: Entities are sorted by proximity per category (flights/events from Tehran, ships from Strait of Hormuz, sites by attack count)
+- [x] **CNTR-04**: Entities are sorted by proximity per category (flights/events from Tehran, ships from Strait of Hormuz, sites by attack count)
 - [ ] **CNTR-05**: Zero-count counter rows are disabled and non-expandable; expanded rows that drop to 0 show empty state
 - [ ] **CNTR-06**: Lists exceeding 8 items show a scrollable container with "Showing X-Y of Z" range indicator
 

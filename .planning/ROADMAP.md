@@ -153,7 +153,7 @@ Plans:
   4. Entities sorted by proximity per category
   5. Zero-count rows are disabled; dropdown shows empty state if count drops to 0
   6. Overflow lists show scrollable container with "Showing X-Y of Z" range indicator
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 19.2-01-PLAN.md -- Data layer: extend useCounterData to return entity arrays with proximity sorting, create EntityListItem component
@@ -197,5 +197,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 18. Oil Markets Tracker | 2/2 | Complete    | 2026-03-21 | - |
 | 19. Search, Filter & UI Cleanup | 4/4 | Complete    | 2026-03-22 | - |
 | 19.1. Advanced Search | v1.1 | 0/5 | In Progress | - |
-| 19.2. Counter Entity Dropdowns | v1.1 | 0/2 | Not started | - |
+| 19.2. Counter Entity Dropdowns | 1/2 | In Progress|  | - |
 | 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: completed
-stopped_at: Phase 19.2 context gathered
-last_updated: "2026-03-22T23:01:56.818Z"
-last_activity: 2026-03-22 -- Completed Phase 19 Plan 03 (search filter integration)
+status: in-progress
+stopped_at: Completed 19.2-01-PLAN.md
+last_updated: "2026-03-22T23:37:27Z"
+last_activity: 2026-03-22 -- Completed Phase 19.2 Plan 01 (counter entity data + list item)
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
+  total_plans: 17
+  completed_plans: 16
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 19 Search, Filter & UI Cleanup
+**Current focus:** Phase 19.2 Counter Entity Dropdowns
 
 ## Current Position
 
-Phase: 19 of 20 (Search, Filter & UI Cleanup)
-Plan: 04 of 04 complete
-Status: Phase 19 complete (all 4 plans done)
-Last activity: 2026-03-22 -- Completed Phase 19 Plan 03 (search filter integration)
+Phase: 19.2 of 20 (Counter Entity Dropdowns)
+Plan: 01 of 02 complete
+Status: Plan 01 complete, Plan 02 remaining
+Last activity: 2026-03-22 -- Completed Phase 19.2 Plan 01 (counter entity data + list item)
 
-Progress: [██████████] 100%
+Progress: [█████████▒] 94%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 19 P02 | 5min | 2 tasks | 10 files |
 | Phase 19 P03 | 7min | 2 tasks | 13 files |
 | Phase 19 P04 | 11min | 2 tasks | 6 files |
+| Phase 19.2 P01 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,10 @@ Progress: [██████████] 100%
 - **19-04:** Tooltip #9ca3af color kept as-is (generic type label color, not ship-specific identity)
 - **19-04:** clampPosition exported as pure helper for independent unit testing without pointer event simulation
 
+- **19.2-01:** Backward-compatible return type via spread: { ...countValues, entities } preserves existing .airstrikes etc access
+- **19.2-01:** CounterEntity normalized shape with id/label/metric/lat/lng/type avoids leaking raw entity types to UI
+- **19.2-01:** Hit sites sorted by attackCount descending (not proximity) since attack frequency is more actionable
+
 ### Roadmap Evolution
 
 - Phase 19.1 inserted after Phase 19: Advanced search with tag and entity type filtering (URGENT)
@@ -142,6 +147,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T23:01:56.809Z
-Stopped at: Phase 19.2 context gathered
-Resume file: .planning/phases/19.2-counter-entity-dropdowns/19.2-CONTEXT.md
+Last session: 2026-03-22T23:37:27Z
+Stopped at: Completed 19.2-01-PLAN.md
+Resume file: .planning/phases/19.2-counter-entity-dropdowns/19.2-02-PLAN.md
