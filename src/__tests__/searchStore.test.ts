@@ -1,4 +1,13 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Mock localStorage before importing stores (stores read localStorage on init)
+const localStorageMock = {
+  getItem: vi.fn(() => null),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+};
+vi.stubGlobal('localStorage', localStorageMock);
+
 import { useSearchStore } from '@/stores/searchStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { searchEntities, getSearchableFields } from '@/lib/searchUtils';
@@ -76,12 +85,60 @@ const mockSite: SiteEntity = {
 describe('searchStore', () => {
   beforeEach(() => {
     useSearchStore.getState().clearSearch();
-    useSearchStore.setState({ isSearchModalOpen: false });
+    useSearchStore.setState({ isSearchModalOpen: false, recentTags: [] });
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
   });
 
   it('setQuery sets query', () => {
     useSearchStore.getState().setQuery('iran');
     expect(useSearchStore.getState().query).toBe('iran');
+  });
+
+  it('setQuery also updates parsedQuery via parse()', () => {
+    useSearchStore.getState().setQuery('type:flight');
+    const { parsedQuery } = useSearchStore.getState();
+    expect(parsedQuery).not.toBeNull();
+    expect(parsedQuery!.type).toBe('tag');
+    if (parsedQuery!.type === 'tag') {
+      expect(parsedQuery!.prefix).toBe('type');
+      expect(parsedQuery!.value).toBe('flight');
+    }
+  });
+
+  it('setQuery with plain text creates text node', () => {
+    useSearchStore.getState().setQuery('iran');
+    const { parsedQuery } = useSearchStore.getState();
+    expect(parsedQuery).not.toBeNull();
+    expect(parsedQuery!.type).toBe('text');
+    if (parsedQuery!.type === 'text') {
+      expect(parsedQuery!.value).toBe('iran');
+    }
+  });
+
+  it('setQuery with empty string sets parsedQuery to null', () => {
+    useSearchStore.getState().setQuery('type:flight');
+    useSearchStore.getState().setQuery('');
+    expect(useSearchStore.getState().parsedQuery).toBeNull();
+  });
+
+  it('setParsedQuery also updates query via serialize()', () => {
+    useSearchStore.getState().setParsedQuery({
+      type: 'tag',
+      prefix: 'type',
+      value: 'ship',
+      negated: false,
+    });
+    expect(useSearchStore.getState().query).toBe('type:ship');
+    expect(useSearchStore.getState().parsedQuery!.type).toBe('tag');
+  });
+
+  it('setParsedQuery with null clears query', () => {
+    useSearchStore.getState().setQuery('something');
+    useSearchStore.getState().setParsedQuery(null);
+    expect(useSearchStore.getState().query).toBe('');
+    expect(useSearchStore.getState().parsedQuery).toBeNull();
   });
 
   it('openSearchModal sets isSearchModalOpen to true', () => {
@@ -112,15 +169,76 @@ describe('searchStore', () => {
     expect(s.query).toBe('iran'); // query preserved
   });
 
-  it('clearSearch resets query, isFilterMode, and matchedIds', () => {
-    useSearchStore.getState().setQuery('iran');
+  it('applyAsFilter saves recent tags from parsedQuery', () => {
+    useSearchStore.getState().setQuery('type:flight country:iran');
+    useSearchStore.getState().applyAsFilter();
+    const { recentTags } = useSearchStore.getState();
+    expect(recentTags).toContain('type:flight');
+    expect(recentTags).toContain('country:iran');
+  });
+
+  it('applyAsFilter deduplicates recent tags', () => {
+    useSearchStore.setState({ recentTags: ['type:flight'] });
+    useSearchStore.getState().setQuery('type:flight country:iran');
+    useSearchStore.getState().applyAsFilter();
+    const { recentTags } = useSearchStore.getState();
+    // type:flight appears only once
+    expect(recentTags.filter((t) => t === 'type:flight')).toHaveLength(1);
+  });
+
+  it('applyAsFilter keeps max 5 recent tags', () => {
+    useSearchStore.setState({ recentTags: ['a:1', 'b:2', 'c:3', 'd:4'] });
+    useSearchStore.getState().setQuery('e:5 f:6');
+    useSearchStore.getState().applyAsFilter();
+    const { recentTags } = useSearchStore.getState();
+    expect(recentTags.length).toBeLessThanOrEqual(5);
+  });
+
+  it('applyAsFilter persists recent tags to localStorage', () => {
+    useSearchStore.getState().setQuery('type:flight');
+    useSearchStore.getState().applyAsFilter();
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'recentSearchTags',
+      expect.stringContaining('type:flight'),
+    );
+  });
+
+  it('clearSearch resets query, parsedQuery, isFilterMode, and matchedIds', () => {
+    useSearchStore.getState().setQuery('type:flight');
     useSearchStore.getState().applyAsFilter();
     useSearchStore.getState().setMatchedIds(new Set(['a', 'b']));
     useSearchStore.getState().clearSearch();
     const s = useSearchStore.getState();
     expect(s.query).toBe('');
+    expect(s.parsedQuery).toBeNull();
     expect(s.isFilterMode).toBe(false);
     expect(s.matchedIds.size).toBe(0);
+  });
+
+  it('clearSearch preserves recentTags', () => {
+    useSearchStore.getState().setQuery('type:flight');
+    useSearchStore.getState().applyAsFilter();
+    const tagsBefore = useSearchStore.getState().recentTags;
+    useSearchStore.getState().clearSearch();
+    expect(useSearchStore.getState().recentTags).toEqual(tagsBefore);
+  });
+
+  it('localStorage round-trip for recentTags', () => {
+    // Simulate localStorage returning stored tags
+    localStorageMock.getItem.mockReturnValueOnce(JSON.stringify(['type:ship', 'country:iraq']));
+    // The loadRecentTags function is called at store creation time; we test the save path instead
+    useSearchStore.getState().setQuery('type:ship');
+    useSearchStore.getState().applyAsFilter();
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'recentSearchTags',
+      expect.any(String),
+    );
+    const savedValue = localStorageMock.setItem.mock.calls.find(
+      (c: string[]) => c[0] === 'recentSearchTags',
+    );
+    expect(savedValue).toBeDefined();
+    const parsed = JSON.parse(savedValue![1]);
+    expect(parsed).toContain('type:ship');
   });
 });
 
