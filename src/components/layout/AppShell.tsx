@@ -2,7 +2,6 @@ import { Topbar } from '@/components/layout/Topbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DetailPanelSlot } from '@/components/layout/DetailPanelSlot';
 import { MarketsSlot } from '@/components/layout/MarketsSlot';
-import { UtcClock } from '@/components/layout/UtcClock';
 import { BaseMap } from '@/components/map/BaseMap';
 import { useFlightPolling } from '@/hooks/useFlightPolling';
 import { useShipPolling } from '@/hooks/useShipPolling';
@@ -12,6 +11,7 @@ import { useNewsPolling } from '@/hooks/useNewsPolling';
 import { useMarketPolling } from '@/hooks/useMarketPolling';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEscapeKeyHandler } from '@/hooks/useEscapeKeyHandler';
+import { useQuerySync } from '@/hooks/useQuerySync';
 
 export function AppShell() {
   useFlightPolling();
@@ -22,6 +22,7 @@ export function AppShell() {
   useMarketPolling();
   useNotifications();
   useEscapeKeyHandler();
+  useQuerySync();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">
@@ -46,8 +47,6 @@ export function AppShell() {
       {/* Floating markets panel */}
       <MarketsSlot />
 
-      {/* Bottom-left: UTC clock */}
-      <UtcClock />
     </div>
   );
 }
