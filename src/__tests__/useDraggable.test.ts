@@ -1,20 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { clampPosition } from '@/hooks/useDraggable';
 
-// Mock localStorage
-let storage: Record<string, string> = {};
+// Mock localStorage using project pattern
+const store: Record<string, string> = {};
+const localStorageMock = {
+  getItem: vi.fn((key: string) => store[key] ?? null),
+  setItem: vi.fn((key: string, val: string) => { store[key] = val; }),
+  removeItem: vi.fn((key: string) => { delete store[key]; }),
+};
+vi.stubGlobal('localStorage', localStorageMock);
 
-beforeEach(() => {
-  storage = {};
-  vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => storage[key] ?? null);
-  vi.spyOn(Storage.prototype, 'setItem').mockImplementation((key: string, value: string) => { storage[key] = value; });
-  vi.spyOn(Storage.prototype, 'removeItem').mockImplementation((key: string) => { delete storage[key]; });
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+// Import after stubbing
+import { useDraggable } from '@/hooks/useDraggable';
 
 describe('clampPosition', () => {
   const bounds = { minX: 0, minY: 0, maxX: 1000, maxY: 800 };
@@ -45,38 +43,36 @@ describe('clampPosition', () => {
 });
 
 describe('useDraggable', () => {
-  // Dynamically import to allow mocks to take effect
-  async function importHook() {
-    const mod = await import('@/hooks/useDraggable');
-    return mod.useDraggable;
-  }
-
   const defaultPos = { x: 500, y: 56 };
   const storageKey = 'test-drag-pos';
 
-  it('returns defaultPosition when localStorage is empty', async () => {
-    const useDraggable = await importHook();
+  beforeEach(() => {
+    // Clear store and reset mocks
+    for (const key of Object.keys(store)) delete store[key];
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
+  });
+
+  it('returns defaultPosition when localStorage is empty', () => {
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
     expect(result.current.position).toEqual(defaultPos);
   });
 
-  it('returns stored position from localStorage', async () => {
-    const saved = { x: 200, y: 300 };
-    storage[storageKey] = JSON.stringify(saved);
+  it('returns stored position from localStorage', () => {
+    store[storageKey] = JSON.stringify({ x: 200, y: 300 });
 
-    const useDraggable = await importHook();
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
-    expect(result.current.position).toEqual(saved);
+    expect(result.current.position).toEqual({ x: 200, y: 300 });
   });
 
-  it('resetPosition sets position to defaultPosition and clears localStorage', async () => {
-    storage[storageKey] = JSON.stringify({ x: 200, y: 300 });
+  it('resetPosition sets position to defaultPosition and clears localStorage', () => {
+    store[storageKey] = JSON.stringify({ x: 200, y: 300 });
 
-    const useDraggable = await importHook();
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
@@ -86,19 +82,18 @@ describe('useDraggable', () => {
     });
 
     expect(result.current.position).toEqual(defaultPos);
-    expect(storage[storageKey]).toBeUndefined();
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith(storageKey);
+    expect(store[storageKey]).toBeUndefined();
   });
 
-  it('isDragging is false initially', async () => {
-    const useDraggable = await importHook();
+  it('isDragging is false initially', () => {
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
     expect(result.current.isDragging).toBe(false);
   });
 
-  it('handleProps has correct style with grab cursor', async () => {
-    const useDraggable = await importHook();
+  it('handleProps has correct style with grab cursor', () => {
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
@@ -106,8 +101,7 @@ describe('useDraggable', () => {
     expect(result.current.handleProps.style.cursor).toBe('grab');
   });
 
-  it('returns handleProps with pointer event handlers', async () => {
-    const useDraggable = await importHook();
+  it('returns handleProps with pointer event handlers', () => {
     const { result } = renderHook(() =>
       useDraggable({ storageKey, defaultPosition: defaultPos })
     );
