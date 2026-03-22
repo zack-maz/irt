@@ -113,7 +113,12 @@ Plans:
   2. User can select a search result and the map flies to that entity with the detail panel opening
   3. User can reset all active filters (date range, proximity, nationality, speed, altitude) with a single "Reset All" button
   4. Filter panel displays grouped sections with scrollable layer toggles and clear visual hierarchy
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 19-01-PLAN.md -- Layout shell: Topbar (title, status dropdown, search hint, notification bell) + Sidebar (icon strip, counters/layers/filters sections) + AppShell restructure
+- [ ] 19-02-PLAN.md -- Search: searchStore, searchUtils, useSearchResults hook, Cmd+K SearchModal with grouped results and fly-to-entity
+- [ ] 19-03-PLAN.md -- Search/filter unification: entity dimming in useEntityLayers, FilterChip, Escape key priority
+- [ ] 19-04-PLAN.md -- Polish: draggable markets panel, ship color change to purple, visual consistency pass
 
 ### Phase 20: Production Review & Deploy Sync
 **Goal**: v1.1 is verified end-to-end and deployed to production
@@ -151,5 +156,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 16. News Feed | 3/3 | Complete    | 2026-03-20 | - |
 | 17. Notification Center | 4/4 | Complete    | 2026-03-20 | - |
 | 18. Oil Markets Tracker | 2/2 | Complete    | 2026-03-21 | - |
-| 19. Search, Filter & UI Cleanup | v1.1 | 0/TBD | Not started | - |
+| 19. Search, Filter & UI Cleanup | v1.1 | 0/4 | Not started | - |
 | 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |
