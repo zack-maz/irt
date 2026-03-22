@@ -130,6 +130,16 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 19.1 to break down)
 
+### Phase 19.2: Counter Entity Dropdowns (INSERTED)
+
+**Goal:** Each counter row in the Counters panel expands to list individual entities, with click-to-fly-to and detail panel integration
+**Requirements**: TBD
+**Depends on:** Phase 19
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 19.2 to break down)
+
 ### Phase 20: Production Review & Deploy Sync
 **Goal**: v1.1 is verified end-to-end and deployed to production
 **Depends on**: Phase 19
