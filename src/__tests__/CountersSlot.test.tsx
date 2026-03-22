@@ -64,14 +64,13 @@ describe('CountersSlot', () => {
     expect(screen.getByText('Events')).toBeInTheDocument();
   });
 
-  it('renders all 6 counter row labels', () => {
+  it('renders all 5 counter row labels', () => {
     render(<CountersSlot />);
     expect(screen.getByText('Iranian')).toBeInTheDocument();
     expect(screen.getByText('Unidentified')).toBeInTheDocument();
     expect(screen.getByText('Airstrikes')).toBeInTheDocument();
     expect(screen.getByText('Ground Combat')).toBeInTheDocument();
     expect(screen.getByText('Targeted')).toBeInTheDocument();
-    expect(screen.getByText('Fatalities')).toBeInTheDocument();
   });
 
   it('shows plain counts for events (no ratios)', () => {
