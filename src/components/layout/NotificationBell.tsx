@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useNotificationStore } from '@/stores/notificationStore';
-import { useUIStore } from '@/stores/uiStore';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function NotificationBell() {
@@ -8,8 +7,6 @@ export function NotificationBell() {
   const isDropdownOpen = useNotificationStore((s) => s.isDropdownOpen);
   const toggleDropdown = useNotificationStore((s) => s.toggleDropdown);
   const closeDropdown = useNotificationStore((s) => s.closeDropdown);
-  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
-
   const containerRef = useRef<HTMLDivElement>(null);
 
   const badgeText = unreadCount > 99 ? '99+' : String(unreadCount);
@@ -47,7 +44,7 @@ export function NotificationBell() {
   return (
     <div
       ref={containerRef}
-      className={`absolute top-4 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
+      className="relative"
       data-testid="notification-bell"
     >
       <button

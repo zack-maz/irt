@@ -55,6 +55,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
   isFlightFiltersOpen: true,
   isShipFiltersOpen: true,
   isEventFiltersOpen: true,
+  isSidebarOpen: false,
+  activeSidebarSection: null,
   pulseEnabled: initial.pulseEnabled,
   showGroundTraffic: initial.showGroundTraffic,
   showFlights: initial.showFlights,
@@ -156,6 +158,25 @@ export const useUIStore = create<UIState>()((set, get) => ({
     set((s) => ({ showHitOnly: !s.showHitOnly }));
     persistToggles(getToggles(get()));
   },
+  toggleSidebar: () => {
+    const { isSidebarOpen } = get();
+    if (isSidebarOpen) {
+      set({ isSidebarOpen: false, activeSidebarSection: null });
+    } else {
+      set({ isSidebarOpen: true });
+    }
+  },
+  openSidebarSection: (section) => {
+    const { isSidebarOpen, activeSidebarSection } = get();
+    if (!isSidebarOpen) {
+      set({ isSidebarOpen: true, activeSidebarSection: section });
+    } else if (activeSidebarSection === section) {
+      set({ isSidebarOpen: false, activeSidebarSection: null });
+    } else {
+      set({ activeSidebarSection: section });
+    }
+  },
+  closeSidebar: () => set({ isSidebarOpen: false, activeSidebarSection: null }),
   selectEntity: (id) => set({ selectedEntityId: id }),
   hoverEntity: (id) => set({ hoveredEntityId: id }),
 }));

@@ -33,10 +33,8 @@ function ToggleRow({ color, label, active, onToggle, indent = false, disabled = 
   );
 }
 
-export function LayerTogglesSlot() {
-  const isCollapsed = useUIStore((s) => s.isLayersCollapsed);
-  const toggleLayers = useUIStore((s) => s.toggleLayers);
-
+/** Inner content of layer toggles, reusable in Sidebar */
+export function LayerTogglesContent() {
   const showFlights = useUIStore((s) => s.showFlights);
   const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
   const pulseEnabled = useUIStore((s) => s.pulseEnabled);
@@ -70,6 +68,45 @@ export function LayerTogglesSlot() {
   const togglePort = useUIStore((s) => s.togglePort);
   const toggleHitOnly = useUIStore((s) => s.toggleHitOnly);
   const customRangeLock = useFilterStore((s) => s.savedToggles !== null);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <ToggleRow color={ENTITY_DOT_COLORS.flights} label="Flights" active={showFlights} onToggle={toggleFlights} disabled={customRangeLock} />
+      <ToggleRow color={ENTITY_DOT_COLORS.ground} label="Ground" active={showGroundTraffic} onToggle={toggleGroundTraffic} indent disabled={customRangeLock} />
+      <ToggleRow color={ENTITY_DOT_COLORS.unidentified} label="Unidentified" active={pulseEnabled} onToggle={togglePulse} indent disabled={customRangeLock} />
+      <ToggleRow color={ENTITY_DOT_COLORS.ships} label="Ships" active={showShips} onToggle={toggleShips} disabled={customRangeLock} />
+      <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Events" active={showEvents} onToggle={toggleEvents} />
+      <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Airstrikes" active={showAirstrikes} onToggle={toggleAirstrikes} indent disabled={!showEvents} />
+      <ToggleRow color={ENTITY_DOT_COLORS.groundCombat} label="Ground Combat" active={showGroundCombat} onToggle={toggleGroundCombat} indent disabled={!showEvents} />
+      <ToggleRow color={ENTITY_DOT_COLORS.targeted} label="Targeted" active={showTargeted} onToggle={toggleTargeted} indent disabled={!showEvents} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Sites" active={showSites} onToggle={toggleSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Nuclear" active={showNuclear} onToggle={toggleNuclear} indent disabled={!showSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Naval" active={showNaval} onToggle={toggleNaval} indent disabled={!showSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Oil" active={showOil} onToggle={toggleOil} indent disabled={!showSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Airbase" active={showAirbase} onToggle={toggleAirbase} indent disabled={!showSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Desalination" active={showDesalination} onToggle={toggleDesalination} indent disabled={!showSites} />
+      <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Port" active={showPort} onToggle={togglePort} indent disabled={!showSites} />
+      <ToggleRow color="#f97316" label="Hit Only" active={showHitOnly} onToggle={toggleHitOnly} indent disabled={!showSites} />
+      <button
+        onClick={() => {
+          localStorage.clear();
+          document.cookie.split(';').forEach((c) => {
+            document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+          });
+          window.location.reload();
+        }}
+        className="mt-2 text-[10px] text-red-400 hover:text-red-300 opacity-60 hover:opacity-100 transition-opacity"
+      >
+        Clear cache & reload
+      </button>
+    </div>
+  );
+}
+
+export function LayerTogglesSlot() {
+  const isCollapsed = useUIStore((s) => s.isLayersCollapsed);
+  const toggleLayers = useUIStore((s) => s.toggleLayers);
+
   return (
     <div data-testid="layer-toggles-slot">
       <OverlayPanel>
@@ -81,38 +118,7 @@ export function LayerTogglesSlot() {
             <span>Layers</span>
             <span className="text-text-muted">{isCollapsed ? '+' : '-'}</span>
           </button>
-          {!isCollapsed && (
-            <>
-              <ToggleRow color={ENTITY_DOT_COLORS.flights} label="Flights" active={showFlights} onToggle={toggleFlights} disabled={customRangeLock} />
-              <ToggleRow color={ENTITY_DOT_COLORS.ground} label="Ground" active={showGroundTraffic} onToggle={toggleGroundTraffic} indent disabled={customRangeLock} />
-              <ToggleRow color={ENTITY_DOT_COLORS.unidentified} label="Unidentified" active={pulseEnabled} onToggle={togglePulse} indent disabled={customRangeLock} />
-              <ToggleRow color={ENTITY_DOT_COLORS.ships} label="Ships" active={showShips} onToggle={toggleShips} disabled={customRangeLock} />
-              <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Events" active={showEvents} onToggle={toggleEvents} />
-              <ToggleRow color={ENTITY_DOT_COLORS.airstrikes} label="Airstrikes" active={showAirstrikes} onToggle={toggleAirstrikes} indent disabled={!showEvents} />
-              <ToggleRow color={ENTITY_DOT_COLORS.groundCombat} label="Ground Combat" active={showGroundCombat} onToggle={toggleGroundCombat} indent disabled={!showEvents} />
-              <ToggleRow color={ENTITY_DOT_COLORS.targeted} label="Targeted" active={showTargeted} onToggle={toggleTargeted} indent disabled={!showEvents} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Sites" active={showSites} onToggle={toggleSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Nuclear" active={showNuclear} onToggle={toggleNuclear} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Naval" active={showNaval} onToggle={toggleNaval} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Oil" active={showOil} onToggle={toggleOil} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Airbase" active={showAirbase} onToggle={toggleAirbase} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Desalination" active={showDesalination} onToggle={toggleDesalination} indent disabled={!showSites} />
-              <ToggleRow color={ENTITY_DOT_COLORS.sites} label="Port" active={showPort} onToggle={togglePort} indent disabled={!showSites} />
-              <ToggleRow color="#f97316" label="Hit Only" active={showHitOnly} onToggle={toggleHitOnly} indent disabled={!showSites} />
-              <button
-                onClick={() => {
-                  localStorage.clear();
-                  document.cookie.split(';').forEach((c) => {
-                    document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-                  });
-                  window.location.reload();
-                }}
-                className="mt-2 text-[10px] text-red-400 hover:text-red-300 opacity-60 hover:opacity-100 transition-opacity"
-              >
-                Clear cache & reload
-              </button>
-            </>
-          )}
+          {!isCollapsed && <LayerTogglesContent />}
         </div>
       </OverlayPanel>
     </div>

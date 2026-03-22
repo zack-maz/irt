@@ -64,10 +64,8 @@ function EntitySectionHeader({
   );
 }
 
-export function FilterPanelSlot() {
-  const isCollapsed = useUIStore((s) => s.isFiltersCollapsed);
-  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
-  const toggleFilters = useUIStore((s) => s.toggleFilters);
+/** Inner content of filter panel, reusable in Sidebar */
+export function FilterPanelContent() {
   const isFlightFiltersOpen = useUIStore((s) => s.isFlightFiltersOpen);
   const isShipFiltersOpen = useUIStore((s) => s.isShipFiltersOpen);
   const isEventFiltersOpen = useUIStore((s) => s.isEventFiltersOpen);
@@ -100,14 +98,10 @@ export function FilterPanelSlot() {
   const dateEnd = useFilterStore((s) => s.dateEnd);
   const setDateRange = useFilterStore((s) => s.setDateRange);
   const clearFilter = useFilterStore((s) => s.clearFilter);
-  const clearAll = useFilterStore((s) => s.clearAll);
-  const activeFilterCount = useFilterStore((s) => s.activeFilterCount);
   const granularity = useFilterStore((s) => s.granularity);
   const setGranularity = useFilterStore((s) => s.setGranularity);
   const customRangeActive = useFilterStore((s) => s.savedToggles !== null);
   const isDefaultWindowActive = useFilterStore((s) => s.isDefaultWindowActive)();
-
-  const activeCount = activeFilterCount();
 
   // Derive available countries from current entity data
   const flights = useFlightStore((s) => s.flights);
@@ -139,6 +133,149 @@ export function FilterPanelSlot() {
   const isDateActive = dateStart !== null || dateEnd !== null;
 
   return (
+    <div className="flex flex-col gap-3">
+      {/* Proximity (global -- applies to all entity types) */}
+      <div>
+        <SectionHeader label="Proximity" active={isProximityActive} filterKey="proximity" onClear={clearFilter} />
+        <div className="mt-1">
+          <ProximityFilter
+            pin={proximityPin}
+            radiusKm={proximityRadiusKm}
+            isSettingPin={isSettingPin}
+            onSetPin={setProximityPin}
+            onClearPin={() => clearFilter('proximity')}
+            onRadiusChange={setProximityRadius}
+            onStartSettingPin={() => setSettingPin(true)}
+          />
+        </div>
+      </div>
+
+      {/* Flights section */}
+      <div>
+        <EntitySectionHeader label="Flights" isOpen={isFlightFiltersOpen} onToggle={toggleFlightFilters} />
+        {isFlightFiltersOpen && (
+          <div className="mt-1.5 flex flex-col gap-2 pl-3">
+            <div>
+              <SectionHeader label="Country" active={isFlightCountryActive} filterKey="flightCountry" onClear={clearFilter} />
+              <div className="mt-1">
+                <CountryFilter
+                  selectedCountries={flightCountries}
+                  onAdd={addFlightCountry}
+                  onRemove={removeFlightCountry}
+                  availableCountries={availableFlightCountries}
+                />
+              </div>
+            </div>
+            <div>
+              <SectionHeader label="Speed" active={isFlightSpeedActive} filterKey="flightSpeed" onClear={clearFilter} />
+              <div className="mt-1">
+                <RangeSlider
+                  label="Speed"
+                  min={0}
+                  max={700}
+                  step={10}
+                  unit="kn"
+                  valueMin={flightSpeedMin}
+                  valueMax={flightSpeedMax}
+                  onChangeMin={(v) => setFlightSpeedRange(v, flightSpeedMax)}
+                  onChangeMax={(v) => setFlightSpeedRange(flightSpeedMin, v)}
+                />
+              </div>
+            </div>
+            <div>
+              <SectionHeader label="Altitude" active={isAltitudeActive} filterKey="altitude" onClear={clearFilter} />
+              <div className="mt-1">
+                <RangeSlider
+                  label="Altitude"
+                  min={0}
+                  max={60000}
+                  step={500}
+                  unit="ft"
+                  valueMin={altitudeMin}
+                  valueMax={altitudeMax}
+                  onChangeMin={(v) => setAltitudeRange(v, altitudeMax)}
+                  onChangeMax={(v) => setAltitudeRange(altitudeMin, v)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Ships section */}
+      <div>
+        <EntitySectionHeader label="Ships" isOpen={isShipFiltersOpen} onToggle={toggleShipFilters} />
+        {isShipFiltersOpen && (
+          <div className="mt-1.5 flex flex-col gap-2 pl-3">
+            <div>
+              <SectionHeader label="Speed" active={isShipSpeedActive} filterKey="shipSpeed" onClear={clearFilter} />
+              <div className="mt-1">
+                <RangeSlider
+                  label="Speed"
+                  min={0}
+                  max={30}
+                  step={1}
+                  unit="kn"
+                  valueMin={shipSpeedMin}
+                  valueMax={shipSpeedMax}
+                  onChangeMin={(v) => setShipSpeedRange(v, shipSpeedMax)}
+                  onChangeMax={(v) => setShipSpeedRange(shipSpeedMin, v)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Events section */}
+      <div>
+        <EntitySectionHeader label="Events" isOpen={isEventFiltersOpen} onToggle={toggleEventFilters} />
+        {isEventFiltersOpen && (
+          <div className="mt-1.5 flex flex-col gap-2 pl-3">
+            <div>
+              <SectionHeader label="Country" active={isEventCountryActive} filterKey="eventCountry" onClear={clearFilter} />
+              <div className="mt-1">
+                <CountryFilter
+                  selectedCountries={eventCountries}
+                  onAdd={addEventCountry}
+                  onRemove={removeEventCountry}
+                  availableCountries={availableEventCountries}
+                />
+              </div>
+            </div>
+            <div>
+              <SectionHeader label="Date Range" active={isDateActive} filterKey="date" onClear={clearFilter} />
+              {isDefaultWindowActive && (
+                <div className="mt-0.5 text-[10px] italic text-text-muted">Showing last 24h</div>
+              )}
+              <div className="mt-1">
+                <DateRangeFilter
+                  dateStart={dateStart}
+                  dateEnd={dateEnd}
+                  granularity={granularity}
+                  isCustomRangeActive={customRangeActive}
+                  onDateRange={setDateRange}
+                  onGranularity={setGranularity}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function FilterPanelSlot() {
+  const isCollapsed = useUIStore((s) => s.isFiltersCollapsed);
+  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
+  const toggleFilters = useUIStore((s) => s.toggleFilters);
+  const activeFilterCount = useFilterStore((s) => s.activeFilterCount);
+  const clearAll = useFilterStore((s) => s.clearAll);
+
+  const activeCount = activeFilterCount();
+
+  return (
     <div
       data-testid="filter-panel-slot"
       className={`absolute top-14 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out max-h-[calc(100vh-4.5rem)] overflow-y-auto ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
@@ -159,135 +296,7 @@ export function FilterPanelSlot() {
           </button>
           {!isCollapsed && (
             <div className="mt-1 flex flex-col gap-3">
-              {/* Proximity (global — applies to all entity types) */}
-              <div>
-                <SectionHeader label="Proximity" active={isProximityActive} filterKey="proximity" onClear={clearFilter} />
-                <div className="mt-1">
-                  <ProximityFilter
-                    pin={proximityPin}
-                    radiusKm={proximityRadiusKm}
-                    isSettingPin={isSettingPin}
-                    onSetPin={setProximityPin}
-                    onClearPin={() => clearFilter('proximity')}
-                    onRadiusChange={setProximityRadius}
-                    onStartSettingPin={() => setSettingPin(true)}
-                  />
-                </div>
-              </div>
-
-              {/* ── Flights section ─────────────────────────────────── */}
-              <div>
-                <EntitySectionHeader label="Flights" isOpen={isFlightFiltersOpen} onToggle={toggleFlightFilters} />
-                {isFlightFiltersOpen && (
-                  <div className="mt-1.5 flex flex-col gap-2 pl-3">
-                    <div>
-                      <SectionHeader label="Country" active={isFlightCountryActive} filterKey="flightCountry" onClear={clearFilter} />
-                      <div className="mt-1">
-                        <CountryFilter
-                          selectedCountries={flightCountries}
-                          onAdd={addFlightCountry}
-                          onRemove={removeFlightCountry}
-                          availableCountries={availableFlightCountries}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <SectionHeader label="Speed" active={isFlightSpeedActive} filterKey="flightSpeed" onClear={clearFilter} />
-                      <div className="mt-1">
-                        <RangeSlider
-                          label="Speed"
-                          min={0}
-                          max={700}
-                          step={10}
-                          unit="kn"
-                          valueMin={flightSpeedMin}
-                          valueMax={flightSpeedMax}
-                          onChangeMin={(v) => setFlightSpeedRange(v, flightSpeedMax)}
-                          onChangeMax={(v) => setFlightSpeedRange(flightSpeedMin, v)}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <SectionHeader label="Altitude" active={isAltitudeActive} filterKey="altitude" onClear={clearFilter} />
-                      <div className="mt-1">
-                        <RangeSlider
-                          label="Altitude"
-                          min={0}
-                          max={60000}
-                          step={500}
-                          unit="ft"
-                          valueMin={altitudeMin}
-                          valueMax={altitudeMax}
-                          onChangeMin={(v) => setAltitudeRange(v, altitudeMax)}
-                          onChangeMax={(v) => setAltitudeRange(altitudeMin, v)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Ships section ───────────────────────────────────── */}
-              <div>
-                <EntitySectionHeader label="Ships" isOpen={isShipFiltersOpen} onToggle={toggleShipFilters} />
-                {isShipFiltersOpen && (
-                  <div className="mt-1.5 flex flex-col gap-2 pl-3">
-                    <div>
-                      <SectionHeader label="Speed" active={isShipSpeedActive} filterKey="shipSpeed" onClear={clearFilter} />
-                      <div className="mt-1">
-                        <RangeSlider
-                          label="Speed"
-                          min={0}
-                          max={30}
-                          step={1}
-                          unit="kn"
-                          valueMin={shipSpeedMin}
-                          valueMax={shipSpeedMax}
-                          onChangeMin={(v) => setShipSpeedRange(v, shipSpeedMax)}
-                          onChangeMax={(v) => setShipSpeedRange(shipSpeedMin, v)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Events section ──────────────────────────────────── */}
-              <div>
-                <EntitySectionHeader label="Events" isOpen={isEventFiltersOpen} onToggle={toggleEventFilters} />
-                {isEventFiltersOpen && (
-                  <div className="mt-1.5 flex flex-col gap-2 pl-3">
-                    <div>
-                      <SectionHeader label="Country" active={isEventCountryActive} filterKey="eventCountry" onClear={clearFilter} />
-                      <div className="mt-1">
-                        <CountryFilter
-                          selectedCountries={eventCountries}
-                          onAdd={addEventCountry}
-                          onRemove={removeEventCountry}
-                          availableCountries={availableEventCountries}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <SectionHeader label="Date Range" active={isDateActive} filterKey="date" onClear={clearFilter} />
-                      {isDefaultWindowActive && (
-                        <div className="mt-0.5 text-[10px] italic text-text-muted">Showing last 24h</div>
-                      )}
-                      <div className="mt-1">
-                        <DateRangeFilter
-                          dateStart={dateStart}
-                          dateEnd={dateEnd}
-                          granularity={granularity}
-                          isCustomRangeActive={customRangeActive}
-                          onDateRange={setDateRange}
-                          onGranularity={setGranularity}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
+              <FilterPanelContent />
               {/* Clear all */}
               {activeCount > 0 && (
                 <button

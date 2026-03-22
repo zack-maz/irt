@@ -75,6 +75,8 @@ export const LAYER_TOGGLE_DEFAULTS: LayerToggles = {
   showHitOnly: false,
 };
 
+export type SidebarSection = 'counters' | 'layers' | 'filters';
+
 export interface UIState {
   isDetailPanelOpen: boolean;
   isStatusCollapsed: boolean;
@@ -84,6 +86,8 @@ export interface UIState {
   isFlightFiltersOpen: boolean;
   isShipFiltersOpen: boolean;
   isEventFiltersOpen: boolean;
+  isSidebarOpen: boolean;
+  activeSidebarSection: SidebarSection | null;
   pulseEnabled: boolean;
   showGroundTraffic: boolean;
   showFlights: boolean;
@@ -129,6 +133,9 @@ export interface UIState {
   toggleHitOnly: () => void;
   selectEntity: (id: string | null) => void;
   hoverEntity: (id: string | null) => void;
+  toggleSidebar: () => void;
+  openSidebarSection: (section: SidebarSection) => void;
+  closeSidebar: () => void;
 }
 
 /** Human-readable labels for each SiteType */
