@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: in-progress
-stopped_at: Completed 19.2-01-PLAN.md
-last_updated: "2026-03-22T23:37:27Z"
+status: completed
+stopped_at: Completed 19.1-02-PLAN.md
+last_updated: "2026-03-22T23:42:06.770Z"
 last_activity: 2026-03-22 -- Completed Phase 19.2 Plan 01 (counter entity data + list item)
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 17
-  completed_plans: 16
+  total_plans: 22
+  completed_plans: 17
   percent: 94
 ---
 
@@ -60,6 +60,7 @@ Progress: [█████████▒] 94%
 | Phase 19 P03 | 7min | 2 tasks | 13 files |
 | Phase 19 P04 | 11min | 2 tasks | 6 files |
 | Phase 19.2 P01 | 4min | 2 tasks | 4 files |
+| Phase 19.1 P02 | 3min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Progress: [█████████▒] 94%
 - **19.2-01:** Backward-compatible return type via spread: { ...countValues, entities } preserves existing .airstrikes etc access
 - **19.2-01:** CounterEntity normalized shape with id/label/metric/lat/lng/type avoids leaking raw entity types to UI
 - **19.2-01:** Hit sites sorted by attackCount descending (not proximity) since attack frequency is more actionable
+- [Phase 19.1-02]: Tag registry uses Tailwind text color classes for direct className usage in syntax highlighting
+- [Phase 19.1-02]: Squawk prefix registered but no-op (data not in FlightEntity model yet)
+- [Phase 19.1-02]: Value extractors sort by frequency descending for autocomplete relevance
 
 ### Roadmap Evolution
 
@@ -147,6 +151,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T23:37:27Z
-Stopped at: Completed 19.2-01-PLAN.md
-Resume file: .planning/phases/19.2-counter-entity-dropdowns/19.2-02-PLAN.md
+Last session: 2026-03-22T23:42:06.768Z
+Stopped at: Completed 19.1-02-PLAN.md
+Resume file: None
