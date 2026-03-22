@@ -132,7 +132,7 @@ Plans:
   4. Search bar and sidebar filters sync bidirectionally (typing `type:flight` activates Flights toggle; toggling Flights ON adds `type:flight` to search)
   5. Clickable chips [Events] [Sites] [Iran] [US] above the input provide quick access to common queries
   6. Plain text queries still work as freeform substring search (backward compat with Phase 19)
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [ ] 19.1-01-PLAN.md -- Core engine: query parser (tokenizer + recursive descent AST), evaluator (AST walker against entity data), serializer (AST to display string)
@@ -196,6 +196,6 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 17. Notification Center | 4/4 | Complete    | 2026-03-20 | - |
 | 18. Oil Markets Tracker | 2/2 | Complete    | 2026-03-21 | - |
 | 19. Search, Filter & UI Cleanup | 4/4 | Complete    | 2026-03-22 | - |
-| 19.1. Advanced Search | 3/5 | In Progress|  | - |
+| 19.1. Advanced Search | 4/5 | In Progress|  | - |
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |

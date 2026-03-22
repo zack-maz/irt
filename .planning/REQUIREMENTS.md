@@ -43,7 +43,7 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 
 - [x] **ASRCH-01**: User can type tag-based queries with full boolean expression support (AND/OR/NOT/parentheses)
 - [x] **ASRCH-02**: Tags are evaluated against all entity types with the full tag vocabulary (~25 prefixes)
-- [ ] **ASRCH-03**: Search bar and sidebar filters sync bidirectionally (typing tags activates toggles; toggling adds/removes tags)
+- [x] **ASRCH-03**: Search bar and sidebar filters sync bidirectionally (typing tags activates toggles; toggling adds/removes tags)
 - [x] **ASRCH-04**: Two-stage autocomplete suggests tag prefixes then known values with counts from live entity data
 - [x] **ASRCH-05**: SearchModal includes chip row, syntax highlighting, autocomplete dropdown, and cheat sheet popover
 - [x] **ASRCH-06**: Plain text queries still work as freeform substring search (backward compat with Phase 19)

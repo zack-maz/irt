@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Completed 19.1-04-PLAN.md
-last_updated: "2026-03-22T23:51:48.460Z"
-last_activity: 2026-03-22 -- Completed Phase 19.2 Plan 02 (counter entity dropdowns)
+stopped_at: Completed 19.1-03-PLAN.md
+last_updated: "2026-03-22T23:53:30.853Z"
+last_activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
   percent: 89
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 
 ## Current Position
 
-Phase: 19.2 of 20 (Counter Entity Dropdowns)
-Plan: 02 of 02 complete
-Status: Phase 19.2 complete
-Last activity: 2026-03-22 -- Completed Phase 19.2 Plan 02 (counter entity dropdowns)
+Phase: 19.1 of 20 (Advanced Search with Tag and Entity Type Filtering)
+Plan: 03 of 05 complete
+Status: Plan 03 complete, Plans 04-05 remaining
+Last activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
 
 Progress: [█████████░] 89%
 
@@ -64,6 +64,7 @@ Progress: [█████████░] 89%
 | Phase 19.1 P01 | 5min | 3 tasks | 6 files |
 | Phase 19.2 P02 | 4min | 2 tasks | 4 files |
 | Phase 19.1 P04 | 4min | 2 tasks | 6 files |
+| Phase 19.1 P03 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Progress: [█████████░] 89%
 - [Phase 19.1]: Transparent input overlay pattern: text-transparent + caret-white input over SyntaxOverlay div
 - [Phase 19.1]: Autocomplete debounced at 100ms with entity data pre-computed via useMemo
 - [Phase 19.1]: Escape key priority stack: cheat sheet > autocomplete > modal close
+- [Phase 19.1]: Triple-ref pattern (syncSourceRef + prevQueryRef + prevTogglesRef) for bidirectional sync loop prevention
+- [Phase 19.1]: Text-only queries don't alter sidebar toggles; sidebar sync only fires with non-empty query
+- [Phase 19.1]: buildASTFromToggles uses first type value per group for concise query serialization
 
 ### Roadmap Evolution
 
@@ -166,6 +170,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T23:51:48.457Z
-Stopped at: Completed 19.1-04-PLAN.md
+Last session: 2026-03-22T23:53:30.851Z
+Stopped at: Completed 19.1-03-PLAN.md
 Resume file: None
