@@ -18,6 +18,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
+import { useSearchStore } from '@/stores/searchStore';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity, SiteEntity } from '@/types/entities';
 import {
@@ -80,6 +81,10 @@ export function BaseMap() {
   const setProximityPin = useFilterStore((s) => s.setProximityPin);
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
+
+  // Search filter state for tooltip suppression
+  const isSearchFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
+  const searchMatchedIds = useSearchStore((s) => s.matchedIds);
 
   const [hover, setHover] = useState<HoverState | null>(null);
 
@@ -178,7 +183,11 @@ export function BaseMap() {
   }
 
   const rawTooltipEntity = hover?.entity ?? null;
-  const tooltipEntity = rawTooltipEntity && !isEntityTooltipVisible(rawTooltipEntity)
+  // Suppress tooltip for non-matching entities during search filter, and for toggled-off conflict events
+  const tooltipEntity = rawTooltipEntity && (
+    !isEntityTooltipVisible(rawTooltipEntity) ||
+    (isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id))
+  )
     ? null
     : rawTooltipEntity;
   const tooltipPos = hover

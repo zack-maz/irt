@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useSearchStore } from '@/stores/searchStore';
 import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
@@ -41,6 +41,28 @@ export function useSearchResults(): GroupedSearchResults {
   shipsRef.current = ships;
   eventsRef.current = events;
   sitesRef.current = sites;
+
+  // When filter mode is active and entity data changes, re-compute matchedIds
+  // so newly arrived/departed entities are correctly dimmed (Pitfall 4 fix)
+  const isFilterMode = useSearchStore((s) => s.isFilterMode);
+  const lastRefreshRef = useRef(0);
+
+  useEffect(() => {
+    if (!isFilterMode || !query.trim()) return;
+
+    // Recompute matched IDs from current entity data
+    const ids = new Set<string>();
+    for (const r of searchEntities(query, flights)) ids.add(r.entity.id);
+    for (const r of searchEntities(query, ships)) ids.add(r.entity.id);
+    for (const r of searchEntities(query, events)) ids.add(r.entity.id);
+    for (const r of searchEntities(query, sites)) ids.add(r.entity.id);
+
+    // Only update if size changed to avoid needless Set creation
+    const current = useSearchStore.getState().matchedIds;
+    if (ids.size !== current.size || [...ids].some((id) => !current.has(id))) {
+      useSearchStore.getState().setMatchedIds(ids);
+    }
+  }, [isFilterMode, query, flights, ships, events, sites]);
 
   return useMemo(() => {
     const f = searchEntities(query, flightsRef.current).slice(0, MAX_PER_TYPE);
