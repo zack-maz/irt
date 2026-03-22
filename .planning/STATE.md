@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: in-progress
-stopped_at: Completed 19-04-PLAN.md
-last_updated: "2026-03-22T19:57:11Z"
-last_activity: 2026-03-22 -- Completed Phase 19 Plan 04 (draggable markets, purple ships, visual polish)
+status: completed
+stopped_at: Completed 19-03-PLAN.md
+last_updated: "2026-03-22T20:09:00Z"
+last_activity: 2026-03-22 -- Completed Phase 19 Plan 03 (search filter integration)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 19 of 20 (Search, Filter & UI Cleanup)
-Plan: 03 of 04 complete
-Status: Plans 01, 02, 04 complete (plan 03 pending)
-Last activity: 2026-03-22 -- Completed Phase 19 Plan 04 (draggable markets, purple ships, visual polish)
+Plan: 04 of 04 complete
+Status: Phase 19 complete (all 4 plans done)
+Last activity: 2026-03-22 -- Completed Phase 19 Plan 03 (search filter integration)
 
-Progress: [█████████▓] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v1.1)
+- Total plans completed: 9 (v1.1)
 - Average duration: 5min
-- Total execution time: 38min
+- Total execution time: 45min
 
 **By Phase:**
 
@@ -47,7 +47,7 @@ Progress: [█████████▓] 93%
 | 16 | 3/3 | 12min | 4min |
 | 17 | 4/4 | 13min | 3.25min |
 | 18 | 2/2 | 4min | 2min |
-| 19 | 3/4 | 22min | 7.3min |
+| 19 | 4/4 | 29min | 7.25min |
 
 *Updated after each plan completion*
 | Phase 17 P01 | 3min | 1 tasks | 8 files |
@@ -57,6 +57,7 @@ Progress: [█████████▓] 93%
 | Phase 18 P02 | 2min | 2 tasks | 7 files |
 | Phase 19 P01 | 6min | 2 tasks | 13 files |
 | Phase 19 P02 | 5min | 2 tasks | 10 files |
+| Phase 19 P03 | 7min | 2 tasks | 13 files |
 | Phase 19 P04 | 11min | 2 tasks | 6 files |
 
 ## Accumulated Context
@@ -113,6 +114,10 @@ Progress: [█████████▓] 93%
 - **19-02:** useSearchResults uses useRef for entity arrays to avoid recomputing on every poll cycle
 - **19-02:** SearchModal rendered inside Topbar; closeSearchModal preserves query for re-open
 - **19-02:** filterStore.clearAll extended to also call searchStore.clearSearch (Reset All clears search)
+- **19-03:** SEARCH_DIM_ALPHA=15 for near-invisible non-matching entities (distinct from DIM_ALPHA=40)
+- **19-03:** Centralized useEscapeKeyHandler replaces per-component Escape listeners for conflict-free priority
+- **19-03:** Glow/highlight layers hidden for non-matched entities during search filter
+- **19-03:** Tooltip suppression for non-matching entities via searchStore state check in BaseMap
 - **19-04:** useDraggable hook: pointer-events drag with setPointerCapture, viewport clamping, localStorage persistence
 - **19-04:** Tooltip #9ca3af color kept as-is (generic type label color, not ship-specific identity)
 - **19-04:** clampPosition exported as pure helper for independent unit testing without pointer event simulation
@@ -133,6 +138,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:57:11Z
-Stopped at: Completed 19-04-PLAN.md
-Resume file: .planning/phases/19-search-filter-ui-cleanup/19-04-SUMMARY.md
+Last session: 2026-03-22T20:09:00Z
+Stopped at: Completed 19-03-PLAN.md (Phase 19 now fully complete)
+Resume file: .planning/phases/19-search-filter-ui-cleanup/19-03-SUMMARY.md
