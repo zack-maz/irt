@@ -56,9 +56,8 @@ export function SearchModal() {
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      useSearchStore.getState().closeSearchModal();
-    } else if (e.key === 'Enter') {
+    // Escape handled by centralized useEscapeKeyHandler (priority stack)
+    if (e.key === 'Enter') {
       const q = useSearchStore.getState().query.trim();
       if (q) {
         // Compute matched IDs from current results

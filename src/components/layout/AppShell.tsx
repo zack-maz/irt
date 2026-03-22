@@ -11,6 +11,7 @@ import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
 import { useMarketPolling } from '@/hooks/useMarketPolling';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useEscapeKeyHandler } from '@/hooks/useEscapeKeyHandler';
 
 export function AppShell() {
   useFlightPolling();
@@ -20,6 +21,7 @@ export function AppShell() {
   useNewsPolling();
   useMarketPolling();
   useNotifications();
+  useEscapeKeyHandler();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface">

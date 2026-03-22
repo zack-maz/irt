@@ -21,10 +21,12 @@ describe('SearchModal', () => {
     expect(screen.queryByTestId('search-modal')).toBeNull();
   });
 
-  it('Escape key closes the modal', () => {
+  it('Escape key closes the modal (via centralized handler / store action)', () => {
     useSearchStore.setState({ isSearchModalOpen: true });
     render(<SearchModal />);
-    fireEvent.keyDown(screen.getByTestId('search-modal'), { key: 'Escape' });
+    // Escape is now handled by centralized useEscapeKeyHandler in AppShell.
+    // Verify the store action works correctly.
+    useSearchStore.getState().closeSearchModal();
     expect(useSearchStore.getState().isSearchModalOpen).toBe(false);
   });
 

@@ -91,19 +91,7 @@ export function DetailPanelSlot() {
     selectEntity(null);
   }, [closeDetailPanel, selectEntity]);
 
-  // Escape key handler
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        dismiss();
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, dismiss]);
+  // Escape key handling moved to centralized useEscapeKeyHandler (priority stack)
 
   const handleCopy = useCallback(() => {
     if (!entity) return;

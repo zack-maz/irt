@@ -12,7 +12,7 @@ export function NotificationBell() {
   const badgeText = unreadCount > 99 ? '99+' : String(unreadCount);
   const ariaLabel = unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications';
 
-  // Outside-click and Escape handlers (only active when dropdown is open)
+  // Outside-click handler (Escape moved to centralized useEscapeKeyHandler)
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -22,24 +22,13 @@ export function NotificationBell() {
     [closeDropdown],
   );
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeDropdown();
-      }
-    },
-    [closeDropdown],
-  );
-
   useEffect(() => {
     if (!isDropdownOpen) return;
     document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isDropdownOpen, handleMouseDown, handleKeyDown]);
+  }, [isDropdownOpen, handleMouseDown]);
 
   return (
     <div

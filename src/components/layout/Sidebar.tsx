@@ -1,11 +1,13 @@
 import { useRef, useEffect } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
+import { useSearchStore } from '@/stores/searchStore';
 import { SidebarSection } from '@/components/layout/SidebarSection';
 import { useCounterData } from '@/components/counters/useCounterData';
 import { CounterRow } from '@/components/counters/CounterRow';
 import { LayerTogglesContent } from '@/components/layout/LayerTogglesSlot';
 import { FilterPanelContent } from '@/components/layout/FilterPanelSlot';
+import { FilterChip } from '@/components/ui/FilterChip';
 import type { SidebarSection as SidebarSectionType } from '@/types/ui';
 
 /* SVG icons for the icon strip */
@@ -91,6 +93,8 @@ export function Sidebar() {
   const toggleFilters = useUIStore((s) => s.toggleFilters);
   const activeFilterCount = useFilterStore((s) => s.activeFilterCount);
   const clearAll = useFilterStore((s) => s.clearAll);
+  const isFilterMode = useSearchStore((s) => s.isFilterMode);
+  const searchQuery = useSearchStore((s) => s.query);
 
   const countersRef = useRef<HTMLDivElement>(null);
   const layersRef = useRef<HTMLDivElement>(null);
@@ -189,6 +193,14 @@ export function Sidebar() {
               isOpen={!isFiltersCollapsed}
               onToggle={toggleFilters}
             >
+              {isFilterMode && searchQuery && (
+                <div className="mb-2">
+                  <FilterChip
+                    label={searchQuery}
+                    onClear={() => useSearchStore.getState().clearSearch()}
+                  />
+                </div>
+              )}
               {filterCount > 0 && (
                 <button
                   onClick={clearAll}

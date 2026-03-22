@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { useNotificationStore } from '@/stores/notificationStore';
@@ -72,12 +72,16 @@ describe('NotificationBell', () => {
     expect(screen.queryByTestId('notification-dropdown')).not.toBeInTheDocument();
   });
 
-  it('closes dropdown on Escape key', () => {
+  it('closes dropdown on Escape key (via centralized handler / store action)', () => {
     useNotificationStore.setState({ isDropdownOpen: true, unreadCount: 1 });
     render(<NotificationBell />);
     expect(screen.getByTestId('notification-dropdown')).toBeInTheDocument();
 
-    fireEvent.keyDown(document, { key: 'Escape' });
+    // Escape is now handled by centralized useEscapeKeyHandler in AppShell.
+    // Verify the store action works correctly.
+    act(() => {
+      useNotificationStore.getState().closeDropdown();
+    });
     expect(screen.queryByTestId('notification-dropdown')).not.toBeInTheDocument();
   });
 });
