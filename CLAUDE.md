@@ -87,7 +87,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Event store** — `src/stores/eventStore.ts` with no stale clearing (historical data)
 - **Polling hooks** — `useShipPolling` (30s), `useEventPolling` (900s / 15 min)
 - **AppShell** — wires all four: `useFlightPolling()`, `useShipPolling()`, `useEventPolling()`, `useSiteFetch()`
-- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships gray (#9ca3af), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
+- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships purple (#a78bfa), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
 - **Entity icons** — flights/ships use chevron, airstrikes use starburst, ground combat uses explosion, targeted uses crosshair, other conflict uses xmark
 - **Icon sizing** — flights/ships 4000m base (minPixels:24, maxPixels:160); events 3000m base (minPixels:16, maxPixels:120); sites 2000m base (minPixels:12, maxPixels:80)
 

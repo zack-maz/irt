@@ -4,7 +4,7 @@
 export const ENTITY_COLORS = {
   flight: [234, 179, 8] as const,            // #eab308 yellow
   flightUnidentified: [185, 28, 28] as const,  // #b91c1c darker red
-  ship: [156, 163, 175] as const,            // #9ca3af gray
+  ship: [167, 139, 250] as const,            // #a78bfa violet-400
   airstrike: [255, 59, 48] as const,         // #ff3b30 red
   groundCombat: [239, 68, 68] as const,      // #ef4444 red
   targeted: [139, 30, 30] as const,          // #8b1e1e dark red
@@ -15,7 +15,7 @@ export const ENTITY_COLORS = {
 /** CSS hex color strings for toggle row dots */
 export const ENTITY_DOT_COLORS = {
   flights: '#eab308',
-  ships: '#9ca3af',
+  ships: '#a78bfa',
   airstrikes: '#ff3b30',
   groundCombat: '#ef4444',
   targeted: '#8b1e1e',
