@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Completed 19.1-01-PLAN.md
-last_updated: "2026-03-22T23:43:56.337Z"
-last_activity: 2026-03-22 -- Completed Phase 19.1 Plan 01 (query parser, evaluator, serializer)
+stopped_at: Completed 19.2-02-PLAN.md
+last_updated: "2026-03-22T23:46:09.329Z"
+last_activity: 2026-03-22 -- Completed Phase 19.2 Plan 02 (counter entity dropdowns)
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 22
-  completed_plans: 18
-  percent: 86
+  completed_plans: 19
+  percent: 89
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 
 ## Current Position
 
-Phase: 19.1 of 20 (Advanced Search with Tag and Entity Type Filtering)
-Plan: 01 of 05 complete
-Status: Plan 01 complete, Plans 02-05 remaining
-Last activity: 2026-03-22 -- Completed Phase 19.1 Plan 01 (query parser, evaluator, serializer)
+Phase: 19.2 of 20 (Counter Entity Dropdowns)
+Plan: 02 of 02 complete
+Status: Phase 19.2 complete
+Last activity: 2026-03-22 -- Completed Phase 19.2 Plan 02 (counter entity dropdowns)
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [█████████░] 86%
 | Phase 19.2 P01 | 4min | 2 tasks | 4 files |
 | Phase 19.1 P02 | 3min | 1 tasks | 2 files |
 | Phase 19.1 P01 | 5min | 3 tasks | 6 files |
+| Phase 19.2 P02 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,11 @@ Progress: [█████████░] 86%
 - [Phase 19.1]: Implicit AND display in serializer (space-separated) for natural query readability
 - [Phase 19.1]: Haversine inlined in evaluator rather than importing from attackStatus.ts (avoid circular)
 - [Phase 19.1]: Evaluator supports 22 tag prefixes with range operators (6 forms) and temporal parsing (relative + absolute)
+- [Phase 19.2]: Entire counter row is click target (button element) for expand/collapse, not just the chevron
+- [Phase 19.2]: Dropdown stays open after entity click for quick jumping between entities
+- [Phase 19.2]: Ref-based scroll range indicator avoids setState re-render cascade on scroll
+- [Phase 19.2]: CountersSlot marked deprecated (dead code) but kept synced for test coverage
+- [Phase 19.2]: Ships count derived from entities.ships.length (no separate counter field)
 
 ### Roadmap Evolution
 
@@ -156,6 +162,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T23:43:56.333Z
-Stopped at: Completed 19.1-01-PLAN.md
+Last session: 2026-03-22T23:46:09.327Z
+Stopped at: Completed 19.2-02-PLAN.md
 Resume file: None
