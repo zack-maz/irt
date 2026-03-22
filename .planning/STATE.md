@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Completed 19.2-02-PLAN.md
-last_updated: "2026-03-22T23:50:23.714Z"
+stopped_at: Completed 19.1-04-PLAN.md
+last_updated: "2026-03-22T23:51:48.460Z"
 last_activity: 2026-03-22 -- Completed Phase 19.2 Plan 02 (counter entity dropdowns)
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 22
-  completed_plans: 19
+  completed_plans: 20
   percent: 89
 ---
 
@@ -63,6 +63,7 @@ Progress: [█████████░] 89%
 | Phase 19.1 P02 | 3min | 1 tasks | 2 files |
 | Phase 19.1 P01 | 5min | 3 tasks | 6 files |
 | Phase 19.2 P02 | 4min | 2 tasks | 4 files |
+| Phase 19.1 P04 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,9 @@ Progress: [█████████░] 89%
 - [Phase 19.2]: Ref-based scroll range indicator avoids setState re-render cascade on scroll
 - [Phase 19.2]: CountersSlot marked deprecated (dead code) but kept synced for test coverage
 - [Phase 19.2]: Ships count derived from entities.ships.length (no separate counter field)
+- [Phase 19.1]: Transparent input overlay pattern: text-transparent + caret-white input over SyntaxOverlay div
+- [Phase 19.1]: Autocomplete debounced at 100ms with entity data pre-computed via useMemo
+- [Phase 19.1]: Escape key priority stack: cheat sheet > autocomplete > modal close
 
 ### Roadmap Evolution
 
@@ -162,6 +166,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T23:46:09.327Z
-Stopped at: Completed 19.2-02-PLAN.md
+Last session: 2026-03-22T23:51:48.457Z
+Stopped at: Completed 19.1-04-PLAN.md
 Resume file: None
