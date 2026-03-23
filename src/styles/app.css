@@ -30,6 +30,9 @@
 
   /* Layout dimensions */
   --width-detail-panel: 360px;
+  --width-sidebar: 280px;
+  --width-icon-strip: 48px;
+  --height-topbar: 48px;
 }
 
 @layer base {

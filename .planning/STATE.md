@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: completed
-stopped_at: Completed 18-02-PLAN.md
-last_updated: "2026-03-21T21:21:40.631Z"
-last_activity: 2026-03-21 -- Completed Phase 18 Plan 02 (oil markets client panel)
+stopped_at: Completed 19.1-03-PLAN.md
+last_updated: "2026-03-22T23:53:30.853Z"
+last_activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
 progress:
-  total_phases: 6
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 8
+  completed_phases: 6
+  total_plans: 22
+  completed_plans: 21
+  percent: 89
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 18 Oil Markets Tracker
+**Current focus:** Phase 19.2 Counter Entity Dropdowns
 
 ## Current Position
 
-Phase: 18 of 20 (Oil Markets Tracker)
-Plan: 02 of 02 complete
-Status: Phase 18 complete (server data pipeline + client market panel with polling and charts)
-Last activity: 2026-03-21 -- Completed Phase 18 Plan 02 (oil markets client panel)
+Phase: 19.1 of 20 (Advanced Search with Tag and Entity Type Filtering)
+Plan: 03 of 05 complete
+Status: Plan 03 complete, Plans 04-05 remaining
+Last activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v1.1)
+- Total plans completed: 9 (v1.1)
 - Average duration: 5min
-- Total execution time: 38min
+- Total execution time: 45min
 
 **By Phase:**
 
@@ -47,6 +47,7 @@ Progress: [██████████] 100%
 | 16 | 3/3 | 12min | 4min |
 | 17 | 4/4 | 13min | 3.25min |
 | 18 | 2/2 | 4min | 2min |
+| 19 | 4/4 | 29min | 7.25min |
 
 *Updated after each plan completion*
 | Phase 17 P01 | 3min | 1 tasks | 8 files |
@@ -54,6 +55,16 @@ Progress: [██████████] 100%
 | Phase 17 P04 | 4min | 2 tasks | 4 files |
 | Phase 18 P01 | 2min | 2 tasks | 6 files |
 | Phase 18 P02 | 2min | 2 tasks | 7 files |
+| Phase 19 P01 | 6min | 2 tasks | 13 files |
+| Phase 19 P02 | 5min | 2 tasks | 10 files |
+| Phase 19 P03 | 7min | 2 tasks | 13 files |
+| Phase 19 P04 | 11min | 2 tasks | 6 files |
+| Phase 19.2 P01 | 4min | 2 tasks | 4 files |
+| Phase 19.1 P02 | 3min | 1 tasks | 2 files |
+| Phase 19.1 P01 | 5min | 3 tasks | 6 files |
+| Phase 19.2 P02 | 4min | 2 tasks | 4 files |
+| Phase 19.1 P04 | 4min | 2 tasks | 6 files |
+| Phase 19.1 P03 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -100,6 +111,49 @@ Progress: [██████████] 100%
 - **18-02:** MarketsSlot positioned at top-14 below NotificationBell with detail-panel-aware right offset
 - **18-02:** Accordion expand uses CSS max-height transition (0 to 160px) for smooth animation
 
+- **19-01:** NotificationBell moved from absolute positioning to topbar flex layout
+- **19-01:** LayerTogglesContent and FilterPanelContent extracted as separate exports for sidebar reuse
+- **19-01:** Iranian flights counter row removed per locked decision
+- **19-01:** Sidebar overlays map with absolute positioning (does not resize map)
+- **19-01:** Icon strip always visible; content panel slides with translate-x transition
+- **19-01:** StatusDropdown shows aggregate health dot plus per-source breakdown in dropdown
+- **19-02:** useSearchResults uses useRef for entity arrays to avoid recomputing on every poll cycle
+- **19-02:** SearchModal rendered inside Topbar; closeSearchModal preserves query for re-open
+- **19-02:** filterStore.clearAll extended to also call searchStore.clearSearch (Reset All clears search)
+- **19-03:** SEARCH_DIM_ALPHA=15 for near-invisible non-matching entities (distinct from DIM_ALPHA=40)
+- **19-03:** Centralized useEscapeKeyHandler replaces per-component Escape listeners for conflict-free priority
+- **19-03:** Glow/highlight layers hidden for non-matched entities during search filter
+- **19-03:** Tooltip suppression for non-matching entities via searchStore state check in BaseMap
+- **19-04:** useDraggable hook: pointer-events drag with setPointerCapture, viewport clamping, localStorage persistence
+- **19-04:** Tooltip #9ca3af color kept as-is (generic type label color, not ship-specific identity)
+- **19-04:** clampPosition exported as pure helper for independent unit testing without pointer event simulation
+
+- **19.2-01:** Backward-compatible return type via spread: { ...countValues, entities } preserves existing .airstrikes etc access
+- **19.2-01:** CounterEntity normalized shape with id/label/metric/lat/lng/type avoids leaking raw entity types to UI
+- **19.2-01:** Hit sites sorted by attackCount descending (not proximity) since attack frequency is more actionable
+- [Phase 19.1-02]: Tag registry uses Tailwind text color classes for direct className usage in syntax highlighting
+- [Phase 19.1-02]: Squawk prefix registered but no-op (data not in FlightEntity model yet)
+- [Phase 19.1-02]: Value extractors sort by frequency descending for autocomplete relevance
+- [Phase 19.1]: QueryNode uses 5-variant discriminated union (tag, text, and, or, not) for type-safe AST
+- [Phase 19.1]: Implicit AND display in serializer (space-separated) for natural query readability
+- [Phase 19.1]: Haversine inlined in evaluator rather than importing from attackStatus.ts (avoid circular)
+- [Phase 19.1]: Evaluator supports 22 tag prefixes with range operators (6 forms) and temporal parsing (relative + absolute)
+- [Phase 19.2]: Entire counter row is click target (button element) for expand/collapse, not just the chevron
+- [Phase 19.2]: Dropdown stays open after entity click for quick jumping between entities
+- [Phase 19.2]: Ref-based scroll range indicator avoids setState re-render cascade on scroll
+- [Phase 19.2]: CountersSlot marked deprecated (dead code) but kept synced for test coverage
+- [Phase 19.2]: Ships count derived from entities.ships.length (no separate counter field)
+- [Phase 19.1]: Transparent input overlay pattern: text-transparent + caret-white input over SyntaxOverlay div
+- [Phase 19.1]: Autocomplete debounced at 100ms with entity data pre-computed via useMemo
+- [Phase 19.1]: Escape key priority stack: cheat sheet > autocomplete > modal close
+- [Phase 19.1]: Triple-ref pattern (syncSourceRef + prevQueryRef + prevTogglesRef) for bidirectional sync loop prevention
+- [Phase 19.1]: Text-only queries don't alter sidebar toggles; sidebar sync only fires with non-empty query
+- [Phase 19.1]: buildASTFromToggles uses first type value per group for concise query serialization
+
+### Roadmap Evolution
+
+- Phase 19.1 inserted after Phase 19: Advanced search with tag and entity type filtering (URGENT)
+
 Decisions are logged in PROJECT.md Key Decisions table.
 Full v0.9 + v1.0 decision history archived in previous STATE.md.
 
@@ -116,6 +170,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T21:16:12Z
-Stopped at: Completed 18-02-PLAN.md
+Last session: 2026-03-22T23:53:30.851Z
+Stopped at: Completed 19.1-03-PLAN.md
 Resume file: None

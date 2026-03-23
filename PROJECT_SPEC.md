@@ -19,7 +19,7 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 | Backend | Express 5 (API proxy, port 3001) |
 | Cache | Upstash Redis (serverless-compatible) |
 | Hosting | Vercel (serverless functions + CDN) |
-| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, Overpass/OSM |
+| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, GDELT DOC, RSS, Overpass/OSM, Yahoo Finance |
 | Testing | Vitest + Testing Library |
 | Dev Tooling | tsx watch (server), concurrently (parallel dev), tsup (bundling) |
 
@@ -110,6 +110,10 @@ interface MapEntityBase {
 13. **Serverless Cache Migration** — Upstash Redis for stateless deployment ✓
 14. **Vercel Deployment** — Serverless functions + CDN hosting ✓
 15. **Key Sites Overlay** — Infrastructure sites (nuclear, naval, oil, airbase, desalination, port) from OSM ✓
+16. **News Feed** — GDELT DOC + RSS aggregation with dedup/clustering ✓
+17. **Notification Center** — Severity-scored alerts with proximity detection ✓
+18. **Oil Markets Tracker** — Live commodity prices with sparkline charts ✓
+19. **Search, Filter & UI Cleanup** — Tag-based search, filter redesign, counter dropdowns ✓
 
 ## Constraints
 

@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useMarketStore } from '@/stores/marketStore';
-import type { ConnectionStatus, MarketRange } from '@/stores/marketStore';
 import { useUIStore } from '@/stores/uiStore';
+import type { ConnectionStatus, MarketRange } from '@/stores/marketStore';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 import { MarketRow } from '@/components/markets/MarketRow';
+import { useDraggable } from '@/hooks/useDraggable';
 
 const STATUS_DOT_CLASS: Record<ConnectionStatus, string> = {
   connected: 'bg-accent-green',
@@ -18,6 +19,8 @@ const RANGES: { value: MarketRange; label: string }[] = [
   { value: '1mo', label: '1M' },
   { value: 'ytd', label: 'YTD' },
 ];
+
+const DEFAULT_POSITION = { x: typeof window !== 'undefined' ? window.innerWidth - 604 : 900, y: 56 };
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -40,19 +43,20 @@ export function MarketsSlot() {
   const connectionStatus = useMarketStore((s) => s.connectionStatus);
   const range = useMarketStore((s) => s.range);
   const setRange = useMarketStore((s) => s.setRange);
-  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
 
-  const [isCollapsed, setIsCollapsed] = useState(() => readBool('markets-collapsed', false));
+  const { position, isDragging, handleProps, resetPosition } = useDraggable({
+    storageKey: 'marketsPosition',
+    defaultPosition: DEFAULT_POSITION,
+  });
+
+  const isNotDefault = useMemo(() => {
+    return Math.abs(position.x - DEFAULT_POSITION.x) > 2 || Math.abs(position.y - DEFAULT_POSITION.y) > 2;
+  }, [position]);
+
+  const isCollapsed = useUIStore((s) => s.isMarketsCollapsed);
+  const toggleCollapse = useUIStore((s) => s.toggleMarkets);
   const [showPercent, setShowPercent] = useState(() => readBool('markets-show-percent', false));
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
-
-  const toggleCollapse = useCallback(() => {
-    setIsCollapsed((prev) => {
-      const next = !prev;
-      persistBool('markets-collapsed', next);
-      return next;
-    });
-  }, []);
 
   const toggleMode = useCallback(() => {
     setShowPercent((prev) => {
@@ -66,12 +70,38 @@ export function MarketsSlot() {
 
   return (
     <div
-      className={`absolute top-14 z-[var(--z-controls)] w-[260px] transition-[right] duration-300 ease-in-out ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
+      style={{
+        position: 'fixed',
+        left: position.x,
+        top: position.y,
+        zIndex: 'var(--z-controls)' as unknown as number,
+        width: 260,
+        userSelect: isDragging ? 'none' : undefined,
+      }}
       data-testid="markets-slot"
     >
       <OverlayPanel>
-        {/* Header */}
-        <div className="flex items-center gap-2">
+        {/* Drag handle header */}
+        <div
+          className="flex items-center gap-2"
+          {...handleProps}
+        >
+          {/* Grip icon */}
+          <svg
+            width="8"
+            height="12"
+            viewBox="0 0 8 12"
+            fill="currentColor"
+            className="text-text-muted flex-shrink-0 opacity-50"
+            aria-hidden="true"
+          >
+            <circle cx="2" cy="2" r="1" />
+            <circle cx="6" cy="2" r="1" />
+            <circle cx="2" cy="6" r="1" />
+            <circle cx="6" cy="6" r="1" />
+            <circle cx="2" cy="10" r="1" />
+            <circle cx="6" cy="10" r="1" />
+          </svg>
           <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Markets
           </span>
@@ -85,6 +115,24 @@ export function MarketsSlot() {
             </span>
           )}
           <div className="ml-auto flex items-center gap-1">
+            {isNotDefault && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetPosition();
+                }}
+                className="text-text-muted text-[10px] px-1 py-0.5 rounded hover:bg-white/5 transition-colors"
+                aria-label="Reset position"
+                title="Reset position"
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 8a6 6 0 0 1 10.47-4" />
+                  <path d="M14 8a6 6 0 0 1-10.47 4" />
+                  <polyline points="13 2 13 5 10 5" />
+                  <polyline points="3 14 3 11 6 11" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={toggleMode}
               className="text-[10px] px-1.5 py-0.5 rounded border border-border text-text-secondary hover:bg-white/5 transition-colors"

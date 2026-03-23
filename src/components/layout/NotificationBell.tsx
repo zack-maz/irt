@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useNotificationStore } from '@/stores/notificationStore';
-import { useUIStore } from '@/stores/uiStore';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function NotificationBell() {
@@ -8,14 +7,12 @@ export function NotificationBell() {
   const isDropdownOpen = useNotificationStore((s) => s.isDropdownOpen);
   const toggleDropdown = useNotificationStore((s) => s.toggleDropdown);
   const closeDropdown = useNotificationStore((s) => s.closeDropdown);
-  const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
-
   const containerRef = useRef<HTMLDivElement>(null);
 
   const badgeText = unreadCount > 99 ? '99+' : String(unreadCount);
   const ariaLabel = unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications';
 
-  // Outside-click and Escape handlers (only active when dropdown is open)
+  // Outside-click handler (Escape moved to centralized useEscapeKeyHandler)
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -25,29 +22,18 @@ export function NotificationBell() {
     [closeDropdown],
   );
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeDropdown();
-      }
-    },
-    [closeDropdown],
-  );
-
   useEffect(() => {
     if (!isDropdownOpen) return;
     document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isDropdownOpen, handleMouseDown, handleKeyDown]);
+  }, [isDropdownOpen, handleMouseDown]);
 
   return (
     <div
       ref={containerRef}
-      className={`absolute top-4 z-[var(--z-controls)] transition-[right] duration-300 ease-in-out ${isDetailPanelOpen ? 'right-[calc(var(--width-detail-panel)+1rem)]' : 'right-4'}`}
+      className="relative"
       data-testid="notification-bell"
     >
       <button

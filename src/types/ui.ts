@@ -54,6 +54,8 @@ export interface LayerToggles {
   showDesalination: boolean;
   showPort: boolean;
   showHitOnly: boolean;
+  showHealthySites: boolean;
+  showAttackedSites: boolean;
 }
 
 export const LAYER_TOGGLE_DEFAULTS: LayerToggles = {
@@ -63,17 +65,21 @@ export const LAYER_TOGGLE_DEFAULTS: LayerToggles = {
   showAirstrikes: true,
   showGroundCombat: true,
   showTargeted: true,
-  showGroundTraffic: false,
+  showGroundTraffic: true,
   pulseEnabled: true,
   showSites: true,
   showNuclear: true,
-  showNaval: true,
+  showNaval: false,
   showOil: true,
-  showAirbase: true,
-  showDesalination: true,
-  showPort: true,
+  showAirbase: false,
+  showDesalination: false,
+  showPort: false,
   showHitOnly: false,
+  showHealthySites: true,
+  showAttackedSites: true,
 };
+
+export type SidebarSection = 'counters' | 'layers' | 'filters';
 
 export interface UIState {
   isDetailPanelOpen: boolean;
@@ -84,6 +90,9 @@ export interface UIState {
   isFlightFiltersOpen: boolean;
   isShipFiltersOpen: boolean;
   isEventFiltersOpen: boolean;
+  isSidebarOpen: boolean;
+  activeSidebarSection: SidebarSection | null;
+  isMarketsCollapsed: boolean;
   pulseEnabled: boolean;
   showGroundTraffic: boolean;
   showFlights: boolean;
@@ -100,8 +109,11 @@ export interface UIState {
   showDesalination: boolean;
   showPort: boolean;
   showHitOnly: boolean;
+  showHealthySites: boolean;
+  showAttackedSites: boolean;
   selectedEntityId: string | null;
   hoveredEntityId: string | null;
+  expandedAlertSiteId: string | null;
   openDetailPanel: () => void;
   closeDetailPanel: () => void;
   toggleStatus: () => void;
@@ -127,8 +139,16 @@ export interface UIState {
   toggleDesalination: () => void;
   togglePort: () => void;
   toggleHitOnly: () => void;
+  toggleHealthySites: () => void;
+  toggleAttackedSites: () => void;
   selectEntity: (id: string | null) => void;
   hoverEntity: (id: string | null) => void;
+  setExpandedAlertSiteId: (id: string | null) => void;
+  toggleSidebar: () => void;
+  openSidebarSection: (section: SidebarSection) => void;
+  closeSidebar: () => void;
+  toggleMarkets: () => void;
+  collapseMarkets: () => void;
 }
 
 /** Human-readable labels for each SiteType */

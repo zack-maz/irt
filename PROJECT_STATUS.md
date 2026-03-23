@@ -1,13 +1,13 @@
 # Iran Conflict Monitor — Project Status
 
-**Last updated:** 2026-03-20
+**Last updated:** 2026-03-22
 
 ## Progress
 
 ```
 v0.9 MVP:              [████████████████████] 12/12 phases (shipped 2026-03-19)
 v1.0 Deployment:       [████████████████████]  2/2  phases (shipped 2026-03-20)
-v1.1 Intelligence Layer: [██████████          ]  3/6  phases (in progress)
+v1.1 Intelligence Layer: [████████████████████]  8/8  phases (shipped 2026-03-22)
 ```
 
 ## Phase Status
@@ -32,10 +32,14 @@ v1.1 Intelligence Layer: [██████████          ]  3/6  phases
 | 15 | Key Sites Overlay | v1.1 | Done | 2026-03-20 |
 | 16 | News Feed | v1.1 | Done | 2026-03-20 |
 | 17 | Notification Center | v1.1 | Done | 2026-03-20 |
+| 18 | Oil Markets Tracker | v1.1 | Done | 2026-03-21 |
+| 19 | Search, Filter & UI Cleanup | v1.1 | Done | 2026-03-22 |
+| 19.1 | Advanced Search with Tag Filtering | v1.1 | Done | 2026-03-22 |
+| 19.2 | Counter Entity Dropdowns | v1.1 | Done | 2026-03-22 |
 
 ## Current Focus
 
-Phase 17 (Notification Center) complete. Next: Phase 18 (Oil Markets Tracker).
+Phase 19 (Search, Filter & UI Cleanup) complete including 19.1 and 19.2. v1.1 milestone shipped.
 
 ## What's Been Built
 
@@ -69,13 +73,21 @@ Phase 17 (Notification Center) complete. Next: Phase 18 (Oil Markets Tracker).
 
 **Phase 14: Vercel Deployment** — Vercel serverless entry point with tsup bundling, rate limiting, graceful config for missing API keys, vercel.json routing.
 
-### v1.1 Intelligence Layer (Phase 15+)
+### v1.1 Intelligence Layer (Phases 15-19)
 
 **Phase 15: Key Sites Overlay** — Overpass/OSM adapter for key infrastructure (nuclear, naval, oil, airbase, desalination, port). SiteEntity type, siteStore, one-time fetch with Redis cache. Site IconLayer with 6 category toggles, attack status detection (orange glow for recently-hit sites), tooltip and SiteDetail panel. 571 tests passing.
 
 **Phase 16: News Feed** — GDELT DOC 2.0 + 5 RSS feeds (BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye) with conflict keyword filtering, Jaccard dedup/clustering, sourceCountry tagging, English-only GDELT filter. newsStore + 15-min polling. 618 tests passing.
 
 **Phase 17: Notification Center** — Severity-scored conflict notifications (type weight × log mentions × log sources × recency decay), news headline matching (temporal + geographic/keyword), proximity alerts for flights/ships approaching key sites within 50km, 24h default event window, notification bell with unread badge and dropdown. 647 tests passing.
+
+**Phase 18: Oil Markets Tracker** — Yahoo Finance adapter with Redis cache (60s TTL) for oil market prices (Brent, WTI, XLE, USO, XOM). MarketsSlot collapsible overlay panel with 5-day sparkline charts and green delta animations. marketStore + 60s polling.
+
+**Phase 19: Search, Filter & UI Cleanup** — Global Cmd+K search bar with fuzzy matching and fly-to-entity. Filter panel redesign with grouped sections, Reset All button, scrollable layout. Layout audit and z-index cleanup.
+
+**Phase 19.1: Advanced Search with Tag Filtering** — Tag-based query language with ~25 prefixes (type:, site:, country:, near:, etc.), implicit OR evaluation, bidirectional sync between search bar and sidebar filters, two-stage autocomplete with live entity counts, chip row, syntax highlighting, cheat sheet popover. near: queries support site names and cities with proximity pin.
+
+**Phase 19.2: Counter Entity Dropdowns** — Click-to-expand counter rows showing individual entities with label + key metric, accordion behavior, fly-to-entity on click, proximity sorting, scrollable lists with range indicators. 851 tests passing.
 
 ## Blockers
 

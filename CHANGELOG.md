@@ -4,6 +4,67 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v1.1.0] - 2026-03-22
+
+### Phase 19.2: Counter Entity Dropdowns
+
+#### Added
+- Click-to-expand counter rows showing individual entities with label + key metric per type
+- Accordion behavior (only one row expanded at a time)
+- Fly-to-entity on click (map flies to entity and opens detail panel)
+- Proximity sorting per category (flights/events from Tehran, ships from Strait of Hormuz, sites by attack count)
+- Zero-count rows disabled and non-expandable; expanded rows that drop to 0 show empty state
+- Scrollable entity lists with "Showing X-Y of Z" range indicator for 8+ items
+- Ships counter row in CountersSlot
+
+### Phase 19.1: Advanced Search with Tag & Entity Type Filtering
+
+#### Added
+- Tag-based query language with ~25 prefixes (type:, site:, country:, near:, callsign:, icao:, mmsi:, cameo:, etc.)
+- Implicit OR evaluation across all entity types
+- Bidirectional sync between search bar and sidebar filters via `useQuerySync`
+- Two-stage autocomplete: tag prefix suggestions → known values with live entity counts
+- TagChipRow, SyntaxOverlay, AutocompleteDropdown components
+- Cheat sheet popover with full tag vocabulary reference
+- `near:` queries support site names and cities, drops proximity pin with 100km radius
+- `near:` auto-opens filters panel to show proximity controls
+- Negated tag wildcards (`!site:`, `!type:`) for toggle control
+
+#### Changed
+- Search parser simplified to implicit OR (removed AND/NOT/parentheses)
+- Search evaluator rewritten for OR-only evaluation
+- Removed goldstein, vertical, squawk from tag registry
+
+### Phase 19: Search, Filter & UI Cleanup
+
+#### Added
+- Global Cmd+K search bar with fuzzy matching across all entity types
+- SearchModal with keyboard navigation and fly-to-entity on selection
+- Filter panel redesign with per-entity grouped sections (Flights, Ships, Events, Sites)
+- Reusable filter UI components (FilterSection, FilterToggle, FilterSlider)
+- "Reset All" button to clear all active filters
+- Severity filtering for events, health filtering for sites
+- New filter predicates: callsign, ICAO, MMSI, name, CAMEO, mentions, heading
+
+#### Changed
+- Filter panel reordered with logical grouping
+- Removed hit-only toggle (replaced by site health filtering)
+- Simplified filterStore with per-entity filter fields
+- Counter data hook updated for new filter system
+- Sidebar layout refined with search integration
+
+### Phase 18: Oil Markets Tracker
+
+#### Added
+- Yahoo Finance adapter (`server/adapters/yahoo-finance.ts`) for commodity prices
+- `/api/markets` route with Redis cache (60s TTL)
+- `marketStore` Zustand store with ConnectionStatus tracking
+- `useMarketPolling` hook — 60s recursive setTimeout
+- MarketsSlot collapsible overlay panel with 5 instruments (Brent, WTI, XLE, USO, XOM)
+- 5-day sparkline SVG charts with color-coded direction (green up, red down)
+- Green delta animations on price changes matching counter animation pattern
+- 851 tests passing
+
 ## [v1.1.0-alpha.3] - 2026-03-20
 
 ### Phase 17: Notification Center

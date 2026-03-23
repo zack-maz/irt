@@ -41,8 +41,9 @@
 - [x] **Phase 16: News Feed** - Multi-source news pipeline (GDELT DOC + BBC RSS + Al Jazeera RSS) with conflict filtering and deduplication (completed 2026-03-20)
 - [x] **Phase 17: Notification Center** - Severity-scored conflict notifications with proximity alerts, news matching, and 24h event default (completed 2026-03-20)
 - [x] **Phase 18: Oil Markets Tracker** - Oil/energy price panel (Brent, WTI, XLE, USO, XOM) with sparkline trends (completed 2026-03-21)
-- [ ] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy
-- [ ] **Phase 20: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.1
+- [x] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy (completed 2026-03-22)
+- [ ] **Phase 20: Layer Purpose Refactor** - Rethink layer toggle purposes and organization
+- [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
 
 ## Phase Details
 
@@ -113,22 +114,73 @@ Plans:
   2. User can select a search result and the map flies to that entity with the detail panel opening
   3. User can reset all active filters (date range, proximity, nationality, speed, altitude) with a single "Reset All" button
   4. Filter panel displays grouped sections with scrollable layer toggles and clear visual hierarchy
+**Plans:** 4/4 plans complete
+Plans:
+- [x] 19-01-PLAN.md -- Layout shell: Topbar (title, status dropdown, search hint, notification bell) + Sidebar (icon strip, counters/layers/filters sections) + AppShell restructure
+- [ ] 19-02-PLAN.md -- Search: searchStore, searchUtils, useSearchResults hook, Cmd+K SearchModal with grouped results and fly-to-entity
+- [ ] 19-03-PLAN.md -- Search/filter unification: entity dimming in useEntityLayers, FilterChip, Escape key priority
+- [ ] 19-04-PLAN.md -- Polish: draggable markets panel, ship color change to purple, visual consistency pass
+
+### Phase 19.1: Advanced search with tag and entity type filtering (INSERTED)
+
+**Goal:** Users can compose structured tag-based queries with boolean logic, autocomplete, and bidirectional sync between the search bar and sidebar filter controls
+**Requirements**: ASRCH-01, ASRCH-02, ASRCH-03, ASRCH-04, ASRCH-05, ASRCH-06
+**Depends on:** Phase 19
+**Success Criteria** (what must be TRUE):
+  1. User can type tag-based queries (e.g., `type:flight AND country:iran`) with full boolean expression support (AND/OR/NOT/parentheses)
+  2. Tags are syntax-highlighted with per-prefix colors in the search input
+  3. Two-stage autocomplete suggests tag prefixes then known values with counts from live entity data
+  4. Search bar and sidebar filters sync bidirectionally (typing `type:flight` activates Flights toggle; toggling Flights ON adds `type:flight` to search)
+  5. Clickable chips [Events] [Sites] [Iran] [US] above the input provide quick access to common queries
+  6. Plain text queries still work as freeform substring search (backward compat with Phase 19)
+**Plans:** 4/5 plans executed
+
+Plans:
+- [ ] 19.1-01-PLAN.md -- Core engine: query parser (tokenizer + recursive descent AST), evaluator (AST walker against entity data), serializer (AST to display string)
+- [ ] 19.1-02-PLAN.md -- Tag registry: centralized vocabulary with metadata, value extractors, display colors for all ~25 tag prefixes
+- [ ] 19.1-03-PLAN.md -- Data integration: extend searchStore with parsed AST, rewrite useSearchResults with evaluator, bidirectional useQuerySync hook
+- [ ] 19.1-04-PLAN.md -- Search UI: TagChipRow, SyntaxOverlay, AutocompleteDropdown, CheatSheet components integrated into SearchModal
+- [ ] 19.1-05-PLAN.md -- Wiring and verification: wire useQuerySync into AppShell, full integration test, visual checkpoint
+
+### Phase 19.2: Counter Entity Dropdowns (INSERTED)
+
+**Goal:** Each counter row in the Counters panel expands to list individual entities, with click-to-fly-to and detail panel integration
+**Requirements**: CNTR-01, CNTR-02, CNTR-03, CNTR-04, CNTR-05, CNTR-06
+**Depends on:** Phase 19
+**Success Criteria** (what must be TRUE):
+  1. User can click any counter row to expand a dropdown showing individual entities with label + key metric
+  2. Only one counter row can be expanded at a time (accordion)
+  3. Clicking an entity flies the map to it and opens the detail panel
+  4. Entities sorted by proximity per category
+  5. Zero-count rows are disabled; dropdown shows empty state if count drops to 0
+  6. Overflow lists show scrollable container with "Showing X-Y of Z" range indicator
+**Plans:** 2/2 plans complete
+
+Plans:
+- [ ] 19.2-01-PLAN.md -- Data layer: extend useCounterData to return entity arrays with proximity sorting, create EntityListItem component
+- [ ] 19.2-02-PLAN.md -- UI layer: refactor CounterRow with expand/collapse dropdown, accordion in CountersContent, fly-to wiring, scroll range indicator
+
+### Phase 20: Layer Purpose Refactor
+**Goal**: Rethink layer toggle purposes and organization
+**Depends on**: Phase 19
+**Requirements**: TBD
+**Success Criteria**: TBD
 **Plans**: TBD
 
-### Phase 20: Production Review & Deploy Sync
-**Goal**: v1.1 is verified end-to-end and deployed to production
-**Depends on**: Phase 19
+### Phase 21: Production Review & Deploy Sync
+**Goal**: v1.2 is verified end-to-end and deployed to production
+**Depends on**: Phase 20
 **Requirements**: None (verification phase)
 **Success Criteria** (what must be TRUE):
-  1. All v1.1 features function correctly together in the deployed Vercel environment
-  2. All overlay panels (notifications, markets, counters, toggles, detail, search) coexist without z-index or layout conflicts
+  1. All features function correctly together in the deployed Vercel environment
+  2. All overlay panels coexist without z-index or layout conflicts
   3. Redis command budget remains within free-tier limits under normal usage
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -151,5 +203,8 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 16. News Feed | 3/3 | Complete    | 2026-03-20 | - |
 | 17. Notification Center | 4/4 | Complete    | 2026-03-20 | - |
 | 18. Oil Markets Tracker | 2/2 | Complete    | 2026-03-21 | - |
-| 19. Search, Filter & UI Cleanup | v1.1 | 0/TBD | Not started | - |
-| 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |
+| 19. Search, Filter & UI Cleanup | 4/4 | Complete    | 2026-03-22 | - |
+| 19.1. Advanced Search | 5/5 | Complete    | 2026-03-22 | - |
+| 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
+| 20. Layer Purpose Refactor | v1.2 | 0/TBD | Not started | - |
+| 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |

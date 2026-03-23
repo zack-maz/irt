@@ -87,7 +87,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Event store** — `src/stores/eventStore.ts` with no stale clearing (historical data)
 - **Polling hooks** — `useShipPolling` (30s), `useEventPolling` (900s / 15 min)
 - **AppShell** — wires all four: `useFlightPolling()`, `useShipPolling()`, `useEventPolling()`, `useSiteFetch()`
-- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships gray (#9ca3af), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
+- **Entity colors** — flights yellow (#eab308), unidentified red (#ef4444), ships purple (#a78bfa), airstrikes bright red (#ff3b30), ground combat red (#ef4444), targeted dark red (#8b1e1e), other conflict red (#ef4444)
 - **Entity icons** — flights/ships use chevron, airstrikes use starburst, ground combat uses explosion, targeted uses crosshair, other conflict uses xmark
 - **Icon sizing** — flights/ships 4000m base (minPixels:24, maxPixels:160); events 3000m base (minPixels:16, maxPixels:120); sites 2000m base (minPixels:12, maxPixels:80)
 
@@ -150,7 +150,7 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 
 - **Upstash Redis** — REST-based client (`@upstash/redis`) for serverless compatibility
 - **CacheEntry<T>** — stores `{data, fetchedAt}` for staleness computation; hard Redis TTL = 10x logical TTL
-- **Cache keys** — `flights:SOURCE`, `ships:ais`, `events:gdelt`, `sites:overpass`, `news:gdelt`
+- **Cache keys** — `flights:SOURCE`, `ships:ais`, `events:gdelt`, `sites:overpass`, `news:gdelt`, `markets:yahoo`
 - **Redis module** — `server/cache/redis.ts` exports `cacheGet<T>`, `cacheSet<T>`, `redis` instance
 - **AISStream on-demand** — connect, collect for N ms, close per request (no persistent WebSocket)
 - **Ship merge/prune** — fresh ships merged with cached by MMSI, 10 min stale threshold
@@ -218,6 +218,37 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Fly-to-event** — clicking notification flies map to event coordinates and opens detail panel
 - **useSiteImage** — `src/hooks/useSiteImage.ts`, ArcGIS World Imagery tile URLs for satellite thumbnails
 - **Dev score display** — NotificationCard shows severity score in dev mode only (hidden in production)
+
+## Oil Markets Tracker (Phase 18)
+
+- **Yahoo Finance adapter** — `server/adapters/yahoo-finance.ts`, unofficial API for commodity prices
+- **Instruments** — Brent Crude (BZ=F), WTI Crude (CL=F), XLE, USO, XOM
+- **marketStore** — `src/stores/marketStore.ts`, Zustand store with ConnectionStatus
+- **useMarketPolling** — 60s recursive setTimeout
+- **MarketsSlot** — `src/components/layout/MarketsSlot.tsx`, collapsible overlay panel with sparkline charts
+- **Cache** — `markets:yahoo` Redis key, 60s TTL
+- **Route** — `/api/markets` returns market data with sparkline history
+
+## Search & Filter System (Phase 19+)
+
+- **searchStore** — `src/stores/searchStore.ts`, raw query string, parsed AST, recent tags
+- **SearchModal** — `src/components/search/SearchModal.tsx`, Cmd+K activated, keyboard navigation
+- **Tag language** — ~25 prefixes: `type:`, `site:`, `country:`, `near:`, `callsign:`, `icao:`, `mmsi:`, `name:`, `cameo:`, `mentions:`, `heading:`, `speed:`, `altitude:`, `severity:`, etc.
+- **Implicit OR** — all tags evaluated as OR across entity types (no AND/NOT operators)
+- **Bidirectional sync** — `src/hooks/useQuerySync.ts` syncs search bar tags ↔ sidebar filter toggles
+- **Autocomplete** — `src/components/search/AutocompleteDropdown.tsx`, two-stage (prefix → values with counts)
+- **near: queries** — supports site names and cities, drops proximity pin with 100km radius, auto-opens filter panel
+- **filterStore** — `src/stores/filterStore.ts`, per-entity filter fields (flights, ships, events, sites)
+- **FilterPanelSlot** — `src/components/layout/FilterPanelSlot.tsx`, grouped sections with Reset All
+- **useFilteredEntities** — `src/hooks/useFilteredEntities.ts`, applies all active filters to entity arrays
+- **useSearchResults** — `src/hooks/useSearchResults.ts`, evaluates search AST against entities
+
+## Counter Entity Dropdowns (Phase 19.2)
+
+- **CountersSlot** — accordion dropdowns showing individual entities per counter row
+- **Fly-to** — clicking entity in dropdown flies map and opens detail panel
+- **Proximity sorting** — flights/events sorted by distance from Tehran, ships from Strait of Hormuz, sites by attack count
+- **Scrollable lists** — 8+ items show scrollable container with "Showing X-Y of Z" indicator
 
 ## Date Range Filter (Phase 11+13)
 

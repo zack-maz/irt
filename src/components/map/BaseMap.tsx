@@ -13,11 +13,13 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { DeckGLOverlay } from './DeckGLOverlay';
 import { EntityTooltip } from './EntityTooltip';
+import { UtcClock } from '@/components/layout/UtcClock';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
+import { useSearchStore } from '@/stores/searchStore';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity, SiteEntity } from '@/types/entities';
 import {
@@ -49,6 +51,8 @@ function FlyToHandler() {
     map.flyTo({
       center: [flyToTarget.lng, flyToTarget.lat],
       zoom: flyToTarget.zoom,
+      ...(flyToTarget.pitch != null && { pitch: flyToTarget.pitch }),
+      ...(flyToTarget.bearing != null && { bearing: flyToTarget.bearing }),
       duration: 1500,
     });
     setFlyToTarget(null);
@@ -81,6 +85,10 @@ export function BaseMap() {
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
 
+  // Search filter state for tooltip suppression
+  const isSearchFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
+  const searchMatchedIds = useSearchStore((s) => s.matchedIds);
+
   const [hover, setHover] = useState<HoverState | null>(null);
 
   const handleDeckHover = useCallback(
@@ -96,6 +104,8 @@ export function BaseMap() {
     },
     [hoverEntity],
   );
+
+  const setFlyToTarget = useNotificationStore((s) => s.setFlyToTarget);
 
   const handleDeckClick = useCallback(
     (info: PickingInfo) => {
@@ -113,12 +123,13 @@ export function BaseMap() {
         selectEntity(null);
         closeDetailPanel();
       } else {
-        // Click new entity: select and open panel
+        // Click new entity: select, open panel, and fly to it
         selectEntity(entity.id);
         openDetailPanel();
+        setFlyToTarget({ lng: entity.lng, lat: entity.lat, zoom: 10 });
       }
     },
-    [selectedEntityId, selectEntity, openDetailPanel, closeDetailPanel],
+    [selectedEntityId, selectEntity, openDetailPanel, closeDetailPanel, setFlyToTarget],
   );
 
   const handleLoad = useCallback(
@@ -178,7 +189,11 @@ export function BaseMap() {
   }
 
   const rawTooltipEntity = hover?.entity ?? null;
-  const tooltipEntity = rawTooltipEntity && !isEntityTooltipVisible(rawTooltipEntity)
+  // Suppress tooltip for non-matching entities during search filter, and for toggled-off conflict events
+  const tooltipEntity = rawTooltipEntity && (
+    !isEntityTooltipVisible(rawTooltipEntity) ||
+    (isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id))
+  )
     ? null
     : rawTooltipEntity;
   const tooltipPos = hover
@@ -243,7 +258,8 @@ export function BaseMap() {
         <FlyToHandler />
       </Map>
       <MapVignette />
-      <div className="absolute bottom-8 right-14 z-[var(--z-controls)]">
+      <div className="absolute bottom-8 right-14 z-[var(--z-controls)] flex flex-col items-end gap-1">
+        <UtcClock />
         <CoordinateReadout />
       </div>
       {tooltipEntity && (

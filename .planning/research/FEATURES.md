@@ -184,8 +184,11 @@ Phase 19: Search, Filter & UI Cleanup  [depends on all stores existing]
   ├── Remove Minute granularity
   └── Layout audit (z-index, spacing, 1280px min)
 
-Phase 20: Production Review  [depends on all above]
-  └── E2E verification + Vercel deploy + git tag v1.1
+Phase 20: Layer Purpose Refactor  [depends on Phase 19]
+  └── TBD — rethink layer toggle purposes and organization
+
+Phase 21: Production Review  [depends on all above]
+  └── E2E verification + Vercel deploy + git tag v1.2
 ```
 
 **Critical path:** Phase 15 -> Phase 16 -> Phase 17 (notification center needs both sites and news).

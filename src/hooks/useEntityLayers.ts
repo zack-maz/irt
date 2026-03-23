@@ -2,10 +2,13 @@ import { useMemo, useEffect, useRef, useState } from 'react';
 import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
+import { useSearchStore } from '@/stores/searchStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 import { useSiteStore } from '@/stores/siteStore';
 import { useEventStore } from '@/stores/eventStore';
 import { computeAttackStatus } from '@/lib/attackStatus';
+import { haversineKm } from '@/lib/geo';
+import { classifySeverity } from '@/lib/severity';
 import {
   ENTITY_COLORS,
   ICON_SIZE,
@@ -17,6 +20,19 @@ import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 
 const DIM_ALPHA = 40;
+const SEARCH_DIM_ALPHA = 15;
+
+// Smooth elliptical region boundary (replaces hard rectangular cutoffs)
+const REGION_CENTER_LAT = 27;
+const REGION_CENTER_LNG = 50;
+const REGION_SEMI_LAT = 25; // north-south half-extent in degrees
+const REGION_SEMI_LNG = 30; // east-west half-extent in degrees
+
+function isInRegion(lat: number, lng: number): boolean {
+  const dLat = (lat - REGION_CENTER_LAT) / REGION_SEMI_LAT;
+  const dLng = (lng - REGION_CENTER_LNG) / REGION_SEMI_LNG;
+  return dLat * dLat + dLng * dLng <= 1;
+}
 
 /** Maps siteType to icon atlas key */
 const SITE_ICON_MAP: Record<string, string> = {
@@ -67,6 +83,13 @@ function getAngleForEntity(entity: MapEntity | SiteEntity): number {
   }
 }
 
+function passesSeverityFilter(event: MapEntity, high: boolean, med: boolean, low: boolean): boolean {
+  const level = classifySeverity(event as ConflictEventEntity);
+  if (level === 'high') return high;
+  if (level === 'medium') return med;
+  return low;
+}
+
 /**
  * Returns Deck.gl layer array driven by filtered entity data and Zustand store toggles.
  * Includes proximity circle layer when a pin is set.
@@ -96,12 +119,23 @@ export function useEntityLayers() {
   const showDesalination = useUIStore((s) => s.showDesalination);
   const showPort = useUIStore((s) => s.showPort);
   const showHitOnly = useUIStore((s) => s.showHitOnly);
+  const showHealthySites = useUIStore((s) => s.showHealthySites);
+  const showAttackedSites = useUIStore((s) => s.showAttackedSites);
   const selectedEntityId = useUIStore((s) => s.selectedEntityId);
   const hoveredEntityId = useUIStore((s) => s.hoveredEntityId);
+
+  // Search filter state
+  const isFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
+  const matchedIds = useSearchStore((s) => s.matchedIds);
 
   // Proximity circle state
   const proximityPin = useFilterStore((s) => s.proximityPin);
   const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
+
+  // Severity filter toggles
+  const showHighSeverity = useFilterStore((s) => s.showHighSeverity);
+  const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
+  const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
 
   // Date range end for attack status computation (start is irrelevant — once hit, stays hit)
   const dateEnd = useFilterStore((s) => s.dateEnd);
@@ -111,10 +145,9 @@ export function useEntityLayers() {
 
   const flights = useMemo(() => {
     return allFlights.filter((f) => {
-      // Exclude European flights: Greek-registered, west of Turkey, or Balkans
+      // Exclude flights outside elliptical region + Greek-registered
       if (f.data.originCountry === 'Greece') return false;
-      if (f.lng < 25) return false;
-      if (f.lat > 42 && f.lng < 30) return false;
+      if (!isInRegion(f.lat, f.lng)) return false;
       // Mutually exclusive: unidentified first, then ground, then regular
       if (f.data.unidentified) return pulseEnabled;
       if (f.data.onGround) return showGroundTraffic;
@@ -123,19 +156,27 @@ export function useEntityLayers() {
   }, [allFlights, showFlights, showGroundTraffic, pulseEnabled]);
 
   const airstrikeEvents = useMemo(() =>
-    events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)),
-    [events]);
+    events
+      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
+      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
+    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
   const groundCombatEvents = useMemo(() =>
-    events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)),
-    [events]);
+    events
+      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
+      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
+    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
   const targetedEvents = useMemo(() =>
-    events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)),
-    [events]);
+    events
+      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
+      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
+    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
 
-  // Sites filtered by type sub-toggles
+  // Sites filtered by proximity pin + type sub-toggles
   const toggleFilteredSites = useMemo(() => {
     if (!showSites) return [];
     return sites.filter(s => {
+      // Proximity filter
+      if (proximityPin && haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) > proximityRadiusKm) return false;
       switch (s.siteType) {
         case 'nuclear': return showNuclear;
         case 'naval': return showNaval;
@@ -145,7 +186,7 @@ export function useEntityLayers() {
         case 'port': return showPort;
       }
     });
-  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort]);
+  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort, proximityPin, proximityRadiusKm]);
 
   // Compute attack status for all toggle-filtered sites
   const siteAttackMap = useMemo(() => {
@@ -157,11 +198,20 @@ export function useEntityLayers() {
     return map;
   }, [toggleFilteredSites, allEvents, dateEnd]);
 
-  // Apply hit-only filter: when enabled, only show attacked sites
+  // Apply hit-only filter and health status filter
   const visibleSites = useMemo(() => {
-    if (!showHitOnly) return toggleFilteredSites;
-    return toggleFilteredSites.filter(s => siteAttackMap.get(s.id));
-  }, [toggleFilteredSites, showHitOnly, siteAttackMap]);
+    let filtered = toggleFilteredSites;
+    if (showHitOnly) {
+      filtered = filtered.filter(s => siteAttackMap.get(s.id));
+    }
+    // Health status filter
+    filtered = filtered.filter(s => {
+      const attacked = siteAttackMap.get(s.id) ?? false;
+      if (attacked) return showAttackedSites;
+      return showHealthySites;
+    });
+    return filtered;
+  }, [toggleFilteredSites, showHitOnly, siteAttackMap, showHealthySites, showAttackedSites]);
 
   // Pulse animation state
   const [pulseOpacity, setPulseOpacity] = useState(1.0);
@@ -204,11 +254,16 @@ export function useEntityLayers() {
     pickable: false,
   }), [proximityPin, proximityRadiusKm]);
 
+  // Filter ships to Middle East region (smooth elliptical boundary)
+  const filteredShips = useMemo(() => {
+    return ships.filter((s) => isInRegion(s.lat, s.lng));
+  }, [ships]);
+
   // Ship layer
   const shipLayer = useMemo(() => new IconLayer<ShipEntity>({
     id: 'ships',
     visible: showShips,
-    data: ships,
+    data: filteredShips,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
     getIcon: () => 'chevron',
@@ -220,13 +275,14 @@ export function useEntityLayers() {
     getAngle: (d: ShipEntity) => -(d.data.courseOverGround ?? 0),
     getColor: (d: ShipEntity) => {
       const [r, g, b] = ENTITY_COLORS.ship;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       return [r, g, b, 255];
     },
     billboard: false,
     pickable: true,
-    updateTriggers: { getColor: [activeId] },
-  }), [ships, showShips, activeId]);
+    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
+  }), [filteredShips, showShips, activeId, isFilterActive, matchedIds]);
 
   // Airstrike layer
   const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
@@ -244,13 +300,14 @@ export function useEntityLayers() {
     getAngle: () => 0,
     getColor: (d: ConflictEventEntity) => {
       const [r, g, b] = ENTITY_COLORS.airstrike;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       return [r, g, b, 255];
     },
     billboard: false,
     pickable: true,
-    updateTriggers: { getColor: [activeId] },
-  }), [airstrikeEvents, showEvents, showAirstrikes, activeId]);
+    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
+  }), [airstrikeEvents, showEvents, showAirstrikes, activeId, isFilterActive, matchedIds]);
 
   // Ground combat layer (includes assault, blockade, ceasefire_violation, mass_violence, wmd)
   const groundCombatLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
@@ -268,13 +325,14 @@ export function useEntityLayers() {
     getAngle: () => 0,
     getColor: (d: ConflictEventEntity) => {
       const [r, g, b] = ENTITY_COLORS.groundCombat;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       return [r, g, b, 255];
     },
     billboard: false,
     pickable: true,
-    updateTriggers: { getColor: [activeId] },
-  }), [groundCombatEvents, showEvents, showGroundCombat, activeId]);
+    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
+  }), [groundCombatEvents, showEvents, showGroundCombat, activeId, isFilterActive, matchedIds]);
 
   // Targeted layer
   const targetedLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
@@ -292,13 +350,14 @@ export function useEntityLayers() {
     getAngle: () => 0,
     getColor: (d: ConflictEventEntity) => {
       const [r, g, b] = ENTITY_COLORS.targeted;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       return [r, g, b, 255];
     },
     billboard: false,
     pickable: true,
-    updateTriggers: { getColor: [activeId] },
-  }), [targetedEvents, showEvents, showTargeted, activeId]);
+    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
+  }), [targetedEvents, showEvents, showTargeted, activeId, isFilterActive, matchedIds]);
 
   // Flight layer
   const showAnyFlights = showFlights || showGroundTraffic || pulseEnabled;
@@ -310,7 +369,13 @@ export function useEntityLayers() {
     iconMapping: ICON_MAPPING,
     getIcon: (d: FlightEntity) => d.data.onGround ? 'chevronGround' : 'chevron',
     getPosition: (d: FlightEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.flight.meters,
+    getSize: (d: FlightEntity) => {
+      if (d.data.unidentified) {
+        // Size pulses between 1.0x and 1.5x
+        return ICON_SIZE.flight.meters * (1.0 + 0.5 * pulseOpacity);
+      }
+      return ICON_SIZE.flight.meters;
+    },
     sizeUnits: 'meters' as const,
     sizeMinPixels: ICON_SIZE.flight.minPixels,
     sizeMaxPixels: ICON_SIZE.flight.maxPixels,
@@ -319,6 +384,7 @@ export function useEntityLayers() {
       const [r, g, b] = d.data.unidentified
         ? ENTITY_COLORS.flightUnidentified
         : ENTITY_COLORS.flight;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       const alpha = d.data.unidentified
         ? Math.round(pulseOpacity * 255)
@@ -328,9 +394,10 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: {
-      getColor: [pulseOpacity, activeId],
+      getColor: [pulseOpacity, activeId, isFilterActive, matchedIds.size],
+      getSize: [pulseOpacity],
     },
-  }), [flights, pulseOpacity, showAnyFlights, activeId]);
+  }), [flights, pulseOpacity, showAnyFlights, activeId, isFilterActive, matchedIds]);
 
   // Site layer
   const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
@@ -349,29 +416,31 @@ export function useEntityLayers() {
     getColor: (d: SiteEntity) => {
       const attacked = siteAttackMap.get(d.id) ?? false;
       const [r, g, b] = attacked ? ENTITY_COLORS.siteAttacked : ENTITY_COLORS.siteHealthy;
+      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
       if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
       return [r, g, b, 255];
     },
     billboard: false,
     pickable: true,
-    updateTriggers: { getColor: [activeId, siteAttackMap] },
-  }), [visibleSites, showSites, activeId, siteAttackMap]);
+    updateTriggers: { getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size] },
+  }), [visibleSites, showSites, activeId, siteAttackMap, isFilterActive, matchedIds]);
 
   // Find active entity across all data sources
   const activeEntity = useMemo<MapEntity | SiteEntity | null>(() => {
     if (!activeId) return null;
     return flights.find((f) => f.id === activeId)
-      ?? ships.find((s) => s.id === activeId)
+      ?? filteredShips.find((s) => s.id === activeId)
       ?? events.find((e) => e.id === activeId)
       ?? visibleSites.find((s) => s.id === activeId)
       ?? null;
-  }, [activeId, flights, ships, events, visibleSites]);
+  }, [activeId, flights, filteredShips, events, visibleSites]);
 
-  // Glow layer for active entity
+  // Glow layer for active entity (hidden when filter active and entity not matched)
   type AnyEntity = MapEntity | SiteEntity;
+  const glowVisible = !!activeEntity && (!isFilterActive || matchedIds.has(activeEntity.id));
   const glowLayer = useMemo(() => new IconLayer<AnyEntity>({
     id: 'entity-glow',
-    visible: !!activeEntity,
+    visible: glowVisible,
     data: activeEntity ? [activeEntity] : [],
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -385,12 +454,13 @@ export function useEntityLayers() {
     getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 60],
     billboard: false,
     pickable: false,
-  }), [activeEntity, siteAttackMap]);
+  }), [activeEntity, siteAttackMap, glowVisible]);
 
-  // Highlight layer for active entity
+  // Highlight layer for active entity (hidden when filter active and entity not matched)
+  const highlightVisible = !!activeEntity && (!isFilterActive || matchedIds.has(activeEntity.id));
   const highlightLayer = useMemo(() => new IconLayer<AnyEntity>({
     id: 'entity-highlight',
-    visible: !!activeEntity,
+    visible: highlightVisible,
     data: activeEntity ? [activeEntity] : [],
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -404,7 +474,7 @@ export function useEntityLayers() {
     getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 255],
     billboard: false,
     pickable: false,
-  }), [activeEntity, siteAttackMap]);
+  }), [activeEntity, siteAttackMap, highlightVisible]);
 
   return [proximityCircleLayer, shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, siteLayer, glowLayer, highlightLayer];
 }

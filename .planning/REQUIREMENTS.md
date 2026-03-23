@@ -35,9 +35,27 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 
 ### Search & UI
 
-- [ ] **SRCH-01**: User can search across all entity types via Cmd+K global search bar with fuzzy matching and fly-to-entity on selection
-- [ ] **SRCH-02**: User can reset all active filters with a single "Reset All" button
-- [ ] **SRCH-03**: Filter panel has grouped sections with scrollable layer toggles and visual hierarchy
+- [x] **SRCH-01**: User can search across all entity types via Cmd+K global search bar with fuzzy matching and fly-to-entity on selection
+- [x] **SRCH-02**: User can reset all active filters with a single "Reset All" button
+- [x] **SRCH-03**: Filter panel has grouped sections with scrollable layer toggles and visual hierarchy
+
+### Advanced Search
+
+- [x] **ASRCH-01**: User can type tag-based queries with full boolean expression support (AND/OR/NOT/parentheses)
+- [x] **ASRCH-02**: Tags are evaluated against all entity types with the full tag vocabulary (~25 prefixes)
+- [x] **ASRCH-03**: Search bar and sidebar filters sync bidirectionally (typing tags activates toggles; toggling adds/removes tags)
+- [x] **ASRCH-04**: Two-stage autocomplete suggests tag prefixes then known values with counts from live entity data
+- [x] **ASRCH-05**: SearchModal includes chip row, syntax highlighting, autocomplete dropdown, and cheat sheet popover
+- [x] **ASRCH-06**: Plain text queries still work as freeform substring search (backward compat with Phase 19)
+
+### Counter Dropdowns
+
+- [x] **CNTR-01**: User can click a counter row to expand a dropdown showing individual entities with label + key metric per type
+- [x] **CNTR-02**: Only one counter row can be expanded at a time (accordion behavior)
+- [x] **CNTR-03**: User can click an entity in the dropdown to fly the map to it and open the detail panel
+- [x] **CNTR-04**: Entities are sorted by proximity per category (flights/events from Tehran, ships from Strait of Hormuz, sites by attack count)
+- [x] **CNTR-05**: Zero-count counter rows are disabled and non-expandable; expanded rows that drop to 0 show empty state
+- [x] **CNTR-06**: Lists exceeding 8 items show a scrollable container with "Showing X-Y of Z" range indicator
 
 ## v1.2+ Requirements
 
@@ -90,15 +108,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MRKT-01 | Phase 18 | Complete |
 | MRKT-02 | Phase 18 | Complete |
 | MRKT-03 | Phase 18 | Complete |
-| SRCH-01 | Phase 19 | Pending |
-| SRCH-02 | Phase 19 | Pending |
-| SRCH-03 | Phase 19 | Pending |
+| SRCH-01 | Phase 19 | Complete |
+| SRCH-02 | Phase 19 | Complete |
+| SRCH-03 | Phase 19 | Complete |
+| ASRCH-01 | Phase 19.1 | Complete |
+| ASRCH-02 | Phase 19.1 | Complete |
+| ASRCH-03 | Phase 19.1 | Complete |
+| ASRCH-04 | Phase 19.1 | Complete |
+| ASRCH-05 | Phase 19.1 | Complete |
+| ASRCH-06 | Phase 19.1 | Complete |
+| CNTR-01 | Phase 19.2 | Complete |
+| CNTR-02 | Phase 19.2 | Complete |
+| CNTR-03 | Phase 19.2 | Complete |
+| CNTR-04 | Phase 19.2 | Complete |
+| CNTR-05 | Phase 19.2 | Complete |
+| CNTR-06 | Phase 19.2 | Complete |
 
 **Coverage:**
-- v1.1 requirements: 17 total
-- Mapped to phases: 17
-- Unmapped: 0 ✓
+- v1.1 requirements: 29 total
+- Mapped to phases: 29
+- Complete: 29
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-22 — all v1.1 requirements complete*
