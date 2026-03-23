@@ -283,5 +283,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
-| 20.2. Threat Heatmap Layer | 1/1 | Complete   | 2026-03-23 | - |
+| 20.2. Threat Heatmap Layer | 1/1 | Complete    | 2026-03-23 | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
