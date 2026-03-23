@@ -145,6 +145,14 @@ export interface MarketSnapshot {
   fetchedAt: number;
 }
 
+export interface WeatherGridPoint {
+  lat: number;
+  lng: number;
+  temperature: number;     // Celsius
+  windSpeed: number;        // knots
+  windDirection: number;    // degrees (0-360)
+}
+
 export class RateLimitError extends Error {
   name: string;
   constructor(message: string) {

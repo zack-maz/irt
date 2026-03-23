@@ -41,6 +41,11 @@ export const CACHE_TTL = {
 export const MARKETS_CACHE_TTL = 300_000; // 5 min logical TTL
 export const MARKETS_REDIS_TTL_SEC = 3000; // 50 min hard TTL (10x logical)
 
+// Weather cache TTL (30 minutes -- Open-Meteo hourly update frequency)
+export const WEATHER_CACHE_TTL = 1_800_000;      // 30 min logical TTL
+export const WEATHER_REDIS_TTL_SEC = 18_000;      // 5h hard TTL (10x logical)
+export const WEATHER_CACHE_KEY = 'weather:open-meteo';
+
 // News aggregation constants
 export const NEWS_CACHE_TTL = 900_000; // 15 min logical TTL
 export const NEWS_REDIS_TTL_SEC = 9000; // 2.5h hard TTL (10x logical)
