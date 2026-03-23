@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 20.2 Threat Heatmap Layer
+**Current focus:** Phase 20.3 Political Boundaries Layer
 
 ## Current Position
 
-Phase: 20.2 (Threat Heatmap Layer Inserted)
-Plan: 01 of 01 complete
-Status: Phase complete -- all plans delivered
-Last activity: 2026-03-23 -- Completed Phase 20.2 Plan 01 (threat heatmap layer)
+Phase: 20.3 (Political Boundaries Layer Inserted)
+Plan: 01 of 02 complete
+Status: In progress
+Last activity: 2026-03-23 -- Completed Phase 20.3 Plan 01 (political data & infrastructure)
 
 Progress: [██████████] 97%
 
@@ -72,6 +72,7 @@ Progress: [██████████] 97%
 | Phase 20.1 P01 | 3min | 2 tasks | 7 files |
 | Phase 20.1 P03 | 6min | 2 tasks | 16 files |
 | Phase 20.2 P01 | 10min | 2 tasks | 4 files |
+| Phase 20.3 P01 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -183,6 +184,12 @@ Progress: [██████████] 97%
 - [Phase 20.2]: Layer stacking: threat below weather below entities in DeckGLOverlay
 - [Phase 20.2]: Tooltip priority: entity > threat > weather
 
+- [Phase 20.3]: Egypt placed US-aligned per Camp David Accords / US military aid
+- [Phase 20.3]: ADM0_A3 as primary lookup key (not ISO_A3) since some countries have -99 for ISO_A3
+- [Phase 20.3]: Natural Earth 110m coordinates rounded to 2dp for bundle size reduction (51KB)
+- [Phase 20.3]: Canvas-generated fill patterns via createHatchPattern/createDualHatchPattern returning ImageData
+- [Phase 20.3]: Discrete-swatch legend mode: LegendConfig.mode='discrete' renders colored dots with labels
+
 ### Roadmap Evolution
 
 - Phase 19.1 inserted after Phase 19: Advanced search with tag and entity type filtering (URGENT)
@@ -203,6 +210,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-23T21:49:52.877Z
-Stopped at: Phase 20.3 context gathered
-Resume file: .planning/phases/20.3-political-boundaries-layer-inserted/20.3-CONTEXT.md
+Last session: 2026-03-23T22:14:43Z
+Stopped at: Completed 20.3-01-PLAN.md
+Resume file: .planning/phases/20.3-political-boundaries-layer-inserted/20.3-01-SUMMARY.md

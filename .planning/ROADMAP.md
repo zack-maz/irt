@@ -223,7 +223,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 20.3-01-PLAN.md -- Data and infrastructure: politicalData.ts (faction assignments, GeoJSON, disputed zones), politicalPatterns.ts (canvas hatching), MapLegend discrete-swatch extension, LayerTogglesSlot political toggle enabled
+- [x] 20.3-01-PLAN.md -- Data and infrastructure: politicalData.ts (faction assignments, GeoJSON, disputed zones), politicalPatterns.ts (canvas hatching), MapLegend discrete-swatch extension, LayerTogglesSlot political toggle enabled
 - [ ] 20.3-02-PLAN.md -- Overlay component and tests: PoliticalOverlay.tsx (fill layers, borders, disputed outlines), BaseMap wiring, test updates for LayerToggles/MapLegend/PoliticalOverlay
 
 ### Phase 20.4: Satellite Imagery Layer (INSERTED)
@@ -288,5 +288,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
 | 20.2. Threat Heatmap Layer | 1/1 | Complete    | 2026-03-23 | - |
-| 20.3. Political Boundaries Layer | v1.1 | 0/2 | In progress | - |
+| 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
