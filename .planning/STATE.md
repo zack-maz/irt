@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: in-progress
-stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-03-23T05:10:34Z"
-last_activity: 2026-03-23 -- Completed Phase 20 Plan 01 (toggle removal and layerStore creation)
+stopped_at: Completed 20-02-PLAN.md
+last_updated: "2026-03-23T05:18:00Z"
+last_activity: 2026-03-23 -- Completed Phase 20 Plan 02 (UI toggle cleanup and legend framework)
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 24
-  completed_plans: 22
-  percent: 92
+  completed_plans: 23
+  percent: 96
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 20 of 20 (Layer Purpose Refactor)
-Plan: 01 of 03 complete
-Status: Plan 01 complete, Plans 02-03 remaining
-Last activity: 2026-03-23 -- Completed Phase 20 Plan 01 (toggle removal and layerStore creation)
+Plan: 02 of 03 complete
+Status: Plan 02 complete, Plan 03 remaining
+Last activity: 2026-03-23 -- Completed Phase 20 Plan 02 (UI toggle cleanup and legend framework)
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [█████████░] 92%
 | Phase 19.1 P04 | 4min | 2 tasks | 6 files |
 | Phase 19.1 P03 | 5min | 2 tasks | 5 files |
 | Phase 20 P01 | 6min | 2 tasks | 7 files |
+| Phase 20 P02 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -151,6 +152,9 @@ Progress: [█████████░] 92%
 - [Phase 19.1]: Text-only queries don't alter sidebar toggles; sidebar sync only fires with non-empty query
 - [Phase 19.1]: buildASTFromToggles uses first type value per group for concise query serialization
 
+- [Phase 20-02]: LayerToggleRow wrapper component prevents hooks-in-loop violation when iterating LAYER_CONFIGS
+- [Phase 20-02]: VisibilityButton component file kept as dead code (not deleted) since tests may import it
+- [Phase 20-02]: Sites section removed entirely from FilterPanelSlot (no filter controls remain for sites)
 - [Phase 20-01]: readBool kept in uiStore for isMarketsCollapsed persistence (only remaining localStorage usage)
 - [Phase 20-01]: Pulse animation always active (no pulseEnabled toggle) since unidentified flights always render
 - [Phase 20-01]: CONFLICT_TOGGLE_GROUPS keys preserved as event type grouping constants (structural, not visibility)
@@ -177,6 +181,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-23T05:10:34Z
-Stopped at: Completed 20-01-PLAN.md
-Resume file: .planning/phases/20-layer-purpose-refactor/20-02-PLAN.md
+Last session: 2026-03-23T05:18:00Z
+Stopped at: Completed 20-02-PLAN.md
+Resume file: .planning/phases/20-layer-purpose-refactor/20-03-PLAN.md

@@ -170,7 +170,7 @@ Plans:
   3. A layerStore manages visualization layer on/off state with no localStorage persistence
   4. An inline legend framework renders in the bottom-left map corner when visualization layers are active
   5. Search/filter is the only way to narrow visible entity data
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 20-01-PLAN.md -- State refactor: remove entity toggles from types/uiStore, create layerStore, simplify useEntityLayers/useCounterData/useProximityAlerts/useQuerySync
@@ -216,5 +216,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21
 | 19. Search, Filter & UI Cleanup | 4/4 | Complete    | 2026-03-22 | - |
 | 19.1. Advanced Search | 5/5 | Complete    | 2026-03-22 | - |
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
-| 20. Layer Purpose Refactor | 1/3 | In Progress|  | - |
+| 20. Layer Purpose Refactor | 2/3 | In Progress|  | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
