@@ -37,3 +37,20 @@
 
 ---
 
+## v1.1 Intelligence Layer (Shipped: 2026-03-22)
+
+**Phases:** 8 (15-19.2) | **Tests:** 851 passing | **Commits:** ~75
+**Lines of code:** 25,842 TypeScript/CSS | **Timeline:** 3 days (2026-03-20 → 2026-03-22)
+**Git range:** 84c6171..e532d92
+
+**Key accomplishments:**
+1. Key infrastructure sites overlay (nuclear, naval, oil, airbase, desalination, port) from Overpass/OSM with attack status detection
+2. News feed aggregation (GDELT DOC + 5 RSS feeds) with Jaccard dedup/clustering
+3. Severity-scored notification center with proximity alerts (50km) and news headline matching
+4. Oil markets tracker (Brent, WTI, XLE, USO, XOM) with sparkline charts and delta animations
+5. Tag-based search language (~25 prefixes) with bidirectional filter sync and autocomplete
+6. Counter entity dropdowns with fly-to and proximity sorting
+7. All 29 v1.1 requirements complete
+
+---
+

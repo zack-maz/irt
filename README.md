@@ -13,9 +13,9 @@ Opens at http://localhost:5173
 
 ## Current State
 
-Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), conflict events (GDELT), news feed (GDELT DOC + RSS), and key infrastructure sites (Overpass/OSM). Layer toggles with 4 conflict categories + 6 site categories, entity tooltips, click-to-inspect detail panel with live stats, hover/click highlighting, smart filters (nationality, speed, altitude, proximity, date range), analytics counters dashboard, severity-scored notification center with proximity alerts, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 647 tests passing.
+Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), conflict events (GDELT), news feed (GDELT DOC + RSS), key infrastructure sites (Overpass/OSM), and oil market prices (Yahoo Finance). Advanced tag-based search (Cmd+K) with ~25 filter prefixes and bidirectional sync to sidebar filters, counter entity dropdowns with fly-to, severity-scored notifications with proximity alerts, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 851 tests passing.
 
-**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20 | v1.1 Intelligence Layer in progress (Phase 17 complete)
+**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20 | v1.1 Intelligence Layer shipped 2026-03-22
 
 ## Tech Stack
 
@@ -28,7 +28,7 @@ Interactive 2.5D map of the Greater Middle East with live flights (3 sources), s
 | Backend | Express 5 (API proxy, port 3001) |
 | Cache | Upstash Redis (serverless-compatible) |
 | Hosting | Vercel (serverless functions + CDN) |
-| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, GDELT DOC, RSS, Overpass/OSM |
+| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, GDELT DOC, RSS, Overpass/OSM, Yahoo Finance |
 | Testing | Vitest + Testing Library |
 
 ## Project Structure
@@ -47,7 +47,7 @@ src/
 server/
 ├── adapters/       # OpenSky, ADS-B Exchange, adsb.lol, AISStream, GDELT, Overpass adapters
 ├── cache/          # Upstash Redis cache module (cacheGet/cacheSet)
-├── routes/         # /api/flights, /api/ships, /api/events, /api/sites, /api/news, /api/sources
+├── routes/         # /api/flights, /api/ships, /api/events, /api/sites, /api/news, /api/markets, /api/sources
 ├── middleware/      # Error handler, rate limiting
 ├── __tests__/      # Adapter, cache, security, and type tests
 ├── config.ts       # Environment-based configuration (graceful degradation)
@@ -68,7 +68,7 @@ server/
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (647 tests)
+npx vitest run              # Run all tests (851 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
 npx vitest run --watch      # Watch mode

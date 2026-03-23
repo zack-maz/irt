@@ -42,7 +42,8 @@
 - [x] **Phase 17: Notification Center** - Severity-scored conflict notifications with proximity alerts, news matching, and 24h event default (completed 2026-03-20)
 - [x] **Phase 18: Oil Markets Tracker** - Oil/energy price panel (Brent, WTI, XLE, USO, XOM) with sparkline trends (completed 2026-03-21)
 - [x] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy (completed 2026-03-22)
-- [ ] **Phase 20: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.1
+- [ ] **Phase 20: Layer Purpose Refactor** - Rethink layer toggle purposes and organization
+- [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
 
 ## Phase Details
 
@@ -159,20 +160,27 @@ Plans:
 - [ ] 19.2-01-PLAN.md -- Data layer: extend useCounterData to return entity arrays with proximity sorting, create EntityListItem component
 - [ ] 19.2-02-PLAN.md -- UI layer: refactor CounterRow with expand/collapse dropdown, accordion in CountersContent, fly-to wiring, scroll range indicator
 
-### Phase 20: Production Review & Deploy Sync
-**Goal**: v1.1 is verified end-to-end and deployed to production
+### Phase 20: Layer Purpose Refactor
+**Goal**: Rethink layer toggle purposes and organization
 **Depends on**: Phase 19
+**Requirements**: TBD
+**Success Criteria**: TBD
+**Plans**: TBD
+
+### Phase 21: Production Review & Deploy Sync
+**Goal**: v1.2 is verified end-to-end and deployed to production
+**Depends on**: Phase 20
 **Requirements**: None (verification phase)
 **Success Criteria** (what must be TRUE):
-  1. All v1.1 features function correctly together in the deployed Vercel environment
-  2. All overlay panels (notifications, markets, counters, toggles, detail, search) coexist without z-index or layout conflicts
+  1. All features function correctly together in the deployed Vercel environment
+  2. All overlay panels coexist without z-index or layout conflicts
   3. Redis command budget remains within free-tier limits under normal usage
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -196,6 +204,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20
 | 17. Notification Center | 4/4 | Complete    | 2026-03-20 | - |
 | 18. Oil Markets Tracker | 2/2 | Complete    | 2026-03-21 | - |
 | 19. Search, Filter & UI Cleanup | 4/4 | Complete    | 2026-03-22 | - |
-| 19.1. Advanced Search | 4/5 | In Progress|  | - |
+| 19.1. Advanced Search | 5/5 | Complete    | 2026-03-22 | - |
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
-| 20. Production Review & Deploy Sync | v1.1 | 0/TBD | Not started | - |
+| 20. Layer Purpose Refactor | v1.2 | 0/TBD | Not started | - |
+| 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |

@@ -111,24 +111,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRCH-01 | Phase 19 | Complete |
 | SRCH-02 | Phase 19 | Complete |
 | SRCH-03 | Phase 19 | Complete |
-| ASRCH-01 | Phase 19.1 | In Progress |
-| ASRCH-02 | Phase 19.1 | In Progress |
-| ASRCH-03 | Phase 19.1 | In Progress |
-| ASRCH-04 | Phase 19.1 | In Progress |
-| ASRCH-05 | Phase 19.1 | In Progress |
-| ASRCH-06 | Phase 19.1 | In Progress |
-| CNTR-01 | Phase 19.2 | Not Started |
-| CNTR-02 | Phase 19.2 | Not Started |
-| CNTR-03 | Phase 19.2 | Not Started |
-| CNTR-04 | Phase 19.2 | Not Started |
-| CNTR-05 | Phase 19.2 | Not Started |
-| CNTR-06 | Phase 19.2 | Not Started |
+| ASRCH-01 | Phase 19.1 | Complete |
+| ASRCH-02 | Phase 19.1 | Complete |
+| ASRCH-03 | Phase 19.1 | Complete |
+| ASRCH-04 | Phase 19.1 | Complete |
+| ASRCH-05 | Phase 19.1 | Complete |
+| ASRCH-06 | Phase 19.1 | Complete |
+| CNTR-01 | Phase 19.2 | Complete |
+| CNTR-02 | Phase 19.2 | Complete |
+| CNTR-03 | Phase 19.2 | Complete |
+| CNTR-04 | Phase 19.2 | Complete |
+| CNTR-05 | Phase 19.2 | Complete |
+| CNTR-06 | Phase 19.2 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 29 total
 - Mapped to phases: 29
-- Unmapped: 0
+- Complete: 29
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-22 after Phase 19.1 planning*
+*Last updated: 2026-03-22 — all v1.1 requirements complete*
