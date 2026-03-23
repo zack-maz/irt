@@ -74,6 +74,15 @@ function CountersContent() {
       </div>
       <div className="mt-0.5 space-y-0.5">
         <CounterRow
+          label="Flights"
+          value={counters.totalFlights}
+          entities={counters.entities.flights}
+          isExpanded={expandedKey === 'flights'}
+          onToggle={() => handleToggle('flights')}
+          onEntityClick={handleEntityClick}
+          selectedEntityId={selectedEntityId}
+        />
+        <CounterRow
           label="Unidentified"
           value={counters.unidentifiedFlights}
           entities={counters.entities.unidentifiedFlights}
