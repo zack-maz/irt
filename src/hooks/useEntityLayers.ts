@@ -123,6 +123,9 @@ export function useEntityLayers() {
   // Date range end for attack status computation (start is irrelevant -- once hit, stays hit)
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
+  // Site type filter
+  const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
+
   // Active entity = hovered (preview) or selected (pinned)
   const activeId = hoveredEntityId ?? selectedEntityId;
 
@@ -151,13 +154,16 @@ export function useEntityLayers() {
       .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
     [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
 
-  // Sites filtered by proximity pin only (all sites always visible)
+  // Sites filtered by enabled types and proximity pin
   const visibleSites = useMemo(() => {
-    if (!proximityPin) return sites;
-    return sites.filter(s => {
-      return haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm;
-    });
-  }, [sites, proximityPin, proximityRadiusKm]);
+    let filtered = sites.filter(s => enabledSiteTypes.includes(s.siteType));
+    if (proximityPin) {
+      filtered = filtered.filter(s =>
+        haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm
+      );
+    }
+    return filtered;
+  }, [sites, enabledSiteTypes, proximityPin, proximityRadiusKm]);
 
   // Compute attack status for visible sites
   const siteAttackMap = useMemo(() => {

@@ -125,6 +125,7 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
 
   const proximityPin = useFilterStore((s) => s.proximityPin);
   const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
+  const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
 
   return useMemo(() => {
     // All flights count (no toggle gating)
@@ -151,11 +152,12 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       nuclear: [], naval: [], oil: [], airbase: [], desalination: [], port: [],
     };
 
-    // All sites always included (proximity filter only)
-    const visibleSites = proximityPin
-      ? sites.filter((s: SiteEntity) =>
-          haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm)
-      : sites;
+    // Sites filtered by enabled types and proximity
+    let visibleSites = sites.filter((s: SiteEntity) => enabledSiteTypes.includes(s.siteType));
+    if (proximityPin) {
+      visibleSites = visibleSites.filter((s: SiteEntity) =>
+        haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm);
+    }
 
     for (const site of visibleSites) {
       const status = computeAttackStatus(site, allEvents, dateEnd);
@@ -212,5 +214,5 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       sites: siteCounts,
       entities,
     };
-  }, [filteredFlights, filteredShips, filteredEvents, sites, allEvents, dateEnd, showHighSeverity, showMediumSeverity, showLowSeverity, proximityPin, proximityRadiusKm]);
+  }, [filteredFlights, filteredShips, filteredEvents, sites, allEvents, dateEnd, showHighSeverity, showMediumSeverity, showLowSeverity, proximityPin, proximityRadiusKm, enabledSiteTypes]);
 }

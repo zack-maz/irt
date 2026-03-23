@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { useSearchStore } from '@/stores/searchStore';
 import { WAR_START, STEP_MS, LOOKBACK_MS, snapToStep } from '@/lib/constants';
+import type { SiteType } from '@/types/entities';
+
+export const ALL_SITE_TYPES: SiteType[] = ['nuclear', 'naval', 'oil', 'airbase', 'desalination', 'port'];
+const DEFAULT_SITE_TYPES: SiteType[] = ['nuclear', 'oil'];
 
 /** Full default range for a given granularity (thumbs at both ends) */
 function defaultRange(g: Granularity): { dateStart: number; dateEnd: number } {
@@ -67,6 +71,9 @@ export interface FilterState {
   showMediumSeverity: boolean;
   showLowSeverity: boolean;
 
+  // Site type toggles
+  enabledSiteTypes: SiteType[];
+
   // Actions
   setFlightCountries: (countries: string[]) => void;
   addFlightCountry: (country: string) => void;
@@ -96,6 +103,8 @@ export interface FilterState {
   setShowHighSeverity: (v: boolean) => void;
   setShowMediumSeverity: (v: boolean) => void;
   setShowLowSeverity: (v: boolean) => void;
+  setEnabledSiteTypes: (types: SiteType[]) => void;
+  toggleSiteType: (type: SiteType) => void;
 }
 
 const DEFAULTS = {
@@ -127,6 +136,9 @@ const DEFAULTS = {
   showHighSeverity: true,
   showMediumSeverity: true,
   showLowSeverity: true,
+
+  // Site type toggles
+  enabledSiteTypes: DEFAULT_SITE_TYPES as SiteType[],
 };
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
@@ -250,4 +262,13 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   setShowHighSeverity: (v) => set({ showHighSeverity: v }),
   setShowMediumSeverity: (v) => set({ showMediumSeverity: v }),
   setShowLowSeverity: (v) => set({ showLowSeverity: v }),
+  setEnabledSiteTypes: (types) => set({ enabledSiteTypes: types }),
+  toggleSiteType: (type) => set((s) => {
+    const enabled = s.enabledSiteTypes.includes(type);
+    return {
+      enabledSiteTypes: enabled
+        ? s.enabledSiteTypes.filter((t) => t !== type)
+        : [...s.enabledSiteTypes, type],
+    };
+  }),
 }));
