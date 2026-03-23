@@ -13,7 +13,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { DeckGLOverlay } from './DeckGLOverlay';
 import { EntityTooltip } from './EntityTooltip';
-import { WeatherTooltip, useWeatherLayers } from './layers/WeatherOverlay';
+import { WeatherTooltip, useWeatherPickerLayer } from './layers/WeatherOverlay';
 import { ThreatTooltip, useThreatHeatmapLayers } from './layers/ThreatHeatmapOverlay';
 import type { ThreatZoneData } from './layers/ThreatHeatmapOverlay';
 import { UtcClock } from '@/components/layout/UtcClock';
@@ -45,6 +45,7 @@ import { CompassControl } from './CompassControl';
 import { ProximityAlertOverlay } from './ProximityAlertOverlay';
 import { MapLegend } from './MapLegend';
 import { GeographicOverlay } from './layers/GeographicOverlay';
+import { PoliticalOverlay } from './layers/PoliticalOverlay';
 import { WeatherHeatmap } from './layers/WeatherHeatmap';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
@@ -87,7 +88,7 @@ export function BaseMap() {
   const setProximityPin = useFilterStore((s) => s.setProximityPin);
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
-  const weatherLayers = useWeatherLayers();
+  const weatherLayers = useWeatherPickerLayer();
   const threatLayers = useThreatHeatmapLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
   const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
@@ -259,13 +260,14 @@ export function BaseMap() {
           type="hillshade"
           source="terrain-dem"
           paint={{
-            'hillshade-exaggeration': 0.6,
+            'hillshade-exaggeration': 0.8,
             'hillshade-shadow-color': '#000000',
             'hillshade-highlight-color': '#444444',
           }}
         />
         <WeatherHeatmap />
         <GeographicOverlay />
+        <PoliticalOverlay />
         <NavigationControl
           showZoom={true}
           showCompass={true}
@@ -274,7 +276,7 @@ export function BaseMap() {
         />
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
-          layers={[...threatLayers, ...weatherLayers, ...entityLayers]}
+          layers={[...weatherLayers, ...threatLayers, ...entityLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
