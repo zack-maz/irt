@@ -29,7 +29,6 @@ interface DateRangeFilterProps {
   dateStart: number | null;
   dateEnd: number | null;
   granularity: Granularity;
-  isCustomRangeActive: boolean;
   onDateRange: (start: number | null, end: number | null) => void;
   onGranularity: (g: Granularity) => void;
 }
@@ -38,7 +37,6 @@ export function DateRangeFilter({
   dateStart,
   dateEnd,
   granularity,
-  isCustomRangeActive,
   onDateRange,
   onGranularity,
 }: DateRangeFilterProps) {
@@ -214,10 +212,6 @@ export function DateRangeFilter({
         <span>{endLabel}</span>
       </div>
 
-      {/* Live feeds paused indicator */}
-      {isCustomRangeActive && (
-        <span className="text-[9px] text-amber-400/80">Live feeds paused</span>
-      )}
     </div>
   );
 }
