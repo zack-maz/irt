@@ -4,7 +4,7 @@
 
 - ✅ **v0.9 MVP** -- Phases 1-12 (shipped 2026-03-19)
 - ✅ **v1.0 Deployment** -- Phases 13-14 (shipped 2026-03-20)
-- 🚧 **v1.1 Intelligence Layer** -- Phases 15-20 (in progress)
+- 🚧 **v1.1 Intelligence Layer** -- Phases 15-21 (in progress)
 
 ## Phases
 
@@ -35,7 +35,7 @@
 
 </details>
 
-### v1.1 Intelligence Layer (Phases 15-20)
+### v1.1 Intelligence Layer (Phases 15-21)
 
 - [x] **Phase 15: Key Sites Overlay** - Infrastructure sites (nuclear, naval, oil, airbase, dam, port) on the map with per-type toggles and click-to-inspect (completed 2026-03-20)
 - [x] **Phase 16: News Feed** - Multi-source news pipeline (GDELT DOC + BBC RSS + Al Jazeera RSS) with conflict filtering and deduplication (completed 2026-03-20)
@@ -43,6 +43,7 @@
 - [x] **Phase 18: Oil Markets Tracker** - Oil/energy price panel (Brent, WTI, XLE, USO, XOM) with sparkline trends (completed 2026-03-21)
 - [x] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy (completed 2026-03-22)
 - [x] **Phase 20: Layer Purpose Refactor** - Remove entity toggles, replace with visualization layer architecture, inline legend framework (completed 2026-03-23)
+- [ ] **Phase 20.1: Geographical & Weather Layers** - Monochrome elevation tinting with contour lines + real-time temperature overlay from Open-Meteo
 - [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
 
 ## Phase Details
@@ -177,6 +178,23 @@ Plans:
 - [ ] 20-02-PLAN.md -- UI components: update BaseMap/StatusDropdown/FilterPanelSlot, replace LayerTogglesSlot content, build MapLegend framework
 - [ ] 20-03-PLAN.md -- Test updates: update 8 existing test files, create layerStore.test.ts and MapLegend.test.tsx
 
+### Phase 20.1: Geographical & Weather Layers (INSERTED)
+**Goal**: Users can toggle a terrain elevation overlay and a real-time temperature heatmap as visualization layers on the map
+**Depends on**: Phase 20
+**Requirements**: LREF-01 (layer architecture)
+**Success Criteria** (what must be TRUE):
+  1. User can toggle a Geographical layer that renders monochrome elevation gradient tinting with contour lines using existing AWS Terrarium tiles
+  2. User can toggle a Weather layer that renders a temperature heatmap from Open-Meteo API data
+  3. Both layers have inline legends that appear/disappear with the toggle
+  4. Server provides `/api/weather` endpoint with Redis-cached Open-Meteo data (30-60 min polling)
+  5. Major geographic feature labels (Zagros Mountains, Dasht-e Kavir, etc.) appear when Geographical layer is active
+**Plans:** 3 plans
+
+Plans:
+- [ ] 20.1-01-PLAN.md -- Server pipeline: WeatherGridPoint types, Open-Meteo adapter with 2-band request splitting, cache-first /api/weather route
+- [ ] 20.1-02-PLAN.md -- Geographic overlay: color-relief elevation tinting, maplibre-contour contour lines, geographic feature labels, elevation legend
+- [ ] 20.1-03-PLAN.md -- Weather overlay: weatherStore, useWeatherPolling, HeatmapLayer temperature heatmap, wind barb IconLayer, weather tooltip, temperature legend
+
 ### Phase 21: Production Review & Deploy Sync
 **Goal**: v1.2 is verified end-to-end and deployed to production
 **Depends on**: Phase 20
@@ -190,7 +208,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -217,4 +235,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 21
 | 19.1. Advanced Search | 5/5 | Complete    | 2026-03-22 | - |
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
+| 20.1. Geographical & Weather Layers | v1.1 | 0/3 | Not started | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
