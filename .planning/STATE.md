@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: completed
-stopped_at: Phase 20.1 context gathered
-last_updated: "2026-03-23T07:00:14.413Z"
-last_activity: 2026-03-23 -- Completed Phase 20 Plan 03 (test suite update for toggle-free architecture)
+status: executing
+stopped_at: Completed 20.1-02-PLAN.md
+last_updated: "2026-03-23T08:07:11.818Z"
+last_activity: 2026-03-23 -- Completed Phase 20.1 Plan 02 (geographic overlay with elevation, contours, labels)
 progress:
-  total_phases: 14
+  total_phases: 10
   completed_phases: 7
-  total_plans: 25
-  completed_plans: 24
-  percent: 97
+  total_plans: 28
+  completed_plans: 26
+  percent: 91
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 20 Layer Purpose Refactor
+**Current focus:** Phase 20.1 Geographical & Weather Layers
 
 ## Current Position
 
-Phase: 20 of 20 (Layer Purpose Refactor)
-Plan: 03 of 03 complete
-Status: Phase 20 complete (all 3 plans done)
-Last activity: 2026-03-23 -- Completed Phase 20 Plan 03 (test suite update for toggle-free architecture)
+Phase: 20.1 (Geographical & Weather Layers Inserted)
+Plan: 02 of 03 complete
+Status: In progress -- Plan 02 complete, Plan 03 remaining
+Last activity: 2026-03-23 -- Completed Phase 20.1 Plan 02 (geographic overlay with elevation, contours, labels)
 
-Progress: [██████████] 97%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [██████████] 97%
 | Phase 20 P01 | 6min | 2 tasks | 7 files |
 | Phase 20 P02 | 4min | 2 tasks | 6 files |
 | Phase 20 P03 | 7min | 2 tasks | 10 files |
+| Phase 20.1 P02 | 3min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,9 @@ Progress: [██████████] 97%
 - [Phase 20]: Removed 717 lines of toggle-related test code across 8 files (net -717 LOC)
 - [Phase 20]: LayerToggles test fully rewritten for 6 visualization layers via layerStore (not patched)
 - [Phase 20]: StatusPanel gets unconditional count tests replacing 9 toggle-gated zero-count tests
+- [Phase 20.1-02]: color-relief layer uses type assertion for react-maplibre type gap
+- [Phase 20.1-02]: contour protocol registered once via module-level initialized guard (idempotent)
+- [Phase 20.1-02]: elevation legend registered via LEGEND_REGISTRY.push at module scope (first consumer of registry pattern)
 
 ### Roadmap Evolution
 
@@ -185,6 +189,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-23T07:00:14.410Z
-Stopped at: Phase 20.1 context gathered
-Resume file: .planning/phases/20.1-geographical-weather-layers-inserted/20.1-CONTEXT.md
+Last session: 2026-03-23T08:07:11.815Z
+Stopped at: Completed 20.1-02-PLAN.md
+Resume file: None

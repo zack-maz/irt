@@ -188,7 +188,7 @@ Plans:
   3. Both layers have inline legends that appear/disappear with the toggle
   4. Server provides `/api/weather` endpoint with Redis-cached Open-Meteo data (30-60 min polling)
   5. Major geographic feature labels (Zagros Mountains, Dasht-e Kavir, etc.) appear when Geographical layer is active
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 20.1-01-PLAN.md -- Server pipeline: WeatherGridPoint types, Open-Meteo adapter with 2-band request splitting, cache-first /api/weather route
@@ -235,5 +235,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 21
 | 19.1. Advanced Search | 5/5 | Complete    | 2026-03-22 | - |
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
-| 20.1. Geographical & Weather Layers | v1.1 | 0/3 | Not started | - |
+| 20.1. Geographical & Weather Layers | 2/3 | In Progress|  | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
