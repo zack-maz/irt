@@ -240,8 +240,13 @@ describe('parse', () => {
     });
   });
 
-  it('handles empty tag value as text', () => {
+  it('handles empty tag value as wildcard tag', () => {
     const ast = parse('type:');
-    expect(ast).toEqual({ type: 'text', value: 'type:' });
+    expect(ast).toEqual({ type: 'tag', prefix: 'type', value: '*', negated: false });
+  });
+
+  it('handles negated empty tag value as negated wildcard tag', () => {
+    const ast = parse('!site:');
+    expect(ast).toEqual({ type: 'tag', prefix: 'site', value: '*', negated: true });
   });
 });

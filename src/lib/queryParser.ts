@@ -117,10 +117,10 @@ export function tokenize(input: string): Token[] {
 
     // Check for tag syntax (prefix:value)
     const colonIdx = word.indexOf(':');
-    if (colonIdx > 0 && colonIdx < word.length - 1) {
-      // Has colon with content on both sides -> TAG
+    if (colonIdx > 0) {
       const prefix = word.slice(0, colonIdx);
-      const tagValue = word.slice(colonIdx + 1);
+      // Trailing colon with no value (e.g., "!site:") -> wildcard TAG with value "*"
+      const tagValue = colonIdx < word.length - 1 ? word.slice(colonIdx + 1) : '*';
       tokens.push({
         type: 'TAG',
         value: fullValue,
@@ -133,8 +133,7 @@ export function tokenize(input: string): Token[] {
       continue;
     }
 
-    // Empty tag value (e.g., "type:") -> treat as TEXT
-    // Or no colon -> TEXT
+    // No colon -> TEXT
     tokens.push({
       type: 'TEXT',
       value: negated ? word : fullValue,

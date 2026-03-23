@@ -16,8 +16,10 @@ export function serialize(node: QueryNode | null): string {
 
 function serializeNode(node: QueryNode, parent: QueryNode | null): string {
   switch (node.type) {
-    case 'tag':
-      return `${node.negated ? '!' : ''}${node.prefix}:${node.value}`;
+    case 'tag': {
+      const val = node.value === '*' ? '' : node.value;
+      return `${node.negated ? '!' : ''}${node.prefix}:${val}`;
+    }
 
     case 'text':
       return node.value;

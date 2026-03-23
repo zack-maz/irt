@@ -4,7 +4,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { parse, type QueryNode } from '@/lib/queryParser';
 import { serialize } from '@/lib/querySerializer';
-import { parseTemporalValue } from '@/lib/queryEvaluator';
+import { parseTemporalValue, parseRangeValue } from '@/lib/queryEvaluator';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 
 // ─── Sync Maps ───────────────────────────────────────────────
@@ -58,6 +58,20 @@ export const SITE_TOGGLE_MAP: Record<string, string> = {
   port: 'showPort',
 };
 
+/**
+ * Boolean search tags that map to uiStore toggles.
+ * ground/unidentified: search→sidebar only (ensures visibility for search results).
+ * status: fully bidirectional (showHitOnly IS a filter).
+ */
+export const BOOL_TAG_MAP: Record<string, { toggle: string; trueValue: string; bidirectional: boolean }> = {
+  ground: { toggle: 'showGroundTraffic', trueValue: 'true', bidirectional: false },
+  unidentified: { toggle: 'pulseEnabled', trueValue: 'true', bidirectional: false },
+  status: { toggle: 'showHitOnly', trueValue: 'attacked', bidirectional: true },
+};
+
+/** Synced range tag prefixes → filterStore setter info */
+const RANGE_TAG_PREFIXES = new Set(['altitude', 'speed']);
+
 /** All conflict event type values (for showEvents parent toggle detection) */
 const CONFLICT_EVENT_TYPES = new Set<string>(
   Object.values(CONFLICT_TOGGLE_GROUPS).flat(),
@@ -81,16 +95,21 @@ export function extractTags(node: QueryNode | null): Array<{ prefix: string; val
   }
 }
 
-/** Extract non-synced nodes from AST (tags whose prefixes don't map to toggles) */
+/** Extract non-synced nodes from AST (tags whose prefixes don't map to toggles/filters) */
 function extractNonSyncedNodes(node: QueryNode | null): QueryNode[] {
   if (!node) return [];
   switch (node.type) {
     case 'tag': {
       const p = node.prefix.toLowerCase();
-      if (p === 'type' && node.value.toLowerCase() in TYPE_TOGGLE_MAP) return [];
-      if (p === 'site' && node.value.toLowerCase() in SITE_TOGGLE_MAP) return [];
+      const v = node.value.toLowerCase();
+      if (p === 'type' && (v in TYPE_TOGGLE_MAP || v === '*')) return [];
+      if (p === 'site' && (v in SITE_TOGGLE_MAP || v === '*')) return [];
       if (p === 'country' || p === 'since' || p === 'before') return [];
-      // Non-synced tag (callsign, actor, near, etc.)
+      // Bidirectional boolean tags are synced (rebuilt from toggle state)
+      if (p in BOOL_TAG_MAP && BOOL_TAG_MAP[p].bidirectional) return [];
+      // Range tags are synced (rebuilt from filter state)
+      if (RANGE_TAG_PREFIXES.has(p)) return [];
+      // Non-synced tag (callsign, actor, near, ground, unidentified, etc.)
       return [node];
     }
     case 'text':
@@ -113,6 +132,30 @@ function buildAndChain(nodes: QueryNode[]): QueryNode | null {
   return result;
 }
 
+// ─── Range helpers ──────────────────────────────────────────
+
+/** Convert a range tag value to min/max pair */
+export function rangeToMinMax(value: string): { min: number | null; max: number | null } {
+  const parsed = parseRangeValue(value);
+  if (!parsed) return { min: null, max: null };
+  switch (parsed.op) {
+    case 'eq': return { min: parsed.num, max: parsed.num };
+    case 'gte': return { min: parsed.num, max: null };
+    case 'gt': return { min: parsed.num, max: null };
+    case 'lte': return { min: null, max: parsed.num };
+    case 'lt': return { min: null, max: parsed.num };
+    case 'range': return { min: parsed.num, max: parsed.num2 ?? null };
+  }
+}
+
+/** Convert min/max pair to a range tag value string */
+export function minMaxToRangeValue(min: number | null, max: number | null): string | null {
+  if (min !== null && max !== null) return `${min}-${max}`;
+  if (min !== null) return `>=${min}`;
+  if (max !== null) return `<=${max}`;
+  return null;
+}
+
 // ─── Sync Logic (pure functions for testability) ─────────────
 
 /**
@@ -129,58 +172,109 @@ export function deriveTogglesFromAST(
   const siteTags = tags
     .filter((t) => t.prefix.toLowerCase() === 'site' && !t.negated)
     .map((t) => t.value.toLowerCase());
+  const negTypeTags = tags
+    .filter((t) => t.prefix.toLowerCase() === 'type' && t.negated)
+    .map((t) => t.value.toLowerCase());
+  const negSiteTags = tags
+    .filter((t) => t.prefix.toLowerCase() === 'site' && t.negated)
+    .map((t) => t.value.toLowerCase());
 
   const updates: Record<string, boolean> = {};
 
-  // If no type: tags in query, don't alter toggles (query might be text-only)
-  if (typeTags.length === 0 && siteTags.length === 0) return updates;
-
-  // Determine which toggles to activate from type: tags
-  const activeToggleKeys = new Set<string>();
-  for (const tv of typeTags) {
-    const toggleKey = TYPE_TOGGLE_MAP[tv];
-    if (toggleKey) activeToggleKeys.add(toggleKey);
+  // ── Boolean tags (ground, unidentified, status) ──
+  for (const [prefix, { toggle, trueValue }] of Object.entries(BOOL_TAG_MAP)) {
+    const boolTags = tags.filter((t) => t.prefix.toLowerCase() === prefix && !t.negated);
+    if (boolTags.length > 0) {
+      const v = boolTags[0].value.toLowerCase();
+      updates[toggle] = v === trueValue;
+    }
   }
 
-  // Set toggle state for each mapped toggle
-  for (const toggleKey of Object.keys(TOGGLE_TYPE_MAP)) {
-    updates[toggleKey] = activeToggleKeys.has(toggleKey);
+  // If no type: or site: tags in query, skip type/site toggle updates
+  if (typeTags.length === 0 && siteTags.length === 0 &&
+      negTypeTags.length === 0 && negSiteTags.length === 0) {
+    return updates;
   }
 
-  // showEvents parent: ON if any conflict event type tag present
-  const hasConflictTag = typeTags.some((tv) => CONFLICT_EVENT_TYPES.has(tv));
-  updates['showEvents'] = hasConflictTag;
+  // Positive tags: turn ON mentioned toggles
+  if (typeTags.length > 0) {
+    for (const tv of typeTags) {
+      const toggleKey = TYPE_TOGGLE_MAP[tv];
+      if (toggleKey) updates[toggleKey] = true;
+    }
 
-  // Site toggles
-  const activeSiteToggles = new Set<string>();
-  for (const sv of siteTags) {
-    const toggleKey = SITE_TOGGLE_MAP[sv];
-    if (toggleKey) activeSiteToggles.add(toggleKey);
+    // showEvents parent: ON if any conflict event type tag present
+    const hasConflictTag = typeTags.some((tv) => CONFLICT_EVENT_TYPES.has(tv));
+    if (hasConflictTag) {
+      updates['showEvents'] = true;
+    }
   }
 
   if (siteTags.length > 0) {
-    for (const toggleKey of Object.values(SITE_TOGGLE_MAP)) {
-      updates[toggleKey] = activeSiteToggles.has(toggleKey);
+    for (const sv of siteTags) {
+      const toggleKey = SITE_TOGGLE_MAP[sv];
+      if (toggleKey) updates[toggleKey] = true;
     }
-    updates['showSites'] = siteTags.length > 0;
+    updates['showSites'] = true;
+  }
+
+  // Negated tags: turn OFF mentioned toggles
+  if (negTypeTags.length > 0) {
+    if (negTypeTags.includes('*')) {
+      for (const toggleKey of Object.values(TYPE_TOGGLE_MAP)) {
+        updates[toggleKey] = false;
+      }
+      updates['showEvents'] = false;
+    } else {
+      for (const tv of negTypeTags) {
+        const toggleKey = TYPE_TOGGLE_MAP[tv];
+        if (toggleKey) updates[toggleKey] = false;
+      }
+    }
+  }
+
+  if (negSiteTags.length > 0) {
+    if (negSiteTags.includes('*')) {
+      for (const toggleKey of Object.values(SITE_TOGGLE_MAP)) {
+        updates[toggleKey] = false;
+      }
+      updates['showSites'] = false;
+    } else {
+      for (const sv of negSiteTags) {
+        const toggleKey = SITE_TOGGLE_MAP[sv];
+        if (toggleKey) updates[toggleKey] = false;
+      }
+    }
   }
 
   return updates;
 }
 
 /**
- * Search -> FilterStore: Extract date/country filters from AST.
+ * Search -> FilterStore: Extract date/country/range filters from AST.
  */
+export interface DerivedFilters {
+  dateStart?: number | null;
+  dateEnd?: number | null;
+  countries?: string[];
+  altitudeMin?: number | null;
+  altitudeMax?: number | null;
+  flightSpeedMin?: number | null;
+  flightSpeedMax?: number | null;
+}
+
 export function deriveFiltersFromAST(
   node: QueryNode | null,
   now: number,
-): { dateStart?: number | null; dateEnd?: number | null; countries?: string[] } {
+): DerivedFilters {
   const tags = extractTags(node);
-  const result: { dateStart?: number | null; dateEnd?: number | null; countries?: string[] } = {};
+  const result: DerivedFilters = {};
 
   const sinceTags = tags.filter((t) => t.prefix.toLowerCase() === 'since' && !t.negated);
   const beforeTags = tags.filter((t) => t.prefix.toLowerCase() === 'before' && !t.negated);
   const countryTags = tags.filter((t) => t.prefix.toLowerCase() === 'country' && !t.negated);
+  const altitudeTags = tags.filter((t) => t.prefix.toLowerCase() === 'altitude' && !t.negated);
+  const speedTags = tags.filter((t) => t.prefix.toLowerCase() === 'speed' && !t.negated);
 
   if (sinceTags.length > 0) {
     result.dateStart = parseTemporalValue(sinceTags[0].value, now);
@@ -191,24 +285,56 @@ export function deriveFiltersFromAST(
   if (countryTags.length > 0) {
     result.countries = countryTags.map((t) => t.value);
   }
+  if (altitudeTags.length > 0) {
+    const { min, max } = rangeToMinMax(altitudeTags[0].value);
+    result.altitudeMin = min;
+    result.altitudeMax = max;
+  }
+  if (speedTags.length > 0) {
+    const { min, max } = rangeToMinMax(speedTags[0].value);
+    result.flightSpeedMin = min;
+    result.flightSpeedMax = max;
+  }
 
   return result;
 }
 
+/** State shape for building AST from sidebar (toggles + filters) */
+export interface SyncableState {
+  // Entity type toggles
+  showFlights: boolean;
+  showShips: boolean;
+  showAirstrikes: boolean;
+  showGroundCombat: boolean;
+  showTargeted: boolean;
+  // Site toggles
+  showNuclear: boolean;
+  showNaval: boolean;
+  showOil: boolean;
+  showAirbase: boolean;
+  showDesalination: boolean;
+  showPort: boolean;
+  // Bidirectional boolean toggles
+  showHitOnly: boolean;
+  // Range filters
+  altitudeMin: number | null;
+  altitudeMax: number | null;
+  flightSpeedMin: number | null;
+  flightSpeedMax: number | null;
+}
+
 /**
- * Sidebar -> Search: Build AST from toggle state + existing non-synced tags.
+ * Sidebar -> Search: Build AST from toggle/filter state + existing non-synced tags.
  */
 export function buildASTFromToggles(
-  toggles: Record<string, boolean>,
+  state: SyncableState,
   existingAST: QueryNode | null,
 ): QueryNode | null {
   const nodes: QueryNode[] = [];
 
   // Add type: tags for ON toggles
   for (const [toggleKey, typeValues] of Object.entries(TOGGLE_TYPE_MAP)) {
-    if (toggles[toggleKey]) {
-      // Add first type value only (e.g., for showGroundCombat add 'ground_combat')
-      // Otherwise the query would be very long
+    if ((state as Record<string, unknown>)[toggleKey]) {
       nodes.push({
         type: 'tag',
         prefix: 'type',
@@ -220,7 +346,7 @@ export function buildASTFromToggles(
 
   // Add site: tags for ON site toggles
   for (const [siteType, toggleKey] of Object.entries(SITE_TOGGLE_MAP)) {
-    if (toggles[toggleKey]) {
+    if ((state as Record<string, unknown>)[toggleKey]) {
       nodes.push({
         type: 'tag',
         prefix: 'site',
@@ -228,6 +354,28 @@ export function buildASTFromToggles(
         negated: false,
       });
     }
+  }
+
+  // Add bidirectional boolean tags
+  for (const [prefix, { toggle, trueValue, bidirectional }] of Object.entries(BOOL_TAG_MAP)) {
+    if (bidirectional && (state as Record<string, unknown>)[toggle]) {
+      nodes.push({
+        type: 'tag',
+        prefix,
+        value: trueValue,
+        negated: false,
+      });
+    }
+  }
+
+  // Add range filter tags
+  const altValue = minMaxToRangeValue(state.altitudeMin, state.altitudeMax);
+  if (altValue) {
+    nodes.push({ type: 'tag', prefix: 'altitude', value: altValue, negated: false });
+  }
+  const speedValue = minMaxToRangeValue(state.flightSpeedMin, state.flightSpeedMax);
+  if (speedValue) {
+    nodes.push({ type: 'tag', prefix: 'speed', value: speedValue, negated: false });
   }
 
   // Preserve non-synced tags from existing AST
@@ -264,6 +412,13 @@ export function useQuerySync(): void {
   const showAirbase = useUIStore((s) => s.showAirbase);
   const showDesalination = useUIStore((s) => s.showDesalination);
   const showPort = useUIStore((s) => s.showPort);
+  const showHitOnly = useUIStore((s) => s.showHitOnly);
+
+  // Subscribe to filter ranges
+  const altitudeMin = useFilterStore((s) => s.altitudeMin);
+  const altitudeMax = useFilterStore((s) => s.altitudeMax);
+  const flightSpeedMin = useFilterStore((s) => s.flightSpeedMin);
+  const flightSpeedMax = useFilterStore((s) => s.flightSpeedMax);
 
   // Track previous query to detect search-initiated changes
   const prevQueryRef = useRef<string>('');
@@ -288,20 +443,42 @@ export function useQuerySync(): void {
     }
 
     const filterUpdates = deriveFiltersFromAST(parsedQuery, Date.now());
+    let hasFilterUpdates = false;
     if (filterUpdates.dateStart !== undefined) {
       useFilterStore.getState().setDateRange(
         filterUpdates.dateStart,
         useFilterStore.getState().dateEnd,
       );
+      hasFilterUpdates = true;
     }
     if (filterUpdates.dateEnd !== undefined) {
       useFilterStore.getState().setDateRange(
         useFilterStore.getState().dateStart,
         filterUpdates.dateEnd,
       );
+      hasFilterUpdates = true;
     }
     if (filterUpdates.countries !== undefined) {
       useFilterStore.getState().setFlightCountries(filterUpdates.countries);
+      hasFilterUpdates = true;
+    }
+    if (filterUpdates.altitudeMin !== undefined || filterUpdates.altitudeMax !== undefined) {
+      useFilterStore.getState().setAltitudeRange(
+        filterUpdates.altitudeMin ?? useFilterStore.getState().altitudeMin,
+        filterUpdates.altitudeMax ?? useFilterStore.getState().altitudeMax,
+      );
+      hasFilterUpdates = true;
+    }
+    if (filterUpdates.flightSpeedMin !== undefined || filterUpdates.flightSpeedMax !== undefined) {
+      useFilterStore.getState().setFlightSpeedRange(
+        filterUpdates.flightSpeedMin ?? useFilterStore.getState().flightSpeedMin,
+        filterUpdates.flightSpeedMax ?? useFilterStore.getState().flightSpeedMax,
+      );
+      hasFilterUpdates = true;
+    }
+
+    if (hasFilterUpdates) {
+      syncSourceRef.current = 'search';
     }
 
     // Clear syncSource after a microtask to allow effects to settle
@@ -312,8 +489,8 @@ export function useQuerySync(): void {
     });
   }, [parsedQuery]);
 
-  // Build current toggle state object for sidebar -> search sync
-  const toggleState = {
+  // Build current syncable state for sidebar -> search sync
+  const syncState: SyncableState = {
     showFlights,
     showShips,
     showAirstrikes,
@@ -325,27 +502,32 @@ export function useQuerySync(): void {
     showAirbase,
     showDesalination,
     showPort,
+    showHitOnly,
+    altitudeMin,
+    altitudeMax,
+    flightSpeedMin,
+    flightSpeedMax,
   };
 
   // Sidebar -> Search sync
-  const prevTogglesRef = useRef(toggleState);
+  const prevSyncStateRef = useRef(syncState);
 
   useEffect(() => {
     if (syncSourceRef.current === 'search') {
       syncSourceRef.current = null;
-      prevTogglesRef.current = toggleState;
+      prevSyncStateRef.current = syncState;
       return;
     }
 
-    // Check if toggles actually changed
-    const prev = prevTogglesRef.current;
-    const changed = Object.keys(toggleState).some(
-      (key) => (toggleState as any)[key] !== (prev as any)[key],
+    // Check if state actually changed
+    const prev = prevSyncStateRef.current;
+    const changed = (Object.keys(syncState) as (keyof SyncableState)[]).some(
+      (key) => syncState[key] !== prev[key],
     );
 
     if (!changed) return;
 
-    prevTogglesRef.current = toggleState;
+    prevSyncStateRef.current = syncState;
 
     // Only sync if there's an existing query (don't generate query from defaults)
     const currentQuery = useSearchStore.getState().query;
@@ -353,7 +535,7 @@ export function useQuerySync(): void {
 
     syncSourceRef.current = 'sidebar';
     const currentAST = useSearchStore.getState().parsedQuery;
-    const newAST = buildASTFromToggles(toggleState, currentAST);
+    const newAST = buildASTFromToggles(syncState, currentAST);
     useSearchStore.getState().setParsedQuery(newAST);
     prevQueryRef.current = useSearchStore.getState().query;
 
@@ -377,5 +559,10 @@ export function useQuerySync(): void {
     showAirbase,
     showDesalination,
     showPort,
+    showHitOnly,
+    altitudeMin,
+    altitudeMax,
+    flightSpeedMin,
+    flightSpeedMax,
   ]);
 }
