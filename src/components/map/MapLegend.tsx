@@ -23,6 +23,18 @@ LEGEND_REGISTRY.push({
   ],
 });
 
+// Temperature legend (Phase 20.1 - Weather layer)
+LEGEND_REGISTRY.push({
+  layerId: 'weather',
+  title: 'Temperature',
+  colorStops: [
+    { color: 'rgb(0, 100, 255)', label: '-5C / 23F' },
+    { color: 'rgb(0, 200, 100)', label: '15C / 59F' },
+    { color: 'rgb(255, 220, 0)', label: '30C / 86F' },
+    { color: 'rgb(255, 50, 0)', label: '45C / 113F' },
+  ],
+});
+
 function LegendItem({ config }: { config: LegendConfig }) {
   const gradient = config.colorStops
     .map((stop) => stop.color)

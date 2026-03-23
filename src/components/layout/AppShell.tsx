@@ -9,6 +9,7 @@ import { useEventPolling } from '@/hooks/useEventPolling';
 import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
 import { useMarketPolling } from '@/hooks/useMarketPolling';
+import { useWeatherPolling } from '@/hooks/useWeatherPolling';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEscapeKeyHandler } from '@/hooks/useEscapeKeyHandler';
 import { useQuerySync } from '@/hooks/useQuerySync';
@@ -20,6 +21,7 @@ export function AppShell() {
   useSiteFetch();
   useNewsPolling();
   useMarketPolling();
+  useWeatherPolling();
   useNotifications();
   useEscapeKeyHandler();
   useQuerySync();

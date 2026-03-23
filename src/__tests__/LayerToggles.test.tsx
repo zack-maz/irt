@@ -45,11 +45,6 @@ describe('LayerTogglesSlot', () => {
     expect(useLayerStore.getState().activeLayers.has('geographic')).toBe(true);
   });
 
-  it('renders "coming soon" subtitle text', () => {
-    render(<LayerTogglesSlot />);
-    expect(screen.getByText(/coming soon/i)).toBeTruthy();
-  });
-
   it('renders "Clear cache & reload" button', () => {
     render(<LayerTogglesSlot />);
     expect(screen.getByText('Clear cache & reload')).toBeTruthy();

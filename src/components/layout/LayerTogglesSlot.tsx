@@ -55,7 +55,6 @@ function LayerToggleRow({ id, label, color }: { id: VisualizationLayerId; label:
 export function LayerTogglesContent() {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[9px] text-text-muted">Visualization overlays (coming soon)</span>
       {LAYER_CONFIGS.map(({ id, label, color }) => (
         <LayerToggleRow key={id} id={id} label={label} color={color} />
       ))}

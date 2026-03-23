@@ -21,11 +21,12 @@ describe('MapLegend', () => {
     expect(getByText('4000m')).toBeTruthy();
   });
 
-  it('renders nothing when non-registered layer is active', () => {
+  it('renders temperature legend when weather layer is active', () => {
     useLayerStore.setState({ activeLayers: new Set(['weather']) });
-    const { container } = render(<MapLegend />);
-    // weather legend not yet registered
-    expect(container.firstChild).toBeNull();
+    const { getByText } = render(<MapLegend />);
+    expect(getByText('Temperature')).toBeTruthy();
+    expect(getByText('-5C / 23F')).toBeTruthy();
+    expect(getByText('45C / 113F')).toBeTruthy();
   });
 
   it('exports LegendConfig interface and LEGEND_REGISTRY array', () => {

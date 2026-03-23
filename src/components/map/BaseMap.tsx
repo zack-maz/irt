@@ -13,6 +13,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { DeckGLOverlay } from './DeckGLOverlay';
 import { EntityTooltip } from './EntityTooltip';
+import { WeatherTooltip, useWeatherLayers } from './layers/WeatherOverlay';
 import { UtcClock } from '@/components/layout/UtcClock';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -20,7 +21,9 @@ import { useFilterStore } from '@/stores/filterStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
 import { useSearchStore } from '@/stores/searchStore';
+import { useLayerStore } from '@/stores/layerStore';
 import type { MapEntity, SiteEntity } from '@/types/entities';
+import type { WeatherGridPoint } from '@/stores/weatherStore';
 import {
   INITIAL_VIEW_STATE,
   MAX_BOUNDS,
@@ -81,25 +84,41 @@ export function BaseMap() {
   const setProximityPin = useFilterStore((s) => s.setProximityPin);
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
+  const weatherLayers = useWeatherLayers();
+  const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
 
   // Search filter state for tooltip suppression
   const isSearchFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
   const searchMatchedIds = useSearchStore((s) => s.matchedIds);
 
   const [hover, setHover] = useState<HoverState | null>(null);
+  const [weatherHover, setWeatherHover] = useState<{ point: WeatherGridPoint; x: number; y: number } | null>(null);
 
   const handleDeckHover = useCallback(
     (info: PickingInfo) => {
       if (!info.object) {
         setHover(null);
+        setWeatherHover(null);
         hoverEntity(null);
         return;
       }
+
+      // Weather picker layer: show weather tooltip instead of entity tooltip
+      if (info.layer?.id === 'weather-picker' && isWeatherActive) {
+        const point = info.object as WeatherGridPoint;
+        setWeatherHover({ point, x: info.x, y: info.y });
+        setHover(null);
+        hoverEntity(null);
+        return;
+      }
+
+      // Entity hover (existing behavior)
+      setWeatherHover(null);
       const entity = info.object as MapEntity | SiteEntity;
       setHover({ entity, x: info.x, y: info.y });
       hoverEntity(entity.id);
     },
-    [hoverEntity],
+    [hoverEntity, isWeatherActive],
   );
 
   const setFlyToTarget = useNotificationStore((s) => s.setFlyToTarget);
@@ -235,7 +254,7 @@ export function BaseMap() {
         />
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
-          layers={entityLayers}
+          layers={[...entityLayers, ...weatherLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
@@ -255,6 +274,13 @@ export function BaseMap() {
           entity={tooltipEntity}
           x={tooltipPos.x}
           y={tooltipPos.y}
+        />
+      )}
+      {!tooltipEntity && weatherHover && (
+        <WeatherTooltip
+          point={weatherHover.point}
+          x={weatherHover.x}
+          y={weatherHover.y}
         />
       )}
     </div>
