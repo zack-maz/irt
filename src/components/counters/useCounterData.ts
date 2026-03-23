@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 import { useSiteStore } from '@/stores/siteStore';
 import { useEventStore } from '@/stores/eventStore';
@@ -114,25 +113,6 @@ function toSiteEntity(s: SiteEntity, attackCount: number): CounterEntity {
 }
 
 export function useCounterData(): CounterValues & { entities: CounterEntities } {
-  const showFlights = useUIStore((s) => s.showFlights);
-  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
-  const pulseEnabled = useUIStore((s) => s.pulseEnabled);
-  const showEvents = useUIStore((s) => s.showEvents);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
-  const showSites = useUIStore((s) => s.showSites);
-  const showNuclear = useUIStore((s) => s.showNuclear);
-  const showNaval = useUIStore((s) => s.showNaval);
-  const showOil = useUIStore((s) => s.showOil);
-  const showAirbase = useUIStore((s) => s.showAirbase);
-  const showDesalination = useUIStore((s) => s.showDesalination);
-  const showPort = useUIStore((s) => s.showPort);
-  const showShips = useUIStore((s) => s.showShips);
-  const showHealthySites = useUIStore((s) => s.showHealthySites);
-  const showAttackedSites = useUIStore((s) => s.showAttackedSites);
-  const showHitOnly = useUIStore((s) => s.showHitOnly);
-
   const showHighSeverity = useFilterStore((s) => s.showHighSeverity);
   const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
   const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
@@ -147,12 +127,8 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
 
   return useMemo(() => {
-    // Visible flights: smart filters + toggle gating (matches useEntityLayers logic)
-    const visibleFlights = filteredFlights.filter((f: FlightEntity) => {
-      if (f.data.unidentified) return pulseEnabled;
-      if (f.data.onGround) return showGroundTraffic;
-      return showFlights;
-    });
+    // All flights count (no toggle gating)
+    const visibleFlights = filteredFlights;
 
     const iranianFlights = visibleFlights.filter((f: FlightEntity) => f.data.originCountry === 'Iran').length;
 
@@ -164,84 +140,59 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       return showLowSeverity;
     });
 
-    // Visible event counts: smart filters + toggle gating + severity gating
-    const airstrikes = showEvents && showAirstrikes
-      ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES)
-      : 0;
-    const groundCombatCount = showEvents && showGroundCombat
-      ? countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES)
-      : 0;
-    const targeted = showEvents && showTargeted
-      ? countByGroup(severityFilteredEvents, TARGETED_TYPES)
-      : 0;
+    // All event counts (no toggle gating)
+    const airstrikes = countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES);
+    const groundCombatCount = countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES);
+    const targeted = countByGroup(severityFilteredEvents, TARGETED_TYPES);
 
-    // Sites: per-type counts + entity collection with proximity + attacked/healthy filtering
+    // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, desalination: 0, port: 0, total: 0 };
     const siteEntities: Record<SiteType, CounterEntity[]> = {
       nuclear: [], naval: [], oil: [], airbase: [], desalination: [], port: [],
     };
 
-    if (showSites) {
-      const visibleSites = sites.filter((s: SiteEntity) => {
-        // Proximity filter
-        if (proximityPin && haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) > proximityRadiusKm) return false;
-        switch (s.siteType) {
-          case 'nuclear': return showNuclear;
-          case 'naval': return showNaval;
-          case 'oil': return showOil;
-          case 'airbase': return showAirbase;
-          case 'desalination': return showDesalination;
-          case 'port': return showPort;
-        }
+    // All sites always included (proximity filter only)
+    const visibleSites = proximityPin
+      ? sites.filter((s: SiteEntity) =>
+          haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm)
+      : sites;
+
+    for (const site of visibleSites) {
+      const status = computeAttackStatus(site, allEvents, dateEnd);
+      siteCounts[site.siteType]++;
+      siteCounts.total++;
+      siteEntities[site.siteType].push(toSiteEntity(site, status.attackCount));
+    }
+    // Sort each site type: attacked first (by attack count desc), then non-attacked
+    for (const key of Object.keys(siteEntities) as SiteType[]) {
+      siteEntities[key].sort((a, b) => {
+        const aCount = parseInt(a.metric) || 0;
+        const bCount = parseInt(b.metric) || 0;
+        return bCount - aCount;
       });
-      for (const site of visibleSites) {
-        const status = computeAttackStatus(site, allEvents, dateEnd);
-        const isAttacked = status.attackCount > 0;
-        // Hit-only filter
-        if (showHitOnly && !isAttacked) continue;
-        // Attacked/healthy status filter
-        if (isAttacked && !showAttackedSites) continue;
-        if (!isAttacked && !showHealthySites) continue;
-        siteCounts[site.siteType]++;
-        siteCounts.total++;
-        siteEntities[site.siteType].push(toSiteEntity(site, status.attackCount));
-      }
-      // Sort each site type: attacked first (by attack count desc), then non-attacked
-      for (const key of Object.keys(siteEntities) as SiteType[]) {
-        siteEntities[key].sort((a, b) => {
-          const aCount = parseInt(a.metric) || 0;
-          const bCount = parseInt(b.metric) || 0;
-          return bCount - aCount;
-        });
-      }
     }
 
     // --- Entity arrays ---
 
-    // All visible flights (including unidentified when toggle is on)
+    // All flights
     const flightEntities = sortByProximity(
       visibleFlights.map(toFlightEntity),
       TEHRAN,
       TEL_AVIV,
     );
 
-    // Ships
-    const shipEntities = showShips
-      ? sortByProximity(filteredShips.map(toShipEntity), STRAIT_HORMUZ)
-      : [];
+    // All ships
+    const shipEntities = sortByProximity(filteredShips.map(toShipEntity), STRAIT_HORMUZ);
 
-    // Event entities
-    const airstrikeEventEntities = showEvents && showAirstrikes
-      ? sortByProximity(filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
-      : [];
+    // All event entities
+    const airstrikeEventEntities = sortByProximity(
+      filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
 
-    const groundCombatEventEntities = showEvents && showGroundCombat
-      ? sortByProximity(filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
-      : [];
+    const groundCombatEventEntities = sortByProximity(
+      filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
 
-    const targetedEventEntities = showEvents && showTargeted
-      ? sortByProximity(filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
-      : [];
+    const targetedEventEntities = sortByProximity(
+      filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
 
     const entities: CounterEntities = {
       flights: flightEntities,
@@ -261,5 +212,5 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       sites: siteCounts,
       entities,
     };
-  }, [filteredFlights, filteredShips, filteredEvents, showFlights, showGroundTraffic, pulseEnabled, showEvents, showAirstrikes, showGroundCombat, showTargeted, showShips, sites, allEvents, dateEnd, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort, showHighSeverity, showMediumSeverity, showLowSeverity, showHealthySites, showAttackedSites, showHitOnly, proximityPin, proximityRadiusKm]);
+  }, [filteredFlights, filteredShips, filteredEvents, sites, allEvents, dateEnd, showHighSeverity, showMediumSeverity, showLowSeverity, proximityPin, proximityRadiusKm]);
 }

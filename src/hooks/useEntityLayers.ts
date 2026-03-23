@@ -91,7 +91,8 @@ function passesSeverityFilter(event: MapEntity, high: boolean, med: boolean, low
 }
 
 /**
- * Returns Deck.gl layer array driven by filtered entity data and Zustand store toggles.
+ * Returns Deck.gl layer array driven by filtered entity data.
+ * All entities are always visible (no toggle gating).
  * Includes proximity circle layer when a pin is set.
  * All entity layers are pickable. Hovered/selected entity is highlighted; others dim.
  */
@@ -103,24 +104,6 @@ export function useEntityLayers() {
   const sites = useSiteStore((s) => s.sites);
   const allEvents = useEventStore((s) => s.events);
 
-  const pulseEnabled = useUIStore((s) => s.pulseEnabled);
-  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
-  const showFlights = useUIStore((s) => s.showFlights);
-  const showShips = useUIStore((s) => s.showShips);
-  const showEvents = useUIStore((s) => s.showEvents);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
-  const showSites = useUIStore((s) => s.showSites);
-  const showNuclear = useUIStore((s) => s.showNuclear);
-  const showNaval = useUIStore((s) => s.showNaval);
-  const showOil = useUIStore((s) => s.showOil);
-  const showAirbase = useUIStore((s) => s.showAirbase);
-  const showDesalination = useUIStore((s) => s.showDesalination);
-  const showPort = useUIStore((s) => s.showPort);
-  const showHitOnly = useUIStore((s) => s.showHitOnly);
-  const showHealthySites = useUIStore((s) => s.showHealthySites);
-  const showAttackedSites = useUIStore((s) => s.showAttackedSites);
   const selectedEntityId = useUIStore((s) => s.selectedEntityId);
   const hoveredEntityId = useUIStore((s) => s.hoveredEntityId);
 
@@ -137,23 +120,20 @@ export function useEntityLayers() {
   const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
   const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
 
-  // Date range end for attack status computation (start is irrelevant — once hit, stays hit)
+  // Date range end for attack status computation (start is irrelevant -- once hit, stays hit)
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
   // Active entity = hovered (preview) or selected (pinned)
   const activeId = hoveredEntityId ?? selectedEntityId;
 
+  // Filter flights by region only (exclude Greece); all sub-categories always visible
   const flights = useMemo(() => {
     return allFlights.filter((f) => {
-      // Exclude flights outside elliptical region + Greek-registered
       if (f.data.originCountry === 'Greece') return false;
       if (!isInRegion(f.lat, f.lng)) return false;
-      // Mutually exclusive: unidentified first, then ground, then regular
-      if (f.data.unidentified) return pulseEnabled;
-      if (f.data.onGround) return showGroundTraffic;
-      return showFlights;
+      return true;
     });
-  }, [allFlights, showFlights, showGroundTraffic, pulseEnabled]);
+  }, [allFlights]);
 
   const airstrikeEvents = useMemo(() =>
     events
@@ -171,58 +151,30 @@ export function useEntityLayers() {
       .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
     [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
 
-  // Sites filtered by proximity pin + type sub-toggles
-  const toggleFilteredSites = useMemo(() => {
-    if (!showSites) return [];
+  // Sites filtered by proximity pin only (all sites always visible)
+  const visibleSites = useMemo(() => {
+    if (!proximityPin) return sites;
     return sites.filter(s => {
-      // Proximity filter
-      if (proximityPin && haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) > proximityRadiusKm) return false;
-      switch (s.siteType) {
-        case 'nuclear': return showNuclear;
-        case 'naval': return showNaval;
-        case 'oil': return showOil;
-        case 'airbase': return showAirbase;
-        case 'desalination': return showDesalination;
-        case 'port': return showPort;
-      }
+      return haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm;
     });
-  }, [sites, showSites, showNuclear, showNaval, showOil, showAirbase, showDesalination, showPort, proximityPin, proximityRadiusKm]);
+  }, [sites, proximityPin, proximityRadiusKm]);
 
-  // Compute attack status for all toggle-filtered sites
+  // Compute attack status for visible sites
   const siteAttackMap = useMemo(() => {
     const map = new Map<string, boolean>();
-    for (const site of toggleFilteredSites) {
+    for (const site of visibleSites) {
       const status = computeAttackStatus(site, allEvents, dateEnd);
       map.set(site.id, status.isAttacked);
     }
     return map;
-  }, [toggleFilteredSites, allEvents, dateEnd]);
+  }, [visibleSites, allEvents, dateEnd]);
 
-  // Apply hit-only filter and health status filter
-  const visibleSites = useMemo(() => {
-    let filtered = toggleFilteredSites;
-    if (showHitOnly) {
-      filtered = filtered.filter(s => siteAttackMap.get(s.id));
-    }
-    // Health status filter
-    filtered = filtered.filter(s => {
-      const attacked = siteAttackMap.get(s.id) ?? false;
-      if (attacked) return showAttackedSites;
-      return showHealthySites;
-    });
-    return filtered;
-  }, [toggleFilteredSites, showHitOnly, siteAttackMap, showHealthySites, showAttackedSites]);
-
-  // Pulse animation state
+  // Pulse animation state (always active for unidentified flights)
   const [pulseOpacity, setPulseOpacity] = useState(1.0);
   const rafRef = useRef<number>(0);
   const lastUpdateRef = useRef(0);
 
   useEffect(() => {
-    if (!pulseEnabled) {
-      setPulseOpacity(1.0);
-      return;
-    }
     const animate = () => {
       const now = Date.now();
       if (now - lastUpdateRef.current >= 67) {
@@ -237,7 +189,7 @@ export function useEntityLayers() {
     };
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [pulseEnabled]);
+  }, []);
 
   // Proximity circle layer
   const proximityCircleLayer = useMemo(() => new ScatterplotLayer({
@@ -259,10 +211,9 @@ export function useEntityLayers() {
     return ships.filter((s) => isInRegion(s.lat, s.lng));
   }, [ships]);
 
-  // Ship layer
+  // Ship layer (always visible)
   const shipLayer = useMemo(() => new IconLayer<ShipEntity>({
     id: 'ships',
-    visible: showShips,
     data: filteredShips,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -282,12 +233,11 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
-  }), [filteredShips, showShips, activeId, isFilterActive, matchedIds]);
+  }), [filteredShips, activeId, isFilterActive, matchedIds]);
 
-  // Airstrike layer
+  // Airstrike layer (always visible)
   const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'airstrikes',
-    visible: showEvents && showAirstrikes,
     data: airstrikeEvents,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -307,12 +257,11 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
-  }), [airstrikeEvents, showEvents, showAirstrikes, activeId, isFilterActive, matchedIds]);
+  }), [airstrikeEvents, activeId, isFilterActive, matchedIds]);
 
-  // Ground combat layer (includes assault, blockade, ceasefire_violation, mass_violence, wmd)
+  // Ground combat layer (always visible)
   const groundCombatLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'groundCombat',
-    visible: showEvents && showGroundCombat,
     data: groundCombatEvents,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -332,12 +281,11 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
-  }), [groundCombatEvents, showEvents, showGroundCombat, activeId, isFilterActive, matchedIds]);
+  }), [groundCombatEvents, activeId, isFilterActive, matchedIds]);
 
-  // Targeted layer
+  // Targeted layer (always visible)
   const targetedLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'targeted',
-    visible: showEvents && showTargeted,
     data: targetedEvents,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -357,13 +305,11 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size] },
-  }), [targetedEvents, showEvents, showTargeted, activeId, isFilterActive, matchedIds]);
+  }), [targetedEvents, activeId, isFilterActive, matchedIds]);
 
-  // Flight layer
-  const showAnyFlights = showFlights || showGroundTraffic || pulseEnabled;
+  // Flight layer (always visible)
   const flightLayer = useMemo(() => new IconLayer<FlightEntity>({
     id: 'flights',
-    visible: showAnyFlights,
     data: flights,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -397,12 +343,11 @@ export function useEntityLayers() {
       getColor: [pulseOpacity, activeId, isFilterActive, matchedIds.size],
       getSize: [pulseOpacity],
     },
-  }), [flights, pulseOpacity, showAnyFlights, activeId, isFilterActive, matchedIds]);
+  }), [flights, pulseOpacity, activeId, isFilterActive, matchedIds]);
 
-  // Site layer
+  // Site layer (always visible)
   const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
     id: 'site-icons',
-    visible: showSites,
     data: visibleSites,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
@@ -423,7 +368,7 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size] },
-  }), [visibleSites, showSites, activeId, siteAttackMap, isFilterActive, matchedIds]);
+  }), [visibleSites, activeId, siteAttackMap, isFilterActive, matchedIds]);
 
   // Find active entity across all data sources
   const activeEntity = useMemo<MapEntity | SiteEntity | null>(() => {
