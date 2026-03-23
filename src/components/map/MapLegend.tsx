@@ -1,9 +1,12 @@
 import { useLayerStore, type VisualizationLayerId } from '@/stores/layerStore';
+import { useUIStore } from '@/stores/uiStore';
 
 export interface LegendConfig {
   layerId: VisualizationLayerId;
   title: string;
   colorStops: Array<{ color: string; label: string }>;
+  /** 'gradient' renders a gradient bar (default), 'discrete' renders individual color swatches */
+  mode?: 'gradient' | 'discrete';
 }
 
 /**
@@ -35,7 +38,42 @@ LEGEND_REGISTRY.push({
   ],
 });
 
+// Political faction legend (Phase 20.3 - discrete swatches)
+LEGEND_REGISTRY.push({
+  layerId: 'political',
+  title: 'Factions',
+  mode: 'discrete',
+  colorStops: [
+    { color: '#ef4444', label: 'Iran Axis' },
+    { color: '#3b82f6', label: 'US-Aligned' },
+    { color: '#f59e0b', label: 'Turkic Bloc' },
+    { color: '#9ca3af', label: 'Contested' },
+    { color: '#6b7280', label: 'Neutral' },
+  ],
+});
+
 function LegendItem({ config }: { config: LegendConfig }) {
+  if (config.mode === 'discrete') {
+    return (
+      <div className="pointer-events-auto rounded bg-surface-overlay/80 px-2 py-1.5 backdrop-blur-sm">
+        <div className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-secondary">
+          {config.title}
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {config.colorStops.map((stop) => (
+            <div key={stop.label} className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ backgroundColor: stop.color }}
+              />
+              <span className="text-[8px] text-text-muted">{stop.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const gradient = config.colorStops
     .map((stop) => stop.color)
     .join(', ');
@@ -57,17 +95,38 @@ function LegendItem({ config }: { config: LegendConfig }) {
   );
 }
 
-export function MapLegend() {
-  const activeLayers = useLayerStore((s) => s.activeLayers);
+/**
+ * Memoizing selector: caches the filtered result and only returns a new
+ * reference when the set of active legend layers actually changes.
+ * This satisfies React's useSyncExternalStore stability requirement.
+ */
+let _cachedLegends: LegendConfig[] = [];
+const selectActiveLegends = (s: { activeLayers: Set<VisualizationLayerId> }): LegendConfig[] => {
+  const next = LEGEND_REGISTRY.filter((l) => s.activeLayers.has(l.layerId));
+  if (
+    next.length === _cachedLegends.length &&
+    next.every((v, i) => v === _cachedLegends[i])
+  ) {
+    return _cachedLegends;
+  }
+  _cachedLegends = next;
+  return next;
+};
 
-  const activeLegends = LEGEND_REGISTRY.filter((legend) =>
-    activeLayers.has(legend.layerId),
-  );
+export function MapLegend() {
+  const activeLegends = useLayerStore(selectActiveLegends);
+  const isSidebarOpen = useUIStore((s) => s.isSidebarOpen);
 
   if (activeLegends.length === 0) return null;
 
+  // Offset past sidebar: icon strip (48px) + gap (8px), plus sidebar width (280px) when open
+  const leftOffset = isSidebarOpen ? 'calc(var(--width-icon-strip) + var(--width-sidebar) + 8px)' : 'calc(var(--width-icon-strip) + 8px)';
+
   return (
-    <div className="absolute bottom-4 left-4 z-[var(--z-controls)] pointer-events-none flex flex-col gap-2">
+    <div
+      className="absolute bottom-4 z-[var(--z-controls)] pointer-events-none flex flex-col gap-2 transition-[left] duration-300 ease-in-out"
+      style={{ left: leftOffset }}
+    >
       {activeLegends.map((legend) => (
         <div
           key={legend.layerId}

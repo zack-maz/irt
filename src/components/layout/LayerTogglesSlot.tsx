@@ -2,45 +2,37 @@ import { useUIStore } from '@/stores/uiStore';
 import { useLayerStore, type VisualizationLayerId } from '@/stores/layerStore';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
-interface ToggleRowProps {
-  color: string;
-  label: string;
-  active: boolean;
-  onToggle: () => void;
-}
-
-function ToggleRow({ color, label, active, onToggle }: ToggleRowProps) {
-  return (
-    <button
-      role="switch"
-      aria-checked={active}
-      aria-label={`Toggle ${label} layer`}
-      onClick={onToggle}
-      className={`flex w-full items-center gap-2 text-xs transition-opacity ${
-        active ? 'opacity-100' : 'opacity-40'
-      }`}
-    >
-      <span
-        className="inline-block h-2 w-2 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-      <span className="text-text-secondary">{label}</span>
-    </button>
-  );
-}
-
 const LAYER_CONFIGS: { id: VisualizationLayerId; label: string; color: string; comingSoon?: boolean }[] = [
   { id: 'geographic', label: 'Geographic', color: '#94a3b8' },
   { id: 'weather', label: 'Weather', color: '#38bdf8' },
   { id: 'threat', label: 'Threat Heatmap', color: '#ef4444' },
-  { id: 'political', label: 'Political', color: '#a78bfa', comingSoon: true },
+  { id: 'political', label: 'Political', color: '#a78bfa' },
   { id: 'satellite', label: 'Satellite', color: '#22d3ee', comingSoon: true },
   { id: 'infrastructure', label: 'Infrastructure', color: '#4ade80', comingSoon: true },
 ];
 
+function LoadingSpinner() {
+  return (
+    <svg
+      className="ml-auto h-3 w-3 animate-spin text-text-muted"
+      viewBox="0 0 16 16"
+      fill="none"
+    >
+      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+      <path
+        d="M14 8a6 6 0 0 0-6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** Wraps ToggleRow with a store-connected hook (avoids calling useLayerStore inside .map) */
 function LayerToggleRow({ id, label, color, comingSoon }: { id: VisualizationLayerId; label: string; color: string; comingSoon?: boolean }) {
   const active = useLayerStore((s) => s.activeLayers.has(id));
+  const isLoading = useLayerStore((s) => s.loadingLayers.has(id));
 
   if (comingSoon) {
     return (
@@ -56,12 +48,22 @@ function LayerToggleRow({ id, label, color, comingSoon }: { id: VisualizationLay
   }
 
   return (
-    <ToggleRow
-      color={color}
-      label={label}
-      active={active}
-      onToggle={() => useLayerStore.getState().toggleLayer(id)}
-    />
+    <button
+      role="switch"
+      aria-checked={active}
+      aria-label={`Toggle ${label} layer`}
+      onClick={() => useLayerStore.getState().toggleLayer(id)}
+      className={`flex w-full items-center gap-2 text-xs transition-opacity ${
+        active ? 'opacity-100' : 'opacity-40'
+      }`}
+    >
+      <span
+        className="inline-block h-2 w-2 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      <span className="text-text-secondary">{label}</span>
+      {isLoading && <LoadingSpinner />}
+    </button>
   );
 }
 
