@@ -59,11 +59,11 @@ Requirements for the Intelligence Layer milestone. Each maps to roadmap phases.
 
 ### Layer Purpose Refactor
 
-- [ ] **LREF-01**: All entities (flights, ships, events, sites) are always visible on the map -- entity toggle state is fully removed
-- [ ] **LREF-02**: New visualization layer store exists with on/off toggle state for 6 layer types (geographic, weather, threat, political, satellite, infrastructure)
+- [x] **LREF-01**: All entities (flights, ships, events, sites) are always visible on the map -- entity toggle state is fully removed
+- [x] **LREF-02**: New visualization layer store exists with on/off toggle state for 6 layer types (geographic, weather, threat, political, satellite, infrastructure)
 - [ ] **LREF-03**: Sidebar "Layers" section replaced with visualization layer toggles instead of entity visibility toggles
 - [ ] **LREF-04**: Inline legend framework renders color scale legends for active visualization layers in the bottom-left map corner
-- [ ] **LREF-05**: Search/filter system is the only mechanism to narrow visible entities on the map
+- [x] **LREF-05**: Search/filter system is the only mechanism to narrow visible entities on the map
 
 ## v1.2+ Requirements
 

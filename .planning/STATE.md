@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: completed
-stopped_at: Phase 20 context gathered
-last_updated: "2026-03-23T04:42:13.181Z"
-last_activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
+status: in-progress
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-03-23T05:10:34Z"
+last_activity: 2026-03-23 -- Completed Phase 20 Plan 01 (toggle removal and layerStore creation)
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 22
-  completed_plans: 21
-  percent: 89
+  total_plans: 24
+  completed_plans: 22
+  percent: 92
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 19.2 Counter Entity Dropdowns
+**Current focus:** Phase 20 Layer Purpose Refactor
 
 ## Current Position
 
-Phase: 19.1 of 20 (Advanced Search with Tag and Entity Type Filtering)
-Plan: 03 of 05 complete
-Status: Plan 03 complete, Plans 04-05 remaining
-Last activity: 2026-03-22 -- Completed Phase 19.1 Plan 03 (search store AST integration & bidirectional query sync)
+Phase: 20 of 20 (Layer Purpose Refactor)
+Plan: 01 of 03 complete
+Status: Plan 01 complete, Plans 02-03 remaining
+Last activity: 2026-03-23 -- Completed Phase 20 Plan 01 (toggle removal and layerStore creation)
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [█████████░] 89%
 | Phase 19.2 P02 | 4min | 2 tasks | 4 files |
 | Phase 19.1 P04 | 4min | 2 tasks | 6 files |
 | Phase 19.1 P03 | 5min | 2 tasks | 5 files |
+| Phase 20 P01 | 6min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -150,6 +151,12 @@ Progress: [█████████░] 89%
 - [Phase 19.1]: Text-only queries don't alter sidebar toggles; sidebar sync only fires with non-empty query
 - [Phase 19.1]: buildASTFromToggles uses first type value per group for concise query serialization
 
+- [Phase 20-01]: readBool kept in uiStore for isMarketsCollapsed persistence (only remaining localStorage usage)
+- [Phase 20-01]: Pulse animation always active (no pulseEnabled toggle) since unidentified flights always render
+- [Phase 20-01]: CONFLICT_TOGGLE_GROUPS keys preserved as event type grouping constants (structural, not visibility)
+- [Phase 20-01]: buildASTFromToggles renamed to buildASTFromFilters to reflect new filter-only scope
+- [Phase 20-01]: SyncableState stripped of all 15 toggle fields, keeping only filter fields
+
 ### Roadmap Evolution
 
 - Phase 19.1 inserted after Phase 19: Advanced search with tag and entity type filtering (URGENT)
@@ -170,6 +177,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-23T04:42:13.172Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-layer-purpose-refactor/20-CONTEXT.md
+Last session: 2026-03-23T05:10:34Z
+Stopped at: Completed 20-01-PLAN.md
+Resume file: .planning/phases/20-layer-purpose-refactor/20-02-PLAN.md
