@@ -12,6 +12,17 @@ export interface LegendConfig {
  */
 export const LEGEND_REGISTRY: LegendConfig[] = [];
 
+// Geographic elevation legend (Phase 20.1)
+LEGEND_REGISTRY.push({
+  layerId: 'geographic',
+  title: 'Elevation',
+  colorStops: [
+    { color: '#1a1a2e', label: '0m' },
+    { color: '#334155', label: '1500m' },
+    { color: '#94a3b8', label: '4000m' },
+  ],
+});
+
 function LegendItem({ config }: { config: LegendConfig }) {
   const gradient = config.colorStops
     .map((stop) => stop.color)

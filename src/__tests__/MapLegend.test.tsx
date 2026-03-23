@@ -13,16 +13,24 @@ describe('MapLegend', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders nothing when LEGEND_REGISTRY is empty even with active layers', () => {
-    useLayerStore.setState({ activeLayers: new Set(['geographic', 'weather']) });
+  it('renders elevation legend when geographic layer is active', () => {
+    useLayerStore.setState({ activeLayers: new Set(['geographic']) });
+    const { getByText } = render(<MapLegend />);
+    expect(getByText('Elevation')).toBeTruthy();
+    expect(getByText('0m')).toBeTruthy();
+    expect(getByText('4000m')).toBeTruthy();
+  });
+
+  it('renders nothing when non-registered layer is active', () => {
+    useLayerStore.setState({ activeLayers: new Set(['weather']) });
     const { container } = render(<MapLegend />);
-    // LEGEND_REGISTRY is currently empty, so nothing should render
+    // weather legend not yet registered
     expect(container.firstChild).toBeNull();
   });
 
   it('exports LegendConfig interface and LEGEND_REGISTRY array', () => {
     expect(LEGEND_REGISTRY).toBeDefined();
     expect(Array.isArray(LEGEND_REGISTRY)).toBe(true);
-    expect(LEGEND_REGISTRY.length).toBe(0); // currently empty, sub-phases will populate
+    expect(LEGEND_REGISTRY.length).toBeGreaterThanOrEqual(1);
   });
 });

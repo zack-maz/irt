@@ -39,6 +39,7 @@ import { CoordinateReadout } from './CoordinateReadout';
 import { CompassControl } from './CompassControl';
 import { ProximityAlertOverlay } from './ProximityAlertOverlay';
 import { MapLegend } from './MapLegend';
+import { GeographicOverlay } from './layers/GeographicOverlay';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
 function FlyToHandler() {
@@ -225,6 +226,7 @@ export function BaseMap() {
             'hillshade-highlight-color': '#444444',
           }}
         />
+        <GeographicOverlay />
         <NavigationControl
           showZoom={true}
           showCompass={true}

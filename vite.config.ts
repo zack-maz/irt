@@ -28,6 +28,7 @@ export default defineConfig({
       '@deck.gl/mapbox': path.resolve(__dirname, './src/test/__mocks__/deck-gl-mapbox.ts'),
       '@vis.gl/react-maplibre': path.resolve(__dirname, './src/test/__mocks__/react-maplibre.tsx'),
       '@deck.gl/layers': path.resolve(__dirname, './src/test/__mocks__/deck-gl-layers.ts'),
+      'maplibre-contour': path.resolve(__dirname, './src/test/__mocks__/maplibre-contour.ts'),
     },
   },
 });
