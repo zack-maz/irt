@@ -14,6 +14,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { DeckGLOverlay } from './DeckGLOverlay';
 import { EntityTooltip } from './EntityTooltip';
 import { WeatherTooltip, useWeatherLayers } from './layers/WeatherOverlay';
+import { ThreatTooltip, useThreatHeatmapLayers } from './layers/ThreatHeatmapOverlay';
+import type { ThreatZoneData } from './layers/ThreatHeatmapOverlay';
 import { UtcClock } from '@/components/layout/UtcClock';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -43,6 +45,7 @@ import { CompassControl } from './CompassControl';
 import { ProximityAlertOverlay } from './ProximityAlertOverlay';
 import { MapLegend } from './MapLegend';
 import { GeographicOverlay } from './layers/GeographicOverlay';
+import { WeatherHeatmap } from './layers/WeatherHeatmap';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
 function FlyToHandler() {
@@ -85,7 +88,9 @@ export function BaseMap() {
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
   const entityLayers = useEntityLayers();
   const weatherLayers = useWeatherLayers();
+  const threatLayers = useThreatHeatmapLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
+  const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
 
   // Search filter state for tooltip suppression
   const isSearchFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
@@ -93,32 +98,46 @@ export function BaseMap() {
 
   const [hover, setHover] = useState<HoverState | null>(null);
   const [weatherHover, setWeatherHover] = useState<{ point: WeatherGridPoint; x: number; y: number } | null>(null);
+  const [threatHover, setThreatHover] = useState<{ zone: ThreatZoneData; x: number; y: number } | null>(null);
 
   const handleDeckHover = useCallback(
     (info: PickingInfo) => {
       if (!info.object) {
+        setHover(null);
+        setThreatHover(null);
+        setWeatherHover(null);
+        hoverEntity(null);
+        return;
+      }
+
+      // Threat picker layer: show threat zone tooltip
+      if (info.layer?.id === 'threat-picker' && isThreatActive) {
+        const zone = info.object as ThreatZoneData;
+        setThreatHover({ zone, x: info.x, y: info.y });
         setHover(null);
         setWeatherHover(null);
         hoverEntity(null);
         return;
       }
 
-      // Weather picker layer: show weather tooltip instead of entity tooltip
+      // Weather picker layer: show weather tooltip
       if (info.layer?.id === 'weather-picker' && isWeatherActive) {
         const point = info.object as WeatherGridPoint;
         setWeatherHover({ point, x: info.x, y: info.y });
         setHover(null);
+        setThreatHover(null);
         hoverEntity(null);
         return;
       }
 
       // Entity hover (existing behavior)
       setWeatherHover(null);
+      setThreatHover(null);
       const entity = info.object as MapEntity | SiteEntity;
       setHover({ entity, x: info.x, y: info.y });
       hoverEntity(entity.id);
     },
-    [hoverEntity, isWeatherActive],
+    [hoverEntity, isWeatherActive, isThreatActive],
   );
 
   const setFlyToTarget = useNotificationStore((s) => s.setFlyToTarget);
@@ -245,6 +264,7 @@ export function BaseMap() {
             'hillshade-highlight-color': '#444444',
           }}
         />
+        <WeatherHeatmap />
         <GeographicOverlay />
         <NavigationControl
           showZoom={true}
@@ -254,7 +274,7 @@ export function BaseMap() {
         />
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
-          layers={[...entityLayers, ...weatherLayers]}
+          layers={[...threatLayers, ...weatherLayers, ...entityLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
@@ -276,7 +296,14 @@ export function BaseMap() {
           y={tooltipPos.y}
         />
       )}
-      {!tooltipEntity && weatherHover && (
+      {!tooltipEntity && threatHover && (
+        <ThreatTooltip
+          zone={threatHover.zone}
+          x={threatHover.x}
+          y={threatHover.y}
+        />
+      )}
+      {!tooltipEntity && !threatHover && weatherHover && (
         <WeatherTooltip
           point={weatherHover.point}
           x={weatherHover.x}
