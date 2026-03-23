@@ -5,7 +5,6 @@ import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
-import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
 function useUtcClock() {
@@ -53,40 +52,14 @@ export function StatusPanel() {
   const siteConnectionStatus = useSiteStore((s) => s.connectionStatus);
   const siteStatus: FeedStatus = siteConnectionStatus === 'idle' ? 'loading' : siteConnectionStatus;
 
-  // Use filtered entities (applies filter store predicates)
+  // Use filtered entities (applies filter store predicates) — unconditional counts
   const { flights, ships: filteredShips, events } = useFilteredEntities();
 
-  const showFlights = useUIStore((s) => s.showFlights);
-  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
-  const pulseEnabled = useUIStore((s) => s.pulseEnabled);
-  const showShips = useUIStore((s) => s.showShips);
-  const showEvents = useUIStore((s) => s.showEvents);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
-  const showSites = useUIStore((s) => s.showSites);
-
   const sites = useSiteStore((s) => s.sites);
-  const visibleSites = showSites ? sites.length : 0;
-
-  // Count = entities passing BOTH filters AND toggles
-  const visibleFlights = flights.filter((f) => {
-    if (f.data.unidentified) return pulseEnabled;
-    if (f.data.onGround) return showGroundTraffic;
-    return showFlights;
-  }).length;
-
-  const visibleShips = showShips ? filteredShips.length : 0;
-
-  let visibleEvents = 0;
-  if (showEvents) {
-    if (showAirstrikes) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)).length;
-    if (showGroundCombat) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)).length;
-    if (showTargeted) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)).length;
-  }
+  const visibleFlights = flights.length;
+  const visibleShips = filteredShips.length;
+  const visibleEvents = events.length;
+  const visibleSites = sites.length;
 
   return (
     <OverlayPanel className="min-w-[140px]">

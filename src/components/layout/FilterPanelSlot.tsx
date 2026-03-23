@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
-import { useFlightStore } from '@/stores/flightStore';
 import { useEventStore } from '@/stores/eventStore';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 import { RangeSlider } from '@/components/filter/RangeSlider';
@@ -11,7 +10,6 @@ import { DateRangeFilter } from '@/components/filter/DateRangeFilter';
 import { TextSearchInput } from '@/components/filter/TextSearchInput';
 import { HeadingSlider } from '@/components/filter/HeadingSlider';
 import { SeverityToggles } from '@/components/filter/SeverityToggles';
-import { VisibilityButton } from '@/components/filter/VisibilityButton';
 import type { FilterKey } from '@/stores/filterStore';
 
 function SectionHeader({
@@ -68,36 +66,6 @@ function EntitySectionHeader({
   );
 }
 
-function BooleanToggle({
-  label,
-  active,
-  onToggle,
-}: {
-  label: string;
-  active: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      role="switch"
-      aria-checked={active}
-      onClick={onToggle}
-      className="flex w-full items-center justify-between py-0.5"
-    >
-      <span className={`text-[10px] uppercase tracking-wider ${active ? 'text-accent-blue' : 'text-text-muted'}`}>
-        {label}
-      </span>
-      <span
-        className={`inline-block h-3 w-6 rounded-full transition-colors ${active ? 'bg-accent-blue' : 'bg-white/10'}`}
-      >
-        <span
-          className={`block h-3 w-3 rounded-full bg-white transition-transform ${active ? 'translate-x-3' : 'translate-x-0'}`}
-        />
-      </span>
-    </button>
-  );
-}
-
 /** Inner content of filter panel, reusable in Sidebar */
 export function FilterPanelContent() {
   const isFlightFiltersOpen = useUIStore((s) => s.isFlightFiltersOpen);
@@ -106,38 +74,6 @@ export function FilterPanelContent() {
   const toggleFlightFilters = useUIStore((s) => s.toggleFlightFilters);
   const toggleShipFilters = useUIStore((s) => s.toggleShipFilters);
   const toggleEventFilters = useUIStore((s) => s.toggleEventFilters);
-
-  // Entity visibility toggles
-  const showFlights = useUIStore((s) => s.showFlights);
-  const toggleFlights = useUIStore((s) => s.toggleFlights);
-  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
-  const toggleGroundTraffic = useUIStore((s) => s.toggleGroundTraffic);
-  const pulseEnabled = useUIStore((s) => s.pulseEnabled);
-  const togglePulse = useUIStore((s) => s.togglePulse);
-  const showShips = useUIStore((s) => s.showShips);
-  const toggleShips = useUIStore((s) => s.toggleShips);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const toggleAirstrikes = useUIStore((s) => s.toggleAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const toggleGroundCombat = useUIStore((s) => s.toggleGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
-  const toggleTargeted = useUIStore((s) => s.toggleTargeted);
-  const showNuclear = useUIStore((s) => s.showNuclear);
-  const toggleNuclear = useUIStore((s) => s.toggleNuclear);
-  const showNaval = useUIStore((s) => s.showNaval);
-  const toggleNaval = useUIStore((s) => s.toggleNaval);
-  const showOil = useUIStore((s) => s.showOil);
-  const toggleOil = useUIStore((s) => s.toggleOil);
-  const showAirbase = useUIStore((s) => s.showAirbase);
-  const toggleAirbase = useUIStore((s) => s.toggleAirbase);
-  const showDesalination = useUIStore((s) => s.showDesalination);
-  const toggleDesalination = useUIStore((s) => s.toggleDesalination);
-  const showPort = useUIStore((s) => s.showPort);
-  const togglePort = useUIStore((s) => s.togglePort);
-  const showHealthySites = useUIStore((s) => s.showHealthySites);
-  const toggleHealthySites = useUIStore((s) => s.toggleHealthySites);
-  const showAttackedSites = useUIStore((s) => s.showAttackedSites);
-  const toggleAttackedSites = useUIStore((s) => s.toggleAttackedSites);
 
   // Filter store — country filters
   const eventCountries = useFilterStore((s) => s.eventCountries);
@@ -227,13 +163,6 @@ export function FilterPanelContent() {
         <EntitySectionHeader label="Flights" isOpen={isFlightFiltersOpen} onToggle={toggleFlightFilters} />
         {isFlightFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
-            {/* Visibility button */}
-            <div className="flex flex-wrap gap-1">
-              <VisibilityButton label="Flights" active={showFlights} onToggle={toggleFlights} color="#eab308" />
-            </div>
-            {/* Boolean sub-filters */}
-            <BooleanToggle label="Grounded" active={showGroundTraffic} onToggle={toggleGroundTraffic} />
-            <BooleanToggle label="Unidentified" active={pulseEnabled} onToggle={togglePulse} />
             {/* Callsign search */}
             <TextSearchInput
               label="Callsign"
@@ -293,10 +222,6 @@ export function FilterPanelContent() {
         <EntitySectionHeader label="Ships" isOpen={isShipFiltersOpen} onToggle={toggleShipFilters} />
         {isShipFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
-            {/* Visibility button */}
-            <div className="flex flex-wrap gap-1">
-              <VisibilityButton label="Ships" active={showShips} onToggle={toggleShips} color="#a78bfa" />
-            </div>
             {/* MMSI search */}
             <TextSearchInput
               label="MMSI"
@@ -320,13 +245,6 @@ export function FilterPanelContent() {
         <EntitySectionHeader label="Conflicts" isOpen={isEventFiltersOpen} onToggle={toggleEventFilters} />
         {isEventFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
-            {/* Visibility buttons */}
-            <div className="flex flex-wrap gap-1">
-              <VisibilityButton label="Airstrikes" active={showAirstrikes} onToggle={toggleAirstrikes} color="#ff3b30" />
-              <VisibilityButton label="Ground Combat" active={showGroundCombat} onToggle={toggleGroundCombat} color="#ef4444" />
-              <VisibilityButton label="Targeted" active={showTargeted} onToggle={toggleTargeted} color="#8b1e1e" />
-            </div>
-
             {/* Severity toggles */}
             <SeverityToggles />
 
@@ -383,25 +301,6 @@ export function FilterPanelContent() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Sites section */}
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Sites</div>
-        <div className="mt-1.5 flex flex-col gap-2 pl-3">
-          {/* Site type visibility buttons */}
-          <div className="flex flex-wrap gap-1">
-            <VisibilityButton label="Nuclear" active={showNuclear} onToggle={toggleNuclear} color="#22c55e" />
-            <VisibilityButton label="Naval" active={showNaval} onToggle={toggleNaval} color="#3b82f6" />
-            <VisibilityButton label="Oil" active={showOil} onToggle={toggleOil} color="#f59e0b" />
-            <VisibilityButton label="Airbase" active={showAirbase} onToggle={toggleAirbase} color="#8b5cf6" />
-            <VisibilityButton label="Desal" active={showDesalination} onToggle={toggleDesalination} color="#06b6d4" />
-            <VisibilityButton label="Port" active={showPort} onToggle={togglePort} color="#78716c" />
-          </div>
-          {/* Status toggles */}
-          <BooleanToggle label="Healthy" active={showHealthySites} onToggle={toggleHealthySites} />
-          <BooleanToggle label="Attacked" active={showAttackedSites} onToggle={toggleAttackedSites} />
-        </div>
       </div>
 
     </div>

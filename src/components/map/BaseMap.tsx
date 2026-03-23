@@ -20,7 +20,6 @@ import { useFilterStore } from '@/stores/filterStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useEntityLayers } from '@/hooks/useEntityLayers';
 import { useSearchStore } from '@/stores/searchStore';
-import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import type { MapEntity, SiteEntity } from '@/types/entities';
 import {
   INITIAL_VIEW_STATE,
@@ -76,10 +75,6 @@ export function BaseMap() {
   const openDetailPanel = useUIStore((s) => s.openDetailPanel);
   const closeDetailPanel = useUIStore((s) => s.closeDetailPanel);
   const hoverEntity = useUIStore((s) => s.hoverEntity);
-  const showEvents = useUIStore((s) => s.showEvents);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
   const isSettingPin = useFilterStore((s) => s.isSettingPin);
   const setProximityPin = useFilterStore((s) => s.setProximityPin);
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
@@ -178,21 +173,10 @@ export function BaseMap() {
     [setCursorPosition],
   );
 
-  // Tooltip gating — conflict events only show when master + category toggle are ON
-  function isEntityTooltipVisible(entity: MapEntity | SiteEntity): boolean {
-    if (!isConflictEventType(entity.type)) return true;
-    if (!showEvents) return false;
-    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(entity.type)) return showAirstrikes;
-    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(entity.type)) return showGroundCombat;
-    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(entity.type)) return showTargeted;
-    return showGroundCombat;
-  }
-
   const rawTooltipEntity = hover?.entity ?? null;
-  // Suppress tooltip for non-matching entities during search filter, and for toggled-off conflict events
+  // Suppress tooltip for non-matching entities during search filter
   const tooltipEntity = rawTooltipEntity && (
-    !isEntityTooltipVisible(rawTooltipEntity) ||
-    (isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id))
+    isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id)
   )
     ? null
     : rawTooltipEntity;

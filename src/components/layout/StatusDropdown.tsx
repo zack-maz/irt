@@ -7,7 +7,6 @@ import { useNewsStore } from '@/stores/newsStore';
 import { useMarketStore } from '@/stores/marketStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
-import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 
 type FeedStatus = 'connected' | 'stale' | 'error' | 'loading' | 'rate_limited' | 'idle';
 
@@ -48,40 +47,17 @@ export function StatusDropdown() {
   const newsStatus = useNewsStore((s) => s.connectionStatus);
   const marketStatus = useMarketStore((s) => s.connectionStatus);
 
-  // Entity counts
+  // Entity counts (unconditional — no toggle gating)
   const { flights, ships: filteredShips, events } = useFilteredEntities();
-  const showFlights = useUIStore((s) => s.showFlights);
-  const showGroundTraffic = useUIStore((s) => s.showGroundTraffic);
-  const pulseEnabled = useUIStore((s) => s.pulseEnabled);
-  const showShips = useUIStore((s) => s.showShips);
-  const showEvents = useUIStore((s) => s.showEvents);
-  const showAirstrikes = useUIStore((s) => s.showAirstrikes);
-  const showGroundCombat = useUIStore((s) => s.showGroundCombat);
-  const showTargeted = useUIStore((s) => s.showTargeted);
-  const showSites = useUIStore((s) => s.showSites);
   const sites = useSiteStore((s) => s.sites);
   const newsClusterCount = useNewsStore((s) => s.clusterCount);
   const marketQuoteCount = useMarketStore((s) => s.quotes).length;
   const isSidebarOpen = useUIStore((s) => s.isSidebarOpen);
 
-  const visibleFlights = flights.filter((f) => {
-    if (f.data.unidentified) return pulseEnabled;
-    if (f.data.onGround) return showGroundTraffic;
-    return showFlights;
-  }).length;
-  const visibleShips = showShips ? filteredShips.length : 0;
-
-  let visibleEvents = 0;
-  if (showEvents) {
-    if (showAirstrikes) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)).length;
-    if (showGroundCombat) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)).length;
-    if (showTargeted) visibleEvents += events.filter((e) =>
-      (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)).length;
-  }
-
-  const visibleSites = showSites ? sites.length : 0;
+  const visibleFlights = flights.length;
+  const visibleShips = filteredShips.length;
+  const visibleEvents = events.length;
+  const visibleSites = sites.length;
 
   // Outside click to close
   const handleMouseDown = useCallback((e: MouseEvent) => {
