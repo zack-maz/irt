@@ -44,7 +44,7 @@
 - [x] **Phase 19: Search, Filter & UI Cleanup** - Global search bar, Reset All, grouped filter sections, visual hierarchy (completed 2026-03-22)
 - [x] **Phase 20: Layer Purpose Refactor** - Remove entity toggles, replace with visualization layer architecture, inline legend framework (completed 2026-03-23)
 - [x] **Phase 20.1: Geographical & Weather Layers** - Monochrome elevation tinting with contour lines + real-time temperature overlay from Open-Meteo (completed 2026-03-23)
-- [ ] **Phase 20.2: Threat Heatmap Layer** - Color-codes regions by GDELT conflict event density, hot zones glow red
+- [x] **Phase 20.2: Threat Heatmap Layer** - Color-codes regions by GDELT conflict event density, hot zones glow red (completed 2026-03-23)
 - [ ] **Phase 20.3: Political Boundaries Layer** - Country borders, disputed territories, alliance/faction color-coding
 - [ ] **Phase 20.4: Satellite Imagery Layer** - ArcGIS World Imagery as semi-transparent overlay on Dark Matter basemap
 - [ ] **Phase 20.5: Infrastructure Focus Layer** - Dims non-site entities, highlights sites with enhanced labels
@@ -207,7 +207,7 @@ Plans:
   1. User can toggle a Threat Heatmap layer that visualizes conflict event density across the map
   2. Hot zones glow red, quiet areas stay dark — uses existing GDELT event data (no new API)
   3. Inline legend shows density scale when layer is active
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 20.2-01-PLAN.md -- ThreatHeatmapOverlay: severity-weighted HeatmapLayer with 6h recency decay, ScatterplotLayer picker grid for zone tooltips, BaseMap wiring with correct layer stacking and tooltip priority
@@ -283,5 +283,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
-| 20.2. Threat Heatmap Layer | v1.1 | 0/1 | Planned | - |
+| 20.2. Threat Heatmap Layer | 1/1 | Complete   | 2026-03-23 | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |

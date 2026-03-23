@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: completed
-stopped_at: Phase 20.2 context gathered
-last_updated: "2026-03-23T18:19:05.830Z"
-last_activity: 2026-03-23 -- Completed Phase 20.1 Plan 03 (weather visualization layer)
+status: in-progress
+stopped_at: Completed 20.2-01-PLAN.md
+last_updated: "2026-03-23T19:21:21Z"
+last_activity: 2026-03-23 -- Completed Phase 20.2 Plan 01 (threat heatmap layer)
 progress:
   total_phases: 14
   completed_phases: 8
-  total_plans: 28
-  completed_plans: 27
+  total_plans: 29
+  completed_plans: 28
   percent: 97
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 20.1 Geographical & Weather Layers
+**Current focus:** Phase 20.2 Threat Heatmap Layer
 
 ## Current Position
 
-Phase: 20.1 (Geographical & Weather Layers Inserted)
-Plan: 03 of 03 complete
+Phase: 20.2 (Threat Heatmap Layer Inserted)
+Plan: 01 of 01 complete
 Status: Phase complete -- all plans delivered
-Last activity: 2026-03-23 -- Completed Phase 20.1 Plan 03 (weather visualization layer)
+Last activity: 2026-03-23 -- Completed Phase 20.2 Plan 01 (threat heatmap layer)
 
 Progress: [██████████] 97%
 
@@ -71,6 +71,7 @@ Progress: [██████████] 97%
 | Phase 20.1 P02 | 3min | 2 tasks | 10 files |
 | Phase 20.1 P01 | 3min | 2 tasks | 7 files |
 | Phase 20.1 P03 | 6min | 2 tasks | 16 files |
+| Phase 20.2 P01 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -177,6 +178,10 @@ Progress: [██████████] 97%
 - [Phase 20.1]: Weather picker uses invisible ScatterplotLayer (50km radius) for tooltip picking separate from heatmap
 - [Phase 20.1]: Wind barbs filtered to 3-degree spacing via lat/lng modulo for clean visual density
 - [Phase 20.1]: Weather tooltip shows dual-unit temperature (C/F) and compass direction matching EntityTooltip style
+- [Phase 20.2]: Exponential decay with 6h half-life for threat weight (distinct from severity.ts rational decay)
+- [Phase 20.2]: Date range filtering uses filterStore dateStart/dateEnd (always numbers, not nullable)
+- [Phase 20.2]: Layer stacking: threat below weather below entities in DeckGLOverlay
+- [Phase 20.2]: Tooltip priority: entity > threat > weather
 
 ### Roadmap Evolution
 
@@ -198,6 +203,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-23T18:19:05.821Z
-Stopped at: Phase 20.2 context gathered
-Resume file: .planning/phases/20.2-threat-heatmap-layer-inserted/20.2-CONTEXT.md
+Last session: 2026-03-23T19:21:21Z
+Stopped at: Completed 20.2-01-PLAN.md
+Resume file: .planning/phases/20.2-threat-heatmap-layer-inserted/20.2-01-SUMMARY.md
