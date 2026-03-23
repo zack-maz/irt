@@ -161,11 +161,11 @@ export const TAG_REGISTRY: Record<string, TagDefinition> = {
   },
   near: {
     prefix: 'near',
-    label: 'Near Site',
-    description: 'Filter entities within 50km of a named site',
+    label: 'Near Location',
+    description: 'Drop proximity pin near a site, city, or coordinates (100km radius)',
     color: 'text-amber-400',
     entityTypes: ['flight', 'ship', 'event', 'site'],
-    examples: ['near:Natanz', 'near:Bushehr'],
+    examples: ['near:Tehran', 'near:Natanz', 'near:Baghdad'],
   },
   since: {
     prefix: 'since',

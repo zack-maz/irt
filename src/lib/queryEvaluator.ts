@@ -12,6 +12,7 @@ import type {
 import { getSearchableFields } from './searchUtils';
 import { computeSeverityScore } from './severity';
 import { computeAttackStatus } from './attackStatus';
+import { findGeoName } from './geoNames';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -265,12 +266,30 @@ export function evaluateTag(
     }
 
     case 'near': {
-      // Find site by name, check distance <= 50km
-      const NEAR_RADIUS_KM = 50;
+      const NEAR_RADIUS_KM = 100;
+      // Try site name first
       const matchingSite = context.sites.find(s => ciIncludes(s.label, value));
-      if (!matchingSite) return false;
-      const dist = haversineDistanceKm(entity.lat, entity.lng, matchingSite.lat, matchingSite.lng);
-      return dist <= NEAR_RADIUS_KM;
+      if (matchingSite) {
+        const dist = haversineDistanceKm(entity.lat, entity.lng, matchingSite.lat, matchingSite.lng);
+        return dist <= NEAR_RADIUS_KM;
+      }
+      // Try city/location lookup
+      const geoMatch = findGeoName(value);
+      if (geoMatch) {
+        const dist = haversineDistanceKm(entity.lat, entity.lng, geoMatch.lat, geoMatch.lng);
+        return dist <= NEAR_RADIUS_KM;
+      }
+      // Try parsing as lat,lng coordinates
+      const parts = value.split(',');
+      if (parts.length === 2) {
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const dist = haversineDistanceKm(entity.lat, entity.lng, lat, lng);
+          return dist <= NEAR_RADIUS_KM;
+        }
+      }
+      return false;
     }
 
     case 'site': {

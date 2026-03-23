@@ -6,6 +6,7 @@ import { useSiteStore } from '@/stores/siteStore';
 import { type QueryNode } from '@/lib/queryParser';
 import { parseTemporalValue, parseRangeValue } from '@/lib/queryEvaluator';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
+import { findGeoName, GEO_NAMES } from '@/lib/geoNames';
 
 // ─── Sync Maps ───────────────────────────────────────────────
 
@@ -319,12 +320,29 @@ export function deriveFiltersFromAST(
     }
   }
   if (nearTags.length > 0) {
-    // Look up site by label to get coordinates
-    const siteName = nearTags[0].value.toLowerCase();
+    const name = nearTags[0].value;
+    const lower = name.toLowerCase();
+    // Try sites first
     const sites = useSiteStore.getState().sites;
-    const match = sites.find((s) => s.label.toLowerCase().includes(siteName));
-    if (match) {
-      result.proximityPin = { lat: match.lat, lng: match.lng };
+    const siteMatch = sites.find((s) => s.label.toLowerCase().includes(lower));
+    if (siteMatch) {
+      result.proximityPin = { lat: siteMatch.lat, lng: siteMatch.lng };
+    } else {
+      // Try city/location lookup
+      const geoMatch = findGeoName(name);
+      if (geoMatch) {
+        result.proximityPin = { lat: geoMatch.lat, lng: geoMatch.lng };
+      } else {
+        // Try parsing as lat,lng coordinates
+        const parts = name.split(',');
+        if (parts.length === 2) {
+          const lat = parseFloat(parts[0]);
+          const lng = parseFloat(parts[1]);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            result.proximityPin = { lat, lng };
+          }
+        }
+      }
     }
   }
 
@@ -483,25 +501,32 @@ export function buildASTFromToggles(
     nodes.push({ type: 'tag', prefix: 'actor', value: actor });
   }
 
-  // Add proximity pin as near: tag (look up closest site label)
+  // Add proximity pin as near: tag (look up closest site or city name)
   if (state.proximityPin) {
+    const CLOSE_THRESHOLD = 0.05 * 0.05; // ~5km in degrees²
+    const { lat, lng } = state.proximityPin;
+    let bestLabel = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+    let bestDist = Infinity;
+
+    // Check sites
     const sites = useSiteStore.getState().sites;
-    let closestLabel = `${state.proximityPin.lat.toFixed(2)},${state.proximityPin.lng.toFixed(2)}`;
-    let closestDist = Infinity;
     for (const site of sites) {
-      const dlat = site.lat - state.proximityPin.lat;
-      const dlng = site.lng - state.proximityPin.lng;
-      const dist = dlat * dlat + dlng * dlng;
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestLabel = site.label;
+      const d = (site.lat - lat) ** 2 + (site.lng - lng) ** 2;
+      if (d < bestDist) { bestDist = d; bestLabel = site.label; }
+    }
+
+    // Check city names (only if no close site found)
+    if (bestDist >= CLOSE_THRESHOLD) {
+      for (const geo of GEO_NAMES) {
+        const d = (geo.lat - lat) ** 2 + (geo.lng - lng) ** 2;
+        if (d < bestDist) { bestDist = d; bestLabel = geo.name; }
       }
     }
-    // Only use site label if close enough (approx 0.05 degree ~= 5km)
-    if (closestDist < 0.05 * 0.05) {
-      nodes.push({ type: 'tag', prefix: 'near', value: closestLabel });
+
+    if (bestDist < CLOSE_THRESHOLD) {
+      nodes.push({ type: 'tag', prefix: 'near', value: bestLabel });
     } else {
-      nodes.push({ type: 'tag', prefix: 'near', value: `${state.proximityPin.lat.toFixed(2)},${state.proximityPin.lng.toFixed(2)}` });
+      nodes.push({ type: 'tag', prefix: 'near', value: `${lat.toFixed(2)},${lng.toFixed(2)}` });
     }
   }
 
