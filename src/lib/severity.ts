@@ -10,7 +10,7 @@ export const MEDIUM_THRESHOLD = 15;
  * Type-based severity weights for conflict event types.
  * Higher weight = more severe/newsworthy event type.
  */
-const TYPE_WEIGHTS: Record<ConflictEventType, number> = {
+export const TYPE_WEIGHTS: Record<ConflictEventType, number> = {
   airstrike: 10,
   wmd: 10,
   mass_violence: 9,
