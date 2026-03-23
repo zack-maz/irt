@@ -207,7 +207,10 @@ Plans:
   1. User can toggle a Threat Heatmap layer that visualizes conflict event density across the map
   2. Hot zones glow red, quiet areas stay dark — uses existing GDELT event data (no new API)
   3. Inline legend shows density scale when layer is active
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 20.2-01-PLAN.md -- ThreatHeatmapOverlay: severity-weighted HeatmapLayer with 6h recency decay, ScatterplotLayer picker grid for zone tooltips, BaseMap wiring with correct layer stacking and tooltip priority
 
 ### Phase 20.3: Political Boundaries Layer (INSERTED)
 **Goal**: Users can toggle a political boundaries overlay that emphasizes country borders and faction alignment
@@ -252,7 +255,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 21
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.2 -> 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -280,4 +283,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 21
 | 19.2. Counter Entity Dropdowns | 2/2 | Complete    | 2026-03-22 | - |
 | 20. Layer Purpose Refactor | 3/3 | Complete    | 2026-03-23 | - |
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
+| 20.2. Threat Heatmap Layer | v1.1 | 0/1 | Planned | - |
 | 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
