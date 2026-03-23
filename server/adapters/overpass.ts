@@ -80,9 +80,9 @@ const SITE_TYPE_LABELS: Record<SiteType, string> = {
 
 /** Extract an English, title-cased label from OSM tags */
 function extractLabel(tags: Record<string, string>, siteType: SiteType): string {
-  // Prefer English name
+  // Prefer English name (verify it's actually Latin script)
   const en = tags['name:en'];
-  if (en && en.trim()) return toTitleCase(en);
+  if (en && en.trim() && isLatin(en)) return toTitleCase(en);
   // Accept generic name only if it's Latin script
   const raw = tags['name'] || '';
   if (raw && isLatin(raw)) return toTitleCase(raw);
@@ -124,7 +124,7 @@ export function normalizeElement(el: OverpassElement): SiteEntity | null {
     lat,
     lng: lon,
     label: extractLabel(el.tags, siteType),
-    operator: el.tags.operator ? toTitleCase(el.tags.operator) : undefined,
+    operator: el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
     wikidata: el.tags.wikidata || undefined,
     osmId: el.id,
   };

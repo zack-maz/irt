@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { FlightEntity, SiteEntity } from '@/types/entities';
 import { useFlightStore } from '@/stores/flightStore';
 import { useSiteStore } from '@/stores/siteStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { haversineKm } from '@/lib/geo';
 
 const PROXIMITY_THRESHOLD_KM = 25;
@@ -69,10 +70,16 @@ export function computeProximityAlerts(
   );
 }
 
-/** React hook that computes proximity alerts from all sites */
+/** React hook that computes proximity alerts from toggled-on sites only */
 export function useProximityAlerts(): ProximityAlert[] {
   const flights = useFlightStore((s) => s.flights);
   const sites = useSiteStore((s) => s.sites);
+  const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
 
-  return useMemo(() => computeProximityAlerts(flights, sites), [flights, sites]);
+  const filteredSites = useMemo(
+    () => sites.filter((s) => enabledSiteTypes.includes(s.siteType)),
+    [sites, enabledSiteTypes],
+  );
+
+  return useMemo(() => computeProximityAlerts(flights, filteredSites), [flights, filteredSites]);
 }

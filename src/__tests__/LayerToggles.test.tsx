@@ -22,10 +22,12 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 6 visualization layer toggle rows', () => {
+  it('renders 3 active toggle rows and 3 coming-soon rows', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(6);
+    expect(switches).toHaveLength(3);
+    // Coming-soon layers render as plain divs, not switches
+    expect(screen.getAllByText('soon')).toHaveLength(3);
   });
 
   it('renders toggle rows with correct labels', () => {

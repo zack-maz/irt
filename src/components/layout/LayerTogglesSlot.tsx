@@ -29,18 +29,32 @@ function ToggleRow({ color, label, active, onToggle }: ToggleRowProps) {
   );
 }
 
-const LAYER_CONFIGS: { id: VisualizationLayerId; label: string; color: string }[] = [
+const LAYER_CONFIGS: { id: VisualizationLayerId; label: string; color: string; comingSoon?: boolean }[] = [
   { id: 'geographic', label: 'Geographic', color: '#94a3b8' },
   { id: 'weather', label: 'Weather', color: '#38bdf8' },
   { id: 'threat', label: 'Threat Heatmap', color: '#ef4444' },
-  { id: 'political', label: 'Political', color: '#a78bfa' },
-  { id: 'satellite', label: 'Satellite', color: '#22d3ee' },
-  { id: 'infrastructure', label: 'Infrastructure', color: '#4ade80' },
+  { id: 'political', label: 'Political', color: '#a78bfa', comingSoon: true },
+  { id: 'satellite', label: 'Satellite', color: '#22d3ee', comingSoon: true },
+  { id: 'infrastructure', label: 'Infrastructure', color: '#4ade80', comingSoon: true },
 ];
 
 /** Wraps ToggleRow with a store-connected hook (avoids calling useLayerStore inside .map) */
-function LayerToggleRow({ id, label, color }: { id: VisualizationLayerId; label: string; color: string }) {
+function LayerToggleRow({ id, label, color, comingSoon }: { id: VisualizationLayerId; label: string; color: string; comingSoon?: boolean }) {
   const active = useLayerStore((s) => s.activeLayers.has(id));
+
+  if (comingSoon) {
+    return (
+      <div className="flex w-full items-center gap-2 text-xs opacity-25 cursor-not-allowed">
+        <span
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+        <span className="text-text-secondary">{label}</span>
+        <span className="ml-auto text-[9px] text-text-muted italic">soon</span>
+      </div>
+    );
+  }
+
   return (
     <ToggleRow
       color={color}
@@ -55,8 +69,8 @@ function LayerToggleRow({ id, label, color }: { id: VisualizationLayerId; label:
 export function LayerTogglesContent() {
   return (
     <div className="flex flex-col gap-1">
-      {LAYER_CONFIGS.map(({ id, label, color }) => (
-        <LayerToggleRow key={id} id={id} label={label} color={color} />
+      {LAYER_CONFIGS.map(({ id, label, color, comingSoon }) => (
+        <LayerToggleRow key={id} id={id} label={label} color={color} comingSoon={comingSoon} />
       ))}
       <button
         onClick={() => {
