@@ -4,14 +4,18 @@ import { ScatterplotLayer } from '@deck.gl/layers';
 import { useEventStore } from '@/stores/eventStore';
 import { useLayerStore } from '@/stores/layerStore';
 import { useFilterStore } from '@/stores/filterStore';
+
 import { TYPE_WEIGHTS } from '@/lib/severity';
-import { EVENT_TYPE_LABELS } from '@/types/ui';
+import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import { LEGEND_REGISTRY } from '@/components/map/MapLegend';
 import type { ConflictEventEntity } from '@/types/entities';
 
 // --- Constants ---
 
 const HALF_LIFE_HOURS = 6;
+
+/** Grid cell size in degrees (~83km at equator) */
+const CELL_SIZE_DEG = 0.75;
 
 const THREAT_COLOR_RANGE: [number, number, number][] = [
   [45, 0, 0],       // #2d0000 dark
@@ -29,37 +33,68 @@ export interface ThreatZoneData {
   eventCount: number;
   dominantType: string;
   latestTime: number;
+  totalFatalities: number;
+  totalMentions: number;
+  totalSources: number;
+  avgGoldstein: number;
+  clusterWeight: number;
 }
 
 // --- Pure functions ---
 
 /**
  * Compute a threat weight for a single event.
- * Formula: typeWeight * exponentialDecay(6h half-life)
- * This is DIFFERENT from severity.ts rational decay.
+ * Compounds type severity, media signal (mentions/sources),
+ * fatalities, Goldstein hostility, and temporal decay.
  */
 export function computeThreatWeight(event: ConflictEventEntity): number {
   const typeWeight = TYPE_WEIGHTS[event.type] ?? 3;
+  const mentions = event.data.numMentions ?? 1;
+  const sources = event.data.numSources ?? 1;
+  const fatalities = event.data.fatalities ?? 0;
+  const goldstein = event.data.goldsteinScale ?? 0;
+
+  // Media amplification (log-dampened)
+  const mediaFactor = Math.log2(1 + mentions) * Math.log2(1 + sources);
+
+  // Fatality boost: each death linearly amplifies
+  const fatalityFactor = 1 + fatalities * 0.5;
+
+  // Goldstein hostility: -10 (max conflict) → 2.0x, 0 → 1.5x, +10 → 1.0x
+  const goldsteinFactor = 1.5 - goldstein / 20;
+
+  // Temporal decay: exponential with 6h half-life
   const ageMs = Math.max(0, Date.now() - event.timestamp);
   const ageHours = ageMs / (1000 * 60 * 60);
-  return typeWeight * Math.pow(0.5, ageHours / HALF_LIFE_HOURS);
+  const decay = Math.pow(0.5, ageHours / HALF_LIFE_HOURS);
+
+  return typeWeight * mediaFactor * fatalityFactor * goldsteinFactor * decay;
 }
 
 /**
  * Aggregate events into grid cells for tooltip picking.
- * Each cell is `cellSize` degrees wide/tall. Returns center of each occupied cell
- * with event count, dominant type, and latest timestamp.
+ * Accumulates all tracked metrics per cell for rich cluster tooltips.
  */
 export function aggregateToGrid(
   events: ConflictEventEntity[],
-  cellSize = 1,
+  cellSize = CELL_SIZE_DEG,
 ): ThreatZoneData[] {
   if (events.length === 0) return [];
 
-  const cells = new Map<
-    string,
-    { lat: number; lng: number; count: number; types: Map<string, number>; latest: number }
-  >();
+  interface CellAcc {
+    lat: number;
+    lng: number;
+    count: number;
+    types: Map<string, number>;
+    latest: number;
+    fatalities: number;
+    mentions: number;
+    sources: number;
+    goldsteinSum: number;
+    weightSum: number;
+  }
+
+  const cells = new Map<string, CellAcc>();
 
   for (const event of events) {
     const cellLat = Math.floor(event.lat / cellSize) * cellSize + cellSize / 2;
@@ -68,20 +103,26 @@ export function aggregateToGrid(
 
     let cell = cells.get(key);
     if (!cell) {
-      cell = { lat: cellLat, lng: cellLng, count: 0, types: new Map(), latest: 0 };
+      cell = {
+        lat: cellLat, lng: cellLng, count: 0, types: new Map(),
+        latest: 0, fatalities: 0, mentions: 0, sources: 0,
+        goldsteinSum: 0, weightSum: 0,
+      };
       cells.set(key, cell);
     }
 
     cell.count++;
     cell.types.set(event.type, (cell.types.get(event.type) ?? 0) + 1);
-    if (event.timestamp > cell.latest) {
-      cell.latest = event.timestamp;
-    }
+    if (event.timestamp > cell.latest) cell.latest = event.timestamp;
+    cell.fatalities += event.data.fatalities ?? 0;
+    cell.mentions += event.data.numMentions ?? 0;
+    cell.sources += event.data.numSources ?? 0;
+    cell.goldsteinSum += event.data.goldsteinScale ?? 0;
+    cell.weightSum += computeThreatWeight(event);
   }
 
   const result: ThreatZoneData[] = [];
   for (const cell of cells.values()) {
-    // Find most frequent type
     let dominantType = '';
     let maxCount = 0;
     for (const [type, count] of cell.types) {
@@ -97,6 +138,11 @@ export function aggregateToGrid(
       eventCount: cell.count,
       dominantType,
       latestTime: cell.latest,
+      totalFatalities: cell.fatalities,
+      totalMentions: cell.mentions,
+      totalSources: cell.sources,
+      avgGoldstein: cell.count > 0 ? cell.goldsteinSum / cell.count : 0,
+      clusterWeight: cell.weightSum,
     });
   }
 
@@ -122,27 +168,28 @@ interface WeightedPoint {
   weight: number;
 }
 
-/**
- * Returns deck.gl layers for threat heatmap visualization:
- * - HeatmapLayer for heat overlay (not pickable)
- * - ScatterplotLayer (invisible) for tooltip picking on aggregated grid
- */
 export function useThreatHeatmapLayers() {
   const events = useEventStore((s) => s.events);
   const isActive = useLayerStore((s) => s.activeLayers.has('threat'));
   const dateStart = useFilterStore((s) => s.dateStart);
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
+  const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
+  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+
   return useMemo(() => {
     if (!isActive || events.length === 0) return [];
 
-    // Filter events by date range
-    const filtered = events.filter(
-      (e) => e.timestamp >= dateStart && e.timestamp <= dateEnd,
-    );
+    const filtered = events.filter((e) => {
+      if (e.timestamp < dateStart || e.timestamp > dateEnd) return false;
+      if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)) return showAirstrikes;
+      if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)) return showGroundCombatToggle;
+      if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)) return showTargetedToggle;
+      return false;
+    });
     if (filtered.length === 0) return [];
 
-    // Compute weighted data for HeatmapLayer
     const weightedData: WeightedPoint[] = filtered.map((e) => ({
       position: [e.lng, e.lat] as [number, number],
       weight: computeThreatWeight(e),
@@ -153,7 +200,7 @@ export function useThreatHeatmapLayers() {
       data: weightedData,
       getPosition: (d: WeightedPoint) => d.position,
       getWeight: (d: WeightedPoint) => d.weight,
-      radiusPixels: 60,
+      radiusPixels: 40,
       colorRange: THREAT_COLOR_RANGE,
       intensity: 1,
       threshold: 0.05,
@@ -163,7 +210,6 @@ export function useThreatHeatmapLayers() {
       debounceTimeout: 500,
     });
 
-    // Aggregate for picker grid
     const grid = aggregateToGrid(filtered);
 
     const pickerLayer = new ScatterplotLayer({
@@ -177,7 +223,7 @@ export function useThreatHeatmapLayers() {
     });
 
     return [heatmapLayer, pickerLayer];
-  }, [isActive, events, dateStart, dateEnd]);
+  }, [isActive, events, dateStart, dateEnd, showAirstrikes, showGroundCombatToggle, showTargetedToggle]);
 }
 
 // --- Tooltip ---
@@ -188,26 +234,44 @@ interface ThreatTooltipProps {
   y: number;
 }
 
+/** Goldstein scale descriptor */
+function goldsteinLabel(g: number): string {
+  if (g <= -7) return 'Extreme';
+  if (g <= -4) return 'High';
+  if (g <= -1) return 'Elevated';
+  return 'Moderate';
+}
+
 /**
- * Threat zone tooltip showing event count, dominant type, and relative time.
- * Positioned at cursor coordinates, styled to match WeatherTooltip.
+ * Threat zone tooltip showing cluster-level intelligence summary.
  */
 export function ThreatTooltip({ zone, x, y }: ThreatTooltipProps) {
   const typeLabel = EVENT_TYPE_LABELS[zone.dominantType] ?? zone.dominantType;
   const ago = formatRelativeTime(zone.latestTime);
+  const hostility = goldsteinLabel(zone.avgGoldstein);
 
   return (
     <div
       className="pointer-events-none absolute z-[var(--z-tooltip)]"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg">
+      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
         <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
-          Threat Zone
+          Threat Cluster
         </div>
-        <div>{zone.eventCount} events</div>
+        <div className="flex justify-between gap-3">
+          <span>{zone.eventCount} events</span>
+          <span className="text-text-muted">{ago}</span>
+        </div>
         <div>Mostly {typeLabel}</div>
-        <div>Latest {ago}</div>
+        {zone.totalFatalities > 0 && (
+          <div className="text-red-400">{zone.totalFatalities} fatalities</div>
+        )}
+        <div className="mt-0.5 border-t border-white/10 pt-0.5 text-[10px] text-text-muted">
+          <span>{hostility} hostility</span>
+          <span className="mx-1">&middot;</span>
+          <span>{zone.totalMentions} mentions</span>
+        </div>
       </div>
     </div>
   );

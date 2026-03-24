@@ -243,6 +243,21 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **useFilteredEntities** — `src/hooks/useFilteredEntities.ts`, applies all active filters to entity arrays
 - **useSearchResults** — `src/hooks/useSearchResults.ts`, evaluates search AST against entities
 
+## Visualization Layers (Phase 20)
+
+- **layerStore** — `src/stores/layerStore.ts`, `Set<VisualizationLayerId>` for active layers
+- **VisualizationLayerId** — `geographic`, `weather`, `threat`, `political`, `ethnic`, `satellite`, `water`
+- **LayerTogglesSlot** — `src/components/layout/LayerTogglesSlot.tsx`, toggle rows with color dots and "coming soon" labels
+- **Geographic overlay** — `src/components/map/layers/GeographicOverlay.tsx`, elevation color-relief tinting, maplibre-contour lines, geographic feature labels (deserts, ranges, seas)
+- **Weather overlay** — `src/components/map/layers/WeatherOverlay.tsx`, Open-Meteo grid with wind barbs (deck.gl IconLayer) + invisible picker for tooltips
+- **WeatherHeatmap** — `src/components/map/layers/WeatherHeatmap.tsx`, MapLibre image source with bilinear-interpolated temperature canvas, drapes onto terrain
+- **Threat heatmap** — `src/components/map/layers/ThreatHeatmapOverlay.tsx`, deck.gl HeatmapLayer (SUM aggregation, static `radiusPixels: 40`) with invisible ScatterplotLayer picker for cluster tooltips
+- **Threat weight formula** — `computeThreatWeight`: typeWeight × log2(mentions) × log2(sources) × fatalityFactor × goldsteinHostility × temporalDecay
+- **Layer stacking** — `layers={[...weatherLayers, ...threatLayers, ...entityLayers]}` — threat picks supersede weather
+- **Filter independence** — entity toggles (flights, ships, events, sites) operate independently from visualization layer toggles
+- **FilterButton** — `src/components/filter/FilterButton.tsx`, pill toggle with color dot for entity category filters
+- **SliderToggle** — `src/components/filter/SliderToggle.tsx`, iOS-style switch for boolean filter options
+
 ## Counter Entity Dropdowns (Phase 19.2)
 
 - **CountersSlot** — accordion dropdowns showing individual entities per counter row

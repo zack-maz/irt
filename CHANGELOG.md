@@ -4,6 +4,31 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
+## [v1.2.0] - 2026-03-24
+
+### Phase 20: Visualization Layers & Filter Independence
+
+#### Added
+- Visualization layer system with `layerStore` (`Set<VisualizationLayerId>`) and LayerTogglesSlot with toggle rows
+- Geographic overlay: elevation color-relief tinting, maplibre-contour lines, geographic feature labels (deserts, mountain ranges, seas)
+- Weather overlay: Open-Meteo temperature heatmap (bilinear-interpolated canvas draped onto terrain), wind barb icons, weather grid tooltip
+- Threat density heatmap: deck.gl HeatmapLayer with compound weight formula (type severity × log mentions × log sources × fatality boost × Goldstein hostility × temporal decay), SUM aggregation for proximity clustering, cluster tooltips with fatalities/mentions/hostility
+- FilterButton component (pill toggle with color dot for entity categories)
+- SliderToggle component (iOS-style switch for boolean filters)
+- Weather store (`weatherStore`) and weather polling hook
+- Contour tile protocol setup (`contourSetup.ts`) for maplibre-contour integration
+- Geographic feature GeoJSON dataset (`geoFeatures.ts`)
+
+#### Changed
+- Entity filter toggles (flights, ships, events, sites) now operate independently from visualization layer toggles
+- Layer stacking order: weather → threat → entities (threat tooltips supersede weather)
+- Filter panel redesigned with FilterButton/SliderToggle components
+- Sidebar layout updated for visualization layers section
+
+#### Removed
+- Political overlay (deferred — planned but not shipped)
+- Political data module and canvas pattern generation files
+
 ## [v1.1.0] - 2026-03-22
 
 ### Phase 19.2: Counter Entity Dropdowns

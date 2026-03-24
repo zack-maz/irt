@@ -38,17 +38,6 @@ export function useWeatherLayers() {
   return useMemo(() => {
     if (!isActive || grid.length === 0) return [];
 
-    const tempLayer = new ScatterplotLayer({
-      id: 'weather-temp-dots',
-      data: grid,
-      getPosition: (d: WeatherGridPoint) => [d.lng, d.lat],
-      getRadius: 55000,
-      radiusUnits: 'meters' as const,
-      getFillColor: (d: WeatherGridPoint) => tempToColor(d.temperature),
-      pickable: false,
-      antialiasing: true,
-    });
-
     // Filter to every 3rd degree for sparser wind barb rendering
     const sparseGrid = grid.filter(
       (d) => d.lat % 3 === 0 && d.lng % 3 === 0,
@@ -81,7 +70,7 @@ export function useWeatherLayers() {
       pickable: true,
     });
 
-    return [tempLayer, windBarbLayer, pickerLayer];
+    return [windBarbLayer, pickerLayer];
   }, [isActive, grid]);
 }
 

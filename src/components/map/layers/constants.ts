@@ -21,7 +21,18 @@ export const ENTITY_DOT_COLORS = {
   targeted: '#8b1e1e',
   ground: '#eab308',
   unidentified: '#ffff64',
-  sites: '#22c55e',
+  siteHealthy: '#22c55e',
+  siteAttacked: '#f97316',
+} as const;
+
+/** CSS hex color strings for site subtype filter buttons */
+export const SITE_SUBTYPE_COLORS: Record<string, string> = {
+  nuclear: '#a855f7',
+  naval: '#3b82f6',
+  oil: '#f59e0b',
+  airbase: '#64748b',
+  desalination: '#06b6d4',
+  port: '#8b5cf6',
 } as const;
 
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */

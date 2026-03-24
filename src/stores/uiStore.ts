@@ -17,6 +17,7 @@ export const useUIStore = create<UIState>()((set, get) => ({
   isFlightFiltersOpen: true,
   isShipFiltersOpen: true,
   isEventFiltersOpen: true,
+  isSiteFiltersOpen: true,
   isSidebarOpen: false,
   activeSidebarSection: null,
   isMarketsCollapsed: readBool('markets-collapsed', false),
@@ -32,6 +33,7 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleFlightFilters: () => set((s) => ({ isFlightFiltersOpen: !s.isFlightFiltersOpen })),
   toggleShipFilters: () => set((s) => ({ isShipFiltersOpen: !s.isShipFiltersOpen })),
   toggleEventFilters: () => set((s) => ({ isEventFiltersOpen: !s.isEventFiltersOpen })),
+  toggleSiteFilters: () => set((s) => ({ isSiteFiltersOpen: !s.isSiteFiltersOpen })),
   toggleSidebar: () => {
     const { isSidebarOpen } = get();
     if (isSidebarOpen) {

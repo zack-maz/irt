@@ -48,6 +48,7 @@ export interface UIState {
   isFlightFiltersOpen: boolean;
   isShipFiltersOpen: boolean;
   isEventFiltersOpen: boolean;
+  isSiteFiltersOpen: boolean;
   isSidebarOpen: boolean;
   activeSidebarSection: SidebarSection | null;
   isMarketsCollapsed: boolean;
@@ -63,6 +64,7 @@ export interface UIState {
   toggleFlightFilters: () => void;
   toggleShipFilters: () => void;
   toggleEventFilters: () => void;
+  toggleSiteFilters: () => void;
   selectEntity: (id: string | null) => void;
   hoverEntity: (id: string | null) => void;
   setExpandedAlertSiteId: (id: string | null) => void;

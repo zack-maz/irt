@@ -26,14 +26,13 @@ describe('useWeatherLayers', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('returns 3 layers when weather layer is active and grid has data', () => {
+  it('returns 2 layers when weather layer is active and grid has data', () => {
     useWeatherStore.setState({ grid: mockGrid });
     useLayerStore.getState().toggleLayer('weather');
     const { result } = renderHook(() => useWeatherLayers());
-    expect(result.current).toHaveLength(3);
-    expect(result.current[0].id).toBe('weather-temp-dots');
-    expect(result.current[1].id).toBe('weather-wind-barbs');
-    expect(result.current[2].id).toBe('weather-picker');
+    expect(result.current).toHaveLength(2);
+    expect(result.current[0].id).toBe('weather-wind-barbs');
+    expect(result.current[1].id).toBe('weather-picker');
   });
 });
 

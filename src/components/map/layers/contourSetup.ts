@@ -22,7 +22,9 @@ export function setupContourProtocol(): void {
 /** Vector tile URL for contour lines. */
 export const CONTOUR_TILE_URL = demSource.contourProtocolUrl({
   thresholds: {
+    4: [1000, 5000],
     7: [500, 2500],
-    9: [500, 2500],
+    9: [200, 1000],
+    11: [100, 500],
   },
 });

@@ -117,6 +117,17 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
   const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
 
+  // Visibility toggles
+  const showFlights = useFilterStore((s) => s.showFlights);
+  const showShips = useFilterStore((s) => s.showShips);
+  const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
+  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+  const showUnidentified = useFilterStore((s) => s.showUnidentified);
+  const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
+  const showHealthySites = useFilterStore((s) => s.showHealthySites);
+  const showAttackedSites = useFilterStore((s) => s.showAttackedSites);
+
   const { flights: filteredFlights, ships: filteredShips, events: filteredEvents } = useFilteredEntities();
 
   const sites = useSiteStore((s) => s.sites);
@@ -128,8 +139,16 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
 
   return useMemo(() => {
-    // All flights count (no toggle gating)
-    const visibleFlights = filteredFlights;
+    // Apply independent flight visibility toggles (matching useEntityLayers)
+    const visibleFlights = filteredFlights.filter((f: FlightEntity) => {
+      const isUnid = f.data.unidentified;
+      const isGround = f.data.onGround;
+      if (isUnid && showUnidentified) return true;
+      if (isGround && !isUnid && showGroundTraffic) return true;
+      if (!isGround && !isUnid && showFlights) return true;
+      if (isUnid && isGround && showGroundTraffic) return true;
+      return false;
+    });
 
     const iranianFlights = visibleFlights.filter((f: FlightEntity) => f.data.originCountry === 'Iran').length;
 
@@ -141,10 +160,10 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       return showLowSeverity;
     });
 
-    // All event counts (no toggle gating)
-    const airstrikes = countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES);
-    const groundCombatCount = countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES);
-    const targeted = countByGroup(severityFilteredEvents, TARGETED_TYPES);
+    // Apply conflict visibility toggles
+    const airstrikes = showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
+    const groundCombatCount = showGroundCombatToggle ? countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES) : 0;
+    const targeted = showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
 
     // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, desalination: 0, port: 0, total: 0 };
@@ -161,6 +180,9 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
 
     for (const site of visibleSites) {
       const status = computeAttackStatus(site, allEvents, dateEnd);
+      // Apply healthy/attacked visibility toggles
+      if (status.isAttacked && !showAttackedSites) continue;
+      if (!status.isAttacked && !showHealthySites) continue;
       siteCounts[site.siteType]++;
       siteCounts.total++;
       siteEntities[site.siteType].push(toSiteEntity(site, status.attackCount));
@@ -176,25 +198,29 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
 
     // --- Entity arrays ---
 
-    // All flights
+    // Flights (already visibility-filtered)
     const flightEntities = sortByProximity(
       visibleFlights.map(toFlightEntity),
       TEHRAN,
       TEL_AVIV,
     );
 
-    // All ships
-    const shipEntities = sortByProximity(filteredShips.map(toShipEntity), STRAIT_HORMUZ);
+    // Ships (apply visibility toggle)
+    const visibleShips = showShips ? filteredShips : [];
+    const shipEntities = sortByProximity(visibleShips.map(toShipEntity), STRAIT_HORMUZ);
 
-    // All event entities
-    const airstrikeEventEntities = sortByProximity(
-      filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
+    // Event entities (apply conflict visibility toggles)
+    const airstrikeEventEntities = showAirstrikes
+      ? sortByProximity(filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
+      : [];
 
-    const groundCombatEventEntities = sortByProximity(
-      filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
+    const groundCombatEventEntities = showGroundCombatToggle
+      ? sortByProximity(filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
+      : [];
 
-    const targetedEventEntities = sortByProximity(
-      filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV);
+    const targetedEventEntities = showTargetedToggle
+      ? sortByProximity(filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity), TEHRAN, TEL_AVIV)
+      : [];
 
     const entities: CounterEntities = {
       flights: flightEntities,
@@ -214,5 +240,5 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       sites: siteCounts,
       entities,
     };
-  }, [filteredFlights, filteredShips, filteredEvents, sites, allEvents, dateEnd, showHighSeverity, showMediumSeverity, showLowSeverity, proximityPin, proximityRadiusKm, enabledSiteTypes]);
+  }, [filteredFlights, filteredShips, filteredEvents, sites, allEvents, dateEnd, showHighSeverity, showMediumSeverity, showLowSeverity, proximityPin, proximityRadiusKm, enabledSiteTypes, showFlights, showShips, showAirstrikes, showGroundCombatToggle, showTargetedToggle, showUnidentified, showGroundTraffic, showHealthySites, showAttackedSites]);
 }

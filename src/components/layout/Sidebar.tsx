@@ -280,7 +280,7 @@ export function Sidebar() {
             : '-translate-x-full opacity-0 !pointer-events-none'
         }`}
       >
-        <div className="px-3 py-2 flex flex-col gap-1">
+        <div className="pl-3 pr-7 py-2 flex flex-col gap-1">
           {/* Counters section */}
           <div ref={countersRef}>
             <SidebarSection

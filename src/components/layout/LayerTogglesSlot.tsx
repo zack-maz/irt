@@ -4,11 +4,12 @@ import { OverlayPanel } from '@/components/ui/OverlayPanel';
 
 const LAYER_CONFIGS: { id: VisualizationLayerId; label: string; color: string; comingSoon?: boolean }[] = [
   { id: 'geographic', label: 'Geographic', color: '#94a3b8' },
-  { id: 'weather', label: 'Weather', color: '#38bdf8' },
-  { id: 'threat', label: 'Threat Heatmap', color: '#ef4444' },
-  { id: 'political', label: 'Political', color: '#a78bfa' },
+  { id: 'weather', label: 'Climate', color: '#38bdf8' },
+  { id: 'threat', label: 'Threat Density', color: '#ef4444' },
+  { id: 'political', label: 'Political', color: '#a78bfa', comingSoon: true },
+  { id: 'ethnic', label: 'Ethnic', color: '#c084fc', comingSoon: true },
   { id: 'satellite', label: 'Satellite', color: '#22d3ee', comingSoon: true },
-  { id: 'infrastructure', label: 'Infrastructure', color: '#4ade80', comingSoon: true },
+  { id: 'water', label: 'Water', color: '#4ade80', comingSoon: true },
 ];
 
 function LoadingSpinner() {

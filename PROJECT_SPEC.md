@@ -31,6 +31,7 @@ Browser (React SPA) — port 5173
   ├── Map Layer (Deck.gl + MapLibre)
   │   ├── BaseMap (CARTO Dark Matter, AWS Terrarium terrain)
   │   ├── DeckGLOverlay (MapboxOverlay via useControl)
+  │   ├── Visualization layers (geographic, weather, threat density)
   │   ├── Flight markers (aircraft icons)
   │   ├── Ship markers (vessel icons)
   │   └── Conflict markers (strike/missile/drone icons)

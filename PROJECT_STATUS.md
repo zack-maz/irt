@@ -1,6 +1,6 @@
 # Iran Conflict Monitor — Project Status
 
-**Last updated:** 2026-03-22
+**Last updated:** 2026-03-24
 
 ## Progress
 
@@ -8,6 +8,7 @@
 v0.9 MVP:              [████████████████████] 12/12 phases (shipped 2026-03-19)
 v1.0 Deployment:       [████████████████████]  2/2  phases (shipped 2026-03-20)
 v1.1 Intelligence Layer: [████████████████████]  8/8  phases (shipped 2026-03-22)
+v1.2 Visualization:    [████████████████████]  1/1  phases (shipped 2026-03-24)
 ```
 
 ## Phase Status
@@ -36,10 +37,11 @@ v1.1 Intelligence Layer: [██████████████████
 | 19 | Search, Filter & UI Cleanup | v1.1 | Done | 2026-03-22 |
 | 19.1 | Advanced Search with Tag Filtering | v1.1 | Done | 2026-03-22 |
 | 19.2 | Counter Entity Dropdowns | v1.1 | Done | 2026-03-22 |
+| 20 | Visualization Layers & Filter Independence | v1.2 | Done | 2026-03-24 |
 
 ## Current Focus
 
-Phase 19 (Search, Filter & UI Cleanup) complete including 19.1 and 19.2. v1.1 milestone shipped.
+Phase 20 (Visualization Layers & Filter Independence) complete. v1.2 milestone shipped.
 
 ## What's Been Built
 
@@ -88,6 +90,10 @@ Phase 19 (Search, Filter & UI Cleanup) complete including 19.1 and 19.2. v1.1 mi
 **Phase 19.1: Advanced Search with Tag Filtering** — Tag-based query language with ~25 prefixes (type:, site:, country:, near:, etc.), implicit OR evaluation, bidirectional sync between search bar and sidebar filters, two-stage autocomplete with live entity counts, chip row, syntax highlighting, cheat sheet popover. near: queries support site names and cities with proximity pin.
 
 **Phase 19.2: Counter Entity Dropdowns** — Click-to-expand counter rows showing individual entities with label + key metric, accordion behavior, fly-to-entity on click, proximity sorting, scrollable lists with range indicators. 851 tests passing.
+
+### v1.2 Visualization (Phase 20)
+
+**Phase 20: Visualization Layers & Filter Independence** — Toggleable visualization layers: geographic (elevation tinting, contour lines, feature labels), weather (temperature heatmap with bilinear interpolation, wind barbs, weather tooltips), threat density (HeatmapLayer with compound weight formula using type severity, media signal, fatalities, Goldstein hostility, and temporal decay). Layer stacking with threat tooltip priority over weather. Entity filter toggles (flights, ships, events, sites) operate independently from visualization layers. FilterButton and SliderToggle components for filter panel redesign. Political overlay planned but deferred.
 
 ## Blockers
 

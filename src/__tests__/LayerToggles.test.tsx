@@ -22,22 +22,23 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 4 active toggle rows and 2 coming-soon rows', () => {
+  it('renders 3 active toggle rows and 4 coming-soon rows', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
-    expect(switches).toHaveLength(4);
+    expect(switches).toHaveLength(3);
     // Coming-soon layers render as plain divs, not switches
-    expect(screen.getAllByText('soon')).toHaveLength(2);
+    expect(screen.getAllByText('soon')).toHaveLength(4);
   });
 
   it('renders toggle rows with correct labels', () => {
     render(<LayerTogglesSlot />);
     expect(screen.getByText('Geographic')).toBeTruthy();
-    expect(screen.getByText('Weather')).toBeTruthy();
-    expect(screen.getByText('Threat Heatmap')).toBeTruthy();
+    expect(screen.getByText('Climate')).toBeTruthy();
+    expect(screen.getByText('Threat Density')).toBeTruthy();
     expect(screen.getByText('Political')).toBeTruthy();
+    expect(screen.getByText('Ethnic')).toBeTruthy();
     expect(screen.getByText('Satellite')).toBeTruthy();
-    expect(screen.getByText('Infrastructure')).toBeTruthy();
+    expect(screen.getByText('Water')).toBeTruthy();
   });
 
   it('clicking a toggle calls toggleLayer', () => {
@@ -68,10 +69,11 @@ describe('LayerTogglesSlot', () => {
     expect(geoToggle.className).toContain('opacity-100');
   });
 
-  it('clicking political toggle calls toggleLayer', () => {
+  it('coming-soon layers are not clickable toggles', () => {
     render(<LayerTogglesSlot />);
-    const politicalToggle = screen.getByLabelText('Toggle Political layer');
-    fireEvent.click(politicalToggle);
-    expect(useLayerStore.getState().activeLayers.has('political')).toBe(true);
+    // Political is now coming-soon, should not have a switch role
+    const switches = screen.getAllByRole('switch');
+    const switchLabels = switches.map((s) => s.getAttribute('aria-label'));
+    expect(switchLabels).not.toContain('Toggle Political layer');
   });
 });

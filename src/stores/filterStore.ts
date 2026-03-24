@@ -74,6 +74,17 @@ export interface FilterState {
   // Site type toggles
   enabledSiteTypes: SiteType[];
 
+  // Visibility toggles (independent — each one gates its category independently)
+  showFlights: boolean;
+  showShips: boolean;
+  showAirstrikes: boolean;
+  showGroundCombat: boolean;
+  showTargeted: boolean;
+  showUnidentified: boolean;
+  showGroundTraffic: boolean;
+  showHealthySites: boolean;
+  showAttackedSites: boolean;
+
   // Actions
   setFlightCountries: (countries: string[]) => void;
   addFlightCountry: (country: string) => void;
@@ -105,6 +116,17 @@ export interface FilterState {
   setShowLowSeverity: (v: boolean) => void;
   setEnabledSiteTypes: (types: SiteType[]) => void;
   toggleSiteType: (type: SiteType) => void;
+
+  // Visibility toggle actions
+  toggleShowFlights: () => void;
+  toggleShowShips: () => void;
+  toggleShowAirstrikes: () => void;
+  toggleShowGroundCombat: () => void;
+  toggleShowTargeted: () => void;
+  toggleShowUnidentified: () => void;
+  toggleShowGroundTraffic: () => void;
+  toggleShowHealthySites: () => void;
+  toggleShowAttackedSites: () => void;
 }
 
 const DEFAULTS = {
@@ -139,6 +161,17 @@ const DEFAULTS = {
 
   // Site type toggles
   enabledSiteTypes: DEFAULT_SITE_TYPES as SiteType[],
+
+  // Visibility toggles (all default ON)
+  showFlights: true,
+  showShips: true,
+  showAirstrikes: true,
+  showGroundCombat: true,
+  showTargeted: true,
+  showUnidentified: true,
+  showGroundTraffic: true,
+  showHealthySites: true,
+  showAttackedSites: true,
 };
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
@@ -271,4 +304,15 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
         : [...s.enabledSiteTypes, type],
     };
   }),
+
+  // Visibility toggles
+  toggleShowFlights: () => set((s) => ({ showFlights: !s.showFlights })),
+  toggleShowShips: () => set((s) => ({ showShips: !s.showShips })),
+  toggleShowAirstrikes: () => set((s) => ({ showAirstrikes: !s.showAirstrikes })),
+  toggleShowGroundCombat: () => set((s) => ({ showGroundCombat: !s.showGroundCombat })),
+  toggleShowTargeted: () => set((s) => ({ showTargeted: !s.showTargeted })),
+  toggleShowUnidentified: () => set((s) => ({ showUnidentified: !s.showUnidentified })),
+  toggleShowGroundTraffic: () => set((s) => ({ showGroundTraffic: !s.showGroundTraffic })),
+  toggleShowHealthySites: () => set((s) => ({ showHealthySites: !s.showHealthySites })),
+  toggleShowAttackedSites: () => set((s) => ({ showAttackedSites: !s.showAttackedSites })),
 }));

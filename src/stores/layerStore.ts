@@ -5,17 +5,20 @@ export type VisualizationLayerId =
   | 'weather'
   | 'threat'
   | 'political'
+  | 'ethnic'
   | 'satellite'
-  | 'infrastructure';
+  | 'water';
 
 interface LayerState {
   activeLayers: Set<VisualizationLayerId>;
+  loadingLayers: Set<VisualizationLayerId>;
   toggleLayer: (id: VisualizationLayerId) => void;
   resetLayers: () => void;
 }
 
 export const useLayerStore = create<LayerState>()((set) => ({
   activeLayers: new Set<VisualizationLayerId>(),
+  loadingLayers: new Set<VisualizationLayerId>(),
   toggleLayer: (id) =>
     set((state) => {
       const next = new Set(state.activeLayers);

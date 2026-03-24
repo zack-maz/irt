@@ -25,17 +25,17 @@ export function GeographicOverlay() {
         type={'color-relief' as any}
         source="terrain-dem"
         paint={{
-          'color-relief-opacity': 0.25,
+          'color-relief-opacity': 0.5,
           'color-relief-color': [
             'interpolate',
             ['linear'],
             ['elevation'],
             0,
-            '#1a1a2e',
+            '#000000',
             1500,
             '#334155',
             4000,
-            '#94a3b8',
+            '#cccccc',
           ],
         }}
       />
@@ -53,10 +53,10 @@ export function GeographicOverlay() {
         source="contour-source"
         source-layer="contours"
         paint={{
-          'line-color': 'rgba(255, 255, 255, 0.18)',
-          'line-width': ['case', ['>', ['get', 'level'], 0], 1.2, 0.6],
+          'line-color': 'rgba(255, 255, 255, 0.45)',
+          'line-width': ['case', ['>', ['get', 'level'], 0], 0.8, 0.2],
         }}
-        minzoom={7}
+        minzoom={4}
       />
 
       {/* Geographic feature labels (GeoJSON point labels) */}

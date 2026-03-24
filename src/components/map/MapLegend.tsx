@@ -11,9 +11,27 @@ export interface LegendConfig {
 
 /**
  * Registry of legend configurations for visualization layers.
- * Sub-phases 20.1-20.5 will register their legends here.
+ * Uses a Map keyed by layerId to prevent duplicates during HMR re-evaluation.
  */
-export const LEGEND_REGISTRY: LegendConfig[] = [];
+const _registry = new Map<VisualizationLayerId, LegendConfig>();
+
+export const LEGEND_REGISTRY = {
+  push(config: LegendConfig) {
+    _registry.set(config.layerId, config);
+  },
+  filter(fn: (config: LegendConfig) => boolean): LegendConfig[] {
+    return Array.from(_registry.values()).filter(fn);
+  },
+  find(fn: (config: LegendConfig) => boolean): LegendConfig | undefined {
+    for (const config of _registry.values()) {
+      if (fn(config)) return config;
+    }
+    return undefined;
+  },
+  get length(): number {
+    return _registry.size;
+  },
+};
 
 // Geographic elevation legend (Phase 20.1)
 LEGEND_REGISTRY.push({
@@ -35,20 +53,6 @@ LEGEND_REGISTRY.push({
     { color: 'rgb(0, 200, 100)', label: '15C / 59F' },
     { color: 'rgb(255, 220, 0)', label: '30C / 86F' },
     { color: 'rgb(255, 50, 0)', label: '45C / 113F' },
-  ],
-});
-
-// Political faction legend (Phase 20.3 - discrete swatches)
-LEGEND_REGISTRY.push({
-  layerId: 'political',
-  title: 'Factions',
-  mode: 'discrete',
-  colorStops: [
-    { color: '#ef4444', label: 'Iran Axis' },
-    { color: '#3b82f6', label: 'US-Aligned' },
-    { color: '#f59e0b', label: 'Turkic Bloc' },
-    { color: '#9ca3af', label: 'Contested' },
-    { color: '#6b7280', label: 'Neutral' },
   ],
 });
 

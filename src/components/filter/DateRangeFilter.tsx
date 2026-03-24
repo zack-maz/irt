@@ -133,7 +133,7 @@ export function DateRangeFilter({
   );
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1">
       {/* Granularity toggle */}
       <div className="flex gap-1">
         {GRANULARITY_LABELS.map(({ key, label }) => (

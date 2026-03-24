@@ -29,37 +29,14 @@ describe('MapLegend', () => {
     expect(getByText('45C / 113F')).toBeTruthy();
   });
 
-  it('exports LegendConfig interface and LEGEND_REGISTRY array', () => {
+  it('exports LEGEND_REGISTRY with registered legends', () => {
     expect(LEGEND_REGISTRY).toBeDefined();
-    expect(Array.isArray(LEGEND_REGISTRY)).toBe(true);
     expect(LEGEND_REGISTRY.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders faction legend with discrete swatches when political layer is active', () => {
-    useLayerStore.setState({ activeLayers: new Set(['political']) });
-    const { getByText } = render(<MapLegend />);
-    expect(getByText('Factions')).toBeTruthy();
-    expect(getByText('Iran Axis')).toBeTruthy();
-    expect(getByText('US-Aligned')).toBeTruthy();
-    expect(getByText('Turkic Bloc')).toBeTruthy();
-    expect(getByText('Contested')).toBeTruthy();
-    expect(getByText('Neutral')).toBeTruthy();
-  });
-
-  it('discrete legend shows colored dots not gradient bar', () => {
+  it('renders nothing when political layer is active (no legend registered)', () => {
     useLayerStore.setState({ activeLayers: new Set(['political']) });
     const { container } = render(<MapLegend />);
-    // Discrete mode renders colored dots (rounded-full class)
-    const dots = container.querySelectorAll('.rounded-full');
-    expect(dots.length).toBeGreaterThanOrEqual(5);
-    // No gradient bar should be rendered for the political legend
-    const allDivs = container.querySelectorAll('div');
-    let hasGradient = false;
-    allDivs.forEach((div) => {
-      if (div.style.background?.includes('linear-gradient')) {
-        hasGradient = true;
-      }
-    });
-    expect(hasGradient).toBe(false);
+    expect(container.firstChild).toBeNull();
   });
 });

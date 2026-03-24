@@ -120,6 +120,17 @@ export function useEntityLayers() {
   const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
   const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
 
+  // Visibility toggles (independent)
+  const showFlights = useFilterStore((s) => s.showFlights);
+  const showShips = useFilterStore((s) => s.showShips);
+  const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
+  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+  const showUnidentified = useFilterStore((s) => s.showUnidentified);
+  const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
+  const showHealthySites = useFilterStore((s) => s.showHealthySites);
+  const showAttackedSites = useFilterStore((s) => s.showAttackedSites);
+
   // Date range end for attack status computation (start is irrelevant -- once hit, stays hit)
   const dateEnd = useFilterStore((s) => s.dateEnd);
 
@@ -129,32 +140,46 @@ export function useEntityLayers() {
   // Active entity = hovered (preview) or selected (pinned)
   const activeId = hoveredEntityId ?? selectedEntityId;
 
-  // Filter flights by region only (exclude Greece); all sub-categories always visible
+  // Filter flights by region + independent visibility toggles
   const flights = useMemo(() => {
     return allFlights.filter((f) => {
       if (f.data.originCountry === 'Greece') return false;
       if (!isInRegion(f.lat, f.lng)) return false;
-      return true;
+      // Independent toggle logic: visible if ANY matching toggle is ON
+      const isUnid = f.data.unidentified;
+      const isGround = f.data.onGround;
+      if (isUnid && showUnidentified) return true;
+      if (isGround && !isUnid && showGroundTraffic) return true;
+      if (!isGround && !isUnid && showFlights) return true;
+      // Unidentified ground flight: either toggle
+      if (isUnid && isGround && showGroundTraffic) return true;
+      return false;
     });
-  }, [allFlights]);
+  }, [allFlights, showFlights, showUnidentified, showGroundTraffic]);
 
   const airstrikeEvents = useMemo(() =>
-    events
-      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
-      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
-    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
+    showAirstrikes
+      ? events
+          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
+          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
+      : [],
+    [events, showAirstrikes, showHighSeverity, showMediumSeverity, showLowSeverity]);
   const groundCombatEvents = useMemo(() =>
-    events
-      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
-      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
-    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
+    showGroundCombatToggle
+      ? events
+          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
+          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
+      : [],
+    [events, showGroundCombatToggle, showHighSeverity, showMediumSeverity, showLowSeverity]);
   const targetedEvents = useMemo(() =>
-    events
-      .filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
-      .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity)),
-    [events, showHighSeverity, showMediumSeverity, showLowSeverity]);
+    showTargetedToggle
+      ? events
+          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
+          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
+      : [],
+    [events, showTargetedToggle, showHighSeverity, showMediumSeverity, showLowSeverity]);
 
-  // Sites filtered by enabled types and proximity pin
+  // Sites filtered by enabled types, proximity pin, and healthy/attacked toggles
   const visibleSites = useMemo(() => {
     let filtered = sites.filter(s => enabledSiteTypes.includes(s.siteType));
     if (proximityPin) {
@@ -174,6 +199,15 @@ export function useEntityLayers() {
     }
     return map;
   }, [visibleSites, allEvents, dateEnd]);
+
+  // Filter sites by healthy/attacked toggles
+  const displaySites = useMemo(() => {
+    return visibleSites.filter((s) => {
+      const attacked = siteAttackMap.get(s.id) ?? false;
+      if (attacked) return showAttackedSites;
+      return showHealthySites;
+    });
+  }, [visibleSites, siteAttackMap, showAttackedSites, showHealthySites]);
 
   // Pulse animation state (always active for unidentified flights)
   const [pulseOpacity, setPulseOpacity] = useState(1.0);
@@ -212,10 +246,11 @@ export function useEntityLayers() {
     pickable: false,
   }), [proximityPin, proximityRadiusKm]);
 
-  // Filter ships to Middle East region (smooth elliptical boundary)
+  // Filter ships to Middle East region (smooth elliptical boundary) + visibility toggle
   const filteredShips = useMemo(() => {
+    if (!showShips) return [];
     return ships.filter((s) => isInRegion(s.lat, s.lng));
-  }, [ships]);
+  }, [ships, showShips]);
 
   // Ship layer (always visible)
   const shipLayer = useMemo(() => new IconLayer<ShipEntity>({
@@ -351,10 +386,10 @@ export function useEntityLayers() {
     },
   }), [flights, pulseOpacity, activeId, isFilterActive, matchedIds]);
 
-  // Site layer (always visible)
+  // Site layer (filtered by type + healthy/attacked toggles)
   const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
     id: 'site-icons',
-    data: visibleSites,
+    data: displaySites,
     iconAtlas: getIconAtlas(),
     iconMapping: ICON_MAPPING,
     getIcon: (d: SiteEntity) => SITE_ICON_MAP[d.siteType] ?? 'diamond',
@@ -374,7 +409,7 @@ export function useEntityLayers() {
     billboard: false,
     pickable: true,
     updateTriggers: { getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size] },
-  }), [visibleSites, activeId, siteAttackMap, isFilterActive, matchedIds]);
+  }), [displaySites, activeId, siteAttackMap, isFilterActive, matchedIds]);
 
   // Find active entity across all data sources
   const activeEntity = useMemo<MapEntity | SiteEntity | null>(() => {
@@ -382,9 +417,9 @@ export function useEntityLayers() {
     return flights.find((f) => f.id === activeId)
       ?? filteredShips.find((s) => s.id === activeId)
       ?? events.find((e) => e.id === activeId)
-      ?? visibleSites.find((s) => s.id === activeId)
+      ?? displaySites.find((s) => s.id === activeId)
       ?? null;
-  }, [activeId, flights, filteredShips, events, visibleSites]);
+  }, [activeId, flights, filteredShips, events, displaySites]);
 
   // Glow layer for active entity (hidden when filter active and entity not matched)
   type AnyEntity = MapEntity | SiteEntity;
