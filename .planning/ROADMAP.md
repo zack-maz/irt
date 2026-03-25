@@ -247,14 +247,21 @@ Plans:
 **Plans**: TBD
 
 ### Phase 21: Production Review & Deploy Sync
-**Goal**: v1.2 is verified end-to-end and deployed to production
+**Goal**: Harden the application for 1000+ concurrent users, comprehensive code polish, and deploy v1.2 to production
 **Depends on**: Phase 20
 **Requirements**: None (verification phase)
 **Success Criteria** (what must be TRUE):
   1. All features function correctly together in the deployed Vercel environment
   2. All overlay panels coexist without z-index or layout conflicts
   3. Redis command budget remains within free-tier limits under normal usage
-**Plans**: TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 21-01-PLAN.md -- Server middleware stack: helmet security, Cache-Control edge caching, per-endpoint rate limits, structured JSON logging
+- [ ] 21-02-PLAN.md -- Redis resilience & health: in-memory fallback with degraded flag, rich /health endpoint with per-source timestamps and budget estimate
+- [ ] 21-03-PLAN.md -- Bundle optimization & analytics: manualChunks vendor splitting, rollup-plugin-visualizer, @vercel/analytics, @vercel/speed-insights
+- [ ] 21-04-PLAN.md -- Code polish: migrate routes to cacheGetSafe, replace console.log with structured logger, fix pre-existing test failures, full codebase audit
+- [ ] 21-05-PLAN.md -- Deploy verification: smoke test script, cron health endpoint, env var audit, doc sync, production deploy with visual checkpoint
 
 ## Progress
 
@@ -289,4 +296,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
 | 20.2. Threat Heatmap Layer | 1/1 | Complete    | 2026-03-23 | - |
 | 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
-| 21. Production Review & Deploy Sync | v1.2 | 0/TBD | Not started | - |
+| 21. Production Review & Deploy Sync | v1.2 | 0/5 | Not started | - |
