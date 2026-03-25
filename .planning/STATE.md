@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: executing
-stopped_at: Completed 21-03-PLAN.md
-last_updated: "2026-03-25T15:25:07.682Z"
-last_activity: 2026-03-25 -- Completed Phase 21 Plan 03 (bundle optimization & analytics)
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-03-25T15:57:05.639Z"
+last_activity: 2026-03-25 -- Completed Phase 21 Plan 01 (server middleware hardening)
 progress:
   total_phases: 14
   completed_phases: 9
-  total_plans: 40
-  completed_plans: 35
+  total_plans: 34
+  completed_plans: 30
   percent: 88
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 21 (Production Review & Deploy Sync)
-Plan: 03 of 05 complete
+Plan: 01 of 05 complete (01, 03 done)
 Status: In progress
-Last activity: 2026-03-25 -- Completed Phase 21 Plan 03 (bundle optimization & analytics)
+Last activity: 2026-03-25 -- Completed Phase 21 Plan 01 (server middleware hardening)
 
 Progress: [█████████░] 88%
 
@@ -74,6 +74,7 @@ Progress: [█████████░] 88%
 | Phase 20.2 P01 | 10min | 2 tasks | 4 files |
 | Phase 20.3 P01 | 7min | 2 tasks | 5 files |
 | Phase 21 P03 | 3min | 2 tasks | 4 files |
+| Phase 21 P01 | 6min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -192,6 +193,9 @@ Progress: [█████████░] 88%
 - [Phase 20.3]: Discrete-swatch legend mode: LegendConfig.mode='discrete' renders colored dots with labels
 - [Phase 21]: Three vendor chunks (react, maplibre, deckgl) for independent browser cache invalidation
 - [Phase 21]: Vercel Analytics and SpeedInsights rendered as App-level siblings (no-op in dev/test)
+- [Phase 21]: createRateLimiter factory pattern for per-endpoint rate limit configuration
+- [Phase 21]: Helmet CSP whitelists map tiles, Vercel analytics, Open-Meteo, ArcGIS, CARTO domains
+- [Phase 21]: max-age=0 with s-maxage for CDN-only caching (browser always revalidates)
 
 ### Roadmap Evolution
 
@@ -213,6 +217,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:25:07.675Z
-Stopped at: Completed 21-03-PLAN.md
+Last session: 2026-03-25T15:57:01.865Z
+Stopped at: Completed 21-01-PLAN.md
 Resume file: None

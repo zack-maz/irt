@@ -254,7 +254,7 @@ Plans:
   1. All features function correctly together in the deployed Vercel environment
   2. All overlay panels coexist without z-index or layout conflicts
   3. Redis command budget remains within free-tier limits under normal usage
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] 21-01-PLAN.md -- Server middleware stack: helmet security, Cache-Control edge caching, per-endpoint rate limits, structured JSON logging
@@ -296,4 +296,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
 | 20.2. Threat Heatmap Layer | 1/1 | Complete    | 2026-03-23 | - |
 | 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
-| 21. Production Review & Deploy Sync | 1/5 | In Progress|  | - |
+| 21. Production Review & Deploy Sync | 2/5 | In Progress|  | - |
