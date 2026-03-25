@@ -92,11 +92,22 @@ describe('Health endpoint', () => {
  * Extract the first GET handler from an Express Router.
  * Express stores route layers in router.stack.
  */
+interface RouteLayer {
+  route?: {
+    methods: Record<string, boolean>;
+    stack: Array<{ handle: Function }>;
+  };
+}
+
 function extractHandler(router: ReturnType<typeof Router>) {
-  const stack = (router as unknown as { stack: Array<{ route?: { methods: Record<string, boolean>; stack: Array<{ handle: Function }> } }> }>).stack;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stack = (router as any).stack as RouteLayer[];
   for (const layer of stack) {
     if (layer.route?.methods.get) {
-      return layer.route.stack[0].handle as (req: import('express').Request, res: import('express').Response) => Promise<void>;
+      return layer.route.stack[0].handle as (
+        req: import('express').Request,
+        res: import('express').Response,
+      ) => Promise<void>;
     }
   }
   throw new Error('No GET handler found on router');

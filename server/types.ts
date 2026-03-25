@@ -81,6 +81,7 @@ export interface CacheResponse<T> {
   data: T;
   stale: boolean;
   lastFresh: number; // Unix ms of last successful fetch
+  degraded?: boolean; // true when serving from in-memory fallback (Redis unavailable)
 }
 
 export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'desalination' | 'port';

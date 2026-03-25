@@ -13,6 +13,9 @@ interface CacheEntry<T> {
   fetchedAt: number; // Unix ms
 }
 
+/** In-memory fallback cache for when Redis is unavailable */
+const memCache = new Map<string, { data: unknown; fetchedAt: number }>();
+
 /**
  * Read a cached value from Redis.
  *
@@ -54,4 +57,56 @@ export async function cacheSet<T>(
 export async function cacheDel(key: string): Promise<boolean> {
   const deleted = await redis.del(key);
   return deleted > 0;
+}
+
+/**
+ * Safe cache read with in-memory fallback.
+ *
+ * On Redis success: returns result and populates memCache.
+ * On Redis failure: returns memCache entry with `degraded: true`.
+ * On both miss: returns null.
+ */
+export async function cacheGetSafe<T>(
+  key: string,
+  logicalTtlMs: number,
+): Promise<CacheResponse<T> | null> {
+  try {
+    const result = await cacheGet<T>(key, logicalTtlMs);
+    if (result) {
+      // Populate memCache on success
+      memCache.set(key, { data: result.data, fetchedAt: result.lastFresh });
+    }
+    return result;
+  } catch {
+    // Redis failed -- try in-memory fallback
+    const mem = memCache.get(key);
+    if (mem) {
+      return {
+        data: mem.data as T,
+        stale: true,
+        lastFresh: mem.fetchedAt,
+        degraded: true,
+      };
+    }
+    return null;
+  }
+}
+
+/**
+ * Safe cache write to both Redis and in-memory fallback.
+ *
+ * Always writes to memCache regardless of Redis success.
+ */
+export async function cacheSetSafe<T>(
+  key: string,
+  data: T,
+  redisTtlSec: number,
+): Promise<void> {
+  // Always update memCache first
+  memCache.set(key, { data, fetchedAt: Date.now() });
+  try {
+    await cacheSet(key, data, redisTtlSec);
+  } catch {
+    // Swallow Redis error -- memCache is already updated
+  }
 }
