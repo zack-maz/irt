@@ -1,6 +1,18 @@
 # Iran Conflict Monitor
 
-A personal real-time intelligence dashboard for monitoring the Iran conflict. Displays a 2.5D map of the Greater Middle East with live flights, ships, and conflict events sourced from public APIs. Prioritizes concrete mathematical data — movement vectors, strike counts, timelines, force posture — over qualitative news reporting.
+A personal real-time intelligence dashboard for monitoring the Iran conflict. Displays a 2.5D map of the Greater Middle East with live flights, ships, conflict events, news, and infrastructure sites sourced from public APIs. Prioritizes concrete mathematical data -- movement vectors, strike counts, timelines, force posture -- over qualitative news reporting.
+
+## Features
+
+- **Live entity tracking** -- flights (3 sources: OpenSky, ADS-B Exchange, adsb.lol), ships (AISStream), conflict events (GDELT v2)
+- **Key infrastructure sites** -- nuclear, naval, oil, airbase, desalination, port facilities from OpenStreetMap
+- **News feed** -- GDELT DOC 2.0 + 5 RSS feeds with dedup/clustering and keyword filtering
+- **Notification center** -- severity-scored alerts with news correlation, proximity alerts for flights/ships near key sites
+- **Oil markets** -- Brent, WTI, XLE, USO, XOM with sparkline charts (Yahoo Finance)
+- **7 visualization layers** -- geographic (elevation contours), weather (temperature heatmap + wind barbs), threat density, political alignment, ethnic distribution, satellite, water stress
+- **Advanced search** -- Cmd+K with ~25 tag prefixes (type:, near:, callsign:, country:, etc.) and bidirectional filter sync
+- **Date range filtering** -- custom time window with granularity toggle (minute/hour/day)
+- **Detail panels** -- per-entity data with dual units, lost contact tracking, copy coordinates
 
 ## Quick Start
 
@@ -9,71 +21,70 @@ npm install
 npm run dev
 ```
 
-Opens at http://localhost:5173
+Opens frontend at http://localhost:5173, API server at http://localhost:3001.
 
-## Current State
+## Production
 
-Interactive 2.5D map of the Greater Middle East with live flights (3 sources), ships (AIS), conflict events (GDELT), news feed (GDELT DOC + RSS), key infrastructure sites (Overpass/OSM), and oil market prices (Yahoo Finance). Advanced tag-based search (Cmd+K) with ~25 filter prefixes and bidirectional sync to sidebar filters, counter entity dropdowns with fly-to, severity-scored notifications with proximity alerts, and a real-time status HUD. Deployed on Vercel with Upstash Redis cache. 851 tests passing.
+Deployed on Vercel with Upstash Redis cache.
 
-**Milestone:** v0.9 MVP shipped 2026-03-19 | v1.0 Deployment shipped 2026-03-20 | v1.1 Intelligence Layer shipped 2026-03-22
+```bash
+# Deploy
+vercel --prod
 
-## Tech Stack
+# Smoke test
+npx tsx scripts/smoke-test.ts https://your-app.vercel.app
+
+# Health check
+curl https://your-app.vercel.app/health
+```
+
+## Architecture
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TypeScript 5.9, Vite 6 |
-| Styling | Tailwind CSS v4 (dark theme, CSS-first @theme) |
+| Frontend | React 19, TypeScript 5.9, Vite 6, Tailwind CSS v4 |
 | State | Zustand 5 |
-| Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
-| Backend | Express 5 (API proxy, port 3001) |
-| Cache | Upstash Redis (serverless-compatible) |
-| Hosting | Vercel (serverless functions + CDN) |
-| Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, GDELT DOC, RSS, Overpass/OSM, Yahoo Finance |
-| Testing | Vitest + Testing Library |
+| Map | Deck.gl + MapLibre GL JS (2.5D terrain rendering) |
+| Backend | Express 5 (serverless functions on Vercel) |
+| Cache | Upstash Redis with graceful degradation (in-memory fallback) |
+| CDN | Vercel Edge with per-endpoint Cache-Control (s-maxage) |
+| Security | Helmet CSP, per-endpoint rate limiting, structured JSON logging |
+| Monitoring | /health endpoint with per-source freshness, cron health checks |
+| Bundle | 4 vendor chunks (react, maplibre, deckgl, app) for independent cache invalidation |
 
-## Project Structure
+## Data Sources
 
-```
-src/
-├── components/
-│   ├── layout/     # AppShell, overlay regions
-│   ├── map/        # BaseMap, overlays (compass, coords, vignette, loading)
-│   └── ui/         # Reusable UI components
-├── hooks/          # Custom hooks (useFlightPolling)
-├── stores/         # Zustand stores (mapStore, uiStore, flightStore)
-├── styles/         # Global CSS, animations
-├── types/          # TypeScript interfaces
-└── __tests__/      # Component and store tests
-server/
-├── adapters/       # OpenSky, ADS-B Exchange, adsb.lol, AISStream, GDELT, Overpass adapters
-├── cache/          # Upstash Redis cache module (cacheGet/cacheSet)
-├── routes/         # /api/flights, /api/ships, /api/events, /api/sites, /api/news, /api/markets, /api/sources
-├── middleware/      # Error handler, rate limiting
-├── __tests__/      # Adapter, cache, security, and type tests
-├── config.ts       # Environment-based configuration (graceful degradation)
-├── constants.ts    # Bbox, cache TTLs, polling intervals
-├── types.ts        # MapEntity discriminated union
-├── app.ts          # Express app factory (createApp)
-├── vercel.ts       # Vercel serverless entry point
-└── index.ts        # Local dev server entry point
-```
-
-## Design
-
-- **Theme:** Dark background, white grid, restrained color accents
-- **Colors:** Blue (naval/friendly), Red (hostile/strikes), Green (safe), Yellow (warning)
-- **Map:** CARTO Dark Matter base, 3D terrain with 3x exaggeration, 50-degree pitch
-- **News:** Non-statistical content hidden by default
+| Source | Type | Polling |
+|--------|------|---------|
+| OpenSky / ADS-B Exchange / adsb.lol | Flights | 5-260s |
+| AISStream | Ships (AIS) | 30s |
+| GDELT v2 | Conflict events | 15min |
+| GDELT DOC 2.0 + RSS | News articles | 15min |
+| Overpass/OSM | Infrastructure sites | One-time |
+| Yahoo Finance | Oil markets | 60s |
+| Open-Meteo | Weather | 10min |
 
 ## Testing
 
 ```bash
-npx vitest run              # Run all tests (851 tests)
+npx vitest run              # Run all tests (859 tests)
 npx vitest run src/         # Frontend tests only
 npx vitest run server/      # Server tests only
-npx vitest run --watch      # Watch mode
 ```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| UPSTASH_REDIS_REST_URL | Yes | Upstash Redis REST endpoint |
+| UPSTASH_REDIS_REST_TOKEN | Yes | Upstash Redis auth token |
+| CORS_ORIGIN | No | CORS origin (defaults to *) |
+| PORT | No | Server port (defaults to 3001) |
+| OPENSKY_CLIENT_ID | No | OpenSky API credentials |
+| OPENSKY_CLIENT_SECRET | No | OpenSky API credentials |
+| ADSB_EXCHANGE_API_KEY | No | ADS-B Exchange RapidAPI key |
+| AISSTREAM_API_KEY | No | AISStream WebSocket API key |
 
 ## License
 
-Private — personal tool.
+Private -- personal tool.

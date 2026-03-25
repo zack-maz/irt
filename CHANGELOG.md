@@ -4,7 +4,28 @@ All notable changes to the Iran Conflict Monitor project.
 
 ## [Unreleased]
 
-## [v1.2.0] - 2026-03-24
+## [v1.2.0] - 2026-03-25
+
+### Phase 21: Production Hardening & Deploy
+
+#### Added
+- Helmet security headers with Content-Security-Policy whitelist for map tiles, analytics, and API domains
+- Per-endpoint Cache-Control middleware (`max-age=0, s-maxage=N` for CDN-only caching)
+- Per-endpoint rate limiting via `createRateLimiter` factory (flights 30/min, events 10/min, etc.)
+- Structured JSON logging (`server/lib/logger.ts`) replacing all console calls in server code
+- Request logging middleware with method, path, status, and duration
+- Redis graceful degradation: `cacheGetSafe`/`cacheSetSafe` with in-memory fallback on Redis failure
+- Rich `/health` endpoint with Redis latency, per-source freshness timestamps, and command estimates
+- Cron health endpoint (`/api/cron/health`) with stale source warnings, triggered every 6h via Vercel cron
+- Production smoke test script (`scripts/smoke-test.ts`) validating all 9 endpoints
+- Vercel Analytics and SpeedInsights integration
+- 4 vendor chunks (react, maplibre, deckgl, app) for independent browser cache invalidation
+
+#### Changed
+- All 7 data routes migrated to `cacheGetSafe`/`cacheSetSafe` for Redis graceful degradation
+- All server adapter console calls replaced with structured `log()` calls
+- Bundle splitting: vendor-react (~200KB), vendor-maplibre (~800KB), vendor-deckgl (~700KB), app
+- 859 tests passing
 
 ### Phase 20: Visualization Layers & Filter Independence
 

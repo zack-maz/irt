@@ -1,7 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
+  "crons": [
+    { "path": "/api/cron/health", "schedule": "0 */6 * * *" }
+  ],
   "rewrites": [
+    { "source": "/api/cron/:path*", "destination": "/api/vercel-entry" },
     { "source": "/api/:path*", "destination": "/api/vercel-entry" },
     { "source": "/health", "destination": "/api/vercel-entry" },
     { "source": "/(.*)", "destination": "/index.html" }
