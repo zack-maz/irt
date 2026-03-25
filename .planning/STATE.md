@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: executing
-stopped_at: Phase 21 context gathered
-last_updated: "2026-03-25T02:37:53.535Z"
-last_activity: 2026-03-23 -- Completed Phase 20.3 Plan 01 (political data & infrastructure)
+stopped_at: Completed 21-03-PLAN.md
+last_updated: "2026-03-25T15:25:07.682Z"
+last_activity: 2026-03-25 -- Completed Phase 21 Plan 03 (bundle optimization & analytics)
 progress:
   total_phases: 14
   completed_phases: 9
-  total_plans: 29
-  completed_plans: 28
-  percent: 97
+  total_plans: 40
+  completed_plans: 35
+  percent: 88
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 20.3 Political Boundaries Layer
+**Current focus:** Phase 21 Production Review & Deploy Sync
 
 ## Current Position
 
-Phase: 20.3 (Political Boundaries Layer Inserted)
-Plan: 01 of 02 complete
+Phase: 21 (Production Review & Deploy Sync)
+Plan: 03 of 05 complete
 Status: In progress
-Last activity: 2026-03-23 -- Completed Phase 20.3 Plan 01 (political data & infrastructure)
+Last activity: 2026-03-25 -- Completed Phase 21 Plan 03 (bundle optimization & analytics)
 
-Progress: [██████████] 97%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████████] 97%
 | Phase 20.1 P03 | 6min | 2 tasks | 16 files |
 | Phase 20.2 P01 | 10min | 2 tasks | 4 files |
 | Phase 20.3 P01 | 7min | 2 tasks | 5 files |
+| Phase 21 P03 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -189,6 +190,8 @@ Progress: [██████████] 97%
 - [Phase 20.3]: Natural Earth 110m coordinates rounded to 2dp for bundle size reduction (51KB)
 - [Phase 20.3]: Canvas-generated fill patterns via createHatchPattern/createDualHatchPattern returning ImageData
 - [Phase 20.3]: Discrete-swatch legend mode: LegendConfig.mode='discrete' renders colored dots with labels
+- [Phase 21]: Three vendor chunks (react, maplibre, deckgl) for independent browser cache invalidation
+- [Phase 21]: Vercel Analytics and SpeedInsights rendered as App-level siblings (no-op in dev/test)
 
 ### Roadmap Evolution
 
@@ -210,6 +213,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-25T02:37:53.527Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-production-review-deploy-sync/21-CONTEXT.md
+Last session: 2026-03-25T15:25:07.675Z
+Stopped at: Completed 21-03-PLAN.md
+Resume file: None
