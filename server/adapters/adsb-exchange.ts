@@ -3,6 +3,7 @@ import type { FlightEntity } from '../types.js';
 import { IRAN_CENTER, ADSB_RADIUS_NM } from '../constants.js';
 import { normalizeAircraft } from './adsb-v2-normalize.js';
 import type { AdsbResponse } from './adsb-v2-normalize.js';
+import { log } from '../lib/logger.js';
 
 const RAPIDAPI_HOST = 'adsbexchange-com1.p.rapidapi.com';
 
@@ -38,6 +39,6 @@ export async function fetchFlights(): Promise<FlightEntity[]> {
     .map(normalizeAircraft)
     .filter((f): f is FlightEntity => f !== null);
 
-  console.log(`[adsb-exchange] fetched ${flights.length} flights in ${Date.now() - start}ms`);
+  log({ level: 'info', message: `[adsb-exchange] fetched ${flights.length} flights in ${Date.now() - start}ms` });
   return flights;
 }

@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
 import { fetchFlights as fetchAdsbExchange } from '../adapters/adsb-exchange.js';
 import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
@@ -54,7 +55,7 @@ flightsRouter.get('/', async (req, res) => {
   }
 
   // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
-  const cached = await cacheGet<FlightEntity[]>(cacheKey, logicalTtl);
+  const cached = await cacheGetSafe<FlightEntity[]>(cacheKey, logicalTtl);
   if (cached && !cached.stale) {
     return res.json(cached);
   }
@@ -62,10 +63,10 @@ flightsRouter.get('/', async (req, res) => {
   try {
     const flights = await getFetcher(source)();
 
-    await cacheSet(cacheKey, flights, redisTtl);
+    await cacheSetSafe(cacheKey, flights, redisTtl);
     res.json({ data: flights, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    console.error(`[flights:${source}] upstream error:`, (err as Error).message);
+    log({ level: 'error', message: `[flights:${source}] upstream error: ${(err as Error).message}` });
 
     // Distinguish rate limit errors from generic errors
     if (err instanceof RateLimitError) {

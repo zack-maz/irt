@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet, redis } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe, redis } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
 import { WAR_START, CACHE_TTL } from '../constants.js';
 import type { ConflictEventEntity } from '../types.js';
@@ -37,7 +38,7 @@ eventsRouter.get('/', async (req, res) => {
   // Check cache first (skip on forced backfill)
   const cached = forceBackfill
     ? null
-    : await cacheGet<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
+    : await cacheGetSafe<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
 
   if (cached && !cached.stale) {
     return res.json(cached);
@@ -64,9 +65,9 @@ eventsRouter.get('/', async (req, res) => {
           eventMap.set(event.id, event);
         }
         await redis.set(BACKFILL_KEY, Date.now(), { ex: REDIS_TTL_SEC });
-        console.log(`[events] backfill: merged ${backfillData.length} historical events`);
+        log({ level: 'info', message: `[events] backfill: merged ${backfillData.length} historical events` });
       } catch (backfillErr) {
-        console.warn('[events] backfill failed (non-fatal):', (backfillErr as Error).message);
+        log({ level: 'warn', message: `[events] backfill failed (non-fatal): ${(backfillErr as Error).message}` });
       }
     }
 
@@ -82,10 +83,10 @@ eventsRouter.get('/', async (req, res) => {
     }
 
     const merged = Array.from(eventMap.values());
-    await cacheSet(EVENTS_KEY, merged, REDIS_TTL_SEC);
+    await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
     res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    console.error('[events] upstream error:', (err as Error).message);
+    log({ level: 'error', message: `[events] upstream error: ${(err as Error).message}` });
 
     if (cached) {
       // Prune stale entries even on error

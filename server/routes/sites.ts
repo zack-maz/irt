@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { fetchSites } from '../adapters/overpass.js';
 import { SITES_CACHE_TTL } from '../constants.js';
 import type { SiteEntity } from '../types.js';
@@ -17,7 +18,7 @@ export const sitesRouter = Router();
 
 sitesRouter.get('/', async (req, res) => {
   const forceRefresh = req.query.refresh === 'true';
-  const cached = await cacheGet<SiteEntity[]>(SITES_KEY, LOGICAL_TTL_MS);
+  const cached = await cacheGetSafe<SiteEntity[]>(SITES_KEY, LOGICAL_TTL_MS);
 
   if (cached && !cached.stale && !forceRefresh) {
     return res.json(cached);
@@ -25,10 +26,10 @@ sitesRouter.get('/', async (req, res) => {
 
   try {
     const sites = await fetchSites();
-    await cacheSet(SITES_KEY, sites, REDIS_TTL_SEC);
+    await cacheSetSafe(SITES_KEY, sites, REDIS_TTL_SEC);
     res.json({ data: sites, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    console.error('[sites] Overpass error:', (err as Error).message);
+    log({ level: 'error', message: `[sites] Overpass error: ${(err as Error).message}` });
     if (cached) {
       res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
     } else {

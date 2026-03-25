@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { collectShips } from '../adapters/aisstream.js';
 import type { ShipEntity } from '../types.js';
 
@@ -11,7 +12,7 @@ const REDIS_TTL_SEC = 300; // 5min -- 10x of 30s logical TTL
 const STALE_THRESHOLD_MS = 600_000; // 10 min -- prune ships not seen in 10 min
 
 shipsRouter.get('/', async (_req, res) => {
-  const cached = await cacheGet<ShipEntity[]>(SHIPS_KEY, LOGICAL_TTL_MS);
+  const cached = await cacheGetSafe<ShipEntity[]>(SHIPS_KEY, LOGICAL_TTL_MS);
 
   // Fresh cache hit -- return immediately
   if (cached && !cached.stale) {
@@ -42,10 +43,10 @@ shipsRouter.get('/', async (_req, res) => {
     }
 
     const merged = Array.from(shipMap.values());
-    await cacheSet(SHIPS_KEY, merged, REDIS_TTL_SEC);
+    await cacheSetSafe(SHIPS_KEY, merged, REDIS_TTL_SEC);
     res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    console.error('[ships] collectShips error:', (err as Error).message);
+    log({ level: 'error', message: `[ships] collectShips error: ${(err as Error).message}` });
     if (cached) {
       res.json({ ...cached, stale: true });
     } else {

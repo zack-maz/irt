@@ -114,21 +114,25 @@ const mockRedisSet = vi.fn(async (key: string, value: unknown, _opts?: unknown) 
   rawRedisStore.set(key, value);
 });
 
+const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+  if (!entry) return null;
+  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+});
+const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+  redisStore.set(key, { data, fetchedAt: Date.now() });
+});
 vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: (...args: unknown[]) => mockRedisGet(...(args as [string])),
     set: (...args: unknown[]) => mockRedisSet(...(args as [string, unknown, unknown?])),
     ping: vi.fn(async () => 'PONG'),
   },
-  cacheGet: vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-    if (!entry) return null;
-    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-  }),
-  cacheSet: vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-    redisStore.set(key, { data, fetchedAt: Date.now() });
-  }),
+  cacheGet: _mockCacheGet,
+  cacheSet: _mockCacheSet,
+  cacheGetSafe: _mockCacheGet,
+  cacheSetSafe: _mockCacheSet,
 }));
 
 describe('Events Route (Redis accumulator)', () => {

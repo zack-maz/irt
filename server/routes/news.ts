@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { fetchGdeltArticles } from '../adapters/gdelt-doc.js';
 import { fetchAllRssFeeds } from '../adapters/rss.js';
 import { filterConflictArticles } from '../lib/newsFilter.js';
@@ -22,7 +23,7 @@ newsRouter.get('/', async (req, res) => {
   // 1. Check cache first (skip on force refresh)
   const cached = forceRefresh
     ? null
-    : await cacheGet<NewsCluster[]>(NEWS_FEED_KEY, NEWS_CACHE_TTL);
+    : await cacheGetSafe<NewsCluster[]>(NEWS_FEED_KEY, NEWS_CACHE_TTL);
   if (cached && !cached.stale) {
     return res.json(cached);
   }
@@ -32,7 +33,7 @@ newsRouter.get('/', async (req, res) => {
     const [gdeltArticles, rssArticles] = await Promise.all([
       fetchGdeltArticles(),
       fetchAllRssFeeds().catch((err) => {
-        console.warn('[news] RSS fetch failed (non-fatal):', (err as Error).message);
+        log({ level: 'warn', message: `[news] RSS fetch failed (non-fatal): ${(err as Error).message}` });
         return [] as NewsArticle[];
       }),
     ]);
@@ -65,18 +66,16 @@ newsRouter.get('/', async (req, res) => {
     clusters = clusters.filter((c) => c.lastUpdated >= cutoff);
 
     // 8. Cache merged feed
-    await cacheSet(NEWS_FEED_KEY, clusters, NEWS_REDIS_TTL_SEC);
+    await cacheSetSafe(NEWS_FEED_KEY, clusters, NEWS_REDIS_TTL_SEC);
 
     const gdeltCount = gdeltArticles.length;
     const rssCount = rssArticles.length;
-    console.log(
-      `[news] fetched: ${gdeltCount} GDELT + ${rssCount} RSS, ${clusters.length} clusters after filter/dedup`,
-    );
+    log({ level: 'info', message: `[news] fetched: ${gdeltCount} GDELT + ${rssCount} RSS, ${clusters.length} clusters after filter/dedup` });
 
     // 9. Return response
     res.json({ data: clusters, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    console.error('[news] upstream error:', (err as Error).message);
+    log({ level: 'error', message: `[news] upstream error: ${(err as Error).message}` });
 
     // Fall back to stale cache if available
     if (cached) {

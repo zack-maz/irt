@@ -79,17 +79,21 @@ vi.mock('../adapters/gdelt.js', () => ({
 }));
 
 // Mock Redis cache module with in-memory store
+const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+  if (!entry) return null;
+  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+});
+const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+  redisStore.set(key, { data, fetchedAt: Date.now() });
+});
 vi.mock('../cache/redis.js', () => ({
   redis: { ping: vi.fn(async () => 'PONG') },
-  cacheGet: vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-    if (!entry) return null;
-    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-  }),
-  cacheSet: vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-    redisStore.set(key, { data, fetchedAt: Date.now() });
-  }),
+  cacheGet: _mockCacheGet,
+  cacheSet: _mockCacheSet,
+  cacheGetSafe: _mockCacheGet,
+  cacheSetSafe: _mockCacheSet,
 }));
 
 let server: Server;

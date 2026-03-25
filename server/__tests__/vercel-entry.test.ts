@@ -58,10 +58,14 @@ vi.mock('../adapters/gdelt.js', () => ({
 }));
 
 // Mock Redis cache module
+const _mockCacheGet = vi.fn(async () => null);
+const _mockCacheSet = vi.fn(async () => undefined);
 vi.mock('../cache/redis.js', () => ({
   redis: { ping: vi.fn(async () => 'PONG') },
-  cacheGet: vi.fn(async () => null),
-  cacheSet: vi.fn(async () => undefined),
+  cacheGet: _mockCacheGet,
+  cacheSet: _mockCacheSet,
+  cacheGetSafe: _mockCacheGet,
+  cacheSetSafe: _mockCacheSet,
 }));
 
 let server: Server;

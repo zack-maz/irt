@@ -1,6 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { NewsArticle } from '../types.js';
 import { hashUrl } from '../lib/newsClustering.js';
+import { log } from '../lib/logger.js';
 
 /** Strip HTML tags and trim whitespace */
 function stripHtml(html: string): string {
@@ -95,7 +96,7 @@ export async function fetchAllRssFeeds(): Promise<NewsArticle[]> {
     if (result.status === 'fulfilled') {
       articles.push(...result.value);
     } else {
-      console.warn(`[rss] feed fetch failed: ${result.reason}`);
+      log({ level: 'warn', message: `[rss] feed fetch failed: ${result.reason}` });
     }
   }
 

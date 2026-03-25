@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cacheGet, cacheSet } from '../cache/redis.js';
+import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
+import { log } from '../lib/logger.js';
 import { fetchMarkets, isValidRange } from '../adapters/yahoo-finance.js';
 import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../constants.js';
 import type { MarketQuote } from '../types.js';
@@ -13,7 +14,7 @@ marketsRouter.get('/', async (req, res) => {
   const cacheKey = `markets:yahoo:${range}`;
 
   // 1. Check cache first
-  const cached = await cacheGet<MarketQuote[]>(cacheKey, MARKETS_CACHE_TTL);
+  const cached = await cacheGetSafe<MarketQuote[]>(cacheKey, MARKETS_CACHE_TTL);
   if (cached && !cached.stale) {
     return res.json(cached);
   }
@@ -24,17 +25,15 @@ marketsRouter.get('/', async (req, res) => {
 
     if (quotes.length > 0) {
       // 3. Cache the fresh data
-      await cacheSet(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
+      await cacheSetSafe(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
 
-      console.log(
-        `[markets] fetched ${quotes.length}/${5} tickers (${range}): ${quotes.map((q) => q.symbol).join(', ')}`,
-      );
+      log({ level: 'info', message: `[markets] fetched ${quotes.length}/${5} tickers (${range}): ${quotes.map((q) => q.symbol).join(', ')}` });
 
       // 4. Return fresh response
       res.json({ data: quotes, stale: false, lastFresh: Date.now() });
     } else if (cached) {
       // All tickers failed but we have stale cache
-      console.warn('[markets] all tickers failed, serving stale cache');
+      log({ level: 'warn', message: '[markets] all tickers failed, serving stale cache' });
       res.json({
         data: cached.data,
         stale: true,
@@ -42,11 +41,11 @@ marketsRouter.get('/', async (req, res) => {
       });
     } else {
       // No data at all
-      console.error('[markets] all tickers failed with no cache available');
+      log({ level: 'error', message: '[markets] all tickers failed with no cache available' });
       res.status(502).json({ error: 'No market data available' });
     }
   } catch (err) {
-    console.error('[markets] upstream error:', (err as Error).message);
+    log({ level: 'error', message: `[markets] upstream error: ${(err as Error).message}` });
 
     // Fall back to stale cache if available
     if (cached) {

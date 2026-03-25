@@ -1,5 +1,6 @@
 import AdmZip from 'adm-zip';
 import type { ConflictEventEntity } from '../types.js';
+import { log } from '../lib/logger.js';
 
 // GDELT v2 lastupdate.txt endpoint (HTTP, NOT HTTPS -- TLS cert issues)
 const GDELT_LASTUPDATE_URL =
@@ -250,9 +251,7 @@ export async function fetchEvents(): Promise<ConflictEventEntity[]> {
   const csv = await downloadAndUnzip(exportUrl);
   const events = parseAndFilter(csv);
 
-  console.log(
-    `[gdelt] fetched ${events.length} events in ${Date.now() - start}ms`,
-  );
+  log({ level: 'info', message: `[gdelt] fetched ${events.length} events in ${Date.now() - start}ms` });
   return events;
 }
 
@@ -294,7 +293,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   const start = Date.now();
 
   const urls = generateBackfillUrls(fromTs, toTs);
-  console.log(`[gdelt] backfill: ${urls.length} files for ${days} days (4/day sampling)`);
+  log({ level: 'info', message: `[gdelt] backfill: ${urls.length} files for ${days} days (4/day sampling)` });
 
   const merged = new Map<string, ConflictEventEntity>();
   const BATCH_SIZE = 5;
@@ -321,8 +320,6 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   }
 
   const events = Array.from(merged.values());
-  console.log(
-    `[gdelt] backfill: loaded ${events.length} events from ${urls.length} files in ${Date.now() - start}ms`,
-  );
+  log({ level: 'info', message: `[gdelt] backfill: loaded ${events.length} events from ${urls.length} files in ${Date.now() - start}ms` });
   return events;
 }

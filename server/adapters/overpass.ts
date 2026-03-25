@@ -1,4 +1,5 @@
 import type { SiteEntity, SiteType } from '../types.js';
+import { log } from '../lib/logger.js';
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const OVERPASS_FALLBACK = 'https://overpass.private.coffee/api/interpreter';
@@ -141,7 +142,7 @@ export async function fetchSites(): Promise<SiteEntity[]> {
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (!res.ok) {
-        console.warn(`[overpass] ${url} returned ${res.status}`);
+        log({ level: 'warn', message: `[overpass] ${url} returned ${res.status}` });
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
@@ -169,7 +170,7 @@ export async function fetchSites(): Promise<SiteEntity[]> {
         return true;
       });
     } catch (err) {
-      console.warn(`[overpass] ${url} failed:`, (err as Error).message);
+      log({ level: 'warn', message: `[overpass] ${url} failed: ${(err as Error).message}` });
     }
   }
   throw new Error('All Overpass API instances failed');
