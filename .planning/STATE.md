@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
 status: executing
-stopped_at: Completed 21-01-PLAN.md
+stopped_at: Completed 21-02-PLAN.md
 last_updated: "2026-03-25T15:57:05.639Z"
-last_activity: 2026-03-25 -- Completed Phase 21 Plan 01 (server middleware hardening)
+last_activity: 2026-03-25 -- Completed Phase 21 Plan 02 (Redis degradation + health endpoint)
 progress:
   total_phases: 14
   completed_phases: 9
   total_plans: 34
-  completed_plans: 30
-  percent: 88
+  completed_plans: 31
+  percent: 91
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 21 (Production Review & Deploy Sync)
-Plan: 01 of 05 complete (01, 03 done)
+Plan: 03 of 05 complete (01, 02, 03 done)
 Status: In progress
-Last activity: 2026-03-25 -- Completed Phase 21 Plan 01 (server middleware hardening)
+Last activity: 2026-03-25 -- Completed Phase 21 Plan 02 (Redis degradation + health endpoint)
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [█████████░] 88%
 | Phase 20.3 P01 | 7min | 2 tasks | 5 files |
 | Phase 21 P03 | 3min | 2 tasks | 4 files |
 | Phase 21 P01 | 6min | 2 tasks | 14 files |
+| Phase 21 P02 | 8min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -196,6 +197,9 @@ Progress: [█████████░] 88%
 - [Phase 21]: createRateLimiter factory pattern for per-endpoint rate limit configuration
 - [Phase 21]: Helmet CSP whitelists map tiles, Vercel analytics, Open-Meteo, ArcGIS, CARTO domains
 - [Phase 21]: max-age=0 with s-maxage for CDN-only caching (browser always revalidates)
+- [Phase 21]: Module-level Map as memCache fallback (bounded by polling source count, not LRU)
+- [Phase 21]: cacheGetSafe/cacheSetSafe as additive exports (backward compat with existing cacheGet/cacheSet)
+- [Phase 21]: degraded flag tracked per-store (flight/ship/event) rather than global UI flag
 
 ### Roadmap Evolution
 
@@ -217,6 +221,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:57:01.865Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-03-25T16:07:00Z
+Stopped at: Completed 21-02-PLAN.md
 Resume file: None
