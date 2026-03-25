@@ -9,6 +9,7 @@ export const SHIP_STALE_THRESHOLD = 120_000;
 interface ShipState {
   ships: ShipEntity[];
   connectionStatus: ConnectionStatus;
+  degraded: boolean;
   lastFetchAt: number | null;
   lastFresh: number | null;
   shipCount: number;
@@ -21,6 +22,7 @@ interface ShipState {
 export const useShipStore = create<ShipState>()((set, get) => ({
   ships: [],
   connectionStatus: 'loading',
+  degraded: false,
   lastFetchAt: null,
   lastFresh: null,
   shipCount: 0,
@@ -30,6 +32,7 @@ export const useShipStore = create<ShipState>()((set, get) => ({
       ships: response.data,
       shipCount: response.data.length,
       connectionStatus: response.stale ? 'stale' : 'connected',
+      degraded: response.degraded ?? false,
       lastFetchAt: Date.now(),
       lastFresh: response.stale ? get().lastFresh : Date.now(),
     }),

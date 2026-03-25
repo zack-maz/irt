@@ -13,6 +13,7 @@ import { sitesRouter } from './routes/sites.js';
 import { newsRouter } from './routes/news.js';
 import { marketsRouter } from './routes/markets.js';
 import { weatherRouter } from './routes/weather.js';
+import { healthRouter } from './routes/health.js';
 export function createApp() {
   const app = express();
 
@@ -54,9 +55,7 @@ export function createApp() {
   app.use(requestLogger);
 
   // Health check (no cache, no rate limit)
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
-  });
+  app.use('/health', healthRouter);
 
   // Data source routes with per-endpoint rate limits and cache-control
   app.use('/api/flights', rateLimiters.flights, cacheControl(5, 25), flightsRouter);

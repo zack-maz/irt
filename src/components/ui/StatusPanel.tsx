@@ -52,6 +52,11 @@ export function StatusPanel() {
   const siteConnectionStatus = useSiteStore((s) => s.connectionStatus);
   const siteStatus: FeedStatus = siteConnectionStatus === 'idle' ? 'loading' : siteConnectionStatus;
 
+  const flightDegraded = useFlightStore((s) => s.degraded);
+  const shipDegraded = useShipStore((s) => s.degraded);
+  const eventDegraded = useEventStore((s) => s.degraded);
+  const anyDegraded = flightDegraded || shipDegraded || eventDegraded;
+
   // Use filtered entities (applies filter store predicates) — unconditional counts
   const { flights, ships: filteredShips, events } = useFilteredEntities();
 
@@ -75,6 +80,16 @@ export function StatusPanel() {
           <span data-testid="utc-clock" className="text-xs text-text-secondary tabular-nums tracking-wide">
             {utc}
           </span>
+          {anyDegraded && (
+            <div
+              data-testid="degraded-indicator"
+              className="flex items-center gap-1.5 text-xs text-accent-yellow"
+              title="Data may be outdated"
+            >
+              <span className="inline-block h-2 w-2 rounded-full bg-accent-yellow" />
+              <span>Degraded</span>
+            </div>
+          )}
           <FeedLine status={flightStatus} count={visibleFlights} label="flights" />
           <FeedLine status={shipStatus} count={visibleShips} label="ships" />
           <FeedLine status={eventStatus} count={visibleEvents} label="events" />

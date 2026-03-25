@@ -6,6 +6,7 @@ export type ConnectionStatus = 'connected' | 'stale' | 'error' | 'loading';
 interface EventState {
   events: ConflictEventEntity[];
   connectionStatus: ConnectionStatus;
+  degraded: boolean;
   lastFetchAt: number | null;
   eventCount: number;
   setEventData: (response: CacheResponse<ConflictEventEntity[]>) => void;
@@ -16,6 +17,7 @@ interface EventState {
 export const useEventStore = create<EventState>()((set) => ({
   events: [],
   connectionStatus: 'loading',
+  degraded: false,
   lastFetchAt: null,
   eventCount: 0,
 
@@ -24,6 +26,7 @@ export const useEventStore = create<EventState>()((set) => ({
       events: response.data,
       eventCount: response.data.length,
       connectionStatus: response.stale ? 'stale' : 'connected',
+      degraded: response.degraded ?? false,
       lastFetchAt: Date.now(),
     }),
 

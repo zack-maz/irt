@@ -7,6 +7,7 @@ export type ConnectionStatus = 'connected' | 'stale' | 'error' | 'loading' | 'ra
 interface FlightState {
   flights: FlightEntity[];
   connectionStatus: ConnectionStatus;
+  degraded: boolean;
   lastFetchAt: number | null;
   lastFresh: number | null;
   flightCount: number;
@@ -21,6 +22,7 @@ interface FlightState {
 export const useFlightStore = create<FlightState>()((set, get) => ({
   flights: [],
   connectionStatus: 'loading',
+  degraded: false,
   lastFetchAt: null,
   lastFresh: null,
   flightCount: 0,
@@ -33,6 +35,7 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
       connectionStatus: response.rateLimited
         ? 'rate_limited'
         : response.stale ? 'stale' : 'connected',
+      degraded: response.degraded ?? false,
       lastFetchAt: Date.now(),
       lastFresh: response.stale ? get().lastFresh : Date.now(),
     }),

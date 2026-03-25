@@ -80,7 +80,7 @@ vi.mock('../adapters/gdelt.js', () => ({
 
 // Mock Redis cache module with in-memory store
 vi.mock('../cache/redis.js', () => ({
-  redis: {},
+  redis: { ping: vi.fn(async () => 'PONG') },
   cacheGet: vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
     const entry = redisStore.get(key) as CacheEntry<T> | undefined;
     if (!entry) return null;
@@ -118,11 +118,13 @@ afterAll(async () => {
 });
 
 describe('Express server', () => {
-  it('GET /health returns 200 with { status: "ok" }', async () => {
+  it('GET /health returns 200 with status ok', async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ status: 'ok' });
+    expect(body.status).toBe('ok');
+    expect(body.redis).toBe(true);
+    expect(typeof body.uptime).toBe('number');
   });
 
   it('unknown route returns 404', async () => {
@@ -143,7 +145,7 @@ describe('Express server', () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ status: 'ok' });
+    expect(body.status).toBe('ok');
   });
 });
 

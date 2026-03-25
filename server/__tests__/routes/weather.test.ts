@@ -88,6 +88,7 @@ vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: vi.fn(async () => null),
     set: vi.fn(async () => {}),
+    ping: vi.fn(async () => 'PONG'),
   },
   cacheGet: vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
     const entry = redisStore.get(key) as CacheEntry<T> | undefined;

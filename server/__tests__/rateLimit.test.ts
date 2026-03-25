@@ -18,7 +18,7 @@ vi.mock('@upstash/ratelimit', () => ({
 
 // Mock redis instance
 vi.mock('../cache/redis.js', () => ({
-  redis: {},
+  redis: { ping: vi.fn(async () => 'PONG') },
 }));
 
 // Import after mocks

@@ -59,7 +59,7 @@ vi.mock('../adapters/gdelt.js', () => ({
 
 // Mock Redis cache module
 vi.mock('../cache/redis.js', () => ({
-  redis: {},
+  redis: { ping: vi.fn(async () => 'PONG') },
   cacheGet: vi.fn(async () => null),
   cacheSet: vi.fn(async () => undefined),
 }));
@@ -101,10 +101,11 @@ describe('Vercel entry point (server/vercel-entry.ts)', () => {
     expect(typeof mod.default).toBe('function');
   });
 
-  it('GET /health returns 200 with { status: "ok" }', async () => {
+  it('GET /health returns 200 with status ok', async () => {
     const res = await fetch(`${baseUrl}/health`);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ status: 'ok' });
+    expect(body.status).toBe('ok');
+    expect(body.redis).toBe(true);
   });
 });
