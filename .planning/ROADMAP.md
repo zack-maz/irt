@@ -49,6 +49,7 @@
 - [ ] **Phase 20.4: Satellite Imagery Layer** - ArcGIS World Imagery as semi-transparent overlay on Dark Matter basemap
 - [ ] **Phase 20.5: Infrastructure Focus Layer** - Dims non-site entities, highlights sites with enhanced labels
 - [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
+- [ ] **Phase 21.1: GDELT News Relevance Filtering** - Reduce false positive conflict news by improving filtering to distinguish actual conflict events from articles that merely mention conflict-related terms or locations
 
 ## Phase Details
 
@@ -254,7 +255,7 @@ Plans:
   1. All features function correctly together in the deployed Vercel environment
   2. All overlay panels coexist without z-index or layout conflicts
   3. Redis command budget remains within free-tier limits under normal usage
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [ ] 21-01-PLAN.md -- Server middleware stack: helmet security, Cache-Control edge caching, per-endpoint rate limits, structured JSON logging
@@ -262,6 +263,17 @@ Plans:
 - [ ] 21-03-PLAN.md -- Bundle optimization & analytics: manualChunks vendor splitting, rollup-plugin-visualizer, @vercel/analytics, @vercel/speed-insights
 - [ ] 21-04-PLAN.md -- Code polish: migrate routes to cacheGetSafe, replace console.log with structured logger, fix pre-existing test failures, full codebase audit
 - [ ] 21-05-PLAN.md -- Deploy verification: smoke test script, cron health endpoint, env var audit, doc sync, production deploy with visual checkpoint
+
+### Phase 21.1: GDELT News Relevance Filtering (INSERTED)
+
+**Goal:** Reduce false positive conflict news by improving filtering to distinguish actual conflict events from articles that merely mention conflict-related terms or locations
+**Depends on:** Phase 16 (News Feed), Phase 21 (Production Review)
+**Requirements**: None (quality improvement)
+**Success Criteria** (what must be TRUE):
+  1. Articles that mention a location (e.g., "Tehran") without describing a conflict event AT that location are filtered out or not geolocated there
+  2. Keyword filter rejects articles where conflict terms appear only in passing context (e.g., "Tehran condemns attack in Yemen" does not mark Tehran)
+  3. False positive rate for conflict news is meaningfully reduced compared to current keyword-only approach
+**Plans:** TBD
 
 ## Progress
 
@@ -296,4 +308,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20.1. Geographical & Weather Layers | 3/3 | Complete   | 2026-03-23 | - |
 | 20.2. Threat Heatmap Layer | 1/1 | Complete    | 2026-03-23 | - |
 | 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
-| 21. Production Review & Deploy Sync | 3/5 | In Progress|  | - |
+| 21. Production Review & Deploy Sync | 4/5 | In Progress|  | - |
