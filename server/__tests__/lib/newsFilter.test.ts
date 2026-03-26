@@ -250,7 +250,7 @@ describe('newsFilter', () => {
     it('still exists and delegates to filterAndScoreArticles', () => {
       expect(typeof filterConflictArticles).toBe('function');
       const articles = [
-        makeArticle({ id: 'a1', title: 'Airstrike on Damascus outskirts', source: 'BBC' }),
+        makeArticle({ id: 'a1', title: 'Iran launches missile strike on Israeli military bases', source: 'BBC' }),
         makeArticle({ id: 'a2', title: 'Local cooking show recipes' }),
       ];
       const filtered = filterConflictArticles(articles);

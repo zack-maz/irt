@@ -1,131 +1,56 @@
 import type { NewsArticle } from '../types.js';
+import { extractTriple } from './nlpExtractor.js';
+import { computeRelevanceScore, EXCLUSION_PATTERNS } from './relevanceScorer.js';
+import { getConfig } from '../config.js';
 
 /**
- * Conflict-relevant keywords matched with word boundaries.
- * Multi-word phrases use plain `includes` (boundaries implicit).
+ * Strict non-ambiguous keywords -- pass on their own.
+ * Per locked decision: only 7 terms remain non-ambiguous.
  */
-export const CONFLICT_KEYWORDS = new Set([
-  // Military terms
+export const NON_AMBIGUOUS_KEYWORDS = new Set([
   'airstrike',
   'missile',
   'bombing',
-  'strike',
-  'troops',
-  'drone',
-  'casualties',
-  'military',
-  'combat',
-  'offensive',
-  'artillery',
-  'warship',
-  'navy',
-  'airforce',
-  'defense',
-  'weapon',
-  'nuclear',
   'shelling',
-  'rocket',
-  'interceptor',
-  'militia',
-  'ammunition',
-  'warplane',
-  'airstrike',
-  'airstrikes',
-  // Diplomatic terms
-  'sanctions',
-  'negotiations',
-  'ceasefire',
-  'escalation',
-  'tensions',
-  'iaea',
-  'diplomacy',
-  'withdrawal',
-  'deployment',
-  // Organizations
-  'irgc',
-  'hezbollah',
-  'hamas',
-  'houthi',
-  'pentagon',
-  'centcom',
-  'nato',
-  'idf',
-  'mossad',
-  // Countries / regions
-  'iran',
-  'israel',
-  'iraq',
-  'syria',
-  'yemen',
-  'lebanon',
-  'gaza',
-  'tehran',
-  'tel aviv',
-  'jerusalem',
-  'beirut',
-  'baghdad',
-  'damascus',
-  'hormuz',
-  'persian gulf',
-  'red sea',
-  // Conflict terms
-  'warfare',
-  'conflict',
+  'casualties',
   'invasion',
-  'blockade',
-  'siege',
-  'occupation',
-  'refugee',
-  'humanitarian',
-  'civilian',
-  'wounded',
-  'destroyed',
+  'drone',
 ]);
 
 /**
- * Ambiguous keywords that only count as a match when a second
- * (non-ambiguous) keyword also appears in the same article.
- * These fire too often on their own (e.g. "clock strikes midnight",
- * "rocket fireworks", "heart attack", "killed in car crash").
+ * Ambiguous keywords -- require a co-occurring non-ambiguous term.
+ * Includes all geographic, diplomatic, organizational, military, and conflict terms.
  */
-const AMBIGUOUS_KEYWORDS = new Set([
-  'strike',
-  'attack',
-  'bomb',
-  'rocket',
-  'killed',
-  'raid',
-  'war',
-  'offensive',
+export const AMBIGUOUS_KEYWORDS = new Set([
+  // Geographic (previously non-ambiguous)
+  'iran', 'israel', 'iraq', 'syria', 'yemen', 'lebanon',
+  'gaza', 'tehran', 'baghdad', 'damascus', 'beirut',
+  'tel aviv', 'jerusalem', 'hormuz', 'persian gulf', 'red sea',
+  // Diplomatic
+  'sanctions', 'negotiations', 'ceasefire', 'escalation', 'tensions',
+  'iaea', 'diplomacy', 'withdrawal', 'deployment',
+  // Organizations
+  'irgc', 'hezbollah', 'hamas', 'houthi', 'pentagon',
+  'centcom', 'nato', 'idf', 'mossad',
+  // Military (previously non-ambiguous)
+  'strike', 'troops', 'military', 'combat', 'offensive', 'artillery',
+  'warship', 'navy', 'airforce', 'defense', 'weapon', 'nuclear',
+  'rocket', 'interceptor', 'militia', 'ammunition', 'warplane',
+  'airstrikes',
+  // Conflict terms
+  'attack', 'bomb', 'killed', 'raid', 'war',
+  'warfare', 'conflict', 'blockade', 'siege', 'occupation',
+  'refugee', 'humanitarian', 'civilian', 'wounded', 'destroyed',
 ]);
 
 /**
- * Exclusion patterns — if any match, the article is rejected regardless
- * of keyword hits. Guards against celebratory / sports / entertainment
- * false positives.
+ * Backward-compatible union of all keywords.
+ * @deprecated Prefer NON_AMBIGUOUS_KEYWORDS + AMBIGUOUS_KEYWORDS
  */
-const EXCLUSION_PATTERNS = [
-  'new year',
-  'firework',
-  'fireworks',
-  'celebration',
-  'celebrate',
-  'festival',
-  'holiday',
-  'parade',
-  'super bowl',
-  'world cup',
-  'box office',
-  'movie premiere',
-  'concert',
-  'cricket',
-  'basketball',
-  'football match',
-  'stock market',
-  'ipo',
-  'earnings report',
-  'fashion week',
-];
+export const CONFLICT_KEYWORDS = new Set([
+  ...NON_AMBIGUOUS_KEYWORDS,
+  ...AMBIGUOUS_KEYWORDS,
+]);
 
 /** Pre-compiled word-boundary regex cache */
 const keywordRegexCache = new Map<string, RegExp>();
@@ -133,7 +58,6 @@ const keywordRegexCache = new Map<string, RegExp>();
 function getKeywordRegex(keyword: string): RegExp {
   let re = keywordRegexCache.get(keyword);
   if (!re) {
-    // Multi-word phrases don't need \b on interior spaces
     const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     re = new RegExp(`\\b${escaped}\\b`, 'i');
     keywordRegexCache.set(keyword, re);
@@ -143,8 +67,8 @@ function getKeywordRegex(keyword: string): RegExp {
 
 /**
  * Check article text against the conflict keyword whitelist using
- * word-boundary matching. Ambiguous keywords only count when
- * accompanied by at least one non-ambiguous keyword.
+ * word-boundary matching. Non-ambiguous keywords pass alone.
+ * Ambiguous keywords only count when accompanied by at least one non-ambiguous keyword.
  *
  * @returns Array of matched keywords (empty = not conflict-relevant)
  */
@@ -161,44 +85,77 @@ export function matchesKeywords(article: {
     }
   }
 
-  const matched: string[] = [];
-  let hasNonAmbiguous = false;
-  let hasAmbiguous = false;
+  const nonAmbiguousHits: string[] = [];
   const ambiguousHits: string[] = [];
 
-  for (const keyword of CONFLICT_KEYWORDS) {
+  // Check non-ambiguous keywords
+  for (const keyword of NON_AMBIGUOUS_KEYWORDS) {
     if (getKeywordRegex(keyword).test(text)) {
-      if (AMBIGUOUS_KEYWORDS.has(keyword)) {
-        hasAmbiguous = true;
-        ambiguousHits.push(keyword);
-      } else {
-        hasNonAmbiguous = true;
-        matched.push(keyword);
-      }
+      nonAmbiguousHits.push(keyword);
+    }
+  }
+
+  // Check ambiguous keywords
+  for (const keyword of AMBIGUOUS_KEYWORDS) {
+    if (getKeywordRegex(keyword).test(text)) {
+      ambiguousHits.push(keyword);
     }
   }
 
   // Ambiguous keywords only included when a non-ambiguous keyword also matched
-  if (hasAmbiguous && hasNonAmbiguous) {
-    matched.push(...ambiguousHits);
+  if (nonAmbiguousHits.length > 0) {
+    return [...nonAmbiguousHits, ...ambiguousHits];
   }
 
-  return matched;
+  return [];
 }
 
 /**
- * Filter articles to only those matching at least one conflict keyword.
- * Populates the `keywords` field on each matched article.
+ * Filter and score articles using NLP triple extraction and relevance scoring.
+ * Replaces the binary keyword filter with a scored pipeline.
+ *
+ * Pipeline per article:
+ *   1. Extract actor-action-target triple via NLP
+ *   2. Compute 0-1 relevance score
+ *   3. Match keywords (reclassified)
+ *   4. Include if score >= threshold AND keywords.length > 0
+ *   5. Enrich with actor/action/target/relevanceScore
  */
-export function filterConflictArticles(articles: NewsArticle[]): NewsArticle[] {
+export function filterAndScoreArticles(articles: NewsArticle[]): NewsArticle[] {
+  const threshold = getConfig().newsRelevanceThreshold;
   const result: NewsArticle[] = [];
 
   for (const article of articles) {
     const matched = matchesKeywords(article);
-    if (matched.length > 0) {
-      result.push({ ...article, keywords: matched });
+    if (matched.length === 0) continue;
+
+    const triple = extractTriple(article.title, article.summary);
+    const relevanceScore = computeRelevanceScore({
+      triple,
+      source: article.source,
+      title: article.title,
+      summary: article.summary,
+    });
+
+    if (relevanceScore >= threshold) {
+      result.push({
+        ...article,
+        actor: triple.actor ?? undefined,
+        action: triple.action ?? undefined,
+        target: triple.target ?? undefined,
+        relevanceScore,
+        keywords: matched,
+      });
     }
   }
 
   return result;
+}
+
+/**
+ * Filter articles to only those matching at least one conflict keyword.
+ * @deprecated Use filterAndScoreArticles for NLP-enriched filtering.
+ */
+export function filterConflictArticles(articles: NewsArticle[]): NewsArticle[] {
+  return filterAndScoreArticles(articles);
 }
