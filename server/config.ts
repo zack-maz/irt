@@ -14,6 +14,7 @@ export interface AppConfig {
     email: string;
     password: string;
   };
+  newsRelevanceThreshold: number; // 0-1 threshold for NLP relevance scoring (default 0.7)
 }
 
 let _config: AppConfig | null = null;
@@ -33,6 +34,9 @@ export function loadConfig(): AppConfig {
       email: process.env.ACLED_EMAIL ?? '',
       password: process.env.ACLED_PASSWORD ?? '',
     },
+    newsRelevanceThreshold: Math.min(1, Math.max(0,
+      parseFloat(process.env.NEWS_RELEVANCE_THRESHOLD ?? '') || 0.7,
+    )),
   };
 }
 

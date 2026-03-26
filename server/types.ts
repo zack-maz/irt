@@ -111,6 +111,10 @@ export interface NewsArticle {
   lng?: number;
   tone?: number; // Reserved for Phase 17 (always undefined in Phase 16)
   keywords: string[]; // Matched whitelist keywords
+  actor?: string; // NLP-extracted actor from headline/summary
+  action?: string; // NLP-extracted action verb/phrase
+  target?: string; // NLP-extracted target of the action
+  relevanceScore?: number; // 0-1 NLP-based relevance confidence score
 }
 
 export interface NewsCluster {
