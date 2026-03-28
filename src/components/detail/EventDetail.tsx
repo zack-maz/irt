@@ -72,6 +72,15 @@ export function EventDetail({ entity }: EventDetailProps) {
           </a>
         </div>
       )}
+
+      {import.meta.env.DEV && d.confidence != null && (
+        <div className="mt-2 border-t border-white/5 pt-2">
+          <DetailValue label="Confidence" value={d.confidence.toFixed(3)} />
+          {d.geoPrecision && (
+            <DetailValue label="Geo Precision" value={d.geoPrecision} />
+          )}
+        </div>
+      )}
     </div>
   );
 }
