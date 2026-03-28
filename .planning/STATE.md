@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: completed
-stopped_at: Phase 21.2 context gathered
-last_updated: "2026-03-28T01:40:30.722Z"
-last_activity: 2026-03-26 -- Completed Phase 21.1 Plan 02 (NLP scoring pipeline integration)
+status: executing
+stopped_at: Completed 21.2-01-PLAN.md
+last_updated: "2026-03-28T02:51:11.173Z"
+last_activity: 2026-03-28 -- Completed Phase 21.2 Plan 01 (scoring engine and geo-validation)
 progress:
   total_phases: 16
   completed_phases: 11
-  total_plans: 36
-  completed_plans: 35
-  percent: 100
+  total_plans: 38
+  completed_plans: 37
+  percent: 97
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 21.1 GDELT News Relevance Filtering -- In Progress
+**Current focus:** Phase 21.2 GDELT Event Quality Pipeline -- In Progress
 
 ## Current Position
 
-Phase: 21.1 (GDELT News Relevance Filtering)
-Plan: 02 of 02 complete (01, 02 done)
-Status: Completed
-Last activity: 2026-03-26 -- Completed Phase 21.1 Plan 02 (NLP scoring pipeline integration)
+Phase: 21.2 (GDELT Event Quality Pipeline)
+Plan: 01 of 02 complete (01 done)
+Status: In Progress
+Last activity: 2026-03-28 -- Completed Phase 21.2 Plan 01 (scoring engine and geo-validation)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 97%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [██████████] 100%
 | Phase 21 P05 | 5min | 2 tasks | 6 files |
 | Phase 21.1 P01 | 7min | 2 tasks | 7 files |
 | Phase 21.1 P02 | 4min | 2 tasks | 4 files |
+| Phase 21.2 P01 | 11min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -220,6 +221,11 @@ Progress: [██████████] 100%
 - [Phase 21.1-02]: Dual gate: articles must pass BOTH keyword match (>= 1 non-ambiguous) AND relevance score (>= 0.7)
 - [Phase 21.1-02]: filterConflictArticles preserved as deprecated backward-compat export delegating to filterAndScoreArticles
 - [Phase 21.1-02]: Exclusion patterns imported from relevanceScorer (single source of truth) instead of duplicated in newsFilter
+- [Phase 21.2]: eventConfidenceThreshold default 0.35 per user decision (not spec's 0.15)
+- [Phase 21.2]: 42 city centroids (30 major + 12 conflict hotspots) for centroid detection
+- [Phase 21.2]: FIPS contradiction check only applies when last segment starts uppercase with no digits
+- [Phase 21.2]: Goldstein consistency signal uses linear decay over 6 points outside ceiling range
+- [Phase 21.2]: 5-signal weighted confidence scoring: media(0.30), sources(0.20), actors(0.20), geo(0.15), goldstein(0.15)
 
 ### Roadmap Evolution
 
@@ -241,6 +247,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T01:40:30.713Z
-Stopped at: Phase 21.2 context gathered
-Resume file: .planning/phases/21.2-gdelt-event-quality-pipeline/21.2-CONTEXT.md
+Last session: 2026-03-28T02:51:11.170Z
+Stopped at: Completed 21.2-01-PLAN.md
+Resume file: None

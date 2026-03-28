@@ -292,7 +292,7 @@ Plans:
   4. Events with Goldstein scores inconsistent with their classified type are reclassified to a lower-severity type
   5. Each event carries a 0-1 `confidence` score based on media coverage, source diversity, actor specificity, geo precision, and Goldstein consistency
   6. Events below a configurable confidence threshold are discarded (default 0.35)
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 21.2-01-PLAN.md -- Core engine: type extensions (geoPrecision, confidence), config (eventConfidenceThreshold), geoValidation module (isGeoValid, detectCentroid, city centroids), eventScoring module (computeEventConfidence, applyGoldsteinSanity), unit tests
@@ -333,4 +333,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
 | 21. Production Review & Deploy Sync | 4/5 | In Progress|  | - |
 | 21.1. GDELT News Relevance Filtering | 2/2 | Complete    | 2026-03-26 | - |
-| 21.2. GDELT Event Quality Pipeline | 0/2 | Not started | - | - |
+| 21.2. GDELT Event Quality Pipeline | 1/2 | In Progress|  | - |
