@@ -179,6 +179,17 @@ describe('GDELT Adapter', () => {
       expect(events).toHaveLength(0);
     });
 
+    it('excludes catch-all CAMEO base code 180 (unconventional violence NOS)', () => {
+      const row180 = makeGdeltRow({
+        0: '6666666666',
+        26: '180',
+        27: '180',
+        28: '18',
+      });
+      const events = parseAndFilter(row180);
+      expect(events).toHaveLength(0);
+    });
+
     it('excludes rows with ActionGeo_CountryCode NOT in MIDDLE_EAST_FIPS', () => {
       const events = parseAndFilter(outsideMiddleEastRow);
       expect(events).toHaveLength(0);

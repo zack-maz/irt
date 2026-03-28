@@ -89,8 +89,12 @@ import type { ConflictEventType } from '../types.js';
 
 // All valid CAMEO base codes in the 180-204 range are mapped below.
 // Codes 187-189, 197-199, 205+ do not exist in the CAMEO spec and correctly fall to ROOT_FALLBACK.
+// CAMEO base codes excluded from the conflict pipeline entirely.
+// 180 "unconventional violence NOS" is GDELT's catch-all for events it can't classify —
+// cyber ops, political demands, campus protests. Overwhelmingly false positives on a kinetic map.
+const EXCLUDED_BASE_CODES = new Set(['180']);
+
 const BASE_CODE_MAP: Record<string, ConflictEventType> = {
-  '180': 'assault',
   '181': 'abduction',
   '182': 'assault',
   '183': 'bombing',
@@ -229,6 +233,8 @@ export function parseAndFilter(csv: string): ConflictEventEntity[] {
     const countryCode = cols[COL.ActionGeo_CountryCode];
 
     if (!CONFLICT_ROOT_CODES.has(eventRootCode)) continue;
+    const eventBaseCode = cols[COL.EventBaseCode];
+    if (EXCLUDED_BASE_CODES.has(eventBaseCode)) continue;
     if (!MIDDLE_EAST_FIPS.has(countryCode)) continue;
 
     // Geo cross-validation: discard events where FullName contradicts FIPS code
