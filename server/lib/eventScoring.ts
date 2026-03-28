@@ -1,6 +1,50 @@
-// Event confidence scoring and Goldstein sanity checks for GDELT events
+// Event confidence scoring, Goldstein sanity checks, and CAMEO specificity for GDELT events
 
 import type { ConflictEventEntity, ConflictEventType } from '../types.js';
+
+/**
+ * CAMEO base code specificity tiers.
+ *
+ * High (1.0): Unambiguous military/violent events — aerial weapons, artillery, WMD, assassination, etc.
+ * Medium (0.5): Conflict-related but broader — occupation, small arms, mass expulsion, assassination attempt.
+ * Low (0.1): Catch-all / vague codes that GDELT frequently misapplies to non-conflict articles —
+ *            "unconventional violence NOS", "physical assault", "conventional military force NOS".
+ */
+export const CAMEO_SPECIFICITY: Record<string, number> = {
+  // Low — catch-all codes prone to false positives
+  '180': 0.1, // Unconventional violence, not specified below
+  '182': 0.1, // Physical assault (very broad)
+  '190': 0.1, // Conventional military force, not specified below
+
+  // Medium — conflict-related but broader
+  '184': 0.5, // Use as human shield
+  '185': 0.5, // Assassination attempt
+  '192': 0.5, // Territorial occupation
+  '193': 0.5, // Small arms / light weapons
+  '200': 0.5, // Unconventional mass violence
+  '201': 0.5, // Mass expulsion
+
+  // High — unambiguous military/violent events
+  '181': 1.0, // Abduction / hostage-taking
+  '183': 1.0, // Bombing
+  '186': 1.0, // Assassination
+  '191': 1.0, // Blockade
+  '194': 1.0, // Artillery / tank support
+  '195': 1.0, // Aerial weapons
+  '196': 1.0, // Ceasefire violation
+  '202': 1.0, // Mass killings
+  '203': 1.0, // Ethnic cleansing
+  '204': 1.0, // Weapons of mass destruction
+};
+
+/**
+ * Look up CAMEO specificity score for a CAMEO event code.
+ * Uses first 3 characters as base code. Defaults to 0.5 (medium) for unknown codes.
+ */
+export function getCameoSpecificity(cameoCode: string): number {
+  const baseCode = cameoCode.slice(0, 3);
+  return CAMEO_SPECIFICITY[baseCode] ?? 0.5;
+}
 
 /**
  * Expected Goldstein scale ceilings per ConflictEventType.
@@ -62,36 +106,37 @@ export function applyGoldsteinSanity(entity: ConflictEventEntity): ConflictEvent
 /**
  * Compute a 0-1 composite confidence score for a GDELT event.
  *
- * Five weighted signals:
- * - Media coverage (0.30): log2 of mentions normalized to 50
- * - Source diversity (0.20): log2 of sources normalized to 15
- * - Actor specificity (0.20): both actors = 1.0, one = 0.5, none = 0.0
- * - Geo precision (0.15): precise = 1.0, centroid = 0.3
- * - Goldstein consistency (0.15): 1.0 if within expected range, linear decay outside, 0.5 if unknown
+ * Six weighted signals:
+ * - Media coverage (0.25): log2 of mentions normalized to 50
+ * - Source diversity (0.15): log2 of sources normalized to 15
+ * - Actor specificity (0.15): both actors = 1.0, one = 0.5, none = 0.0
+ * - Geo precision (0.10): precise = 1.0, centroid = 0.3
+ * - Goldstein consistency (0.10): 1.0 if within expected range, linear decay outside, 0.5 if unknown
+ * - CAMEO specificity (0.25): 1.0 for unambiguous codes (195, 194, 204), 0.1 for catch-alls (180, 182, 190)
  */
 export function computeEventConfidence(
   entity: ConflictEventEntity,
   geoPrecision: 'precise' | 'centroid',
 ): number {
-  const { numMentions, numSources, actor1, actor2, goldsteinScale } = entity.data;
+  const { numMentions, numSources, actor1, actor2, goldsteinScale, cameoCode } = entity.data;
 
-  // Signal 1: Media coverage (weight 0.30)
+  // Signal 1: Media coverage (weight 0.25)
   const mentions = numMentions ?? 1;
   const mediaCoverage = Math.min(1, Math.log2(mentions + 1) / Math.log2(50));
 
-  // Signal 2: Source diversity (weight 0.20)
+  // Signal 2: Source diversity (weight 0.15)
   const sources = numSources ?? 1;
   const sourceDiversity = Math.min(1, Math.log2(sources + 1) / Math.log2(15));
 
-  // Signal 3: Actor specificity (weight 0.20)
+  // Signal 3: Actor specificity (weight 0.15)
   const hasActor1 = actor1.trim().length > 0;
   const hasActor2 = actor2.trim().length > 0;
   const actorSpecificity = hasActor1 && hasActor2 ? 1.0 : hasActor1 || hasActor2 ? 0.5 : 0.0;
 
-  // Signal 4: Geo precision (weight 0.15)
+  // Signal 4: Geo precision (weight 0.10)
   const geoPrecisionSignal = geoPrecision === 'precise' ? 1.0 : 0.3;
 
-  // Signal 5: Goldstein consistency (weight 0.15)
+  // Signal 5: Goldstein consistency (weight 0.10)
   let goldsteinConsistency: number;
   if (goldsteinScale === 0 || goldsteinScale > 0) {
     // Unknown or data error -- neutral
@@ -112,12 +157,16 @@ export function computeEventConfidence(
     }
   }
 
+  // Signal 6: CAMEO specificity (weight 0.25)
+  const cameoSpecificity = getCameoSpecificity(cameoCode);
+
   // Weighted sum
   return (
-    0.30 * mediaCoverage +
-    0.20 * sourceDiversity +
-    0.20 * actorSpecificity +
-    0.15 * geoPrecisionSignal +
-    0.15 * goldsteinConsistency
+    0.25 * mediaCoverage +
+    0.15 * sourceDiversity +
+    0.15 * actorSpecificity +
+    0.10 * geoPrecisionSignal +
+    0.10 * goldsteinConsistency +
+    0.25 * cameoSpecificity
   );
 }

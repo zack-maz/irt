@@ -4,6 +4,8 @@ import {
   computeEventConfidence,
   applyGoldsteinSanity,
   GOLDSTEIN_CEILINGS,
+  CAMEO_SPECIFICITY,
+  getCameoSpecificity,
 } from '../../lib/eventScoring.js';
 
 /** Helper to create a test ConflictEventEntity with configurable fields */
@@ -14,7 +16,9 @@ function makeTestEvent(overrides: {
   goldsteinScale?: number;
   numMentions?: number;
   numSources?: number;
+  cameoCode?: string;
 } = {}): ConflictEventEntity {
+  const cameoCode = overrides.cameoCode ?? '195';
   return {
     id: 'gdelt-test-1',
     type: overrides.type ?? 'airstrike',
@@ -24,7 +28,7 @@ function makeTestEvent(overrides: {
     label: 'Test event',
     data: {
       eventType: 'Aerial weapons',
-      subEventType: 'CAMEO 195',
+      subEventType: `CAMEO ${cameoCode}`,
       fatalities: 0,
       actor1: overrides.actor1 ?? '',
       actor2: overrides.actor2 ?? '',
@@ -32,7 +36,7 @@ function makeTestEvent(overrides: {
       source: 'http://example.com/article',
       goldsteinScale: overrides.goldsteinScale ?? -5,
       locationName: 'Baghdad, Iraq',
-      cameoCode: '195',
+      cameoCode,
       numMentions: overrides.numMentions,
       numSources: overrides.numSources,
     },
@@ -129,18 +133,19 @@ describe('eventScoring', () => {
       expect(score).toBeLessThanOrEqual(1.0);
     });
 
-    it('returns ~0.15-0.25 for low-signal event', () => {
+    it('returns ~0.15-0.25 for low-signal event with catch-all CAMEO', () => {
       const event = makeTestEvent({
-        type: 'airstrike',
+        type: 'assault',
         actor1: '',
         actor2: '',
         goldsteinScale: 0,
         numMentions: 1,
         numSources: 1,
+        cameoCode: '180', // catch-all code
       });
       const score = computeEventConfidence(event, 'centroid');
       expect(score).toBeGreaterThanOrEqual(0.10);
-      expect(score).toBeLessThanOrEqual(0.35);
+      expect(score).toBeLessThanOrEqual(0.25);
     });
 
     it('handles undefined numMentions/numSources (defaults to 1, non-NaN)', () => {
@@ -242,8 +247,8 @@ describe('eventScoring', () => {
       const scorePrecise = computeEventConfidence(event, 'precise');
       const scoreCentroid = computeEventConfidence(event, 'centroid');
       expect(scorePrecise).toBeGreaterThan(scoreCentroid);
-      // Difference should be geo precision weight * (1.0 - 0.3) = 0.15 * 0.7 = 0.105
-      expect(scorePrecise - scoreCentroid).toBeCloseTo(0.105, 2);
+      // Difference should be geo precision weight * (1.0 - 0.3) = 0.10 * 0.7 = 0.07
+      expect(scorePrecise - scoreCentroid).toBeCloseTo(0.07, 2);
     });
 
     it('actor specificity: both actors > one actor > no actors', () => {
@@ -261,6 +266,99 @@ describe('eventScoring', () => {
       );
       expect(both).toBeGreaterThan(one);
       expect(one).toBeGreaterThan(none);
+    });
+
+    it('CAMEO specificity: specific code (195) scores higher than catch-all (180)', () => {
+      const specific = computeEventConfidence(
+        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '195' }),
+        'precise',
+      );
+      const catchAll = computeEventConfidence(
+        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '180' }),
+        'precise',
+      );
+      expect(specific).toBeGreaterThan(catchAll);
+      // Difference: 0.25 * (1.0 - 0.1) = 0.225
+      expect(specific - catchAll).toBeCloseTo(0.225, 2);
+    });
+
+    it('CAMEO specificity: medium code (193) scores between high and low', () => {
+      const base = { actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3 };
+      const high = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '195' }), 'precise');
+      const medium = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '193' }), 'precise');
+      const low = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '180' }), 'precise');
+      expect(high).toBeGreaterThan(medium);
+      expect(medium).toBeGreaterThan(low);
+    });
+
+    it('catch-all CAMEO + low signals falls below 0.35 threshold', () => {
+      // Simulates the false positive scenario: campus article geocoded to Israel
+      const event = makeTestEvent({
+        type: 'assault',
+        actor1: 'STUDENT GOVERNMENT',
+        actor2: '',
+        goldsteinScale: -2,
+        numMentions: 1,
+        numSources: 1,
+        cameoCode: '180',
+      });
+      const score = computeEventConfidence(event, 'centroid');
+      expect(score).toBeLessThan(0.35);
+    });
+
+    it('specific CAMEO + good signals stays well above threshold', () => {
+      const event = makeTestEvent({
+        type: 'airstrike',
+        actor1: 'ISRAEL',
+        actor2: 'IRAN',
+        goldsteinScale: -7,
+        numMentions: 15,
+        numSources: 8,
+        cameoCode: '195',
+      });
+      const score = computeEventConfidence(event, 'precise');
+      expect(score).toBeGreaterThan(0.7);
+    });
+
+    it('handles 4-digit CAMEO codes by using first 3 as base', () => {
+      const score3 = computeEventConfidence(
+        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '195' }),
+        'precise',
+      );
+      const score4 = computeEventConfidence(
+        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '1951' }),
+        'precise',
+      );
+      expect(score3).toBeCloseTo(score4, 5);
+    });
+  });
+
+  describe('getCameoSpecificity', () => {
+    it('returns 0.1 for catch-all codes (180, 182, 190)', () => {
+      expect(getCameoSpecificity('180')).toBe(0.1);
+      expect(getCameoSpecificity('182')).toBe(0.1);
+      expect(getCameoSpecificity('190')).toBe(0.1);
+    });
+
+    it('returns 1.0 for specific codes (195, 194, 204)', () => {
+      expect(getCameoSpecificity('195')).toBe(1.0);
+      expect(getCameoSpecificity('194')).toBe(1.0);
+      expect(getCameoSpecificity('204')).toBe(1.0);
+    });
+
+    it('returns 0.5 for medium codes (193, 200)', () => {
+      expect(getCameoSpecificity('193')).toBe(0.5);
+      expect(getCameoSpecificity('200')).toBe(0.5);
+    });
+
+    it('returns 0.5 for unknown codes (default)', () => {
+      expect(getCameoSpecificity('999')).toBe(0.5);
+      expect(getCameoSpecificity('')).toBe(0.5);
+    });
+
+    it('uses first 3 chars of 4-digit codes', () => {
+      expect(getCameoSpecificity('1951')).toBe(1.0); // 195 -> high
+      expect(getCameoSpecificity('1801')).toBe(0.1); // 180 -> low
     });
   });
 });
