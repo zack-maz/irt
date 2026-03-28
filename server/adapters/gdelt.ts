@@ -1,6 +1,9 @@
 import AdmZip from 'adm-zip';
 import type { ConflictEventEntity } from '../types.js';
 import { log } from '../lib/logger.js';
+import { isGeoValid, detectCentroid } from '../lib/geoValidation.js';
+import { computeEventConfidence, applyGoldsteinSanity, GOLDSTEIN_CEILINGS } from '../lib/eventScoring.js';
+import { getConfig } from '../config.js';
 
 // GDELT v2 lastupdate.txt endpoint (HTTP, NOT HTTPS -- TLS cert issues)
 const GDELT_LASTUPDATE_URL =
@@ -84,6 +87,8 @@ async function downloadAndUnzip(url: string): Promise<string> {
 
 import type { ConflictEventType } from '../types.js';
 
+// All valid CAMEO base codes in the 180-204 range are mapped below.
+// Codes 187-189, 197-199, 205+ do not exist in the CAMEO spec and correctly fall to ROOT_FALLBACK.
 const BASE_CODE_MAP: Record<string, ConflictEventType> = {
   '180': 'assault',
   '181': 'abduction',
@@ -202,12 +207,19 @@ export function normalizeGdeltEvent(
 /**
  * Parse tab-delimited CSV text, filter to Middle East conflict events,
  * and normalize survivors to ConflictEventEntity[].
+ *
+ * Phase A: Raw row filtering (operates on string[] columns)
+ * Phase B: Normalize, score, and threshold-filter (operates on entities)
  */
 export function parseAndFilter(csv: string): ConflictEventEntity[] {
   const lines = csv.trim().split('\n');
+  const rawCount = lines.length;
+
+  // --- Phase A: Raw row filtering ---
 
   // Deduplicate by location + date + CAMEO code, keeping the row with the most mentions
   const best = new Map<string, { cols: string[]; lat: number; lng: number; mentions: number }>();
+  let geoDiscardCount = 0;
 
   for (const line of lines) {
     const cols = line.split('\t');
@@ -218,6 +230,14 @@ export function parseAndFilter(csv: string): ConflictEventEntity[] {
 
     if (!CONFLICT_ROOT_CODES.has(eventRootCode)) continue;
     if (!MIDDLE_EAST_FIPS.has(countryCode)) continue;
+
+    // Geo cross-validation: discard events where FullName contradicts FIPS code
+    const fullName = cols[COL.ActionGeo_FullName];
+    if (!isGeoValid(fullName, countryCode)) {
+      geoDiscardCount++;
+      log({ level: 'warn', message: `[gdelt] discarded gdelt-${cols[COL.GLOBALEVENTID]}: FullName='${fullName}' contradicts FIPS=${countryCode}` });
+      continue;
+    }
 
     // Require at least one actor with a country code (filters non-state actors)
     const actor1Country = cols[COL.Actor1CountryCode]?.trim();
@@ -237,7 +257,50 @@ export function parseAndFilter(csv: string): ConflictEventEntity[] {
     }
   }
 
-  return Array.from(best.values()).map((e) => normalizeGdeltEvent(e.cols, e.lat, e.lng));
+  const geoValidCount = best.size;
+
+  // --- Phase B: Normalize, score, and threshold-filter ---
+
+  const { eventConfidenceThreshold } = getConfig();
+  let reclassifyCount = 0;
+  let thresholdDiscardCount = 0;
+  const results: ConflictEventEntity[] = [];
+
+  for (const entry of best.values()) {
+    // Step 8: Normalize
+    let entity = normalizeGdeltEvent(entry.cols, entry.lat, entry.lng);
+
+    // Step 9: Goldstein sanity check
+    const origType = entity.type;
+    entity = applyGoldsteinSanity(entity);
+    if (entity.type !== origType) {
+      reclassifyCount++;
+      const ceiling = GOLDSTEIN_CEILINGS[origType]?.ceiling;
+      log({ level: 'info', message: `[gdelt] reclassified ${entity.id}: ${origType} -> ${entity.type} (Goldstein ${entity.data.goldsteinScale}, ceiling ${ceiling})` });
+    }
+
+    // Step 10: Centroid detection
+    const geoPrecision = detectCentroid(entity.lat, entity.lng);
+    entity = { ...entity, data: { ...entity.data, geoPrecision } };
+
+    // Step 11: Confidence scoring
+    const confidence = computeEventConfidence(entity, geoPrecision);
+    entity = { ...entity, data: { ...entity.data, confidence } };
+
+    // Step 12: Threshold filter
+    if (confidence < eventConfidenceThreshold) {
+      thresholdDiscardCount++;
+      log({ level: 'warn', message: `[gdelt] discarded ${entity.id}: confidence ${confidence.toFixed(3)} below threshold ${eventConfidenceThreshold}` });
+      continue;
+    }
+
+    results.push(entity);
+  }
+
+  // Pipeline summary
+  log({ level: 'info', message: `[gdelt] pipeline: ${rawCount} raw -> ${geoValidCount} geo-valid -> ${reclassifyCount} reclassified -> ${geoValidCount - thresholdDiscardCount} above threshold -> ${results.length} final` });
+
+  return results;
 }
 
 /**

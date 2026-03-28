@@ -16,6 +16,13 @@ vi.mock('adm-zip', () => {
   };
 });
 
+// Mock config to provide eventConfidenceThreshold for parseAndFilter
+vi.mock('../config.js', () => ({
+  getConfig: () => ({
+    eventConfidenceThreshold: 0.35,
+  }),
+}));
+
 // Sample lastupdate.txt content (3 lines: export, mentions, gkg)
 const sampleLastUpdate = [
   '150383 297a16b493de7cf6ca809a7cc31d0b93 http://data.gdeltproject.org/gdeltv2/20260317120000.export.CSV.zip',
@@ -212,6 +219,95 @@ describe('GDELT Adapter', () => {
       const row18 = makeGdeltRow({ 0: '9999999999', 26: '183', 28: '18', 27: '183', 31: '10' });
       const events = parseAndFilter([row19, row18].join('\n'));
       expect(events).toHaveLength(2);
+    });
+
+    it('discards row where FullName="New York, United States" with FIPS="IS" (geo cross-validation)', () => {
+      const row = makeGdeltRow({
+        0: '1010101010',
+        52: 'New York, United States',
+        53: 'IS',
+      });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(0);
+    });
+
+    it('preserves row where FullName="US forces in Baghdad, Iraq" with FIPS="IZ" (actor reference in non-last segment)', () => {
+      const row = makeGdeltRow({
+        0: '2020202020',
+        52: 'US forces in Baghdad, Iraq',
+        53: 'IZ',
+        56: '33.3152',
+        57: '44.3661',
+      });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+    });
+
+    it('sets geoPrecision="centroid" when lat/lng matches Tehran (35.6892, 51.3890)', () => {
+      const row = makeGdeltRow({
+        0: '3030303030',
+        56: '35.6892',
+        57: '51.3890',
+      });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+      expect(events[0].data.geoPrecision).toBe('centroid');
+    });
+
+    it('sets geoPrecision="precise" for non-centroid coordinates', () => {
+      const row = makeGdeltRow({
+        0: '4040404040',
+        56: '34.1234',
+        57: '50.5678',
+      });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+      expect(events[0].data.geoPrecision).toBe('precise');
+    });
+
+    it('reclassifies airstrike with Goldstein=-1 to shelling', () => {
+      // Airstrike (base code 195) with Goldstein=-1: ceiling is -5, diff = -1 - (-5) = 4 > 3 -> reclassify to shelling
+      const row = makeGdeltRow({
+        0: '5050505050',
+        26: '195',
+        27: '195',
+        28: '19',
+        30: '-1',
+        56: '34.1234',
+        57: '50.5678',
+      });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe('shelling');
+    });
+
+    it('attaches confidence score (0 < confidence <= 1) to all returned events', () => {
+      const row = makeGdeltRow({ 0: '6060606060' });
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+      expect(events[0].data.confidence).toBeDefined();
+      expect(events[0].data.confidence).toBeGreaterThan(0);
+      expect(events[0].data.confidence).toBeLessThanOrEqual(1);
+    });
+
+    it('discards events below confidence threshold (low-signal row)', () => {
+      // Low signal: empty actors, 1 mention, 0 sources, centroid location (Tehran), Goldstein 0
+      const row = makeGdeltRow({
+        0: '7070707070',
+        6: '',          // no Actor1Name
+        7: 'IRN',       // still need actor country for Phase A
+        16: '',         // no Actor2Name
+        17: '',         // no Actor2CountryCode
+        31: '1',        // minimal mentions
+        32: '0',        // no sources
+        30: '0',        // Goldstein 0 (unknown)
+        56: '35.6892',  // Tehran centroid
+        57: '51.3890',
+      });
+      const events = parseAndFilter(row);
+      // With empty actors (score 0.0 for actor specificity), 1 mention, 0 sources,
+      // centroid (0.3), and Goldstein 0 (0.5 neutral), the score should be well below 0.35
+      expect(events).toHaveLength(0);
     });
   });
 

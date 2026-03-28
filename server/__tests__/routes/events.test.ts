@@ -25,6 +25,8 @@ const makeEvent = (
     goldsteinScale: -10,
     locationName: 'Baghdad, Iraq',
     cameoCode: '195',
+    geoPrecision: 'precise' as const,
+    confidence: 0.8,
   },
   ...overrides,
 });
@@ -69,6 +71,8 @@ vi.mock('../../config.js', () => ({
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
   },
   loadConfig: () => ({
     port: 0,
@@ -76,6 +80,17 @@ vi.mock('../../config.js', () => ({
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
+  }),
+  getConfig: () => ({
+    port: 0,
+    corsOrigin: '*',
+    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
+    aisstream: { apiKey: 'test-ais-key' },
+    acled: { email: 'test@example.com', password: 'test-pass' },
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
   }),
 }));
 
