@@ -46,6 +46,7 @@ function makeGdeltRow(overrides: Partial<Record<number, string>> = {}): string {
   cols[28] = '19';         // EventRootCode
   cols[30] = '-9.5';       // GoldsteinScale
   cols[31] = '10';          // NumMentions
+  cols[32] = '5';           // NumSources (>= 2 required)
   cols[52] = 'Tehran, Tehran, Iran'; // ActionGeo_FullName
   cols[53] = 'IR';         // ActionGeo_CountryCode (FIPS)
   cols[56] = '35.6892';    // ActionGeo_Lat
@@ -187,6 +188,15 @@ describe('GDELT Adapter', () => {
         28: '18',
       });
       const events = parseAndFilter(row180);
+      expect(events).toHaveLength(0);
+    });
+
+    it('excludes single-source events (NumSources < 2)', () => {
+      const singleSourceRow = makeGdeltRow({
+        0: '7777777777',
+        32: '1', // only 1 source
+      });
+      const events = parseAndFilter(singleSourceRow);
       expect(events).toHaveLength(0);
     });
 

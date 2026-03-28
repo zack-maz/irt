@@ -245,6 +245,11 @@ export function parseAndFilter(csv: string): ConflictEventEntity[] {
       continue;
     }
 
+    // Require at least 2 independent sources — single-source events are overwhelmingly
+    // false positives (op-eds, niche sites). Real kinetic events get multi-source coverage fast.
+    const numSources = parseInt(cols[COL.NumSources], 10) || 0;
+    if (numSources < 2) continue;
+
     // Require at least one actor with a country code (filters non-state actors)
     const actor1Country = cols[COL.Actor1CountryCode]?.trim();
     const actor2Country = cols[COL.Actor2CountryCode]?.trim();
