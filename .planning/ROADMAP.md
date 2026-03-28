@@ -50,7 +50,7 @@
 - [ ] **Phase 20.5: Infrastructure Focus Layer** - Dims non-site entities, highlights sites with enhanced labels
 - [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
 - [x] **Phase 21.1: GDELT News Relevance Filtering** - Reduce false positive conflict news by improving filtering to distinguish actual conflict events from articles that merely mention conflict-related terms or locations (completed 2026-03-26)
-- [ ] **Phase 21.2: GDELT Event Quality Pipeline** - Geo-validation, expanded CAMEO classification, Goldstein sanity check, and composite confidence scoring for GDELT conflict events
+- [x] **Phase 21.2: GDELT Event Quality Pipeline** - Geo-validation, expanded CAMEO classification, Goldstein sanity check, and composite confidence scoring for GDELT conflict events (completed 2026-03-28)
 
 ## Phase Details
 
@@ -292,7 +292,7 @@ Plans:
   4. Events with Goldstein scores inconsistent with their classified type are reclassified to a lower-severity type
   5. Each event carries a 0-1 `confidence` score based on media coverage, source diversity, actor specificity, geo precision, and Goldstein consistency
   6. Events below a configurable confidence threshold are discarded (default 0.35)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 21.2-01-PLAN.md -- Core engine: type extensions (geoPrecision, confidence), config (eventConfidenceThreshold), geoValidation module (isGeoValid, detectCentroid, city centroids), eventScoring module (computeEventConfidence, applyGoldsteinSanity), unit tests
@@ -333,4 +333,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 20.3. Political Boundaries Layer | v1.1 | 1/2 | In progress | - |
 | 21. Production Review & Deploy Sync | 4/5 | In Progress|  | - |
 | 21.1. GDELT News Relevance Filtering | 2/2 | Complete    | 2026-03-26 | - |
-| 21.2. GDELT Event Quality Pipeline | 1/2 | In Progress|  | - |
+| 21.2. GDELT Event Quality Pipeline | 2/2 | Complete   | 2026-03-28 | - |

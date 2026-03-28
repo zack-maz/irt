@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Intelligence Layer
-status: executing
-stopped_at: Completed 21.2-01-PLAN.md
-last_updated: "2026-03-28T02:51:11.173Z"
-last_activity: 2026-03-28 -- Completed Phase 21.2 Plan 01 (scoring engine and geo-validation)
+status: completed
+stopped_at: Completed 21.2-02-PLAN.md
+last_updated: "2026-03-28T02:58:26.221Z"
+last_activity: 2026-03-28 -- Completed Phase 21.2 Plan 02 (pipeline integration)
 progress:
   total_phases: 16
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 38
-  completed_plans: 37
-  percent: 97
+  completed_plans: 38
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
-**Current focus:** Phase 21.2 GDELT Event Quality Pipeline -- In Progress
+**Current focus:** Phase 21.2 GDELT Event Quality Pipeline -- Complete
 
 ## Current Position
 
 Phase: 21.2 (GDELT Event Quality Pipeline)
-Plan: 01 of 02 complete (01 done)
-Status: In Progress
-Last activity: 2026-03-28 -- Completed Phase 21.2 Plan 01 (scoring engine and geo-validation)
+Plan: 02 of 02 complete (all done)
+Status: Complete
+Last activity: 2026-03-28 -- Completed Phase 21.2 Plan 02 (pipeline integration)
 
-Progress: [█████████░] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 97%
 | Phase 21.1 P01 | 7min | 2 tasks | 7 files |
 | Phase 21.1 P02 | 4min | 2 tasks | 4 files |
 | Phase 21.2 P01 | 11min | 2 tasks | 6 files |
+| Phase 21.2 P02 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -226,6 +227,7 @@ Progress: [█████████░] 97%
 - [Phase 21.2]: FIPS contradiction check only applies when last segment starts uppercase with no digits
 - [Phase 21.2]: Goldstein consistency signal uses linear decay over 6 points outside ceiling range
 - [Phase 21.2]: 5-signal weighted confidence scoring: media(0.30), sources(0.20), actors(0.20), geo(0.15), goldstein(0.15)
+- [Phase 21.2]: Phase A/B pipeline architecture: geo cross-validation before actor checks, then normalize/score/threshold
 
 ### Roadmap Evolution
 
@@ -247,6 +249,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T02:51:11.170Z
-Stopped at: Completed 21.2-01-PLAN.md
+Last session: 2026-03-28T02:58:26.218Z
+Stopped at: Completed 21.2-02-PLAN.md
 Resume file: None
