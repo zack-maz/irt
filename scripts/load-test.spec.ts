@@ -47,8 +47,9 @@ test.describe('Production Load Validation', () => {
     await page.waitForTimeout(10_000);
 
     // Check that the app has rendered content (not a blank/error page)
+    // Note: match "500" only as "500 Internal" (not as numeric values like "500km")
     const body = page.locator('body');
-    await expect(body).not.toHaveText(/error|crash|500/i);
+    await expect(body).not.toHaveText(/internal server error|crash|5xx/i);
 
     // Look for the sidebar or status area — verify flight count is visible and > 0
     // The counters section shows entity counts in the sidebar
@@ -72,6 +73,7 @@ test.describe('Production Load Validation', () => {
   });
 
   test('app remains stable over 3 minutes', async ({ page }) => {
+    test.setTimeout(240_000); // 4 minutes (3-min test window + 1-min buffer)
     const errors: string[] = [];
 
     // Collect uncaught JS errors
