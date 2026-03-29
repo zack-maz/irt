@@ -51,6 +51,7 @@
 - [ ] **Phase 21: Production Review & Deploy Sync** - Full verification, integration testing, Vercel deployment, git tag v1.2
 - [x] **Phase 21.1: GDELT News Relevance Filtering** - Reduce false positive conflict news by improving filtering to distinguish actual conflict events from articles that merely mention conflict-related terms or locations (completed 2026-03-26)
 - [x] **Phase 21.2: GDELT Event Quality Pipeline** - Geo-validation, expanded CAMEO classification, Goldstein sanity check, and composite confidence scoring for GDELT conflict events (completed 2026-03-28)
+- [ ] **Phase 21.3: Multi-User Load Testing** - Test load balancing and performance with multiple concurrent users on production
 
 ## Phase Details
 
@@ -298,10 +299,22 @@ Plans:
 - [ ] 21.2-01-PLAN.md -- Core engine: type extensions (geoPrecision, confidence), config (eventConfidenceThreshold), geoValidation module (isGeoValid, detectCentroid, city centroids), eventScoring module (computeEventConfidence, applyGoldsteinSanity), unit tests
 - [ ] 21.2-02-PLAN.md -- Integration: refactor parseAndFilter into Phase A/B pipeline, wire geo-validation + scoring + threshold filter, expanded CAMEO verification, pipeline observability logging, EventDetail dev-mode confidence display, integration tests
 
+### Phase 21.3: Multi-User Load Testing
+
+**Goal:** Validate that the production deployment handles multiple concurrent users without degradation — test rate limiting, Redis connection pooling, Vercel cold starts, and client-side polling under real multi-user load
+**Depends on:** Phase 21 (Production Review)
+**Requirements**: None (testing/validation phase)
+**Success Criteria** (what must be TRUE):
+  1. Production handles N concurrent users without 5xx errors or rate limit exhaustion
+  2. Redis command budget stays within free-tier limits under concurrent load
+  3. Client polling from multiple tabs/browsers doesn't cause cascading failures
+  4. Performance bottlenecks are identified and documented
+**Plans:** TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.2 -> 20.3 -> 21 -> 21.1 -> 21.2
+Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.2 -> 20.3 -> 21 -> 21.1 -> 21.2 -> 21.3
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -334,3 +347,4 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19 -> 20 -> 20.1 -> 20.
 | 21. Production Review & Deploy Sync | 4/5 | In Progress|  | - |
 | 21.1. GDELT News Relevance Filtering | 2/2 | Complete    | 2026-03-26 | - |
 | 21.2. GDELT Event Quality Pipeline | 2/2 | Complete    | 2026-03-28 | - |
+| 21.3. Multi-User Load Testing | 0/0 | Not started | - | - |
