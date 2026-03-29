@@ -23,6 +23,8 @@ test.use({
 });
 
 test.describe('Production Load Validation', () => {
+  test.describe.configure({ mode: 'parallel' });
+
   test('app loads and renders map', async ({ page }) => {
     await page.goto('/');
 
