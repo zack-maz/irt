@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
-status: planning
-last_updated: "2026-04-01T00:00:00.000Z"
-last_activity: 2026-04-01 -- v1.3 milestone planning
+status: in_progress
+last_updated: "2026-04-01T23:37:00.000Z"
+last_activity: 2026-04-01 -- Completed 22-01-PLAN.md
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,14 +22,15 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Milestone: v1.3 Data Quality & Layers — PLANNING
+Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 22, Plan 01 complete (2 of 3 plans remaining)
 Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 
 ## v1.3 Phases
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 22 | GDELT Event Quality & OSINT Integration | Context gathered |
+| 22 | GDELT Event Quality & OSINT Integration | Plan 01/03 complete |
 | 23 | Threat Density Improvements | Planned |
 | 24 | Political Boundaries Layer | Planned |
 | 25 | Ethnic Distribution Layer | Planned |
@@ -44,6 +44,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Ethnic layer: hatched overlay regions (Option C) — not solid fills
 - Load target: 250 VUs (up from 100 in v1.2)
 - Satellite imagery deferred to v1.4
+- Dispersion only for ActionGeo_Type 3/4; centroid penalty 0.7x on confidence (multiplicative, not exclusion)
 
 ## Pending Todos
 
