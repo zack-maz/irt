@@ -16,6 +16,10 @@ export interface AppConfig {
   };
   newsRelevanceThreshold: number; // 0-1 threshold for NLP relevance scoring (default 0.7)
   eventConfidenceThreshold: number; // 0-1 threshold for event confidence filtering (default 0.35)
+  eventMinSources: number; // Minimum independent sources for event inclusion (default 2)
+  eventCentroidPenalty: number; // Confidence multiplier for city-centroid events (default 0.7)
+  eventExcludedCameo: string[]; // CAMEO base codes excluded from pipeline (default ['180','192'])
+  bellingcatCorroborationBoost: number; // Confidence boost for Bellingcat-corroborated events (default 0.2)
 }
 
 let _config: AppConfig | null = null;
@@ -40,6 +44,19 @@ export function loadConfig(): AppConfig {
     )),
     eventConfidenceThreshold: Math.min(1, Math.max(0,
       parseFloat(process.env.EVENT_CONFIDENCE_THRESHOLD ?? '') || 0.35,
+    )),
+    eventMinSources: Math.max(1,
+      parseInt(process.env.EVENT_MIN_SOURCES ?? '', 10) || 2,
+    ),
+    eventCentroidPenalty: Math.min(1, Math.max(0,
+      parseFloat(process.env.EVENT_CENTROID_PENALTY ?? '') || 0.7,
+    )),
+    eventExcludedCameo: (process.env.EVENT_EXCLUDED_CAMEO ?? '180,192')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean),
+    bellingcatCorroborationBoost: Math.min(1, Math.max(0,
+      parseFloat(process.env.BELLINGCAT_CORROBORATION_BOOST ?? '') || 0.2,
     )),
   };
 }
