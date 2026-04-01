@@ -75,8 +75,8 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **EQ-02**: City-centroid events are dispersed into concentric rings (6 at 3km, 12 at 6km, 18 at 9km) with deterministic timestamp-sorted positioning
 - [x] **EQ-03**: Both original centroid and dispersed coordinates are stored on each event for audit purposes
 - [x] **EQ-04**: Event filtering thresholds (confidence, minSources, centroidPenalty, CAMEO exclusions) are config-driven via env vars with safe defaults
-- [ ] **EQ-05**: Bellingcat RSS feed is integrated as 6th news source and articles flow through existing keyword filter, relevance scoring, and dedup/clustering
-- [ ] **EQ-06**: GDELT events corroborated by Bellingcat articles receive +0.2 confidence boost (requires temporal AND geographic AND keyword overlap)
+- [x] **EQ-05**: Bellingcat RSS feed is integrated as 6th news source and articles flow through existing keyword filter, relevance scoring, and dedup/clustering
+- [x] **EQ-06**: GDELT events corroborated by Bellingcat articles receive +0.2 confidence boost (requires temporal AND geographic AND keyword overlap)
 - [ ] **EQ-07**: CLI audit script (`npx tsx scripts/audit-events.ts`) dumps all cached events with pipeline trace metadata to JSON
 - [ ] **EQ-08**: Audit output includes both accepted AND rejected events with specific rejection reasons and full pipeline trace
 - [ ] **EQ-09**: Known true/false positive GDELT fixtures are verified by automated tests (regression suite)
