@@ -365,6 +365,7 @@ export function buildASTFromFilters(
  */
 export function useQuerySync(): void {
   const syncSourceRef = useRef<'search' | 'sidebar' | null>(null);
+  const lastFlownPinRef = useRef<{ lat: number; lng: number } | null>(null);
 
   // Subscribe to parsedQuery changes
   const parsedQuery = useSearchStore((s) => s.parsedQuery);
@@ -500,15 +501,28 @@ export function useQuerySync(): void {
       useFilterStore.getState().setProximityPin(filterUpdates.proximityPin);
       hasFilterUpdates = true;
       if (filterUpdates.proximityPin !== null) {
-        // Open the filters panel so the user can see the proximity controls
-        useUIStore.setState({ isFiltersCollapsed: false });
-        // Fly to the proximity pin location
-        useNotificationStore.getState().setFlyToTarget({
-          lng: filterUpdates.proximityPin.lng,
-          lat: filterUpdates.proximityPin.lat,
-          zoom: 8,
-        });
+        const prev = lastFlownPinRef.current;
+        const pin = filterUpdates.proximityPin;
+        const pinChanged = !prev || prev.lat !== pin.lat || prev.lng !== pin.lng;
+        if (pinChanged) {
+          // Open the filters panel so the user can see the proximity controls
+          useUIStore.setState({ isFiltersCollapsed: false });
+          // Fly to the proximity pin location
+          useNotificationStore.getState().setFlyToTarget({
+            lng: pin.lng,
+            lat: pin.lat,
+            zoom: 8,
+          });
+          lastFlownPinRef.current = { lat: pin.lat, lng: pin.lng };
+        }
+      } else {
+        // Clearing near: resets fly-to state
+        lastFlownPinRef.current = null;
       }
+    } else if (lastFlownPinRef.current !== null) {
+      // No near: tag in current query — reset fly-to state so re-entering
+      // the same near: location will trigger fly-to again
+      lastFlownPinRef.current = null;
     }
 
     if (hasFilterUpdates) {
