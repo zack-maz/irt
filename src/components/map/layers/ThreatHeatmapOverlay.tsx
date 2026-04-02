@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { ScatterplotLayer } from '@deck.gl/layers';
 import { useLayerStore } from '@/stores/layerStore';
 import { useFilterStore } from '@/stores/filterStore';
@@ -302,11 +301,6 @@ function formatRelativeTime(timestamp: number): string {
 
 // --- Hook ---
 
-interface WeightedPoint {
-  position: [number, number];
-  weight: number;
-}
-
 export function useThreatHeatmapLayers() {
   // Consume events already filtered by useFilteredEntities (date, proximity, country, CAMEO, mentions, etc.)
   const { events } = useFilteredEntities();
@@ -328,47 +322,35 @@ export function useThreatHeatmapLayers() {
     });
     if (filtered.length === 0) return [];
 
-    const weightedData: WeightedPoint[] = filtered.map((e) => ({
-      position: [e.lng, e.lat] as [number, number],
-      weight: computeThreatWeight(e),
-    }));
-
-    const p90 = computeP90(weightedData.map((d) => d.weight));
-
-    const heatmapLayer = new HeatmapLayer({
-      id: 'threat-heatmap',
-      data: weightedData,
-      getPosition: (d: WeightedPoint) => d.position,
-      getWeight: (d: WeightedPoint) => d.weight,
-      radiusPixels: 40,
-      colorRange: THERMAL_COLOR_RANGE,
-      colorDomain: [0, p90],
-      intensity: 1,
-      opacity: 0.45,
-      aggregation: 'SUM',
-      pickable: false,
-      debounceTimeout: 500,
-    });
-
     const grid = aggregateToGrid(filtered);
     const clusters = mergeClusters(grid);
+
+    // Max cluster weight for color interpolation
+    const maxClusterWeight = Math.max(1, ...clusters.map((c) => c.totalWeight));
 
     const clusterPickerLayer = new ScatterplotLayer({
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
+      // Meter-based radius matching event icon sizing strategy so both
+      // scale together on zoom. Low threat = smaller, high threat = larger.
       getRadius: (d: ThreatCluster) => {
-        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
-        const dLat = (maxLat - minLat) * 111000;
-        const dLng = (maxLng - minLng) * 111000 * Math.cos((d.centroidLat * Math.PI) / 180);
-        return Math.max(50000, Math.sqrt(dLat * dLat + dLng * dLng) / 2);
+        const t = Math.min(1, d.totalWeight / maxClusterWeight);
+        return 500 + t * 2500; // 500m (low) to 3000m (high)
       },
       radiusUnits: 'meters' as const,
-      getFillColor: [0, 0, 0, 0],
+      radiusMinPixels: 8,
+      radiusMaxPixels: 50,
+      // Thermal color mapped from cluster weight
+      getFillColor: (d: ThreatCluster) => {
+        const t = Math.min(1, d.totalWeight / maxClusterWeight);
+        const idx = Math.min(THERMAL_COLOR_RANGE.length - 1, Math.floor(t * THERMAL_COLOR_RANGE.length));
+        return [...THERMAL_COLOR_RANGE[idx], 180] as [number, number, number, number];
+      },
       pickable: true,
     });
 
-    return [heatmapLayer, clusterPickerLayer];
+    return [clusterPickerLayer];
   }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle]);
 }
 
