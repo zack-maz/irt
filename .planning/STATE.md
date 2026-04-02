@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-02T00:00:15.359Z"
+last_updated: "2026-04-02T02:00:10.553Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 22.1 IN PROGRESS — Plan 02 of 2 complete (fly-to dedup done, dispersion pipeline pending)
 Phase 22 COMPLETE (3 of 3 plans done)
 Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 
@@ -30,6 +31,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | Phase | Name | Status |
 |-------|------|--------|
 | 22 | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans) |
+| 22.1 | Fixing Dispersion | IN PROGRESS (1/2 plans) |
 | 23 | Threat Density Improvements | Planned |
 | 24 | Political Boundaries Layer | Planned |
 | 25 | Ethnic Distribution Layer | Planned |
@@ -47,6 +49,8 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Bellingcat corroboration uses three-gate matching (temporal AND geographic AND keyword) to prevent false boosts
 - RSS_FEEDS changed from const assertion to typed array for extensibility
 - parseAndFilterWithTrace kept separate from parseAndFilter to preserve production performance
+- Fly-to dedup uses simple lat/lng !== equality (coordinates from lookup table, exact match correct)
+- Added else-if branch to reset lastFlownPinRef when near: tag absent from query (deriveFiltersFromAST returns undefined, not null)
 
 ## Pending Todos
 
