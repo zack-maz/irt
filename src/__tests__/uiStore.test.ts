@@ -118,4 +118,166 @@ describe('uiStore', () => {
     expect(useUIStore.getState().isMarketsCollapsed).toBe(true);
     expect(localStorageMock.setItem).toHaveBeenCalledWith('markets-collapsed', 'true');
   });
+
+  describe('navigation stack', () => {
+    beforeEach(() => {
+      useUIStore.setState({
+        navigationStack: [],
+        slideDirection: null,
+        selectedEntityId: null,
+        selectedCluster: null,
+      });
+    });
+
+    it('navigationStack starts as empty array', () => {
+      expect(useUIStore.getState().navigationStack).toEqual([]);
+    });
+
+    it('slideDirection starts as null', () => {
+      expect(useUIStore.getState().slideDirection).toBeNull();
+    });
+
+    it('pushView adds entry to navigationStack and sets slideDirection to forward', () => {
+      const view = { entityId: 'flight-1', cluster: null, breadcrumbLabel: 'FLIGHT ABC123' };
+      useUIStore.getState().pushView(view);
+      const state = useUIStore.getState();
+      expect(state.navigationStack).toEqual([view]);
+      expect(state.slideDirection).toBe('forward');
+    });
+
+    it('pushView appends (does not replace) existing stack entries', () => {
+      const view1 = { entityId: 'flight-1', cluster: null, breadcrumbLabel: 'FLIGHT ABC123' };
+      const view2 = { entityId: 'ship-1', cluster: null, breadcrumbLabel: 'SHIP VESSEL' };
+      useUIStore.getState().pushView(view1);
+      useUIStore.getState().pushView(view2);
+      const state = useUIStore.getState();
+      expect(state.navigationStack).toEqual([view1, view2]);
+    });
+
+    it('goBack pops last entry and restores selectedEntityId from it', () => {
+      const view = { entityId: 'flight-1', cluster: null, breadcrumbLabel: 'FLIGHT ABC123' };
+      useUIStore.setState({
+        navigationStack: [view],
+        selectedEntityId: 'ship-2',
+        selectedCluster: null,
+      });
+      useUIStore.getState().goBack();
+      const state = useUIStore.getState();
+      expect(state.navigationStack).toEqual([]);
+      expect(state.selectedEntityId).toBe('flight-1');
+    });
+
+    it('goBack restores selectedCluster from popped entry (bypasses mutual exclusion)', () => {
+      const cluster = {
+        id: 'cluster-1',
+        centroidLat: 33.0,
+        centroidLng: 44.0,
+        cells: [],
+        eventCount: 5,
+        totalWeight: 10,
+        dominantType: 'airstrike',
+        totalFatalities: 0,
+        latestTime: Date.now(),
+        boundingBox: { minLat: 32, maxLat: 34, minLng: 43, maxLng: 45 },
+        eventIds: ['e1', 'e2'],
+      };
+      const view = { entityId: null, cluster, breadcrumbLabel: 'Cluster(5)' };
+      useUIStore.setState({
+        navigationStack: [view],
+        selectedEntityId: 'flight-1',
+        selectedCluster: null,
+      });
+      useUIStore.getState().goBack();
+      const state = useUIStore.getState();
+      expect(state.selectedCluster).toEqual(cluster);
+      // Mutual exclusion bypass: cluster is set directly, entityId from the view is null
+      expect(state.selectedEntityId).toBeNull();
+    });
+
+    it('goBack sets slideDirection to back', () => {
+      const view = { entityId: 'flight-1', cluster: null, breadcrumbLabel: 'FLIGHT ABC123' };
+      useUIStore.setState({ navigationStack: [view] });
+      useUIStore.getState().goBack();
+      expect(useUIStore.getState().slideDirection).toBe('back');
+    });
+
+    it('goBack on empty stack returns empty object (no state change)', () => {
+      useUIStore.setState({
+        navigationStack: [],
+        slideDirection: 'forward',
+        selectedEntityId: 'flight-1',
+        selectedCluster: null,
+      });
+      useUIStore.getState().goBack();
+      const state = useUIStore.getState();
+      // No state change
+      expect(state.navigationStack).toEqual([]);
+      expect(state.slideDirection).toBe('forward');
+      expect(state.selectedEntityId).toBe('flight-1');
+    });
+
+    it('clearStack empties navigationStack and sets slideDirection to null', () => {
+      const view = { entityId: 'flight-1', cluster: null, breadcrumbLabel: 'FLIGHT ABC123' };
+      useUIStore.setState({
+        navigationStack: [view],
+        slideDirection: 'forward',
+      });
+      useUIStore.getState().clearStack();
+      const state = useUIStore.getState();
+      expect(state.navigationStack).toEqual([]);
+      expect(state.slideDirection).toBeNull();
+    });
+
+    it('goBack with cluster entry restores cluster AND sets entityId to null', () => {
+      const cluster = {
+        id: 'cluster-2',
+        centroidLat: 35.0,
+        centroidLng: 51.0,
+        cells: [],
+        eventCount: 3,
+        totalWeight: 7,
+        dominantType: 'ground_combat',
+        totalFatalities: 2,
+        latestTime: Date.now(),
+        boundingBox: { minLat: 34, maxLat: 36, minLng: 50, maxLng: 52 },
+        eventIds: ['e3'],
+      };
+      const view = { entityId: null, cluster, breadcrumbLabel: 'Cluster(3)' };
+      useUIStore.setState({
+        navigationStack: [view],
+        selectedEntityId: 'some-entity',
+        selectedCluster: null,
+      });
+      useUIStore.getState().goBack();
+      const state = useUIStore.getState();
+      expect(state.selectedCluster).toEqual(cluster);
+      expect(state.selectedEntityId).toBeNull();
+    });
+
+    it('goBack with entity entry restores entityId AND sets cluster to null', () => {
+      const view = { entityId: 'flight-99', cluster: null, breadcrumbLabel: 'FLIGHT XYZ' };
+      const activeCluster = {
+        id: 'cluster-active',
+        centroidLat: 30.0,
+        centroidLng: 50.0,
+        cells: [],
+        eventCount: 1,
+        totalWeight: 1,
+        dominantType: 'airstrike',
+        totalFatalities: 0,
+        latestTime: Date.now(),
+        boundingBox: { minLat: 29, maxLat: 31, minLng: 49, maxLng: 51 },
+        eventIds: ['e4'],
+      };
+      useUIStore.setState({
+        navigationStack: [view],
+        selectedEntityId: null,
+        selectedCluster: activeCluster,
+      });
+      useUIStore.getState().goBack();
+      const state = useUIStore.getState();
+      expect(state.selectedEntityId).toBe('flight-99');
+      expect(state.selectedCluster).toBeNull();
+    });
+  });
 });
