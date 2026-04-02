@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UIState } from '@/types/ui';
+import type { UIState, PanelView } from '@/types/ui';
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -25,6 +25,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
   selectedCluster: null,
   hoveredEntityId: null,
   expandedAlertSiteId: null,
+  navigationStack: [],
+  slideDirection: null,
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
   closeDetailPanel: () => set({ isDetailPanelOpen: false }),
   toggleStatus: () => set((s) => ({ isStatusCollapsed: !s.isStatusCollapsed })),
@@ -73,4 +75,24 @@ export const useUIStore = create<UIState>()((set, get) => ({
   setSelectedCluster: (cluster) => set({ selectedCluster: cluster, selectedEntityId: null }),
   hoverEntity: (id) => set({ hoveredEntityId: id }),
   setExpandedAlertSiteId: (id) => set({ expandedAlertSiteId: id }),
+  pushView: (view: PanelView) => set((s) => ({
+    navigationStack: [...s.navigationStack, view],
+    slideDirection: 'forward' as const,
+  })),
+  goBack: () => set((s) => {
+    const stack = [...s.navigationStack];
+    const prev = stack.pop();
+    if (!prev) return {};
+    // Bypass mutual exclusion — set both directly in one atomic call
+    return {
+      navigationStack: stack,
+      selectedEntityId: prev.entityId,
+      selectedCluster: prev.cluster,
+      slideDirection: 'back' as const,
+    };
+  }),
+  clearStack: () => set({
+    navigationStack: [],
+    slideDirection: null,
+  }),
 }));

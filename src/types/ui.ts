@@ -64,6 +64,13 @@ export interface ThreatCluster {
   eventIds: string[];
 }
 
+/** A single entry in the detail panel navigation stack */
+export interface PanelView {
+  entityId: string | null;
+  cluster: ThreatCluster | null;
+  breadcrumbLabel: string;
+}
+
 export type SidebarSection = 'counters' | 'layers' | 'filters';
 
 export interface UIState {
@@ -83,6 +90,8 @@ export interface UIState {
   selectedCluster: ThreatCluster | null;
   hoveredEntityId: string | null;
   expandedAlertSiteId: string | null;
+  navigationStack: PanelView[];
+  slideDirection: 'forward' | 'back' | null;
   openDetailPanel: () => void;
   closeDetailPanel: () => void;
   toggleStatus: () => void;
@@ -102,6 +111,9 @@ export interface UIState {
   closeSidebar: () => void;
   toggleMarkets: () => void;
   collapseMarkets: () => void;
+  pushView: (view: PanelView) => void;
+  goBack: () => void;
+  clearStack: () => void;
 }
 
 /** Human-readable labels for each SiteType */

@@ -86,3 +86,41 @@
   animation: delta-fade 3s ease-out forwards;
 }
 
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 150ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 150ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@keyframes breadcrumb-enter {
+  from { max-height: 0; opacity: 0; }
+  to   { max-height: 40px; opacity: 1; }
+}
+
+@keyframes breadcrumb-exit {
+  from { max-height: 40px; opacity: 1; }
+  to   { max-height: 0; opacity: 0; }
+}
+
+.animate-breadcrumb-enter {
+  animation: breadcrumb-enter 150ms ease-out both;
+  overflow: hidden;
+}
+
+.animate-breadcrumb-exit {
+  animation: breadcrumb-exit 150ms ease-out both;
+  overflow: hidden;
+}
+

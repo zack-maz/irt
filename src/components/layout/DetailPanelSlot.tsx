@@ -7,7 +7,8 @@ import { EventDetail } from '@/components/detail/EventDetail';
 import { SiteDetail } from '@/components/detail/SiteDetail';
 import { ThreatClusterDetail } from '@/components/detail/ThreatClusterDetail';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
-import { isConflictEventType, CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
+import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
+import { getTypeLabel, getEntityName } from '@/lib/panelLabel';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 
 /** Maps entity type to the ENTITY_DOT_COLORS key */
@@ -22,38 +23,6 @@ function getDotColor(type: string): string {
     return ENTITY_DOT_COLORS.groundCombat;
   }
   return '#9ca3af';
-}
-
-/** Maps entity type to display label */
-function getTypeLabel(type: string): string {
-  if (type === 'flight') return 'FLIGHT';
-  if (type === 'ship') return 'SHIP';
-  if (type === 'site') return 'SITE';
-  return (EVENT_TYPE_LABELS[type] ?? type).toUpperCase();
-}
-
-/** Gets the display name for an entity */
-function getEntityName(entity: { type: string; [key: string]: unknown }): string {
-  switch (entity.type) {
-    case 'flight': {
-      const d = (entity as FlightEntity).data;
-      return d.callsign || d.icao24;
-    }
-    case 'ship': {
-      const d = (entity as ShipEntity).data;
-      return d.shipName || String(d.mmsi);
-    }
-    case 'site': {
-      return (entity as SiteEntity).label || 'Unknown Site';
-    }
-    default: {
-      if (isConflictEventType(entity.type)) {
-        const d = (entity as ConflictEventEntity).data;
-        return d.eventType;
-      }
-      return '';
-    }
-  }
 }
 
 /** Hook: returns a ticking relative time string */
