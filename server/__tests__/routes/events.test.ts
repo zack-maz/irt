@@ -70,7 +70,6 @@ vi.mock('../../config.js', () => ({
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
     eventConfidenceThreshold: 0.35,
   },
@@ -79,7 +78,6 @@ vi.mock('../../config.js', () => ({
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
     eventConfidenceThreshold: 0.35,
   }),
@@ -88,7 +86,6 @@ vi.mock('../../config.js', () => ({
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
     eventConfidenceThreshold: 0.35,
   }),
@@ -110,11 +107,6 @@ vi.mock('../../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
   getLastMessageTime: vi.fn(() => 0),
   connectAISStream: vi.fn(),
-}));
-
-// Mock ACLED adapter
-vi.mock('../../adapters/acled.js', () => ({
-  fetchEvents: vi.fn(async () => []),
 }));
 
 // Mock GDELT adapter
@@ -413,6 +405,69 @@ describe('Events Route (Redis accumulator)', () => {
       expect(body.data).toHaveLength(1);
       // Backfill merges first, then fresh overwrites -- so fresh version wins
       expect(body.data[0].label).toBe('Fresh version');
+    });
+  });
+
+  describe('Raw coordinates (dispersion is client-side)', () => {
+    it('returns undispersed coordinates so client-side dispersion can dynamically adjust with filters', async () => {
+      const tehranEvent1 = makeEvent({
+        id: 'gdelt-DISP1',
+        label: 'Tehran event 1',
+        lat: 35.6892,
+        lng: 51.389,
+        data: {
+          eventType: 'Conventional military force',
+          subEventType: 'CAMEO 190',
+          fatalities: 0,
+          actor1: 'IRN',
+          actor2: 'ISR',
+          notes: '',
+          source: 'https://example.com/1',
+          goldsteinScale: -10,
+          locationName: 'Tehran, Iran',
+          cameoCode: '190',
+          geoPrecision: 'centroid' as const,
+          confidence: 0.8,
+          actionGeoType: 3,
+        },
+      });
+      const tehranEvent2 = makeEvent({
+        id: 'gdelt-DISP2',
+        label: 'Tehran event 2',
+        lat: 35.6892,
+        lng: 51.389,
+        timestamp: Date.now() - 1000,
+        data: {
+          eventType: 'Aerial weapons',
+          subEventType: 'CAMEO 195',
+          fatalities: 0,
+          actor1: 'USA',
+          actor2: 'IRN',
+          notes: '',
+          source: 'https://example.com/2',
+          goldsteinScale: -10,
+          locationName: 'Tehran, Iran',
+          cameoCode: '195',
+          geoPrecision: 'centroid' as const,
+          confidence: 0.8,
+          actionGeoType: 3,
+        },
+      });
+
+      mockFetchEvents.mockResolvedValue([tehranEvent1]);
+      mockBackfillEvents.mockResolvedValue([tehranEvent2]);
+
+      const res = await fetch(`${baseUrl}/api/events`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.data).toHaveLength(2);
+
+      // Server returns raw (undispersed) coordinates — dispersion is client-side
+      for (const e of body.data) {
+        expect(e.lat).toBe(35.6892);
+        expect(e.lng).toBe(51.389);
+      }
     });
   });
 });

@@ -22,6 +22,7 @@ export const useUIStore = create<UIState>()((set, get) => ({
   activeSidebarSection: null,
   isMarketsCollapsed: readBool('markets-collapsed', false),
   selectedEntityId: null,
+  selectedCluster: null,
   hoveredEntityId: null,
   expandedAlertSiteId: null,
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
@@ -68,7 +69,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
     set({ isMarketsCollapsed: true });
     try { localStorage.setItem('markets-collapsed', 'true'); } catch { /* */ }
   },
-  selectEntity: (id) => set({ selectedEntityId: id }),
+  selectEntity: (id) => set({ selectedEntityId: id, selectedCluster: null }),
+  setSelectedCluster: (cluster) => set({ selectedCluster: cluster, selectedEntityId: null }),
   hoverEntity: (id) => set({ hoveredEntityId: id }),
   setExpandedAlertSiteId: (id) => set({ expandedAlertSiteId: id }),
 }));

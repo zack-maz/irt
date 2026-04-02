@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 
 // Mock localStorage before importing stores
 const localStorageMock = {
@@ -15,8 +16,12 @@ import {
   buildASTFromFilters,
   rangeToMinMax,
   minMaxToRangeValue,
+  useQuerySync,
   type SyncableState,
 } from '@/hooks/useQuerySync';
+import { useSearchStore } from '@/stores/searchStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { serialize } from '@/lib/querySerializer';
 
 // Helper: default syncable state with everything null/empty
@@ -295,5 +300,115 @@ describe('sync loop prevention', () => {
     expect(str1).toContain('type:flight');
     // altitude should be present (bidirectional, rebuilt from filter state)
     expect(str1).toContain('altitude:>=30000');
+  });
+});
+
+// ─── Fly-to deduplication (useQuerySync hook) ───────────────
+
+describe('fly-to deduplication', () => {
+  let flyToCalls: Array<{ lng: number; lat: number; zoom: number }>;
+  let unsubscribe: () => void;
+
+  beforeEach(() => {
+    // Reset stores to defaults
+    useSearchStore.setState({ query: '', parsedQuery: null });
+    useFilterStore.setState({ proximityPin: null });
+    useNotificationStore.setState({ flyToTarget: null });
+
+    // Track setFlyToTarget calls by subscribing to store changes
+    flyToCalls = [];
+    unsubscribe = useNotificationStore.subscribe((state, prevState) => {
+      if (state.flyToTarget !== null && state.flyToTarget !== prevState.flyToTarget) {
+        flyToCalls.push({ ...state.flyToTarget });
+      }
+    });
+  });
+
+  afterEach(() => {
+    unsubscribe();
+  });
+
+  it('calls setFlyToTarget when near: pin is first set', () => {
+    const { unmount } = renderHook(() => useQuerySync());
+
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran');
+    });
+
+    expect(flyToCalls).toHaveLength(1);
+    expect(flyToCalls[0]).toEqual(
+      expect.objectContaining({ lat: 35.6892, lng: 51.389 }),
+    );
+
+    unmount();
+  });
+
+  it('does NOT call setFlyToTarget when pin coordinates unchanged', () => {
+    const { unmount } = renderHook(() => useQuerySync());
+
+    // First: set near:Tehran
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran');
+    });
+    expect(flyToCalls).toHaveLength(1);
+
+    // Second: add another tag while keeping near:Tehran
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran type:airstrike');
+    });
+
+    // Should NOT call setFlyToTarget again - same pin coordinates
+    expect(flyToCalls).toHaveLength(1);
+
+    unmount();
+  });
+
+  it('calls setFlyToTarget when pin changes to different location', () => {
+    const { unmount } = renderHook(() => useQuerySync());
+
+    // First: set near:Tehran
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran');
+    });
+    expect(flyToCalls).toHaveLength(1);
+
+    // Second: change to near:Baghdad
+    act(() => {
+      useSearchStore.getState().setQuery('near:Baghdad');
+    });
+
+    expect(flyToCalls).toHaveLength(2);
+    expect(flyToCalls[1]).toEqual(
+      expect.objectContaining({ lat: 33.3152, lng: 44.3661 }),
+    );
+
+    unmount();
+  });
+
+  it('resets fly-to state when near: is cleared, allowing re-fly', () => {
+    const { unmount } = renderHook(() => useQuerySync());
+
+    // First: set near:Tehran
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran');
+    });
+    expect(flyToCalls).toHaveLength(1);
+
+    // Second: clear near: tag
+    act(() => {
+      useSearchStore.getState().setQuery('type:airstrike');
+    });
+
+    // Third: re-enter near:Tehran - should fly again
+    act(() => {
+      useSearchStore.getState().setQuery('near:Tehran');
+    });
+
+    expect(flyToCalls).toHaveLength(2);
+    expect(flyToCalls[1]).toEqual(
+      expect.objectContaining({ lat: 35.6892, lng: 51.389 }),
+    );
+
+    unmount();
   });
 });

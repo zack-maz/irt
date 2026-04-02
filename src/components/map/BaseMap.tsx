@@ -16,6 +16,7 @@ import { EntityTooltip } from './EntityTooltip';
 import { WeatherTooltip, useWeatherLayers } from './layers/WeatherOverlay';
 import { ThreatTooltip, useThreatHeatmapLayers } from './layers/ThreatHeatmapOverlay';
 import type { ThreatZoneData } from './layers/ThreatHeatmapOverlay';
+import type { ThreatCluster } from '@/types/ui';
 import { UtcClock } from '@/components/layout/UtcClock';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -80,6 +81,7 @@ export function BaseMap() {
   const setCursorPosition = useMapStore((s) => s.setCursorPosition);
   const selectedEntityId = useUIStore((s) => s.selectedEntityId);
   const selectEntity = useUIStore((s) => s.selectEntity);
+  const setSelectedCluster = useUIStore((s) => s.setSelectedCluster);
   const openDetailPanel = useUIStore((s) => s.openDetailPanel);
   const closeDetailPanel = useUIStore((s) => s.closeDetailPanel);
   const hoverEntity = useUIStore((s) => s.hoverEntity);
@@ -110,8 +112,8 @@ export function BaseMap() {
         return;
       }
 
-      // Threat picker layer: show threat zone tooltip
-      if (info.layer?.id === 'threat-picker' && isThreatActive) {
+      // Threat cluster picker layer: show threat zone tooltip
+      if (info.layer?.id === 'threat-cluster-picker' && isThreatActive) {
         const zone = info.object as ThreatZoneData;
         setThreatHover({ zone, x: info.x, y: info.y });
         setHover(null);
@@ -149,9 +151,19 @@ export function BaseMap() {
       if (!info.object) {
         // Empty map click dismisses detail panel and selection
         selectEntity(null);
+        setSelectedCluster(null);
         closeDetailPanel();
         return;
       }
+
+      // Threat cluster picker: open cluster detail
+      if (info.layer?.id === 'threat-cluster-picker') {
+        const cluster = info.object as ThreatCluster;
+        setSelectedCluster(cluster);
+        openDetailPanel();
+        return;
+      }
+
       const entity = info.object as MapEntity | SiteEntity;
       if (selectedEntityId === entity.id) {
         // Re-click same entity: deselect and close panel
@@ -164,7 +176,7 @@ export function BaseMap() {
         setFlyToTarget({ lng: entity.lng, lat: entity.lat, zoom: 10 });
       }
     },
-    [selectedEntityId, selectEntity, openDetailPanel, closeDetailPanel, setFlyToTarget],
+    [selectedEntityId, selectEntity, setSelectedCluster, openDetailPanel, closeDetailPanel, setFlyToTarget],
   );
 
   const handleLoad = useCallback(

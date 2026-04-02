@@ -16,11 +16,16 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config to provide eventConfidenceThreshold for parseAndFilter
+// Mock config to provide thresholds for parseAndFilter
+const mockConfig = {
+  eventConfidenceThreshold: 0.35,
+  eventMinSources: 2,
+  eventCentroidPenalty: 0.7,
+  eventExcludedCameo: ['180', '192'],
+  bellingcatCorroborationBoost: 0.2,
+};
 vi.mock('../config.js', () => ({
-  getConfig: () => ({
-    eventConfidenceThreshold: 0.35,
-  }),
+  getConfig: () => mockConfig,
 }));
 
 // Sample lastupdate.txt content (3 lines: export, mentions, gkg)
@@ -535,12 +540,16 @@ describe('GDELT Adapter', () => {
       // First event: Iran ground_combat (base code 190)
       expect(events[0].id).toBe('gdelt-1234567890');
       expect(events[0].type).toBe('ground_combat');
+      // parseAndFilter no longer applies dispersion -- raw coordinates preserved
       expect(events[0].lat).toBe(35.6892);
+      expect(events[0].data.originalLat).toBeUndefined();
 
       // Second event: Syria bombing (base code 183)
       expect(events[1].id).toBe('gdelt-9876543210');
       expect(events[1].type).toBe('bombing');
+      // Raw Damascus centroid coordinates (no dispersion)
       expect(events[1].lat).toBe(33.5138);
+      expect(events[1].data.originalLat).toBeUndefined();
 
       // Verify fetch was called twice (lastupdate + ZIP download)
       expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -557,6 +566,309 @@ describe('GDELT Adapter', () => {
       mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
 
       await expect(fetchEvents()).rejects.toThrow('download failed');
+    });
+  });
+
+  describe('ActionGeo_Type parsing', () => {
+    it('parses ActionGeo_Type=4 and stores in entity.data.actionGeoType', () => {
+      const row = makeGdeltRow({ 51: '4' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actionGeoType).toBe(4);
+    });
+
+    it('parses ActionGeo_Type=1 (country level)', () => {
+      const row = makeGdeltRow({ 51: '1' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actionGeoType).toBe(1);
+    });
+
+    it('parses ActionGeo_Type=3 (city level)', () => {
+      const row = makeGdeltRow({ 51: '3' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actionGeoType).toBe(3);
+    });
+
+    it('actionGeoType is undefined when column is empty', () => {
+      const row = makeGdeltRow({ 51: '' });
+      const cols = row.split('\t');
+      const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
+      expect(entity.data.actionGeoType).toBeUndefined();
+    });
+  });
+
+  describe('config-driven thresholds', () => {
+    it('uses config-driven CAMEO exclusions (respects eventExcludedCameo)', () => {
+      // Default excludes 180 and 192. Override to only exclude 180.
+      const origExcluded = mockConfig.eventExcludedCameo;
+      mockConfig.eventExcludedCameo = ['180'];
+      try {
+        // Base code 192 should now be allowed
+        const row = makeGdeltRow({
+          0: '8080808080',
+          26: '192',
+          27: '192',
+          28: '19',
+        });
+        const events = parseAndFilter(row);
+        // 192 maps to blockade. With enough mentions/sources, it should pass.
+        expect(events.length).toBeGreaterThanOrEqual(1);
+      } finally {
+        mockConfig.eventExcludedCameo = origExcluded;
+      }
+    });
+
+    it('uses config-driven minSources threshold', () => {
+      const origMin = mockConfig.eventMinSources;
+      mockConfig.eventMinSources = 3;
+      try {
+        // Default row has NumSources=5, so it should still pass with minSources=3
+        const row = makeGdeltRow({ 0: '9090909090', 32: '5' });
+        const events = parseAndFilter(row);
+        expect(events).toHaveLength(1);
+
+        // But NumSources=2 should now be rejected (< 3)
+        const row2 = makeGdeltRow({ 0: '9191919191', 32: '2' });
+        const events2 = parseAndFilter(row2);
+        expect(events2).toHaveLength(0);
+      } finally {
+        mockConfig.eventMinSources = origMin;
+      }
+    });
+
+    it('applies centroid penalty for ActionGeo_Type 3 (reduces confidence)', () => {
+      // Create a row at Tehran centroid with ActionGeo_Type=3
+      const rowCentroid = makeGdeltRow({
+        0: 'C1C1C1C1C1',
+        51: '3', // ActionGeo_Type = city
+        56: '35.6892',
+        57: '51.3890',
+      });
+      // Same row without ActionGeo_Type (no penalty)
+      const rowNoPenalty = makeGdeltRow({
+        0: 'C2C2C2C2C2',
+        51: '', // No ActionGeo_Type
+        56: '35.6892',
+        57: '51.3890',
+      });
+
+      const eventsCentroid = parseAndFilter(rowCentroid);
+      const eventsNoPenalty = parseAndFilter(rowNoPenalty);
+
+      // Both should pass (confidence still above threshold after penalty)
+      expect(eventsCentroid).toHaveLength(1);
+      expect(eventsNoPenalty).toHaveLength(1);
+
+      // Centroid event should have lower confidence due to penalty
+      expect(eventsCentroid[0].data.confidence!).toBeLessThan(
+        eventsNoPenalty[0].data.confidence!,
+      );
+    });
+
+    it('applies centroid penalty for ActionGeo_Type 4 (landmark)', () => {
+      const row = makeGdeltRow({
+        0: 'C3C3C3C3C3',
+        51: '4', // ActionGeo_Type = landmark/feature
+        56: '34.1234', // non-centroid coordinates
+        57: '50.5678',
+      });
+      const rowNoPenalty = makeGdeltRow({
+        0: 'C4C4C4C4C4',
+        51: '',
+        56: '34.1234',
+        57: '50.5678',
+      });
+
+      const eventsType4 = parseAndFilter(row);
+      const eventsNoPenalty = parseAndFilter(rowNoPenalty);
+
+      if (eventsType4.length > 0 && eventsNoPenalty.length > 0) {
+        expect(eventsType4[0].data.confidence!).toBeLessThan(
+          eventsNoPenalty[0].data.confidence!,
+        );
+      }
+    });
+
+    it('does not apply centroid penalty for ActionGeo_Type 1 (country level)', () => {
+      const row1 = makeGdeltRow({
+        0: 'C5C5C5C5C5',
+        51: '1', // country level - no penalty
+        56: '34.1234',
+        57: '50.5678',
+      });
+      const row2 = makeGdeltRow({
+        0: 'C6C6C6C6C6',
+        51: '', // no type
+        56: '34.1234',
+        57: '50.5678',
+      });
+
+      const events1 = parseAndFilter(row1);
+      const events2 = parseAndFilter(row2);
+
+      if (events1.length > 0 && events2.length > 0) {
+        // Same confidence (no penalty applied for type 1)
+        expect(events1[0].data.confidence!).toBeCloseTo(
+          events2[0].data.confidence!,
+          10,
+        );
+      }
+    });
+  });
+
+  describe('parseAndFilter returns undispersed events', () => {
+    it('returns centroid events with raw (undispersed) lat/lng matching the GDELT input', () => {
+      // Two events at Tehran centroid with ActionGeo_Type=3
+      const row1 = makeGdeltRow({
+        0: 'D1D1D1D1D1',
+        51: '3',
+        56: '35.6892',
+        57: '51.3890',
+      });
+      const row2 = makeGdeltRow({
+        0: 'D2D2D2D2D2',
+        1: '20260316', // Different date to avoid dedup
+        51: '3',
+        56: '35.6892',
+        57: '51.3890',
+      });
+
+      const events = parseAndFilter([row1, row2].join('\n'));
+
+      // Both should pass filtering
+      expect(events).toHaveLength(2);
+
+      // Events should have RAW coordinates (no dispersion applied by parseAndFilter)
+      for (const e of events) {
+        expect(e.lat).toBe(35.6892);
+        expect(e.lng).toBe(51.389);
+        // No originalLat/originalLng since dispersion is NOT applied here
+        expect(e.data.originalLat).toBeUndefined();
+        expect(e.data.originalLng).toBeUndefined();
+      }
+    });
+
+    it('non-centroid events keep their raw coordinates', () => {
+      const row = makeGdeltRow({
+        0: 'D3D3D3D3D3',
+        51: '2', // state level
+        56: '34.1234',
+        57: '50.5678',
+      });
+
+      const events = parseAndFilter(row);
+      expect(events).toHaveLength(1);
+      expect(events[0].lat).toBe(34.1234);
+      expect(events[0].lng).toBe(50.5678);
+      expect(events[0].data.originalLat).toBeUndefined();
+    });
+  });
+
+  describe('Bellingcat corroboration pipeline', () => {
+    it('parseAndFilter with no bellingcatArticles arg works identically to before (backward compat)', () => {
+      const events = parseAndFilter(validIranMissileRow);
+      expect(events).toHaveLength(1);
+      // Confidence should be set but not boosted
+      expect(events[0].data.confidence).toBeDefined();
+      expect(events[0].data.confidence!).toBeLessThanOrEqual(1.0);
+    });
+
+    it('parseAndFilter with matching Bellingcat article boosts event confidence by 0.2', () => {
+      // Event is at Tehran (35.6892, 51.3890), locationName "Tehran, Tehran, Iran"
+      const articles = [{
+        title: 'Investigation reveals Tehran Iran military site activity',
+        url: 'https://www.bellingcat.com/article/1',
+        publishedAt: Date.UTC(2026, 2, 15, 12), // Same day as SQLDATE (20260315)
+        lat: 35.6892,
+        lng: 51.3890,
+      }];
+
+      const eventsWithout = parseAndFilter(validIranMissileRow);
+      const eventsWith = parseAndFilter(validIranMissileRow, articles);
+
+      expect(eventsWithout).toHaveLength(1);
+      expect(eventsWith).toHaveLength(1);
+
+      const confidenceWithout = eventsWithout[0].data.confidence!;
+      const confidenceWith = eventsWith[0].data.confidence!;
+
+      // Boosted confidence should be higher by the configured boost amount (0.2)
+      expect(confidenceWith).toBeCloseTo(
+        Math.min(1.0, confidenceWithout + mockConfig.bellingcatCorroborationBoost),
+        5,
+      );
+    });
+
+    it('parseAndFilter with non-matching Bellingcat articles does not boost confidence', () => {
+      // Article is nowhere near the event
+      const articles = [{
+        title: 'Unrelated investigation in London',
+        url: 'https://www.bellingcat.com/article/2',
+        publishedAt: Date.UTC(2026, 2, 15),
+        lat: 51.5074,
+        lng: -0.1278,
+      }];
+
+      const eventsWithout = parseAndFilter(validIranMissileRow);
+      const eventsWith = parseAndFilter(validIranMissileRow, articles);
+
+      expect(eventsWithout).toHaveLength(1);
+      expect(eventsWith).toHaveLength(1);
+
+      // Confidence should be identical (no boost applied)
+      expect(eventsWith[0].data.confidence).toBeCloseTo(
+        eventsWithout[0].data.confidence!,
+        5,
+      );
+    });
+
+    it('confidence is clamped to 1.0 max after boost', () => {
+      // Create a high-confidence event row with very high signals
+      const highSignalRow = makeGdeltRow({
+        0: 'BC_CLAMP_TEST',
+        6: 'ISRAEL',
+        7: 'ISR',
+        16: 'IRAN',
+        17: 'IRN',
+        26: '195',
+        27: '195',
+        28: '19',
+        30: '-10',
+        31: '100',
+        32: '50',
+        52: 'Tehran, Tehran, Iran',
+        53: 'IR',
+        56: '35.6892',
+        57: '51.3890',
+      });
+
+      // Matching article
+      const articles = [{
+        title: 'Tehran Iran conflict investigation',
+        url: 'https://www.bellingcat.com/article/3',
+        publishedAt: Date.UTC(2026, 2, 15, 12),
+        lat: 35.6892,
+        lng: 51.3890,
+      }];
+
+      const events = parseAndFilter(highSignalRow, articles);
+      expect(events).toHaveLength(1);
+      expect(events[0].data.confidence!).toBeLessThanOrEqual(1.0);
+    });
+
+    it('parseAndFilter with empty bellingcatArticles array applies no boost', () => {
+      const eventsWithout = parseAndFilter(validIranMissileRow);
+      const eventsWith = parseAndFilter(validIranMissileRow, []);
+
+      expect(eventsWithout).toHaveLength(1);
+      expect(eventsWith).toHaveLength(1);
+
+      expect(eventsWith[0].data.confidence).toBeCloseTo(
+        eventsWithout[0].data.confidence!,
+        5,
+      );
     });
   });
 });

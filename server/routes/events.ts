@@ -2,8 +2,9 @@ import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe, redis } from '../cache/redis.js';
 import { log } from '../lib/logger.js';
 import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
+import { extractBellingcatGeo } from '../lib/eventScoring.js';
 import { WAR_START, CACHE_TTL } from '../constants.js';
-import type { ConflictEventEntity } from '../types.js';
+import type { ConflictEventEntity, NewsCluster } from '../types.js';
 
 /** Redis key for accumulated GDELT events */
 const EVENTS_KEY = 'events:gdelt';
@@ -45,7 +46,27 @@ eventsRouter.get('/', async (req, res) => {
   }
 
   try {
-    const fresh = await fetchEvents();
+    // Extract Bellingcat articles from news cache for corroboration boost (opportunistic)
+    let bellingcatArticles: { title: string; url: string; publishedAt: number; lat?: number; lng?: number }[] = [];
+    try {
+      const newsCache = await cacheGetSafe<NewsCluster[]>('news:gdelt', 0);
+      if (newsCache?.data) {
+        bellingcatArticles = newsCache.data
+          .flatMap((cluster) => cluster.articles)
+          .filter((a) => a.source === 'Bellingcat')
+          .map((a) => ({
+            title: a.title,
+            url: a.url,
+            publishedAt: a.publishedAt,
+            ...extractBellingcatGeo(a.title),
+          }));
+      }
+    } catch {
+      // Non-fatal: if news cache is unavailable, proceed without corroboration
+      log({ level: 'warn', message: '[events] failed to fetch Bellingcat articles for corroboration' });
+    }
+
+    const fresh = await fetchEvents(bellingcatArticles);
 
     // Merge: seed with cached data (if any), then overwrite with fresh events
     const eventMap = new Map<string, ConflictEventEntity>();
@@ -83,6 +104,9 @@ eventsRouter.get('/', async (req, res) => {
     }
 
     const merged = Array.from(eventMap.values());
+
+    // Store raw (undispersed) coordinates — dispersion is applied client-side
+    // in useFilteredEntities so it dynamically adjusts when filters change.
     await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
     res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {

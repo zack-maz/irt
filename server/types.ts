@@ -67,6 +67,9 @@ export interface ConflictEventEntity extends MapEntityBase {
     numSources?: number; // GDELT NumSources (col 32) — optional for backward compat
     geoPrecision?: 'precise' | 'centroid'; // City-centroid detection result
     confidence?: number; // 0-1 composite confidence score
+    actionGeoType?: number; // GDELT ActionGeo_Type (1=country, 2=state, 3=city, 4=landmark)
+    originalLat?: number; // Pre-dispersion centroid latitude (set for dispersed events)
+    originalLng?: number; // Pre-dispersion centroid longitude (set for dispersed events)
   };
 }
 
