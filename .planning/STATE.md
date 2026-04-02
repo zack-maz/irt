@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-02T16:36:33.994Z"
+last_updated: "2026-04-02T19:23:16Z"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 24: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23.2: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23 COMPLETE (2 of 2 plans done)
 Phase 22.1 COMPLETE (2 of 2 plans done)
@@ -36,7 +37,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 22.1 | Fixing Dispersion | COMPLETE (2/2 plans) |
 | 23 | Threat Density Improvements | COMPLETE (2/2 plans) |
 | 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
-| 24 | Political Boundaries Layer | Planned |
+| 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | Planned |
 | 26 | Water Stress Layer | Planned |
 | 27 | Performance & Load Testing | Planned |
@@ -68,6 +69,10 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Zoom threshold tracked via boolean isBelowZoom9 + ref crossover (not continuous zoom) to prevent 60fps re-renders
 - Hover cluster state managed as local React state in BaseMap (not uiStore -- transient visual state)
 - 4-stop simplified thermal palette replacing 8-stop FLIR Ironbow (deep purple->magenta->orange->bright red)
+- Natural Earth 10m disputed areas file: ne_10m_admin_0_disputed_areas (not breakaway variant)
+- Extended filter bbox (lat 0-50, lng 20-80) captures 57 countries for political overlay
+- Canvas-generated 16x16 hatching pattern (8px spacing, amber #f59e0b) for disputed territories
+- Disputed hover labels via MapLibre feature-state (preferred over always-visible)
 
 ## Pending Todos
 

@@ -83,12 +83,12 @@ Requirements for the Data Quality & Layers milestone.
 
 ### Political Boundaries Layer
 
-- [ ] **POL-01**: User can toggle a political overlay showing country borders color-coded by faction alignment (US-aligned, Iran-aligned, Neutral)
-- [ ] **POL-02**: Countries are categorized into 3 factions with correct assignments (US-aligned: ISR, SAU, ARE, BHR, JOR, KWT, EGY; Iran-aligned: IRN, SYR, YEM; all others neutral)
-- [ ] **POL-03**: Disputed territories (Gaza, West Bank, Golan Heights) display with diagonal hatching in yellow/amber
-- [ ] **POL-04**: Disputed zones show zone name label on hover (only interactive element in the political layer)
-- [ ] **POL-05**: Discrete swatch legend with faction colors + disputed hatching visible when political layer is active
-- [ ] **POL-06**: Political layer renders below all other visualization layers and entity markers (background context only)
+- [x] **POL-01**: User can toggle a political overlay showing country borders color-coded by faction alignment (US-aligned, Iran-aligned, Neutral)
+- [x] **POL-02**: Countries are categorized into 3 factions with correct assignments (US-aligned: ISR, SAU, ARE, BHR, JOR, KWT, EGY; Iran-aligned: IRN, SYR, YEM; all others neutral)
+- [x] **POL-03**: Disputed territories (Gaza, West Bank, Golan Heights) display with diagonal hatching in yellow/amber
+- [x] **POL-04**: Disputed zones show zone name label on hover (only interactive element in the political layer)
+- [x] **POL-05**: Discrete swatch legend with faction colors + disputed hatching visible when political layer is active
+- [x] **POL-06**: Political layer renders below all other visualization layers and entity markers (background context only)
 
 ## v1.2+ Requirements
 
