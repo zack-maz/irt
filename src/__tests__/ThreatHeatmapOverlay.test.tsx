@@ -182,10 +182,11 @@ describe('mergeClusters', () => {
   const CELL_SIZE = 0.25;
 
   function makeCell(lat: number, lng: number, overrides: Partial<import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData> = {}): import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData {
+    const eventCount = overrides.eventCount ?? 1;
     return {
       lat,
       lng,
-      eventCount: 1,
+      eventCount,
       dominantType: 'airstrike',
       latestTime: Date.now(),
       totalFatalities: 0,
@@ -194,6 +195,8 @@ describe('mergeClusters', () => {
       avgGoldstein: -5,
       clusterWeight: 10,
       eventIds: [`evt-${lat}-${lng}`],
+      realLatSum: overrides.realLatSum ?? lat * eventCount,
+      realLngSum: overrides.realLngSum ?? lng * eventCount,
       ...overrides,
     };
   }
@@ -248,15 +251,17 @@ describe('mergeClusters', () => {
     expect(clusters[0].eventCount).toBe(8);
   });
 
-  it('computes bounding box center as centroid', () => {
+  it('computes mean of actual event coordinates as centroid', () => {
+    // Cell 1: 5 events averaging lat 33.10, Cell 2: 3 events averaging lat 33.40
     const cells = [
-      makeCell(33.125, 44.125, { clusterWeight: 10 }),
-      makeCell(33.375, 44.125, { clusterWeight: 30 }),
+      makeCell(33.125, 44.125, { eventCount: 5, clusterWeight: 10, realLatSum: 33.10 * 5, realLngSum: 44.10 * 5 }),
+      makeCell(33.375, 44.125, { eventCount: 3, clusterWeight: 30, realLatSum: 33.40 * 3, realLngSum: 44.15 * 3 }),
     ];
     const clusters = mergeClusters(cells, CELL_SIZE);
-    // Bbox center: (33.125 + 33.375) / 2 = 33.25
-    expect(clusters[0].centroidLat).toBeCloseTo(33.25, 4);
-    expect(clusters[0].centroidLng).toBeCloseTo(44.125, 4);
+    // True centroid: weighted by event count, not bbox center
+    // (33.10*5 + 33.40*3) / 8 = (165.5 + 100.2) / 8 = 33.2125
+    expect(clusters[0].centroidLat).toBeCloseTo((33.10 * 5 + 33.40 * 3) / 8, 4);
+    expect(clusters[0].centroidLng).toBeCloseTo((44.10 * 5 + 44.15 * 3) / 8, 4);
   });
 
   it('computes correct eventIds as union of all cell eventIds', () => {

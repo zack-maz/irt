@@ -41,6 +41,10 @@ export interface ThreatZoneData {
   avgGoldstein: number;
   clusterWeight: number;
   eventIds: string[];
+  /** Sum of actual event latitudes (for true centroid, not grid-snapped). */
+  realLatSum: number;
+  /** Sum of actual event longitudes (for true centroid, not grid-snapped). */
+  realLngSum: number;
 }
 
 // --- Pure functions ---
@@ -102,6 +106,9 @@ export function aggregateToGrid(
     goldsteinSum: number;
     weightSum: number;
     eventIds: string[];
+    // Actual event coordinate sums for true centroid computation
+    realLatSum: number;
+    realLngSum: number;
   }
 
   const cells = new Map<string, CellAcc>();
@@ -117,6 +124,7 @@ export function aggregateToGrid(
         lat: cellLat, lng: cellLng, count: 0, types: new Map(),
         latest: 0, fatalities: 0, mentions: 0, sources: 0,
         goldsteinSum: 0, weightSum: 0, eventIds: [],
+        realLatSum: 0, realLngSum: 0,
       };
       cells.set(key, cell);
     }
@@ -130,6 +138,8 @@ export function aggregateToGrid(
     cell.goldsteinSum += event.data.goldsteinScale ?? 0;
     cell.weightSum += computeThreatWeight(event);
     cell.eventIds.push(event.id);
+    cell.realLatSum += event.lat;
+    cell.realLngSum += event.lng;
   }
 
   const result: ThreatZoneData[] = [];
@@ -155,6 +165,8 @@ export function aggregateToGrid(
       avgGoldstein: cell.count > 0 ? cell.goldsteinSum / cell.count : 0,
       clusterWeight: cell.weightSum,
       eventIds: cell.eventIds,
+      realLatSum: cell.realLatSum,
+      realLngSum: cell.realLngSum,
     });
   }
 
@@ -218,6 +230,8 @@ export function mergeClusters(
     let eventCount = 0;
     let totalFatalities = 0;
     let latestTime = 0;
+    let realLatSum = 0;
+    let realLngSum = 0;
     const allEventIds: string[] = [];
     const typeCounts = new Map<string, number>();
     let minLat = Infinity, maxLat = -Infinity;
@@ -229,6 +243,8 @@ export function mergeClusters(
       totalFatalities += c.totalFatalities;
       if (c.latestTime > latestTime) latestTime = c.latestTime;
       allEventIds.push(...c.eventIds);
+      realLatSum += c.realLatSum;
+      realLngSum += c.realLngSum;
 
       // Type counting
       typeCounts.set(c.dominantType, (typeCounts.get(c.dominantType) ?? 0) + c.eventCount);
@@ -263,8 +279,8 @@ export function mergeClusters(
 
     clusters.push({
       id: sortedKeys,
-      centroidLat: (minLat + maxLat) / 2,
-      centroidLng: (minLng + maxLng) / 2,
+      centroidLat: eventCount > 0 ? realLatSum / eventCount : (minLat + maxLat) / 2,
+      centroidLng: eventCount > 0 ? realLngSum / eventCount : (minLng + maxLng) / 2,
       cells: component,
       eventCount,
       totalWeight,

@@ -48,7 +48,7 @@ import { ProximityAlertOverlay } from './ProximityAlertOverlay';
 import { MapLegend } from './MapLegend';
 import { GeographicOverlay } from './layers/GeographicOverlay';
 import { WeatherHeatmap } from './layers/WeatherHeatmap';
-import { PoliticalOverlay } from './layers/PoliticalOverlay';
+import { PoliticalOverlay, usePoliticalLayers } from './layers/PoliticalOverlay';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
 function FlyToHandler() {
@@ -99,6 +99,7 @@ export function BaseMap() {
   const entityLayers = useEntityLayers();
   const weatherLayers = useWeatherLayers();
   const threatLayers = useThreatHeatmapLayers(hoveredClusterId);
+  const politicalLayers = usePoliticalLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
   const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
 
@@ -321,8 +322,8 @@ export function BaseMap() {
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
           layers={isBelowZoom9
-            ? [...weatherLayers, ...entityLayers, ...threatLayers]
-            : [...weatherLayers, ...threatLayers, ...entityLayers]}
+            ? [...politicalLayers, ...weatherLayers, ...entityLayers, ...threatLayers]
+            : [...politicalLayers, ...weatherLayers, ...threatLayers, ...entityLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
