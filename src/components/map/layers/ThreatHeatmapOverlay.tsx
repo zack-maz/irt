@@ -332,11 +332,15 @@ export function useThreatHeatmapLayers() {
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Static pixel radius scaled by event count (15-40px range)
-      getRadius: (d: ThreatCluster) => Math.min(40, 15 + d.eventCount * 3),
-      radiusUnits: 'pixels' as const,
-      radiusMinPixels: 15,
-      radiusMaxPixels: 40,
+      // Meter-based radius matching event icon sizing strategy so both
+      // scale together on zoom. Low threat = smaller, high threat = larger.
+      getRadius: (d: ThreatCluster) => {
+        const t = Math.min(1, d.totalWeight / maxClusterWeight);
+        return 500 + t * 2500; // 500m (low) to 3000m (high)
+      },
+      radiusUnits: 'meters' as const,
+      radiusMinPixels: 8,
+      radiusMaxPixels: 50,
       // Thermal color mapped from cluster weight
       getFillColor: (d: ThreatCluster) => {
         const t = Math.min(1, d.totalWeight / maxClusterWeight);
