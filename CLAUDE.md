@@ -291,3 +291,15 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **useGeoContext** — `src/hooks/useGeoContext.ts`, two-tier: synchronous siteStore bbox check → async `/api/geocode` Nominatim fallback
 - **Nominatim geocoding** — `server/adapters/nominatim.ts` + `server/routes/geocode.ts`, coordinate quantization (2 decimal places), Redis cache 30-day logical / 90-day hard TTL
 - **Cache key** — `geocode:${lat},${lon}` with quantized coordinates
+
+## Detail Panel Navigation Stack (Phase 23.1)
+
+- **PanelView** — `src/types/ui.ts`, `{ entityId, cluster, breadcrumbLabel }` — represents a saved detail panel state
+- **navigationStack** — `uiStore.navigationStack: PanelView[]`, push/pop actions for back navigation
+- **pushView** — saves current panel state (entity or cluster) before navigating to a new entity; called from 8 sites (ThreatClusterDetail, CountersSlot, SearchModal, Sidebar, SiteDetail, ProximityAlertOverlay, plus BaseMap click)
+- **popView** — restores previous panel state from stack; wired to back button in BreadcrumbRow
+- **BreadcrumbRow** — `src/components/detail/BreadcrumbRow.tsx`, shows breadcrumb trail with back arrow + label from `panelLabel.ts`
+- **panelLabel** — `src/lib/panelLabel.ts`, `getCurrentPanelView()` derives breadcrumb label from current entity/cluster state across all stores
+- **slideDirection** — `uiStore.slideDirection: 'forward' | 'back' | null`, drives CSS slide-in/slide-out animations
+- **CSS animations** — `@keyframes slide-in-right`, `slide-out-left`, `slide-in-left`, `slide-out-right` in `app.css`
+- **Escape key** — pops navigation stack if non-empty, otherwise closes panel (existing behavior)
