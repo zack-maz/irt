@@ -37,6 +37,33 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
   wmd: 'WMD',
 };
 
+/** Represents a connected-component cluster of threat grid cells */
+export interface ThreatCluster {
+  id: string;
+  centroidLat: number;
+  centroidLng: number;
+  cells: Array<{
+    lat: number;
+    lng: number;
+    eventCount: number;
+    dominantType: string;
+    latestTime: number;
+    totalFatalities: number;
+    totalMentions: number;
+    totalSources: number;
+    avgGoldstein: number;
+    clusterWeight: number;
+    eventIds: string[];
+  }>;
+  eventCount: number;
+  totalWeight: number;
+  dominantType: string;
+  totalFatalities: number;
+  latestTime: number;
+  boundingBox: { minLat: number; maxLat: number; minLng: number; maxLng: number };
+  eventIds: string[];
+}
+
 export type SidebarSection = 'counters' | 'layers' | 'filters';
 
 export interface UIState {

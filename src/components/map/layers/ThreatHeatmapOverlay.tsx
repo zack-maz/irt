@@ -7,6 +7,7 @@ import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 
 import { TYPE_WEIGHTS } from '@/lib/severity';
 import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
+import type { ThreatCluster } from '@/types/ui';
 import { LEGEND_REGISTRY } from '@/components/map/MapLegend';
 import type { ConflictEventEntity } from '@/types/entities';
 
@@ -165,6 +166,128 @@ export function aggregateToGrid(
   return result;
 }
 
+/**
+ * Merge adjacent non-empty grid cells into connected-component clusters via BFS.
+ * Uses integer grid indices as keys to avoid floating-point mismatch.
+ */
+export function mergeClusters(
+  cells: ThreatZoneData[],
+  cellSize = CELL_SIZE_DEG,
+): ThreatCluster[] {
+  if (cells.length === 0) return [];
+
+  // Build a lookup by integer grid indices
+  const cellMap = new Map<string, ThreatZoneData>();
+  for (const cell of cells) {
+    const row = Math.round(cell.lat / cellSize);
+    const col = Math.round(cell.lng / cellSize);
+    cellMap.set(`${row},${col}`, cell);
+  }
+
+  const visited = new Set<string>();
+  const clusters: ThreatCluster[] = [];
+
+  // 4-connected neighbors: N, S, E, W
+  const NEIGHBORS = [
+    [1, 0], [-1, 0], [0, 1], [0, -1],
+  ];
+
+  for (const cell of cells) {
+    const row = Math.round(cell.lat / cellSize);
+    const col = Math.round(cell.lng / cellSize);
+    const startKey = `${row},${col}`;
+    if (visited.has(startKey)) continue;
+
+    // BFS flood fill
+    const component: ThreatZoneData[] = [];
+    const queue = [startKey];
+    visited.add(startKey);
+
+    while (queue.length > 0) {
+      const key = queue.shift()!;
+      const c = cellMap.get(key)!;
+      component.push(c);
+
+      const [r, cIdx] = key.split(',').map(Number);
+      for (const [dr, dc] of NEIGHBORS) {
+        const nKey = `${r + dr},${cIdx + dc}`;
+        if (!visited.has(nKey) && cellMap.has(nKey)) {
+          visited.add(nKey);
+          queue.push(nKey);
+        }
+      }
+    }
+
+    // Aggregate component into a ThreatCluster
+    let totalWeight = 0;
+    let eventCount = 0;
+    let totalFatalities = 0;
+    let latestTime = 0;
+    const allEventIds: string[] = [];
+    const typeCounts = new Map<string, number>();
+    let minLat = Infinity, maxLat = -Infinity;
+    let minLng = Infinity, maxLng = -Infinity;
+    let weightedLatSum = 0, weightedLngSum = 0;
+
+    for (const c of component) {
+      totalWeight += c.clusterWeight;
+      eventCount += c.eventCount;
+      totalFatalities += c.totalFatalities;
+      if (c.latestTime > latestTime) latestTime = c.latestTime;
+      allEventIds.push(...c.eventIds);
+
+      // Type counting
+      typeCounts.set(c.dominantType, (typeCounts.get(c.dominantType) ?? 0) + c.eventCount);
+
+      // Bounding box
+      if (c.lat < minLat) minLat = c.lat;
+      if (c.lat > maxLat) maxLat = c.lat;
+      if (c.lng < minLng) minLng = c.lng;
+      if (c.lng > maxLng) maxLng = c.lng;
+
+      // Weighted centroid
+      weightedLatSum += c.lat * c.clusterWeight;
+      weightedLngSum += c.lng * c.clusterWeight;
+    }
+
+    // Dominant type across all cells
+    let dominantType = '';
+    let maxTypeCount = 0;
+    for (const [type, count] of typeCounts) {
+      if (count > maxTypeCount) {
+        maxTypeCount = count;
+        dominantType = type;
+      }
+    }
+
+    // Deterministic ID from sorted integer grid keys
+    const sortedKeys = component
+      .map((c) => {
+        const r = Math.round(c.lat / cellSize);
+        const cIdx = Math.round(c.lng / cellSize);
+        return `${r},${cIdx}`;
+      })
+      .sort()
+      .join(';');
+
+    clusters.push({
+      id: sortedKeys,
+      centroidLat: totalWeight > 0 ? weightedLatSum / totalWeight : component[0].lat,
+      centroidLng: totalWeight > 0 ? weightedLngSum / totalWeight : component[0].lng,
+      cells: component,
+      eventCount,
+      totalWeight,
+      dominantType,
+      totalFatalities,
+      latestTime,
+      boundingBox: { minLat, maxLat, minLng, maxLng },
+      eventIds: allEventIds,
+    });
+  }
+
+  return clusters;
+}
+
 // --- Relative time helper ---
 
 function formatRelativeTime(timestamp: number): string {
@@ -228,18 +351,24 @@ export function useThreatHeatmapLayers() {
     });
 
     const grid = aggregateToGrid(filtered);
+    const clusters = mergeClusters(grid);
 
-    const pickerLayer = new ScatterplotLayer({
-      id: 'threat-picker',
-      data: grid,
-      getPosition: (d: ThreatZoneData) => [d.lng, d.lat],
-      getRadius: 50000,
+    const clusterPickerLayer = new ScatterplotLayer({
+      id: 'threat-cluster-picker',
+      data: clusters,
+      getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
+      getRadius: (d: ThreatCluster) => {
+        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
+        const dLat = (maxLat - minLat) * 111000;
+        const dLng = (maxLng - minLng) * 111000 * Math.cos((d.centroidLat * Math.PI) / 180);
+        return Math.max(50000, Math.sqrt(dLat * dLat + dLng * dLng) / 2);
+      },
       radiusUnits: 'meters' as const,
       getFillColor: [0, 0, 0, 0],
       pickable: true,
     });
 
-    return [heatmapLayer, pickerLayer];
+    return [heatmapLayer, clusterPickerLayer];
   }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle]);
 }
 

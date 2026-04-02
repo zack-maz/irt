@@ -269,11 +269,14 @@ describe('mergeClusters', () => {
   });
 
   it('computes correct boundingBox', () => {
+    // Use an L-shape so bounding box spans both lat and lng
     const cells = [
-      makeCell(33.125, 44.125),
-      makeCell(33.375, 44.375),
+      makeCell(33.125, 44.125),  // bottom-left
+      makeCell(33.375, 44.125),  // above it (adjacent N)
+      makeCell(33.375, 44.375),  // to its right (adjacent E)
     ];
     const clusters = mergeClusters(cells, CELL_SIZE);
+    expect(clusters).toHaveLength(1);
     expect(clusters[0].boundingBox).toEqual({
       minLat: 33.125,
       maxLat: 33.375,
