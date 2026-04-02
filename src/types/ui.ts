@@ -80,6 +80,7 @@ export interface UIState {
   activeSidebarSection: SidebarSection | null;
   isMarketsCollapsed: boolean;
   selectedEntityId: string | null;
+  selectedCluster: ThreatCluster | null;
   hoveredEntityId: string | null;
   expandedAlertSiteId: string | null;
   openDetailPanel: () => void;
@@ -93,6 +94,7 @@ export interface UIState {
   toggleEventFilters: () => void;
   toggleSiteFilters: () => void;
   selectEntity: (id: string | null) => void;
+  setSelectedCluster: (cluster: ThreatCluster | null) => void;
   hoverEntity: (id: string | null) => void;
   setExpandedAlertSiteId: (id: string | null) => void;
   toggleSidebar: () => void;

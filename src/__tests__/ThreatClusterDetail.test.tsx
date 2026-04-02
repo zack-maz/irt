@@ -81,7 +81,8 @@ describe('ThreatClusterDetail', () => {
 
   it('shows dominant type label', () => {
     render(<ThreatClusterDetail cluster={mockCluster} />);
-    expect(screen.getByText('Airstrike')).toBeInTheDocument();
+    // "Airstrike" appears in summary and in event list entries
+    expect(screen.getAllByText('Airstrike').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows fatalities when > 0', () => {

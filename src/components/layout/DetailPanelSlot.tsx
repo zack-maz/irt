@@ -5,6 +5,7 @@ import { FlightDetail } from '@/components/detail/FlightDetail';
 import { ShipDetail } from '@/components/detail/ShipDetail';
 import { EventDetail } from '@/components/detail/EventDetail';
 import { SiteDetail } from '@/components/detail/SiteDetail';
+import { ThreatClusterDetail } from '@/components/detail/ThreatClusterDetail';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
@@ -81,6 +82,8 @@ export function DetailPanelSlot() {
   const isOpen = useUIStore((s) => s.isDetailPanelOpen);
   const closeDetailPanel = useUIStore((s) => s.closeDetailPanel);
   const selectEntity = useUIStore((s) => s.selectEntity);
+  const selectedCluster = useUIStore((s) => s.selectedCluster);
+  const setSelectedCluster = useUIStore((s) => s.setSelectedCluster);
   const { entity, isLost } = useSelectedEntity();
   const [copied, setCopied] = useState(false);
 
@@ -89,7 +92,8 @@ export function DetailPanelSlot() {
   const dismiss = useCallback(() => {
     closeDetailPanel();
     selectEntity(null);
-  }, [closeDetailPanel, selectEntity]);
+    setSelectedCluster(null);
+  }, [closeDetailPanel, selectEntity, setSelectedCluster]);
 
   // Escape key handling moved to centralized useEscapeKeyHandler (priority stack)
 
@@ -112,7 +116,40 @@ export function DetailPanelSlot() {
                   ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
     >
       <div className="h-full border-l border-border bg-surface/95 backdrop-blur-sm overflow-y-auto">
-        {entity ? (
+        {selectedCluster ? (
+          <>
+            {/* Cluster Header */}
+            <div
+              data-testid="detail-panel-header"
+              className="flex items-center justify-between px-4 py-3 border-b border-border"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-block w-2 h-2 rounded-full"
+                  style={{ backgroundColor: '#f97316' }}
+                />
+                <span className="text-[10px] uppercase tracking-wider text-text-muted">
+                  THREAT CLUSTER
+                </span>
+                <span className="text-sm font-semibold text-text-primary">
+                  {selectedCluster.eventCount} events
+                </span>
+              </div>
+              <button
+                onClick={dismiss}
+                aria-label="Close"
+                className="text-text-muted transition-colors hover:text-text-primary text-lg leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Cluster content */}
+            <div className="p-4">
+              <ThreatClusterDetail cluster={selectedCluster} />
+            </div>
+          </>
+        ) : entity ? (
           <>
             {/* Lost contact banner */}
             {isLost && (
