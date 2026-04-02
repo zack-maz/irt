@@ -61,9 +61,10 @@ describe('countries.json integrity', () => {
     expect(countriesData.features.length).toBeGreaterThan(0);
   });
 
-  it('has approximately 25-35 features for the Middle East region', () => {
-    expect(countriesData.features.length).toBeGreaterThanOrEqual(20);
-    expect(countriesData.features.length).toBeLessThanOrEqual(45);
+  it('has a reasonable number of features for the Middle East region', () => {
+    // Extended bbox (lat 0-50, lng 20-80) captures ~50-60 countries that overlap the region
+    expect(countriesData.features.length).toBeGreaterThanOrEqual(40);
+    expect(countriesData.features.length).toBeLessThanOrEqual(70);
   });
 
   it('every feature has ISO_A3 property as a valid 3-letter string (not "-99")', () => {
