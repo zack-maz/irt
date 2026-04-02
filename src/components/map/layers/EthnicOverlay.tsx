@@ -245,6 +245,48 @@ export function useEthnicLayers(): (GeoJsonLayer | TextLayer)[] {
 }
 
 // ---------------------------------------------------------------------------
+// EthnicTooltip component
+// ---------------------------------------------------------------------------
+
+interface EthnicTooltipProps {
+  groups: string[];
+  x: number;
+  y: number;
+}
+
+export function EthnicTooltip({ groups, x, y }: EthnicTooltipProps) {
+  return (
+    <div
+      className="pointer-events-none absolute z-[var(--z-tooltip)]"
+      style={{ left: x + 12, top: y - 12 }}
+    >
+      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
+        <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
+          {groups.length > 1 ? 'Overlap Zone' : 'Ethnic Zone'}
+        </div>
+        {groups.map((groupId) => {
+          const config = ETHNIC_GROUPS[groupId as EthnicGroup];
+          if (!config) return null;
+          return (
+            <div key={groupId} className="flex items-start gap-1.5 py-0.5">
+              <span
+                className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: config.color }}
+              />
+              <div>
+                <div className="font-medium">{config.label}</div>
+                <div className="text-[10px] text-text-muted">{config.population}</div>
+                <div className="text-[10px] text-text-muted">{config.context}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Backward-compat null component export
 // ---------------------------------------------------------------------------
 

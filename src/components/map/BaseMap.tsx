@@ -49,6 +49,8 @@ import { MapLegend } from './MapLegend';
 import { GeographicOverlay } from './layers/GeographicOverlay';
 import { WeatherHeatmap } from './layers/WeatherHeatmap';
 import { PoliticalOverlay, usePoliticalLayers } from './layers/PoliticalOverlay';
+import { useEthnicLayers, EthnicTooltip } from './layers/EthnicOverlay';
+import { ETHNIC_GROUPS, type EthnicGroup } from '@/lib/ethnicGroups';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
 function FlyToHandler() {
@@ -100,8 +102,10 @@ export function BaseMap() {
   const weatherLayers = useWeatherLayers();
   const threatLayers = useThreatHeatmapLayers(hoveredClusterId);
   const politicalLayers = usePoliticalLayers();
+  const ethnicLayers = useEthnicLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
   const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
+  const isEthnicActive = useLayerStore((s) => s.activeLayers.has('ethnic'));
 
   // Search filter state for tooltip suppression
   const isSearchFilterActive = useSearchStore((s) => s.isFilterMode && s.matchedIds.size > 0);
@@ -110,12 +114,14 @@ export function BaseMap() {
   const [hover, setHover] = useState<HoverState | null>(null);
   const [weatherHover, setWeatherHover] = useState<{ point: WeatherGridPoint; x: number; y: number } | null>(null);
   const [threatHover, setThreatHover] = useState<{ zone: ThreatZoneData; x: number; y: number } | null>(null);
+  const [ethnicHover, setEthnicHover] = useState<{ groups: string[]; x: number; y: number } | null>(null);
 
   const handleDeckHover = useCallback(
     (info: PickingInfo) => {
       if (!info.object) {
         setHover(null);
         setThreatHover(null);
+        setEthnicHover(null);
         setWeatherHover(null);
         setHoveredClusterId(null);
         hoverEntity(null);
@@ -128,6 +134,22 @@ export function BaseMap() {
         setThreatHover({ zone: cluster as unknown as ThreatZoneData, x: info.x, y: info.y });
         setHoveredClusterId(cluster.id);
         setHover(null);
+        setEthnicHover(null);
+        setWeatherHover(null);
+        hoverEntity(null);
+        return;
+      }
+
+      // Ethnic zone hover: after threat, before weather
+      if (
+        (info.layer?.id === 'ethnic-zones' || info.layer?.id?.startsWith('ethnic-overlap-')) &&
+        isEthnicActive
+      ) {
+        const props = (info.object as { properties: { group?: string; groups?: string[] } }).properties;
+        const groups = props.groups ?? (props.group ? [props.group] : []);
+        setEthnicHover({ groups, x: info.x, y: info.y });
+        setHover(null);
+        setThreatHover(null);
         setWeatherHover(null);
         hoverEntity(null);
         return;
@@ -139,6 +161,7 @@ export function BaseMap() {
         setWeatherHover({ point, x: info.x, y: info.y });
         setHover(null);
         setThreatHover(null);
+        setEthnicHover(null);
         hoverEntity(null);
         return;
       }
@@ -146,12 +169,13 @@ export function BaseMap() {
       // Entity hover (existing behavior)
       setWeatherHover(null);
       setThreatHover(null);
+      setEthnicHover(null);
       setHoveredClusterId(null);
       const entity = info.object as MapEntity | SiteEntity;
       setHover({ entity, x: info.x, y: info.y });
       hoverEntity(entity.id);
     },
-    [hoverEntity, isWeatherActive, isThreatActive],
+    [hoverEntity, isWeatherActive, isThreatActive, isEthnicActive],
   );
 
   const setFlyToTarget = useNotificationStore((s) => s.setFlyToTarget);
@@ -322,8 +346,8 @@ export function BaseMap() {
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
           layers={isBelowZoom9
-            ? [...politicalLayers, ...weatherLayers, ...entityLayers, ...threatLayers]
-            : [...politicalLayers, ...weatherLayers, ...threatLayers, ...entityLayers]}
+            ? [...politicalLayers, ...ethnicLayers, ...weatherLayers, ...entityLayers, ...threatLayers]
+            : [...politicalLayers, ...ethnicLayers, ...weatherLayers, ...threatLayers, ...entityLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
@@ -352,7 +376,14 @@ export function BaseMap() {
           y={threatHover.y}
         />
       )}
-      {!tooltipEntity && !threatHover && weatherHover && (
+      {!tooltipEntity && !threatHover && ethnicHover && (
+        <EthnicTooltip
+          groups={ethnicHover.groups}
+          x={ethnicHover.x}
+          y={ethnicHover.y}
+        />
+      )}
+      {!tooltipEntity && !threatHover && !ethnicHover && weatherHover && (
         <WeatherTooltip
           point={weatherHover.point}
           x={weatherHover.x}
