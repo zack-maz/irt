@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-02T05:20:57.071Z"
+last_updated: "2026-04-02T05:37:52.702Z"
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 23: Plan 1 of 2 COMPLETE
+Phase 23 COMPLETE (2 of 2 plans done)
 Phase 22.1 COMPLETE (2 of 2 plans done)
 Phase 22 COMPLETE (3 of 3 plans done)
 Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
@@ -33,7 +33,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 |-------|------|--------|
 | 22 | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans) |
 | 22.1 | Fixing Dispersion | COMPLETE (2/2 plans) |
-| 23 | Threat Density Improvements | IN PROGRESS (1/2 plans) |
+| 23 | Threat Density Improvements | COMPLETE (2/2 plans) |
 | 24 | Political Boundaries Layer | Planned |
 | 25 | Ethnic Distribution Layer | Planned |
 | 26 | Water Stress Layer | Planned |
@@ -57,6 +57,10 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Thermal palette: 8-stop FLIR Ironbow (indigo->purple->violet->magenta->orange->amber->yellow->red) for better threat intensity differentiation
 - P90 normalization: colorDomain=[0, p90] prevents high-activity zones from washing out lower-intensity areas
 - Temporal decay removed from computeThreatWeight -- age-independent scoring, date filtering handles recency
+- ThreatCluster type defined in ui.ts (not ThreatHeatmapOverlay) to avoid circular imports
+- Integer grid indices (Math.round) for BFS neighbor lookup to avoid floating-point key mismatch
+- selectedCluster and selectedEntityId mutually exclusive in uiStore via cross-clearing
+- Cluster picker radius proportional to bounding box diagonal with 50km floor
 
 ## Pending Todos
 
