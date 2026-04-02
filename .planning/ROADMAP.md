@@ -83,15 +83,16 @@ Plans:
 - [ ] 23-01-PLAN.md -- Military thermal palette, decay removal, 0.25-deg grid, P90 normalization, legend update
 - [ ] 23-02-PLAN.md -- BFS cluster merging, ThreatClusterDetail component, detail panel + BaseMap wiring
 
-### Phase 23.2: improving threat density scatter plots (INSERTED)
+### Phase 23.2: Improving Threat Density Scatter Plots (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Upgrade threat cluster circles with radial gradient shaders, additive blending, dual-dimension encoding (radius=spread, color=weight), zoom-dependent z-ordering, hover dimming, and enriched detail panel with type breakdown bars, geographic context, and weight-sorted event lists
 **Depends on:** Phase 23
-**Plans:** 0 plans
+**Requirements:** [TD-01, TD-02, TD-03, TD-04, TD-05, TD-06, TD-07, TD-08, TD-09, TD-10]
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 23.2 to break down)
+- [ ] 23.2-01-PLAN.md -- Radial gradient shader, simplified palette, pixel sizing, additive blending, hover dimming, zoom z-order
+- [ ] 23.2-02-PLAN.md -- Nominatim geocode route, type breakdown bars, geographic context, weight-sorted events
 
 ### Phase 23.1: Detail Panel Navigation Stack (INSERTED)
 
