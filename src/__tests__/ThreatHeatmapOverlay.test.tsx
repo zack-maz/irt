@@ -385,7 +385,9 @@ describe('useThreatHeatmapLayers', () => {
     const picker = result.current[1];
     expect(picker.id).toBe('threat-cluster-picker');
     expect(picker.props.pickable).toBe(true);
-    expect(picker.props.getFillColor).toEqual([0, 0, 0, 0]);
+    // Cluster circles are thermal-colored (function accessor) and pixel-sized
+    expect(typeof picker.props.getFillColor).toBe('function');
+    expect(picker.props.radiusUnits).toBe('pixels');
   });
 });
 

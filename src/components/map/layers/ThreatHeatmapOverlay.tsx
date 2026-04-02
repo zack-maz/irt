@@ -333,7 +333,10 @@ export function useThreatHeatmapLayers() {
       weight: computeThreatWeight(e),
     }));
 
-    const p90 = computeP90(weightedData.map((d) => d.weight));
+    const grid = aggregateToGrid(filtered);
+    // P90 from aggregated grid cell weights (not individual events)
+    // — matches the spatial accumulation the heatmap performs
+    const p90 = computeP90(grid.map((c) => c.clusterWeight));
 
     const heatmapLayer = new HeatmapLayer({
       id: 'threat-heatmap',
@@ -344,27 +347,33 @@ export function useThreatHeatmapLayers() {
       colorRange: THERMAL_COLOR_RANGE,
       colorDomain: [0, p90],
       intensity: 1,
+      threshold: 0.03,
       opacity: 0.45,
       aggregation: 'SUM',
       pickable: false,
       debounceTimeout: 500,
     });
 
-    const grid = aggregateToGrid(filtered);
     const clusters = mergeClusters(grid);
+
+    // Max cluster weight for color interpolation
+    const maxClusterWeight = Math.max(1, ...clusters.map((c) => c.totalWeight));
 
     const clusterPickerLayer = new ScatterplotLayer({
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      getRadius: (d: ThreatCluster) => {
-        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
-        const dLat = (maxLat - minLat) * 111000;
-        const dLng = (maxLng - minLng) * 111000 * Math.cos((d.centroidLat * Math.PI) / 180);
-        return Math.max(50000, Math.sqrt(dLat * dLat + dLng * dLng) / 2);
+      // Static pixel radius scaled by event count (15-40px range)
+      getRadius: (d: ThreatCluster) => Math.min(40, 15 + d.eventCount * 3),
+      radiusUnits: 'pixels' as const,
+      radiusMinPixels: 15,
+      radiusMaxPixels: 40,
+      // Thermal color mapped from cluster weight
+      getFillColor: (d: ThreatCluster) => {
+        const t = Math.min(1, d.totalWeight / maxClusterWeight);
+        const idx = Math.min(THERMAL_COLOR_RANGE.length - 1, Math.floor(t * THERMAL_COLOR_RANGE.length));
+        return [...THERMAL_COLOR_RANGE[idx], 180] as [number, number, number, number];
       },
-      radiusUnits: 'meters' as const,
-      getFillColor: [0, 0, 0, 0],
       pickable: true,
     });
 
