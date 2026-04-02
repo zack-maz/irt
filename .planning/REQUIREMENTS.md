@@ -1,7 +1,7 @@
 # Requirements: Iran Conflict Monitor
 
 **Defined:** 2026-03-19
-**Core Value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map — numbers over narratives.
+**Core Value:** Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map -- numbers over narratives.
 
 ## v1.1 Requirements
 
@@ -90,6 +90,17 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **POL-05**: Discrete swatch legend with faction colors + disputed hatching visible when political layer is active
 - [x] **POL-06**: Political layer renders below all other visualization layers and entity markers (background context only)
 
+### Ethnic Distribution Layer
+
+- [ ] **ETH-01**: Static GeoJSON ethnic-zones.json contains ethnic boundary polygons extracted from GeoEPR 2021 dataset filtered to Middle East bbox
+- [ ] **ETH-02**: Cross-border ethnic groups (Kurdish, Arab, Baloch, Turkmen, Pashtun) are merged into single MultiPolygon features per group
+- [ ] **ETH-03**: Ethnic group config (ethnicGroups.ts) defines all 10 zones with distinct colors, rgba values, population estimates, and context descriptions
+- [ ] **ETH-04**: User can toggle ethnic overlay showing diagonal-hatched polygons color-coded per ethnic group using FillStyleExtension with fillPatternMask
+- [ ] **ETH-05**: Zone labels rendered at polygon centroids are always visible when ethnic layer is active with zoom-responsive sizing (10-24px)
+- [ ] **ETH-06**: Hover tooltip on ethnic zones shows group name, approximate population, and brief geographic context (only when no entity/threat is hovered)
+- [ ] **ETH-07**: Discrete legend with 10 ethnic group color swatches appears in bottom-left when ethnic layer is active
+- [ ] **ETH-08**: Ethnic layer stacks on top of political layer but below weather/entity/threat layers in DeckGLOverlay
+
 ## v1.2+ Requirements
 
 Deferred to future releases. Tracked but not in current roadmap.
@@ -115,7 +126,7 @@ Deferred to future releases. Tracked but not in current roadmap.
 
 | Feature | Reason |
 |---------|--------|
-| Standalone news feed UI | Contradicts "numbers over narratives" core value — news is infrastructure for notifications only |
+| Standalone news feed UI | Contradicts "numbers over narratives" core value -- news is infrastructure for notifications only |
 | Real-time WebSocket for notifications | Polling is sufficient for single-user tool; WebSocket adds serverless complexity |
 | Paid market data APIs | Free-tier constraint; Yahoo Finance unofficial API with graceful degradation |
 | Full-text article scraping | Copyright concerns; title + URL linking is sufficient |
@@ -176,13 +187,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POL-04 | Phase 24 | Planned |
 | POL-05 | Phase 24 | Planned |
 | POL-06 | Phase 24 | Planned |
+| ETH-01 | Phase 25 | Planned |
+| ETH-02 | Phase 25 | Planned |
+| ETH-03 | Phase 25 | Planned |
+| ETH-04 | Phase 25 | Planned |
+| ETH-05 | Phase 25 | Planned |
+| ETH-06 | Phase 25 | Planned |
+| ETH-07 | Phase 25 | Planned |
+| ETH-08 | Phase 25 | Planned |
 
 **Coverage:**
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 15 total, 0 complete
-- Total: 49 mapped, 34 complete
+- v1.3 requirements: 23 total, 0 complete
+- Total: 57 mapped, 34 complete
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-02 -- Phase 24 requirements added*
+*Last updated: 2026-04-02 -- Phase 25 ethnic distribution requirements added*

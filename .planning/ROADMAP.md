@@ -116,21 +116,21 @@ Plans:
 - [ ] 24-02-PLAN.md -- BaseMap wiring, toggle activation, existing test updates, visual checkpoint
 
 ### Phase 25: Ethnic Distribution Layer
-**Goal**: Users can toggle an overlay showing major ethnic/sectarian zones as labeled hatched regions
+**Goal**: Users can toggle an overlay showing 10 major ethnic/sectarian zones as labeled hatched regions with per-group colors, hover tooltips, and a discrete legend
 **Depends on**: Phase 24 (political layer patterns)
-**Key deliverables:**
-- Hatched overlay polygons for major zones: Kurdish areas, Shia/Sunni corridors, Baloch region, Druze, Alawite, Turkmen
-- Canvas-generated hatch patterns (distinct from political fill — lines vs solid)
-- Labeled region names with zoom-responsive visibility
-- Discrete legend with ethnic group colors/patterns
-- Data: hand-drawn approximate GeoJSON from published ethnic maps
+**Requirements:** [ETH-01, ETH-02, ETH-03, ETH-04, ETH-05, ETH-06, ETH-07, ETH-08]
+**Plans:** 2 plans
+
+Plans:
+- [ ] 25-01-PLAN.md -- GeoEPR data extraction, ethnic group config, @deck.gl/extensions install, test mock setup
+- [ ] 25-02-PLAN.md -- EthnicOverlay component with hatched fills, labels, BaseMap wiring, tooltip priority, legend, visual checkpoint
 
 ### Phase 26: Water Stress Layer
 **Goal**: Users can toggle a water stress overlay showing resource scarcity as a conflict multiplier
 **Depends on**: Phase 20 (layer architecture)
 **Key deliverables:**
 - WRI Aqueduct water stress index data as GeoJSON
-- Color scale: blue (low stress) → yellow → red (extreme stress)
+- Color scale: blue (low stress) -> yellow -> red (extreme stress)
 - Major water infrastructure labels (Tigris, Euphrates, dams, aquifers)
 - Cross-reference with existing desalination site data from siteStore
 - Inline legend with stress scale
@@ -139,7 +139,7 @@ Plans:
 **Goal**: Optimize initial load time and validate production handles 250 concurrent users
 **Depends on**: All other v1.3 phases complete
 **Key deliverables:**
-- Staggered API calls on mount (priority: flights → ships/events → rest)
+- Staggered API calls on mount (priority: flights -> ships/events -> rest)
 - Lazy-load visualization layer components (only load when toggled)
 - Code-splitting evaluation for maplibre chunk (282KB gzipped)
 - k6 test scaled to 250 VUs with thundering herd mitigation
@@ -150,8 +150,8 @@ Plans:
 ## Deferred Work
 
 Carried from v1.2:
-- **Satellite Imagery** — ArcGIS World Imagery as semi-transparent overlay
+- **Satellite Imagery** -- ArcGIS World Imagery as semi-transparent overlay
 
 Deferred from v1.3:
-- **GDELT BigQuery adapter** — SQL-based querying with full column access (requires GCP project)
-- **Telegram channel monitoring** — GramJS/TGSTAT for OSINT early-warning signals
+- **GDELT BigQuery adapter** -- SQL-based querying with full column access (requires GCP project)
+- **Telegram channel monitoring** -- GramJS/TGSTAT for OSINT early-warning signals
