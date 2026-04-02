@@ -320,3 +320,21 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Legend** — discrete swatch legend in bottom-left via LEGEND_REGISTRY (4 swatches: US, Iran, Neutral, Disputed)
 - **Toggle** — `comingSoon` removed from political entry in LayerTogglesSlot; instant toggle (no fade)
 - **Threat centroid fix** — cluster centroids now use mean of actual event coordinates (`realLatSum`/`realLngSum` in ThreatZoneData) instead of bounding box center of grid cells
+
+## Ethnic Distribution Layer (Phase 25)
+
+- **deck.gl GeoJsonLayer + FillStyleExtension** — hatched polygon fills via `useEthnicLayers` hook with `fillPatternMask: true`
+- **10 ethnic zones** — Kurdish, Arab, Persian, Baloch, Turkmen, Druze, Alawite, Yazidi, Assyrian, Pashtun
+- **Data source** — GeoEPR 2021 (ETH Zurich), extracted via `scripts/extract-ethnic-data.ts`, static `src/data/ethnic-zones.json`
+- **Overlap zones** — 23 multi-group features with `properties.groups: string[]`; rendered as stacked GeoJsonLayers with `getFillPatternOffset` for interleaved colored stripes
+- **Single-group features** — `properties.group: string` + `properties.label: string`
+- **Canvas hatch atlas** — 32x32 diagonal line pattern (4px width, 10px spacing), `fillPatternScale: 200`, created once at module load
+- **RGBA alpha** — 140/255 (~55%) for visible hatching; thicker lines than political layer's solid fills
+- **Labels** — TextLayer at polygon centroids, zoom-responsive (10-24px), single-group zones only (no labels on overlap areas)
+- **Hover tooltips** — `EthnicTooltip` component shows group name, population, context; overlap zones list all groups
+- **Tooltip priority** — Entity > Threat > Ethnic > Weather; ethnic tooltip only on empty map areas
+- **Click guard** — `handleDeckClick` returns early for `ethnic-*` layer IDs to prevent crash
+- **Layer stacking** — ethnic layers after political in DeckGLOverlay array (ethnic hatching on top of political fills)
+- **Legend** — discrete 10-swatch entry via `LEGEND_REGISTRY`
+- **Ethnic group config** — `src/lib/ethnicGroups.ts`, `EthnicGroup` type, `ETHNIC_GROUPS` record with color/rgba/population/context
+- **Yazidi absent** — GeoEPR maps Yazidi under Kurdish ("Kurds/Yezidis"); deferred to future patch

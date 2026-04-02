@@ -9,7 +9,7 @@ v0.9 MVP:              [██████████████████�
 v1.0 Deployment:       [████████████████████]  2/2  phases (shipped 2026-03-20)
 v1.1 Intelligence Layer: [████████████████████]  8/8  phases (shipped 2026-03-22)
 v1.2 Visualization:    [████████████████████]  7/7  phases (shipped 2026-03-29)
-v1.3 Data Quality:     [██████████████░░░░░░]  5/9  phases
+v1.3 Data Quality:     [████████████████░░░░]  6/9  phases
 ```
 
 ## Phase Status
@@ -51,10 +51,11 @@ v1.3 Data Quality:     [██████████████░░░░�
 | 23.1 | Detail Panel Navigation Stack | v1.3 | Done | 2026-04-01 |
 | 23.2 | Threat Density Scatter Plots | v1.3 | Done | 2026-04-01 |
 | 24 | Political Boundaries Layer | v1.3 | Done | 2026-04-02 |
+| 25 | Ethnic Distribution Layer | v1.3 | Done | 2026-04-02 |
 
 ## Current Focus
 
-v1.3 milestone in progress — 5/9 phases complete. 1106 tests passing. Next up: Phase 25 (Ethnic Distribution Layer).
+v1.3 milestone in progress — 6/9 phases complete. 1113 tests passing. Next up: Phase 26 (Water Stress Layer).
 
 ## What's Been Built
 
@@ -133,6 +134,8 @@ v1.3 milestone in progress — 5/9 phases complete. 1106 tests passing. Next up:
 **Phase 23.2: Threat Density Scatter Plots** — RadialGradientExtension (custom GLSL shader), additive blending, dual-dimension encoding (radius=spread, color=weight), zoom-dependent z-ordering, hover dimming, Nominatim geocoding for cluster context.
 
 **Phase 24: Political Boundaries Layer** — deck.gl GeoJsonLayer for faction-colored country fills (US-aligned blue, Iran-aligned red, neutral gray at 15% opacity). Natural Earth 110m polygons + 10m disputed areas (Gaza, West Bank, Golan Heights with amber fill). Discrete swatch legend. Threat cluster centroids fixed to use mean of actual event coordinates. 1106 tests passing.
+
+**Phase 25: Ethnic Distribution Layer** — deck.gl GeoJsonLayer + FillStyleExtension hatched fills for 10 ethnic zones (Kurdish, Arab, Persian, Baloch, Turkmen, Druze, Alawite, Yazidi, Assyrian, Pashtun). GeoEPR 2021 dataset from ETH Zurich. 23 overlap zones with stacked interleaved stripe hatching. Canvas-generated 32x32 hatch atlas. Centroid labels on single-group zones only. Hover tooltips with group info and population. 1113 tests passing.
 
 ## Blockers
 
