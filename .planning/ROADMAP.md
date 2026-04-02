@@ -93,15 +93,16 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 23.2 to break down)
 
-### Phase 23.1: detail panel navigation stack (INSERTED)
+### Phase 23.1: Detail Panel Navigation Stack (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Add browser-like back-navigation to the detail panel with a breadcrumb row, directional slide transitions, and universal history across all entity/cluster entry points
 **Depends on:** Phase 23
-**Plans:** 0 plans
+**Requirements:** [NAV-01, NAV-02, NAV-03, NAV-04, NAV-05, NAV-06, NAV-07, NAV-08, NAV-09]
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 23.1 to break down)
+- [ ] 23.1-01-PLAN.md -- PanelView type, UIState extension, store actions, label helper, CSS animations, and tests
+- [ ] 23.1-02-PLAN.md -- BreadcrumbRow component, DetailPanelSlot integration, call site wiring, visual checkpoint
 
 ### Phase 24: Political Boundaries Layer
 **Goal**: Users can toggle a political overlay showing country borders color-coded by alliance/faction alignment
