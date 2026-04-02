@@ -353,7 +353,7 @@ describe('useThreatHeatmapLayers', () => {
     expect(result.current[0].id).toBe('threat-cluster-picker');
   });
 
-  it('cluster layer has thermal-colored circles with pixel-based radius', () => {
+  it('cluster layer has thermal-colored circles with meter-based radius and pixel clamps', () => {
     const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
     useEventStore.setState({ events, eventCount: events.length });
     useLayerStore.getState().toggleLayer('threat');
@@ -362,11 +362,10 @@ describe('useThreatHeatmapLayers', () => {
     expect(picker.id).toBe('threat-cluster-picker');
     expect(picker.props.pickable).toBe(true);
     expect(typeof picker.props.getFillColor).toBe('function');
-    // Pixel-based sizing for consistent visual size across zoom
-    expect(picker.props.radiusUnits).toBe('pixels');
-    // No radiusMinPixels/radiusMaxPixels with pixel units
-    expect(picker.props.radiusMinPixels).toBeUndefined();
-    expect(picker.props.radiusMaxPixels).toBeUndefined();
+    // Meter-based sizing to stay geographically anchored on zoom
+    expect(picker.props.radiusUnits).toBe('meters');
+    expect(picker.props.radiusMinPixels).toBe(10);
+    expect(picker.props.radiusMaxPixels).toBe(150);
   });
 
   it('cluster layer has RadialGradientExtension in extensions array', () => {

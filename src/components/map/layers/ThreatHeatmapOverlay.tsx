@@ -328,16 +328,22 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null) {
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Pixel-based radius encoding geographic spread (cell count).
-      // Single-cell = 12px, 20+ cells = 100px. Linear interpolation.
+      // Meter-based radius from bounding box diagonal + event density boost.
+      // Stays geographically anchored to events on zoom. Dense clusters grow bigger.
       getRadius: (d: ThreatCluster) => {
-        const cellCount = d.cells.length;
-        const MIN_PX = 12;
-        const MAX_PX = 100;
-        const t = Math.min(1, (cellCount - 1) / 19);
-        return MIN_PX + t * (MAX_PX - MIN_PX);
+        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
+        const dLat = (maxLat - minLat) * 111_000; // ~111km per degree latitude
+        const dLng = (maxLng - minLng) * 111_000 * Math.cos((d.centroidLat * Math.PI) / 180);
+        const diagonal = Math.sqrt(dLat * dLat + dLng * dLng);
+        // Base: half the bounding box diagonal (so circle covers the cluster extent)
+        const baseRadius = Math.max(diagonal / 2, 15_000); // floor 15km for single-cell clusters
+        // Density boost: sqrt of event count scales up packed clusters
+        const densityFactor = 1 + Math.sqrt(d.eventCount) * 0.15;
+        return baseRadius * densityFactor;
       },
-      radiusUnits: 'pixels' as const,
+      radiusUnits: 'meters' as const,
+      radiusMinPixels: 10,
+      radiusMaxPixels: 150,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {
