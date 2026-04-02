@@ -57,3 +57,9 @@ None.
 - Ethnic distribution GeoJSON data needs manual curation from published maps
 - WRI Aqueduct data format/licensing needs verification
 - Redis command budget at ~92% — monitor with Bellingcat RSS adding another polling source
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 22.1 inserted after Phase 22: fixing dispersion (URGENT)
