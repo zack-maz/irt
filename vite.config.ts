@@ -31,6 +31,7 @@ export default defineConfig({
             '@deck.gl/mapbox',
             '@deck.gl/react',
             '@deck.gl/aggregation-layers',
+            '@deck.gl/extensions',
           ],
         },
       },
@@ -62,6 +63,7 @@ export default defineConfig({
       '@deck.gl/layers': path.resolve(__dirname, './src/test/__mocks__/deck-gl-layers.ts'),
       'maplibre-contour': path.resolve(__dirname, './src/test/__mocks__/maplibre-contour.ts'),
       '@deck.gl/aggregation-layers': path.resolve(__dirname, './src/test/__mocks__/deck-gl-aggregation-layers.ts'),
+      '@deck.gl/extensions': path.resolve(__dirname, './src/test/__mocks__/deck-gl-extensions.ts'),
     },
   },
 });
