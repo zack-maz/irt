@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { ScatterplotLayer } from '@deck.gl/layers';
 import { useLayerStore } from '@/stores/layerStore';
 import { useFilterStore } from '@/stores/filterStore';
@@ -302,11 +301,6 @@ function formatRelativeTime(timestamp: number): string {
 
 // --- Hook ---
 
-interface WeightedPoint {
-  position: [number, number];
-  weight: number;
-}
-
 export function useThreatHeatmapLayers() {
   // Consume events already filtered by useFilteredEntities (date, proximity, country, CAMEO, mentions, etc.)
   const { events } = useFilteredEntities();
@@ -328,32 +322,7 @@ export function useThreatHeatmapLayers() {
     });
     if (filtered.length === 0) return [];
 
-    const weightedData: WeightedPoint[] = filtered.map((e) => ({
-      position: [e.lng, e.lat] as [number, number],
-      weight: computeThreatWeight(e),
-    }));
-
     const grid = aggregateToGrid(filtered);
-    // P90 from aggregated grid cell weights (not individual events)
-    // — matches the spatial accumulation the heatmap performs
-    const p90 = computeP90(grid.map((c) => c.clusterWeight));
-
-    const heatmapLayer = new HeatmapLayer({
-      id: 'threat-heatmap',
-      data: weightedData,
-      getPosition: (d: WeightedPoint) => d.position,
-      getWeight: (d: WeightedPoint) => d.weight,
-      radiusPixels: 40,
-      colorRange: THERMAL_COLOR_RANGE,
-      colorDomain: [0, p90],
-      intensity: 1,
-      threshold: 0.03,
-      opacity: 0.45,
-      aggregation: 'SUM',
-      pickable: false,
-      debounceTimeout: 500,
-    });
-
     const clusters = mergeClusters(grid);
 
     // Max cluster weight for color interpolation
@@ -377,7 +346,7 @@ export function useThreatHeatmapLayers() {
       pickable: true,
     });
 
-    return [heatmapLayer, clusterPickerLayer];
+    return [clusterPickerLayer];
   }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle]);
 }
 

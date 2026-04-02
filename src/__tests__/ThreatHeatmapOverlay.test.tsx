@@ -343,51 +343,27 @@ describe('useThreatHeatmapLayers', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('returns HeatmapLayer + ScatterplotLayer when active with events', () => {
+  it('returns cluster ScatterplotLayer when active with events', () => {
     const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
     useEventStore.setState({ events, eventCount: events.length });
     useLayerStore.getState().toggleLayer('threat');
     const { result } = renderHook(() => useThreatHeatmapLayers());
-    expect(result.current).toHaveLength(2);
-    expect(result.current[0].id).toBe('threat-heatmap');
-    expect(result.current[1].id).toBe('threat-cluster-picker');
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].id).toBe('threat-cluster-picker');
   });
 
-  it('HeatmapLayer has correct configuration with thermal palette', () => {
+  it('cluster layer has thermal-colored circles with static pixel radius', () => {
     const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
     useEventStore.setState({ events, eventCount: events.length });
     useLayerStore.getState().toggleLayer('threat');
     const { result } = renderHook(() => useThreatHeatmapLayers());
-    const heatmap = result.current[0];
-    expect(heatmap.id).toBe('threat-heatmap');
-    expect(heatmap.props.pickable).toBe(false);
-    expect(heatmap.props.opacity).toBe(0.45);
-    expect(heatmap.props.colorRange).toEqual(THERMAL_COLOR_RANGE);
-  });
-
-  it('HeatmapLayer has colorDomain set', () => {
-    const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
-    useEventStore.setState({ events, eventCount: events.length });
-    useLayerStore.getState().toggleLayer('threat');
-    const { result } = renderHook(() => useThreatHeatmapLayers());
-    const heatmap = result.current[0];
-    expect(heatmap.props.colorDomain).toBeDefined();
-    expect(Array.isArray(heatmap.props.colorDomain)).toBe(true);
-    expect(heatmap.props.colorDomain[0]).toBe(0);
-    expect(heatmap.props.colorDomain[1]).toBeGreaterThan(0);
-  });
-
-  it('ScatterplotLayer has correct configuration with cluster-level data', () => {
-    const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
-    useEventStore.setState({ events, eventCount: events.length });
-    useLayerStore.getState().toggleLayer('threat');
-    const { result } = renderHook(() => useThreatHeatmapLayers());
-    const picker = result.current[1];
+    const picker = result.current[0];
     expect(picker.id).toBe('threat-cluster-picker');
     expect(picker.props.pickable).toBe(true);
-    // Cluster circles are thermal-colored (function accessor) and pixel-sized
     expect(typeof picker.props.getFillColor).toBe('function');
     expect(picker.props.radiusUnits).toBe('pixels');
+    expect(picker.props.radiusMinPixels).toBe(15);
+    expect(picker.props.radiusMaxPixels).toBe(40);
   });
 });
 
