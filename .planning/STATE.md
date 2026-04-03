@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-03T15:24:33Z"
+last_updated: "2026-04-03T17:55:19.230Z"
 progress:
   total_phases: 9
-  completed_phases: 4
-  total_plans: 20
-  completed_plans: 17
+  completed_phases: 5
+  total_plans: 21
+  completed_plans: 18
 ---
 
 # Project State
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 26: Plan 05 COMPLETE (5 of 5 plans done, pending visual checkpoint)
+Phase 26: Plan 06 COMPLETE (6 of 6 plans done, gap closure complete)
 Phase 25: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 24: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23.2: Plan 01 COMPLETE (1 of 2 plans done)
@@ -41,7 +41,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
 | 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (5/5 plans, visual checkpoint pending) |
+| 26 | Water Stress Layer | IN PROGRESS (6/6 plans, gap closure complete) |
 | 27 | Performance & Load Testing | Planned |
 
 ## Key Decisions
@@ -93,6 +93,9 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Water facilities use same proximity alert system as sites (waterToSiteLike adapter pattern)
 - Proximity alerts dismissible with 60s cooldown to prevent overwhelm from water facilities
 - Alert click selects site/facility (not approaching flight) for detail panel context
+- Dark purple [40,20,60] as water stress color floor -- visible on dark terrain while still reading as stressed
+- Core/extended Overpass batch split: core 12 countries must succeed, extended 11 is best-effort (partial data > none)
+- Route-level 30s timeout returns empty array with stale:true (not 500) -- client degrades gracefully on Overpass failure
 
 ## Pending Todos
 
