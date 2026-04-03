@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-03T04:50:51.172Z"
+last_updated: "2026-04-03T05:35:26.243Z"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 20
-  completed_plans: 13
+  completed_plans: 15
 ---
 
 # Project State
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 26: Plan 02 IN PROGRESS (2 of 5 plans done)
+Phase 26: Plan 04 IN PROGRESS (4 of 5 plans done)
 Phase 25: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 24: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23.2: Plan 01 COMPLETE (1 of 2 plans done)
@@ -41,7 +41,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
 | 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (2/5 plans) |
+| 26 | Water Stress Layer | IN PROGRESS (4/5 plans) |
 | 27 | Performance & Load Testing | Planned |
 
 ## Key Decisions
@@ -84,6 +84,9 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - WRI Aqueduct 4.0 CSV used directly: 6377 basins across 29 ME countries (no fallback needed)
 - Country matching for basin filtering uses exact equality (substring "Romania" matching "Oman" was a bug)
 - compositeHealth: baseline dominates (75%), precipitation modifier adjusts (25%), clamped [0,1]
+- PrecipitationData defined locally in waterStore.ts (not server/types.ts) since 26-03 server plan not yet executed
+- Water facility icons use existing atlas placeholders (diamond, siteDesalination) pending dedicated water icons
+- River labels use serif italic font to distinguish from ethnic overlay sans-serif labels
 
 ## Pending Todos
 
