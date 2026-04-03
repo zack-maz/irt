@@ -338,3 +338,25 @@ Personal real-time intelligence dashboard for monitoring the Iran conflict. 2.5D
 - **Legend** — discrete 10-swatch entry via `LEGEND_REGISTRY`
 - **Ethnic group config** — `src/lib/ethnicGroups.ts`, `EthnicGroup` type, `ETHNIC_GROUPS` record with color/rgba/population/context
 - **Yazidi absent** — GeoEPR maps Yazidi under Kurdish ("Kurds/Yezidis"); deferred to future patch
+
+## Water Stress Layer (Phase 26)
+
+- **Point-based approach** — stress shown at specific water facilities (dams, reservoirs, treatment plants, canals, desalination), NOT polygon fills
+- **WRI Aqueduct 4.0** — baseline water stress + drought risk + groundwater depletion + seasonal variability; basin-level data in `src/data/aqueduct-basins.json` (6377 entries)
+- **Basin lookup** — `server/lib/basinLookup.ts`, assigns WRI stress to each facility by nearest country-centroid basin match
+- **Composite health** — `src/lib/waterStress.ts`, combines WRI baseline stress + Open-Meteo precipitation anomaly into health score
+- **Color ramp** — continuous gradient from black (extreme stress) to light blue (healthy); `stressToRGBA()` interpolation
+- **Open-Meteo precipitation** — `server/adapters/open-meteo-precip.ts`, 30-day anomaly with 100-location batching, 6h polling
+- **Overpass water adapter** — `server/adapters/overpass-water.ts`, queries 5 facility types with `["name"]` filter (~4300 named facilities), 120s timeout
+- **Desalination migrated** — removed from SiteType/siteStore, now exclusively under Water layer
+- **Rivers** — 6 major rivers (Tigris, Euphrates, Nile, Jordan, Karun, Litani) as GeoJSON line features in `src/data/rivers.json`, stress-colored by watershed
+- **waterStore** — `src/stores/waterStore.ts`, Zustand store with facility lifecycle and precipitation merge
+- **useWaterFetch** — one-time fetch on mount via `/api/water` (24h Redis cache)
+- **useWaterPrecipPolling** — 6h recursive setTimeout for `/api/water/precip`
+- **useWaterLayers** — deck.gl GeoJsonLayer (rivers) + IconLayer (facilities) + TextLayer (river labels in italic)
+- **WaterFacilityDetail** — detail panel with all Aqueduct indicators, precipitation, attack status, coordinates
+- **Full integration** — counters, search (type:dam, stress:high, name:, near:), proximity alerts — gated by water layer active
+- **Attack status** — cross-references water facilities with GDELT events within 5km
+- **Legend** — gradient bar from black to light blue via LEGEND_REGISTRY
+- **Click guard** — `handleDeckClick` returns early for `water-river*` layer IDs
+- **Layer stacking** — rivers after ethnic, water facilities at same z-level as entities
