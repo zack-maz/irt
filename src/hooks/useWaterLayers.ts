@@ -77,8 +77,8 @@ export function useWaterLayers(): (GeoJsonLayer | IconLayer<WaterFacility> | Tex
         return Math.max(1, 6 - scale) * 500;
       }) as any,
       lineWidthUnits: 'meters' as const,
-      lineWidthMinPixels: 1,
-      lineWidthMaxPixels: 6,
+      lineWidthMinPixels: 2,
+      lineWidthMaxPixels: 12,
       pickable: false,
     });
 
