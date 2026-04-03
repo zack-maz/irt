@@ -6,12 +6,14 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
+import { useWaterStore } from '@/stores/waterStore';
 
 /** Maps entity type to display label */
 export function getTypeLabel(type: string): string {
   if (type === 'flight') return 'FLIGHT';
   if (type === 'ship') return 'SHIP';
   if (type === 'site') return 'SITE';
+  if (type === 'water') return 'WATER FACILITY';
   return (EVENT_TYPE_LABELS[type] ?? type).toUpperCase();
 }
 
@@ -29,6 +31,9 @@ export function getEntityName(entity: { type: string; [key: string]: unknown }):
     case 'site': {
       return (entity as SiteEntity).label || 'Unknown Site';
     }
+    case 'water': {
+      return (entity as { label: string }).label || 'Unknown Facility';
+    }
     default: {
       if (isConflictEventType(entity.type)) {
         const d = (entity as ConflictEventEntity).data;
@@ -45,12 +50,14 @@ export function findEntityById(id: string): MapEntity | SiteEntity | null {
   const ships = useShipStore.getState().ships;
   const events = useEventStore.getState().events;
   const sites = useSiteStore.getState().sites;
+  const waterFacilities = useWaterStore.getState().facilities;
 
   return (
     flights.find((f) => f.id === id) ??
     ships.find((s) => s.id === id) ??
     events.find((e) => e.id === id) ??
     sites.find((s) => s.id === id) ??
+    waterFacilities.find((w) => w.id === id) ??
     null
   );
 }

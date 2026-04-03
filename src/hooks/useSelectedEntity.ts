@@ -4,16 +4,18 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
+import { useWaterStore } from '@/stores/waterStore';
 import type { MapEntity, SiteEntity } from '@/types/entities';
+import type { WaterFacility } from '../../server/types';
 
 export interface SelectedEntityResult {
-  entity: MapEntity | SiteEntity | null;
+  entity: MapEntity | SiteEntity | WaterFacility | null;
   isLost: boolean;
   lastSeen: number;
 }
 
 interface LastKnown {
-  entity: MapEntity | SiteEntity;
+  entity: MapEntity | SiteEntity | WaterFacility;
   lastSeen: number;
 }
 
@@ -23,6 +25,7 @@ export function useSelectedEntity(): SelectedEntityResult {
   const ships = useShipStore((s) => s.ships);
   const events = useEventStore((s) => s.events);
   const sites = useSiteStore((s) => s.sites);
+  const waterFacilities = useWaterStore((s) => s.facilities);
 
   const lastKnownRef = useRef<LastKnown | null>(null);
 
@@ -33,12 +36,13 @@ export function useSelectedEntity(): SelectedEntityResult {
       return { entity: null, isLost: false, lastSeen: 0 };
     }
 
-    // Search across all stores
+    // Search across all stores (including water facilities)
     const found =
       flights.find((f) => f.id === selectedId) ??
       ships.find((s) => s.id === selectedId) ??
       events.find((e) => e.id === selectedId) ??
       sites.find((s) => s.id === selectedId) ??
+      waterFacilities.find((w) => w.id === selectedId) ??
       null;
 
     if (found) {
@@ -58,5 +62,5 @@ export function useSelectedEntity(): SelectedEntityResult {
 
     // No entity found and no last-known (shouldn't normally happen)
     return { entity: null, isLost: false, lastSeen: 0 };
-  }, [selectedId, flights, ships, events, sites]);
+  }, [selectedId, flights, ships, events, sites, waterFacilities]);
 }

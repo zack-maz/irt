@@ -6,18 +6,21 @@ import { FlightDetail } from '@/components/detail/FlightDetail';
 import { ShipDetail } from '@/components/detail/ShipDetail';
 import { EventDetail } from '@/components/detail/EventDetail';
 import { SiteDetail } from '@/components/detail/SiteDetail';
+import { WaterFacilityDetail } from '@/components/detail/WaterFacilityDetail';
 import { ThreatClusterDetail } from '@/components/detail/ThreatClusterDetail';
 import { BreadcrumbRow } from '@/components/detail/BreadcrumbRow';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
 import { isConflictEventType, CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
 import { getTypeLabel, getEntityName, findEntityById } from '@/lib/panelLabel';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
+import type { WaterFacility } from '../../../server/types';
 
 /** Maps entity type to the ENTITY_DOT_COLORS key */
 function getDotColor(type: string): string {
   if (type === 'flight') return ENTITY_DOT_COLORS.flights;
   if (type === 'ship') return ENTITY_DOT_COLORS.ships;
   if (type === 'site') return ENTITY_DOT_COLORS.siteHealthy;
+  if (type === 'water') return '#4ade80';
   if (isConflictEventType(type)) {
     if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
     if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
@@ -225,6 +228,9 @@ export function DetailPanelSlot() {
               )}
               {entity.type === 'site' && (
                 <SiteDetail entity={entity as SiteEntity} />
+              )}
+              {entity.type === 'water' && (
+                <WaterFacilityDetail facility={entity as unknown as WaterFacility} />
               )}
 
               {/* Coordinates with copy button */}

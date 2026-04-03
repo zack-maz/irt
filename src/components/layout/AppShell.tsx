@@ -10,6 +10,8 @@ import { useSiteFetch } from '@/hooks/useSiteFetch';
 import { useNewsPolling } from '@/hooks/useNewsPolling';
 import { useMarketPolling } from '@/hooks/useMarketPolling';
 import { useWeatherPolling } from '@/hooks/useWeatherPolling';
+import { useWaterFetch } from '@/hooks/useWaterFetch';
+import { useWaterPrecipPolling } from '@/hooks/useWaterPrecipPolling';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEscapeKeyHandler } from '@/hooks/useEscapeKeyHandler';
 import { useQuerySync } from '@/hooks/useQuerySync';
@@ -22,6 +24,8 @@ export function AppShell() {
   useNewsPolling();
   useMarketPolling();
   useWeatherPolling();
+  useWaterFetch();
+  useWaterPrecipPolling();
   useNotifications();
   useEscapeKeyHandler();
   useQuerySync();
