@@ -129,7 +129,7 @@ Plans:
 **Goal**: Users can toggle a water stress overlay showing point-based resource scarcity at water infrastructure facilities (dams, reservoirs, treatment plants, canals, desalination) with stress-colored markers, major river line features, precipitation integration, and full entity treatment (detail panel, counters, search, proximity alerts)
 **Depends on**: Phase 20 (layer architecture)
 **Requirements:** [WAT-01, WAT-02, WAT-03, WAT-04, WAT-05, WAT-06, WAT-07, WAT-08, WAT-09, WAT-10, WAT-11]
-**Plans:** 5/5 plans complete
+**Plans:** 6 plans (5 complete + 1 gap closure)
 
 Plans:
 - [ ] 26-01-PLAN.md -- WaterFacility types, stress utilities, data extraction scripts (rivers + Aqueduct basins)
@@ -137,6 +137,7 @@ Plans:
 - [ ] 26-03-PLAN.md -- Overpass water adapter, basin lookup, Open-Meteo precip adapter, /api/water routes
 - [ ] 26-04-PLAN.md -- waterStore, fetch/polling hooks, useWaterLayers (rivers + facilities), WaterOverlay tooltip
 - [ ] 26-05-PLAN.md -- Detail panel, BaseMap wiring, counters, search, proximity, legend, toggle UI, visual checkpoint
+- [ ] 26-06-PLAN.md -- Gap closure: API timeout fix, color floor adjustment, river compositeHealth + line width
 
 ### Phase 27: Performance & Load Testing
 **Goal**: Optimize initial load time and validate production handles 250 concurrent users
