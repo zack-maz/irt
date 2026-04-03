@@ -86,6 +86,29 @@ export function ProximityAlertOverlay() {
   const expandedSiteId = useUIStore((s) => s.expandedAlertSiteId);
   const setExpandedSiteId = useUIStore((s) => s.setExpandedAlertSiteId);
   const rafRef = useRef<number>(0);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => new Set());
+  const dismissTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const dismissAlert = useCallback((siteId: string) => {
+    setDismissedIds((prev) => new Set(prev).add(siteId));
+    // Re-allow after 60s so persistent threats re-alert
+    const timer = setTimeout(() => {
+      setDismissedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(siteId);
+        return next;
+      });
+      dismissTimers.current.delete(siteId);
+    }, 60_000);
+    dismissTimers.current.set(siteId, timer);
+  }, []);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      for (const timer of dismissTimers.current.values()) clearTimeout(timer);
+    };
+  }, []);
 
   // Force re-render on map move to update projected positions
   const handleMapMove = useCallback(() => {
@@ -116,7 +139,9 @@ export function ProximityAlertOverlay() {
     }
   }, [alerts, expandedSiteId]);
 
-  if (!mapRef || alerts.length === 0) return null;
+  const visibleAlerts = alerts.filter((a) => !dismissedIds.has(a.siteId));
+
+  if (!mapRef || visibleAlerts.length === 0) return null;
 
   const map = mapRef.getMap();
 
@@ -125,7 +150,7 @@ export function ProximityAlertOverlay() {
       className="pointer-events-none absolute inset-0"
       style={{ zIndex: 'var(--z-controls)' }}
     >
-      {alerts.map((alert) => {
+      {visibleAlerts.map((alert) => {
         const projected = map.project([alert.siteLng, alert.siteLat]);
         return (
           <AlertIcon
@@ -144,8 +169,9 @@ export function ProximityAlertOverlay() {
                 lat: alert.siteLat,
                 zoom: 10,
               });
-              useUIStore.getState().selectEntity(alert.flightId);
+              useUIStore.getState().selectEntity(alert.siteId);
               useUIStore.getState().openDetailPanel();
+              dismissAlert(alert.siteId);
             }}
             screenX={projected.x}
             screenY={projected.y}
