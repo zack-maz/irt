@@ -89,7 +89,7 @@ export interface CacheResponse<T> {
   degraded?: boolean; // true when serving from in-memory fallback (Redis unavailable)
 }
 
-export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'desalination' | 'port';
+export type SiteType = 'nuclear' | 'naval' | 'oil' | 'airbase' | 'port';
 
 export interface SiteEntity {
   id: string; // "site-{osmId}"
