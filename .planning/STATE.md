@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 26: Plan 02 COMPLETE (1 of 5 plans done)
+Phase 26: Plan 02 IN PROGRESS (2 of 5 plans done)
 Phase 25: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 24: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23.2: Plan 01 COMPLETE (1 of 2 plans done)
@@ -41,7 +41,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
 | 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (1/5 plans) |
+| 26 | Water Stress Layer | IN PROGRESS (2/5 plans) |
 | 27 | Performance & Load Testing | Planned |
 
 ## Key Decisions
@@ -80,6 +80,10 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Yazidi absent from GeoEPR (mapped as Kurds/Yezidis -> Kurdish); not hand-drawn per CONTEXT.md policy
 - Grid-based overlap detection at 0.5-degree resolution identifies 23 overlap zones
 - Only removed desalination from SiteType, left WaterFacilityType (added by 26-01) untouched -- clean parallel execution
+- Karun and Litani rivers manually defined (not in Natural Earth 10m dataset)
+- WRI Aqueduct 4.0 CSV used directly: 6377 basins across 29 ME countries (no fallback needed)
+- Country matching for basin filtering uses exact equality (substring "Romania" matching "Oman" was a bug)
+- compositeHealth: baseline dominates (75%), precipitation modifier adjusts (25%), clamped [0,1]
 
 ## Pending Todos
 
@@ -88,7 +92,7 @@ None.
 ## Blockers/Concerns
 
 - Ethnic distribution GeoJSON data needs manual curation from published maps
-- WRI Aqueduct data format/licensing needs verification
+- WRI Aqueduct 4.0 format verified: ZIP contains CSV + GeoPackage; CSV has 231 columns, no lat/lng centroids
 - Redis command budget at ~92% — monitor with Bellingcat RSS adding another polling source
 
 ## Accumulated Context

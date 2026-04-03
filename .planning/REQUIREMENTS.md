@@ -104,11 +104,11 @@ Requirements for the Data Quality & Layers milestone.
 ### Water Stress Layer
 
 - [ ] **WAT-01**: Overpass water infrastructure query returns dams, reservoirs, treatment plants, named canals, and desalination plants from Middle East countries
-- [ ] **WAT-02**: Each water facility is assigned WRI Aqueduct 4.0 basin-level stress indicators (baseline water stress, drought risk, groundwater decline, seasonal variability) via coordinate-to-basin lookup
+- [x] **WAT-02**: Each water facility is assigned WRI Aqueduct 4.0 basin-level stress indicators (baseline water stress, drought risk, groundwater decline, seasonal variability) via coordinate-to-basin lookup
 - [ ] **WAT-03**: Open-Meteo 30-day precipitation anomaly is polled every 6 hours and feeds into composite water health score
-- [ ] **WAT-04**: Composite water health score combines WRI baseline (75% weight) with precipitation anomaly (25% weight) into a 0-1 scale
+- [x] **WAT-04**: Composite water health score combines WRI baseline (75% weight) with precipitation anomaly (25% weight) into a 0-1 scale
 - [ ] **WAT-05**: Water facilities render as type-specific icon markers (dam, reservoir, plant, canal, desalination) tinted by stress color on the black-to-light-blue gradient
-- [ ] **WAT-06**: Six major rivers (Tigris, Euphrates, Nile, Jordan, Karun, Litani) render as stress-colored line features with italic serif labels when water layer is active
+- [x] **WAT-06**: Six major rivers (Tigris, Euphrates, Nile, Jordan, Karun, Litani) render as stress-colored line features with italic serif labels when water layer is active
 - [x] **WAT-07**: Desalination plants are migrated entirely from the Sites overlay to the Water layer (removed from SiteType, Overpass sites query, site toggles, and site counters)
 - [ ] **WAT-08**: Clicking a water facility opens WaterFacilityDetail panel showing all WRI indicators, precipitation anomaly, composite health, attack status, and coordinates
 - [ ] **WAT-09**: Water facilities appear in counters, are searchable (type:dam, stress:high, name:, near:), and trigger proximity alerts -- all gated by water layer being active
