@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Data Quality & Layers
 status: unknown
-last_updated: "2026-04-03T09:13:18.344Z"
+last_updated: "2026-04-03T15:24:33Z"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 20
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 26: Plan 04 IN PROGRESS (4 of 5 plans done)
+Phase 26: Plan 05 COMPLETE (5 of 5 plans done, pending visual checkpoint)
 Phase 25: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 24: Plan 01 COMPLETE (1 of 2 plans done)
 Phase 23.2: Plan 01 COMPLETE (1 of 2 plans done)
@@ -41,7 +41,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
 | 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (4/5 plans) |
+| 26 | Water Stress Layer | IN PROGRESS (5/5 plans, visual checkpoint pending) |
 | 27 | Performance & Load Testing | Planned |
 
 ## Key Decisions
@@ -90,6 +90,9 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Country-centroid basin lookup: WRI Aqueduct lacks lat/lng, so basinLookup uses haversine to nearest country centroid then median-stress basin
 - Regional precipitation normals: 20mm/month arid default, 50mm/month Fertile Crescent (lat 30-40, lng 35-50)
 - Water API dual-cache: water:facilities (24h) + water:precip (6h) as separate Redis keys
+- Water facilities use same proximity alert system as sites (waterToSiteLike adapter pattern)
+- Proximity alerts dismissible with 60s cooldown to prevent overwhelm from water facilities
+- Alert click selects site/facility (not approaching flight) for detail panel context
 
 ## Pending Todos
 
