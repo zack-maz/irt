@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { stressToRGBA, bwsScoreToLabel } from '@/lib/waterStress';
+import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
 import type { WaterFacility, WaterFacilityType } from '../../../../server/types';
 
 /** Human-readable labels for water facility types */
 const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
-  treatment_plant: 'Water Treatment Plant',
-  canal: 'Canal/Aqueduct',
   desalination: 'Desalination Plant',
 };
 
@@ -28,10 +26,10 @@ interface WaterTooltipProps {
  * composite health as percentage, and precipitation anomaly if available.
  */
 export function WaterTooltip({ facility }: WaterTooltipProps): React.ReactElement {
-  const healthPct = Math.round(facility.stress.compositeHealth * 100);
+  const score = healthToScore(facility.stress.compositeHealth);
   const [r, g, b] = stressToRGBA(facility.stress.compositeHealth, 255);
   const colorHex = `rgb(${r}, ${g}, ${b})`;
-  const bwsLabel = bwsScoreToLabel(facility.stress.bws_score);
+  const label = scoreToLabel(score);
 
   return (
     <div className="space-y-1 text-xs">
@@ -43,7 +41,7 @@ export function WaterTooltip({ facility }: WaterTooltipProps): React.ReactElemen
           style={{ backgroundColor: colorHex }}
         />
         <span className="text-zinc-300">
-          Water Stress: {bwsLabel} ({healthPct}% health)
+          Health: {score}/10 — {label}
         </span>
       </div>
       {facility.precipitation && (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { WaterFacility } from '../../../server/types';
-import { stressToRGBA, bwsScoreToLabel } from '@/lib/waterStress';
+import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -14,8 +14,6 @@ import type { ConflictEventEntity } from '@/types/entities';
 const WATER_TYPE_LABELS: Record<string, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
-  treatment_plant: 'Water Treatment Plant',
-  canal: 'Canal / Aqueduct',
   desalination: 'Desalination Plant',
 };
 
@@ -65,7 +63,8 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
   const osmUrl = `https://www.openstreetmap.org/?mlat=${facility.lat}&mlon=${facility.lng}#map=15/${facility.lat}/${facility.lng}`;
   const imageUrl = useSiteImage(facility.lat, facility.lng);
 
-  const healthPct = Math.round(facility.stress.compositeHealth * 100);
+  const score = healthToScore(facility.stress.compositeHealth);
+  const scorePct = Math.round((score / 10) * 100);
   const [r, g, b] = stressToRGBA(facility.stress.compositeHealth, 255);
   const stressColor = `rgb(${r}, ${g}, ${b})`;
 
@@ -130,12 +129,12 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
             <div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{
-                width: `${healthPct}%`,
+                width: `${scorePct}%`,
                 backgroundColor: stressColor,
               }}
             />
           </div>
-          <span className="tabular-nums text-text-primary text-xs">{healthPct}%</span>
+          <span className="tabular-nums text-text-primary text-xs">{score}/10 {scoreToLabel(score)}</span>
         </div>
       </div>
 

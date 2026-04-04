@@ -8,6 +8,7 @@ import { useLayerStore } from '@/stores/layerStore';
 import { computeAttackStatus } from '@/lib/attackStatus';
 import { haversineKm } from '@/lib/geo';
 import { classifySeverity } from '@/lib/severity';
+import { healthToScore, scoreToLabel } from '@/lib/waterStress';
 import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity, SiteType } from '@/types/entities';
 import type { WaterFacility, WaterFacilityType } from '../../../server/types';
@@ -24,8 +25,6 @@ export interface SiteCounts {
 export interface WaterCounts {
   dam: number;
   reservoir: number;
-  treatment_plant: number;
-  canal: number;
   desalination: number;
   total: number;
 }
@@ -128,14 +127,12 @@ function toSiteEntity(s: SiteEntity, attackCount: number): CounterEntity {
 const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
-  treatment_plant: 'Treatment Plant',
-  canal: 'Canal',
   desalination: 'Desalination',
 };
 
 function toWaterEntity(w: WaterFacility): CounterEntity {
-  const healthPct = Math.round(w.stress.compositeHealth * 100);
-  const metric = `${healthPct}% health`;
+  const score = healthToScore(w.stress.compositeHealth);
+  const metric = `${score}/10 ${scoreToLabel(score)}`;
   return { id: w.id, label: w.label || WATER_TYPE_LABELS[w.facilityType], metric, lat: w.lat, lng: w.lng, type: w.facilityType };
 }
 
@@ -227,9 +224,9 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     }
 
     // --- Water facilities (gated by layer active) ---
-    const waterCounts: WaterCounts = { dam: 0, reservoir: 0, treatment_plant: 0, canal: 0, desalination: 0, total: 0 };
+    const waterCounts: WaterCounts = { dam: 0, reservoir: 0, desalination: 0, total: 0 };
     const waterEntities: Record<WaterFacilityType, CounterEntity[]> = {
-      dam: [], reservoir: [], treatment_plant: [], canal: [], desalination: [],
+      dam: [], reservoir: [], desalination: [],
     };
 
     if (isWaterLayerActive) {

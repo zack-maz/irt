@@ -120,7 +120,7 @@ export function EntityTooltip({ entity, x, y }: EntityTooltipProps) {
         position: 'fixed',
         left: pos.left,
         top: pos.top,
-        backgroundColor: 'rgba(0,0,0,0.85)',
+        backgroundColor: 'rgba(0,0,0,0.95)',
         color: '#e5e5e5',
         borderRadius: '6px',
         padding: '8px 12px',

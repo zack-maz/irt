@@ -355,7 +355,6 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null) {
       },
       radiusUnits: 'meters' as const,
       radiusMinPixels: 20,
-      radiusMaxPixels: 200,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {
@@ -417,7 +416,7 @@ export function ThreatTooltip({ zone, x, y }: ThreatTooltipProps) {
       className="pointer-events-none absolute z-[var(--z-tooltip)]"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
+      <div className="rounded bg-surface-overlay px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
         <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
           Threat Cluster
         </div>

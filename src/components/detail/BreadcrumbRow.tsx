@@ -18,7 +18,7 @@ export function BreadcrumbRow({ stack, onBack }: BreadcrumbRowProps) {
   return (
     <div
       data-testid="breadcrumb-row"
-      className="animate-breadcrumb-enter flex items-center gap-1 border-b border-border px-3 py-1.5 overflow-x-auto whitespace-nowrap"
+      className="animate-breadcrumb-enter flex items-center gap-1 border-b border-border px-3 py-1.5 overflow-hidden whitespace-nowrap"
     >
       {/* Back arrow button */}
       <button
@@ -30,35 +30,30 @@ export function BreadcrumbRow({ stack, onBack }: BreadcrumbRowProps) {
         {'\u2190'}
       </button>
 
-      {stack.map((entry, i) => {
-        const isLast = i === stack.length - 1;
-
-        return (
-          <span key={`${entry.entityId ?? 'cluster'}-${i}`} className="flex items-center gap-1">
-            {/* Chevron separator */}
-            <span className="text-text-muted text-[10px] select-none">&gt;</span>
-
-            {isLast ? (
-              /* Last segment: clickable (same as back) */
-              <button
-                onClick={onBack}
-                className="text-[10px] text-text-muted hover:text-text-primary transition-colors truncate max-w-[120px]"
-                title={entry.breadcrumbLabel}
-              >
-                {entry.breadcrumbLabel}
-              </button>
-            ) : (
-              /* Deeper segments: display-only */
-              <span
-                className="text-[10px] text-text-muted truncate max-w-[120px]"
-                title={entry.breadcrumbLabel}
-              >
-                {entry.breadcrumbLabel}
-              </span>
-            )}
-          </span>
-        );
-      })}
+      {/* Single truncatable trail — clips with "..." at the panel edge */}
+      <span className="truncate min-w-0 text-[10px] text-text-muted">
+        {stack.map((entry, i) => {
+          const isLast = i === stack.length - 1;
+          return (
+            <span key={`${entry.entityId ?? 'cluster'}-${i}`}>
+              <span className="select-none"> &gt; </span>
+              {isLast ? (
+                <button
+                  onClick={onBack}
+                  className="hover:text-text-primary transition-colors"
+                  title={entry.breadcrumbLabel}
+                >
+                  {entry.breadcrumbLabel}
+                </button>
+              ) : (
+                <span title={entry.breadcrumbLabel}>
+                  {entry.breadcrumbLabel}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </span>
     </div>
   );
 }

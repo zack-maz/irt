@@ -18,8 +18,8 @@ const FACILITIES_KEY = 'water:facilities';
 /** Redis key for cached precipitation data */
 const PRECIP_KEY = 'water:precip';
 
-/** Route-level timeout to prevent indefinite hangs when Overpass is slow */
-const ROUTE_TIMEOUT_MS = 30_000;
+/** Route-level timeout — allows 23 sequential country queries at ~6s each + 1s delays */
+const ROUTE_TIMEOUT_MS = 180_000;
 
 export const waterRouter = Router();
 
@@ -29,8 +29,10 @@ export const waterRouter = Router();
  * Cache-first with 24h logical TTL.
  */
 waterRouter.get('/', async (req, res) => {
+  log({ level: 'info', message: '[water] GET /api/water hit' });
   const forceRefresh = req.query.refresh === 'true';
   const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
+  log({ level: 'info', message: `[water] cache result: ${cached ? `${cached.data.length} facilities, stale=${cached.stale}` : 'miss'}` });
 
   if (cached && !cached.stale && !forceRefresh) {
     return res.json(cached);

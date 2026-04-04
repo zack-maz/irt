@@ -1,8 +1,8 @@
 /**
  * Water stress color interpolation and composite health formula.
  *
- * Color ramp: dark purple (extreme stress, health=0) -> light blue (healthy, health=1)
- * 4 stops for smooth gradient across the range.
+ * 1-10 scale: 1 = extreme stress (deep navy), 10 = healthy (light blue)
+ * Uses sqrt curve for gracious distribution — fewer facilities cluster at extreme.
  */
 
 import type { WaterStressIndicators } from '../../server/types';
@@ -12,19 +12,20 @@ export type { WaterStressIndicators };
 
 // ---------- Color Stops ----------
 
-/** 4-stop gradient: dark purple -> dark blue -> medium blue -> light blue */
+/** 5-stop blue gradient: deep navy → navy → blue → sky → light blue */
 export const STRESS_COLORS: [number, number, number][] = [
-  [40, 20, 60],      // health=0: dark purple (extreme stress) -- visible on dark terrain
-  [30, 58, 138],     // health=0.33: dark blue
-  [59, 130, 200],    // health=0.66: medium blue
-  [125, 211, 252],   // health=1.0: light blue (healthy)
+  [10, 20, 60],      // score 1: deep navy — extreme stress
+  [20, 50, 120],     // score 3: navy
+  [40, 100, 180],    // score 5: blue
+  [80, 160, 220],    // score 7: sky blue
+  [140, 210, 250],   // score 10: light blue — healthy
 ];
 
 // ---------- Color Interpolation ----------
 
 /**
  * Map a 0-1 health value to an RGBA color tuple.
- * Linearly interpolates across the 4 color stops.
+ * Linearly interpolates across the 5 color stops.
  * Clamps input to [0, 1].
  */
 export function stressToRGBA(
@@ -49,9 +50,10 @@ export function stressToRGBA(
 
 /**
  * Combine WRI Aqueduct baseline stress with precipitation anomaly
- * into a single 0-1 health score.
+ * into a 0-1 health score.
  *
- * Baseline dominates (75%), precipitation adjusts (25%).
+ * Uses sqrt curve so fewer facilities cluster at extreme stress.
+ * BWS 4 → ~0.45 health instead of linear 0.2.
  *
  * @param bwsScore - WRI baseline water stress score (0-5, 0=low stress, 5=extreme)
  * @param precipAnomalyRatio - Ratio of actual/normal precipitation (<1 = drier, >1 = wetter)
@@ -61,18 +63,36 @@ export function compositeHealth(
   bwsScore: number,
   precipAnomalyRatio: number,
 ): number {
-  // Normalize baseline stress to 0-1 health (inverted: 0=extreme stress -> 0 health)
-  const baselineHealth = 1 - bwsScore / 5;
+  // Sqrt curve: spreads distribution so high-stress facilities don't all pile up at 0
+  const baselineHealth = Math.sqrt(Math.max(0, 1 - bwsScore / 5));
 
   // Precipitation modifier: wetter = healthier, drier = worse
-  // Clamp to [-0.25, +0.25] range
   const precipModifier = Math.max(
-    -0.25,
-    Math.min(0.25, (precipAnomalyRatio - 1.0) * 0.5),
+    -0.15,
+    Math.min(0.15, (precipAnomalyRatio - 1.0) * 0.3),
   );
 
-  // Composite: clamp to [0, 1]
   return Math.max(0, Math.min(1, baselineHealth + precipModifier));
+}
+
+// ---------- Score Conversion ----------
+
+/**
+ * Convert 0-1 health to 1-10 display score.
+ */
+export function healthToScore(health: number): number {
+  return Math.max(1, Math.min(10, Math.round(health * 9) + 1));
+}
+
+/**
+ * Label for a 1-10 score.
+ */
+export function scoreToLabel(score: number): string {
+  if (score <= 2) return 'Extreme Stress';
+  if (score <= 4) return 'High Stress';
+  if (score <= 6) return 'Moderate';
+  if (score <= 8) return 'Good';
+  return 'Healthy';
 }
 
 // ---------- BWS Label ----------
@@ -92,8 +112,9 @@ export function bwsScoreToLabel(score: number): string {
 
 /** Color stops for legend registration */
 export const WATER_STRESS_LEGEND_STOPS: { color: string; label: string }[] = [
-  { color: '#28143c', label: 'Extreme Stress' },
-  { color: '#1e3a8a', label: '' },
-  { color: '#3b82c8', label: '' },
-  { color: '#7dd3fc', label: 'Healthy' },
+  { color: '#0a143c', label: '1 — Extreme' },
+  { color: '#143278', label: '' },
+  { color: '#2864b4', label: '5 — Moderate' },
+  { color: '#50a0dc', label: '' },
+  { color: '#8cd2fa', label: '10 — Healthy' },
 ];

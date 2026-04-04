@@ -138,9 +138,9 @@ const DEFAULTS = {
   altitudeMax: null as number | null,
   proximityPin: null as ProximityPin | null,
   proximityRadiusKm: 100,
-  ...defaultRange('hour'),
+  ...defaultRange('day'),
   isSettingPin: false,
-  granularity: 'hour' as Granularity,
+  granularity: 'day' as Granularity,
 
   // New text search fields
   flightCallsign: '',
@@ -235,7 +235,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
         set({ proximityPin: null, proximityRadiusKm: 100 });
         break;
       case 'date':
-        set({ granularity: 'hour' as Granularity, ...defaultRange('hour') });
+        set({ granularity: 'day' as Granularity, ...defaultRange('day') });
         break;
       case 'mentions':
         set({ mentionsMin: null, mentionsMax: null });
@@ -262,7 +262,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   },
 
   clearAll: () => {
-    set({ ...DEFAULTS, ...defaultRange('hour') });
+    set({ ...DEFAULTS, ...defaultRange('day') });
     useSearchStore.getState().clearSearch();
   },
 

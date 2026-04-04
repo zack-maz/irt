@@ -81,7 +81,7 @@ export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
       className="pointer-events-none absolute z-[var(--z-tooltip)]"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg">
+      <div className="rounded bg-surface-overlay px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg">
         <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
           Weather
         </div>

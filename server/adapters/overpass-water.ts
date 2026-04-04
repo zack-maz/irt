@@ -4,35 +4,78 @@ import { log } from '../lib/logger.js';
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const OVERPASS_FALLBACK = 'https://overpass.private.coffee/api/interpreter';
-const TIMEOUT_MS = 60_000;
+const TIMEOUT_MS = 90_000;
 
-// Core batch: immediate region (12 countries)
-const CORE_COUNTRIES = [
-  'IR', 'IQ', 'SY', 'LB', 'IL', 'PS', 'JO',
-  'SA', 'AE', 'KW', 'BH', 'QA',
+/**
+ * Single bbox covering the Greater Middle East (matches IRAN_BBOX from constants).
+ * Using bbox instead of area unions avoids expensive country-area resolution.
+ */
+const ME_BBOX = '15,30,42,70'; // south,west,north,east
+
+// ---------- Geographic Exclusion Filter ----------
+
+/** Approximate country centroids [lat, lng] for nearest-match filtering */
+const CENTROIDS: [string, number, number][] = [
+  ['Turkey', 39.0, 35.2],
+  ['Uzbekistan', 41.4, 64.6],
+  ['Tajikistan', 38.9, 71.3],
+  ['Kyrgyzstan', 41.2, 74.8],
+  ['Kazakhstan', 48.0, 67.0],
 ];
 
-// Extended batch: surrounding region (11 countries)
-const EXTENDED_COUNTRIES = [
-  'YE', 'TR', 'EG', 'AF', 'PK',
-  'AM', 'AZ', 'GE', 'TM', 'OM', 'DJ',
+/** Countries to fully exclude */
+const EXCLUDED_COUNTRIES = new Set(['Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Kazakhstan']);
+
+/** Haversine distance in km (lightweight, no import needed) */
+function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/**
+ * Returns true if a facility should be excluded based on location.
+ * Excludes: western Turkey (west of 35°E), Uzbekistan, Tajikistan, Kyrgyzstan, Kazakhstan.
+ * Keeps: Iran, Iraq, Syria, Lebanon, Israel, Jordan, Gulf states, Egypt, Pakistan, Afghanistan, Turkmenistan.
+ */
+function isExcludedLocation(lat: number, lng: number): boolean {
+  // Western Turkey: exclude facilities too far from the SE Turkey conflict zone.
+  // Uses distance from Diyarbakir (37.9°N, 40.2°E) — the strategic center.
+  // >600km away captures western/central Turkey while keeping the Kurdish southeast.
+  if (lat > 36 && lng < 42) {
+    const distFromSE = haversine(lat, lng, 37.9, 40.2);
+    if (distFromSE > 600) return true;
+  }
+
+  // Check if nearest centroid is an excluded country
+  let minDist = Infinity;
+  let nearest = '';
+  for (const [name, clat, clng] of CENTROIDS) {
+    const d = haversine(lat, lng, clat, clng);
+    if (d < minDist) { minDist = d; nearest = name; }
+  }
+  if (EXCLUDED_COUNTRIES.has(nearest)) return true;
+
+  return false;
+}
+
+/**
+ * Split into separate queries per facility type to keep each request light.
+ * Only strategically significant types: dams (notable only), reservoirs, desalination.
+ * Treatment plants and canals dropped — too many low-value results.
+ */
+const FACILITY_QUERIES: { label: string; nwr: string }[] = [
+  // All named dams — geographic exclusion filter handles noise
+  { label: 'dams', nwr: 'nwr["waterway"="dam"]["name"]' },
+  { label: 'reservoirs', nwr: 'nwr["natural"="water"]["water"="reservoir"]["name"]' },
+  { label: 'desalination', nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)' },
 ];
 
-function buildQuery(countries: string[]): string {
-  const areaUnion = countries.map(c => `area["ISO3166-1"="${c}"]`).join(';');
-  return `
-[out:json][timeout:60];
-(${areaUnion};)->.searchArea;
-(
-  nwr["waterway"="dam"]["name"](area.searchArea);
-  nwr["natural"="water"]["water"="reservoir"]["name"](area.searchArea);
-  nwr["man_made"="water_works"]["name"](area.searchArea);
-  nwr["waterway"="canal"]["name"]["canal"!~"irrigation_ditch"](area.searchArea);
-  nwr["man_made"="desalination_plant"](area.searchArea);
-  nwr["water_works"="desalination"](area.searchArea);
-);
-out center tags;
-`;
+function buildQuery(nwr: string): string {
+  return `[out:json][timeout:90][bbox:${ME_BBOX}];${nwr};out center tags;`;
 }
 
 export interface OverpassElement {
@@ -66,9 +109,6 @@ function toTitleCase(str: string): string {
 export function classifyWaterType(tags: Record<string, string>): WaterFacilityType | null {
   if (tags['waterway'] === 'dam') return 'dam';
   if (tags['natural'] === 'water' && tags['water'] === 'reservoir') return 'reservoir';
-  if (tags['man_made'] === 'water_works') return 'treatment_plant';
-  // Canal requires a name to filter out unnamed irrigation channels
-  if (tags['waterway'] === 'canal' && tags['name']) return 'canal';
   if (tags['man_made'] === 'desalination_plant') return 'desalination';
   if (tags['water_works'] === 'desalination') return 'desalination';
   return null;
@@ -77,8 +117,6 @@ export function classifyWaterType(tags: Record<string, string>): WaterFacilityTy
 const FACILITY_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
-  treatment_plant: 'Treatment Plant',
-  canal: 'Canal',
   desalination: 'Desalination Plant',
 };
 
@@ -108,6 +146,9 @@ export function normalizeWaterElement(
   const lon = el.lon ?? el.center?.lon;
   if (lat === undefined || lon === undefined) return null;
 
+  // Geographic exclusion: western Turkey, Uzbekistan, Tajikistan, etc.
+  if (isExcludedLocation(lat, lon)) return null;
+
   return {
     id: `water-${el.id}`,
     type: 'water',
@@ -122,14 +163,12 @@ export function normalizeWaterElement(
 }
 
 /**
- * Fetch a batch of water facilities from Overpass, trying primary then fallback URL.
- * Returns facilities array on success, null on failure.
+ * Fetch one facility type from Overpass, trying primary then fallback.
  */
-async function fetchBatch(
-  countries: string[],
-  batchLabel: string,
-): Promise<WaterFacility[] | null> {
-  const query = buildQuery(countries);
+async function fetchFacilityType(
+  entry: { label: string; nwr: string },
+): Promise<WaterFacility[]> {
+  const query = buildQuery(entry.nwr);
   for (const url of [OVERPASS_URL, OVERPASS_FALLBACK]) {
     try {
       const res = await fetch(url, {
@@ -139,50 +178,50 @@ async function fetchBatch(
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (!res.ok) {
-        log({ level: 'warn', message: `[overpass-water] ${batchLabel} ${url} returned ${res.status}` });
+        log({ level: 'warn', message: `[overpass-water] ${entry.label} ${url} returned ${res.status}` });
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
 
-      const facilityMap = new Map<number, WaterFacility>();
+      const facilities: WaterFacility[] = [];
       for (const el of json.elements) {
         const facility = normalizeWaterElement(el, assignBasinStress);
-        if (facility) facilityMap.set(el.id, facility);
+        if (facility) facilities.push(facility);
       }
 
-      log({ level: 'info', message: `[overpass-water] ${batchLabel}: ${facilityMap.size} facilities` });
-      return Array.from(facilityMap.values());
+      log({ level: 'info', message: `[overpass-water] ${entry.label}: ${facilities.length} facilities` });
+      return facilities;
     } catch (err) {
-      log({ level: 'warn', message: `[overpass-water] ${batchLabel} ${url} failed: ${(err as Error).message}` });
+      log({ level: 'warn', message: `[overpass-water] ${entry.label} ${url} failed: ${(err as Error).message}` });
     }
   }
-  return null;
+  log({ level: 'warn', message: `[overpass-water] ${entry.label}: all URLs failed, skipping` });
+  return [];
 }
 
 /**
  * Fetch water infrastructure facilities from Overpass API.
- * Splits into two batches (core 12 + extended 11 countries) to reduce per-request load.
+ * Uses bbox queries (one per facility type, sequential) instead of country-area unions.
  * Each facility is enriched with WRI basin stress indicators via assignBasinStress.
  */
 export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
-  // Core batch must succeed; extended batch is best-effort
-  const coreFacilities = await fetchBatch(CORE_COUNTRIES, 'core');
-  if (!coreFacilities) {
-    throw new Error('All Overpass API instances failed for water facilities (core batch)');
+  const all: WaterFacility[] = [];
+  let succeeded = 0;
+
+  for (const entry of FACILITY_QUERIES) {
+    const batch = await fetchFacilityType(entry);
+    if (batch.length > 0) succeeded++;
+    all.push(...batch);
   }
 
-  const extendedFacilities = await fetchBatch(EXTENDED_COUNTRIES, 'extended');
-  if (!extendedFacilities) {
-    log({ level: 'warn', message: '[overpass-water] Extended batch failed, returning core results only' });
-    return coreFacilities;
+  if (succeeded === 0) {
+    throw new Error('All Overpass API instances failed for water facilities');
   }
 
-  // Deduplicate by OSM ID across batches
-  const combined = new Map<string, WaterFacility>();
-  for (const f of [...coreFacilities, ...extendedFacilities]) {
-    combined.set(f.id, f);
-  }
+  // Deduplicate by OSM ID
+  const unique = new Map<string, WaterFacility>();
+  for (const f of all) unique.set(f.id, f);
 
-  log({ level: 'info', message: `[overpass-water] Total: ${combined.size} water facilities (core + extended)` });
-  return Array.from(combined.values());
+  log({ level: 'info', message: `[overpass-water] Total: ${unique.size} facilities from ${succeeded}/${FACILITY_QUERIES.length} queries` });
+  return Array.from(unique.values());
 }

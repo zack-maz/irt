@@ -18,9 +18,8 @@ import type { WaterStressIndicators } from '../types.js';
 // Compute compositeHealth and bwsScoreToLabel inline to avoid cross-module
 // import from src/ (server should not depend on frontend lib)
 function compositeHealth(bwsScore: number): number {
-  // With no precipitation data yet, ratio=1.0 (normal)
-  const baselineHealth = 1 - bwsScore / 5;
-  // precipModifier = 0 when ratio = 1.0
+  // Sqrt curve: spreads distribution so high-stress facilities don't all pile at 0
+  const baselineHealth = Math.sqrt(Math.max(0, 1 - bwsScore / 5));
   return Math.max(0, Math.min(1, baselineHealth));
 }
 

@@ -6,6 +6,7 @@ import {
   NavigationControl,
   ScaleControl,
   useMap,
+  type MapRef,
 } from '@vis.gl/react-maplibre';
 import type { MapEvent } from '@vis.gl/react-maplibre';
 import type { PickingInfo } from '@deck.gl/core';
@@ -99,14 +100,15 @@ export function BaseMap() {
   const setZoomRegion = useMapStore((s) => s.setZoomRegion);
   const lastZoomRegionRef = useRef(true); // initial view is zoomed out (below zoom 9)
 
+  const mapRef = useRef<MapRef>(null);
   const [hoveredClusterId, setHoveredClusterId] = useState<string | null>(null);
 
-  const entityLayers = useEntityLayers();
+  const { conflictLayers, entityLayers } = useEntityLayers();
   const weatherLayers = useWeatherLayers();
   const threatLayers = useThreatHeatmapLayers(hoveredClusterId);
   const politicalLayers = usePoliticalLayers();
   const ethnicLayers = useEthnicLayers();
-  const waterLayers = useWaterLayers();
+  const { riverLayers, facilityLayers } = useWaterLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
   const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
   const isEthnicActive = useLayerStore((s) => s.activeLayers.has('ethnic'));
@@ -219,7 +221,7 @@ export function BaseMap() {
       // Ethnic/political zones are pickable for hover only — ignore clicks
       if (info.layer?.id?.startsWith('ethnic-')) return;
 
-      // Threat cluster picker: open cluster detail
+      // Threat cluster picker: open cluster detail + fly to fit bounds
       if (info.layer?.id === 'threat-cluster-picker') {
         const cluster = info.object as ThreatCluster;
         const currentView = getCurrentPanelView();
@@ -228,6 +230,13 @@ export function BaseMap() {
         }
         setSelectedCluster(cluster);
         openDetailPanel();
+
+        // Fly to fit the entire cluster bounding box
+        const { minLat, maxLat, minLng, maxLng } = cluster.boundingBox;
+        mapRef.current?.fitBounds(
+          [[minLng, minLat], [maxLng, maxLat]],
+          { padding: 80, duration: 1500, maxZoom: 10 },
+        );
         return;
       }
 
@@ -323,6 +332,7 @@ export function BaseMap() {
     <div className="relative h-full w-full">
       <MapLoadingScreen isLoaded={isMapLoaded} />
       <Map
+        ref={mapRef}
         initialViewState={INITIAL_VIEW_STATE}
         style={{ width: '100%', height: '100%' }}
         mapStyle={MAP_STYLE}
@@ -372,8 +382,8 @@ export function BaseMap() {
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
           layers={isBelowZoom9
-            ? [...politicalLayers, ...ethnicLayers, ...waterLayers, ...weatherLayers, ...entityLayers, ...threatLayers]
-            : [...politicalLayers, ...ethnicLayers, ...waterLayers, ...weatherLayers, ...threatLayers, ...entityLayers]}
+            ? [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...conflictLayers, ...threatLayers, ...entityLayers, ...facilityLayers]
+            : [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...threatLayers, ...conflictLayers, ...entityLayers, ...facilityLayers]}
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
@@ -414,7 +424,7 @@ export function BaseMap() {
           className="pointer-events-none absolute z-[var(--z-tooltip)]"
           style={{ left: waterHover.x + 12, top: waterHover.y - 12 }}
         >
-          <div className="rounded bg-surface-overlay/95 px-2 py-1.5 backdrop-blur-sm shadow-lg border border-border/50">
+          <div className="rounded bg-surface-overlay px-2 py-1.5 backdrop-blur-sm shadow-lg border border-border/50">
             <WaterTooltip facility={waterHover.facility} />
           </div>
         </div>

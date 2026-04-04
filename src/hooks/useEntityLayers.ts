@@ -474,5 +474,10 @@ export function useEntityLayers() {
     pickable: false,
   }), [activeEntity, siteAttackMap, highlightVisible]);
 
-  return [proximityCircleLayer, shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, siteLayer, glowLayer, highlightLayer];
+  return {
+    /** Conflict event layers — zoom-dependent stacking with threat clusters */
+    conflictLayers: [airstrikeLayer, groundCombatLayer, targetedLayer],
+    /** Non-conflict layers (flights, ships, sites, glow/highlight) — always on top of threats */
+    entityLayers: [proximityCircleLayer, shipLayer, flightLayer, siteLayer, glowLayer, highlightLayer],
+  };
 }

@@ -108,10 +108,11 @@ export function DetailPanelSlot() {
   return (
     <div
       data-testid="detail-panel-slot"
-      className={`absolute top-0 right-0 z-[var(--z-panel)] h-full
+      className={`absolute right-0 z-[var(--z-panel)]
                   w-[var(--width-detail-panel)] transform transition-transform
                   duration-300 ease-in-out
                   ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      style={{ top: 'var(--height-topbar)', height: 'calc(100% - var(--height-topbar))' }}
     >
       <div className="h-full border-l border-border bg-surface/95 backdrop-blur-sm overflow-y-auto">
         {selectedCluster ? (

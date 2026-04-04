@@ -254,7 +254,7 @@ export function EthnicTooltip({ groups, x, y }: EthnicTooltipProps) {
       className="pointer-events-none absolute z-[var(--z-tooltip)]"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="rounded bg-surface-overlay/90 px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
+      <div className="rounded bg-surface-overlay px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg min-w-[140px]">
         <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
           {groups.length > 1 ? 'Overlap Zone' : 'Ethnic Zone'}
         </div>

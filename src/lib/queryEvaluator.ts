@@ -158,10 +158,6 @@ export function evaluateTag(
       // For water facilities, also match facilityType
       if (entity.type === 'water') {
         const wf = entity as unknown as { facilityType: string };
-        // Allow 'plant' as shorthand for 'treatment_plant'
-        if (ciEq(value, 'plant') || ciEq(value, 'treatment_plant')) {
-          return ciEq(wf.facilityType, 'treatment_plant');
-        }
         return ciEq(wf.facilityType, value);
       }
       return false;

@@ -122,15 +122,19 @@ export function ProximityAlertOverlay() {
     if (!mapRef) return;
     const map = mapRef.getMap();
     map.on('move', handleMapMove);
-    // Collapse expanded alert on any map click
-    const handleMapClick = () => setExpandedSiteId(null);
+    // Collapse expanded alert and dismiss on any map click
+    const handleMapClick = () => {
+      const expanded = useUIStore.getState().expandedAlertSiteId;
+      if (expanded) dismissAlert(expanded);
+      setExpandedSiteId(null);
+    };
     map.on('click', handleMapClick);
     return () => {
       map.off('move', handleMapMove);
       map.off('click', handleMapClick);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [mapRef, handleMapMove]);
+  }, [mapRef, handleMapMove, dismissAlert, setExpandedSiteId]);
 
   // Clear expanded state if the expanded site no longer has an alert
   useEffect(() => {
@@ -171,7 +175,7 @@ export function ProximityAlertOverlay() {
               });
               useUIStore.getState().selectEntity(alert.siteId);
               useUIStore.getState().openDetailPanel();
-              dismissAlert(alert.siteId);
+              setExpandedSiteId(alert.siteId);
             }}
             screenX={projected.x}
             screenY={projected.y}

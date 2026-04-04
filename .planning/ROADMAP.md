@@ -47,10 +47,6 @@
 
 **v0.9-v1.2 Totals:** 30 phases (27 shipped, 3 deferred) | 72/72 plans executed
 
----
-
-## v1.3 Data Quality & Layers
-
 ### Phase 22: GDELT Event Quality & OSINT Integration
 **Goal**: Eliminate false positives/negatives in the conflict event pipeline, add Bellingcat OSINT signal, fix location stacking, and produce a verified event audit trail
 **Depends on**: Phase 21.2 (existing quality pipeline)
@@ -138,6 +134,16 @@ Plans:
 - [ ] 26-04-PLAN.md -- waterStore, fetch/polling hooks, useWaterLayers (rivers + facilities), WaterOverlay tooltip
 - [ ] 26-05-PLAN.md -- Detail panel, BaseMap wiring, counters, search, proximity, legend, toggle UI, visual checkpoint
 - [ ] 26-06-PLAN.md -- Gap closure: API timeout fix, color floor adjustment, river compositeHealth + line width
+
+### Phase 26.1: Water layer refinements (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 26
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 26.1 to break down)
 
 ### Phase 27: Performance & Load Testing
 **Goal**: Optimize initial load time and validate production handles 250 concurrent users

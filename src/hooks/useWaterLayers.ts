@@ -1,19 +1,18 @@
 import { useMemo } from 'react';
-import { GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
+import { PathLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import { useWaterStore } from '@/stores/waterStore';
 import { useLayerStore } from '@/stores/layerStore';
 import { stressToRGBA } from '@/lib/waterStress';
 import { getIconAtlas, ICON_MAPPING } from '@/components/map/layers/icons';
 import riversGeoJson from '@/data/rivers.json';
 import type { WaterFacility, WaterFacilityType } from '../../server/types';
+import type { Layer } from '@deck.gl/core';
 
-/** Maps water facility type to icon atlas key (fallback to existing icons until dedicated water icons exist) */
+/** Maps water facility type to icon atlas key */
 const WATER_ICON_MAP: Record<WaterFacilityType, string> = {
-  dam: 'diamond',               // placeholder -- distinct diamond shape
-  reservoir: 'siteDesalination', // water droplet icon (existing in atlas)
-  treatment_plant: 'diamond',    // placeholder
-  canal: 'diamond',              // placeholder
-  desalination: 'siteDesalination', // water droplet icon (existing in atlas)
+  dam: 'diamond',
+  reservoir: 'siteDesalination',
+  desalination: 'siteDesalination',
 };
 
 interface RiverFeature {
@@ -29,6 +28,55 @@ interface RiverFeature {
   };
 }
 
+/** A single river segment with path coordinates and per-vertex colors */
+interface RiverSegment {
+  name: string;
+  path: [number, number][];
+  colors: [number, number, number, number][];
+  width: number;
+}
+
+/**
+ * Pre-compute river segments with per-vertex gradient colors.
+ * Source (first coord) is healthier, mouth (last coord) is more stressed.
+ * Health interpolates from compositeHealth+0.2 at source to compositeHealth-0.1 at mouth.
+ */
+function buildRiverSegments(): RiverSegment[] {
+  const features = (riversGeoJson as { features: RiverFeature[] }).features;
+  const segments: RiverSegment[] = [];
+
+  for (const f of features) {
+    const baseHealth = f.properties?.compositeHealth ?? 0.5;
+    const scale = f.properties?.scalerank ?? 3;
+    const width = Math.max(1, 6 - scale) * 1200;
+    const name = f.properties?.name ?? '';
+
+    // Health range: source is healthier, mouth is more stressed
+    const sourceHealth = Math.min(1, baseHealth + 0.25);
+    const mouthHealth = Math.max(0, baseHealth - 0.15);
+
+    const lines: number[][][] =
+      f.geometry.type === 'LineString'
+        ? [f.geometry.coordinates as number[][]]
+        : (f.geometry.coordinates as number[][][]);
+
+    for (const line of lines) {
+      const path: [number, number][] = line.map((c) => [c[0], c[1]]);
+      const colors: [number, number, number, number][] = line.map((_, i) => {
+        const t = line.length > 1 ? i / (line.length - 1) : 0.5;
+        const health = sourceHealth + (mouthHealth - sourceHealth) * t;
+        return stressToRGBA(health, 220);
+      });
+      segments.push({ name, path, colors, width });
+    }
+  }
+
+  return segments;
+}
+
+/** Cached river segments — computed once at module load */
+const RIVER_SEGMENTS = buildRiverSegments();
+
 /**
  * Get the midpoint of a river feature's coordinates for label placement.
  */
@@ -39,7 +87,6 @@ function getRiverMidpoint(feature: RiverFeature): [number, number] {
     const mid = line[Math.floor(line.length / 2)];
     return [mid[0], mid[1]];
   }
-  // MultiLineString: use the longest segment's midpoint
   const lines = coords as number[][][];
   let longest = lines[0];
   for (const line of lines) {
@@ -51,35 +98,39 @@ function getRiverMidpoint(feature: RiverFeature): [number, number] {
 
 /**
  * Returns deck.gl layers for water visualization:
- * - River GeoJsonLayer (stress-colored lines)
+ * - River PathLayer (gradient stress-colored lines)
  * - River label TextLayer (italic serif)
  * - Facility IconLayer (stress-tinted markers)
  *
  * All rendering is gated by the 'water' visualization layer toggle.
  */
-export function useWaterLayers(): (GeoJsonLayer | IconLayer<WaterFacility> | TextLayer)[] {
+export interface WaterLayerGroup {
+  /** Rivers + labels — render below entities */
+  riverLayers: Layer[];
+  /** Facility icons — render at entity level */
+  facilityLayers: Layer[];
+}
+
+export function useWaterLayers(): WaterLayerGroup {
   const isActive = useLayerStore((s) => s.activeLayers.has('water'));
   const facilities = useWaterStore((s) => s.facilities);
 
   return useMemo(() => {
-    if (!isActive) return [];
+    if (!isActive) return { riverLayers: [], facilityLayers: [] };
 
-    // River lines colored by watershed stress
-    const riverLayer = new GeoJsonLayer({
+    // River lines with per-vertex gradient coloring
+    const riverLayer = new PathLayer<RiverSegment>({
       id: 'water-rivers',
-      data: riversGeoJson as unknown as Record<string, unknown>,
-      getLineColor: ((f: RiverFeature) => {
-        const health = f.properties?.compositeHealth ?? 0.5;
-        return stressToRGBA(health);
-      }) as any,
-      getLineWidth: ((f: RiverFeature) => {
-        const scale = f.properties?.scalerank ?? 3;
-        return Math.max(1, 6 - scale) * 500;
-      }) as any,
-      lineWidthUnits: 'meters' as const,
-      lineWidthMinPixels: 2,
-      lineWidthMaxPixels: 12,
+      data: RIVER_SEGMENTS,
+      getPath: (d) => d.path,
+      getColor: (d) => d.colors,
+      getWidth: (d) => d.width,
+      widthUnits: 'meters',
+      widthMinPixels: 5,
+      widthMaxPixels: 24,
       pickable: false,
+      capRounded: true,
+      jointRounded: true,
     });
 
     // River name labels in italic serif
@@ -92,9 +143,9 @@ export function useWaterLayers(): (GeoJsonLayer | IconLayer<WaterFacility> | Tex
       data: riverLabelData,
       getText: (f: RiverFeature) => f.properties?.name ?? '',
       getPosition: (f: RiverFeature) => getRiverMidpoint(f),
-      getSize: 12,
-      sizeMinPixels: 10,
-      sizeMaxPixels: 18,
+      getSize: 16,
+      sizeMinPixels: 14,
+      sizeMaxPixels: 24,
       fontFamily: 'serif',
       fontStyle: 'italic',
       getColor: [147, 197, 253, 220] as [number, number, number, number],
@@ -120,6 +171,9 @@ export function useWaterLayers(): (GeoJsonLayer | IconLayer<WaterFacility> | Tex
       iconMapping: ICON_MAPPING,
     });
 
-    return [riverLayer, riverLabelLayer, facilityLayer];
+    return {
+      riverLayers: [riverLayer, riverLabelLayer],
+      facilityLayers: [facilityLayer],
+    };
   }, [isActive, facilities]);
 }
