@@ -123,7 +123,7 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **WR-04**: Water stress score scale expanded to 0-10 with score 0 = "Destroyed" triggered by destructive GDELT events (airstrike, bombing, shelling, wmd) within 5km; destroyed facilities render solid black
 - [x] **WR-05**: Icon atlas expanded with 4 type-specific water facility icons (dam trapezoid, reservoir pool, treatment plant industrial, desalination factory+droplet) at 32x32 white mask mode
 - [x] **WR-06**: WaterFacilityType includes treatment_plant; all WATER_TYPE_LABELS maps updated across tooltip, detail panel, and counters
-- [ ] **WR-07**: Desalination audit cross-references known major Gulf plants against Overpass results and reports coverage gaps (report-only, no manual data addition)
+- [x] **WR-07**: Desalination audit cross-references known major Gulf plants against Overpass results and reports coverage gaps (report-only, no manual data addition)
 
 ## v1.2+ Requirements
 

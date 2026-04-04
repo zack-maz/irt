@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-04T06:35:34.133Z"
+last_updated: "2026-04-04T16:33:35.185Z"
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 24
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 26.1 COMPLETE (3 of 3 plans done)
 Phase 26.1: Plan 02 COMPLETE (2 of 3 plans done)
 Phase 26.1: Plan 01 COMPLETE (1 of 3 plans done)
 Phase 26: Plan 06 COMPLETE (6 of 6 plans done, gap closure complete)
@@ -44,7 +45,7 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 | 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
 | 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
 | 26 | Water Stress Layer | IN PROGRESS (6/6 plans, gap closure complete) |
-| 26.1 | Water Layer Refinements | IN PROGRESS (2/3 plans) |
+| 26.1 | Water Layer Refinements | COMPLETE (3/3 plans) |
 | 27 | Performance & Load Testing | Planned |
 
 ## Key Decisions
@@ -105,6 +106,9 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - isExcludedLocation upgraded to use full centroids -- sparse 5-entry array was falsely excluding Iran/Pakistan/etc.
 - Cron refresh=true guarded by vercel-cron user-agent in production; dev always allows refresh
 - treatment_plant uses diamond icon placeholder pending dedicated water icons
+- Labels already present from Plan 01/02 -- no duplicate changes needed for treatment_plant
+- Inline haversine in useWaterLayers avoids cross-type dependency on attackStatus.ts SiteEntity imports
+- Desalination audit: 63 OSM elements found but major Gulf plants missing (Israel, Kuwait, Qatar entirely absent); report-only per user decision
 
 ## Pending Todos
 
