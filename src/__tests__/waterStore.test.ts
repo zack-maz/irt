@@ -130,9 +130,9 @@ describe('waterStore', () => {
     };
     useWaterStore.getState().setWaterData(response);
 
-    // Facility has bws_score=3.0, so baselineHealth = 1 - 3.0/5 = 0.4
-    // With anomalyRatio=0.5 (very dry): precipModifier = (0.5-1.0)*0.5 = -0.25
-    // compositeHealth = max(0, min(1, 0.4 + (-0.25))) = 0.15
+    // Facility has bws_score=3.0, so baselineHealth = sqrt(1 - 3.0/5) = sqrt(0.4) ≈ 0.6325
+    // With anomalyRatio=0.5 (very dry): precipModifier = clamp((0.5-1.0)*0.3, -0.15, 0.15) = -0.15
+    // compositeHealth = clamp(0.6325 + (-0.15)) ≈ 0.4825
     useWaterStore.getState().updatePrecipitation([
       {
         lat: 33.44,
@@ -145,7 +145,7 @@ describe('waterStore', () => {
 
     const state = useWaterStore.getState();
     const updated = state.facilities.find((f) => f.id === 'water-12345');
-    expect(updated?.stress.compositeHealth).toBeCloseTo(0.15, 2);
+    expect(updated?.stress.compositeHealth).toBeCloseTo(0.4825, 2);
   });
 
   it('updatePrecipitation does not affect unmatched facilities', () => {

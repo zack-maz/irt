@@ -42,10 +42,10 @@ describe('WaterTooltip', () => {
     expect(screen.getByText('Dam')).toBeDefined();
   });
 
-  it('renders stress level and health percentage', () => {
+  it('renders stress level and health score', () => {
     render(<WaterTooltip facility={mockFacility} />);
-    // compositeHealth 0.4 = 40%
-    expect(screen.getByText(/Water Stress: High \(40% health\)/)).toBeDefined();
+    // compositeHealth 0.4 → healthToScore(0.4) = 5, scoreToLabel(5) = 'Moderate'
+    expect(screen.getByText(/Health: 5\/10/)).toBeDefined();
   });
 
   it('renders color indicator dot', () => {
@@ -72,18 +72,19 @@ describe('useWaterLayers', () => {
     useWaterStore.setState({ facilities: [], connectionStatus: 'idle' });
   });
 
-  it('returns empty array when water layer is inactive', async () => {
+  it('returns empty arrays when water layer is inactive', async () => {
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: unknown[] = [];
+    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = { riverLayers: [], facilityLayers: [] };
     function TestComponent() {
       result = useWaterLayers();
       return null;
     }
     render(<TestComponent />);
-    expect(result).toEqual([]);
+    expect(result.riverLayers).toEqual([]);
+    expect(result.facilityLayers).toEqual([]);
   });
 
-  it('returns 3 layers when water layer is active', async () => {
+  it('returns river and facility layers when water layer is active', async () => {
     useLayerStore.setState({ activeLayers: new Set(['water']) });
     useWaterStore.setState({
       facilities: [mockFacility],
@@ -91,13 +92,15 @@ describe('useWaterLayers', () => {
     });
 
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: unknown[] = [];
+    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = { riverLayers: [], facilityLayers: [] };
     function TestComponent() {
       result = useWaterLayers();
       return null;
     }
     render(<TestComponent />);
-    expect(result).toHaveLength(3);
+    // 2 river layers (path + labels) + 1 facility layer
+    expect(result.riverLayers).toHaveLength(2);
+    expect(result.facilityLayers).toHaveLength(1);
   });
 
   it('layers have correct IDs', async () => {
@@ -108,15 +111,15 @@ describe('useWaterLayers', () => {
     });
 
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: { id: string }[] = [];
+    let result: { riverLayers: { id: string }[]; facilityLayers: { id: string }[] } = { riverLayers: [], facilityLayers: [] };
     function TestComponent() {
-      result = useWaterLayers() as { id: string }[];
+      result = useWaterLayers() as typeof result;
       return null;
     }
     render(<TestComponent />);
-    expect(result[0].id).toBe('water-rivers');
-    expect(result[1].id).toBe('water-river-labels');
-    expect(result[2].id).toBe('water-facility-icons');
+    expect(result.riverLayers[0].id).toBe('water-rivers');
+    expect(result.riverLayers[1].id).toBe('water-river-labels');
+    expect(result.facilityLayers[0].id).toBe('water-facility-icons');
   });
 });
 
