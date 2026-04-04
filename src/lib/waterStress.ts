@@ -1,7 +1,7 @@
 /**
  * Water stress color interpolation and composite health formula.
  *
- * 1-10 scale: 1 = extreme stress (deep navy), 10 = healthy (light blue)
+ * 0-10 scale: 0 = destroyed (black, applied externally), 1 = extreme stress (deep navy), 10 = healthy (light blue)
  * Uses sqrt curve for gracious distribution — fewer facilities cluster at extreme.
  */
 
@@ -85,9 +85,11 @@ export function healthToScore(health: number): number {
 }
 
 /**
- * Label for a 1-10 score.
+ * Label for a 0-10 score.
+ * Score 0 = Destroyed (applied externally in useWaterLayers when facility has destructive events within 5km).
  */
 export function scoreToLabel(score: number): string {
+  if (score === 0) return 'Destroyed';
   if (score <= 2) return 'Extreme Stress';
   if (score <= 4) return 'High Stress';
   if (score <= 6) return 'Moderate';
@@ -110,8 +112,9 @@ export function bwsScoreToLabel(score: number): string {
 
 // ---------- Legend ----------
 
-/** Color stops for legend registration */
+/** Color stops for legend registration (0-10 scale) */
 export const WATER_STRESS_LEGEND_STOPS: { color: string; label: string }[] = [
+  { color: '#000000', label: '0 — Destroyed' },
   { color: '#0a143c', label: '1 — Extreme' },
   { color: '#143278', label: '' },
   { color: '#2864b4', label: '5 — Moderate' },
