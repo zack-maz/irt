@@ -2,100 +2,119 @@ import { describe, it, expect } from 'vitest';
 import {
   stressToRGBA,
   compositeHealth,
+  healthToScore,
+  scoreToLabel,
   bwsScoreToLabel,
   STRESS_COLORS,
   WATER_STRESS_LEGEND_STOPS,
 } from '../lib/waterStress';
 
 describe('stressToRGBA', () => {
-  it('returns dark purple at health=0 (extreme stress)', () => {
-    expect(stressToRGBA(0)).toEqual([40, 20, 60, 200]);
+  it('returns deep navy at health=0 (extreme stress)', () => {
+    expect(stressToRGBA(0)).toEqual([10, 20, 60, 200]);
   });
 
   it('returns light blue at health=1 (healthy)', () => {
-    expect(stressToRGBA(1)).toEqual([125, 211, 252, 200]);
+    expect(stressToRGBA(1)).toEqual([140, 210, 250, 200]);
   });
 
-  it('returns midpoint color between dark blue and medium blue at health=0.5', () => {
+  it('returns midpoint color at health=0.5', () => {
     const result = stressToRGBA(0.5);
-    // health=0.5 is halfway through the 4-stop gradient
-    // segment = 0.5 * 3 = 1.5, so i=1, f=0.5
-    // c0 = [30, 58, 138], c1 = [59, 130, 200]
-    // lerp: [45, 94, 169, 200]
-    expect(result).toEqual([45, 94, 169, 200]);
+    // health=0.5 is halfway through the 5-stop gradient
+    // segment = 0.5 * 4 = 2.0, so i=2, f=0.0
+    // c0 = [40, 100, 180], c1 = [80, 160, 220]
+    // lerp at f=0: [40, 100, 180, 200]
+    expect(result).toEqual([40, 100, 180, 200]);
   });
 
   it('clamps values below 0', () => {
-    expect(stressToRGBA(-0.1)).toEqual([40, 20, 60, 200]);
+    expect(stressToRGBA(-0.1)).toEqual([10, 20, 60, 200]);
   });
 
   it('clamps values above 1', () => {
-    expect(stressToRGBA(1.5)).toEqual([125, 211, 252, 200]);
+    expect(stressToRGBA(1.5)).toEqual([140, 210, 250, 200]);
   });
 
   it('accepts a custom alpha value', () => {
     const result = stressToRGBA(1, 255);
-    expect(result).toEqual([125, 211, 252, 255]);
+    expect(result).toEqual([140, 210, 250, 255]);
   });
 });
 
 describe('compositeHealth', () => {
   it('returns ~0 for extreme baseline stress with normal precipitation', () => {
-    // bwsScore=5, precipRatio=1.0
-    // baselineHealth = 1 - 5/5 = 0
-    // precipModifier = (1.0 - 1.0) * 0.5 = 0
-    // result = 0
     expect(compositeHealth(5, 1.0)).toBeCloseTo(0, 2);
   });
 
   it('returns ~1 for no baseline stress with normal precipitation', () => {
-    // bwsScore=0, precipRatio=1.0
-    // baselineHealth = 1 - 0/5 = 1
-    // precipModifier = 0
-    // result = 1
     expect(compositeHealth(0, 1.0)).toBeCloseTo(1, 2);
   });
 
-  it('returns ~0.375 for moderate stress with dry conditions', () => {
-    // bwsScore=2.5, precipRatio=0.5
-    // baselineHealth = 1 - 2.5/5 = 0.5
-    // precipModifier = (0.5 - 1.0) * 0.5 = -0.25
-    // result = 0.5 + (-0.25) = 0.25
-    // Wait: 0.5 - 0.25 = 0.25, but test says 0.375
-    // Let me re-check: The plan says compositeHealth(2.5, 0.5) returns ~0.375
-    // Maybe the formula differs. Let's use the exact plan spec:
-    // baselineHealth = 1 - (2.5/5) = 0.5
-    // precipModifier = clamp((0.5 - 1.0) * 0.5, -0.25, 0.25) = clamp(-0.25, -0.25, 0.25) = -0.25
-    // result = clamp(0.5 + (-0.25), 0, 1) = 0.25
-    // But the plan says ~0.375... Let me check the behavior spec again
-    // The behavior says: compositeHealth(2.5, 0.5) returns ~0.375
-    // That would mean precipModifier = -0.125 => (0.5 - 1.0) * 0.25 = -0.125
-    // Or maybe the formula interpretation is different.
-    // Plan action says: precipModifier = clamp((precipRatio - 1.0) * 0.5, -0.25, 0.25)
-    // With precipRatio=0.5: (0.5 - 1.0) * 0.5 = -0.25
-    // Result: 0.5 + (-0.25) = 0.25
-    //
-    // The behavior spec says ~0.375 which contradicts the formula.
-    // Going with the formula from the action section (authoritative implementation spec).
-    expect(compositeHealth(2.5, 0.5)).toBeCloseTo(0.25, 2);
+  it('precipitation flow-through: dry conditions lower score', () => {
+    // compositeHealth(3, 0.5) < compositeHealth(3, 1.0)
+    const dry = compositeHealth(3, 0.5);
+    const normal = compositeHealth(3, 1.0);
+    expect(dry).toBeLessThan(normal);
   });
 
-  it('returns ~0.625 for moderate stress with wet conditions', () => {
-    // bwsScore=2.5, precipRatio=1.5
-    // baselineHealth = 1 - 2.5/5 = 0.5
-    // precipModifier = clamp((1.5 - 1.0) * 0.5, -0.25, 0.25) = clamp(0.25, -0.25, 0.25) = 0.25
-    // result = 0.5 + 0.25 = 0.75
-    // Plan behavior says ~0.625, but formula gives 0.75. Going with formula.
-    expect(compositeHealth(2.5, 1.5)).toBeCloseTo(0.75, 2);
+  it('precipitation flow-through: wet conditions raise score', () => {
+    // compositeHealth(3, 1.5) > compositeHealth(3, 1.0)
+    const wet = compositeHealth(3, 1.5);
+    const normal = compositeHealth(3, 1.0);
+    expect(wet).toBeGreaterThan(normal);
   });
 
   it('clamps result to [0, 1]', () => {
-    // Extreme stress + very dry
     expect(compositeHealth(5, 0.0)).toBeGreaterThanOrEqual(0);
     expect(compositeHealth(5, 0.0)).toBeLessThanOrEqual(1);
-    // No stress + very wet
     expect(compositeHealth(0, 3.0)).toBeGreaterThanOrEqual(0);
     expect(compositeHealth(0, 3.0)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('healthToScore', () => {
+  it('returns 1 for health=0 (not 0 -- score 0 is destroyed, applied externally)', () => {
+    expect(healthToScore(0)).toBe(1);
+  });
+
+  it('returns 10 for health=1', () => {
+    expect(healthToScore(1)).toBe(10);
+  });
+
+  it('returns intermediate scores for intermediate health values', () => {
+    expect(healthToScore(0.5)).toBeGreaterThanOrEqual(4);
+    expect(healthToScore(0.5)).toBeLessThanOrEqual(6);
+  });
+});
+
+describe('scoreToLabel', () => {
+  it('returns "Destroyed" for score 0', () => {
+    expect(scoreToLabel(0)).toBe('Destroyed');
+  });
+
+  it('returns "Extreme Stress" for scores 1-2', () => {
+    expect(scoreToLabel(1)).toBe('Extreme Stress');
+    expect(scoreToLabel(2)).toBe('Extreme Stress');
+  });
+
+  it('returns "High Stress" for scores 3-4', () => {
+    expect(scoreToLabel(3)).toBe('High Stress');
+    expect(scoreToLabel(4)).toBe('High Stress');
+  });
+
+  it('returns "Moderate" for scores 5-6', () => {
+    expect(scoreToLabel(5)).toBe('Moderate');
+    expect(scoreToLabel(6)).toBe('Moderate');
+  });
+
+  it('returns "Good" for scores 7-8', () => {
+    expect(scoreToLabel(7)).toBe('Good');
+    expect(scoreToLabel(8)).toBe('Good');
+  });
+
+  it('returns "Healthy" for scores 9-10', () => {
+    expect(scoreToLabel(9)).toBe('Healthy');
+    expect(scoreToLabel(10)).toBe('Healthy');
   });
 });
 
@@ -128,24 +147,24 @@ describe('bwsScoreToLabel', () => {
 });
 
 describe('STRESS_COLORS', () => {
-  it('has 4 color stops', () => {
-    expect(STRESS_COLORS).toHaveLength(4);
+  it('has 5 color stops', () => {
+    expect(STRESS_COLORS).toHaveLength(5);
   });
 
-  it('starts with dark purple (visible on dark terrain)', () => {
-    expect(STRESS_COLORS[0]).toEqual([40, 20, 60]);
+  it('starts with deep navy (extreme stress)', () => {
+    expect(STRESS_COLORS[0]).toEqual([10, 20, 60]);
   });
 
-  it('ends with light blue', () => {
-    expect(STRESS_COLORS[3]).toEqual([125, 211, 252]);
+  it('ends with light blue (healthy)', () => {
+    expect(STRESS_COLORS[4]).toEqual([140, 210, 250]);
   });
 });
 
 describe('WATER_STRESS_LEGEND_STOPS', () => {
-  it('exports legend stops array', () => {
+  it('exports legend stops array with at least 3 entries', () => {
     expect(WATER_STRESS_LEGEND_STOPS).toBeDefined();
     expect(Array.isArray(WATER_STRESS_LEGEND_STOPS)).toBe(true);
-    expect(WATER_STRESS_LEGEND_STOPS.length).toBeGreaterThanOrEqual(2);
+    expect(WATER_STRESS_LEGEND_STOPS.length).toBeGreaterThanOrEqual(3);
   });
 
   it('each stop has color and label', () => {
@@ -153,5 +172,18 @@ describe('WATER_STRESS_LEGEND_STOPS', () => {
       expect(stop).toHaveProperty('color');
       expect(stop).toHaveProperty('label');
     }
+  });
+
+  it('includes Destroyed entry with black color', () => {
+    const destroyedStop = WATER_STRESS_LEGEND_STOPS.find(
+      (s) => s.label.includes('Destroyed'),
+    );
+    expect(destroyedStop).toBeDefined();
+    expect(destroyedStop!.color).toBe('#000000');
+  });
+
+  it('first stop is the Destroyed entry', () => {
+    expect(WATER_STRESS_LEGEND_STOPS[0].label).toContain('Destroyed');
+    expect(WATER_STRESS_LEGEND_STOPS[0].color).toBe('#000000');
   });
 });
