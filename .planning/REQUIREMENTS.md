@@ -115,6 +115,16 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **WAT-10**: Continuous gradient legend (black = extreme stress to light blue = healthy) appears in bottom-left when water layer is active
 - [x] **WAT-11**: Water layer toggle in LayerTogglesSlot is functional (no longer "coming soon")
 
+### Water Layer Refinements
+
+- [ ] **WR-01**: Overpass queries include treatment_plant (man_made=water_works) for priority countries (IL, JO, LB, SY, IQ, IR, AF) and filter non-priority countries to notable-only dams/reservoirs (require wikidata/wikipedia tags)
+- [ ] **WR-02**: Desalination facilities pass through unfiltered for all countries regardless of priority tier
+- [ ] **WR-03**: Vercel cron hits /api/water?refresh=true daily at 06:00 UTC; route-level Promise.race timeout removed; Redis hard TTL extended to 7 days
+- [ ] **WR-04**: Water stress score scale expanded to 0-10 with score 0 = "Destroyed" triggered by destructive GDELT events (airstrike, bombing, shelling, wmd) within 5km; destroyed facilities render solid black
+- [ ] **WR-05**: Icon atlas expanded with 4 type-specific water facility icons (dam trapezoid, reservoir pool, treatment plant industrial, desalination factory+droplet) at 32x32 white mask mode
+- [ ] **WR-06**: WaterFacilityType includes treatment_plant; all WATER_TYPE_LABELS maps updated across tooltip, detail panel, and counters
+- [ ] **WR-07**: Desalination audit cross-references known major Gulf plants against Overpass results and reports coverage gaps (report-only, no manual data addition)
+
 ## v1.2+ Requirements
 
 Deferred to future releases. Tracked but not in current roadmap.
@@ -220,13 +230,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WAT-09 | Phase 26 | Planned |
 | WAT-10 | Phase 26 | Planned |
 | WAT-11 | Phase 26 | Planned |
+| WR-01 | Phase 26.1 | Planned |
+| WR-02 | Phase 26.1 | Planned |
+| WR-03 | Phase 26.1 | Planned |
+| WR-04 | Phase 26.1 | Planned |
+| WR-05 | Phase 26.1 | Planned |
+| WR-06 | Phase 26.1 | Planned |
+| WR-07 | Phase 26.1 | Planned |
 
 **Coverage:**
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 34 total, 0 complete
-- Total: 68 mapped, 34 complete
+- v1.3 requirements: 41 total, 0 complete
+- Total: 75 mapped, 34 complete
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-02 -- Phase 26 water stress layer requirements added*
+*Last updated: 2026-04-03 -- Phase 26.1 water layer refinements requirements added*

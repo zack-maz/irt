@@ -135,15 +135,17 @@ Plans:
 - [ ] 26-05-PLAN.md -- Detail panel, BaseMap wiring, counters, search, proximity, legend, toggle UI, visual checkpoint
 - [ ] 26-06-PLAN.md -- Gap closure: API timeout fix, color floor adjustment, river compositeHealth + line width
 
-### Phase 26.1: Water layer refinements (INSERTED)
+### Phase 26.1: Water Layer Refinements (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Refine the water stress overlay: add tiered Overpass queries (~1000 facility target with priority country coverage), expand score to 0-10 with destroyed state, create type-specific canvas icons, set up Vercel cron for daily cache refresh, and audit desalination coverage
 **Depends on:** Phase 26
-**Plans:** 0 plans
+**Requirements:** [WR-01, WR-02, WR-03, WR-04, WR-05, WR-06, WR-07]
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 26.1 to break down)
+- [ ] 26.1-01-PLAN.md -- Tiered Overpass queries, treatment_plant type, Vercel cron, route timeout removal
+- [ ] 26.1-02-PLAN.md -- Score 0-10 with destroyed state, 4 new water facility canvas icons
+- [ ] 26.1-03-PLAN.md -- useWaterLayers icon wiring + destroyed rendering, label updates, desalination audit
 
 ### Phase 27: Performance & Load Testing
 **Goal**: Optimize initial load time and validate production handles 250 concurrent users
