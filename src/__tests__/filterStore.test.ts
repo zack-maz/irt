@@ -35,21 +35,21 @@ describe('filterStore', () => {
       expect(useFilterStore.getState().proximityRadiusKm).toBe(100);
     });
 
-    it('dateStart defaults to ~24h ago, dateEnd defaults to ~now', () => {
+    it('dateStart defaults to WAR_START, dateEnd defaults to ~now', () => {
       const s = useFilterStore.getState();
-      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const WAR_START = Date.UTC(2026, 1, 28);
       expect(s.dateStart).toBeTypeOf('number');
-      expect(Math.abs(s.dateStart - oneDayAgo)).toBeLessThan(60 * 60 * 1000);
+      expect(s.dateStart).toBe(WAR_START);
       expect(s.dateEnd).toBeTypeOf('number');
-      expect(Math.abs(s.dateEnd - Date.now())).toBeLessThan(60 * 60 * 1000);
+      expect(Math.abs(s.dateEnd - Date.now())).toBeLessThan(24 * 60 * 60 * 1000);
     });
 
     it('isSettingPin defaults to false', () => {
       expect(useFilterStore.getState().isSettingPin).toBe(false);
     });
 
-    it('granularity defaults to hour', () => {
-      expect(useFilterStore.getState().granularity).toBe('hour');
+    it('granularity defaults to day', () => {
+      expect(useFilterStore.getState().granularity).toBe('day');
     });
 
     it('new text fields default to empty strings', () => {

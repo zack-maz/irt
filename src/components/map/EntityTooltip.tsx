@@ -120,18 +120,19 @@ export function EntityTooltip({ entity, x, y }: EntityTooltipProps) {
         position: 'fixed',
         left: pos.left,
         top: pos.top,
-        backgroundColor: 'rgba(0,0,0,0.95)',
+        backgroundColor: 'rgba(30,30,30,0.96)',
         color: '#e5e5e5',
         borderRadius: '6px',
         padding: '8px 12px',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
         maxWidth: '300px',
-        backdropFilter: 'blur(4px)',
+        backdropFilter: 'blur(8px)',
         fontFamily: 'monospace',
         fontSize: '11px',
         lineHeight: 1.5,
         pointerEvents: 'auto',
-        zIndex: 1000,
+        zIndex: 'var(--z-tooltip)' as unknown as number,
       }}
     >
       {entity.type === 'flight' && <FlightContent entity={entity as FlightEntity} />}

@@ -132,8 +132,8 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
   treatment_plant: 'Treatment Plant',
 };
 
-function toWaterEntity(w: WaterFacility): CounterEntity {
-  const score = healthToScore(w.stress.compositeHealth);
+function toWaterEntity(w: WaterFacility, isAttacked: boolean): CounterEntity {
+  const score = isAttacked ? 0 : healthToScore(w.stress.compositeHealth);
   const metric = `${score}/10 ${scoreToLabel(score)}`;
   return { id: w.id, label: w.label || WATER_TYPE_LABELS[w.facilityType], metric, lat: w.lat, lng: w.lng, type: w.facilityType };
 }
@@ -232,10 +232,21 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     };
 
     if (isWaterLayerActive) {
+      // Pre-compute destroyed set (destructive events within 5km)
+      const DESTRUCTIVE = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
+      const destructive = allEvents.filter((e) => DESTRUCTIVE.has(e.type) && e.timestamp <= dateEnd);
+      const destroyedWater = new Set<string>();
+      for (const wf of waterFacilities) {
+        for (const e of destructive) {
+          if (Math.abs(e.lat - wf.lat) > 0.05 || Math.abs(e.lng - wf.lng) > 0.05) continue;
+          if (haversineKm(wf.lat, wf.lng, e.lat, e.lng) <= 5) { destroyedWater.add(wf.id); break; }
+        }
+      }
+
       for (const wf of waterFacilities) {
         waterCounts[wf.facilityType]++;
         waterCounts.total++;
-        waterEntities[wf.facilityType].push(toWaterEntity(wf));
+        waterEntities[wf.facilityType].push(toWaterEntity(wf, destroyedWater.has(wf.id)));
       }
       // Sort each type by health ascending (most stressed first)
       for (const key of Object.keys(waterEntities) as WaterFacilityType[]) {

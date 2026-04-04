@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { IconLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { useWeatherStore, type WeatherGridPoint } from '@/stores/weatherStore';
+import { useWaterStore } from '@/stores/waterStore';
 import { useLayerStore } from '@/stores/layerStore';
 import { getWindBarbIcon } from './windBarbs';
+import type { WaterFacility } from '../../../../server/types';
 
 /**
  * Returns deck.gl layers for weather visualization:
@@ -71,10 +73,26 @@ interface WeatherTooltipProps {
  * Weather tooltip showing temperature (C/F) and wind (direction + speed).
  * Positioned at cursor coordinates, styled to match EntityTooltip.
  */
+/** Find the nearest water facility within ~50km of a point */
+function findNearestFacility(lat: number, lng: number, facilities: WaterFacility[]): WaterFacility | null {
+  let best: WaterFacility | null = null;
+  let bestDist = Infinity;
+  for (const f of facilities) {
+    const d = Math.abs(f.lat - lat) + Math.abs(f.lng - lng);
+    if (d < bestDist) { bestDist = d; best = f; }
+  }
+  // ~0.5 degrees ≈ 50km — don't show precip for distant facilities
+  return bestDist < 0.5 ? best : null;
+}
+
 export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
   const tempC = point.temperature.toFixed(1);
   const tempF = (point.temperature * 9 / 5 + 32).toFixed(1);
   const compass = directionToCompass(point.windDirection);
+  const facilities = useWaterStore((s) => s.facilities);
+
+  const nearbyFacility = facilities.length > 0 ? findNearestFacility(point.lat, point.lng, facilities) : null;
+  const precip = nearbyFacility?.precipitation;
 
   return (
     <div
@@ -87,6 +105,15 @@ export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
         </div>
         <div>{tempC}C / {tempF}F</div>
         <div>Wind: {compass} {Math.round(point.windSpeed)} kn</div>
+        {precip && (
+          <>
+            <div className="mt-1 border-t border-border/30 pt-1 text-[9px] uppercase tracking-wider text-text-muted">
+              Precipitation
+            </div>
+            <div>30-day: {precip.last30DaysMm.toFixed(1)} mm</div>
+            <div>Anomaly: {Math.round(precip.anomalyRatio * 100)}% of normal</div>
+          </>
+        )}
       </div>
     </div>
   );

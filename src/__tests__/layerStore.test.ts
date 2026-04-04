@@ -44,7 +44,7 @@ describe('layerStore', () => {
 
   it('state resets to empty on fresh store', () => {
     useLayerStore.getState().toggleLayer('threat');
-    useLayerStore.getState().toggleLayer('satellite');
+    useLayerStore.getState().toggleLayer('water');
     // Reset
     useLayerStore.setState({ activeLayers: new Set() });
     expect(useLayerStore.getState().activeLayers.size).toBe(0);

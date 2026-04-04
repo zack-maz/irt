@@ -6,7 +6,6 @@ export type VisualizationLayerId =
   | 'threat'
   | 'political'
   | 'ethnic'
-  | 'satellite'
   | 'water';
 
 interface LayerState {

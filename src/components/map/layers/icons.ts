@@ -297,63 +297,39 @@ export function getIconAtlas(): HTMLCanvasElement {
   ctx.lineWidth = 2;
   ctx.lineCap = 'butt';
 
-  // Icon 13 (offset 416): Dam -- trapezoid wall cross-section
-  // Wide base (~24px), narrow top (~16px), ~22px tall
+  // Icon 13 (offset 416): Dam -- trapezoid (4px padding on all sides)
   ctx.beginPath();
-  ctx.moveTo(424, 5);    // top-left
-  ctx.lineTo(440, 5);    // top-right
-  ctx.lineTo(444, 27);   // bottom-right
-  ctx.lineTo(420, 27);   // bottom-left
+  ctx.moveTo(426, 6);    // top-left
+  ctx.lineTo(438, 6);    // top-right
+  ctx.lineTo(442, 26);   // bottom-right
+  ctx.lineTo(422, 26);   // bottom-left
   ctx.closePath();
   ctx.fill();
 
-  // Icon 14 (offset 448): Reservoir -- oval lake shape with wave line
-  const cx14 = 464;
-  const cy14 = 16;
-  // Main ellipse body
+  // Icon 14 (offset 448): Reservoir -- horizontal oval (4px padding)
   ctx.beginPath();
-  ctx.ellipse(cx14, cy14, 11, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(464, 16, 11, 7, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Wavy line across upper third to suggest water surface
-  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(cx14 - 9, cy14 - 2);
-  ctx.quadraticCurveTo(cx14 - 4, cy14 - 5, cx14, cy14 - 2);
-  ctx.quadraticCurveTo(cx14 + 4, cy14 + 1, cx14 + 9, cy14 - 2);
-  ctx.stroke();
-  ctx.strokeStyle = 'white';
 
-  // Icon 15 (offset 480): Treatment plant -- rectangular base with circular tank
+  // Icon 15 (offset 480): Treatment plant -- triangle (4px padding)
   ctx.fillStyle = 'white';
-  // Rectangular base building
-  ctx.fillRect(487, 18, 18, 10);
-  // Circular tank on top
   ctx.beginPath();
-  ctx.arc(496, 14, 6, 0, Math.PI * 2);
-  ctx.fill();
-  // Small chimney/pipe on left side
-  ctx.fillRect(488, 6, 3, 8);
-
-  // Icon 16 (offset 512): Desalination -- factory building + water droplet
-  ctx.fillStyle = 'white';
-  // Left: factory/building silhouette with angled roof
-  ctx.beginPath();
-  ctx.moveTo(514, 8);    // roof peak
-  ctx.lineTo(520, 14);   // roof right
-  ctx.lineTo(520, 28);   // bottom right
-  ctx.lineTo(514, 28);   // bottom left (narrower)
-  ctx.lineTo(514, 14);   // wall left
+  ctx.moveTo(496, 6);    // top center
+  ctx.lineTo(507, 26);   // bottom right
+  ctx.lineTo(485, 26);   // bottom left
   ctx.closePath();
   ctx.fill();
-  // Factory body
-  ctx.fillRect(514, 14, 6, 14);
-  // Right: water droplet
-  const cx16d = 530;
-  const cy16d = 20;
+
+  // Icon 16 (offset 512): Desalination -- fat water droplet
+  // Large round bottom (~70% of shape) with short pointed tip at top
+  ctx.fillStyle = 'white';
+  const cx16 = 528;
   ctx.beginPath();
-  ctx.arc(cx16d, cy16d + 2, 5, 0.2 * Math.PI, 0.8 * Math.PI, false);
-  ctx.lineTo(cx16d, 10);
+  // Round bottom: nearly full circle, centered low
+  ctx.arc(cx16, 20, 9, 0.05 * Math.PI, 0.95 * Math.PI, false);
+  // Curve up to pointed tip via quadratic bezier for smooth bulge
+  ctx.quadraticCurveTo(cx16 + 4, 10, cx16, 5);
+  ctx.quadraticCurveTo(cx16 - 4, 10, cx16 - 9 * Math.cos(0.05 * Math.PI), 20 - 9 * Math.sin(0.05 * Math.PI));
   ctx.closePath();
   ctx.fill();
 

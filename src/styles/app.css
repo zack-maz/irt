@@ -27,6 +27,7 @@
   --z-panel: 20;
   --z-controls: 30;
   --z-modal: 40;
+  --z-tooltip: 50;
 
   /* Layout dimensions */
   --width-detail-panel: 360px;

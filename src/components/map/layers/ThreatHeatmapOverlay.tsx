@@ -309,7 +309,7 @@ function formatRelativeTime(timestamp: number): string {
 
 // --- Hook ---
 
-export function useThreatHeatmapLayers(hoveredClusterId: string | null = null) {
+export function useThreatHeatmapLayers(hoveredClusterId: string | null = null, isBelowCrossover = true) {
   // Consume events already filtered by useFilteredEntities (date, proximity, country, CAMEO, mentions, etc.)
   const { events } = useFilteredEntities();
   const isActive = useLayerStore((s) => s.activeLayers.has('threat'));
@@ -361,13 +361,13 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null) {
         const t = Math.min(1, d.totalWeight / p90Weight);
         const idx = Math.min(3, Math.floor(t * 4));
         const baseColor = THERMAL_COLOR_RANGE[idx];
-        let alpha = 180;
+        let alpha = isBelowCrossover ? 180 : 80;
         if (hoveredClusterId != null) {
           alpha = d.id === hoveredClusterId ? 255 : 102;
         }
         return [...baseColor, alpha] as [number, number, number, number];
       },
-      pickable: true,
+      pickable: isBelowCrossover,
       extensions: [new RadialGradientExtension()],
       parameters: {
         depthWriteEnabled: false,
@@ -379,12 +379,12 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null) {
         blendAlphaOperation: 'add' as const,
       },
       updateTriggers: {
-        getFillColor: hoveredClusterId,
+        getFillColor: [hoveredClusterId, isBelowCrossover],
       },
     });
 
     return [clusterPickerLayer];
-  }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle, hoveredClusterId]);
+  }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle, hoveredClusterId, isBelowCrossover]);
 }
 
 // --- Tooltip ---

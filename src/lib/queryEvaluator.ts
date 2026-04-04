@@ -307,12 +307,9 @@ export function evaluateTag(
     case 'stress': {
       if (entity.type !== 'water') return false;
       const wf = entity as unknown as { stress: { compositeHealth: number } };
-      const health = wf.stress.compositeHealth;
-      const v = value.toLowerCase();
-      if (v === 'extreme') return health < 0.1;
-      if (v === 'high') return health < 0.3;
-      if (v === 'medium') return health >= 0.3 && health <= 0.7;
-      if (v === 'low') return health > 0.7;
+      const score = Math.max(1, Math.min(10, Math.round(wf.stress.compositeHealth * 9) + 1));
+      const n = parseInt(value, 10);
+      if (!isNaN(n)) return score === n;
       return false;
     }
 

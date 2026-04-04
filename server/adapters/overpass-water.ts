@@ -134,7 +134,7 @@ function isExcludedLocation(lat: number, lng: number): boolean {
  */
 const FACILITY_QUERIES: { label: string; nwr: string }[] = [
   { label: 'dams', nwr: 'nwr["waterway"="dam"]["name"]' },
-  { label: 'reservoirs', nwr: 'nwr["natural"="water"]["water"="reservoir"]["name"]' },
+  { label: 'reservoirs', nwr: '(way["natural"="water"]["water"="reservoir"]["name"];relation["natural"="water"]["water"="reservoir"]["name"];)' },
   { label: 'desalination', nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)' },
   { label: 'treatment_plants', nwr: 'nwr["man_made"="water_works"]["name"]' },
 ];
@@ -279,13 +279,22 @@ async function fetchFacilityType(
  * Each facility is enriched with WRI basin stress indicators via assignBasinStress.
  */
 export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
+  // Run all facility type queries in parallel for faster cold starts
+  const results = await Promise.allSettled(
+    FACILITY_QUERIES.map((entry) => fetchFacilityType(entry)),
+  );
+
   const all: WaterFacility[] = [];
   let succeeded = 0;
 
-  for (const entry of FACILITY_QUERIES) {
-    const batch = await fetchFacilityType(entry);
-    if (batch.length > 0) succeeded++;
-    all.push(...batch);
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === 'fulfilled' && result.value.length > 0) {
+      succeeded++;
+      all.push(...result.value);
+    } else if (result.status === 'rejected') {
+      log({ level: 'warn', message: `[overpass-water] ${FACILITY_QUERIES[i].label} rejected: ${result.reason}` });
+    }
   }
 
   if (succeeded === 0) {

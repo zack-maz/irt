@@ -115,6 +115,8 @@ export interface WaterLayerGroup {
   riverLayers: Layer[];
   /** Facility icons — render at entity level */
   facilityLayers: Layer[];
+  /** IDs of facilities with destructive events within 5km */
+  destroyedIds: Set<string>;
 }
 
 export function useWaterLayers(): WaterLayerGroup {
@@ -124,7 +126,7 @@ export function useWaterLayers(): WaterLayerGroup {
   const dateEnd = useFilterStore((s) => s.dateEnd) ?? Date.now();
 
   return useMemo(() => {
-    if (!isActive) return { riverLayers: [], facilityLayers: [] };
+    if (!isActive) return { riverLayers: [], facilityLayers: [], destroyedIds: new Set<string>() };
 
     // Pre-compute destroyed set (O(facilities * destructiveEvents))
     const destructiveEvents = events.filter(
@@ -201,6 +203,8 @@ export function useWaterLayers(): WaterLayerGroup {
         if (destroyedIds.has(d.id)) return [0, 0, 0, 255] as [number, number, number, number];
         return stressToRGBA(d.stress.compositeHealth);
       },
+      getAngle: () => 0,
+      billboard: false,
       pickable: true,
       iconAtlas: getIconAtlas(),
       iconMapping: ICON_MAPPING,
@@ -209,6 +213,7 @@ export function useWaterLayers(): WaterLayerGroup {
     return {
       riverLayers: [riverLayer, riverLabelLayer],
       facilityLayers: [facilityLayer],
+      destroyedIds,
     };
   }, [isActive, facilities, events, dateEnd]);
 }

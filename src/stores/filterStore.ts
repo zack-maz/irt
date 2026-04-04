@@ -4,7 +4,7 @@ import { WAR_START, STEP_MS, LOOKBACK_MS, snapToStep } from '@/lib/constants';
 import type { SiteType } from '@/types/entities';
 
 export const ALL_SITE_TYPES: SiteType[] = ['nuclear', 'naval', 'oil', 'airbase', 'port'];
-const DEFAULT_SITE_TYPES: SiteType[] = ['nuclear', 'oil'];
+const DEFAULT_SITE_TYPES: SiteType[] = ['nuclear', 'naval', 'oil', 'airbase', 'port'];
 
 /** Full default range for a given granularity (thumbs at both ends) */
 function defaultRange(g: Granularity): { dateStart: number; dateEnd: number } {

@@ -143,6 +143,17 @@ export function ProximityAlertOverlay() {
     }
   }, [alerts, expandedSiteId]);
 
+  // Dismiss alert when user selects a different entity or deselects
+  const selectedEntityId = useUIStore((s) => s.selectedEntityId);
+  useEffect(() => {
+    if (!expandedSiteId) return;
+    // If selection changed away from the alert's site, dismiss it
+    if (selectedEntityId !== expandedSiteId) {
+      dismissAlert(expandedSiteId);
+      setExpandedSiteId(null);
+    }
+  }, [selectedEntityId, expandedSiteId, dismissAlert, setExpandedSiteId]);
+
   const visibleAlerts = alerts.filter((a) => !dismissedIds.has(a.siteId));
 
   if (!mapRef || visibleAlerts.length === 0) return null;

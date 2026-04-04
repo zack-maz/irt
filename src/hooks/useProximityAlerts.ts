@@ -8,8 +8,8 @@ import { useFilterStore } from '@/stores/filterStore';
 import { haversineKm } from '@/lib/geo';
 import type { WaterFacility } from '../../server/types';
 
-const PROXIMITY_THRESHOLD_KM = 25;
-const COARSE_DEG = 0.25; // ~25km coarse bbox pre-filter
+const PROXIMITY_THRESHOLD_KM = 5;
+const COARSE_DEG = 0.05; // ~5km coarse bbox pre-filter
 
 export interface ProximityAlert {
   siteId: string;

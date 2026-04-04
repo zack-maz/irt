@@ -19,6 +19,7 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
 
 interface WaterTooltipProps {
   facility: WaterFacility;
+  isAttacked?: boolean;
 }
 
 /**
@@ -26,9 +27,9 @@ interface WaterTooltipProps {
  * Shows facility name, type, stress level with color indicator,
  * composite health as percentage, and precipitation anomaly if available.
  */
-export function WaterTooltip({ facility }: WaterTooltipProps): React.ReactElement {
-  const score = healthToScore(facility.stress.compositeHealth);
-  const [r, g, b] = stressToRGBA(facility.stress.compositeHealth, 255);
+export function WaterTooltip({ facility, isAttacked }: WaterTooltipProps): React.ReactElement {
+  const score = isAttacked ? 0 : healthToScore(facility.stress.compositeHealth);
+  const [r, g, b] = isAttacked ? [0, 0, 0] as const : stressToRGBA(facility.stress.compositeHealth, 255);
   const colorHex = `rgb(${r}, ${g}, ${b})`;
   const label = scoreToLabel(score);
 

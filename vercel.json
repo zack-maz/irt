@@ -3,7 +3,7 @@
   "framework": "vite",
   "crons": [
     { "path": "/api/cron/health", "schedule": "0 0 * * *" },
-    { "path": "/api/water?refresh=true", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/warm", "schedule": "0 */12 * * *" }
   ],
   "rewrites": [
     { "source": "/api/cron/:path*", "destination": "/api/vercel-entry" },

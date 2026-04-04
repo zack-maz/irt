@@ -42,6 +42,11 @@ export function EventDetail({ entity }: EventDetailProps) {
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
         Location
       </h3>
+      {d.actionGeoType != null && d.actionGeoType <= 2 && (
+        <div className="mb-1.5 rounded bg-amber-500/10 border border-amber-500/20 px-2 py-1 text-[10px] text-amber-400">
+          Approximate location — based on {d.actionGeoType === 1 ? 'country' : 'state/region'} coordinates, not a precise geolocation
+        </div>
+      )}
       <DetailValue label="Location" value={d.locationName || '--'} />
       <DetailValue label="Latitude" value={entity.lat.toFixed(6)} />
       <DetailValue label="Longitude" value={entity.lng.toFixed(6)} />

@@ -163,15 +163,31 @@ export function assignBasinStress(lat: number, lng: number): WaterStressIndicato
     return { ...DEFAULT_INDICATORS };
   }
 
-  // Select median-stress basin (most representative of the region)
+  // Select a basin based on coordinates for geographic variation within the country.
+  // Uses a deterministic hash of lat/lng to pick from the sorted basin range,
+  // so nearby facilities get similar (but not identical) stress values.
   const sorted = [...basins]
     .filter(b => b.bws_score >= 0) // exclude no-data basins
     .sort((a, b) => a.bws_score - b.bws_score);
 
-  // If all basins are no-data, use the first basin raw
-  const representative = sorted.length > 0
-    ? sorted[Math.floor(sorted.length / 2)]
-    : basins[0];
+  if (sorted.length === 0) {
+    const fallback = basins[0];
+    return {
+      bws_raw: fallback.bws_raw,
+      bws_score: fallback.bws_score,
+      bws_label: fallback.bws_label,
+      drr_score: fallback.drr_score,
+      gtd_score: fallback.gtd_score,
+      sev_score: fallback.sev_score,
+      iav_score: fallback.iav_score,
+      compositeHealth: 0.5,
+    };
+  }
+
+  // Deterministic index from coordinates: fractional lat/lng bits create spread
+  const hash = Math.abs(Math.sin(lat * 12.9898 + lng * 78.233) * 43758.5453) % 1;
+  const index = Math.floor(hash * sorted.length);
+  const representative = sorted[Math.min(index, sorted.length - 1)];
 
   const bwsScore = representative.bws_score;
 

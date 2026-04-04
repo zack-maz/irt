@@ -96,19 +96,18 @@ export function BaseMap() {
   const isSettingPin = useFilterStore((s) => s.isSettingPin);
   const setProximityPin = useFilterStore((s) => s.setProximityPin);
   const setSettingPin = useFilterStore((s) => s.setSettingPin);
-  const isBelowZoom9 = useMapStore((s) => s.isBelowZoom9);
+  const isBelowCrossover = useMapStore((s) => s.isBelowCrossover);
   const setZoomRegion = useMapStore((s) => s.setZoomRegion);
-  const lastZoomRegionRef = useRef(true); // initial view is zoomed out (below zoom 9)
 
   const mapRef = useRef<MapRef>(null);
   const [hoveredClusterId, setHoveredClusterId] = useState<string | null>(null);
 
   const { conflictLayers, entityLayers } = useEntityLayers();
   const weatherLayers = useWeatherLayers();
-  const threatLayers = useThreatHeatmapLayers(hoveredClusterId);
+  const threatLayers = useThreatHeatmapLayers(hoveredClusterId, isBelowCrossover);
   const politicalLayers = usePoliticalLayers();
   const ethnicLayers = useEthnicLayers();
-  const { riverLayers, facilityLayers } = useWaterLayers();
+  const { riverLayers, facilityLayers, destroyedIds: waterDestroyedIds } = useWaterLayers();
   const isWeatherActive = useLayerStore((s) => s.activeLayers.has('weather'));
   const isThreatActive = useLayerStore((s) => s.activeLayers.has('threat'));
   const isEthnicActive = useLayerStore((s) => s.activeLayers.has('ethnic'));
@@ -308,11 +307,7 @@ export function BaseMap() {
   const handleMove = useCallback(
     (e: MapEvent) => {
       const zoom = e.target.getZoom();
-      const currentRegion = zoom < 9;
-      if (currentRegion !== lastZoomRegionRef.current) {
-        lastZoomRegionRef.current = currentRegion;
-        setZoomRegion(zoom);
-      }
+      setZoomRegion(zoom);
     },
     [setZoomRegion],
   );
@@ -381,7 +376,7 @@ export function BaseMap() {
         />
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
-          layers={isBelowZoom9
+          layers={isBelowCrossover
             ? [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...conflictLayers, ...threatLayers, ...entityLayers, ...facilityLayers]
             : [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...threatLayers, ...conflictLayers, ...entityLayers, ...facilityLayers]}
           onHover={handleDeckHover}
@@ -425,7 +420,7 @@ export function BaseMap() {
           style={{ left: waterHover.x + 12, top: waterHover.y - 12 }}
         >
           <div className="rounded bg-surface-overlay px-2 py-1.5 backdrop-blur-sm shadow-lg border border-border/50">
-            <WaterTooltip facility={waterHover.facility} />
+            <WaterTooltip facility={waterHover.facility} isAttacked={waterDestroyedIds.has(waterHover.facility.id)} />
           </div>
         </div>
       )}

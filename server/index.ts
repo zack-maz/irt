@@ -17,6 +17,7 @@ import { geocodeRouter } from './routes/geocode.js';
 import { waterRouter } from './routes/water.js';
 import { healthRouter } from './routes/health.js';
 import { cronHealthRouter } from './routes/cron-health.js';
+import { cronWarmRouter } from './routes/cron-warm.js';
 export function createApp() {
   const app = express();
 
@@ -60,8 +61,9 @@ export function createApp() {
   // Health check (no cache, no rate limit)
   app.use('/health', healthRouter);
 
-  // Cron health check (no cache, no rate limit — triggered by Vercel cron)
+  // Cron endpoints (no cache, no rate limit — triggered by Vercel cron)
   app.use('/api/cron/health', cronHealthRouter);
+  app.use('/api/cron/warm', cronWarmRouter);
 
   // Data source routes with per-endpoint rate limits and cache-control
   app.use('/api/flights', rateLimiters.flights, cacheControl(5, 25), flightsRouter);

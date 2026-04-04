@@ -36,14 +36,19 @@ function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Event types that mark a facility as "destroyed" (score 0) */
+const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
+
 function computeWaterAttackStatus(facility: WaterFacility, events: ConflictEventEntity[], dateEnd: number) {
   const attacks = events.filter((e) => {
     if (e.timestamp > dateEnd) return false;
     if (Math.abs(e.lat - facility.lat) > COARSE_DEG || Math.abs(e.lng - facility.lng) > COARSE_DEG) return false;
     return haversineDistanceKm(facility.lat, facility.lng, e.lat, e.lng) <= ATTACK_RADIUS_KM;
   });
+  const isDestroyed = attacks.some((e) => DESTRUCTIVE_EVENT_TYPES.has(e.type));
   return {
     isAttacked: attacks.length > 0,
+    isDestroyed,
     attackCount: attacks.length,
     attacks: attacks.sort((a, b) => b.timestamp - a.timestamp),
   };
@@ -64,9 +69,9 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
   const osmUrl = `https://www.openstreetmap.org/?mlat=${facility.lat}&mlon=${facility.lng}#map=15/${facility.lat}/${facility.lng}`;
   const imageUrl = useSiteImage(facility.lat, facility.lng);
 
-  const score = healthToScore(facility.stress.compositeHealth);
+  const score = attack.isDestroyed ? 0 : healthToScore(facility.stress.compositeHealth);
   const scorePct = Math.round((score / 10) * 100);
-  const [r, g, b] = stressToRGBA(facility.stress.compositeHealth, 255);
+  const [r, g, b] = attack.isDestroyed ? [0, 0, 0] as const : stressToRGBA(facility.stress.compositeHealth, 255);
   const stressColor = `rgb(${r}, ${g}, ${b})`;
 
   const [showAll, setShowAll] = useState(false);

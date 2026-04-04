@@ -68,6 +68,18 @@ LEGEND_REGISTRY.push({
   ],
 });
 
+// Threat Density legend (Phase 23 - Threat layer)
+LEGEND_REGISTRY.push({
+  layerId: 'threat',
+  title: 'Threat Density',
+  colorStops: [
+    { color: '#4a0050', label: 'Low' },
+    { color: '#c8007b', label: '' },
+    { color: '#f08000', label: '' },
+    { color: '#ff2020', label: 'High' },
+  ],
+});
+
 // Factions legend (Phase 24 - Political layer)
 LEGEND_REGISTRY.push({
   layerId: 'political',

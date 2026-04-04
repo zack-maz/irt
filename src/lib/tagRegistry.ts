@@ -324,8 +324,8 @@ export const TAG_REGISTRY: Record<string, TagDefinition> = {
     description: 'Filter water facilities by stress level',
     color: 'text-cyan-400',
     entityTypes: ['water'],
-    examples: ['stress:high', 'stress:low', 'stress:extreme'],
-    getValues: () => staticValues(['low', 'medium', 'high', 'extreme']),
+    examples: ['stress:1', 'stress:5', 'stress:10'],
+    getValues: () => staticValues(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']),
   },
 
   // Site-specific tags
