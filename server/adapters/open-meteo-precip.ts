@@ -2,8 +2,8 @@
  * Open-Meteo precipitation adapter.
  *
  * Fetches 30-day precipitation totals and computes anomaly ratios
- * for water facility locations. Batches requests to stay under
- * Open-Meteo API limits (100 locations per request).
+ * for water facility locations. Deduplicates to a 0.5° grid (~50km)
+ * to minimize API calls, then fans results back to all original locations.
  */
 
 import { log } from '../lib/logger.js';
@@ -36,6 +36,8 @@ function estimateNormalMm(lat: number, lng: number): number {
 
 const BATCH_SIZE = 100;
 const TIMEOUT_MS = 30_000;
+/** Grid quantization step in degrees (~50km) */
+const GRID_STEP = 0.5;
 
 interface OpenMeteoDailyResponse {
   daily: {
@@ -44,77 +46,104 @@ interface OpenMeteoDailyResponse {
   };
 }
 
+/** Quantize a coordinate to the grid */
+function quantize(v: number): number {
+  return Math.round(v / GRID_STEP) * GRID_STEP;
+}
+
+function gridKey(lat: number, lng: number): string {
+  return `${quantize(lat).toFixed(2)},${quantize(lng).toFixed(2)}`;
+}
+
 /**
  * Fetch 30-day precipitation data for a list of locations.
  *
- * Batches into groups of 100 to stay under Open-Meteo API limits.
- * Returns empty array on failure (graceful degradation).
+ * Deduplicates locations to a 0.5° grid, fetches unique cells in batches
+ * of 100, then maps results back to every original location via its
+ * nearest grid cell. Skips failed batches instead of aborting entirely.
  */
 export async function fetchPrecipitation(
   locations: { lat: number; lng: number }[],
 ): Promise<PrecipitationData[]> {
   if (locations.length === 0) return [];
 
-  try {
-    const results: PrecipitationData[] = [];
+  // Deduplicate to grid cells
+  const cellMap = new Map<string, { lat: number; lng: number }>();
+  for (const loc of locations) {
+    const key = gridKey(loc.lat, loc.lng);
+    if (!cellMap.has(key)) {
+      cellMap.set(key, { lat: quantize(loc.lat), lng: quantize(loc.lng) });
+    }
+  }
+  const uniqueCells = Array.from(cellMap.values());
 
-    // Split into batches of BATCH_SIZE
-    for (let i = 0; i < locations.length; i += BATCH_SIZE) {
-      const batch = locations.slice(i, i + BATCH_SIZE);
-      const lats = batch.map(l => l.lat.toFixed(2)).join(',');
-      const lngs = batch.map(l => l.lng.toFixed(2)).join(',');
+  log({ level: 'info', message: `[open-meteo-precip] ${locations.length} locations → ${uniqueCells.length} unique grid cells (${Math.ceil(uniqueCells.length / BATCH_SIZE)} batches)` });
 
-      const url =
-        `https://api.open-meteo.com/v1/forecast?` +
-        `latitude=${lats}&longitude=${lngs}&` +
-        `daily=precipitation_sum&past_days=30&forecast_days=0&timezone=UTC`;
+  // Fetch precipitation for unique grid cells
+  const cellResults = new Map<string, { totalMm: number; anomalyRatio: number }>();
 
-      try {
-        const res = await fetch(url, {
-          signal: AbortSignal.timeout(TIMEOUT_MS),
-        });
+  for (let i = 0; i < uniqueCells.length; i += BATCH_SIZE) {
+    const batch = uniqueCells.slice(i, i + BATCH_SIZE);
+    const lats = batch.map(c => c.lat.toFixed(2)).join(',');
+    const lngs = batch.map(c => c.lng.toFixed(2)).join(',');
 
-        if (!res.ok) {
-          log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} returned ${res.status}, skipping` });
-          continue;
-        }
+    const url =
+      `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${lats}&longitude=${lngs}&` +
+      `daily=precipitation_sum&past_days=30&forecast_days=0&timezone=UTC`;
 
-        const json = await res.json();
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
 
-        // Open-Meteo returns array for multi-location, single object for 1 location
-        const responses: OpenMeteoDailyResponse[] = Array.isArray(json) ? json : [json];
-
-        for (let j = 0; j < responses.length; j++) {
-          const loc = batch[j];
-          const data = responses[j];
-          if (!data?.daily?.precipitation_sum) continue;
-
-          const total = data.daily.precipitation_sum.reduce(
-            (sum: number, v: number | null) => sum + (v ?? 0),
-            0,
-          );
-
-          const normalMm = estimateNormalMm(loc.lat, loc.lng);
-          const anomalyRatio = normalMm > 0 ? total / normalMm : 1.0;
-
-          results.push({
-            lat: loc.lat,
-            lng: loc.lng,
-            last30DaysMm: Math.round(total * 10) / 10, // 1 decimal
-            anomalyRatio: Math.round(anomalyRatio * 100) / 100, // 2 decimals
-            updatedAt: Date.now(),
-          });
-        }
-      } catch (batchErr) {
-        log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} failed: ${(batchErr as Error).message}, skipping` });
+      if (!res.ok) {
+        log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} returned ${res.status}, skipping` });
         continue;
       }
-    }
 
-    log({ level: 'info', message: `[open-meteo-precip] Fetched precipitation for ${results.length} locations` });
-    return results;
-  } catch (err) {
-    log({ level: 'warn', message: `[open-meteo-precip] Failed: ${(err as Error).message}` });
-    return [];
+      const json = await res.json();
+      const responses: OpenMeteoDailyResponse[] = Array.isArray(json) ? json : [json];
+
+      for (let j = 0; j < responses.length; j++) {
+        const cell = batch[j];
+        const data = responses[j];
+        if (!data?.daily?.precipitation_sum) continue;
+
+        const totalMm = data.daily.precipitation_sum.reduce(
+          (sum: number, v: number | null) => sum + (v ?? 0),
+          0,
+        );
+
+        const normalMm = estimateNormalMm(cell.lat, cell.lng);
+        const anomalyRatio = normalMm > 0 ? totalMm / normalMm : 1.0;
+
+        cellResults.set(gridKey(cell.lat, cell.lng), {
+          totalMm: Math.round(totalMm * 10) / 10,
+          anomalyRatio: Math.round(anomalyRatio * 100) / 100,
+        });
+      }
+    } catch (batchErr) {
+      log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} failed: ${(batchErr as Error).message}, skipping` });
+      continue;
+    }
   }
+
+  // Fan results back to all original locations
+  const now = Date.now();
+  const results: PrecipitationData[] = [];
+  for (const loc of locations) {
+    const cell = cellResults.get(gridKey(loc.lat, loc.lng));
+    if (!cell) continue;
+    results.push({
+      lat: loc.lat,
+      lng: loc.lng,
+      last30DaysMm: cell.totalMm,
+      anomalyRatio: cell.anomalyRatio,
+      updatedAt: now,
+    });
+  }
+
+  log({ level: 'info', message: `[open-meteo-precip] Fetched precipitation for ${cellResults.size} cells, mapped to ${results.length} locations` });
+  return results;
 }
