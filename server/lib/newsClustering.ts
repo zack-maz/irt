@@ -62,27 +62,33 @@ export function deduplicateAndCluster(articles: NewsArticle[]): NewsCluster[] {
   for (let i = 0; i < unique.length; i++) {
     if (clustered.has(i)) continue;
 
-    const group: NewsArticle[] = [unique[i]];
+    const seed = unique[i];
+    if (!seed) continue;
+
+    const group: NewsArticle[] = [seed];
     clustered.add(i);
 
-    const tokensI = tokenize(unique[i].title);
+    const tokensI = tokenize(seed.title);
     const canFuzzyI = tokensI.size >= NEWS_MIN_TOKENS_FOR_FUZZY;
 
     if (canFuzzyI) {
       for (let j = i + 1; j < unique.length; j++) {
         if (clustered.has(j)) continue;
 
-        const tokensJ = tokenize(unique[j].title);
+        const candidate = unique[j];
+        if (!candidate) continue;
+
+        const tokensJ = tokenize(candidate.title);
         const canFuzzyJ = tokensJ.size >= NEWS_MIN_TOKENS_FOR_FUZZY;
         if (!canFuzzyJ) continue;
 
         // Check 24h window
-        const timeDiff = Math.abs(unique[i].publishedAt - unique[j].publishedAt);
+        const timeDiff = Math.abs(seed.publishedAt - candidate.publishedAt);
         if (timeDiff > NEWS_CLUSTER_WINDOW_MS) continue;
 
         const similarity = jaccardSimilarity(tokensI, tokensJ);
         if (similarity >= NEWS_JACCARD_THRESHOLD) {
-          group.push(unique[j]);
+          group.push(candidate);
           clustered.add(j);
         }
       }
@@ -91,8 +97,10 @@ export function deduplicateAndCluster(articles: NewsArticle[]): NewsCluster[] {
     // Primary = earliest publishedAt
     group.sort((a, b) => a.publishedAt - b.publishedAt);
     const primary = group[0];
+    const last = group[group.length - 1];
+    if (!primary || !last) continue;
     const firstSeen = primary.publishedAt;
-    const lastUpdated = group[group.length - 1].publishedAt;
+    const lastUpdated = last.publishedAt;
 
     clusters.push({
       id: primary.id,

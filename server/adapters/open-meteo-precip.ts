@@ -19,10 +19,10 @@ export interface PrecipitationData {
 }
 
 /** Approximate regional monthly precipitation normals (mm) */
-const REGIONAL_NORMALS_MM: Record<string, number> = {
+const REGIONAL_NORMALS_MM = {
   arid: 20,    // Arabian Peninsula, central Iran, Sahara
   fertile: 50, // Fertile Crescent, coastal areas, Turkey
-};
+} as const;
 
 /**
  * Estimate the regional monthly normal precipitation for a coordinate.
@@ -110,7 +110,7 @@ export async function fetchPrecipitation(
       for (let j = 0; j < responses.length; j++) {
         const cell = batch[j];
         const data = responses[j];
-        if (!data?.daily?.precipitation_sum) continue;
+        if (!cell || !data?.daily?.precipitation_sum) continue;
 
         const totalMm = data.daily.precipitation_sum.reduce(
           (sum: number, v: number | null) => sum + (v ?? 0),

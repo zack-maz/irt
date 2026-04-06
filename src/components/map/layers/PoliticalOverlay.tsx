@@ -67,7 +67,9 @@ export function usePoliticalLayers(): GeoJsonLayer[] {
 
     const countryLayer = new GeoJsonLayer({
       id: 'political-countries',
-      data: countriesData as unknown as Record<string, unknown>,
+      // deck.gl GeoJsonLayer accepts FeatureCollection at runtime; static GeoJSON imports
+// type as Record<string, unknown> via Vite's JSON loader.
+data: countriesData as any,
       pickable: false,
       stroked: true,
       filled: true,
@@ -79,7 +81,8 @@ export function usePoliticalLayers(): GeoJsonLayer[] {
 
     const disputedLayer = new GeoJsonLayer({
       id: 'political-disputed',
-      data: disputedData as unknown as Record<string, unknown>,
+      // deck.gl GeoJsonLayer accepts FeatureCollection at runtime.
+data: disputedData as any,
       pickable: false,
       stroked: true,
       filled: true,

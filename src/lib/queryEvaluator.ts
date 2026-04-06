@@ -9,7 +9,8 @@ import type {
   ConflictEventEntity,
   SiteEntity,
 } from '@/types/entities';
-import { getSearchableFields } from './searchUtils';
+import type { WaterFacility } from '../../server/types';
+import { getSearchableFields, type SearchableEntity } from './searchUtils';
 import { computeSeverityScore } from './severity';
 import { computeAttackStatus } from './attackStatus';
 import { findGeoName } from './geoNames';
@@ -117,11 +118,17 @@ function ciIncludes(haystack: string, needle: string): boolean {
   return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
+/** Returns the entity's timestamp if it has one (MapEntity), or null. */
+function getEntityTimestamp(entity: SearchableEntity): number | null {
+  if (entity.type === 'site' || entity.type === 'water') return null;
+  return (entity as MapEntity).timestamp;
+}
+
 // ─── Main Evaluator ──────────────────────────────────────────
 
 export function evaluateQuery(
   node: QueryNode | null,
-  entity: MapEntity | SiteEntity,
+  entity: SearchableEntity,
   context: EvaluationContext,
 ): boolean {
   if (!node) return true; // null AST matches everything
@@ -142,7 +149,7 @@ export function evaluateQuery(
 // ─── Tag Evaluator ────────────────────────────────────────────
 
 export function evaluateTag(
-  entity: MapEntity | SiteEntity,
+  entity: SearchableEntity,
   prefix: string,
   value: string,
   context: EvaluationContext,
@@ -167,7 +174,7 @@ export function evaluateTag(
       if (entity.type === 'flight') {
         return ciIncludes((entity as FlightEntity).data.originCountry, value);
       }
-      if (entity.type !== 'ship' && entity.type !== 'site') {
+      if (entity.type !== 'ship' && entity.type !== 'site' && entity.type !== 'water') {
         // ConflictEventEntity
         const e = entity as ConflictEventEntity;
         return ciIncludes(e.data.actor1, value) || ciIncludes(e.data.actor2, value);
@@ -196,7 +203,7 @@ export function evaluateTag(
     }
 
     case 'actor': {
-      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site') return false;
+      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site' || entity.type === 'water') return false;
       const e = entity as ConflictEventEntity;
       return ciIncludes(e.data.actor1, value) || ciIncludes(e.data.actor2, value);
     }
@@ -206,7 +213,7 @@ export function evaluateTag(
         return ciIncludes((entity as SiteEntity).label, value);
       }
       if (entity.type === 'water') {
-        return ciIncludes(entity.label, value);
+        return ciIncludes((entity as WaterFacility).label, value);
       }
       if (entity.type !== 'ship' && entity.type !== 'flight') {
         return ciIncludes((entity as ConflictEventEntity).data.locationName, value);
@@ -219,7 +226,7 @@ export function evaluateTag(
     }
 
     case 'cameo': {
-      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site') return false;
+      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site' || entity.type === 'water') return false;
       return (entity as ConflictEventEntity).data.cameoCode === value;
     }
 
@@ -249,7 +256,7 @@ export function evaluateTag(
     }
 
     case 'mentions': {
-      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site') return false;
+      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site' || entity.type === 'water') return false;
       return matchRange((entity as ConflictEventEntity).data.numMentions, value);
     }
 
@@ -267,7 +274,7 @@ export function evaluateTag(
 
     case 'severity': {
       // Only applies to conflict events
-      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site') return false;
+      if (entity.type === 'ship' || entity.type === 'flight' || entity.type === 'site' || entity.type === 'water') return false;
       const score = computeSeverityScore(entity as ConflictEventEntity);
       const v = value.toLowerCase();
       if (v === 'high') return score > 50;
@@ -320,7 +327,7 @@ export function evaluateTag(
 
     case 'status': {
       if (entity.type !== 'site') return false;
-      const attackStatus = computeAttackStatus(entity as SiteEntity, context.events, null);
+      const attackStatus = computeAttackStatus(entity as SiteEntity, context.events, context.now);
       const v = value.toLowerCase();
       if (v === 'attacked') return attackStatus.isAttacked;
       if (v === 'healthy') return !attackStatus.isAttacked;
@@ -328,18 +335,24 @@ export function evaluateTag(
     }
 
     case 'since': {
+      const ts = getEntityTimestamp(entity);
+      if (ts === null) return false;
       const threshold = parseTemporalValue(value, context.now);
-      return entity.timestamp >= threshold;
+      return ts >= threshold;
     }
 
     case 'before': {
+      const ts = getEntityTimestamp(entity);
+      if (ts === null) return false;
       const threshold = parseTemporalValue(value, context.now);
-      return entity.timestamp <= threshold;
+      return ts <= threshold;
     }
 
     case 'date': {
       // Match entity timestamp to date string (YYYY-MM-DD)
-      const d = new Date(entity.timestamp);
+      const ts = getEntityTimestamp(entity);
+      if (ts === null) return false;
+      const d = new Date(ts);
       const dateStr = d.toISOString().slice(0, 10);
       return dateStr === value;
     }
@@ -355,7 +368,7 @@ export function evaluateTag(
 
 // ─── has: attribute presence check ───────────────────────────
 
-function checkHasAttribute(entity: MapEntity | SiteEntity, attr: string): boolean {
+function checkHasAttribute(entity: SearchableEntity, attr: string): boolean {
   const a = attr.toLowerCase();
 
   if (entity.type === 'flight') {
@@ -386,6 +399,15 @@ function checkHasAttribute(entity: MapEntity | SiteEntity, attr: string): boolea
     switch (a) {
       case 'operator': return !!s.operator;
       case 'wikidata': return !!s.wikidata;
+      default: return false;
+    }
+  }
+
+  if (entity.type === 'water') {
+    const w = entity as WaterFacility;
+    switch (a) {
+      case 'operator': return !!w.operator;
+      case 'precipitation': return w.precipitation != null;
       default: return false;
     }
   }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { stressToRGBA, healthToScore, scoreToLabel } from '@/lib/waterStress';
 import type { WaterFacility, WaterFacilityType } from '../../../../server/types';
 
 /** Human-readable labels for water facility types */

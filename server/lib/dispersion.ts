@@ -54,8 +54,11 @@ export function dispersePosition(
     // Find which ring this slot belongs to
     let cumulative = 0;
     ringIndex = 0;
+    localSlot = 0;
     for (let i = 0; i < RINGS.length; i++) {
-      const [count] = RINGS[i];
+      const ring = RINGS[i];
+      if (!ring) continue;
+      const [count] = ring;
       if (globalSlotIndex < cumulative + count) {
         ringIndex = i;
         localSlot = globalSlotIndex - cumulative;
@@ -63,15 +66,22 @@ export function dispersePosition(
       }
       cumulative += count;
     }
-    localSlot = localSlot!;
   } else {
     // Overflow: wrap to Ring 2
     ringIndex = 2;
     const overflowIndex = globalSlotIndex - TOTAL_SLOTS;
-    localSlot = overflowIndex % RINGS[2][0];
+    const ring2 = RINGS[2];
+    if (!ring2) {
+      throw new Error('Dispersion misconfigured: missing RINGS[2]');
+    }
+    localSlot = overflowIndex % ring2[0];
   }
 
-  const [slotCount, radiusKm] = RINGS[ringIndex];
+  const ring = RINGS[ringIndex];
+  if (!ring) {
+    throw new Error(`Dispersion misconfigured: missing RINGS[${ringIndex}]`);
+  }
+  const [slotCount, radiusKm] = ring;
 
   // Base angle: evenly distribute around circle
   const baseAngle = (2 * Math.PI * localSlot) / slotCount;
@@ -176,6 +186,7 @@ export function disperseEvents(events: ConflictEventEntity[]): ConflictEventEnti
 
     for (let i = 0; i < group.length; i++) {
       const event = group[i];
+      if (!event) continue;
       const pos = dispersePosition(event.lat, event.lng, i);
 
       dispersed.push({

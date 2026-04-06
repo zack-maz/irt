@@ -13,6 +13,9 @@ import { AutocompleteDropdown } from '@/components/search/AutocompleteDropdown';
 import { CheatSheet } from '@/components/search/CheatSheet';
 import { findGeoName } from '@/lib/geoNames';
 import type { MapEntity, SiteEntity } from '@/types/entities';
+import type { WaterFacility } from '../../../server/types';
+
+type SearchableEntity = MapEntity | SiteEntity | WaterFacility;
 
 // --- Word-at-cursor extraction (for autocomplete acceptance) ---
 
@@ -159,7 +162,7 @@ export function SearchModal() {
   }, []);
 
   // --- Entity selection ---
-  const handleSelect = useCallback((entity: MapEntity | SiteEntity) => {
+  const handleSelect = useCallback((entity: SearchableEntity) => {
     const currentView = getCurrentPanelView();
     if (currentView) {
       useUIStore.getState().pushView(currentView);

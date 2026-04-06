@@ -115,12 +115,13 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     const lows: number[] = [];
 
     for (let i = 0; i < rawTimestamps.length; i++) {
+      const ts = rawTimestamps[i];
       const c = quote.close?.[i];
       const h = quote.high?.[i];
       const l = quote.low?.[i];
-      // Only include entries where all three values are present
-      if (c != null && h != null && l != null) {
-        timestamps.push(rawTimestamps[i] * 1000);
+      // Only include entries where all four values are present
+      if (ts != null && c != null && h != null && l != null) {
+        timestamps.push(ts * 1000);
         closes.push(c);
         highs.push(h);
         lows.push(l);

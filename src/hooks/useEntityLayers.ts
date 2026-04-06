@@ -262,7 +262,8 @@ export function useEntityLayers() {
   const shipLayer = useMemo(() => new IconLayer<ShipEntity>({
     id: 'ships',
     data: filteredShips,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: () => 'chevron',
     getPosition: (d: ShipEntity) => [d.lng, d.lat],
@@ -287,7 +288,8 @@ export function useEntityLayers() {
   const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'airstrikes',
     data: airstrikeEvents,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: () => 'starburst',
     getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
@@ -312,7 +314,8 @@ export function useEntityLayers() {
   const groundCombatLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'groundCombat',
     data: groundCombatEvents,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: (d: ConflictEventEntity) => getIconForEntity(d),
     getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
@@ -337,7 +340,8 @@ export function useEntityLayers() {
   const targetedLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
     id: 'targeted',
     data: targetedEvents,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: () => 'crosshair',
     getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
@@ -362,7 +366,8 @@ export function useEntityLayers() {
   const flightLayer = useMemo(() => new IconLayer<FlightEntity>({
     id: 'flights',
     data: flights,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: (d: FlightEntity) => d.data.onGround ? 'chevronGround' : 'chevron',
     getPosition: (d: FlightEntity) => [d.lng, d.lat],
@@ -401,7 +406,8 @@ export function useEntityLayers() {
   const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
     id: 'site-icons',
     data: displaySites,
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: (d: SiteEntity) => SITE_ICON_MAP[d.siteType] ?? 'diamond',
     getPosition: (d: SiteEntity) => [d.lng, d.lat],
@@ -440,7 +446,8 @@ export function useEntityLayers() {
     id: 'entity-glow',
     visible: glowVisible,
     data: activeEntity ? [activeEntity] : [],
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: (d: AnyEntity) => getIconForEntity(d),
     getPosition: (d: AnyEntity) => [d.lng, d.lat],
@@ -460,7 +467,8 @@ export function useEntityLayers() {
     id: 'entity-highlight',
     visible: highlightVisible,
     data: activeEntity ? [activeEntity] : [],
-    iconAtlas: getIconAtlas(),
+    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+    iconAtlas: getIconAtlas() as any,
     iconMapping: ICON_MAPPING,
     getIcon: (d: AnyEntity) => getIconForEntity(d),
     getPosition: (d: AnyEntity) => [d.lng, d.lat],

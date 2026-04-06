@@ -1,5 +1,5 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vite';
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -53,9 +53,8 @@ export default defineConfig({
     globals: true,
     testTimeout: 10000,
     pool: 'forks',
-    forks: {
-      maxForks: 4,
-    },
+    // vitest 4 removed per-pool option blocks; use top-level maxWorkers to bound forks.
+    maxWorkers: 4,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],

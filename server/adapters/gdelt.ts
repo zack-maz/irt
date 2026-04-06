@@ -77,7 +77,12 @@ export async function getExportUrl(): Promise<string> {
   if (!exportLine) {
     throw new Error('No export URL found in lastupdate.txt');
   }
-  return exportLine.trim().split(' ')[2];
+  const parts = exportLine.trim().split(' ');
+  const url = parts[2];
+  if (!url) {
+    throw new Error('Malformed lastupdate.txt: missing URL column');
+  }
+  return url;
 }
 
 /**
@@ -91,7 +96,20 @@ async function downloadAndUnzip(url: string): Promise<string> {
   const buffer = Buffer.from(await res.arrayBuffer());
   const zip = new AdmZip(buffer);
   const entries = zip.getEntries();
-  return entries[0].getData().toString('utf8');
+  const firstEntry = entries[0];
+  if (!firstEntry) {
+    throw new Error('GDELT ZIP archive contained no entries');
+  }
+  return firstEntry.getData().toString('utf8');
+}
+
+/**
+ * Safely read a CSV column, returning empty string for out-of-bounds access.
+ * GDELT rows have at least 61 columns once filtered earlier in the pipeline,
+ * but this guard makes column reads explicit under noUncheckedIndexedAccess.
+ */
+function getCol(cols: string[], idx: number): string {
+  return cols[idx] ?? '';
 }
 
 // All valid CAMEO base codes in the 180-204 range are mapped below.
@@ -181,32 +199,32 @@ export function normalizeGdeltEvent(
   lat: number,
   lng: number,
 ): ConflictEventEntity {
-  const eventBaseCode = cols[COL.EventBaseCode];
-  const eventRootCode = cols[COL.EventRootCode];
-  const eventCode = cols[COL.EventCode];
-  const sqlDate = cols[COL.SQLDATE];
-  const actionGeoType = parseInt(cols[COL.ActionGeo_Type], 10) || undefined;
+  const eventBaseCode = getCol(cols, COL.EventBaseCode);
+  const eventRootCode = getCol(cols, COL.EventRootCode);
+  const eventCode = getCol(cols, COL.EventCode);
+  const sqlDate = getCol(cols, COL.SQLDATE);
+  const actionGeoType = parseInt(getCol(cols, COL.ActionGeo_Type), 10) || undefined;
 
   return {
-    id: `gdelt-${cols[COL.GLOBALEVENTID]}`,
+    id: `gdelt-${getCol(cols, COL.GLOBALEVENTID)}`,
     type: classifyByBaseCode(eventBaseCode, eventRootCode),
     lat,
     lng,
     timestamp: parseSqlDate(sqlDate),
-    label: `${cols[COL.ActionGeo_FullName]}: ${describeEvent(eventBaseCode)}`,
+    label: `${getCol(cols, COL.ActionGeo_FullName)}: ${describeEvent(eventBaseCode)}`,
     data: {
       eventType: describeEvent(eventBaseCode),
       subEventType: `CAMEO ${eventCode}`,
       fatalities: 0, // GDELT does not track fatalities
-      actor1: cols[COL.Actor1Name] || '',
-      actor2: cols[COL.Actor2Name] || '',
+      actor1: getCol(cols, COL.Actor1Name),
+      actor2: getCol(cols, COL.Actor2Name),
       notes: '',
-      source: cols[COL.SOURCEURL] ?? '',
-      goldsteinScale: parseFloat(cols[COL.GoldsteinScale]) || 0,
-      locationName: cols[COL.ActionGeo_FullName] || '',
+      source: getCol(cols, COL.SOURCEURL),
+      goldsteinScale: parseFloat(getCol(cols, COL.GoldsteinScale)) || 0,
+      locationName: getCol(cols, COL.ActionGeo_FullName),
       cameoCode: eventCode,
-      numMentions: parseInt(cols[COL.NumMentions], 10) || undefined,
-      numSources: parseInt(cols[COL.NumSources], 10) || undefined,
+      numMentions: parseInt(getCol(cols, COL.NumMentions), 10) || undefined,
+      numSources: parseInt(getCol(cols, COL.NumSources), 10) || undefined,
       actionGeoType,
     },
   };
@@ -235,38 +253,38 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     const cols = line.split('\t');
     if (cols.length < 61) continue;
 
-    const eventRootCode = cols[COL.EventRootCode];
-    const countryCode = cols[COL.ActionGeo_CountryCode];
+    const eventRootCode = getCol(cols, COL.EventRootCode);
+    const countryCode = getCol(cols, COL.ActionGeo_CountryCode);
 
     if (!CONFLICT_ROOT_CODES.has(eventRootCode)) continue;
-    const eventBaseCode = cols[COL.EventBaseCode];
+    const eventBaseCode = getCol(cols, COL.EventBaseCode);
     if (excludedCameo.has(eventBaseCode)) continue;
     if (!MIDDLE_EAST_FIPS.has(countryCode)) continue;
 
     // Geo cross-validation: discard events where FullName contradicts FIPS code
-    const fullName = cols[COL.ActionGeo_FullName];
+    const fullName = getCol(cols, COL.ActionGeo_FullName);
     if (!isGeoValid(fullName, countryCode)) {
       geoDiscardCount++;
-      log.warn({ eventId: cols[COL.GLOBALEVENTID], fullName, countryCode }, 'discarded: FullName contradicts FIPS');
+      log.warn({ eventId: getCol(cols, COL.GLOBALEVENTID), fullName, countryCode }, 'discarded: FullName contradicts FIPS');
       continue;
     }
 
     // Require at least N independent sources — single-source events are overwhelmingly
     // false positives (op-eds, niche sites). Real kinetic events get multi-source coverage fast.
-    const numSources = parseInt(cols[COL.NumSources], 10) || 0;
+    const numSources = parseInt(getCol(cols, COL.NumSources), 10) || 0;
     if (numSources < config.eventMinSources) continue;
 
     // Require at least one actor with a country code (filters non-state actors)
-    const actor1Country = cols[COL.Actor1CountryCode]?.trim();
-    const actor2Country = cols[COL.Actor2CountryCode]?.trim();
+    const actor1Country = getCol(cols, COL.Actor1CountryCode).trim();
+    const actor2Country = getCol(cols, COL.Actor2CountryCode).trim();
     if (!actor1Country && !actor2Country) continue;
 
-    const lat = parseFloat(cols[COL.ActionGeo_Lat]);
-    const lng = parseFloat(cols[COL.ActionGeo_Long]);
+    const lat = parseFloat(getCol(cols, COL.ActionGeo_Lat));
+    const lng = parseFloat(getCol(cols, COL.ActionGeo_Long));
     if (isNaN(lat) || isNaN(lng)) continue;
 
-    const key = `${cols[COL.SQLDATE]}|${cols[COL.EventCode]}|${lat}|${lng}`;
-    const mentions = parseInt(cols[COL.NumMentions], 10) || 0;
+    const key = `${getCol(cols, COL.SQLDATE)}|${getCol(cols, COL.EventCode)}|${lat}|${lng}`;
+    const mentions = parseInt(getCol(cols, COL.NumMentions), 10) || 0;
     const existing = best.get(key);
 
     if (!existing || mentions > existing.mentions) {
@@ -344,27 +362,27 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
  */
 function extractRawColumns(cols: string[]): Record<string, string> {
   return {
-    GLOBALEVENTID: cols[COL.GLOBALEVENTID] ?? '',
-    SQLDATE: cols[COL.SQLDATE] ?? '',
-    Actor1Name: cols[COL.Actor1Name] ?? '',
-    Actor1CountryCode: cols[COL.Actor1CountryCode] ?? '',
-    Actor2Name: cols[COL.Actor2Name] ?? '',
-    Actor2CountryCode: cols[COL.Actor2CountryCode] ?? '',
-    EventCode: cols[COL.EventCode] ?? '',
-    EventBaseCode: cols[COL.EventBaseCode] ?? '',
-    EventRootCode: cols[COL.EventRootCode] ?? '',
-    GoldsteinScale: cols[COL.GoldsteinScale] ?? '',
-    NumMentions: cols[COL.NumMentions] ?? '',
-    NumSources: cols[COL.NumSources] ?? '',
-    ActionGeo_Type: cols[COL.ActionGeo_Type] ?? '',
-    ActionGeo_FullName: cols[COL.ActionGeo_FullName] ?? '',
-    ActionGeo_CountryCode: cols[COL.ActionGeo_CountryCode] ?? '',
-    ActionGeo_ADM1Code: cols[COL.ActionGeo_ADM1Code] ?? '',
-    ActionGeo_ADM2Code: cols[COL.ActionGeo_ADM2Code] ?? '',
-    ActionGeo_Lat: cols[COL.ActionGeo_Lat] ?? '',
-    ActionGeo_Long: cols[COL.ActionGeo_Long] ?? '',
-    ActionGeo_FeatureID: cols[COL.ActionGeo_FeatureID] ?? '',
-    SOURCEURL: cols[COL.SOURCEURL] ?? '',
+    GLOBALEVENTID: getCol(cols, COL.GLOBALEVENTID),
+    SQLDATE: getCol(cols, COL.SQLDATE),
+    Actor1Name: getCol(cols, COL.Actor1Name),
+    Actor1CountryCode: getCol(cols, COL.Actor1CountryCode),
+    Actor2Name: getCol(cols, COL.Actor2Name),
+    Actor2CountryCode: getCol(cols, COL.Actor2CountryCode),
+    EventCode: getCol(cols, COL.EventCode),
+    EventBaseCode: getCol(cols, COL.EventBaseCode),
+    EventRootCode: getCol(cols, COL.EventRootCode),
+    GoldsteinScale: getCol(cols, COL.GoldsteinScale),
+    NumMentions: getCol(cols, COL.NumMentions),
+    NumSources: getCol(cols, COL.NumSources),
+    ActionGeo_Type: getCol(cols, COL.ActionGeo_Type),
+    ActionGeo_FullName: getCol(cols, COL.ActionGeo_FullName),
+    ActionGeo_CountryCode: getCol(cols, COL.ActionGeo_CountryCode),
+    ActionGeo_ADM1Code: getCol(cols, COL.ActionGeo_ADM1Code),
+    ActionGeo_ADM2Code: getCol(cols, COL.ActionGeo_ADM2Code),
+    ActionGeo_Lat: getCol(cols, COL.ActionGeo_Lat),
+    ActionGeo_Long: getCol(cols, COL.ActionGeo_Long),
+    ActionGeo_FeatureID: getCol(cols, COL.ActionGeo_FeatureID),
+    SOURCEURL: getCol(cols, COL.SOURCEURL),
   };
 }
 
@@ -442,13 +460,13 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
     const cols = line.split('\t');
     if (cols.length < 61) continue;
 
-    const eventRootCode = cols[COL.EventRootCode];
-    const eventBaseCode = cols[COL.EventBaseCode];
-    const countryCode = cols[COL.ActionGeo_CountryCode];
-    const fullName = cols[COL.ActionGeo_FullName];
-    const numSources = parseInt(cols[COL.NumSources], 10) || 0;
-    const actor1Country = cols[COL.Actor1CountryCode]?.trim();
-    const actor2Country = cols[COL.Actor2CountryCode]?.trim();
+    const eventRootCode = getCol(cols, COL.EventRootCode);
+    const eventBaseCode = getCol(cols, COL.EventBaseCode);
+    const countryCode = getCol(cols, COL.ActionGeo_CountryCode);
+    const fullName = getCol(cols, COL.ActionGeo_FullName);
+    const numSources = parseInt(getCol(cols, COL.NumSources), 10) || 0;
+    const actor1Country = getCol(cols, COL.Actor1CountryCode).trim();
+    const actor2Country = getCol(cols, COL.Actor2CountryCode).trim();
 
     const passedRootCode = CONFLICT_ROOT_CODES.has(eventRootCode);
     const passedCameoExclusion = !excludedCameo.has(eventBaseCode);
@@ -492,20 +510,20 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
       continue;
     }
 
-    const lat = parseFloat(cols[COL.ActionGeo_Lat]);
-    const lng = parseFloat(cols[COL.ActionGeo_Long]);
+    const lat = parseFloat(getCol(cols, COL.ActionGeo_Lat));
+    const lng = parseFloat(getCol(cols, COL.ActionGeo_Long));
     if (isNaN(lat) || isNaN(lng)) {
       phaseARejections.push({ cols, reason: 'invalid_coordinates', phaseA });
       continue;
     }
 
-    const mentions = parseInt(cols[COL.NumMentions], 10) || 0;
+    const mentions = parseInt(getCol(cols, COL.NumMentions), 10) || 0;
     phaseAPassedRows.push({ cols, lat, lng, mentions, phaseA });
   }
 
   // Build Phase A rejection records
   for (const rej of phaseARejections) {
-    const id = `gdelt-${rej.cols[COL.GLOBALEVENTID]}`;
+    const id = `gdelt-${getCol(rej.cols, COL.GLOBALEVENTID)}`;
     const defaultPhaseB = {
       originalType: 'assault' as const,
       reclassified: false,
@@ -522,7 +540,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
         phaseA: rej.phaseA,
         phaseB: defaultPhaseB,
         rejectionReason: rej.reason,
-        actionGeoType: parseInt(rej.cols[COL.ActionGeo_Type], 10) || undefined,
+        actionGeoType: parseInt(getCol(rej.cols, COL.ActionGeo_Type), 10) || undefined,
       },
       rawGdeltColumns: extractRawColumns(rej.cols),
     }));
@@ -533,7 +551,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
   const superseded: Array<typeof phaseAPassedRows[0]> = [];
 
   for (const row of phaseAPassedRows) {
-    const key = `${row.cols[COL.SQLDATE]}|${row.cols[COL.EventCode]}|${row.lat}|${row.lng}`;
+    const key = `${getCol(row.cols, COL.SQLDATE)}|${getCol(row.cols, COL.EventCode)}|${row.lat}|${row.lng}`;
     const existing = best.get(key);
     if (!existing || row.mentions > existing.mentions) {
       if (existing) superseded.push(existing);
@@ -545,7 +563,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
 
   // Build dedup rejection records
   for (const sup of superseded) {
-    const id = `gdelt-${sup.cols[COL.GLOBALEVENTID]}`;
+    const id = `gdelt-${getCol(sup.cols, COL.GLOBALEVENTID)}`;
     const defaultPhaseB = {
       originalType: 'assault' as const,
       reclassified: false,
@@ -562,7 +580,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
         phaseA: sup.phaseA,
         phaseB: defaultPhaseB,
         rejectionReason: 'dedup_superseded',
-        actionGeoType: parseInt(sup.cols[COL.ActionGeo_Type], 10) || undefined,
+        actionGeoType: parseInt(getCol(sup.cols, COL.ActionGeo_Type), 10) || undefined,
       },
       rawGdeltColumns: extractRawColumns(sup.cols),
     }));

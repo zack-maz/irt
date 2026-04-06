@@ -156,7 +156,9 @@ export function useEthnicLayers(): (GeoJsonLayer | TextLayer)[] {
     layers.push(
       new GeoJsonLayer({
         id: 'ethnic-zones',
-        data: { type: 'FeatureCollection', features: singleGroupFeatures } as unknown as Record<string, unknown>,
+        // deck.gl GeoJsonLayer accepts FeatureCollection objects at runtime; the runtime
+// type is too restrictive in v9 type defs.
+data: { type: 'FeatureCollection', features: singleGroupFeatures } as any,
         pickable: true,
         stroked: true,
         filled: true,
@@ -194,7 +196,8 @@ export function useEthnicLayers(): (GeoJsonLayer | TextLayer)[] {
       layers.push(
         new GeoJsonLayer({
           id: `ethnic-overlap-${group}`,
-          data: { type: 'FeatureCollection', features: groupOverlapFeatures } as unknown as Record<string, unknown>,
+          // deck.gl GeoJsonLayer accepts FeatureCollection objects at runtime.
+data: { type: 'FeatureCollection', features: groupOverlapFeatures } as any,
           pickable: true,
           stroked: false,
           filled: true,

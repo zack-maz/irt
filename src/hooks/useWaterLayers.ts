@@ -206,7 +206,8 @@ export function useWaterLayers(): WaterLayerGroup {
       getAngle: () => 0,
       billboard: false,
       pickable: true,
-      iconAtlas: getIconAtlas(),
+      // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+      iconAtlas: getIconAtlas() as any,
       iconMapping: ICON_MAPPING,
     });
 

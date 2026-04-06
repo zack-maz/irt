@@ -8,7 +8,7 @@ import {
   useMap,
   type MapRef,
 } from '@vis.gl/react-maplibre';
-import type { MapEvent } from '@vis.gl/react-maplibre';
+import type { MapEvent, MapMouseEvent } from '@vis.gl/react-maplibre';
 import type { PickingInfo } from '@deck.gl/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -53,7 +53,6 @@ import { PoliticalOverlay, usePoliticalLayers } from './layers/PoliticalOverlay'
 import { useEthnicLayers, EthnicTooltip } from './layers/EthnicOverlay';
 import { useWaterLayers } from '@/hooks/useWaterLayers';
 import { WaterTooltip } from './layers/WaterOverlay';
-import { ETHNIC_GROUPS, type EthnicGroup } from '@/lib/ethnicGroups';
 import type { WaterFacility } from '../../../server/types';
 
 /** Watches notificationStore.flyToTarget and animates the map. Renders null. */
@@ -297,7 +296,7 @@ export function BaseMap() {
   );
 
   const handleMouseMove = useCallback(
-    (e: MapEvent<MouseEvent>) => {
+    (e: MapMouseEvent) => {
       const lngLat = e.lngLat;
       setCursorPosition(lngLat.lng, lngLat.lat);
     },

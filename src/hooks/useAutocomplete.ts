@@ -66,7 +66,7 @@ export function useAutocomplete(
 ): AutocompleteSuggestion[] {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [debouncedCursor, setDebouncedCursor] = useState(cursorPosition);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Debounce query + cursor changes
   useEffect(() => {

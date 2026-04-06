@@ -66,7 +66,10 @@ export function DetailPanelSlot() {
   const { entity, isLost } = useSelectedEntity();
   const [copied, setCopied] = useState(false);
 
-  const relativeTime = useRelativeTime(entity?.timestamp ?? null);
+  // Site/water entities lack a top-level timestamp (they're static infrastructure).
+  const entityTimestamp =
+    entity && 'timestamp' in entity ? entity.timestamp : null;
+  const relativeTime = useRelativeTime(entityTimestamp);
 
   const dismiss = useCallback(() => {
     closeDetailPanel();
