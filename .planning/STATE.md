@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-06T22:54:21.518Z"
+last_updated: "2026-04-06T23:00:54.588Z"
 progress:
   total_phases: 13
   completed_phases: 7
   total_plans: 33
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 26.3: Plan 04 COMPLETE (4 of 6 plans done)
 Phase 26.3: Plan 03 COMPLETE (3 of 6 plans done)
 Phase 26.3: Plan 02 COMPLETE (2 of 6 plans done)
 Phase 26.3: Plan 01 COMPLETE (1 of 6 plans done)
@@ -137,6 +138,11 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - genReqId accepts client-provided X-Request-ID or generates UUID via crypto.randomUUID
 - autoLogging ignores /health endpoint to reduce noise
 - ParsedQs to Zod inferred type cast uses 'as unknown as' double-cast pattern
+- AppError uses explicit property assignment (not parameter properties) due to erasableSyntaxOnly tsconfig
+- Compression middleware gated by !VERCEL — Vercel CDN handles edge gzip/brotli, local dev gets compression for realistic testing
+- Graceful SIGTERM handler only in isMainModule block — Vercel has its own 500ms window and Upstash Redis is REST-based (no connections to drain)
+- Consistent error envelope { error, code, statusCode, requestId } established across all routes and middleware
+- AppError(statusCode, code, message) is the canonical pattern for typed route errors
 
 ## Pending Todos
 
