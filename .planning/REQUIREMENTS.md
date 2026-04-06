@@ -133,8 +133,8 @@ Requirements for the Data Quality & Layers milestone.
 - [ ] **GEO-02**: Events where NLP-extracted actors clearly contradict the geocoded country are rejected with actor_geo_mismatch pipeline trace
 - [ ] **GEO-03**: Centroid events are relocated to NLP-extracted city coordinates when article title mentions a specific place name
 - [ ] **GEO-04**: Cross-border events (e.g., "Israel strikes targets in Syria") are NOT falsely rejected by actor-country validation
-- [ ] **TITLE-01**: Article titles extracted from GDELT SOURCEURL via HTTP GET of HTML head (og:title or title tag, regex-based, no DOM parser)
-- [ ] **TITLE-02**: Title extractions cached in Redis (URL hash key, 7-day logical TTL) with batch concurrency limit (10 parallel fetches)
+- [x] **TITLE-01**: Article titles extracted from GDELT SOURCEURL via HTTP GET of HTML head (og:title or title tag, regex-based, no DOM parser)
+- [x] **TITLE-02**: Title extractions cached in Redis (URL hash key, 7-day logical TTL) with batch concurrency limit (10 parallel fetches)
 - [ ] **PIPE-01**: parseAndFilter includes Phase C NLP cross-validation that rejects actor-geo mismatches and relocates centroid events
 - [ ] **PIPE-02**: CAMEO codes 182 (physical assault) and 190 (conventional military force NOS) are hard-rejected (added to excluded codes list)
 - [ ] **PIPE-03**: Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)
