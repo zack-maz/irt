@@ -54,6 +54,7 @@ const ACTOR_COUNTRY_MAP: Record<string, string[]> = {
   turkish: ['TU'],
   ankara: ['TU'],
   saudi: ['SA'],
+  'saudi arabia': ['SA'],
   hamas: ['IS', 'GZ'],
   hezbollah: ['LE', 'SY'],
   houthi: ['YM'],
@@ -80,8 +81,14 @@ const ACTOR_COUNTRY_MAP: Record<string, string[]> = {
   qatari: ['QA'],
   oman: ['MU'],
   omani: ['MU'],
+  'united arab emirates': ['AE'],
+  uae: ['AE'],
   emirates: ['AE'],
   emirati: ['AE'],
+  'west bank': ['WE', 'IS'],
+  gaza: ['GZ', 'IS'],
+  palestinian: ['GZ', 'WE'],
+  palestine: ['GZ', 'WE'],
 };
 
 // ─── ISO -> FIPS for NLP place lookups ─────────────────────────────────────

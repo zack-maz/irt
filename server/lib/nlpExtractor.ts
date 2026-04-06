@@ -42,6 +42,16 @@ for (const city of ME_CITIES) {
   }
 }
 
+// Country names/acronyms that compromise doesn't tag as places
+const ME_COUNTRY_ALIASES = [
+  'uae', 'UAE', 'saudi arabia', 'Saudi Arabia', 'west bank', 'West Bank',
+  'gaza strip', 'Gaza Strip', 'gaza', 'Gaza',
+  'palestine', 'Palestine', 'palestinian territory',
+];
+for (const alias of ME_COUNTRY_ALIASES) {
+  ME_LEXICON[alias] = 'Place';
+}
+
 // Known conflict actor names that compromise doesn't recognize as proper nouns
 const CONFLICT_ACTORS = [
   'houthi', 'hezbollah', 'hamas', 'taliban', 'irgc', 'quds',
@@ -224,14 +234,16 @@ export function extractActorsAndPlaces(title: string): NlpExtraction {
     }
   }
 
-  // Deduplicate places (case-insensitive)
+  // Deduplicate places (case-insensitive), strip trailing punctuation
   const seenPlaces = new Set<string>();
   const places: string[] = [];
   for (const p of rawPlaces) {
-    const key = p.toLowerCase();
+    const clean = p.replace(/[^a-zA-Z\s'-]+$/g, '').trim();
+    if (!clean) continue;
+    const key = clean.toLowerCase();
     if (!seenPlaces.has(key)) {
       seenPlaces.add(key);
-      places.push(p);
+      places.push(clean);
     }
   }
 
@@ -242,6 +254,19 @@ export function extractActorsAndPlaces(title: string): NlpExtraction {
     if (titleLower.includes(cityName.toLowerCase()) && !seenPlaces.has(cityName.toLowerCase())) {
       seenPlaces.add(cityName.toLowerCase());
       places.push(cityName);
+    }
+  }
+
+  // Fallback: check for country aliases that compromise misses (acronyms like UAE)
+  for (const alias of ME_COUNTRY_ALIASES) {
+    const aliasLower = alias.toLowerCase();
+    if (aliasLower.length < 4 && title.includes(alias.toUpperCase()) && !seenPlaces.has(aliasLower)) {
+      // Short acronyms: match exact uppercase (UAE, not "uae" in a word)
+      seenPlaces.add(aliasLower);
+      places.push(alias);
+    } else if (aliasLower.length >= 4 && titleLower.includes(aliasLower) && !seenPlaces.has(aliasLower)) {
+      seenPlaces.add(aliasLower);
+      places.push(alias);
     }
   }
 
