@@ -20,28 +20,18 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config with standard thresholds (updated to match 26.2-03 defaults)
+// Mock config with standard thresholds
 const mockConfig = {
-  eventConfidenceThreshold: 0.38,
+  eventConfidenceThreshold: 0.35,
   eventMinSources: 2,
   eventCentroidPenalty: 0.7,
-  eventExcludedCameo: ['180', '182', '190', '192'],
+  eventExcludedCameo: ['180', '192'],
   bellingcatCorroborationBoost: 0.2,
 };
 vi.mock('../config.js', () => ({
   getConfig: () => mockConfig,
 }));
 
-// Mock batchFetchTitles to return empty map -- fixture tests focus on Phase A/B logic
-vi.mock('../lib/titleFetcher.js', () => ({
-  batchFetchTitles: vi.fn().mockResolvedValue(new Map()),
-}));
-
-// Mock nlpGeoValidator -- return 'skipped' for all events so Phase C doesn't interfere
-vi.mock('../lib/nlpGeoValidator.js', () => ({
-  validateEventGeo: vi.fn().mockReturnValue({ status: 'skipped', reason: 'no_actor_data' }),
-  ACTOR_COUNTRY_MAP: {},
-}));
 
 /**
  * Helper to build a 61-column tab-delimited GDELT row.
@@ -447,16 +437,6 @@ describe('GDELT Pipeline Fixtures', () => {
       expect(phaseB.confidenceSubScores.mediaCoverage).toBeGreaterThan(0);
       expect(phaseB.confidenceSubScores.sourceDiversity).toBeGreaterThan(0);
       expect(phaseB.confidenceSubScores.cameoSpecificity).toBeGreaterThan(0);
-    });
-
-    it('accepted records have phaseC trace fields', async () => {
-      const records = await parseAndFilterWithTrace(TP_IRAN_AIRSTRIKE);
-      const accepted = records.filter(r => r.status === 'accepted');
-      const phaseC = accepted[0].pipelineTrace.phaseC;
-
-      expect(phaseC).toBeDefined();
-      expect(phaseC!.titleFetched).toBe(false); // batchFetchTitles mocked to empty map
-      expect(phaseC!.validationStatus).toBe('skipped');
     });
 
     it('accepted records have rawGdeltColumns', async () => {

@@ -16,28 +16,18 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config to provide thresholds for parseAndFilter (updated for 26.2-03 defaults)
+// Mock config to provide thresholds for parseAndFilter
 const mockConfig = {
-  eventConfidenceThreshold: 0.38,
+  eventConfidenceThreshold: 0.35,
   eventMinSources: 2,
   eventCentroidPenalty: 0.7,
-  eventExcludedCameo: ['180', '182', '190', '192'],
+  eventExcludedCameo: ['180', '192'],
   bellingcatCorroborationBoost: 0.2,
 };
 vi.mock('../config.js', () => ({
   getConfig: () => mockConfig,
 }));
 
-// Mock batchFetchTitles to return empty map (tests focus on Phase A/B logic)
-vi.mock('../lib/titleFetcher.js', () => ({
-  batchFetchTitles: vi.fn().mockResolvedValue(new Map()),
-}));
-
-// Mock nlpGeoValidator to skip Phase C (tests focus on Phase A/B)
-vi.mock('../lib/nlpGeoValidator.js', () => ({
-  validateEventGeo: vi.fn().mockReturnValue({ status: 'skipped', reason: 'no_actor_data' }),
-  ACTOR_COUNTRY_MAP: {},
-}));
 
 // Sample lastupdate.txt content (3 lines: export, mentions, gkg)
 const sampleLastUpdate = [
