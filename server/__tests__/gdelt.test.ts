@@ -269,11 +269,12 @@ describe('GDELT Adapter', () => {
       expect(events).toHaveLength(1);
     });
 
-    it('sets geoPrecision="centroid" when lat/lng matches Tehran (35.6892, 51.3890)', () => {
+    it('sets geoPrecision="centroid" when lat/lng matches Tehran (GeoNames coords)', () => {
+      // GeoNames coordinates for Tehran: 35.6944, 51.4215
       const row = makeGdeltRow({
         0: '3030303030',
-        56: '35.6892',
-        57: '51.3890',
+        56: '35.6944',
+        57: '51.4215',
       });
       const events = parseAndFilter(row);
       expect(events).toHaveLength(1);

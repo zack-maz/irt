@@ -451,8 +451,9 @@ describe('eventScoring', () => {
     it('returns Baghdad centroid coords for title containing "Baghdad"', () => {
       const geo = extractBellingcatGeo('Airstrike hits Baghdad military base');
       expect(geo).toBeDefined();
-      expect(geo!.lat).toBeCloseTo(33.3152, 3);
-      expect(geo!.lng).toBeCloseTo(44.3661, 3);
+      // GeoNames coordinates for Baghdad
+      expect(geo!.lat).toBeCloseTo(33.3406, 3);
+      expect(geo!.lng).toBeCloseTo(44.4009, 3);
     });
 
     it('returns undefined for title with no city name', () => {
@@ -463,8 +464,9 @@ describe('eventScoring', () => {
     it('matches city names case-insensitively', () => {
       const geo = extractBellingcatGeo('TEHRAN under fire as conflict escalates');
       expect(geo).toBeDefined();
-      expect(geo!.lat).toBeCloseTo(35.6892, 3);
-      expect(geo!.lng).toBeCloseTo(51.3890, 3);
+      // GeoNames coordinates for Tehran
+      expect(geo!.lat).toBeCloseTo(35.6944, 3);
+      expect(geo!.lng).toBeCloseTo(51.4215, 3);
     });
   });
 });
