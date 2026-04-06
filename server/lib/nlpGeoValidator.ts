@@ -170,10 +170,11 @@ export function validateEventGeo(params: {
     if (fips) actorFips.add(fips);
   }
 
-  // Non-ME Actor1 check: if Actor1 has a country code but it's NOT a ME country,
-  // this is likely diplomatic reporting ABOUT the conflict (e.g., "US attacks Iran"),
-  // not a kinetic event IN the region. Penalize rather than reject since some are real.
-  if (actorCountryCodes.actor1 && !CAMEO_TO_FIPS[actorCountryCodes.actor1]) {
+  // Non-ME Actor1 check: if Actor1 has a KNOWN non-ME country code (3+ letters,
+  // looks like a real CAMEO code), penalize. Unknown/short codes (like "DUB" for Dubai)
+  // are GDELT artifacts that should pass through to NLP place extraction.
+  const KNOWN_NON_ME = new Set(['USA', 'GBR', 'RUS', 'CHN', 'FRN', 'GMY', 'IND', 'JPN', 'AUL', 'CAN', 'BRA', 'ITA', 'SPN', 'UKR', 'POL', 'NTH', 'BEL', 'SWD', 'NOR', 'SAF', 'NIG', 'KEN', 'ETH', 'INS', 'THI', 'VNM', 'PHI', 'MEX', 'SKO', 'NKO']);
+  if (actorCountryCodes.actor1 && KNOWN_NON_ME.has(actorCountryCodes.actor1)) {
     return { status: 'penalized', confidenceMultiplier: 0.3, reason: 'non_me_actor1' };
   }
 

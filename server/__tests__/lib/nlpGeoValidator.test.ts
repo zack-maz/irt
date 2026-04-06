@@ -254,8 +254,8 @@ describe('validateEventGeo', () => {
         lat: 35.69,
         lng: 51.42,
       });
-      // XXX doesn't map to any ME FIPS -- penalized as non-ME actor1
-      expect(result.status).toBe('penalized');
+      // XXX is not a known non-ME code -- falls through to NLP, no signal -> skipped
+      expect(result.status).toBe('skipped');
     });
 
     it('does not relocate non-centroid events even with NLP city', () => {
