@@ -130,7 +130,7 @@ export async function batchFetchTitles(
   if (urls.length === 0) return results;
 
   // Deduplicate
-  const uniqueUrls = [...new Set(urls)];
+  const uniqueUrls = Array.from(new Set(urls));
 
   // Phase 1: Check Redis cache
   const uncachedUrls: string[] = [];
