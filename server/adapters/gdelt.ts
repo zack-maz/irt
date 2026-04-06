@@ -1,12 +1,15 @@
 import AdmZip from 'adm-zip';
-import type { ConflictEventEntity } from '../types.js';
+import type { ConflictEventEntity, ConflictEventType } from '../types.js';
 import { log } from '../lib/logger.js';
 import { isGeoValid, detectCentroid } from '../lib/geoValidation.js';
 import { computeEventConfidence, applyGoldsteinSanity, GOLDSTEIN_CEILINGS, checkBellingcatCorroboration, getCameoSpecificity } from '../lib/eventScoring.js';
 import type { BellingcatArticle } from '../lib/eventScoring.js';
 import { getConfig } from '../config.js';
 import { buildAuditRecord } from '../lib/eventAudit.js';
-import type { AuditRecord, PipelineTrace, PhaseAChecks, ConfidenceSubScores } from '../lib/eventAudit.js';
+import type { AuditRecord, PipelineTrace, PhaseAChecks, PhaseCChecks, ConfidenceSubScores } from '../lib/eventAudit.js';
+import { validateEventGeo } from '../lib/nlpGeoValidator.js';
+import { extractActorsAndPlaces } from '../lib/nlpExtractor.js';
+import { batchFetchTitles } from '../lib/titleFetcher.js';
 
 // GDELT v2 lastupdate.txt endpoint (HTTP, NOT HTTPS -- TLS cert issues)
 const GDELT_LASTUPDATE_URL =
@@ -92,14 +95,14 @@ async function downloadAndUnzip(url: string): Promise<string> {
   return entries[0].getData().toString('utf8');
 }
 
-import type { ConflictEventType } from '../types.js';
-
 // All valid CAMEO base codes in the 180-204 range are mapped below.
 // Codes 187-189, 197-199, 205+ do not exist in the CAMEO spec and correctly fall to ROOT_FALLBACK.
 // CAMEO base codes excluded from the conflict pipeline entirely.
-// 180 "unconventional violence NOS" is GDELT's catch-all for events it can't classify —
-// cyber ops, political demands, campus protests. Overwhelmingly false positives on a kinetic map.
-const EXCLUDED_BASE_CODES = new Set(['180', '192']);
+// 180 "unconventional violence NOS" — GDELT's catch-all (cyber ops, protests, false positives)
+// 182 "physical assault" — very broad, non-kinetic
+// 190 "conventional military force NOS" — vague catch-all
+// 192 — non-conflict
+const EXCLUDED_BASE_CODES = new Set(['180', '182', '190', '192']);
 
 const BASE_CODE_MAP: Record<string, ConflictEventType> = {
   '181': 'abduction',
@@ -220,9 +223,10 @@ export function normalizeGdeltEvent(
  * and normalize survivors to ConflictEventEntity[].
  *
  * Phase A: Raw row filtering (operates on string[] columns)
- * Phase B: Normalize, score, and threshold-filter (operates on entities)
+ * Phase B: Normalize, score, and centroid detection (operates on entities)
+ * Phase C: NLP geo cross-validation (async -- fetches article titles)
  */
-export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArticle[]): ConflictEventEntity[] {
+export async function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArticle[]): Promise<ConflictEventEntity[]> {
   const lines = csv.trim().split('\n');
   const rawCount = lines.length;
   const config = getConfig();
@@ -279,12 +283,20 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
 
   const geoValidCount = best.size;
 
-  // --- Phase B: Normalize, score, and threshold-filter ---
+  // --- Phase B: Normalize, score (pre-threshold) ---
 
   const { eventConfidenceThreshold, eventCentroidPenalty } = config;
   let reclassifyCount = 0;
   let thresholdDiscardCount = 0;
-  const results: ConflictEventEntity[] = [];
+  let nlpRejectCount = 0;
+
+  // Build intermediate entities with their raw cols for Phase C
+  const intermediates: Array<{
+    entity: ConflictEventEntity;
+    cols: string[];
+    geoPrecision: 'precise' | 'centroid';
+    confidence: number;
+  }> = [];
 
   for (const entry of best.values()) {
     // Step 8: Normalize
@@ -312,9 +324,83 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
       confidence *= eventCentroidPenalty;
     }
 
+    intermediates.push({ entity, cols: entry.cols, geoPrecision, confidence });
+  }
+
+  // --- Phase C: NLP geo cross-validation ---
+  // Batch fetch titles for all candidate events, then validate
+
+  const urlsToFetch: string[] = [];
+  for (const item of intermediates) {
+    const url = item.cols[COL.SOURCEURL];
+    if (url) urlsToFetch.push(url);
+  }
+
+  const titleMap = await batchFetchTitles(urlsToFetch);
+
+  const results: ConflictEventEntity[] = [];
+
+  for (const item of intermediates) {
+    let { entity, confidence, cols } = item;
+    const url = cols[COL.SOURCEURL] || '';
+    const title = titleMap.get(url) ?? null;
+
+    // NLP cross-validation
+    const nlpResult = validateEventGeo({
+      title,
+      actorCountryCodes: {
+        actor1: cols[COL.Actor1CountryCode]?.trim() || '',
+        actor2: cols[COL.Actor2CountryCode]?.trim() || '',
+      },
+      geoCountryCode: cols[COL.ActionGeo_CountryCode],
+      actionGeoType: entity.data.actionGeoType,
+      lat: entity.lat,
+      lng: entity.lng,
+    });
+
+    switch (nlpResult.status) {
+      case 'verified':
+        // Full confidence retained
+        break;
+
+      case 'mismatch':
+        nlpRejectCount++;
+        log({ level: 'warn', message: `[gdelt] NLP rejected ${entity.id}: ${nlpResult.reason}` });
+        continue; // Skip this event entirely
+
+      case 'relocated': {
+        // Update coordinates and remove centroid penalty
+        entity = {
+          ...entity,
+          lat: nlpResult.newLat,
+          lng: nlpResult.newLng,
+          data: {
+            ...entity.data,
+            geoPrecision: 'precise' as const,
+          },
+        };
+        // Restore confidence by undoing centroid penalty if it was applied
+        const actionGeoType = entity.data.actionGeoType;
+        if ((actionGeoType === 3 || actionGeoType === 4) && eventCentroidPenalty > 0) {
+          confidence = confidence / eventCentroidPenalty;
+        }
+        log({ level: 'info', message: `[gdelt] NLP relocated ${entity.id} to ${nlpResult.cityName} (${nlpResult.newLat.toFixed(4)}, ${nlpResult.newLng.toFixed(4)})` });
+        break;
+      }
+
+      case 'skipped':
+        // Title fetch failure -> 0.7x penalty
+        if (nlpResult.reason === 'title_fetch_failed') {
+          confidence *= 0.7;
+        }
+        // Other skip reasons: no penalty
+        break;
+    }
+
+    // Update entity with final confidence
     entity = { ...entity, data: { ...entity.data, confidence } };
 
-    // Step 12: Threshold filter
+    // Step 12: Threshold filter (AFTER Phase C adjustments)
     if (confidence < eventConfidenceThreshold) {
       thresholdDiscardCount++;
       log({ level: 'warn', message: `[gdelt] discarded ${entity.id}: confidence ${confidence.toFixed(3)} below threshold ${eventConfidenceThreshold}` });
@@ -335,7 +421,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
   }
 
   // Pipeline summary
-  log({ level: 'info', message: `[gdelt] pipeline: ${rawCount} raw -> ${geoValidCount} geo-valid -> ${reclassifyCount} reclassified -> ${geoValidCount - thresholdDiscardCount} above threshold -> ${results.length} final` });
+  log({ level: 'info', message: `[gdelt] pipeline: ${rawCount} raw -> ${geoValidCount} geo-valid -> ${reclassifyCount} reclassified -> ${nlpRejectCount} NLP rejected -> ${geoValidCount - thresholdDiscardCount - nlpRejectCount} above threshold -> ${results.length} final` });
 
   // Dispersion is applied downstream in the events route (after all merging)
   // so that the full merged event set gets single-pass slot assignment.
@@ -430,7 +516,7 @@ function computeConfidenceSubScores(
  * to keep the production-hot parseAndFilter lean. This function is slower but
  * provides complete pipeline transparency.
  */
-export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: BellingcatArticle[]): AuditRecord[] {
+export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: BellingcatArticle[]): Promise<AuditRecord[]> {
   const lines = csv.trim().split('\n');
   const config = getConfig();
   const excludedCameo = new Set(config.eventExcludedCameo);
@@ -571,9 +657,22 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
     }));
   }
 
-  // Phase B: normalize, score, threshold-filter for dedup winners
+  // Phase B: normalize, score for dedup winners
   const { eventConfidenceThreshold, eventCentroidPenalty } = config;
-  const acceptedEntities: ConflictEventEntity[] = [];
+
+  // Pre-compute Phase B for all dedup winners, collect URLs for Phase C batch fetch
+  const phaseBEntries: Array<{
+    entity: ConflictEventEntity;
+    origType: ConflictEventType;
+    reclassified: boolean;
+    geoPrecision: 'precise' | 'centroid';
+    confidence: number;
+    subScores: ConfidenceSubScores;
+    actionGeoType: number | undefined;
+    entry: typeof phaseAPassedRows[0];
+  }> = [];
+
+  const traceUrls: string[] = [];
 
   for (const entry of best.values()) {
     let entity = normalizeGdeltEvent(entry.cols, entry.lat, entry.lng);
@@ -589,13 +688,110 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
     if (actionGeoType === 3 || actionGeoType === 4) {
       confidence *= eventCentroidPenalty;
     }
-    entity = { ...entity, data: { ...entity.data, confidence } };
 
     const subScores = computeConfidenceSubScores(entity, geoPrecision);
+
+    const url = entry.cols[COL.SOURCEURL];
+    if (url) traceUrls.push(url);
+
+    phaseBEntries.push({ entity, origType, reclassified, geoPrecision, confidence, subScores, actionGeoType, entry });
+  }
+
+  // Phase C: Batch fetch titles and NLP validate
+  const traceTitleMap = await batchFetchTitles(traceUrls);
+
+  const acceptedEntities: ConflictEventEntity[] = [];
+
+  for (const item of phaseBEntries) {
+    let { entity, origType, reclassified, geoPrecision, confidence, subScores, actionGeoType, entry } = item;
+
+    // Phase C: NLP geo cross-validation
+    const url = entry.cols[COL.SOURCEURL] || '';
+    const title = traceTitleMap.get(url) ?? null;
+
+    const nlpResult = validateEventGeo({
+      title,
+      actorCountryCodes: {
+        actor1: entry.cols[COL.Actor1CountryCode]?.trim() || '',
+        actor2: entry.cols[COL.Actor2CountryCode]?.trim() || '',
+      },
+      geoCountryCode: entry.cols[COL.ActionGeo_CountryCode],
+      actionGeoType,
+      lat: entity.lat,
+      lng: entity.lng,
+    });
+
+    // Build Phase C trace
+    let nlpActors: string[] = [];
+    let nlpPlaces: string[] = [];
+    if (title !== null) {
+      const nlpExtraction = extractActorsAndPlaces(title);
+      nlpActors = nlpExtraction.actors;
+      nlpPlaces = nlpExtraction.places;
+    }
+
+    const phaseC: PhaseCChecks = {
+      titleFetched: title !== null,
+      nlpActors,
+      nlpPlaces,
+      validationStatus: nlpResult.status,
+      relocatedTo: nlpResult.status === 'relocated' ? { lat: nlpResult.newLat, lng: nlpResult.newLng, cityName: nlpResult.cityName } : undefined,
+      mismatchReason: nlpResult.status === 'mismatch' ? nlpResult.reason : undefined,
+      skipReason: nlpResult.status === 'skipped' ? nlpResult.reason : undefined,
+    };
+
+    // Apply Phase C effects
+    switch (nlpResult.status) {
+      case 'verified':
+        break;
+
+      case 'mismatch':
+        records.push(buildAuditRecord({
+          id: entity.id,
+          status: 'rejected',
+          event: null,
+          pipelineTrace: {
+            phaseA: entry.phaseA,
+            phaseB: {
+              originalType: origType,
+              reclassified,
+              geoPrecision,
+              confidenceSubScores: subScores,
+              finalConfidence: confidence,
+              passedThreshold: false,
+            },
+            phaseC,
+            rejectionReason: 'actor_geo_mismatch',
+            actionGeoType,
+          },
+          rawGdeltColumns: extractRawColumns(entry.cols),
+        }));
+        continue;
+
+      case 'relocated':
+        entity = {
+          ...entity,
+          lat: nlpResult.newLat,
+          lng: nlpResult.newLng,
+          data: { ...entity.data, geoPrecision: 'precise' as const },
+        };
+        if ((actionGeoType === 3 || actionGeoType === 4) && eventCentroidPenalty > 0) {
+          confidence = confidence / eventCentroidPenalty;
+        }
+        geoPrecision = 'precise';
+        break;
+
+      case 'skipped':
+        if (nlpResult.reason === 'title_fetch_failed') {
+          confidence *= 0.7;
+        }
+        break;
+    }
+
+    entity = { ...entity, data: { ...entity.data, confidence } };
     const passedThreshold = confidence >= eventConfidenceThreshold;
 
     if (!passedThreshold) {
-      // Rejected at threshold
       records.push(buildAuditRecord({
         id: entity.id,
         status: 'rejected',
@@ -610,6 +806,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
             finalConfidence: confidence,
             passedThreshold: false,
           },
+          phaseC,
           rejectionReason: 'below_confidence_threshold',
           actionGeoType,
         },
@@ -648,6 +845,7 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
           finalConfidence: confidence,
           passedThreshold: true,
         },
+        phaseC,
         bellingcatMatch,
         actionGeoType,
       },
@@ -671,7 +869,7 @@ export async function fetchEvents(bellingcatArticles?: BellingcatArticle[]): Pro
 
   const exportUrl = await getExportUrl();
   const csv = await downloadAndUnzip(exportUrl);
-  const events = parseAndFilter(csv, bellingcatArticles);
+  const events = await parseAndFilter(csv, bellingcatArticles);
 
   log({ level: 'info', message: `[gdelt] fetched ${events.length} events in ${Date.now() - start}ms` });
   return events;
@@ -725,7 +923,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
     const results = await Promise.allSettled(
       batch.map(async (url) => {
         const csv = await downloadAndUnzip(url);
-        return parseAndFilter(csv);
+        return await parseAndFilter(csv);
       }),
     );
 
@@ -775,7 +973,7 @@ export async function backfillEventsWithTrace(
     const results = await Promise.allSettled(
       batch.map(async (url) => {
         const csv = await downloadAndUnzip(url);
-        return parseAndFilterWithTrace(csv);
+        return await parseAndFilterWithTrace(csv);
       }),
     );
 

@@ -53,12 +53,26 @@ export interface DispersionInfo {
 }
 
 /**
+ * Phase C NLP geo cross-validation checks.
+ */
+export interface PhaseCChecks {
+  titleFetched: boolean;
+  nlpActors: string[];
+  nlpPlaces: string[];
+  validationStatus: 'verified' | 'mismatch' | 'relocated' | 'skipped';
+  relocatedTo?: { lat: number; lng: number; cityName: string };
+  mismatchReason?: string;
+  skipReason?: string;
+}
+
+/**
  * Full pipeline trace for a single GDELT event.
  * Captures every decision point in the processing pipeline.
  */
 export interface PipelineTrace {
   phaseA: PhaseAChecks;
   phaseB: PhaseBChecks;
+  phaseC?: PhaseCChecks;
   bellingcatMatch?: boolean;
   dispersion?: DispersionInfo;
   rejectionReason?: string;

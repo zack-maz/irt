@@ -16,16 +16,26 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config to provide thresholds for parseAndFilter
+// Mock config to provide thresholds for parseAndFilter (updated for 26.2-03 defaults)
 const mockConfig = {
-  eventConfidenceThreshold: 0.35,
+  eventConfidenceThreshold: 0.38,
   eventMinSources: 2,
   eventCentroidPenalty: 0.7,
-  eventExcludedCameo: ['180', '192'],
+  eventExcludedCameo: ['180', '182', '190', '192'],
   bellingcatCorroborationBoost: 0.2,
 };
 vi.mock('../config.js', () => ({
   getConfig: () => mockConfig,
+}));
+
+// Mock batchFetchTitles to return empty map (tests focus on Phase A/B logic)
+vi.mock('../lib/titleFetcher.js', () => ({
+  batchFetchTitles: vi.fn().mockResolvedValue(new Map()),
+}));
+
+// Mock nlpGeoValidator to skip Phase C (tests focus on Phase A/B)
+vi.mock('../lib/nlpGeoValidator.js', () => ({
+  validateEventGeo: vi.fn().mockReturnValue({ status: 'skipped', reason: 'no_actor_data' }),
 }));
 
 // Sample lastupdate.txt content (3 lines: export, mentions, gkg)
@@ -46,8 +56,8 @@ function makeGdeltRow(overrides: Partial<Record<number, string>> = {}): string {
   cols[7] = 'IRN';          // Actor1CountryCode
   cols[16] = 'IRAQ';       // Actor2Name
   cols[17] = 'IRQ';         // Actor2CountryCode
-  cols[26] = '190';        // EventCode
-  cols[27] = '190';        // EventBaseCode
+  cols[26] = '195';        // EventCode (was 190, now excluded)
+  cols[27] = '195';        // EventBaseCode (aerial weapons -- not excluded)
   cols[28] = '19';         // EventRootCode
   cols[30] = '-9.5';       // GoldsteinScale
   cols[31] = '10';          // NumMentions
@@ -173,91 +183,91 @@ describe('GDELT Adapter', () => {
   });
 
   describe('parseAndFilter', () => {
-    it('extracts conflict events from tab-delimited CSV with correct column indices', () => {
-      const events = parseAndFilter(sampleCsv);
+    it('extracts conflict events from tab-delimited CSV with correct column indices', async () => {
+      const events = await parseAndFilter(sampleCsv);
 
       // Only the 2 valid Middle East conflict events should pass
       expect(events).toHaveLength(2);
     });
 
-    it('excludes rows with EventRootCode NOT in (18, 19, 20)', () => {
-      const events = parseAndFilter(nonConflictRow);
+    it('excludes rows with EventRootCode NOT in (18, 19, 20)', async () => {
+      const events = await parseAndFilter(nonConflictRow);
       expect(events).toHaveLength(0);
     });
 
-    it('excludes catch-all CAMEO base code 180 (unconventional violence NOS)', () => {
+    it('excludes catch-all CAMEO base code 180 (unconventional violence NOS)', async () => {
       const row180 = makeGdeltRow({
         0: '6666666666',
         26: '180',
         27: '180',
         28: '18',
       });
-      const events = parseAndFilter(row180);
+      const events = await parseAndFilter(row180);
       expect(events).toHaveLength(0);
     });
 
-    it('excludes single-source events (NumSources < 2)', () => {
+    it('excludes single-source events (NumSources < 2)', async () => {
       const singleSourceRow = makeGdeltRow({
         0: '7777777777',
         32: '1', // only 1 source
       });
-      const events = parseAndFilter(singleSourceRow);
+      const events = await parseAndFilter(singleSourceRow);
       expect(events).toHaveLength(0);
     });
 
-    it('excludes rows with ActionGeo_CountryCode NOT in MIDDLE_EAST_FIPS', () => {
-      const events = parseAndFilter(outsideMiddleEastRow);
+    it('excludes rows with ActionGeo_CountryCode NOT in MIDDLE_EAST_FIPS', async () => {
+      const events = await parseAndFilter(outsideMiddleEastRow);
       expect(events).toHaveLength(0);
     });
 
-    it('excludes rows with empty/missing lat or lng (no NaN)', () => {
-      const events = parseAndFilter(missingLatLngRow);
+    it('excludes rows with empty/missing lat or lng (no NaN)', async () => {
+      const events = await parseAndFilter(missingLatLngRow);
       expect(events).toHaveLength(0);
     });
 
-    it('excludes rows with fewer than 61 columns', () => {
-      const events = parseAndFilter(malformedShortRow);
+    it('excludes rows with fewer than 61 columns', async () => {
+      const events = await parseAndFilter(malformedShortRow);
       expect(events).toHaveLength(0);
     });
 
-    it('handles trailing newlines gracefully', () => {
+    it('handles trailing newlines gracefully', async () => {
       const csvWithTrailing = validIranMissileRow + '\n\n';
-      const events = parseAndFilter(csvWithTrailing);
+      const events = await parseAndFilter(csvWithTrailing);
       expect(events).toHaveLength(1);
     });
 
-    it('deduplicates rows with same date/code/location, keeping highest NumMentions', () => {
+    it('deduplicates rows with same date/code/location, keeping highest NumMentions', async () => {
       const csv = [dupRowLowMentions, dupRowHighMentions].join('\n');
-      const events = parseAndFilter(csv);
+      const events = await parseAndFilter(csv);
       expect(events).toHaveLength(1);
       expect(events[0].data.actor2).toBe('Government');
     });
 
-    it('dedup keeps first row when mention counts are equal', () => {
+    it('dedup keeps first row when mention counts are equal', async () => {
       const rowA = makeGdeltRow({ 0: '6666666666', 6: 'ACTOR_A', 31: '10' });
       const rowB = makeGdeltRow({ 0: '7777777777', 6: 'ACTOR_B', 31: '10' });
-      const events = parseAndFilter([rowA, rowB].join('\n'));
+      const events = await parseAndFilter([rowA, rowB].join('\n'));
       expect(events).toHaveLength(1);
     });
 
-    it('does not dedup rows at the same location with different CAMEO codes', () => {
-      const row19 = makeGdeltRow({ 0: '8888888888', 26: '190', 31: '10' });
+    it('does not dedup rows at the same location with different CAMEO codes', async () => {
+      const row19 = makeGdeltRow({ 0: '8888888888', 26: '195', 27: '195', 31: '10' });
       const row18 = makeGdeltRow({ 0: '9999999999', 26: '183', 28: '18', 27: '183', 31: '10' });
-      const events = parseAndFilter([row19, row18].join('\n'));
+      const events = await parseAndFilter([row19, row18].join('\n'));
       expect(events).toHaveLength(2);
     });
 
-    it('discards row where FullName="New York, United States" with FIPS="IS" (geo cross-validation)', () => {
+    it('discards row where FullName="New York, United States" with FIPS="IS" (geo cross-validation)', async () => {
       const row = makeGdeltRow({
         0: '1010101010',
         52: 'New York, United States',
         53: 'IS',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(0);
     });
 
-    it('preserves row where FullName="US forces in Baghdad, Iraq" with FIPS="IZ" (actor reference in non-last segment)', () => {
+    it('preserves row where FullName="US forces in Baghdad, Iraq" with FIPS="IZ" (actor reference in non-last segment)', async () => {
       const row = makeGdeltRow({
         0: '2020202020',
         52: 'US forces in Baghdad, Iraq',
@@ -265,34 +275,34 @@ describe('GDELT Adapter', () => {
         56: '33.3152',
         57: '44.3661',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
     });
 
-    it('sets geoPrecision="centroid" when lat/lng matches Tehran (GeoNames coords)', () => {
+    it('sets geoPrecision="centroid" when lat/lng matches Tehran (GeoNames coords)', async () => {
       // GeoNames coordinates for Tehran: 35.6944, 51.4215
       const row = makeGdeltRow({
         0: '3030303030',
         56: '35.6944',
         57: '51.4215',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
       expect(events[0].data.geoPrecision).toBe('centroid');
     });
 
-    it('sets geoPrecision="precise" for non-centroid coordinates', () => {
+    it('sets geoPrecision="precise" for non-centroid coordinates', async () => {
       const row = makeGdeltRow({
         0: '4040404040',
         56: '34.1234',
         57: '50.5678',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
       expect(events[0].data.geoPrecision).toBe('precise');
     });
 
-    it('reclassifies airstrike with Goldstein=-1 to shelling', () => {
+    it('reclassifies airstrike with Goldstein=-1 to shelling', async () => {
       // Airstrike (base code 195) with Goldstein=-1: ceiling is -5, diff = -1 - (-5) = 4 > 3 -> reclassify to shelling
       const row = makeGdeltRow({
         0: '5050505050',
@@ -303,21 +313,21 @@ describe('GDELT Adapter', () => {
         56: '34.1234',
         57: '50.5678',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
       expect(events[0].type).toBe('shelling');
     });
 
-    it('attaches confidence score (0 < confidence <= 1) to all returned events', () => {
+    it('attaches confidence score (0 < confidence <= 1) to all returned events', async () => {
       const row = makeGdeltRow({ 0: '6060606060' });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
       expect(events[0].data.confidence).toBeDefined();
       expect(events[0].data.confidence).toBeGreaterThan(0);
       expect(events[0].data.confidence).toBeLessThanOrEqual(1);
     });
 
-    it('discards events below confidence threshold (low-signal row)', () => {
+    it('discards events below confidence threshold (low-signal row)', async () => {
       // Low signal: empty actors, 1 mention, 0 sources, centroid location (Tehran), Goldstein 0
       const row = makeGdeltRow({
         0: '7070707070',
@@ -331,7 +341,7 @@ describe('GDELT Adapter', () => {
         56: '35.6892',  // Tehran centroid
         57: '51.3890',
       });
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       // With empty actors (score 0.0 for actor specificity), 1 mention, 0 sources,
       // centroid (0.3), and Goldstein 0 (0.5 neutral), the score should be well below 0.35
       expect(events).toHaveLength(0);
@@ -410,12 +420,12 @@ describe('GDELT Adapter', () => {
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
 
       expect(entity.id).toBe('gdelt-1234567890');
-      expect(entity.type).toBe('ground_combat');
+      expect(entity.type).toBe('airstrike');
       expect(entity.lat).toBe(35.6892);
       expect(entity.lng).toBe(51.389);
-      expect(entity.label).toBe('Tehran, Tehran, Iran: Conventional military force');
-      expect(entity.data.eventType).toBe('Conventional military force');
-      expect(entity.data.subEventType).toBe('CAMEO 190');
+      expect(entity.label).toBe('Tehran, Tehran, Iran: Aerial weapons');
+      expect(entity.data.eventType).toBe('Aerial weapons');
+      expect(entity.data.subEventType).toBe('CAMEO 195');
       expect(entity.data.fatalities).toBe(0);
       expect(entity.data.source).toBe('https://reuters.com/article/123');
       expect(entity.data.actor1).toBe('IRANIAN GOVERNMENT');
@@ -469,7 +479,7 @@ describe('GDELT Adapter', () => {
     it('passes through EventCode as cameoCode', () => {
       const cols = validIranMissileRow.split('\t');
       const entity = normalizeGdeltEvent(cols, 35.6892, 51.389);
-      expect(entity.data.cameoCode).toBe('190');
+      expect(entity.data.cameoCode).toBe('195');
     });
 
     it('missing actor names default to empty string', () => {
@@ -538,9 +548,9 @@ describe('GDELT Adapter', () => {
       // Should get only the 2 valid Middle East conflict events
       expect(events).toHaveLength(2);
 
-      // First event: Iran ground_combat (base code 190)
+      // First event: Iran airstrike (base code 195)
       expect(events[0].id).toBe('gdelt-1234567890');
-      expect(events[0].type).toBe('ground_combat');
+      expect(events[0].type).toBe('airstrike');
       // parseAndFilter no longer applies dispersion -- raw coordinates preserved
       expect(events[0].lat).toBe(35.6892);
       expect(events[0].data.originalLat).toBeUndefined();
@@ -601,8 +611,8 @@ describe('GDELT Adapter', () => {
   });
 
   describe('config-driven thresholds', () => {
-    it('uses config-driven CAMEO exclusions (respects eventExcludedCameo)', () => {
-      // Default excludes 180 and 192. Override to only exclude 180.
+    it('uses config-driven CAMEO exclusions (respects eventExcludedCameo)', async () => {
+      // Default excludes 180,182,190,192. Override to only exclude 180.
       const origExcluded = mockConfig.eventExcludedCameo;
       mockConfig.eventExcludedCameo = ['180'];
       try {
@@ -613,7 +623,7 @@ describe('GDELT Adapter', () => {
           27: '192',
           28: '19',
         });
-        const events = parseAndFilter(row);
+        const events = await parseAndFilter(row);
         // 192 maps to blockade. With enough mentions/sources, it should pass.
         expect(events.length).toBeGreaterThanOrEqual(1);
       } finally {
@@ -621,25 +631,25 @@ describe('GDELT Adapter', () => {
       }
     });
 
-    it('uses config-driven minSources threshold', () => {
+    it('uses config-driven minSources threshold', async () => {
       const origMin = mockConfig.eventMinSources;
       mockConfig.eventMinSources = 3;
       try {
         // Default row has NumSources=5, so it should still pass with minSources=3
         const row = makeGdeltRow({ 0: '9090909090', 32: '5' });
-        const events = parseAndFilter(row);
+        const events = await parseAndFilter(row);
         expect(events).toHaveLength(1);
 
         // But NumSources=2 should now be rejected (< 3)
         const row2 = makeGdeltRow({ 0: '9191919191', 32: '2' });
-        const events2 = parseAndFilter(row2);
+        const events2 = await parseAndFilter(row2);
         expect(events2).toHaveLength(0);
       } finally {
         mockConfig.eventMinSources = origMin;
       }
     });
 
-    it('applies centroid penalty for ActionGeo_Type 3 (reduces confidence)', () => {
+    it('applies centroid penalty for ActionGeo_Type 3 (reduces confidence)', async () => {
       // Create a row at Tehran centroid with ActionGeo_Type=3
       const rowCentroid = makeGdeltRow({
         0: 'C1C1C1C1C1',
@@ -655,8 +665,8 @@ describe('GDELT Adapter', () => {
         57: '51.3890',
       });
 
-      const eventsCentroid = parseAndFilter(rowCentroid);
-      const eventsNoPenalty = parseAndFilter(rowNoPenalty);
+      const eventsCentroid = await parseAndFilter(rowCentroid);
+      const eventsNoPenalty = await parseAndFilter(rowNoPenalty);
 
       // Both should pass (confidence still above threshold after penalty)
       expect(eventsCentroid).toHaveLength(1);
@@ -668,7 +678,7 @@ describe('GDELT Adapter', () => {
       );
     });
 
-    it('applies centroid penalty for ActionGeo_Type 4 (landmark)', () => {
+    it('applies centroid penalty for ActionGeo_Type 4 (landmark)', async () => {
       const row = makeGdeltRow({
         0: 'C3C3C3C3C3',
         51: '4', // ActionGeo_Type = landmark/feature
@@ -682,8 +692,8 @@ describe('GDELT Adapter', () => {
         57: '50.5678',
       });
 
-      const eventsType4 = parseAndFilter(row);
-      const eventsNoPenalty = parseAndFilter(rowNoPenalty);
+      const eventsType4 = await parseAndFilter(row);
+      const eventsNoPenalty = await parseAndFilter(rowNoPenalty);
 
       if (eventsType4.length > 0 && eventsNoPenalty.length > 0) {
         expect(eventsType4[0].data.confidence!).toBeLessThan(
@@ -692,7 +702,7 @@ describe('GDELT Adapter', () => {
       }
     });
 
-    it('does not apply centroid penalty for ActionGeo_Type 1 (country level)', () => {
+    it('does not apply centroid penalty for ActionGeo_Type 1 (country level)', async () => {
       const row1 = makeGdeltRow({
         0: 'C5C5C5C5C5',
         51: '1', // country level - no penalty
@@ -706,8 +716,8 @@ describe('GDELT Adapter', () => {
         57: '50.5678',
       });
 
-      const events1 = parseAndFilter(row1);
-      const events2 = parseAndFilter(row2);
+      const events1 = await parseAndFilter(row1);
+      const events2 = await parseAndFilter(row2);
 
       if (events1.length > 0 && events2.length > 0) {
         // Same confidence (no penalty applied for type 1)
@@ -720,7 +730,7 @@ describe('GDELT Adapter', () => {
   });
 
   describe('parseAndFilter returns undispersed events', () => {
-    it('returns centroid events with raw (undispersed) lat/lng matching the GDELT input', () => {
+    it('returns centroid events with raw (undispersed) lat/lng matching the GDELT input', async () => {
       // Two events at Tehran centroid with ActionGeo_Type=3
       const row1 = makeGdeltRow({
         0: 'D1D1D1D1D1',
@@ -736,7 +746,7 @@ describe('GDELT Adapter', () => {
         57: '51.3890',
       });
 
-      const events = parseAndFilter([row1, row2].join('\n'));
+      const events = await parseAndFilter([row1, row2].join('\n'));
 
       // Both should pass filtering
       expect(events).toHaveLength(2);
@@ -751,7 +761,7 @@ describe('GDELT Adapter', () => {
       }
     });
 
-    it('non-centroid events keep their raw coordinates', () => {
+    it('non-centroid events keep their raw coordinates', async () => {
       const row = makeGdeltRow({
         0: 'D3D3D3D3D3',
         51: '2', // state level
@@ -759,7 +769,7 @@ describe('GDELT Adapter', () => {
         57: '50.5678',
       });
 
-      const events = parseAndFilter(row);
+      const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
       expect(events[0].lat).toBe(34.1234);
       expect(events[0].lng).toBe(50.5678);
@@ -768,15 +778,15 @@ describe('GDELT Adapter', () => {
   });
 
   describe('Bellingcat corroboration pipeline', () => {
-    it('parseAndFilter with no bellingcatArticles arg works identically to before (backward compat)', () => {
-      const events = parseAndFilter(validIranMissileRow);
+    it('parseAndFilter with no bellingcatArticles arg works identically to before (backward compat)', async () => {
+      const events = await parseAndFilter(validIranMissileRow);
       expect(events).toHaveLength(1);
       // Confidence should be set but not boosted
       expect(events[0].data.confidence).toBeDefined();
       expect(events[0].data.confidence!).toBeLessThanOrEqual(1.0);
     });
 
-    it('parseAndFilter with matching Bellingcat article boosts event confidence by 0.2', () => {
+    it('parseAndFilter with matching Bellingcat article boosts event confidence by 0.2', async () => {
       // Event is at Tehran (35.6892, 51.3890), locationName "Tehran, Tehran, Iran"
       const articles = [{
         title: 'Investigation reveals Tehran Iran military site activity',
@@ -786,8 +796,8 @@ describe('GDELT Adapter', () => {
         lng: 51.3890,
       }];
 
-      const eventsWithout = parseAndFilter(validIranMissileRow);
-      const eventsWith = parseAndFilter(validIranMissileRow, articles);
+      const eventsWithout = await parseAndFilter(validIranMissileRow);
+      const eventsWith = await parseAndFilter(validIranMissileRow, articles);
 
       expect(eventsWithout).toHaveLength(1);
       expect(eventsWith).toHaveLength(1);
@@ -802,7 +812,7 @@ describe('GDELT Adapter', () => {
       );
     });
 
-    it('parseAndFilter with non-matching Bellingcat articles does not boost confidence', () => {
+    it('parseAndFilter with non-matching Bellingcat articles does not boost confidence', async () => {
       // Article is nowhere near the event
       const articles = [{
         title: 'Unrelated investigation in London',
@@ -812,8 +822,8 @@ describe('GDELT Adapter', () => {
         lng: -0.1278,
       }];
 
-      const eventsWithout = parseAndFilter(validIranMissileRow);
-      const eventsWith = parseAndFilter(validIranMissileRow, articles);
+      const eventsWithout = await parseAndFilter(validIranMissileRow);
+      const eventsWith = await parseAndFilter(validIranMissileRow, articles);
 
       expect(eventsWithout).toHaveLength(1);
       expect(eventsWith).toHaveLength(1);
@@ -825,7 +835,7 @@ describe('GDELT Adapter', () => {
       );
     });
 
-    it('confidence is clamped to 1.0 max after boost', () => {
+    it('confidence is clamped to 1.0 max after boost', async () => {
       // Create a high-confidence event row with very high signals
       const highSignalRow = makeGdeltRow({
         0: 'BC_CLAMP_TEST',
@@ -854,14 +864,14 @@ describe('GDELT Adapter', () => {
         lng: 51.3890,
       }];
 
-      const events = parseAndFilter(highSignalRow, articles);
+      const events = await parseAndFilter(highSignalRow, articles);
       expect(events).toHaveLength(1);
       expect(events[0].data.confidence!).toBeLessThanOrEqual(1.0);
     });
 
-    it('parseAndFilter with empty bellingcatArticles array applies no boost', () => {
-      const eventsWithout = parseAndFilter(validIranMissileRow);
-      const eventsWith = parseAndFilter(validIranMissileRow, []);
+    it('parseAndFilter with empty bellingcatArticles array applies no boost', async () => {
+      const eventsWithout = await parseAndFilter(validIranMissileRow);
+      const eventsWith = await parseAndFilter(validIranMissileRow, []);
 
       expect(eventsWithout).toHaveLength(1);
       expect(eventsWith).toHaveLength(1);

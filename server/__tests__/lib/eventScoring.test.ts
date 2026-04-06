@@ -136,7 +136,10 @@ describe('eventScoring', () => {
       expect(score).toBeLessThanOrEqual(1.0);
     });
 
-    it('returns ~0.15-0.25 for low-signal event with catch-all CAMEO', () => {
+    it('returns low score for low-signal event with unknown CAMEO (default 0.5 specificity)', () => {
+      // Note: 180/182/190 removed from CAMEO_SPECIFICITY (now hard-excluded in pipeline).
+      // Using 180 here still works -- it falls through to default 0.5 (medium).
+      // With all-low signals + default specificity, score is ~0.29.
       const event = makeTestEvent({
         type: 'assault',
         actor1: '',
@@ -144,11 +147,11 @@ describe('eventScoring', () => {
         goldsteinScale: 0,
         numMentions: 1,
         numSources: 1,
-        cameoCode: '180', // catch-all code
+        cameoCode: '180', // falls to default 0.5 specificity
       });
       const score = computeEventConfidence(event, 'centroid');
-      expect(score).toBeGreaterThanOrEqual(0.10);
-      expect(score).toBeLessThanOrEqual(0.25);
+      expect(score).toBeGreaterThanOrEqual(0.15);
+      expect(score).toBeLessThanOrEqual(0.35);
     });
 
     it('handles undefined numMentions/numSources (defaults to 1, non-NaN)', () => {
@@ -271,42 +274,47 @@ describe('eventScoring', () => {
       expect(one).toBeGreaterThan(none);
     });
 
-    it('CAMEO specificity: specific code (195) scores higher than catch-all (180)', () => {
+    it('CAMEO specificity: high code (195) scores higher than medium code (184)', () => {
+      // Note: 180/182/190 removed from CAMEO_SPECIFICITY (hard-excluded in pipeline).
+      // Using 184 (medium, 0.5) and 195 (high, 1.0) instead.
       const specific = computeEventConfidence(
         makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '195' }),
         'precise',
       );
-      const catchAll = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '180' }),
+      const medium = computeEventConfidence(
+        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '184' }),
         'precise',
       );
-      expect(specific).toBeGreaterThan(catchAll);
-      // Difference: 0.25 * (1.0 - 0.1) = 0.225
-      expect(specific - catchAll).toBeCloseTo(0.225, 2);
+      expect(specific).toBeGreaterThan(medium);
+      // Difference: 0.25 * (1.0 - 0.5) = 0.125
+      expect(specific - medium).toBeCloseTo(0.125, 2);
     });
 
-    it('CAMEO specificity: medium code (193) scores between high and low', () => {
+    it('CAMEO specificity: high code (195) scores higher than medium code (193)', () => {
+      // Note: 180/182/190 removed from CAMEO_SPECIFICITY -- no "low" tier remaining.
+      // Only high (1.0) and medium (0.5) tiers exist now. Unknown codes default to 0.5.
       const base = { actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3 };
       const high = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '195' }), 'precise');
       const medium = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '193' }), 'precise');
-      const low = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '180' }), 'precise');
       expect(high).toBeGreaterThan(medium);
-      expect(medium).toBeGreaterThan(low);
     });
 
-    it('catch-all CAMEO + low signals falls below 0.35 threshold', () => {
-      // Simulates the false positive scenario: campus article geocoded to Israel
+    it('low signals + no actors + centroid falls below 0.38 threshold', () => {
+      // Simulates false positive: minimal evidence event
+      // Note: 180 removed from CAMEO_SPECIFICITY (falls to default 0.5).
+      // But with no actors (0.0), 1 mention, 1 source, centroid, Goldstein 0 (unknown),
+      // the score is still low enough to be rejected.
       const event = makeTestEvent({
         type: 'assault',
-        actor1: 'STUDENT GOVERNMENT',
+        actor1: '',
         actor2: '',
-        goldsteinScale: -2,
+        goldsteinScale: 0,
         numMentions: 1,
         numSources: 1,
         cameoCode: '180',
       });
       const score = computeEventConfidence(event, 'centroid');
-      expect(score).toBeLessThan(0.35);
+      expect(score).toBeLessThan(0.38);
     });
 
     it('specific CAMEO + good signals stays well above threshold', () => {
@@ -337,10 +345,12 @@ describe('eventScoring', () => {
   });
 
   describe('getCameoSpecificity', () => {
-    it('returns 0.1 for catch-all codes (180, 182, 190)', () => {
-      expect(getCameoSpecificity('180')).toBe(0.1);
-      expect(getCameoSpecificity('182')).toBe(0.1);
-      expect(getCameoSpecificity('190')).toBe(0.1);
+    it('returns 0.5 (default) for excluded codes (180, 182, 190) -- no longer in specificity map', () => {
+      // These codes are hard-excluded in config.eventExcludedCameo before scoring runs,
+      // so their specificity entries were removed. They fall to the default 0.5.
+      expect(getCameoSpecificity('180')).toBe(0.5);
+      expect(getCameoSpecificity('182')).toBe(0.5);
+      expect(getCameoSpecificity('190')).toBe(0.5);
     });
 
     it('returns 1.0 for specific codes (195, 194, 204)', () => {
@@ -361,7 +371,7 @@ describe('eventScoring', () => {
 
     it('uses first 3 chars of 4-digit codes', () => {
       expect(getCameoSpecificity('1951')).toBe(1.0); // 195 -> high
-      expect(getCameoSpecificity('1801')).toBe(0.1); // 180 -> low
+      expect(getCameoSpecificity('1801')).toBe(0.5); // 180 -> default (removed from map)
     });
   });
 
