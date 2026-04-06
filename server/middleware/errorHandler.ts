@@ -5,13 +5,14 @@ import type { Request, Response, NextFunction } from 'express';
  * Throw from routes/middleware to produce consistent error responses.
  */
 export class AppError extends Error {
-  constructor(
-    public readonly statusCode: number,
-    public readonly code: string,
-    message: string,
-  ) {
+  readonly statusCode: number;
+  readonly code: string;
+
+  constructor(statusCode: number, code: string, message: string) {
     super(message);
     this.name = 'AppError';
+    this.statusCode = statusCode;
+    this.code = code;
   }
 }
 

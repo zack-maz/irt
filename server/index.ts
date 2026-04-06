@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { randomUUID } from 'node:crypto';
@@ -58,6 +59,12 @@ export function createApp() {
       },
     }),
   );
+  // Compress responses in local dev. Vercel CDN handles gzip/brotli at the
+  // edge, so skip in production to avoid double-compression overhead.
+  if (!process.env.VERCEL) {
+    app.use(compression());
+  }
+
   app.use(pinoHttp({
     logger,
     genReqId: (req) => (req.headers['x-request-id'] as string) ?? randomUUID(),
@@ -107,8 +114,22 @@ if (isMainModule) {
     const port = Number(process.env.PORT ?? 3001);
     const app = createApp();
 
-    app.listen(port, () => {
+    const server = app.listen(port, () => {
       logger.info({ port }, 'server listening');
+    });
+
+    // Graceful shutdown: drain open connections before exiting
+    process.on('SIGTERM', () => {
+      logger.info('SIGTERM received, draining connections...');
+      server.close(() => {
+        logger.info('HTTP server closed');
+        process.exit(0);
+      });
+      // Force exit after 10s if graceful shutdown hangs
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10_000).unref();
     });
   } catch (err) {
     logger.error({ err }, 'server failed to start');

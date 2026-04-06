@@ -1,6 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createApp } from './index.js';
 
+// Vercel handles its own SIGTERM (500ms window) — no custom shutdown handler needed.
+// Upstash Redis is REST-based, so there are no persistent connections to drain.
+// If async pino transport is added later, add pino.final() here for log flushing.
+
 let app: ReturnType<typeof createApp> | null = null;
 let initError: string | null = null;
 
