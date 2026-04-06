@@ -127,9 +127,9 @@ Requirements for the Data Quality & Layers milestone.
 
 ### Conflict Geolocation Improvement
 
-- [ ] **NLP-01**: extractActorsAndPlaces() returns actors and places from a single NLP pass on article titles using compromise
-- [ ] **NLP-02**: Custom ME city lexicon (from GeoNames) makes compromise .places() recognize Middle East-specific city names (Isfahan, Mosul, Homs, Deir ez-Zor, etc.)
-- [ ] **GEO-01**: CITY_CENTROIDS expanded from 42 hardcoded entries to 100+ entries sourced from GeoNames dump (pop >= 50k in ME bbox)
+- [x] **NLP-01**: extractActorsAndPlaces() returns actors and places from a single NLP pass on article titles using compromise
+- [x] **NLP-02**: Custom ME city lexicon (from GeoNames) makes compromise .places() recognize Middle East-specific city names (Isfahan, Mosul, Homs, Deir ez-Zor, etc.)
+- [x] **GEO-01**: CITY_CENTROIDS expanded from 42 hardcoded entries to 100+ entries sourced from GeoNames dump (pop >= 50k in ME bbox)
 - [ ] **GEO-02**: Events where NLP-extracted actors clearly contradict the geocoded country are rejected with actor_geo_mismatch pipeline trace
 - [ ] **GEO-03**: Centroid events are relocated to NLP-extracted city coordinates when article title mentions a specific place name
 - [ ] **GEO-04**: Cross-border events (e.g., "Israel strikes targets in Syria") are NOT falsely rejected by actor-country validation
@@ -138,7 +138,7 @@ Requirements for the Data Quality & Layers milestone.
 - [ ] **PIPE-01**: parseAndFilter includes Phase C NLP cross-validation that rejects actor-geo mismatches and relocates centroid events
 - [ ] **PIPE-02**: CAMEO codes 182 (physical assault) and 190 (conventional military force NOS) are hard-rejected (added to excluded codes list)
 - [ ] **PIPE-03**: Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)
-- [ ] **SCRIPT-01**: GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities
+- [x] **SCRIPT-01**: GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities
 
 ## v1.2+ Requirements
 

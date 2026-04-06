@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-06T00:34:04.119Z"
+last_updated: "2026-04-06T00:41:00Z"
 progress:
   total_phases: 11
   completed_phases: 6
   total_plans: 27
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 26.2: Plan 01 COMPLETE (plans 01+02 done, 1 remaining)
 Phase 26.2: Plan 02 COMPLETE (2 of 3 plans done)
 Phase 26.1 COMPLETE (3 of 3 plans done)
 Phase 26.1: Plan 02 COMPLETE (2 of 3 plans done)
@@ -112,6 +113,9 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Inline haversine in useWaterLayers avoids cross-type dependency on attackStatus.ts SiteEntity imports
 - Desalination audit: 63 OSM elements found but major Gulf plants missing (Israel, Kuwait, Qatar entirely absent); report-only per user decision
 - Regex-based HTML title extraction (no DOM parser dep) with og:title priority and entity decoding; SHA-256 prefix cache keys
+- GeoNames population threshold 200k (not 50k) to stay in 100-300 city target range; 22 ME country ISO codes for filtering
+- Multi-word city substring fallback for names compromise tokenizes (Deir ez-Zor, Mazar-i-Sharif); conflict actor lexicon for Houthi/Hamas/etc.
+- me-cities.json as single source of truth for both NLP lexicon and CITY_CENTROIDS (replaces 42 hardcoded entries)
 
 ## Pending Todos
 
