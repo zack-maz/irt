@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { redis, cacheGet } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'cron-health' });
 
 export const cronHealthRouter = Router();
 
@@ -27,7 +29,7 @@ cronHealthRouter.get('/', async (_req, res) => {
     await redis.ping();
     redisOk = true;
   } catch {
-    log({ level: 'error', message: 'Cron health: Redis ping failed' });
+    log.error('Redis ping failed');
   }
 
   // Query per-source freshness
@@ -58,15 +60,9 @@ cronHealthRouter.get('/', async (_req, res) => {
 
   // Log results
   if (warnings.length > 0) {
-    log({
-      level: 'warn',
-      message: `Cron health: ${warnings.length} warning(s) — ${warnings.join(', ')}`,
-    });
+    log.warn({ warningCount: warnings.length, warnings }, 'source health warnings');
   } else {
-    log({
-      level: 'info',
-      message: 'Cron health: all sources healthy',
-    });
+    log.info('all sources healthy');
   }
 
   res.json({

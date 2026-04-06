@@ -1,17 +1,23 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'markets' });
-import { fetchMarkets, isValidRange } from '../adapters/yahoo-finance.js';
+import { fetchMarkets } from '../adapters/yahoo-finance.js';
 import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
 import type { MarketQuote } from '../types.js';
+
+/** Zod schema for /api/markets query params */
+const marketsQuerySchema = z.object({
+  range: z.enum(['1d', '5d', '1mo', 'ytd']).default('1d'),
+});
 
 export const marketsRouter = Router();
 
-marketsRouter.get('/', async (req, res) => {
-  const rangeParam = typeof req.query.range === 'string' ? req.query.range : '1d';
-  const range = isValidRange(rangeParam) ? rangeParam : '1d';
+marketsRouter.get('/', validateQuery(marketsQuerySchema), async (req, res) => {
+  const { range } = req.query as unknown as z.infer<typeof marketsQuerySchema>;
 
   const cacheKey = `markets:yahoo:${range}`;
 

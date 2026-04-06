@@ -1,5 +1,7 @@
 import type { MarketQuote } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'yahoo-finance' });
 
 /** Tickers to fetch from Yahoo Finance v8 chart API */
 export const TICKERS = ['BZ=F', 'CL=F', 'XLE', 'USO', 'XOM'] as const;
@@ -76,7 +78,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     });
 
     if (!resp.ok) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} HTTP ${resp.status}` });
+      log.warn({ symbol, status: resp.status }, 'HTTP error');
       return null;
     }
 
@@ -84,7 +86,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
 
     const result = json.chart?.result?.[0];
     if (!result) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} no chart result` });
+      log.warn({ symbol }, 'no chart result');
       return null;
     }
 
@@ -92,7 +94,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     const quote = indicators?.quote?.[0];
 
     if (!meta || !rawTimestamps || !quote) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} missing meta/timestamps/quote` });
+      log.warn({ symbol }, 'missing meta/timestamps/quote');
       return null;
     }
 
@@ -141,7 +143,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
       history: { timestamps, closes, highs, lows },
     };
   } catch (err) {
-    log({ level: 'warn', message: `[yahoo] ${symbol} fetch error: ${(err as Error).message}` });
+    log.warn({ err, symbol }, 'fetch error');
     return null;
   }
 }

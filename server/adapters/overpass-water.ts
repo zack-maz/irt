@@ -1,6 +1,8 @@
 import type { WaterFacility, WaterFacilityType, WaterStressIndicators } from '../types.js';
 import { assignBasinStress } from '../lib/basinLookup.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'overpass-water' });
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const OVERPASS_FALLBACK = 'https://overpass.private.coffee/api/interpreter';
@@ -241,7 +243,7 @@ async function fetchFacilityType(
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (!res.ok) {
-        log({ level: 'warn', message: `[overpass-water] ${entry.label} ${url} returned ${res.status}` });
+        log.warn({ facilityType: entry.label, url, status: res.status }, 'Overpass returned error status');
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
@@ -252,13 +254,13 @@ async function fetchFacilityType(
         if (facility) facilities.push(facility);
       }
 
-      log({ level: 'info', message: `[overpass-water] ${entry.label}: ${facilities.length} facilities` });
+      log.info({ facilityType: entry.label, count: facilities.length }, 'fetched facilities');
       return facilities;
     } catch (err) {
-      log({ level: 'warn', message: `[overpass-water] ${entry.label} ${url} failed: ${(err as Error).message}` });
+      log.warn({ err, facilityType: entry.label, url }, 'Overpass request failed');
     }
   }
-  log({ level: 'warn', message: `[overpass-water] ${entry.label}: all URLs failed, skipping` });
+  log.warn({ facilityType: entry.label }, 'all URLs failed, skipping');
   return [];
 }
 
@@ -282,7 +284,7 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
       succeeded++;
       all.push(...result.value);
     } else if (result.status === 'rejected') {
-      log({ level: 'warn', message: `[overpass-water] ${FACILITY_QUERIES[i].label} rejected: ${result.reason}` });
+      log.warn({ facilityType: FACILITY_QUERIES[i].label, err: result.reason }, 'query rejected');
     }
   }
 
@@ -294,6 +296,6 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
   const unique = new Map<string, WaterFacility>();
   for (const f of all) unique.set(f.id, f);
 
-  log({ level: 'info', message: `[overpass-water] Total: ${unique.size} facilities from ${succeeded}/${FACILITY_QUERIES.length} queries` });
+  log.info({ total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length }, 'water facilities fetch complete');
   return Array.from(unique.values());
 }

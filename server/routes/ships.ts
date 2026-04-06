@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'ships' });
 import { collectShips } from '../adapters/aisstream.js';
 import type { ShipEntity } from '../types.js';
 
@@ -46,7 +48,7 @@ shipsRouter.get('/', async (_req, res) => {
     await cacheSetSafe(SHIPS_KEY, merged, REDIS_TTL_SEC);
     res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[ships] collectShips error: ${(err as Error).message}` });
+    log.error({ err }, 'collectShips error');
     if (cached) {
       res.json({ ...cached, stale: true });
     } else {

@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import pinoHttp from 'pino-http';
+import { randomUUID } from 'node:crypto';
+import { logger } from './lib/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { cacheControl } from './middleware/cacheControl.js';
-import { requestLogger } from './middleware/requestLogger.js';
 import { rateLimiters } from './middleware/rateLimit.js';
 import { flightsRouter } from './routes/flights.js';
 import { shipsRouter } from './routes/ships.js';
@@ -56,7 +58,19 @@ export function createApp() {
       },
     }),
   );
-  app.use(requestLogger);
+  app.use(pinoHttp({
+    logger,
+    genReqId: (req) => (req.headers['x-request-id'] as string) ?? randomUUID(),
+    autoLogging: { ignore: (req) => req.url === '/health' },
+    customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+    customErrorMessage: (req, _res, err) => `${req.method} ${req.url} failed: ${err.message}`,
+  }));
+
+  // Propagate request ID to response headers for traceability
+  app.use((req, res, next) => {
+    res.setHeader('X-Request-ID', req.id as string);
+    next();
+  });
 
   // Health check (no cache, no rate limit)
   app.use('/health', healthRouter);
@@ -94,10 +108,10 @@ if (isMainModule) {
     const app = createApp();
 
     app.listen(port, () => {
-      console.log(`[server] listening on port ${port}`);
+      logger.info({ port }, 'server listening');
     });
   } catch (err) {
-    console.error('[server] Failed to start:', (err as Error).message);
+    logger.error({ err }, 'server failed to start');
     process.exit(1);
   }
 }

@@ -6,7 +6,9 @@
  * to minimize API calls, then fans results back to all original locations.
  */
 
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'open-meteo-precip' });
 
 export interface PrecipitationData {
   lat: number;
@@ -77,7 +79,7 @@ export async function fetchPrecipitation(
   }
   const uniqueCells = Array.from(cellMap.values());
 
-  log({ level: 'info', message: `[open-meteo-precip] ${locations.length} locations → ${uniqueCells.length} unique grid cells (${Math.ceil(uniqueCells.length / BATCH_SIZE)} batches)` });
+  log.info({ locations: locations.length, uniqueCells: uniqueCells.length, batches: Math.ceil(uniqueCells.length / BATCH_SIZE) }, 'starting precipitation fetch');
 
   // Fetch precipitation for unique grid cells
   const cellResults = new Map<string, { totalMm: number; anomalyRatio: number }>();
@@ -98,7 +100,7 @@ export async function fetchPrecipitation(
       });
 
       if (!res.ok) {
-        log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} returned ${res.status}, skipping` });
+        log.warn({ batch: Math.floor(i / BATCH_SIZE), status: res.status }, 'batch returned error, skipping');
         continue;
       }
 
@@ -124,7 +126,7 @@ export async function fetchPrecipitation(
         });
       }
     } catch (batchErr) {
-      log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} failed: ${(batchErr as Error).message}, skipping` });
+      log.warn({ err: batchErr, batch: Math.floor(i / BATCH_SIZE) }, 'batch failed, skipping');
       continue;
     }
   }
@@ -144,6 +146,6 @@ export async function fetchPrecipitation(
     });
   }
 
-  log({ level: 'info', message: `[open-meteo-precip] Fetched precipitation for ${cellResults.size} cells, mapped to ${results.length} locations` });
+  log.info({ cells: cellResults.size, mappedLocations: results.length }, 'precipitation fetch complete');
   return results;
 }

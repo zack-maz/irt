@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
@@ -11,8 +12,14 @@ import {
   WATER_PRECIP_CACHE_TTL,
   WATER_PRECIP_REDIS_TTL_SEC,
 } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
 import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
+
+/** Zod schema for /api/water and /api/water/precip query params */
+const waterQuerySchema = z.object({
+  refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+});
 
 /** Redis key for cached water facilities */
 const FACILITIES_KEY = 'water:facilities';
@@ -32,10 +39,11 @@ export const waterRouter = Router();
  * The Vercel function timeout (60s maxDuration) provides the hard cap in production;
  * in local dev, the 90s per-query Overpass timeout handles it.
  */
-waterRouter.get('/', async (req, res) => {
+waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   log.info('GET /api/water hit');
   const isCron = req.headers['user-agent']?.includes('vercel-cron');
-  const forceRefresh = req.query.refresh === 'true' && (isCron || process.env.NODE_ENV !== 'production');
+  const { refresh } = req.query as unknown as z.infer<typeof waterQuerySchema>;
+  const forceRefresh = refresh && (isCron || process.env.NODE_ENV !== 'production');
   const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
   log.info({ cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale }, 'cache result');
 
@@ -63,8 +71,8 @@ waterRouter.get('/', async (req, res) => {
  * Returns 30-day precipitation data for cached water facilities.
  * Cache-first with 6h logical TTL.
  */
-waterRouter.get('/precip', async (req, res) => {
-  const forceRefresh = req.query.refresh === 'true';
+waterRouter.get('/precip', validateQuery(waterQuerySchema), async (req, res) => {
+  const { refresh: forceRefresh } = req.query as unknown as z.infer<typeof waterQuerySchema>;
   const cachedPrecip = await cacheGetSafe<PrecipitationData[]>(PRECIP_KEY, WATER_PRECIP_CACHE_TTL);
 
   if (cachedPrecip && !cachedPrecip.stale && !forceRefresh) {

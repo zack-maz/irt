@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe, redis } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
@@ -6,7 +7,13 @@ const log = logger.child({ module: 'events' });
 import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
 import { extractBellingcatGeo } from '../lib/eventScoring.js';
 import { WAR_START, CACHE_TTL } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
 import type { ConflictEventEntity, NewsCluster } from '../types.js';
+
+/** Zod schema for /api/events query params */
+const eventsQuerySchema = z.object({
+  backfill: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+});
 
 /** Redis key for accumulated GDELT events */
 const EVENTS_KEY = 'events:gdelt';
@@ -35,8 +42,8 @@ async function shouldBackfill(): Promise<boolean> {
 
 export const eventsRouter = Router();
 
-eventsRouter.get('/', async (req, res) => {
-  const forceBackfill = req.query.backfill === 'true';
+eventsRouter.get('/', validateQuery(eventsQuerySchema), async (req, res) => {
+  const { backfill: forceBackfill } = req.query as unknown as z.infer<typeof eventsQuerySchema>;
 
   // Check cache first (skip on forced backfill)
   const cached = forceBackfill

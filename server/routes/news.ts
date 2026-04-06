@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
@@ -12,15 +13,21 @@ import {
   NEWS_REDIS_TTL_SEC,
   NEWS_SLIDING_WINDOW_MS,
 } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
 import type { NewsArticle, NewsCluster } from '../types.js';
+
+/** Zod schema for /api/news query params */
+const newsQuerySchema = z.object({
+  refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+});
 
 /** Redis key for the merged news feed */
 const NEWS_FEED_KEY = 'news:feed';
 
 export const newsRouter = Router();
 
-newsRouter.get('/', async (req, res) => {
-  const forceRefresh = req.query.refresh === 'true';
+newsRouter.get('/', validateQuery(newsQuerySchema), async (req, res) => {
+  const { refresh: forceRefresh } = req.query as unknown as z.infer<typeof newsQuerySchema>;
 
   // 1. Check cache first (skip on force refresh)
   const cached = forceRefresh

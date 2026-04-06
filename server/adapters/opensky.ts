@@ -1,7 +1,9 @@
 import { config } from '../config.js';
 import { RateLimitError } from '../types.js';
 import type { FlightEntity, BoundingBox } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'opensky' });
 
 const OPENSKY_TOKEN_URL =
   'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
@@ -105,6 +107,6 @@ export async function fetchFlights(bbox: BoundingBox): Promise<FlightEntity[]> {
     .map(normalizeFlightState)
     .filter((f): f is FlightEntity => f !== null);
 
-  log({ level: 'info', message: `[opensky] fetched ${flights.length} flights in ${Date.now() - start}ms` });
+  log.info({ count: flights.length, durationMs: Date.now() - start }, 'fetched flights');
   return flights;
 }

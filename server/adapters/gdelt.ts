@@ -1,6 +1,8 @@
 import AdmZip from 'adm-zip';
 import type { ConflictEventEntity, ConflictEventType } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'gdelt' });
 import { isGeoValid, detectCentroid } from '../lib/geoValidation.js';
 import { computeEventConfidence, applyGoldsteinSanity, GOLDSTEIN_CEILINGS, checkBellingcatCorroboration, getCameoSpecificity } from '../lib/eventScoring.js';
 import type { BellingcatArticle } from '../lib/eventScoring.js';
@@ -245,7 +247,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     const fullName = cols[COL.ActionGeo_FullName];
     if (!isGeoValid(fullName, countryCode)) {
       geoDiscardCount++;
-      log({ level: 'warn', message: `[gdelt] discarded gdelt-${cols[COL.GLOBALEVENTID]}: FullName='${fullName}' contradicts FIPS=${countryCode}` });
+      log.warn({ eventId: cols[COL.GLOBALEVENTID], fullName, countryCode }, 'discarded: FullName contradicts FIPS');
       continue;
     }
 
@@ -291,7 +293,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     if (entity.type !== origType) {
       reclassifyCount++;
       const ceiling = GOLDSTEIN_CEILINGS[origType]?.ceiling;
-      log({ level: 'info', message: `[gdelt] reclassified ${entity.id}: ${origType} -> ${entity.type} (Goldstein ${entity.data.goldsteinScale}, ceiling ${ceiling})` });
+      log.info({ id: entity.id, from: origType, to: entity.type, goldstein: entity.data.goldsteinScale, ceiling }, 'reclassified event');
     }
 
     // Step 10: Centroid detection
@@ -312,7 +314,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     // Step 12: Threshold filter
     if (confidence < eventConfidenceThreshold) {
       thresholdDiscardCount++;
-      log({ level: 'warn', message: `[gdelt] discarded ${entity.id}: confidence ${confidence.toFixed(3)} below threshold ${eventConfidenceThreshold}` });
+      log.warn({ id: entity.id, confidence: +confidence.toFixed(3), threshold: eventConfidenceThreshold }, 'discarded: below confidence threshold');
       continue;
     }
 
@@ -322,7 +324,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
       if (corroboration.matched) {
         confidence = Math.min(1.0, confidence + config.bellingcatCorroborationBoost);
         entity = { ...entity, data: { ...entity.data, confidence } };
-        log({ level: 'info', message: `[gdelt] Bellingcat corroboration boost for ${entity.id}: +${config.bellingcatCorroborationBoost} -> ${confidence.toFixed(3)} (article: ${corroboration.article.url})` });
+        log.info({ id: entity.id, boost: config.bellingcatCorroborationBoost, confidence: +confidence.toFixed(3), article: corroboration.article.url }, 'Bellingcat corroboration boost');
       }
     }
 
@@ -330,7 +332,7 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
   }
 
   // Pipeline summary
-  log({ level: 'info', message: `[gdelt] pipeline: ${rawCount} raw -> ${geoValidCount} geo-valid -> ${reclassifyCount} reclassified -> ${geoValidCount - thresholdDiscardCount} above threshold -> ${results.length} final` });
+  log.info({ rawCount, geoValidCount, reclassifyCount, aboveThreshold: geoValidCount - thresholdDiscardCount, finalCount: results.length }, 'pipeline summary');
 
   // Dispersion is applied downstream in the events route (after all merging)
   // so that the full merged event set gets single-pass slot assignment.
@@ -668,7 +670,7 @@ export async function fetchEvents(bellingcatArticles?: BellingcatArticle[]): Pro
   const csv = await downloadAndUnzip(exportUrl);
   const events = parseAndFilter(csv, bellingcatArticles);
 
-  log({ level: 'info', message: `[gdelt] fetched ${events.length} events in ${Date.now() - start}ms` });
+  log.info({ count: events.length, durationMs: Date.now() - start }, 'fetched events');
   return events;
 }
 
@@ -710,7 +712,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   const start = Date.now();
 
   const urls = generateBackfillUrls(fromTs, toTs);
-  log({ level: 'info', message: `[gdelt] backfill: ${urls.length} files for ${days} days (4/day sampling)` });
+  log.info({ fileCount: urls.length, days, sampling: '4/day' }, 'backfill started');
 
   const merged = new Map<string, ConflictEventEntity>();
   const BATCH_SIZE = 5;
@@ -737,7 +739,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   }
 
   const events = Array.from(merged.values());
-  log({ level: 'info', message: `[gdelt] backfill: loaded ${events.length} events from ${urls.length} files in ${Date.now() - start}ms` });
+  log.info({ count: events.length, fileCount: urls.length, durationMs: Date.now() - start }, 'backfill complete');
   return events;
 }
 
@@ -759,7 +761,7 @@ export async function backfillEventsWithTrace(
 
   const intervalMs = Math.floor((24 * 60 * 60 * 1000) / samplesPerDay);
   const urls = generateBackfillUrls(fromTs, toTs, intervalMs);
-  log({ level: 'info', message: `[gdelt] audit backfill: ${urls.length} files for ${days} days (${samplesPerDay}/day sampling)` });
+  log.info({ fileCount: urls.length, days, samplesPerDay }, 'audit backfill started');
 
   const allRecords: AuditRecord[] = [];
   const seenIds = new Set<string>();
@@ -787,6 +789,6 @@ export async function backfillEventsWithTrace(
     }
   }
 
-  log({ level: 'info', message: `[gdelt] audit backfill: ${allRecords.length} records (${allRecords.filter(r => r.status === 'accepted').length} accepted, ${allRecords.filter(r => r.status === 'rejected').length} rejected) from ${urls.length} files in ${Date.now() - start}ms` });
+  log.info({ totalRecords: allRecords.length, accepted: allRecords.filter(r => r.status === 'accepted').length, rejected: allRecords.filter(r => r.status === 'rejected').length, fileCount: urls.length, durationMs: Date.now() - start }, 'audit backfill complete');
   return allRecords;
 }
