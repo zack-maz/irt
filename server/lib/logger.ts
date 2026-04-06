@@ -1,3 +1,5 @@
+import pino from 'pino';
+
 export interface LogEntry {
   level: 'info' | 'warn' | 'error';
   message: string;
@@ -9,15 +11,27 @@ export interface LogEntry {
   timestamp?: string;
 }
 
-export function log(entry: LogEntry): void {
-  const output = JSON.stringify({
-    ...entry,
-    timestamp: entry.timestamp ?? new Date().toISOString(),
-  });
+const isTest = process.env.NODE_ENV === 'test';
+const isProd = process.env.NODE_ENV === 'production';
 
-  if (entry.level === 'error') {
-    console.error(output);
-  } else {
-    console.log(output);
-  }
+export const logger = pino({
+  level: isTest ? 'silent' : (process.env.LOG_LEVEL ?? 'info'),
+  ...(!isProd && !isTest
+    ? {
+        transport: {
+          target: 'pino-pretty',
+          options: { colorize: true, translateTime: 'SYS:standard' },
+        },
+      }
+    : {}),
+});
+
+/**
+ * Backward-compatible log() wrapper that delegates to the pino logger.
+ * Callers can continue using `log({ level, message, ...meta })` while
+ * new code uses `logger.info(meta, message)` directly.
+ */
+export function log(entry: LogEntry): void {
+  const { level, message, ...meta } = entry;
+  logger[level](meta, message);
 }
