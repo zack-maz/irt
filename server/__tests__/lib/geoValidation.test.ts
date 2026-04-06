@@ -22,8 +22,19 @@ describe('geoValidation', () => {
       }
     });
 
-    it('CITY_CENTROIDS has >= 30 entries', () => {
-      expect(CITY_CENTROIDS.length).toBeGreaterThanOrEqual(30);
+    it('CITY_CENTROIDS has >= 100 entries (expanded from GeoNames)', () => {
+      expect(CITY_CENTROIDS.length).toBeGreaterThanOrEqual(100);
+    });
+
+    it('CITY_CENTROIDS entries have name, lat, lng fields', () => {
+      for (const city of CITY_CENTROIDS) {
+        expect(city).toHaveProperty('name');
+        expect(city).toHaveProperty('lat');
+        expect(city).toHaveProperty('lng');
+        expect(typeof city.name).toBe('string');
+        expect(typeof city.lat).toBe('number');
+        expect(typeof city.lng).toBe('number');
+      }
     });
   });
 
@@ -114,6 +125,25 @@ describe('geoValidation', () => {
     it('returns precise for point just outside tolerance (0.011 away)', () => {
       // Tehran is 35.6892, 51.3890 -- test at +0.011 on lat
       expect(detectCentroid(35.7003, 51.3890)).toBe('precise');
+    });
+
+    it('detects Mashhad as centroid (newly added from GeoNames)', () => {
+      // Mashhad at ~36.2981, 59.6057 -- was NOT in old 42-entry hardcoded list
+      expect(detectCentroid(36.2981, 59.6057)).toBe('centroid');
+    });
+
+    it('detects Erbil as centroid (newly added from GeoNames)', () => {
+      // Erbil at ~36.1912, 44.0094
+      expect(detectCentroid(36.1912, 44.0094)).toBe('centroid');
+    });
+
+    it('detects Shiraz as centroid (newly added from GeoNames)', () => {
+      // Shiraz at ~29.6103, 52.5311
+      expect(detectCentroid(29.6103, 52.5311)).toBe('centroid');
+    });
+
+    it('still detects Tehran from the original list', () => {
+      expect(detectCentroid(35.6892, 51.3890)).toBe('centroid');
     });
   });
 });
