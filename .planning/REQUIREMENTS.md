@@ -125,6 +125,21 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **WR-06**: WaterFacilityType includes treatment_plant; all WATER_TYPE_LABELS maps updated across tooltip, detail panel, and counters
 - [x] **WR-07**: Desalination audit cross-references known major Gulf plants against Overpass results and reports coverage gaps (report-only, no manual data addition)
 
+### Conflict Geolocation Improvement
+
+- [ ] **NLP-01**: extractActorsAndPlaces() returns actors and places from a single NLP pass on article titles using compromise
+- [ ] **NLP-02**: Custom ME city lexicon (from GeoNames) makes compromise .places() recognize Middle East-specific city names (Isfahan, Mosul, Homs, Deir ez-Zor, etc.)
+- [ ] **GEO-01**: CITY_CENTROIDS expanded from 42 hardcoded entries to 100+ entries sourced from GeoNames dump (pop >= 50k in ME bbox)
+- [ ] **GEO-02**: Events where NLP-extracted actors clearly contradict the geocoded country are rejected with actor_geo_mismatch pipeline trace
+- [ ] **GEO-03**: Centroid events are relocated to NLP-extracted city coordinates when article title mentions a specific place name
+- [ ] **GEO-04**: Cross-border events (e.g., "Israel strikes targets in Syria") are NOT falsely rejected by actor-country validation
+- [ ] **TITLE-01**: Article titles extracted from GDELT SOURCEURL via HTTP GET of HTML head (og:title or title tag, regex-based, no DOM parser)
+- [ ] **TITLE-02**: Title extractions cached in Redis (URL hash key, 7-day logical TTL) with batch concurrency limit (10 parallel fetches)
+- [ ] **PIPE-01**: parseAndFilter includes Phase C NLP cross-validation that rejects actor-geo mismatches and relocates centroid events
+- [ ] **PIPE-02**: CAMEO codes 182 (physical assault) and 190 (conventional military force NOS) are hard-rejected (added to excluded codes list)
+- [ ] **PIPE-03**: Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)
+- [ ] **SCRIPT-01**: GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities
+
 ## v1.2+ Requirements
 
 Deferred to future releases. Tracked but not in current roadmap.
@@ -237,13 +252,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WR-05 | Phase 26.1 | Planned |
 | WR-06 | Phase 26.1 | Planned |
 | WR-07 | Phase 26.1 | Planned |
+| NLP-01 | Phase 26.2 | Planned |
+| NLP-02 | Phase 26.2 | Planned |
+| GEO-01 | Phase 26.2 | Planned |
+| GEO-02 | Phase 26.2 | Planned |
+| GEO-03 | Phase 26.2 | Planned |
+| GEO-04 | Phase 26.2 | Planned |
+| TITLE-01 | Phase 26.2 | Planned |
+| TITLE-02 | Phase 26.2 | Planned |
+| PIPE-01 | Phase 26.2 | Planned |
+| PIPE-02 | Phase 26.2 | Planned |
+| PIPE-03 | Phase 26.2 | Planned |
+| SCRIPT-01 | Phase 26.2 | Planned |
 
 **Coverage:**
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 41 total, 0 complete
-- Total: 75 mapped, 34 complete
+- v1.3 requirements: 53 total, 0 complete
+- Total: 87 mapped, 34 complete
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-03 -- Phase 26.1 water layer refinements requirements added*
+*Last updated: 2026-04-05 -- Phase 26.2 conflict geolocation improvement requirements added*

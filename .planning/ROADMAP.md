@@ -135,15 +135,17 @@ Plans:
 - [ ] 26-05-PLAN.md -- Detail panel, BaseMap wiring, counters, search, proximity, legend, toggle UI, visual checkpoint
 - [ ] 26-06-PLAN.md -- Gap closure: API timeout fix, color floor adjustment, river compositeHealth + line width
 
-### Phase 26.2: Conflict geolocation improvement (INSERTED)
+### Phase 26.2: Conflict Geolocation Improvement (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Reduce misplaced conflict events by adding NLP-based cross-validation to the GDELT pipeline -- extract actors and locations from article titles using compromise, cross-check against GDELT geocoded coordinates, reject mismatches, and relocate centroid events to specific cities when NLP identifies a place name
 **Depends on:** Phase 26
-**Plans:** 0 plans
+**Requirements:** [NLP-01, NLP-02, GEO-01, GEO-02, GEO-03, GEO-04, TITLE-01, TITLE-02, PIPE-01, PIPE-02, PIPE-03, SCRIPT-01]
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 26.2 to break down)
+- [ ] 26.2-01-PLAN.md -- GeoNames extraction script, NLP extractor place extraction, CITY_CENTROIDS expansion
+- [ ] 26.2-02-PLAN.md -- Title fetcher with Redis caching and batch concurrency
+- [ ] 26.2-03-PLAN.md -- NLP geo cross-validator, pipeline Phase C wiring, CAMEO exclusion updates, audit trace
 
 ### Phase 26.1: Water Layer Refinements (INSERTED)
 
