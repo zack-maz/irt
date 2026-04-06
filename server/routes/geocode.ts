@@ -1,7 +1,15 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { reverseGeocode } from '../adapters/nominatim.js';
+import { validateQuery } from '../middleware/validate.js';
 import type { GeocodedLocation } from '../adapters/nominatim.js';
+
+/** Zod schema for /api/geocode query params */
+const geocodeQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lon: z.coerce.number().min(-180).max(180),
+});
 
 /** Cache key prefix for geocode results */
 const GEOCODE_CACHE_PREFIX = 'geocode:';
@@ -14,22 +22,8 @@ const GEOCODE_REDIS_TTL_SEC = 90 * 24 * 60 * 60;
 
 export const geocodeRouter = Router();
 
-geocodeRouter.get('/', async (req, res) => {
-  const latRaw = req.query.lat;
-  const lonRaw = req.query.lon;
-
-  if (latRaw == null || lonRaw == null) {
-    res.status(400).json({ error: 'lat and lon query parameters are required' });
-    return;
-  }
-
-  const lat = Number(latRaw);
-  const lon = Number(lonRaw);
-
-  if (Number.isNaN(lat) || Number.isNaN(lon)) {
-    res.status(400).json({ error: 'lat and lon must be valid numbers' });
-    return;
-  }
+geocodeRouter.get('/', validateQuery(geocodeQuerySchema), async (req, res) => {
+  const { lat, lon } = req.query as unknown as z.infer<typeof geocodeQuerySchema>;
 
   // Quantize to 2 decimal places for cache key consistency
   const qLat = Math.round(lat * 100) / 100;

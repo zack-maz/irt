@@ -46,14 +46,14 @@ export type Env = z.infer<typeof envSchema>;
 // that don't have real Redis don't crash on import.
 function parseEnv(): Env {
   const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
-  const envWithTestDefaults = isTest
-    ? {
-        UPSTASH_REDIS_REST_URL: 'https://test-redis.upstash.io',
-        UPSTASH_REDIS_REST_TOKEN: 'test-token',
-        ...process.env,
-      }
-    : process.env;
-  return envSchema.parse(envWithTestDefaults);
+  if (isTest) {
+    // In test: provide safe defaults for Redis vars, but let real env vars override
+    const merged = { ...process.env };
+    if (!merged.UPSTASH_REDIS_REST_URL) merged.UPSTASH_REDIS_REST_URL = 'https://test-redis.upstash.io';
+    if (!merged.UPSTASH_REDIS_REST_TOKEN) merged.UPSTASH_REDIS_REST_TOKEN = 'test-token';
+    return envSchema.parse(merged);
+  }
+  return envSchema.parse(process.env);
 }
 
 export const env = parseEnv();

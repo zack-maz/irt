@@ -139,18 +139,19 @@ describe('Geocode Route (/api/geocode)', () => {
     server?.close();
   });
 
-  it('returns 400 when lat/lon missing', async () => {
+  it('returns 400 with VALIDATION_ERROR when lat/lon missing', async () => {
     const res = await fetch(`${baseUrl}/api/geocode`);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toMatch(/lat and lon/);
+    expect(body.code).toBe('VALIDATION_ERROR');
+    expect(body.details).toBeDefined();
   });
 
-  it('returns 400 when lat/lon are not numbers', async () => {
+  it('returns 400 with VALIDATION_ERROR when lat/lon are not numbers', async () => {
     const res = await fetch(`${baseUrl}/api/geocode?lat=abc&lon=xyz`);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toMatch(/valid numbers/);
+    expect(body.code).toBe('VALIDATION_ERROR');
   });
 
   it('returns cached result on cache hit (does not call Nominatim)', async () => {
