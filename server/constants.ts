@@ -12,14 +12,11 @@ export const IRAN_BBOX: BoundingBox = {
   east: 80.0,
 };
 
-// ADS-B Exchange/adsb.lol center point for radius query (centered on region)
+// adsb.lol center point for radius query (centered on region)
 export const IRAN_CENTER = { lat: 28.0, lon: 45.0 } as const;
 export const ADSB_RADIUS_NM = 1200;
 
-// ADS-B Exchange polling interval: 10K requests/month / 30 days => ~260s per poll
-export const ADSB_POLL_INTERVAL = 260_000;
-
-// Unit conversion constants (ADS-B Exchange uses imperial units)
+// Unit conversion constants (adsb.lol v2 API uses imperial units)
 export const KNOTS_TO_MS = 0.514444;
 export const FEET_TO_METERS = 0.3048;
 export const FPM_TO_MS = 0.00508; // feet per minute to meters per second
@@ -30,7 +27,6 @@ export const SITES_CACHE_TTL = 86_400_000;
 // Cache TTL values per data source (milliseconds)
 export const CACHE_TTL = {
   flights: 10_000, // 10s -- OpenSky polling interval
-  adsbFlights: 260_000, // 260s -- same as ADS-B Exchange poll interval
   adsblolFlights: 30_000, // 30s -- adsb.lol community API (respectful polling)
   ships: 0, // N/A for WebSocket push
   events: 900_000, // 15min -- GDELT updates every 15 minutes

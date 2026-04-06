@@ -15,17 +15,8 @@ vi.mock('../../middleware/rateLimit.js', () => ({
 }));
 
 // Mock all adapter modules to prevent real network calls
-vi.mock('../../adapters/opensky.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-
-vi.mock('../../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../../adapters/opensky.js', () => ({ fetchFlights: vi.fn(async () => []) }));
+vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 
 vi.mock('../../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
@@ -101,22 +92,18 @@ describe('Sources Route', () => {
   it('returns 200 with correct shape', async () => {
     process.env.OPENSKY_CLIENT_ID = 'test-id';
     process.env.OPENSKY_CLIENT_SECRET = 'test-secret';
-    process.env.ADSB_EXCHANGE_API_KEY = 'test-key';
 
     const res = await fetch(`${baseUrl}/api/sources`);
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body).toHaveProperty('opensky');
-    expect(body).toHaveProperty('adsb');
     expect(body).toHaveProperty('adsblol');
     expect(body.opensky).toHaveProperty('configured');
-    expect(body.adsb).toHaveProperty('configured');
     expect(body.adsblol).toHaveProperty('configured');
 
     delete process.env.OPENSKY_CLIENT_ID;
     delete process.env.OPENSKY_CLIENT_SECRET;
-    delete process.env.ADSB_EXCHANGE_API_KEY;
   });
 
   it('adsblol.configured is always true', async () => {
@@ -161,25 +148,5 @@ describe('Sources Route', () => {
     expect(body.opensky.configured).toBe(false);
 
     delete process.env.OPENSKY_CLIENT_ID;
-  });
-
-  it('adsb.configured is true when ADSB_EXCHANGE_API_KEY is set', async () => {
-    process.env.ADSB_EXCHANGE_API_KEY = 'test-key';
-
-    const res = await fetch(`${baseUrl}/api/sources`);
-    const body = await res.json();
-
-    expect(body.adsb.configured).toBe(true);
-
-    delete process.env.ADSB_EXCHANGE_API_KEY;
-  });
-
-  it('adsb.configured is false when ADSB_EXCHANGE_API_KEY is missing', async () => {
-    delete process.env.ADSB_EXCHANGE_API_KEY;
-
-    const res = await fetch(`${baseUrl}/api/sources`);
-    const body = await res.json();
-
-    expect(body.adsb.configured).toBe(false);
   });
 });

@@ -52,7 +52,6 @@ vi.mock('../../config.js', () => ({
 
 // Mock all existing adapters
 vi.mock('../../adapters/opensky.js', () => ({ fetchFlights: vi.fn(async () => []) }));
-vi.mock('../../adapters/adsb-exchange.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []), getLastMessageTime: vi.fn(() => 0), connectAISStream: vi.fn(),

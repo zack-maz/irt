@@ -8,11 +8,10 @@ type SourceConfig = Record<FlightSource, { configured: boolean }>;
 
 const SOURCE_LABELS: Record<FlightSource, string> = {
   opensky: 'OpenSky',
-  adsb: 'ADS-B Exchange',
   adsblol: 'adsb.lol',
 };
 
-const SOURCES: FlightSource[] = ['opensky', 'adsb', 'adsblol'];
+const SOURCES: FlightSource[] = ['opensky', 'adsblol'];
 
 const STATUS_DOT_CLASS: Record<ConnectionStatus, string> = {
   connected: 'bg-accent-green',

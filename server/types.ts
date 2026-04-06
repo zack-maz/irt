@@ -130,7 +130,7 @@ export interface NewsCluster {
   lastUpdated: number; // Latest publishedAt in cluster
 }
 
-export type FlightSource = 'opensky' | 'adsb' | 'adsblol';
+export type FlightSource = 'opensky' | 'adsblol';
 
 export interface MarketQuote {
   symbol: string;           // "BZ=F", "CL=F", "XLE", "USO", "XOM"

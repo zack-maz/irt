@@ -101,30 +101,6 @@ vi.mock('../adapters/opensky.js', () => ({
   ]),
 }));
 
-vi.mock('../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async (): Promise<FlightEntity[]> => [
-    {
-      id: 'flight-def456',
-      type: 'flight',
-      lat: 32.5,
-      lng: 53.0,
-      timestamp: Date.now(),
-      label: 'UAE789',
-      data: {
-        icao24: 'def456',
-        callsign: 'UAE789',
-        originCountry: '',
-        velocity: 174.4,
-        heading: 90,
-        altitude: 11582.4,
-        onGround: false,
-        verticalRate: 0,
-        unidentified: false,
-      },
-    },
-  ]),
-}));
-
 vi.mock('../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
   getLastMessageTime: vi.fn(() => 0),
@@ -172,7 +148,6 @@ describe('Security: No credential leaks in API responses', () => {
   let baseUrl: string;
 
   beforeEach(async () => {
-    process.env.ADSB_EXCHANGE_API_KEY = 'SECRET_ADSB_API_KEY';
 
     const { createApp } = await import('../index.js');
     const app = createApp();
@@ -191,7 +166,6 @@ describe('Security: No credential leaks in API responses', () => {
 
   afterEach(() => {
     server?.close();
-    delete process.env.ADSB_EXCHANGE_API_KEY;
   });
 
   it('GET /api/flights response does not contain OpenSky credentials', async () => {

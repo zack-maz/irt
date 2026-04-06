@@ -97,12 +97,7 @@ vi.mock('../../config.js', () => ({
 vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-vi.mock('../../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 
 // Mock aisstream adapter (ships route uses it)
 vi.mock('../../adapters/aisstream.js', () => ({

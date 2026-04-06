@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { log } from '../lib/logger.js';
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
-import { fetchFlights as fetchAdsbExchange } from '../adapters/adsb-exchange.js';
 import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
 import { IRAN_BBOX, CACHE_TTL } from '../constants.js';
 import { RateLimitError } from '../types.js';
@@ -11,20 +10,17 @@ import type { FlightEntity, FlightSource } from '../types.js';
 /** Redis key per flight source */
 const CACHE_KEYS: Record<FlightSource, string> = {
   opensky: 'flights:opensky',
-  adsb: 'flights:adsb',
   adsblol: 'flights:adsblol',
 };
 
 /** Logical TTL (ms) -- used to compute staleness */
 const LOGICAL_TTLS: Record<FlightSource, number> = {
   opensky: CACHE_TTL.flights,
-  adsb: CACHE_TTL.adsbFlights,
   adsblol: CACHE_TTL.adsblolFlights,
 };
 
 function parseSource(raw: unknown): FlightSource {
   if (raw === 'opensky') return 'opensky';
-  if (raw === 'adsb') return 'adsb';
   if (raw === 'adsblol') return 'adsblol';
   return 'adsblol';
 }
@@ -32,7 +28,6 @@ function parseSource(raw: unknown): FlightSource {
 function getFetcher(source: FlightSource): () => Promise<FlightEntity[]> {
   switch (source) {
     case 'opensky': return () => fetchOpenSky(IRAN_BBOX);
-    case 'adsb': return fetchAdsbExchange;
     case 'adsblol': return fetchAdsbLol;
   }
 }
@@ -46,10 +41,6 @@ flightsRouter.get('/', async (req, res) => {
   const redisTtl = Math.ceil((logicalTtl * 10) / 1000); // 10x multiplier, ms → seconds
 
   // Credential checks for sources that require API keys
-  if (source === 'adsb' && !process.env.ADSB_EXCHANGE_API_KEY) {
-    return res.status(503).json({ error: 'ADS-B Exchange API key not configured' });
-  }
-
   if (source === 'opensky' && !(process.env.OPENSKY_CLIENT_ID && process.env.OPENSKY_CLIENT_SECRET)) {
     return res.status(503).json({ error: 'OpenSky credentials not configured' });
   }

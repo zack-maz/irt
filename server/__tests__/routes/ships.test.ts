@@ -92,10 +92,6 @@ vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
 
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-
 vi.mock('../../adapters/adsb-lol.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
