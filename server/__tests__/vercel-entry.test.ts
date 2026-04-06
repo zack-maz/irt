@@ -2,33 +2,19 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { Server } from 'node:http';
 
-// Mock config before importing the entry point
-vi.mock('../config.js', () => ({
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
+// Mock config before importing the entry point (spread actual to preserve constants)
+vi.mock('../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../config.js')>();
+  const mockCfg = {
+    port: 0, corsOrigin: '*',
     opensky: { clientId: '', clientSecret: '' },
     aisstream: { apiKey: '' },
     acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  config: {
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  },
-}));
+    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
+    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock rate limiter -- pass through
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();

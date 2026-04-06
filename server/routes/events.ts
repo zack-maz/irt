@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe, redis } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'events' });
 import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
 import { extractBellingcatGeo } from '../lib/eventScoring.js';
 import { WAR_START, CACHE_TTL } from '../config.js';
@@ -63,7 +65,7 @@ eventsRouter.get('/', async (req, res) => {
       }
     } catch {
       // Non-fatal: if news cache is unavailable, proceed without corroboration
-      log({ level: 'warn', message: '[events] failed to fetch Bellingcat articles for corroboration' });
+      log.warn('failed to fetch Bellingcat articles for corroboration');
     }
 
     const fresh = await fetchEvents(bellingcatArticles);
@@ -86,9 +88,9 @@ eventsRouter.get('/', async (req, res) => {
           eventMap.set(event.id, event);
         }
         await redis.set(BACKFILL_KEY, Date.now(), { ex: REDIS_TTL_SEC });
-        log({ level: 'info', message: `[events] backfill: merged ${backfillData.length} historical events` });
+        log.info({ count: backfillData.length }, 'backfill: merged historical events');
       } catch (backfillErr) {
-        log({ level: 'warn', message: `[events] backfill failed (non-fatal): ${(backfillErr as Error).message}` });
+        log.warn({ err: backfillErr }, 'backfill failed (non-fatal)');
       }
     }
 
@@ -110,7 +112,7 @@ eventsRouter.get('/', async (req, res) => {
     await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
     res.json({ data: merged, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[events] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     if (cached) {
       // Prune stale entries even on error

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'water' });
 import { fetchWaterFacilities } from '../adapters/overpass-water.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
 import {
@@ -31,11 +33,11 @@ export const waterRouter = Router();
  * in local dev, the 90s per-query Overpass timeout handles it.
  */
 waterRouter.get('/', async (req, res) => {
-  log({ level: 'info', message: '[water] GET /api/water hit' });
+  log.info('GET /api/water hit');
   const isCron = req.headers['user-agent']?.includes('vercel-cron');
   const forceRefresh = req.query.refresh === 'true' && (isCron || process.env.NODE_ENV !== 'production');
   const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
-  log({ level: 'info', message: `[water] cache result: ${cached ? `${cached.data.length} facilities, stale=${cached.stale}` : 'miss'}` });
+  log.info({ cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale }, 'cache result');
 
   if (cached && !cached.stale && !forceRefresh) {
     return res.json(cached);
@@ -46,11 +48,11 @@ waterRouter.get('/', async (req, res) => {
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     res.json({ data: facilities, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[water] Overpass error: ${(err as Error).message}` });
+    log.error({ err }, 'Overpass error');
     if (cached) {
       res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
     } else {
-      log({ level: 'warn', message: '[water] Overpass failed, returning empty' });
+      log.warn('Overpass failed, returning empty');
       res.json({ data: [], stale: true, lastFresh: 0 });
     }
   }
@@ -90,7 +92,7 @@ waterRouter.get('/precip', async (req, res) => {
     }
     res.json({ data: precipData, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[water/precip] Error: ${(err as Error).message}` });
+    log.error({ err }, 'precipitation fetch error');
     if (cachedPrecip) {
       res.json({ data: cachedPrecip.data, stale: true, lastFresh: cachedPrecip.lastFresh });
     } else {

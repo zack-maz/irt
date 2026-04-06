@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'flights' });
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
 import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
 import { IRAN_BBOX, CACHE_TTL } from '../config.js';
@@ -57,7 +59,7 @@ flightsRouter.get('/', async (req, res) => {
     await cacheSetSafe(cacheKey, flights, redisTtl);
     res.json({ data: flights, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[flights:${source}] upstream error: ${(err as Error).message}` });
+    log.error({ err, source }, 'upstream error');
 
     // Distinguish rate limit errors from generic errors
     if (err instanceof RateLimitError) {

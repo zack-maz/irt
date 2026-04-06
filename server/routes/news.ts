@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'news' });
 import { fetchGdeltArticles } from '../adapters/gdelt-doc.js';
 import { fetchAllRssFeeds } from '../adapters/rss.js';
 import { filterAndScoreArticles } from '../lib/newsFilter.js';
@@ -33,7 +35,7 @@ newsRouter.get('/', async (req, res) => {
     const [gdeltArticles, rssArticles] = await Promise.all([
       fetchGdeltArticles(),
       fetchAllRssFeeds().catch((err) => {
-        log({ level: 'warn', message: `[news] RSS fetch failed (non-fatal): ${(err as Error).message}` });
+        log.warn({ err }, 'RSS fetch failed (non-fatal)');
         return [] as NewsArticle[];
       }),
     ]);
@@ -70,12 +72,12 @@ newsRouter.get('/', async (req, res) => {
 
     const gdeltCount = gdeltArticles.length;
     const rssCount = rssArticles.length;
-    log({ level: 'info', message: `[news] fetched: ${gdeltCount} GDELT + ${rssCount} RSS, ${clusters.length} clusters after filter/dedup` });
+    log.info({ gdeltCount, rssCount, clusterCount: clusters.length }, 'fetched and clustered news');
 
     // 9. Return response
     res.json({ data: clusters, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[news] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     // Fall back to stale cache if available
     if (cached) {

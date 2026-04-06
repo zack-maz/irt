@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'weather' });
 import { fetchWeather } from '../adapters/open-meteo.js';
 import { WEATHER_CACHE_TTL, WEATHER_REDIS_TTL_SEC, WEATHER_CACHE_KEY } from '../config.js';
 import type { WeatherGridPoint } from '../types.js';
@@ -21,12 +23,12 @@ weatherRouter.get('/', async (_req, res) => {
     // 3. Cache the fresh data
     await cacheSetSafe(WEATHER_CACHE_KEY, points, WEATHER_REDIS_TTL_SEC);
 
-    log({ level: 'info', message: `[weather] fetched ${points.length} grid points` });
+    log.info({ count: points.length }, 'fetched grid points');
 
     // 4. Return fresh response
     res.json({ data: points, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[weather] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     // Fall back to stale cache if available
     if (cached) {

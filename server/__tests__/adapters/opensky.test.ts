@@ -1,15 +1,14 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock config module before importing adapter
-vi.mock('../../config.js', () => ({
-  config: {
-    opensky: {
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
-    },
-  },
-}));
+// Mock config module before importing adapter (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  return {
+    ...actual,
+    config: { ...actual.config, opensky: { clientId: 'test-client-id', clientSecret: 'test-client-secret' } },
+  };
+});
 
 // Sample OpenSky state vector (array of 18 values per API docs)
 // [0]=icao24, [1]=callsign, [2]=origin_country, [3]=time_position, [4]=last_contact,

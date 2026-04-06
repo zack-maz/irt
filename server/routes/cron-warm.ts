@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'cron-warm' });
 import { fetchSites } from '../adapters/overpass.js';
 import { fetchWaterFacilities } from '../adapters/overpass-water.js';
 import { WATER_REDIS_TTL_SEC } from '../config.js';
@@ -22,7 +24,7 @@ export const cronWarmRouter = Router();
  */
 cronWarmRouter.get('/', async (_req, res) => {
   const start = Date.now();
-  log({ level: 'info', message: '[cron-warm] Starting cache pre-warm' });
+  log.info('starting cache pre-warm');
 
   const results = await Promise.allSettled([
     (async () => {
@@ -48,10 +50,8 @@ cronWarmRouter.get('/', async (_req, res) => {
   };
 
   const allOk = results.every((r) => r.status === 'fulfilled');
-  log({
-    level: allOk ? 'info' : 'warn',
-    message: `[cron-warm] Done in ${summary.durationMs}ms — sites: ${JSON.stringify(summary.sites)}, water: ${JSON.stringify(summary.water)}`,
-  });
+  const logLevel = allOk ? 'info' : 'warn';
+  log[logLevel](summary, 'cache pre-warm complete');
 
   res.json({ status: allOk ? 'ok' : 'partial', ...summary });
 });

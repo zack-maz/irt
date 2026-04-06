@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'markets' });
 import { fetchMarkets, isValidRange } from '../adapters/yahoo-finance.js';
 import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../config.js';
 import type { MarketQuote } from '../types.js';
@@ -27,13 +29,13 @@ marketsRouter.get('/', async (req, res) => {
       // 3. Cache the fresh data
       await cacheSetSafe(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
 
-      log({ level: 'info', message: `[markets] fetched ${quotes.length}/${5} tickers (${range}): ${quotes.map((q) => q.symbol).join(', ')}` });
+      log.info({ count: quotes.length, total: 5, range, tickers: quotes.map((q) => q.symbol) }, 'fetched tickers');
 
       // 4. Return fresh response
       res.json({ data: quotes, stale: false, lastFresh: Date.now() });
     } else if (cached) {
       // All tickers failed but we have stale cache
-      log({ level: 'warn', message: '[markets] all tickers failed, serving stale cache' });
+      log.warn('all tickers failed, serving stale cache');
       res.json({
         data: cached.data,
         stale: true,
@@ -41,11 +43,11 @@ marketsRouter.get('/', async (req, res) => {
       });
     } else {
       // No data at all
-      log({ level: 'error', message: '[markets] all tickers failed with no cache available' });
+      log.error('all tickers failed with no cache available');
       res.status(502).json({ error: 'No market data available' });
     }
   } catch (err) {
-    log({ level: 'error', message: `[markets] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     // Fall back to stale cache if available
     if (cached) {

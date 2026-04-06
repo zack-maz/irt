@@ -10,33 +10,19 @@ interface CacheEntry<T> {
 }
 const redisStore = new Map<string, CacheEntry<unknown>>();
 
-// Mock config before importing createApp
-vi.mock('../config.js', () => ({
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
+// Mock config before importing createApp (spread actual to preserve constants)
+vi.mock('../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../config.js')>();
+  const mockCfg = {
+    port: 0, corsOrigin: '*',
     opensky: { clientId: '', clientSecret: '' },
     aisstream: { apiKey: '' },
     acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  config: {
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  },
-}));
+    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
+    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock rate limiter -- pass through for server tests
 const passThrough = (_req: unknown, _res: unknown, next: () => void) => next();

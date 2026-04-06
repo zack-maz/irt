@@ -3,57 +3,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Server } from 'http';
 import type { FlightEntity, ConflictEventEntity } from '../types.js';
 
-// Mock config module with test credentials
-vi.mock('../config.js', () => ({
-  config: {
-    port: 0,
-    corsOrigin: '*',
-    opensky: {
-      clientId: 'SECRET_OPENSKY_CLIENT_ID',
-      clientSecret: 'SECRET_OPENSKY_CLIENT_SECRET',
-    },
-    aisstream: {
-      apiKey: 'SECRET_AISSTREAM_API_KEY',
-    },
-    acled: {
-      email: 'SECRET_ACLED_EMAIL@example.com',
-      password: 'SECRET_ACLED_PASSWORD',
-    },
-    newsRelevanceThreshold: 0.7,
-  },
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: {
-      clientId: 'SECRET_OPENSKY_CLIENT_ID',
-      clientSecret: 'SECRET_OPENSKY_CLIENT_SECRET',
-    },
-    aisstream: {
-      apiKey: 'SECRET_AISSTREAM_API_KEY',
-    },
-    acled: {
-      email: 'SECRET_ACLED_EMAIL@example.com',
-      password: 'SECRET_ACLED_PASSWORD',
-    },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: {
-      clientId: 'SECRET_OPENSKY_CLIENT_ID',
-      clientSecret: 'SECRET_OPENSKY_CLIENT_SECRET',
-    },
-    aisstream: {
-      apiKey: 'SECRET_AISSTREAM_API_KEY',
-    },
-    acled: {
-      email: 'SECRET_ACLED_EMAIL@example.com',
-      password: 'SECRET_ACLED_PASSWORD',
-    },
-    newsRelevanceThreshold: 0.7,
-  }),
-}));
+// Mock config module with test credentials (spread actual to preserve constants)
+vi.mock('../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../config.js')>();
+  const mockCfg = {
+    port: 0, corsOrigin: '*',
+    opensky: { clientId: 'SECRET_OPENSKY_CLIENT_ID', clientSecret: 'SECRET_OPENSKY_CLIENT_SECRET' },
+    aisstream: { apiKey: 'SECRET_AISSTREAM_API_KEY' },
+    acled: { email: 'SECRET_ACLED_EMAIL@example.com', password: 'SECRET_ACLED_PASSWORD' },
+    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
+    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock rate limiter -- pass through for security tests
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();

@@ -2,16 +2,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NewsArticle } from '../../types.js';
 
-// Mock config module so we can control newsRelevanceThreshold
-vi.mock('../../config.js', () => ({
-  getConfig: () => ({
-    newsRelevanceThreshold: 0.7,
-  }),
-  loadConfig: () => ({
-    newsRelevanceThreshold: 0.7,
-  }),
-  config: { newsRelevanceThreshold: 0.7 },
-}));
+// Mock config module (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = { ...actual.config, newsRelevanceThreshold: 0.7 };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 const makeArticle = (overrides: Partial<NewsArticle> = {}): NewsArticle => ({
   id: 'test-id-001',
