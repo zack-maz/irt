@@ -11,16 +11,23 @@
     "dev:client": "vite",
     "dev:server": "node --env-file-if-exists=.env --import tsx/esm --watch server/index.ts",
     "build": "vite build && tsup server/vercel-entry.ts --format esm --out-dir api --no-splitting --tsconfig tsconfig.server.json",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && type-coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "knip": "knip",
     "check:env": "tsx scripts/check-env-example.ts",
-    "type-coverage": "echo 'type-coverage placeholder -- wired in 26.4-03' && exit 0",
+    "type-coverage": "type-coverage",
     "preview": "vite preview",
     "prepare": "husky"
+  },
+  "typeCoverage": {
+    "atLeast": 97,
+    "strict": true,
+    "project": "tsconfig.server.json",
+    "detail": true,
+    "ignoreCatch": true
   },
   "lint-staged": {
     "*.{ts,tsx}": [
