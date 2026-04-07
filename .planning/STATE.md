@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: '2026-04-07T03:30:25.644Z'
+last_updated: '2026-04-07T16:37:21Z'
 progress:
   total_phases: 13
   completed_phases: 8
-  total_plans: 33
-  completed_plans: 30
+  total_plans: 34
+  completed_plans: 31
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 26.4: Plan 01 COMPLETE (final code grooming pass, tooling installed)
 Phase 26.3 COMPLETE (6 of 6 plans done)
 Phase 26.3: Plan 05 COMPLETE (strict TS + OpenAPI, closes the phase)
 Phase 26.3: Plan 06 COMPLETE (5 of 6 plans done; Plan 05 still pending)
@@ -155,6 +156,15 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Rate limit test fixture swap: rateLimiters.flights aliased locally instead of preserving deprecated rateLimitMiddleware export purely for tests
 - OpenAPI 3.0.3 spec hand-written (not zod-to-openapi generated) to avoid code-gen runtime dep and keep editorial descriptions for portfolio review
 - allOf composition in OpenAPI for CacheResponse&lt;T&gt; pattern (OpenAPI 3.0 has no generics)
+- Prettier 3 + eslint-config-prettier 10 (flat) + knip 5 installed; lint:fix, format, format:check, knip, check:env scripts added (26.4-01)
+- eslint argsIgnorePattern '^\_' enforces existing underscore-prefix convention for intentionally-unused identifiers (26.4-01)
+- getIconAtlasForLayer() wrapper in icons.ts eliminates 9 iconAtlas `as any` casts across useEntityLayers and useWaterLayers (26.4-01)
+- Static GeoJSON imports typed via `as unknown as FeatureCollection` instead of `as any` -- deck.gl v9 type defs are stricter than runtime contract (26.4-01)
+- ColorReliefLayer wrapper component isolates the maplibre 5 `color-relief` type cast so @vis.gl/react-maplibre 8 type gap is contained (26.4-01)
+- scripts/check-env-example.ts drift checker forces NODE_ENV=test before dynamic import of server/config so parseEnv() returns safe defaults (26.4-01)
+- knip.json whitelists tailwindcss / pino-pretty / @types/pino-http -- CSS @import / string-literal / type-only usage cannot be statically detected (26.4-01)
+- 81 pre-existing lint errors absorbed into Plan 01 Task 1 commit (26.4-01 cleanup pass intentionally covers pre-existing tech debt)
+- Deleted @deck.gl/aggregation-layers and @deck.gl/react deps (genuinely unused; test mocks aliased via vite.config) (26.4-01)
 
 ## Pending Todos
 

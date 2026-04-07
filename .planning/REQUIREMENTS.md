@@ -162,13 +162,13 @@ Phase 26.4 — portfolio-grade external artifacts and Palantir-grade engineering
 
 **Plan 01 — Final code cleanup pass**
 
-- [ ] **PRES-01**: Repository is fully Prettier-formatted with `eslint --fix` applied repo-wide; flat ESLint config (`eslint.config.js`) and `.prettierrc.json` committed
-- [ ] **PRES-02**: Zero `TODO`/`FIXME` comments remain except explicitly preserved `TODO(26.2)` GDELT-redo flags and any `TODO(coverage)` placeholders
-- [ ] **PRES-03**: Zero `console.log`/`console.warn`/`console.error` calls remain in client production code
-- [ ] **PRES-04**: `knip` reports zero unused files, exports, and devDependencies (or all whitelisted with rationale)
-- [ ] **PRES-05**: `.env.example` matches every key in `server/config.ts` Zod schema, verified by `scripts/check-env-example.ts`
-- [ ] **PRES-06**: Tracked file scan finds no `.DS_Store`/`.env.local`/`coverage/`/`dist/` stragglers committed to the repo
-- [ ] **PRES-07**: `package.json` exposes `lint`, `lint:fix`, `format`, `format:check`, `knip`, `type-coverage` scripts as new entries
+- [x] **PRES-01**: Repository is fully Prettier-formatted with `eslint --fix` applied repo-wide; flat ESLint config (`eslint.config.js`) and `.prettierrc.json` committed
+- [x] **PRES-02**: Zero `TODO`/`FIXME` comments remain except explicitly preserved `TODO(26.2)` GDELT-redo flags and any `TODO(coverage)` placeholders
+- [x] **PRES-03**: Zero `console.log`/`console.warn`/`console.error` calls remain in client production code
+- [x] **PRES-04**: `knip` reports zero unused files, exports, and devDependencies (or all whitelisted with rationale)
+- [x] **PRES-05**: `.env.example` matches every key in `server/config.ts` Zod schema, verified by `scripts/check-env-example.ts`
+- [x] **PRES-06**: Tracked file scan finds no `.DS_Store`/`.env.local`/`coverage/`/`dist/` stragglers committed to the repo
+- [x] **PRES-07**: `package.json` exposes `lint`, `lint:fix`, `format`, `format:check`, `knip`, `type-coverage` scripts as new entries
 
 **Plan 02 — CI/CD + husky + gitleaks**
 
@@ -355,13 +355,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLN-11      | Phase 26.3 | Complete |
 | CLN-12      | Phase 26.3 | Complete |
 | CLN-13      | Phase 26.3 | Complete |
-| PRES-01     | Phase 26.4 | Planned  |
-| PRES-02     | Phase 26.4 | Planned  |
-| PRES-03     | Phase 26.4 | Planned  |
-| PRES-04     | Phase 26.4 | Planned  |
-| PRES-05     | Phase 26.4 | Planned  |
-| PRES-06     | Phase 26.4 | Planned  |
-| PRES-07     | Phase 26.4 | Planned  |
+| PRES-01     | Phase 26.4 | Complete |
+| PRES-02     | Phase 26.4 | Complete |
+| PRES-03     | Phase 26.4 | Complete |
+| PRES-04     | Phase 26.4 | Complete |
+| PRES-05     | Phase 26.4 | Complete |
+| PRES-06     | Phase 26.4 | Complete |
+| PRES-07     | Phase 26.4 | Complete |
 | PRES-10     | Phase 26.4 | Planned  |
 | PRES-11     | Phase 26.4 | Planned  |
 | PRES-12     | Phase 26.4 | Planned  |
