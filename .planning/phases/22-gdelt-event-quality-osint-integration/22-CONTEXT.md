@@ -14,6 +14,7 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 ## Implementation Decisions
 
 ### Event Stacking Fix
+
 - Use concentric ring dispersion for city-level centroid events (ActionGeo_Type=3)
 - Ring 1: 6 positions at ~3km radius, Ring 2: 12 at ~6km, Ring 3: 18 at ~9km
 - Deterministic positioning: events sorted by timestamp, assigned to ring slots in order — stable across reloads
@@ -22,12 +23,14 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 - City-level events are kept (not rejected or downranked) — dispersion is the solution, not filtering
 
 ### GDELT Filter Tuning
+
 - Audit-first approach: dump all events (passed + rejected) before making any filter changes
 - Compare against manual review — user will scan the dump and flag false positives/negatives
 - Corrections fed back via config-driven thresholds (adjustable confidence threshold, CAMEO exclusion list, NumSources min, centroid penalty) — no code changes needed per adjustment
 - Auto-audit cross-referencing deferred to potential Phase 22.1
 
 ### Bellingcat Integration
+
 - Dual role: RSS news feed source (6th feed in existing pipeline) AND event confidence booster
 - As news feed: flows through existing keyword filter, relevance scoring, and dedup/clustering — appears in notification center
 - As confidence booster: +0.2 to GDELT event confidence score when corroborated by a Bellingcat article
@@ -35,12 +38,13 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 - Reuses newsMatching.ts approach but with stricter parameters
 
 ### Event Audit Output
+
 - CLI script: `npx tsx scripts/audit-events.ts`
 - JSON format, well-structured and easy to read
 - Includes both accepted AND rejected events with rejection reason (e.g., rejected:low_confidence, rejected:excluded_cameo, rejected:single_source)
 - Metadata per event includes:
   - Pipeline trace: which Phase A/B checks passed/failed, confidence sub-scores (media, sources, actors, geo, goldstein, cameo), final composite score
-  - Original GDELT columns: raw fields we currently ignore (ActionGeo_Type, FeatureID, EventGeo_*, QuadClass, etc.)
+  - Original GDELT columns: raw fields we currently ignore (ActionGeo*Type, FeatureID, EventGeo*\*, QuadClass, etc.)
   - Bellingcat match: flag + article title/URL if corroborated
   - Dispersion info: original centroid coords + dispersed coords + ring position
   - Any other audit-relevant data
@@ -48,6 +52,7 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 - Output to local JSON file (not deployed as API route)
 
 ### Claude's Discretion
+
 - Exact ring angle offsets and event-to-slot assignment algorithm
 - JSON output structure and field naming
 - How to surface ActionGeo_Type in the existing pipeline (currently ignored column)
@@ -57,9 +62,11 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/adapters/gdelt.ts`: Two-phase parseAndFilter pipeline, backfillEvents() with direct URL construction, 4-files/day sampling
 - `server/lib/geoValidation.ts`: detectCentroid (42 cities at ±0.01°), isGeoValid cross-validation
 - `server/lib/eventScoring.ts`: computeEventConfidence (6-signal composite), applyGoldsteinSanity
@@ -68,6 +75,7 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 - `server/lib/newsFilter.ts`: filterAndScoreArticles with relevance scoring — Bellingcat articles flow through this
 
 ### Established Patterns
+
 - Adapter → route → Redis cache → Zustand store → polling hook (all data sources follow this)
 - CacheEntry<T> with {data, fetchedAt} for staleness computation
 - Config-driven thresholds via loadConfig() with safe defaults
@@ -75,6 +83,7 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 - Per-event confidence scoring with weighted signals
 
 ### Integration Points
+
 - `server/adapters/gdelt.ts` parseAndFilter() — add ActionGeo_Type parsing, dispersion logic, pipeline trace metadata
 - `server/routes/events.ts` — no changes needed if dispersion happens in adapter
 - `server/adapters/rss.ts` RSS_FEEDS array — add Bellingcat entry
@@ -104,5 +113,5 @@ Eliminate false positives/negatives in the conflict event pipeline, add Bellingc
 
 ---
 
-*Phase: 22-gdelt-event-quality-osint-integration*
-*Context gathered: 2026-04-01*
+_Phase: 22-gdelt-event-quality-osint-integration_
+_Context gathered: 2026-04-01_

@@ -54,9 +54,7 @@ function AlertIcon({
           <div className="mb-0.5">
             <span className="font-semibold text-amber-400 text-[9px]">PROXIMITY ALERT</span>
           </div>
-          <div className="mb-0.5 truncate font-medium text-text-primary">
-            {alert.siteLabel}
-          </div>
+          <div className="mb-0.5 truncate font-medium text-text-primary">{alert.siteLabel}</div>
           <div className="space-y-px text-text-secondary">
             <div>
               <span className="text-text-tertiary">Flight:</span>{' '}
@@ -161,10 +159,7 @@ export function ProximityAlertOverlay() {
   const map = mapRef.getMap();
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0"
-      style={{ zIndex: 'var(--z-controls)' }}
-    >
+    <div className="pointer-events-none absolute inset-0" style={{ zIndex: 'var(--z-controls)' }}>
       {visibleAlerts.map((alert) => {
         const projected = map.project([alert.siteLng, alert.siteLat]);
         return (

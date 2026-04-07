@@ -12,10 +12,18 @@ import { findGeoName, GEO_NAMES } from '@/lib/geoNames';
 
 /** All synced tag prefixes (filter-related only, no entity toggle prefixes) */
 const SYNCED_PREFIXES = new Set([
-  'country', 'since', 'before',
-  'altitude', 'speed',
-  'callsign', 'icao', 'mmsi', 'shipname', 'cameo',
-  'mentions', 'heading',
+  'country',
+  'since',
+  'before',
+  'altitude',
+  'speed',
+  'callsign',
+  'icao',
+  'mmsi',
+  'shipname',
+  'cameo',
+  'mentions',
+  'heading',
   'severity',
   'actor',
   'near',
@@ -66,12 +74,18 @@ export function rangeToMinMax(value: string): { min: number | null; max: number 
   const parsed = parseRangeValue(value);
   if (!parsed) return { min: null, max: null };
   switch (parsed.op) {
-    case 'eq': return { min: parsed.num, max: parsed.num };
-    case 'gte': return { min: parsed.num, max: null };
-    case 'gt': return { min: parsed.num, max: null };
-    case 'lte': return { min: null, max: parsed.num };
-    case 'lt': return { min: null, max: parsed.num };
-    case 'range': return { min: parsed.num, max: parsed.num2 ?? null };
+    case 'eq':
+      return { min: parsed.num, max: parsed.num };
+    case 'gte':
+      return { min: parsed.num, max: null };
+    case 'gt':
+      return { min: parsed.num, max: null };
+    case 'lte':
+      return { min: null, max: parsed.num };
+    case 'lt':
+      return { min: null, max: parsed.num };
+    case 'range':
+      return { min: parsed.num, max: parsed.num2 ?? null };
   }
 }
 
@@ -111,10 +125,7 @@ export interface DerivedFilters {
   proximityPin?: { lat: number; lng: number } | null;
 }
 
-export function deriveFiltersFromAST(
-  node: QueryNode | null,
-  now: number,
-): DerivedFilters {
+export function deriveFiltersFromAST(node: QueryNode | null, now: number): DerivedFilters {
   const tags = extractTags(node);
   const result: DerivedFilters = {};
 
@@ -331,14 +342,20 @@ export function buildASTFromFilters(
     const sites = useSiteStore.getState().sites;
     for (const site of sites) {
       const d = (site.lat - lat) ** 2 + (site.lng - lng) ** 2;
-      if (d < bestDist) { bestDist = d; bestLabel = site.label; }
+      if (d < bestDist) {
+        bestDist = d;
+        bestLabel = site.label;
+      }
     }
 
     // Check city names (only if no close site found)
     if (bestDist >= CLOSE_THRESHOLD) {
       for (const geo of GEO_NAMES) {
         const d = (geo.lat - lat) ** 2 + (geo.lng - lng) ** 2;
-        if (d < bestDist) { bestDist = d; bestLabel = geo.name; }
+        if (d < bestDist) {
+          bestDist = d;
+          bestLabel = geo.name;
+        }
       }
     }
 
@@ -428,17 +445,15 @@ export function useQuerySync(): void {
     const filterUpdates = deriveFiltersFromAST(parsedQuery, Date.now());
     let hasFilterUpdates = false;
     if (filterUpdates.dateStart !== undefined) {
-      useFilterStore.getState().setDateRange(
-        filterUpdates.dateStart,
-        useFilterStore.getState().dateEnd,
-      );
+      useFilterStore
+        .getState()
+        .setDateRange(filterUpdates.dateStart, useFilterStore.getState().dateEnd);
       hasFilterUpdates = true;
     }
     if (filterUpdates.dateEnd !== undefined) {
-      useFilterStore.getState().setDateRange(
-        useFilterStore.getState().dateStart,
-        filterUpdates.dateEnd,
-      );
+      useFilterStore
+        .getState()
+        .setDateRange(useFilterStore.getState().dateStart, filterUpdates.dateEnd);
       hasFilterUpdates = true;
     }
     if (filterUpdates.flightCountries !== undefined) {
@@ -450,17 +465,21 @@ export function useQuerySync(): void {
       hasFilterUpdates = true;
     }
     if (filterUpdates.altitudeMin !== undefined || filterUpdates.altitudeMax !== undefined) {
-      useFilterStore.getState().setAltitudeRange(
-        filterUpdates.altitudeMin ?? useFilterStore.getState().altitudeMin,
-        filterUpdates.altitudeMax ?? useFilterStore.getState().altitudeMax,
-      );
+      useFilterStore
+        .getState()
+        .setAltitudeRange(
+          filterUpdates.altitudeMin ?? useFilterStore.getState().altitudeMin,
+          filterUpdates.altitudeMax ?? useFilterStore.getState().altitudeMax,
+        );
       hasFilterUpdates = true;
     }
     if (filterUpdates.flightSpeedMin !== undefined || filterUpdates.flightSpeedMax !== undefined) {
-      useFilterStore.getState().setFlightSpeedRange(
-        filterUpdates.flightSpeedMin ?? useFilterStore.getState().flightSpeedMin,
-        filterUpdates.flightSpeedMax ?? useFilterStore.getState().flightSpeedMax,
-      );
+      useFilterStore
+        .getState()
+        .setFlightSpeedRange(
+          filterUpdates.flightSpeedMin ?? useFilterStore.getState().flightSpeedMin,
+          filterUpdates.flightSpeedMax ?? useFilterStore.getState().flightSpeedMax,
+        );
       hasFilterUpdates = true;
     }
     if (filterUpdates.flightCallsign !== undefined) {
@@ -484,10 +503,12 @@ export function useQuerySync(): void {
       hasFilterUpdates = true;
     }
     if (filterUpdates.mentionsMin !== undefined || filterUpdates.mentionsMax !== undefined) {
-      useFilterStore.getState().setMentionsRange(
-        filterUpdates.mentionsMin ?? useFilterStore.getState().mentionsMin,
-        filterUpdates.mentionsMax ?? useFilterStore.getState().mentionsMax,
-      );
+      useFilterStore
+        .getState()
+        .setMentionsRange(
+          filterUpdates.mentionsMin ?? useFilterStore.getState().mentionsMin,
+          filterUpdates.mentionsMax ?? useFilterStore.getState().mentionsMax,
+        );
       hasFilterUpdates = true;
     }
     if (filterUpdates.headingAngle !== undefined) {
@@ -581,22 +602,28 @@ export function useQuerySync(): void {
 
     // Check if state actually changed
     const prev = prevSyncStateRef.current;
-    const changed = (Object.keys(syncState) as (keyof SyncableState)[]).some(
-      (key) => {
-        const curr = syncState[key];
-        const prevVal = prev[key];
-        // Deep compare arrays
-        if (Array.isArray(curr) && Array.isArray(prevVal)) {
-          return curr.length !== prevVal.length || curr.some((v, i) => v !== (prevVal as unknown[])[i]);
-        }
-        // Deep compare objects (proximityPin)
-        if (curr !== null && typeof curr === 'object' && !Array.isArray(curr) &&
-            prevVal !== null && typeof prevVal === 'object' && !Array.isArray(prevVal)) {
-          return JSON.stringify(curr) !== JSON.stringify(prevVal);
-        }
-        return curr !== prevVal;
-      },
-    );
+    const changed = (Object.keys(syncState) as (keyof SyncableState)[]).some((key) => {
+      const curr = syncState[key];
+      const prevVal = prev[key];
+      // Deep compare arrays
+      if (Array.isArray(curr) && Array.isArray(prevVal)) {
+        return (
+          curr.length !== prevVal.length || curr.some((v, i) => v !== (prevVal as unknown[])[i])
+        );
+      }
+      // Deep compare objects (proximityPin)
+      if (
+        curr !== null &&
+        typeof curr === 'object' &&
+        !Array.isArray(curr) &&
+        prevVal !== null &&
+        typeof prevVal === 'object' &&
+        !Array.isArray(prevVal)
+      ) {
+        return JSON.stringify(curr) !== JSON.stringify(prevVal);
+      }
+      return curr !== prevVal;
+    });
 
     if (!changed) return;
 

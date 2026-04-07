@@ -1,6 +1,6 @@
 ---
 status: diagnosed
-trigger: "npm run dev fails with [server] node: .env: not found and tsx --env-file .env watch server/index.ts exited with code 9"
+trigger: 'npm run dev fails with [server] node: .env: not found and tsx --env-file .env watch server/index.ts exited with code 9'
 created: 2026-03-14T00:00:00Z
 updated: 2026-03-14T00:00:00Z
 ---

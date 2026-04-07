@@ -10,22 +10,58 @@ import type { ConflictEventType } from '@/types/ui';
 
 function makeFlight(id: string, onGround: boolean, country = ''): FlightEntity {
   return {
-    id, type: 'flight', lat: 32, lng: 51, timestamp: Date.now(), label: id,
-    data: { icao24: id, callsign: id, originCountry: country, velocity: 0, heading: 0, altitude: onGround ? 0 : 10000, onGround, verticalRate: 0, unidentified: false },
+    id,
+    type: 'flight',
+    lat: 32,
+    lng: 51,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      icao24: id,
+      callsign: id,
+      originCountry: country,
+      velocity: 0,
+      heading: 0,
+      altitude: onGround ? 0 : 10000,
+      onGround,
+      verticalRate: 0,
+      unidentified: false,
+    },
   };
 }
 
 function makeShip(id: string, mmsi: number): ShipEntity {
   return {
-    id, type: 'ship', lat: 26, lng: 56, timestamp: Date.now(), label: id,
+    id,
+    type: 'ship',
+    lat: 26,
+    lng: 56,
+    timestamp: Date.now(),
+    label: id,
     data: { mmsi, shipName: id, speedOverGround: 12.5, courseOverGround: 180, trueHeading: 178 },
   };
 }
 
 function makeEvent(id: string, type: ConflictEventType): ConflictEventEntity {
   return {
-    id, type, lat: 32, lng: 51, timestamp: Date.now(), label: id,
-    data: { eventType: '', subEventType: '', fatalities: 0, actor1: '', actor2: '', notes: '', source: '', goldsteinScale: 0, locationName: '', cameoCode: '' },
+    id,
+    type,
+    lat: 32,
+    lng: 51,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      eventType: '',
+      subEventType: '',
+      fatalities: 0,
+      actor1: '',
+      actor2: '',
+      notes: '',
+      source: '',
+      goldsteinScale: 0,
+      locationName: '',
+      cameoCode: '',
+    },
   };
 }
 
@@ -44,7 +80,21 @@ describe('StatusPanel', () => {
     useShipStore.setState({ connectionStatus: 'connected', ships: [], shipCount: 0 });
     useEventStore.setState({ connectionStatus: 'connected', events: [], eventCount: 0 });
     useSiteStore.setState({ connectionStatus: 'idle', sites: [], siteCount: 0 });
-    useFilterStore.setState({ flightCountries: [], eventCountries: [], flightSpeedMin: null, flightSpeedMax: null, shipSpeedMin: null, shipSpeedMax: null, altitudeMin: null, altitudeMax: null, proximityPin: null, proximityRadiusKm: 100, dateStart: 0, dateEnd: Date.now() + 86400000, isSettingPin: false });
+    useFilterStore.setState({
+      flightCountries: [],
+      eventCountries: [],
+      flightSpeedMin: null,
+      flightSpeedMax: null,
+      shipSpeedMin: null,
+      shipSpeedMax: null,
+      altitudeMin: null,
+      altitudeMax: null,
+      proximityPin: null,
+      proximityRadiusKm: 100,
+      dateStart: 0,
+      dateEnd: Date.now() + 86400000,
+      isSettingPin: false,
+    });
   });
 
   it('renders four feed lines (flights, ships, events, sites)', () => {
@@ -61,7 +111,11 @@ describe('StatusPanel', () => {
   });
 
   it('shows green dot for connected status', () => {
-    useFlightStore.setState({ connectionStatus: 'connected', flights: [makeFlight('f1', false)], flightCount: 1 });
+    useFlightStore.setState({
+      connectionStatus: 'connected',
+      flights: [makeFlight('f1', false)],
+      flightCount: 1,
+    });
     render(<StatusPanel />);
 
     const dot = screen.getByTestId('status-dot-flights');
@@ -69,7 +123,11 @@ describe('StatusPanel', () => {
   });
 
   it('shows yellow dot for stale status', () => {
-    useShipStore.setState({ connectionStatus: 'stale', ships: [makeShip('s1', 100)], shipCount: 1 });
+    useShipStore.setState({
+      connectionStatus: 'stale',
+      ships: [makeShip('s1', 100)],
+      shipCount: 1,
+    });
     render(<StatusPanel />);
 
     const dot = screen.getByTestId('status-dot-ships');
@@ -96,7 +154,11 @@ describe('StatusPanel', () => {
   });
 
   it('shows red dot for rate_limited status', () => {
-    useFlightStore.setState({ connectionStatus: 'rate_limited', flights: [makeFlight('f1', false)], flightCount: 1 });
+    useFlightStore.setState({
+      connectionStatus: 'rate_limited',
+      flights: [makeFlight('f1', false)],
+      flightCount: 1,
+    });
     render(<StatusPanel />);
 
     const dot = screen.getByTestId('status-dot-flights');

@@ -29,7 +29,9 @@ interface WaterTooltipProps {
  */
 export function WaterTooltip({ facility, isAttacked }: WaterTooltipProps): React.ReactElement {
   const score = isAttacked ? 0 : healthToScore(facility.stress.compositeHealth);
-  const [r, g, b] = isAttacked ? [0, 0, 0] as const : stressToRGBA(facility.stress.compositeHealth, 255);
+  const [r, g, b] = isAttacked
+    ? ([0, 0, 0] as const)
+    : stressToRGBA(facility.stress.compositeHealth, 255);
   const colorHex = `rgb(${r}, ${g}, ${b})`;
   const label = scoreToLabel(score);
 

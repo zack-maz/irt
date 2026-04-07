@@ -6,7 +6,10 @@ vi.mock('../../config.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../config.js')>();
   return {
     ...actual,
-    config: { ...actual.config, opensky: { clientId: 'test-client-id', clientSecret: 'test-client-secret' } },
+    config: {
+      ...actual.config,
+      opensky: { clientId: 'test-client-id', clientSecret: 'test-client-secret' },
+    },
   };
 });
 
@@ -16,87 +19,87 @@ vi.mock('../../config.js', async (importOriginal) => {
 // [10]=true_track, [11]=vertical_rate, [12]=sensors, [13]=geo_altitude, [14]=squawk,
 // [15]=spi, [16]=position_source, [17]=category
 const validState = [
-  'abc123',    // [0] icao24
-  'IRN1234 ',  // [1] callsign (with trailing space)
-  'Iran',      // [2] origin_country
-  1700000000,  // [3] time_position
-  1700000005,  // [4] last_contact
-  51.5,        // [5] longitude
-  35.6,        // [6] latitude
-  10000,       // [7] baro_altitude
-  false,       // [8] on_ground
-  250,         // [9] velocity
-  180,         // [10] true_track
-  -5.0,        // [11] vertical_rate
-  null,        // [12] sensors
-  10200,       // [13] geo_altitude
-  '7700',      // [14] squawk
-  false,       // [15] spi
-  0,           // [16] position_source
-  0,           // [17] category
+  'abc123', // [0] icao24
+  'IRN1234 ', // [1] callsign (with trailing space)
+  'Iran', // [2] origin_country
+  1700000000, // [3] time_position
+  1700000005, // [4] last_contact
+  51.5, // [5] longitude
+  35.6, // [6] latitude
+  10000, // [7] baro_altitude
+  false, // [8] on_ground
+  250, // [9] velocity
+  180, // [10] true_track
+  -5.0, // [11] vertical_rate
+  null, // [12] sensors
+  10200, // [13] geo_altitude
+  '7700', // [14] squawk
+  false, // [15] spi
+  0, // [16] position_source
+  0, // [17] category
 ];
 
 const groundState = [
-  'gnd789',    // [0] icao24
-  'GND5678 ',  // [1] callsign
-  'Iran',      // [2] origin_country
-  1700000000,  // [3] time_position
-  1700000005,  // [4] last_contact
-  51.5,        // [5] longitude
-  35.6,        // [6] latitude
-  0,           // [7] baro_altitude
-  true,        // [8] on_ground -- ON GROUND
-  0,           // [9] velocity
-  0,           // [10] true_track
-  0,           // [11] vertical_rate
-  null,        // [12] sensors
-  null,        // [13] geo_altitude
-  null,        // [14] squawk
-  false,       // [15] spi
-  0,           // [16] position_source
-  0,           // [17] category
+  'gnd789', // [0] icao24
+  'GND5678 ', // [1] callsign
+  'Iran', // [2] origin_country
+  1700000000, // [3] time_position
+  1700000005, // [4] last_contact
+  51.5, // [5] longitude
+  35.6, // [6] latitude
+  0, // [7] baro_altitude
+  true, // [8] on_ground -- ON GROUND
+  0, // [9] velocity
+  0, // [10] true_track
+  0, // [11] vertical_rate
+  null, // [12] sensors
+  null, // [13] geo_altitude
+  null, // [14] squawk
+  false, // [15] spi
+  0, // [16] position_source
+  0, // [17] category
 ];
 
 const noCallsignState = [
-  'mil456',    // [0] icao24
-  '   ',       // [1] callsign (blank -- military/unidentified)
-  'Unknown',   // [2] origin_country
-  1700000000,  // [3] time_position
-  1700000005,  // [4] last_contact
-  52.0,        // [5] longitude
-  36.0,        // [6] latitude
-  12000,       // [7] baro_altitude
-  false,       // [8] on_ground
-  300,         // [9] velocity
-  90,          // [10] true_track
-  0,           // [11] vertical_rate
-  null,        // [12] sensors
-  12200,       // [13] geo_altitude
-  null,        // [14] squawk
-  false,       // [15] spi
-  0,           // [16] position_source
-  0,           // [17] category
+  'mil456', // [0] icao24
+  '   ', // [1] callsign (blank -- military/unidentified)
+  'Unknown', // [2] origin_country
+  1700000000, // [3] time_position
+  1700000005, // [4] last_contact
+  52.0, // [5] longitude
+  36.0, // [6] latitude
+  12000, // [7] baro_altitude
+  false, // [8] on_ground
+  300, // [9] velocity
+  90, // [10] true_track
+  0, // [11] vertical_rate
+  null, // [12] sensors
+  12200, // [13] geo_altitude
+  null, // [14] squawk
+  false, // [15] spi
+  0, // [16] position_source
+  0, // [17] category
 ];
 
 const nullLatLngState = [
-  'def456',   // [0] icao24
-  'TEST ',    // [1] callsign
-  'USA',      // [2] origin_country
+  'def456', // [0] icao24
+  'TEST ', // [1] callsign
+  'USA', // [2] origin_country
   1700000000, // [3] time_position
   1700000005, // [4] last_contact
-  null,       // [5] longitude -- NULL
-  null,       // [6] latitude -- NULL
-  null,       // [7] baro_altitude
-  true,       // [8] on_ground
-  0,          // [9] velocity
-  0,          // [10] true_track
-  0,          // [11] vertical_rate
-  null,       // [12] sensors
-  null,       // [13] geo_altitude
-  null,       // [14] squawk
-  false,      // [15] spi
-  0,          // [16] position_source
-  0,          // [17] category
+  null, // [5] longitude -- NULL
+  null, // [6] latitude -- NULL
+  null, // [7] baro_altitude
+  true, // [8] on_ground
+  0, // [9] velocity
+  0, // [10] true_track
+  0, // [11] vertical_rate
+  null, // [12] sensors
+  null, // [13] geo_altitude
+  null, // [14] squawk
+  false, // [15] spi
+  0, // [16] position_source
+  0, // [17] category
 ];
 
 describe('OpenSky Adapter', () => {

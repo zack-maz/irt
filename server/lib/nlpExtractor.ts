@@ -66,8 +66,8 @@ export function extractTriple(title: string, summary?: string): ArticleTriple {
   const action = normalize(verbs[0]) ?? null;
   // Target: prefer a place/person different from the actor
   const targetCandidates = [
-    ...places.filter(p => normalize(p) !== actor),
-    ...people.filter(p => normalize(p) !== actor),
+    ...places.filter((p) => normalize(p) !== actor),
+    ...people.filter((p) => normalize(p) !== actor),
   ];
   const target = normalize(targetCandidates[0]) ?? null;
 

@@ -36,8 +36,7 @@ export function createRateLimiter(maxRequests: number, windowSec: number) {
       return;
     }
 
-    const identifier =
-      req.ip ?? (req.headers['x-forwarded-for'] as string) ?? 'anonymous';
+    const identifier = req.ip ?? (req.headers['x-forwarded-for'] as string) ?? 'anonymous';
 
     const result = await limiter.limit(identifier);
 

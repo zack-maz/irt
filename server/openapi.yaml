@@ -58,7 +58,6 @@ tags:
     description: Service health probes and cron endpoints.
 
 paths:
-
   # ---------- Flights ----------
   /api/flights:
     get:
@@ -512,7 +511,6 @@ paths:
                 $ref: '#/components/schemas/WarmResult'
 
 components:
-
   # ----------------------------------------------------------------
   # Shared response templates
   # ----------------------------------------------------------------
@@ -524,10 +522,10 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            error: "Invalid query: lat must be >= -90"
+            error: 'Invalid query: lat must be >= -90'
             code: VALIDATION_ERROR
             statusCode: 400
-            requestId: "req_abc123"
+            requestId: 'req_abc123'
 
     RateLimited:
       description: Rate limit exceeded for this endpoint.
@@ -549,7 +547,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            error: "Too many requests"
+            error: 'Too many requests'
             code: RATE_LIMITED
             statusCode: 429
 
@@ -560,10 +558,10 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            error: "Internal server error"
+            error: 'Internal server error'
             code: INTERNAL_ERROR
             statusCode: 500
-            requestId: "req_xyz789"
+            requestId: 'req_xyz789'
 
     UpstreamError:
       description: Upstream data provider failure (no stale cache available).
@@ -572,7 +570,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            error: "OpenSky credentials not configured"
+            error: 'OpenSky credentials not configured'
             code: UPSTREAM_ERROR
             statusCode: 503
 
@@ -580,7 +578,6 @@ components:
   # Shared schemas
   # ----------------------------------------------------------------
   schemas:
-
     # -- Error envelope --
     ErrorResponse:
       type: object
@@ -756,7 +753,19 @@ components:
           type: string
         data:
           type: object
-          required: [eventType, subEventType, fatalities, actor1, actor2, notes, source, goldsteinScale, locationName, cameoCode]
+          required:
+            [
+              eventType,
+              subEventType,
+              fatalities,
+              actor1,
+              actor2,
+              notes,
+              source,
+              goldsteinScale,
+              locationName,
+              cameoCode,
+            ]
           properties:
             eventType:
               type: string
@@ -808,7 +817,7 @@ components:
       properties:
         id:
           type: string
-          description: "\"site-{osmId}\""
+          description: '"site-{osmId}"'
         type:
           type: string
           enum: [site]
@@ -840,7 +849,7 @@ components:
       properties:
         id:
           type: string
-          description: "\"water-{osmId}\""
+          description: '"water-{osmId}"'
         type:
           type: string
           enum: [water]
@@ -874,7 +883,8 @@ components:
 
     WaterStressIndicators:
       type: object
-      required: [bws_raw, bws_score, bws_label, drr_score, gtd_score, sev_score, iav_score, compositeHealth]
+      required:
+        [bws_raw, bws_score, bws_label, drr_score, gtd_score, sev_score, iav_score, compositeHealth]
       properties:
         bws_raw:
           type: number
@@ -948,7 +958,7 @@ components:
           format: uri
         source:
           type: string
-          description: "GDELT, BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye, Bellingcat."
+          description: 'GDELT, BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye, Bellingcat.'
         sourceCountry:
           type: string
         publishedAt:
@@ -979,11 +989,23 @@ components:
     # -- Markets --
     MarketQuote:
       type: object
-      required: [symbol, displayName, price, previousClose, change, changePercent, currency, marketOpen, lastTradeTime, history]
+      required:
+        [
+          symbol,
+          displayName,
+          price,
+          previousClose,
+          change,
+          changePercent,
+          currency,
+          marketOpen,
+          lastTradeTime,
+          history,
+        ]
       properties:
         symbol:
           type: string
-          description: "Yahoo Finance symbol (BZ=F, CL=F, XLE, USO, XOM)."
+          description: 'Yahoo Finance symbol (BZ=F, CL=F, XLE, USO, XOM).'
         displayName:
           type: string
         price:

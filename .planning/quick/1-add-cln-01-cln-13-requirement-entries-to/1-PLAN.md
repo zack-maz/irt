@@ -7,29 +7,44 @@ depends_on: []
 files_modified:
   - .planning/REQUIREMENTS.md
 autonomous: true
-requirements: [CLN-01, CLN-02, CLN-03, CLN-04, CLN-05, CLN-06, CLN-07, CLN-08, CLN-09, CLN-10, CLN-11, CLN-12, CLN-13]
+requirements:
+  [
+    CLN-01,
+    CLN-02,
+    CLN-03,
+    CLN-04,
+    CLN-05,
+    CLN-06,
+    CLN-07,
+    CLN-08,
+    CLN-09,
+    CLN-10,
+    CLN-11,
+    CLN-12,
+    CLN-13,
+  ]
 
 must_haves:
   truths:
-    - "REQUIREMENTS.md contains a Production Cleanup section under v1.3 with 13 CLN entries"
-    - "All 13 CLN entries (CLN-01..CLN-13) are marked complete (checked)"
-    - "Each CLN ID matches the ID referenced in a Phase 26.3 PLAN.md requirements frontmatter field"
-    - "Traceability table at bottom of REQUIREMENTS.md lists all 13 CLN entries mapped to Phase 26.3"
-    - "Coverage count in REQUIREMENTS.md footer reflects 13 new completed v1.3 requirements"
-    - "No existing REQUIREMENTS.md content is removed or reordered"
+    - 'REQUIREMENTS.md contains a Production Cleanup section under v1.3 with 13 CLN entries'
+    - 'All 13 CLN entries (CLN-01..CLN-13) are marked complete (checked)'
+    - 'Each CLN ID matches the ID referenced in a Phase 26.3 PLAN.md requirements frontmatter field'
+    - 'Traceability table at bottom of REQUIREMENTS.md lists all 13 CLN entries mapped to Phase 26.3'
+    - 'Coverage count in REQUIREMENTS.md footer reflects 13 new completed v1.3 requirements'
+    - 'No existing REQUIREMENTS.md content is removed or reordered'
   artifacts:
-    - path: ".planning/REQUIREMENTS.md"
-      provides: "Requirements traceability with CLN-01..CLN-13 entries added under v1.3 Production Cleanup section"
-      contains: "CLN-01"
+    - path: '.planning/REQUIREMENTS.md'
+      provides: 'Requirements traceability with CLN-01..CLN-13 entries added under v1.3 Production Cleanup section'
+      contains: 'CLN-01'
   key_links:
-    - from: ".planning/REQUIREMENTS.md"
-      to: ".planning/phases/26.3-production-code-cleanup/26.3-*-PLAN.md"
-      via: "CLN requirement IDs referenced in plan frontmatters"
-      pattern: "CLN-"
-    - from: ".planning/REQUIREMENTS.md Traceability table"
-      to: "Phase 26.3"
-      via: "Phase mapping rows"
-      pattern: "Phase 26.3"
+    - from: '.planning/REQUIREMENTS.md'
+      to: '.planning/phases/26.3-production-code-cleanup/26.3-*-PLAN.md'
+      via: 'CLN requirement IDs referenced in plan frontmatters'
+      pattern: 'CLN-'
+    - from: '.planning/REQUIREMENTS.md Traceability table'
+      to: 'Phase 26.3'
+      via: 'Phase mapping rows'
+      pattern: 'Phase 26.3'
 ---
 
 <objective>
@@ -56,7 +71,9 @@ Output: REQUIREMENTS.md with a new `### Production Cleanup` subsection under `##
 @.planning/phases/26.3-production-code-cleanup/26.3-VERIFICATION.md
 
 <plan_mapping>
+
 <!-- Derived from Phase 26.3 plan frontmatters and objectives -->
+
 Plan 26.3-01 (Wave 1: dead code removal + tsc cleanup) → CLN-01, CLN-13
 Plan 26.3-02 (Wave 2: pino structured logging + X-Request-ID) → CLN-02, CLN-03
 Plan 26.3-03 (Wave 2: Zod config consolidation + query validation) → CLN-05, CLN-06
@@ -66,49 +83,51 @@ Plan 26.3-06 (Wave 4: vitest coverage + stub cleanup) → CLN-08, CLN-11
 </plan_mapping>
 
 <derived_descriptions>
+
 <!-- User-facing descriptions derived from each plan's <objective> and must_haves.truths -->
 <!-- All are code-quality/maintainer-perspective requirements (no user-visible UI feature) -->
 
 CLN-01 (Plan 01): Phase 26.2 NLP dead code fully removed from server
-  Source: "Remove all Phase 26.2 NLP dead code and clean up unused imports/variables across the server codebase."
-  Truths: All Phase 26.2 NLP files deleted; reverted files contain only pre-26.2 code
+Source: "Remove all Phase 26.2 NLP dead code and clean up unused imports/variables across the server codebase."
+Truths: All Phase 26.2 NLP files deleted; reverted files contain only pre-26.2 code
 
 CLN-02 (Plan 02): Pino structured JSON logging replaces ad-hoc console/log() calls
-  Source: "All server log output is structured JSON via pino (no console.log/error in production code)"
+Source: "All server log output is structured JSON via pino (no console.log/error in production code)"
 
 CLN-03 (Plan 02): X-Request-ID tracing on every HTTP request and response
-  Source: "Every HTTP request gets a unique X-Request-ID header in the response" + "Request ID appears in all log entries for that request"
+Source: "Every HTTP request gets a unique X-Request-ID header in the response" + "Request ID appears in all log entries for that request"
 
 CLN-04 (Plan 04): Consistent error JSON envelope via AppError class
-  Source: "All error responses follow { error, code, statusCode, requestId } shape"
-  + "Dev mode includes stack traces, production strips them"
+Source: "All error responses follow { error, code, statusCode, requestId } shape"
+
+- "Dev mode includes stack traces, production strips them"
 
 CLN-05 (Plan 03): Zod-validated config with fail-fast startup on missing env vars
-  Source: "Single config.ts module exports all env vars and constants" + "All env vars validated at startup via Zod — missing required vars crash the app"
+Source: "Single config.ts module exports all env vars and constants" + "All env vars validated at startup via Zod — missing required vars crash the app"
 
 CLN-06 (Plan 03): Zod query validation middleware on all API routes
-  Source: "All API route query params go through Zod validation middleware (no raw req.query access)" + "Invalid query params return consistent 400 error with validation details"
+Source: "All API route query params go through Zod validation middleware (no raw req.query access)" + "Invalid query params return consistent 400 error with validation details"
 
 CLN-07 (Plan 05): Strict TypeScript with noUncheckedIndexedAccess on server
-  Source: "TypeScript compiles with zero errors across both server and app tsconfigs" + "noUncheckedIndexedAccess is enabled in server tsconfig"
+Source: "TypeScript compiles with zero errors across both server and app tsconfigs" + "noUncheckedIndexedAccess is enabled in server tsconfig"
 
 CLN-08 (Plan 06): Vitest V8 coverage reporting with threshold gates
-  Source: "@vitest/coverage-v8 is installed and configured with 80% line threshold" + "npx vitest run --coverage passes the configured thresholds"
+Source: "@vitest/coverage-v8 is installed and configured with 80% line threshold" + "npx vitest run --coverage passes the configured thresholds"
 
 CLN-09 (Plan 04): Graceful SIGTERM shutdown and response compression in local dev
-  Source: "API responses are gzip/brotli compressed in local dev mode" + "SIGTERM handler logs shutdown and exits cleanly"
+Source: "API responses are gzip/brotli compressed in local dev mode" + "SIGTERM handler logs shutdown and exits cleanly"
 
 CLN-10 (Plan 05): Rate limiters documented with per-endpoint rationale
-  Source: "Rate limiters have documented per-endpoint limits with rationale"
+Source: "Rate limiters have documented per-endpoint limits with rationale"
 
 CLN-11 (Plan 06): Zero `it.todo()` stubs in the test suite
-  Source: "All it.todo() stubs are removed from the test suite" + "Every remaining test asserts real behavior"
+Source: "All it.todo() stubs are removed from the test suite" + "Every remaining test asserts real behavior"
 
 CLN-12 (Plan 05): Hand-written OpenAPI 3.0 spec covering all /api endpoints
-  Source: "OpenAPI 3.0 spec exists documenting all /api/* endpoints with request/response schemas"
+Source: "OpenAPI 3.0 spec exists documenting all /api/\* endpoints with request/response schemas"
 
 CLN-13 (Plan 01): Server codebase has zero unused imports/variables (clean tsc)
-  Source: "Server TypeScript compiles without unused-import or unused-variable errors" + "All existing tests pass (no regressions from reversion)"
+Source: "Server TypeScript compiles without unused-import or unused-variable errors" + "All existing tests pass (no regressions from reversion)"
 </derived_descriptions>
 </context>
 
@@ -202,6 +221,7 @@ CLN-13 (Plan 01): Server codebase has zero unused imports/variables (clean tsc)
     - Do NOT change the wording of existing CLN descriptions once written (they will be referenced by future verification runs)
     - Preserve existing Markdown formatting conventions (`- [x] **ID**: description` pattern, `|` table separators, blank lines between sections)
     - All 13 CLN entries must be marked `[x]` (Phase 26.3 is complete per STATE.md and 26.3-VERIFICATION.md)
+
   </action>
   <verify>
     <automated>cd /Users/zackmaz/Desktop/my_world && grep -c "^\- \[x\] \*\*CLN-" .planning/REQUIREMENTS.md && grep -c "| CLN-" .planning/REQUIREMENTS.md && grep "v1.3 requirements: 66 total" .planning/REQUIREMENTS.md && grep "### Production Cleanup" .planning/REQUIREMENTS.md</automated>
@@ -228,6 +248,7 @@ CLN-13 (Plan 01): Server codebase has zero unused imports/variables (clean tsc)
 </verification>
 
 <success_criteria>
+
 - REQUIREMENTS.md contains a new `### Production Cleanup` subsection under v1.3 with exactly 13 CLN entries, all marked `[x]`
 - Each CLN description is user/maintainer-facing and derived from the corresponding Phase 26.3 plan's objective and must_haves.truths
 - All 13 CLN IDs match the IDs referenced in the six Phase 26.3 PLAN.md frontmatters (CLN-01, CLN-02, CLN-03, CLN-04, CLN-05, CLN-06, CLN-07, CLN-08, CLN-09, CLN-10, CLN-11, CLN-12, CLN-13)
@@ -235,7 +256,7 @@ CLN-13 (Plan 01): Server codebase has zero unused imports/variables (clean tsc)
 - Coverage footer accurately reflects the 13 new completed v1.3 requirements (66 total / 13 complete; total 100 mapped / 47 complete)
 - Zero existing REQUIREMENTS.md content is removed or reordered
 - No code, test, or config files are modified — pure docs edit
-</success_criteria>
+  </success_criteria>
 
 <output>
 After completion, create `.planning/quick/1-add-cln-01-cln-13-requirement-entries-to/1-SUMMARY.md` summarizing the edit (file modified, lines added, traceability invariant restored).

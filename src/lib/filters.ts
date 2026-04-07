@@ -12,17 +12,12 @@ export const FEET_PER_METER = 3.28084;
  * Non-applicable filters include (not exclude) the entity.
  * Unknown/null values pass through range filters.
  */
-export function entityPassesFilters(
-  entity: MapEntity,
-  filters: FilterState,
-): boolean {
+export function entityPassesFilters(entity: MapEntity, filters: FilterState): boolean {
   // ── Flight country filter ──────────────────────────────────────────
   if (filters.flightCountries.length > 0) {
     if (entity.type === 'flight') {
       const origin = entity.data.originCountry.toLowerCase();
-      const match = filters.flightCountries.some(
-        (c) => c.toLowerCase() === origin,
-      );
+      const match = filters.flightCountries.some((c) => c.toLowerCase() === origin);
       if (!match) return false;
     }
     // Ships and events: always pass flight country filter
@@ -99,7 +94,8 @@ export function entityPassesFilters(
   // ── Flight ICAO filter ──
   if (filters.flightIcao) {
     if (entity.type === 'flight') {
-      if (!entity.data.icao24.toLowerCase().includes(filters.flightIcao.toLowerCase())) return false;
+      if (!entity.data.icao24.toLowerCase().includes(filters.flightIcao.toLowerCase()))
+        return false;
     }
   }
 
@@ -113,7 +109,8 @@ export function entityPassesFilters(
   // ── Ship name filter ──
   if (filters.shipNameFilter) {
     if (entity.type === 'ship') {
-      if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase())) return false;
+      if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase()))
+        return false;
     }
   }
 

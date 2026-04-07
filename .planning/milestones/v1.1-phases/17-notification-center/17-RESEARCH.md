@@ -13,9 +13,11 @@ All four capabilities are purely client-side derived state -- no new server endp
 **Primary recommendation:** Build a notificationStore that derives scored notifications from eventStore events + newsStore clusters on each poll cycle, a useProximityAlerts hook that computes flight-to-site proximity from flightStore + siteStore on each flight poll, and extend filterStore with a `defaultEventWindow` concept that filters events/news to 24h when no custom range is active.
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Event-first card design: lead with conflict event type, location, and severity-derived sort position, then 1-3 matched news headlines below as supporting evidence
 - Severity score is hidden from the card -- used internally for sort order within time groups, not displayed as a visible number or color band
 - Cards show: event type icon, event type label (uppercase), location name, relative timestamp, coordinates, then matched news headlines (source: truncated title) with "N sources reporting" summary
@@ -44,6 +46,7 @@ All four capabilities are purely client-side derived state -- no new server endp
 - Scope: applies to conflict events and news clusters; flights, ships, and sites are unaffected
 
 ### Claude's Discretion
+
 - Notification store shape and derived state implementation
 - Severity scoring formula implementation (type weight x log mentions x log sources x recency decay)
 - News-to-event matching algorithm (temporal + geographic/keyword proximity)
@@ -52,45 +55,52 @@ All four capabilities are purely client-side derived state -- no new server endp
 - Notification generation timing (on event poll, on news poll, or both)
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 None -- discussion stayed within phase scope
 </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|-----------------|
-| NOTF-01 | User can see a bell icon with unread count badge in the top-right corner | Bell component in AppShell top-right area; z-index --z-controls (30); OverlayPanel styling for dropdown |
+| ID      | Description                                                                                                                            | Research Support                                                                                                                               |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| NOTF-01 | User can see a bell icon with unread count badge in the top-right corner                                                               | Bell component in AppShell top-right area; z-index --z-controls (30); OverlayPanel styling for dropdown                                        |
 | NOTF-02 | User can open a notification drawer showing severity-scored conflict events (type weight x log mentions x log sources x recency decay) | notificationStore derives scored notifications from eventStore + GDELT NumMentions/NumSources fields; ConflictEventEntity.data needs extension |
-| NOTF-03 | User sees 1-3 matched news headlines on each notification card (temporal + geographic/keyword matching) | newsStore clusters have lat/lng, keywords, publishedAt; matching via temporal window + haversine distance + keyword overlap |
-| NOTF-04 | User receives proximity alerts when tracked entities approach key sites within 50km | useProximityAlerts hook cross-references flightStore unidentified flights x siteStore sites using haversineKm from src/lib/geo.ts |
-| NOTF-05 | Map shows only last 24h of conflict events by default when no custom date filter is set | filterStore extension with defaultEventWindow; useFilteredEntities applies 24h cutoff when dateStart===null && dateEnd===null |
+| NOTF-03 | User sees 1-3 matched news headlines on each notification card (temporal + geographic/keyword matching)                                | newsStore clusters have lat/lng, keywords, publishedAt; matching via temporal window + haversine distance + keyword overlap                    |
+| NOTF-04 | User receives proximity alerts when tracked entities approach key sites within 50km                                                    | useProximityAlerts hook cross-references flightStore unidentified flights x siteStore sites using haversineKm from src/lib/geo.ts              |
+| NOTF-05 | Map shows only last 24h of conflict events by default when no custom date filter is set                                                | filterStore extension with defaultEventWindow; useFilteredEntities applies 24h cutoff when dateStart===null && dateEnd===null                  |
+
 </phase_requirements>
 
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| zustand | 5.x (already installed) | notificationStore state management | Project standard for all stores |
-| React | 19.x (already installed) | UI components for bell, dropdown, cards, proximity icons | Project standard |
-| @deck.gl/layers | 9.2.x (already installed) | Proximity alert icon layer on map | Already used for all entity layers |
+
+| Library         | Version                   | Purpose                                                  | Why Standard                       |
+| --------------- | ------------------------- | -------------------------------------------------------- | ---------------------------------- |
+| zustand         | 5.x (already installed)   | notificationStore state management                       | Project standard for all stores    |
+| React           | 19.x (already installed)  | UI components for bell, dropdown, cards, proximity icons | Project standard                   |
+| @deck.gl/layers | 9.2.x (already installed) | Proximity alert icon layer on map                        | Already used for all entity layers |
 
 ### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| src/lib/geo.ts | N/A (existing) | haversineKm for 50km proximity computation | Proximity alerts (NOTF-04) |
+
+| Library                 | Version        | Purpose                                                             | When to Use                            |
+| ----------------------- | -------------- | ------------------------------------------------------------------- | -------------------------------------- |
+| src/lib/geo.ts          | N/A (existing) | haversineKm for 50km proximity computation                          | Proximity alerts (NOTF-04)             |
 | src/lib/attackStatus.ts | N/A (existing) | haversineDistanceKm reference pattern (bbox pre-filter + haversine) | Pattern reference for proximity alerts |
-| src/types/ui.ts | N/A (existing) | EVENT_TYPE_LABELS, CONFLICT_TOGGLE_GROUPS for card rendering | Notification card content |
+| src/types/ui.ts         | N/A (existing) | EVENT_TYPE_LABELS, CONFLICT_TOGGLE_GROUPS for card rendering        | Notification card content              |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Zustand derived state | React Context | Zustand is project standard; Context would add unnecessary complexity |
-| Client-side scoring | Server-side scoring endpoint | No need -- all data already available client-side; avoids new API endpoint |
-| deck.gl IconLayer for proximity | HTML overlay markers | IconLayer integrates with existing map layer system; HTML overlays would need separate z-index management |
+
+| Instead of                      | Could Use                    | Tradeoff                                                                                                  |
+| ------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Zustand derived state           | React Context                | Zustand is project standard; Context would add unnecessary complexity                                     |
+| Client-side scoring             | Server-side scoring endpoint | No need -- all data already available client-side; avoids new API endpoint                                |
+| deck.gl IconLayer for proximity | HTML overlay markers         | IconLayer integrates with existing map layer system; HTML overlays would need separate z-index management |
 
 **Installation:**
+
 ```bash
 # No new packages needed -- all capabilities use existing dependencies
 ```
@@ -98,6 +108,7 @@ None -- discussion stayed within phase scope
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 src/
   stores/
@@ -120,19 +131,21 @@ src/
 ```
 
 ### Pattern 1: Notification Store as Derived State
+
 **What:** The notificationStore does NOT fetch data independently. It derives notifications from existing stores (eventStore, newsStore) by computing severity scores and matching news to events. The store holds read/unread state and the computed notification list.
 **When to use:** Always -- notifications are a view transformation of existing data, not a new data source.
 **Example:**
+
 ```typescript
 // notificationStore.ts
 import { create } from 'zustand';
 
 interface Notification {
-  id: string;                    // Same as event ID
-  eventId: string;               // Reference to ConflictEventEntity
-  score: number;                 // Severity score (internal, not displayed)
+  id: string; // Same as event ID
+  eventId: string; // Reference to ConflictEventEntity
+  score: number; // Severity score (internal, not displayed)
   matchedNews: MatchedHeadline[]; // 0-3 matched news headlines
-  timestamp: number;             // Event timestamp
+  timestamp: number; // Event timestamp
   isRead: boolean;
 }
 
@@ -162,9 +175,11 @@ export const useNotificationStore = create<NotificationState>()((set, get) => ({
 ```
 
 ### Pattern 2: Severity Scoring as Pure Function
+
 **What:** Severity score is computed as: `typeWeight * log2(1 + numMentions) * log2(1 + numSources) * recencyDecay`. This is a pure function that takes an event and returns a number.
 **When to use:** Called during notification derivation, not stored on events.
 **Example:**
+
 ```typescript
 // src/lib/severity.ts
 import type { ConflictEventEntity } from '@/types/entities';
@@ -185,8 +200,8 @@ const TYPE_WEIGHTS: Record<string, number> = {
 
 export function computeSeverityScore(event: ConflictEventEntity): number {
   const typeWeight = TYPE_WEIGHTS[event.type] ?? 3;
-  const mentions = (event.data as Record<string, unknown>).numMentions as number ?? 1;
-  const sources = (event.data as Record<string, unknown>).numSources as number ?? 1;
+  const mentions = ((event.data as Record<string, unknown>).numMentions as number) ?? 1;
+  const sources = ((event.data as Record<string, unknown>).numSources as number) ?? 1;
   const ageHours = (Date.now() - event.timestamp) / (1000 * 60 * 60);
   const recencyDecay = 1 / (1 + ageHours / 24); // Half-life of ~24h
   return typeWeight * Math.log2(1 + mentions) * Math.log2(1 + sources) * recencyDecay;
@@ -194,9 +209,11 @@ export function computeSeverityScore(event: ConflictEventEntity): number {
 ```
 
 ### Pattern 3: News-to-Event Matching
+
 **What:** For each conflict event, find 0-3 news clusters that are temporally close (within 24h), geographically close (within 100km if geo available), or share keywords.
 **When to use:** During notification derivation, after events are scored.
 **Example:**
+
 ```typescript
 // src/lib/newsMatching.ts
 import type { ConflictEventEntity, NewsCluster } from '@/types/entities';
@@ -212,31 +229,28 @@ export function matchNewsToEvent(
 ): MatchedHeadline[] {
   // Score each cluster by relevance to the event
   const scored = clusters
-    .map(cluster => ({
+    .map((cluster) => ({
       cluster,
       relevance: computeRelevance(event, cluster),
     }))
-    .filter(s => s.relevance > 0)
+    .filter((s) => s.relevance > 0)
     .sort((a, b) => b.relevance - a.relevance)
     .slice(0, MAX_MATCHES);
 
-  return scored.map(s => ({
+  return scored.map((s) => ({
     source: s.cluster.primaryArticle.source,
     title: s.cluster.primaryArticle.title,
     url: s.cluster.primaryArticle.url,
   }));
 }
 
-function computeRelevance(
-  event: ConflictEventEntity,
-  cluster: NewsCluster,
-): number {
+function computeRelevance(event: ConflictEventEntity, cluster: NewsCluster): number {
   let score = 0;
 
   // Temporal proximity (must be within window)
   const timeDiff = Math.abs(event.timestamp - cluster.lastUpdated);
   if (timeDiff > TEMPORAL_WINDOW_MS) return 0;
-  score += 1 - (timeDiff / TEMPORAL_WINDOW_MS); // 0-1 temporal score
+  score += 1 - timeDiff / TEMPORAL_WINDOW_MS; // 0-1 temporal score
 
   // Geographic proximity (if news has location)
   const article = cluster.primaryArticle;
@@ -262,9 +276,11 @@ function computeRelevance(
 ```
 
 ### Pattern 4: Proximity Alert Computation
+
 **What:** On each flight poll cycle, cross-reference unidentified flights with site positions using haversineKm. Alert when distance < 50km.
 **When to use:** In a useProximityAlerts hook that runs as a useMemo dependent on flights and sites.
 **Example:**
+
 ```typescript
 // src/hooks/useProximityAlerts.ts
 import { useMemo } from 'react';
@@ -287,11 +303,11 @@ export interface ProximityAlert {
 }
 
 export function useProximityAlerts(): ProximityAlert[] {
-  const flights = useFlightStore(s => s.flights);
-  const sites = useSiteStore(s => s.sites);
+  const flights = useFlightStore((s) => s.flights);
+  const sites = useSiteStore((s) => s.sites);
 
   return useMemo(() => {
-    const unidentified = flights.filter(f => f.data.unidentified);
+    const unidentified = flights.filter((f) => f.data.unidentified);
     if (unidentified.length === 0 || sites.length === 0) return [];
 
     const alerts: ProximityAlert[] = [];
@@ -321,9 +337,11 @@ export function useProximityAlerts(): ProximityAlert[] {
 ```
 
 ### Pattern 5: 24h Default Event Window in filterStore
+
 **What:** Extend filterStore with a concept of "default event window" that applies a 24h cutoff to events and news when no custom date range is active.
 **When to use:** In useFilteredEntities and wherever news clusters are consumed.
 **Example:**
+
 ```typescript
 // Addition to filterStore
 // The actual filter logic goes in useFilteredEntities / entityPassesFilters
@@ -341,6 +359,7 @@ if (isDefaultWindowActive) {
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Storing notifications server-side:** This is a single-user tool. No need for persistence -- notifications are derived from existing data on each render cycle.
 - **Polling for notifications separately:** Notifications derive from existing store data. Adding a separate poll would be wasteful and create synchronization issues.
 - **Putting NumMentions/NumSources on the ConflictEventEntity.data type as required fields:** Use optional fields with fallback defaults (1) to maintain backward compatibility with cached/backfilled data.
@@ -349,50 +368,56 @@ if (isDefaultWindowActive) {
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Haversine distance | Custom haversine function | `haversineKm` from `src/lib/geo.ts` | Already implemented and tested |
-| Event type labels | Hardcoded strings in notification cards | `EVENT_TYPE_LABELS` from `src/types/ui.ts` | Single source of truth used across tooltip, detail panel, etc. |
-| Event type color mapping | New color constants | `ENTITY_DOT_COLORS` from `src/components/map/layers/constants.ts` | Consistent with detail panel and other UI |
-| Outside-click detection | Manual document click listeners | Reuse the Escape handler pattern from `DetailPanelSlot.tsx` plus a click-outside ref | Established pattern in codebase |
-| Time grouping | Manual time bucket computation | Simple threshold comparison: `Date.now() - timestamp` < 1h / 24h / 7d | Straightforward math, no library needed |
-| Icon atlas for map layers | New icon atlas for proximity | Extend existing `getIconAtlas()` + `ICON_MAPPING` from `src/components/map/layers/icons.ts` | Consistent with all other map entities |
+| Problem                   | Don't Build                             | Use Instead                                                                                 | Why                                                            |
+| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Haversine distance        | Custom haversine function               | `haversineKm` from `src/lib/geo.ts`                                                         | Already implemented and tested                                 |
+| Event type labels         | Hardcoded strings in notification cards | `EVENT_TYPE_LABELS` from `src/types/ui.ts`                                                  | Single source of truth used across tooltip, detail panel, etc. |
+| Event type color mapping  | New color constants                     | `ENTITY_DOT_COLORS` from `src/components/map/layers/constants.ts`                           | Consistent with detail panel and other UI                      |
+| Outside-click detection   | Manual document click listeners         | Reuse the Escape handler pattern from `DetailPanelSlot.tsx` plus a click-outside ref        | Established pattern in codebase                                |
+| Time grouping             | Manual time bucket computation          | Simple threshold comparison: `Date.now() - timestamp` < 1h / 24h / 7d                       | Straightforward math, no library needed                        |
+| Icon atlas for map layers | New icon atlas for proximity            | Extend existing `getIconAtlas()` + `ICON_MAPPING` from `src/components/map/layers/icons.ts` | Consistent with all other map entities                         |
 
 **Key insight:** This phase is almost entirely derived client-side state. The only server-side change is adding `numMentions` and `numSources` to the GDELT normalizer output. Everything else reuses existing stores, hooks, and patterns.
 
 ## Common Pitfalls
 
 ### Pitfall 1: NumMentions/NumSources Not in ConflictEventEntity Type
+
 **What goes wrong:** The severity scoring formula requires `numMentions` and `numSources` from GDELT events, but these fields are NOT currently on the `ConflictEventEntity.data` type definition. The GDELT adapter parses them for dedup but does not include them in the normalized output.
 **Why it happens:** The original Phase 8 design only needed these for deduplication (picking highest mention count), not for display.
 **How to avoid:** Add `numMentions?: number` and `numSources?: number` as optional fields to `ConflictEventEntity.data` in `server/types.ts`, and populate them in the `normalizeGdeltEvent` function from GDELT column 31 (NumMentions) and column 32 (NumSources). Use optional fields so cached/backfilled data without these fields still works (default to 1 in scoring).
 **Warning signs:** Severity scores are flat (all events score the same within a type) because mentions/sources are always 1.
 
 ### Pitfall 2: Dropdown Z-Index Conflicts
+
 **What goes wrong:** The notification dropdown renders behind the detail panel, filter panel, or map controls.
 **Why it happens:** The existing z-index scale is: map=0, overlay=10, panel=20, controls=30, modal=40. The bell icon is at z-controls (30), but the dropdown needs to be above other controls.
 **How to avoid:** Use z-[var(--z-modal)] (40) for the dropdown panel itself, while the bell icon sits at z-[var(--z-controls)] (30). This ensures the dropdown floats above all other controls when open.
 **Warning signs:** Dropdown is clipped or hidden behind other panels.
 
 ### Pitfall 3: Performance of O(flights x sites) Proximity Check
+
 **What goes wrong:** Proximity alerting runs `unidentified.length * sites.length` haversine computations on every flight poll (every 5-30s depending on source).
 **Why it happens:** Naive nested loop without early termination.
 **How to avoid:** Use coarse bounding box pre-filter (same pattern as `attackStatus.ts`). With ~0.5 degree pre-filter for 50km radius, most flight-site pairs are eliminated before haversine. Also filter to only unidentified flights first (typically < 50 at any time). The cross product is manageable: ~50 flights x ~200 sites = ~10K comparisons, reduced to ~100 after bbox filter.
 **Warning signs:** Frame drops or UI jank on flight poll update.
 
 ### Pitfall 4: Stale Notification Read State on Event Refresh
+
 **What goes wrong:** User marks a notification as read, then a new event poll replaces the events array. The notification regeneration creates new notification objects, losing the read state.
 **Why it happens:** Notifications are re-derived from scratch on each event update.
 **How to avoid:** Maintain a `readIds: Set<string>` in notificationStore keyed by event ID. When regenerating notifications, apply read state from the set. Persist readIds to localStorage for session continuity.
 **Warning signs:** Read badges reset to unread after every poll cycle.
 
 ### Pitfall 5: 24h Default Window Interacting with Custom Range Toggle Suppression
+
 **What goes wrong:** The 24h default window accidentally triggers the custom range activation logic (which suppresses flight/ship toggles).
 **Why it happens:** The existing `setDateRange` in filterStore auto-activates custom range mode when either dateStart or dateEnd becomes non-null. If the 24h window is implemented by setting dateStart, it would trigger toggle suppression.
 **How to avoid:** The 24h default window MUST NOT touch dateStart/dateEnd. It is a separate client-side filter applied in `useFilteredEntities` or `entityPassesFilters` based on the condition `dateStart === null && dateEnd === null`. The filterStore may optionally have a boolean `isDefaultWindowActive` derived field, but it must not set the date range sliders.
 **Warning signs:** Flight and ship layers disappear on initial load because toggle suppression fires.
 
 ### Pitfall 6: News Matching Produces Zero Matches
+
 **What goes wrong:** Most notification cards show no news headlines because GDELT DOC articles lack lat/lng geo data and keyword overlap is sparse.
 **Why it happens:** GDELT DOC articles in the NewsArticle type have optional `lat?` and `lng?` fields that are often undefined. Keyword matching depends on the keyword whitelist from the news filter.
 **How to avoid:** Make temporal proximity the primary matching signal (within 24h). Use location name string matching as a secondary signal (event.data.locationName overlaps with article title). Geographic matching is a bonus when available, not required. This ensures most events get at least temporal matches.
@@ -401,6 +426,7 @@ if (isDefaultWindowActive) {
 ## Code Examples
 
 ### Extending ConflictEventEntity.data for NumMentions/NumSources
+
 ```typescript
 // server/types.ts -- add to ConflictEventEntity.data
 export interface ConflictEventEntity extends MapEntityBase {
@@ -416,13 +442,14 @@ export interface ConflictEventEntity extends MapEntityBase {
     goldsteinScale: number;
     locationName: string;
     cameoCode: string;
-    numMentions?: number;  // NEW: GDELT NumMentions (column 31)
-    numSources?: number;   // NEW: GDELT NumSources (column 32)
+    numMentions?: number; // NEW: GDELT NumMentions (column 31)
+    numSources?: number; // NEW: GDELT NumSources (column 32)
   };
 }
 ```
 
 ### GDELT Adapter -- Populating NumMentions/NumSources
+
 ```typescript
 // server/adapters/gdelt.ts -- add to COL and normalizeGdeltEvent
 export const COL = {
@@ -440,6 +467,7 @@ data: {
 ```
 
 ### AppShell Integration -- Bell Icon Placement
+
 ```typescript
 // src/components/layout/AppShell.tsx
 export function AppShell() {
@@ -470,6 +498,7 @@ export function AppShell() {
 ```
 
 ### Notification Bell Component
+
 ```typescript
 // src/components/layout/NotificationBell.tsx
 import { useRef, useEffect, useCallback } from 'react';
@@ -528,6 +557,7 @@ export function NotificationBell() {
 ```
 
 ### Time Group Helper
+
 ```typescript
 // src/lib/timeGroup.ts
 export type TimeGroup = 'last_hour' | 'last_day' | 'last_week';
@@ -553,6 +583,7 @@ export const TIME_GROUP_ORDER: TimeGroup[] = ['last_hour', 'last_day', 'last_wee
 ```
 
 ### 24h Default Window in useFilteredEntities
+
 ```typescript
 // Extension to src/hooks/useFilteredEntities.ts
 const DEFAULT_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -561,13 +592,13 @@ const DEFAULT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const isDefaultWindowActive = dateStart === null && dateEnd === null;
 
 const events = useMemo(() => {
-  let filtered = rawEvents.filter(e =>
-    entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1])
+  let filtered = rawEvents.filter((e) =>
+    entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]),
   );
   // Apply 24h default window when no custom range
   if (isDefaultWindowActive) {
     const cutoff = Date.now() - DEFAULT_WINDOW_MS;
-    filtered = filtered.filter(e => e.timestamp >= cutoff);
+    filtered = filtered.filter((e) => e.timestamp >= cutoff);
   }
   return filtered;
 }, [rawEvents, filters, isDefaultWindowActive]);
@@ -575,14 +606,15 @@ const events = useMemo(() => {
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| No event window | 24h default window (NOTF-05) | Phase 17 | Events filtered to last 24h by default; prevents map from showing all historical events |
-| NumMentions used only for dedup | NumMentions + NumSources exposed on entity data | Phase 17 | Enables severity scoring with media impact weighting |
-| No cross-referencing of stores | Notification system cross-references events + news | Phase 17 | First derived state that merges multiple data stores |
-| Sites only for static display | Sites as proximity alert targets | Phase 17 | Sites become actively monitored against flight positions |
+| Old Approach                    | Current Approach                                   | When Changed | Impact                                                                                  |
+| ------------------------------- | -------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| No event window                 | 24h default window (NOTF-05)                       | Phase 17     | Events filtered to last 24h by default; prevents map from showing all historical events |
+| NumMentions used only for dedup | NumMentions + NumSources exposed on entity data    | Phase 17     | Enables severity scoring with media impact weighting                                    |
+| No cross-referencing of stores  | Notification system cross-references events + news | Phase 17     | First derived state that merges multiple data stores                                    |
+| Sites only for static display   | Sites as proximity alert targets                   | Phase 17     | Sites become actively monitored against flight positions                                |
 
 **Deprecated/outdated:**
+
 - None specific to this phase
 
 ## Open Questions
@@ -605,31 +637,35 @@ const events = useMemo(() => {
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 3.x with jsdom (frontend), node (server) |
-| Config file | `vite.config.ts` (test section) |
-| Quick run command | `npx vitest run --reporter=verbose` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                                           |
+| ------------------ | ----------------------------------------------- |
+| Framework          | Vitest 3.x with jsdom (frontend), node (server) |
+| Config file        | `vite.config.ts` (test section)                 |
+| Quick run command  | `npx vitest run --reporter=verbose`             |
+| Full suite command | `npx vitest run`                                |
 
 ### Phase Requirements -> Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| NOTF-01 | Bell icon renders with unread count badge | unit | `npx vitest run src/__tests__/NotificationBell.test.tsx -x` | Wave 0 |
-| NOTF-02 | Severity scoring formula produces correct ranking | unit | `npx vitest run src/__tests__/severity.test.ts -x` | Wave 0 |
-| NOTF-02 | notificationStore derives scored notifications from events | unit | `npx vitest run src/__tests__/notificationStore.test.ts -x` | Wave 0 |
-| NOTF-03 | News-to-event matching returns 0-3 headlines | unit | `npx vitest run src/__tests__/newsMatching.test.ts -x` | Wave 0 |
-| NOTF-04 | Proximity alerts computed for unidentified flights near sites | unit | `npx vitest run src/__tests__/proximityAlerts.test.ts -x` | Wave 0 |
-| NOTF-04 | Proximity alert icon renders on map for nearby unidentified flights | unit | `npx vitest run src/__tests__/proximityAlerts.test.ts -x` | Wave 0 |
-| NOTF-05 | 24h default window filters events when no custom range active | unit | `npx vitest run src/__tests__/filterStore.test.ts -x` | Extend existing |
-| NOTF-05 | "Showing last 24h" label visible when default window active | unit | `npx vitest run src/__tests__/FilterPanel.test.tsx -x` | Extend existing |
+
+| Req ID  | Behavior                                                            | Test Type | Automated Command                                           | File Exists?    |
+| ------- | ------------------------------------------------------------------- | --------- | ----------------------------------------------------------- | --------------- |
+| NOTF-01 | Bell icon renders with unread count badge                           | unit      | `npx vitest run src/__tests__/NotificationBell.test.tsx -x` | Wave 0          |
+| NOTF-02 | Severity scoring formula produces correct ranking                   | unit      | `npx vitest run src/__tests__/severity.test.ts -x`          | Wave 0          |
+| NOTF-02 | notificationStore derives scored notifications from events          | unit      | `npx vitest run src/__tests__/notificationStore.test.ts -x` | Wave 0          |
+| NOTF-03 | News-to-event matching returns 0-3 headlines                        | unit      | `npx vitest run src/__tests__/newsMatching.test.ts -x`      | Wave 0          |
+| NOTF-04 | Proximity alerts computed for unidentified flights near sites       | unit      | `npx vitest run src/__tests__/proximityAlerts.test.ts -x`   | Wave 0          |
+| NOTF-04 | Proximity alert icon renders on map for nearby unidentified flights | unit      | `npx vitest run src/__tests__/proximityAlerts.test.ts -x`   | Wave 0          |
+| NOTF-05 | 24h default window filters events when no custom range active       | unit      | `npx vitest run src/__tests__/filterStore.test.ts -x`       | Extend existing |
+| NOTF-05 | "Showing last 24h" label visible when default window active         | unit      | `npx vitest run src/__tests__/FilterPanel.test.tsx -x`      | Extend existing |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run --reporter=verbose`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `src/__tests__/severity.test.ts` -- covers NOTF-02 scoring
 - [ ] `src/__tests__/newsMatching.test.ts` -- covers NOTF-03 matching
 - [ ] `src/__tests__/notificationStore.test.ts` -- covers NOTF-02 store
@@ -641,24 +677,28 @@ const events = useMemo(() => {
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Project codebase: `server/types.ts`, `server/adapters/gdelt.ts`, `src/stores/eventStore.ts`, `src/stores/newsStore.ts`, `src/stores/filterStore.ts`, `src/lib/attackStatus.ts`, `src/lib/geo.ts`, `src/hooks/useFilteredEntities.ts`, `src/hooks/useEntityLayers.ts`
 - GDELT v2 Event Codebook: columns 31 (NumMentions), 32 (NumSources), 33 (NumArticles) confirmed via official documentation
 - Context file: `.planning/phases/17-notification-center/17-CONTEXT.md` for locked decisions
 
 ### Secondary (MEDIUM confidence)
+
 - GDELT v2 column positions cross-verified via [GDELT Event Codebook V2.0](http://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf) and [gdelt2HeaderRows repository](https://github.com/linwoodc3/gdelt2HeaderRows)
 - Severity formula weights are recommendations based on conflict type severity hierarchy (Claude's discretion area)
 
 ### Tertiary (LOW confidence)
+
 - None -- all findings verified against codebase or official documentation
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH -- all libraries already installed and in use; no new dependencies
 - Architecture: HIGH -- patterns derived directly from existing codebase (stores, hooks, layers)
 - Pitfalls: HIGH -- identified from actual code review (missing type fields, z-index scale, performance, state synchronization)
-- Severity scoring: MEDIUM -- formula weights are recommendations (Claude's discretion); the mathematical structure (log * decay) is well-established
+- Severity scoring: MEDIUM -- formula weights are recommendations (Claude's discretion); the mathematical structure (log \* decay) is well-established
 - News matching: MEDIUM -- algorithm design is Claude's discretion; GDELT DOC articles may have sparse geo data
 
 **Research date:** 2026-03-20

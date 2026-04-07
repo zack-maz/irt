@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { classifyWaterType, normalizeWaterElement, isPriorityCountry, isNotable } from '../../adapters/overpass-water.js';
+import {
+  classifyWaterType,
+  normalizeWaterElement,
+  isPriorityCountry,
+  isNotable,
+} from '../../adapters/overpass-water.js';
 import type { WaterStressIndicators } from '../../types.js';
 
 describe('classifyWaterType', () => {
@@ -179,7 +184,11 @@ describe('normalizeWaterElement', () => {
       id: 100,
       lat: 33.0,
       lon: 44.0,
-      tags: { waterway: 'dam', name: 'Darbandikhan Dam', operator: 'Iraqi Ministry of Water Resources' },
+      tags: {
+        waterway: 'dam',
+        name: 'Darbandikhan Dam',
+        operator: 'Iraqi Ministry of Water Resources',
+      },
     };
     const result = normalizeWaterElement(el, stressLookup);
     expect(result).not.toBeNull();
@@ -254,7 +263,12 @@ describe('normalizeWaterElement', () => {
         id: 303,
         lat: 23.9,
         lon: 45.1,
-        tags: { natural: 'water', water: 'reservoir', name: 'Notable Reservoir', wikipedia: 'en:Reservoir' },
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Notable Reservoir',
+          wikipedia: 'en:Reservoir',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
@@ -286,8 +300,13 @@ describe('normalizeWaterElement', () => {
         type: 'node' as const,
         id: 306,
         lat: 26.8,
-        lon: 30.8,  // Egypt (non-priority)
-        tags: { natural: 'water', water: 'reservoir', name: 'Aswan Reservoir', 'wikipedia:en': 'Lake Nasser' },
+        lon: 30.8, // Egypt (non-priority)
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Aswan Reservoir',
+          'wikipedia:en': 'Lake Nasser',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });

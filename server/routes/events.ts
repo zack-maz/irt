@@ -12,7 +12,10 @@ import type { ConflictEventEntity, NewsCluster } from '../types.js';
 
 /** Zod schema for /api/events query params */
 const eventsQuerySchema = z.object({
-  backfill: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+  backfill: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 /** Redis key for accumulated GDELT events */
@@ -43,7 +46,9 @@ async function shouldBackfill(): Promise<boolean> {
 export const eventsRouter = Router();
 
 eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
-  const { backfill: forceBackfill } = res.locals.validatedQuery as z.infer<typeof eventsQuerySchema>;
+  const { backfill: forceBackfill } = res.locals.validatedQuery as z.infer<
+    typeof eventsQuerySchema
+  >;
 
   // Check cache first (skip on forced backfill)
   const cached = forceBackfill
@@ -56,7 +61,13 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
 
   try {
     // Extract Bellingcat articles from news cache for corroboration boost (opportunistic)
-    let bellingcatArticles: { title: string; url: string; publishedAt: number; lat?: number; lng?: number }[] = [];
+    let bellingcatArticles: {
+      title: string;
+      url: string;
+      publishedAt: number;
+      lat?: number;
+      lng?: number;
+    }[] = [];
     try {
       const newsCache = await cacheGetSafe<NewsCluster[]>('news:gdelt', 0);
       if (newsCache?.data) {

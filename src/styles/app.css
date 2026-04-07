@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* Accent colors with semantic meaning */
@@ -45,7 +45,10 @@
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -69,8 +72,12 @@
 }
 
 @keyframes flash {
-  0% { background-color: rgba(234, 179, 8, 0.3); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(234, 179, 8, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 .animate-flash {
@@ -78,9 +85,15 @@
 }
 
 @keyframes delta-fade {
-  0% { opacity: 1; }
-  70% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .animate-delta {
@@ -88,13 +101,25 @@
 }
 
 @keyframes slide-in-right {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-in-left {
-  from { transform: translateX(-100%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .animate-slide-in-right {
@@ -106,13 +131,25 @@
 }
 
 @keyframes breadcrumb-enter {
-  from { max-height: 0; opacity: 0; }
-  to   { max-height: 40px; opacity: 1; }
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 40px;
+    opacity: 1;
+  }
 }
 
 @keyframes breadcrumb-exit {
-  from { max-height: 40px; opacity: 1; }
-  to   { max-height: 0; opacity: 0; }
+  from {
+    max-height: 40px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
 }
 
 .animate-breadcrumb-enter {
@@ -124,4 +161,3 @@
   animation: breadcrumb-exit 150ms ease-out both;
   overflow: hidden;
 }
-

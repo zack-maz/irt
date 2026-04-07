@@ -4,15 +4,20 @@ import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'gdelt' });
 import { isGeoValid, detectCentroid } from '../lib/geoValidation.js';
-import { computeEventConfidence, applyGoldsteinSanity, GOLDSTEIN_CEILINGS, checkBellingcatCorroboration, getCameoSpecificity } from '../lib/eventScoring.js';
+import {
+  computeEventConfidence,
+  applyGoldsteinSanity,
+  GOLDSTEIN_CEILINGS,
+  checkBellingcatCorroboration,
+  getCameoSpecificity,
+} from '../lib/eventScoring.js';
 import type { BellingcatArticle } from '../lib/eventScoring.js';
 import { getConfig } from '../config.js';
 import { buildAuditRecord } from '../lib/eventAudit.js';
 import type { AuditRecord, PhaseAChecks, ConfidenceSubScores } from '../lib/eventAudit.js';
 
 // GDELT v2 lastupdate.txt endpoint (HTTP, NOT HTTPS -- TLS cert issues)
-const GDELT_LASTUPDATE_URL =
-  'http://data.gdeltproject.org/gdeltv2/lastupdate.txt';
+const GDELT_LASTUPDATE_URL = 'http://data.gdeltproject.org/gdeltv2/lastupdate.txt';
 
 // FIPS 10-4 codes for Greater Middle East (16 countries, same coverage as ACLED)
 export const MIDDLE_EAST_FIPS = new Set([
@@ -194,11 +199,7 @@ function describeEvent(eventBaseCode: string): string {
 /**
  * Normalize a GDELT CSV row (as columns array) to ConflictEventEntity.
  */
-export function normalizeGdeltEvent(
-  cols: string[],
-  lat: number,
-  lng: number,
-): ConflictEventEntity {
+export function normalizeGdeltEvent(cols: string[], lat: number, lng: number): ConflictEventEntity {
   const eventBaseCode = getCol(cols, COL.EventBaseCode);
   const eventRootCode = getCol(cols, COL.EventRootCode);
   const eventCode = getCol(cols, COL.EventCode);
@@ -237,7 +238,10 @@ export function normalizeGdeltEvent(
  * Phase A: Raw row filtering (operates on string[] columns)
  * Phase B: Normalize, score, and threshold-filter (operates on entities)
  */
-export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArticle[]): ConflictEventEntity[] {
+export function parseAndFilter(
+  csv: string,
+  bellingcatArticles?: BellingcatArticle[],
+): ConflictEventEntity[] {
   const lines = csv.trim().split('\n');
   const rawCount = lines.length;
   const config = getConfig();
@@ -265,7 +269,10 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     const fullName = getCol(cols, COL.ActionGeo_FullName);
     if (!isGeoValid(fullName, countryCode)) {
       geoDiscardCount++;
-      log.warn({ eventId: getCol(cols, COL.GLOBALEVENTID), fullName, countryCode }, 'discarded: FullName contradicts FIPS');
+      log.warn(
+        { eventId: getCol(cols, COL.GLOBALEVENTID), fullName, countryCode },
+        'discarded: FullName contradicts FIPS',
+      );
       continue;
     }
 
@@ -311,7 +318,16 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     if (entity.type !== origType) {
       reclassifyCount++;
       const ceiling = GOLDSTEIN_CEILINGS[origType]?.ceiling;
-      log.info({ id: entity.id, from: origType, to: entity.type, goldstein: entity.data.goldsteinScale, ceiling }, 'reclassified event');
+      log.info(
+        {
+          id: entity.id,
+          from: origType,
+          to: entity.type,
+          goldstein: entity.data.goldsteinScale,
+          ceiling,
+        },
+        'reclassified event',
+      );
     }
 
     // Step 10: Centroid detection
@@ -332,7 +348,10 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
     // Step 12: Threshold filter
     if (confidence < eventConfidenceThreshold) {
       thresholdDiscardCount++;
-      log.warn({ id: entity.id, confidence: +confidence.toFixed(3), threshold: eventConfidenceThreshold }, 'discarded: below confidence threshold');
+      log.warn(
+        { id: entity.id, confidence: +confidence.toFixed(3), threshold: eventConfidenceThreshold },
+        'discarded: below confidence threshold',
+      );
       continue;
     }
 
@@ -342,7 +361,15 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
       if (corroboration.matched) {
         confidence = Math.min(1.0, confidence + config.bellingcatCorroborationBoost);
         entity = { ...entity, data: { ...entity.data, confidence } };
-        log.info({ id: entity.id, boost: config.bellingcatCorroborationBoost, confidence: +confidence.toFixed(3), article: corroboration.article.url }, 'Bellingcat corroboration boost');
+        log.info(
+          {
+            id: entity.id,
+            boost: config.bellingcatCorroborationBoost,
+            confidence: +confidence.toFixed(3),
+            article: corroboration.article.url,
+          },
+          'Bellingcat corroboration boost',
+        );
       }
     }
 
@@ -350,7 +377,17 @@ export function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArtic
   }
 
   // Pipeline summary
-  log.info({ rawCount, geoValidCount, reclassifyCount, aboveThreshold: geoValidCount - thresholdDiscardCount, finalCount: results.length }, 'pipeline summary');
+  log.info(
+    {
+      rawCount,
+      geoValidCount,
+      geoDiscardCount,
+      reclassifyCount,
+      aboveThreshold: geoValidCount - thresholdDiscardCount,
+      finalCount: results.length,
+    },
+    'pipeline summary',
+  );
 
   // Dispersion is applied downstream in the events route (after all merging)
   // so that the full merged event set gets single-pass slot assignment.
@@ -445,7 +482,10 @@ function computeConfidenceSubScores(
  * to keep the production-hot parseAndFilter lean. This function is slower but
  * provides complete pipeline transparency.
  */
-export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: BellingcatArticle[]): AuditRecord[] {
+export function parseAndFilterWithTrace(
+  csv: string,
+  bellingcatArticles?: BellingcatArticle[],
+): AuditRecord[] {
   const lines = csv.trim().split('\n');
   const config = getConfig();
   const excludedCameo = new Set(config.eventExcludedCameo);
@@ -453,7 +493,13 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
 
   // Phase A: Build dedup map for rows that pass all Phase A checks
   // We need two passes: first collect all Phase A survivors for dedup, then process
-  const phaseAPassedRows: Array<{ cols: string[]; lat: number; lng: number; mentions: number; phaseA: PhaseAChecks }> = [];
+  const phaseAPassedRows: Array<{
+    cols: string[];
+    lat: number;
+    lng: number;
+    mentions: number;
+    phaseA: PhaseAChecks;
+  }> = [];
   const phaseARejections: Array<{ cols: string[]; reason: string; phaseA: PhaseAChecks }> = [];
 
   for (const line of lines) {
@@ -528,27 +574,36 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
       originalType: 'assault' as const,
       reclassified: false,
       geoPrecision: 'precise' as const,
-      confidenceSubScores: { mediaCoverage: 0, sourceDiversity: 0, actorSpecificity: 0, geoPrecisionSignal: 0, goldsteinConsistency: 0, cameoSpecificity: 0 },
+      confidenceSubScores: {
+        mediaCoverage: 0,
+        sourceDiversity: 0,
+        actorSpecificity: 0,
+        geoPrecisionSignal: 0,
+        goldsteinConsistency: 0,
+        cameoSpecificity: 0,
+      },
       finalConfidence: 0,
       passedThreshold: false,
     };
-    records.push(buildAuditRecord({
-      id,
-      status: 'rejected',
-      event: null,
-      pipelineTrace: {
-        phaseA: rej.phaseA,
-        phaseB: defaultPhaseB,
-        rejectionReason: rej.reason,
-        actionGeoType: parseInt(getCol(rej.cols, COL.ActionGeo_Type), 10) || undefined,
-      },
-      rawGdeltColumns: extractRawColumns(rej.cols),
-    }));
+    records.push(
+      buildAuditRecord({
+        id,
+        status: 'rejected',
+        event: null,
+        pipelineTrace: {
+          phaseA: rej.phaseA,
+          phaseB: defaultPhaseB,
+          rejectionReason: rej.reason,
+          actionGeoType: parseInt(getCol(rej.cols, COL.ActionGeo_Type), 10) || undefined,
+        },
+        rawGdeltColumns: extractRawColumns(rej.cols),
+      }),
+    );
   }
 
   // Dedup: same date+code+lat+lng, keep highest mentions
-  const best = new Map<string, typeof phaseAPassedRows[0]>();
-  const superseded: Array<typeof phaseAPassedRows[0]> = [];
+  const best = new Map<string, (typeof phaseAPassedRows)[0]>();
+  const superseded: Array<(typeof phaseAPassedRows)[0]> = [];
 
   for (const row of phaseAPassedRows) {
     const key = `${getCol(row.cols, COL.SQLDATE)}|${getCol(row.cols, COL.EventCode)}|${row.lat}|${row.lng}`;
@@ -568,22 +623,31 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
       originalType: 'assault' as const,
       reclassified: false,
       geoPrecision: 'precise' as const,
-      confidenceSubScores: { mediaCoverage: 0, sourceDiversity: 0, actorSpecificity: 0, geoPrecisionSignal: 0, goldsteinConsistency: 0, cameoSpecificity: 0 },
+      confidenceSubScores: {
+        mediaCoverage: 0,
+        sourceDiversity: 0,
+        actorSpecificity: 0,
+        geoPrecisionSignal: 0,
+        goldsteinConsistency: 0,
+        cameoSpecificity: 0,
+      },
       finalConfidence: 0,
       passedThreshold: false,
     };
-    records.push(buildAuditRecord({
-      id,
-      status: 'rejected',
-      event: null,
-      pipelineTrace: {
-        phaseA: sup.phaseA,
-        phaseB: defaultPhaseB,
-        rejectionReason: 'dedup_superseded',
-        actionGeoType: parseInt(getCol(sup.cols, COL.ActionGeo_Type), 10) || undefined,
-      },
-      rawGdeltColumns: extractRawColumns(sup.cols),
-    }));
+    records.push(
+      buildAuditRecord({
+        id,
+        status: 'rejected',
+        event: null,
+        pipelineTrace: {
+          phaseA: sup.phaseA,
+          phaseB: defaultPhaseB,
+          rejectionReason: 'dedup_superseded',
+          actionGeoType: parseInt(getCol(sup.cols, COL.ActionGeo_Type), 10) || undefined,
+        },
+        rawGdeltColumns: extractRawColumns(sup.cols),
+      }),
+    );
   }
 
   // Phase B: normalize, score, threshold-filter for dedup winners
@@ -611,25 +675,27 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
 
     if (!passedThreshold) {
       // Rejected at threshold
-      records.push(buildAuditRecord({
-        id: entity.id,
-        status: 'rejected',
-        event: null,
-        pipelineTrace: {
-          phaseA: entry.phaseA,
-          phaseB: {
-            originalType: origType,
-            reclassified,
-            geoPrecision,
-            confidenceSubScores: subScores,
-            finalConfidence: confidence,
-            passedThreshold: false,
+      records.push(
+        buildAuditRecord({
+          id: entity.id,
+          status: 'rejected',
+          event: null,
+          pipelineTrace: {
+            phaseA: entry.phaseA,
+            phaseB: {
+              originalType: origType,
+              reclassified,
+              geoPrecision,
+              confidenceSubScores: subScores,
+              finalConfidence: confidence,
+              passedThreshold: false,
+            },
+            rejectionReason: 'below_confidence_threshold',
+            actionGeoType,
           },
-          rejectionReason: 'below_confidence_threshold',
-          actionGeoType,
-        },
-        rawGdeltColumns: extractRawColumns(entry.cols),
-      }));
+          rawGdeltColumns: extractRawColumns(entry.cols),
+        }),
+      );
       continue;
     }
 
@@ -649,25 +715,27 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
     acceptedEntities.push(entity);
 
     // Build accepted audit record (raw undispersed coordinates for audit)
-    records.push(buildAuditRecord({
-      id: entity.id,
-      status: 'accepted',
-      event: entity,
-      pipelineTrace: {
-        phaseA: entry.phaseA,
-        phaseB: {
-          originalType: origType,
-          reclassified,
-          geoPrecision,
-          confidenceSubScores: subScores,
-          finalConfidence: confidence,
-          passedThreshold: true,
+    records.push(
+      buildAuditRecord({
+        id: entity.id,
+        status: 'accepted',
+        event: entity,
+        pipelineTrace: {
+          phaseA: entry.phaseA,
+          phaseB: {
+            originalType: origType,
+            reclassified,
+            geoPrecision,
+            confidenceSubScores: subScores,
+            finalConfidence: confidence,
+            passedThreshold: true,
+          },
+          bellingcatMatch,
+          actionGeoType,
         },
-        bellingcatMatch,
-        actionGeoType,
-      },
-      rawGdeltColumns: extractRawColumns(entry.cols),
-    }));
+        rawGdeltColumns: extractRawColumns(entry.cols),
+      }),
+    );
   }
 
   // Dispersion is applied downstream (in the events route after merging).
@@ -681,7 +749,9 @@ export function parseAndFilterWithTrace(csv: string, bellingcatArticles?: Bellin
  * and return normalized ConflictEventEntity[].
  * Optionally accepts Bellingcat articles for confidence corroboration.
  */
-export async function fetchEvents(bellingcatArticles?: BellingcatArticle[]): Promise<ConflictEventEntity[]> {
+export async function fetchEvents(
+  bellingcatArticles?: BellingcatArticle[],
+): Promise<ConflictEventEntity[]> {
   const start = Date.now();
 
   const exportUrl = await getExportUrl();
@@ -710,9 +780,7 @@ function generateBackfillUrls(fromTs: number, toTs: number, intervalMs?: number)
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');
     const hh = String(d.getUTCHours()).padStart(2, '0');
-    urls.push(
-      `http://data.gdeltproject.org/gdeltv2/${yyyy}${mm}${dd}${hh}0000.export.CSV.zip`,
-    );
+    urls.push(`http://data.gdeltproject.org/gdeltv2/${yyyy}${mm}${dd}${hh}0000.export.CSV.zip`);
     cursor += interval;
   }
 
@@ -757,7 +825,10 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   }
 
   const events = Array.from(merged.values());
-  log.info({ count: events.length, fileCount: urls.length, durationMs: Date.now() - start }, 'backfill complete');
+  log.info(
+    { count: events.length, fileCount: urls.length, durationMs: Date.now() - start },
+    'backfill complete',
+  );
   return events;
 }
 
@@ -807,6 +878,15 @@ export async function backfillEventsWithTrace(
     }
   }
 
-  log.info({ totalRecords: allRecords.length, accepted: allRecords.filter(r => r.status === 'accepted').length, rejected: allRecords.filter(r => r.status === 'rejected').length, fileCount: urls.length, durationMs: Date.now() - start }, 'audit backfill complete');
+  log.info(
+    {
+      totalRecords: allRecords.length,
+      accepted: allRecords.filter((r) => r.status === 'accepted').length,
+      rejected: allRecords.filter((r) => r.status === 'rejected').length,
+      fileCount: urls.length,
+      durationMs: Date.now() - start,
+    },
+    'audit backfill complete',
+  );
   return allRecords;
 }

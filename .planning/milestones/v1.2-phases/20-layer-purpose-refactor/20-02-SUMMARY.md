@@ -31,13 +31,13 @@ key-files:
     - src/components/layout/LayerTogglesSlot.tsx
 
 key-decisions:
-  - "LayerToggleRow wrapper component prevents hooks-in-loop violation when iterating LAYER_CONFIGS"
-  - "VisibilityButton component file kept as dead code (not deleted) since it may be referenced by tests"
-  - "Sites section removed entirely from FilterPanelSlot (no filter controls remain for sites)"
+  - 'LayerToggleRow wrapper component prevents hooks-in-loop violation when iterating LAYER_CONFIGS'
+  - 'VisibilityButton component file kept as dead code (not deleted) since it may be referenced by tests'
+  - 'Sites section removed entirely from FilterPanelSlot (no filter controls remain for sites)'
 
 patterns-established:
-  - "LayerToggleRow: Zustand hook wrapped in per-item component for .map() iteration safety"
-  - "LEGEND_REGISTRY: empty array pattern for sub-phase registration of visualization legends"
+  - 'LayerToggleRow: Zustand hook wrapped in per-item component for .map() iteration safety'
+  - 'LEGEND_REGISTRY: empty array pattern for sub-phase registration of visualization legends'
 
 requirements-completed: [LREF-03, LREF-04]
 
@@ -58,6 +58,7 @@ completed: 2026-03-23
 - **Files modified:** 6
 
 ## Accomplishments
+
 - Removed isEntityTooltipVisible gating from BaseMap -- tooltips now show for all entities
 - Simplified StatusDropdown and StatusPanel to unconditional entity counts (no toggle gating)
 - Removed all VisibilityButton usages and entity toggle selectors from FilterPanelSlot
@@ -72,6 +73,7 @@ Each task was committed atomically:
 2. **Task 2: Replace layer toggles UI + build legend framework** - `29e5e42` (feat)
 
 ## Files Created/Modified
+
 - `src/components/map/MapLegend.tsx` - New legend framework with LegendConfig, LEGEND_REGISTRY, and MapLegend component
 - `src/components/map/BaseMap.tsx` - Removed isEntityTooltipVisible, removed toggle imports, added MapLegend
 - `src/components/layout/StatusDropdown.tsx` - Simplified to unconditional entity counts
@@ -80,6 +82,7 @@ Each task was committed atomically:
 - `src/components/layout/LayerTogglesSlot.tsx` - Replaced entity toggles with 6 visualization layer toggles
 
 ## Decisions Made
+
 - LayerToggleRow wrapper component created to prevent hooks-in-loop violation when iterating LAYER_CONFIGS with .map()
 - VisibilityButton.tsx component file left in place (dead code) rather than deleted, since test files may import it
 - Sites section removed entirely from FilterPanelSlot since no filter controls (only visibility toggles) existed for sites
@@ -89,6 +92,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed hooks-in-loop violation in LayerTogglesContent**
+
 - **Found during:** Task 2 (Replace layer toggles UI)
 - **Issue:** Initial implementation called useLayerStore inside .map() callback, violating Rules of Hooks
 - **Fix:** Extracted LayerToggleRow as a separate component that wraps the hook call
@@ -102,17 +106,21 @@ Each task was committed atomically:
 **Impact on plan:** Essential fix for React hook rules compliance. No scope creep.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - All UI components clean of entity toggle references
 - LayerTogglesSlot connected to layerStore with 6 visualization layers
 - MapLegend framework ready for sub-phases 20.1-20.5 to register their legends
 - Plan 03 can proceed with useEntityLayers and rendering pipeline cleanup
 
 ---
-*Phase: 20-layer-purpose-refactor*
-*Completed: 2026-03-23*
+
+_Phase: 20-layer-purpose-refactor_
+_Completed: 2026-03-23_

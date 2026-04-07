@@ -3,10 +3,7 @@
 
 // ─── AST Node Types ───────────────────────────────────────────
 
-export type QueryNode =
-  | TagNode
-  | TextNode
-  | OrNode;
+export type QueryNode = TagNode | TextNode | OrNode;
 
 export interface TagNode {
   type: 'tag';
@@ -68,7 +65,13 @@ export function tokenize(input: string): Token[] {
 
     // Read word characters (anything except whitespace and parens)
     const wordStart = i;
-    while (i < input.length && input[i] !== ' ' && input[i] !== '\t' && input[i] !== '(' && input[i] !== ')') {
+    while (
+      i < input.length &&
+      input[i] !== ' ' &&
+      input[i] !== '\t' &&
+      input[i] !== '(' &&
+      input[i] !== ')'
+    ) {
       i++;
     }
 
@@ -121,9 +124,15 @@ export function parse(input: string): QueryNode | null {
 
   let pos = 0;
 
-  function peek(): Token | undefined { return tokens[pos]; }
-  function consume(): Token { return tokens[pos++]; }
-  function isAtEnd(): boolean { return pos >= tokens.length; }
+  function peek(): Token | undefined {
+    return tokens[pos];
+  }
+  function consume(): Token {
+    return tokens[pos++];
+  }
+  function isAtEnd(): boolean {
+    return pos >= tokens.length;
+  }
 
   // factor = '(' expr ')' | tag | text
   function parseFactor(): QueryNode | null {

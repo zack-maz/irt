@@ -15,91 +15,97 @@
 ## File Map
 
 ### Phase 15: Key Sites Overlay
-| Action | File |
-|--------|------|
-| Create | `server/adapters/overpass.ts` |
-| Create | `server/routes/sites.ts` |
-| Create | `src/stores/siteStore.ts` |
-| Create | `src/hooks/useSitePolling.ts` |
-| Create | `src/components/detail/SiteDetail.tsx` |
-| Create | `server/__tests__/adapters/overpass.test.ts` |
-| Create | `server/__tests__/routes/sites.test.ts` |
-| Create | `src/__tests__/siteStore.test.ts` |
-| Create | `src/__tests__/useSitePolling.test.ts` |
-| Modify | `server/types.ts` — add `SiteEntity`, `'site'` to `EntityType` |
-| Modify | `src/types/entities.ts` — re-export `SiteEntity` |
-| Modify | `src/types/ui.ts` — add site toggle fields to `LayerToggles` |
-| Modify | `server/index.ts` — register `/api/sites` |
-| Modify | `src/stores/uiStore.ts` — add site toggle state + actions |
-| Modify | `src/hooks/useSelectedEntity.ts` — search siteStore |
-| Modify | `src/components/layout/LayerTogglesSlot.tsx` — add site toggles |
-| Modify | `src/components/layout/AppShell.tsx` — wire useSitePolling |
-| Modify | `src/components/layout/DetailPanelSlot.tsx` — render SiteDetail |
+
+| Action | File                                                                      |
+| ------ | ------------------------------------------------------------------------- |
+| Create | `server/adapters/overpass.ts`                                             |
+| Create | `server/routes/sites.ts`                                                  |
+| Create | `src/stores/siteStore.ts`                                                 |
+| Create | `src/hooks/useSitePolling.ts`                                             |
+| Create | `src/components/detail/SiteDetail.tsx`                                    |
+| Create | `server/__tests__/adapters/overpass.test.ts`                              |
+| Create | `server/__tests__/routes/sites.test.ts`                                   |
+| Create | `src/__tests__/siteStore.test.ts`                                         |
+| Create | `src/__tests__/useSitePolling.test.ts`                                    |
+| Modify | `server/types.ts` — add `SiteEntity`, `'site'` to `EntityType`            |
+| Modify | `src/types/entities.ts` — re-export `SiteEntity`                          |
+| Modify | `src/types/ui.ts` — add site toggle fields to `LayerToggles`              |
+| Modify | `server/index.ts` — register `/api/sites`                                 |
+| Modify | `src/stores/uiStore.ts` — add site toggle state + actions                 |
+| Modify | `src/hooks/useSelectedEntity.ts` — search siteStore                       |
+| Modify | `src/components/layout/LayerTogglesSlot.tsx` — add site toggles           |
+| Modify | `src/components/layout/AppShell.tsx` — wire useSitePolling                |
+| Modify | `src/components/layout/DetailPanelSlot.tsx` — render SiteDetail           |
 | Modify | `src/components/map/BaseMap.tsx` — add site IconLayer, shrink event icons |
 
 ### Phase 16: News Feed
-| Action | File |
-|--------|------|
-| Create | `server/adapters/news.ts` |
-| Create | `server/routes/news.ts` |
-| Create | `src/stores/newsStore.ts` |
-| Create | `src/hooks/useNewsPolling.ts` |
-| Create | `server/__tests__/adapters/news.test.ts` |
-| Create | `server/__tests__/routes/news.test.ts` |
-| Create | `src/__tests__/newsStore.test.ts` |
-| Create | `src/__tests__/useNewsPolling.test.ts` |
-| Modify | `server/index.ts` — register `/api/news` |
+
+| Action | File                                                       |
+| ------ | ---------------------------------------------------------- |
+| Create | `server/adapters/news.ts`                                  |
+| Create | `server/routes/news.ts`                                    |
+| Create | `src/stores/newsStore.ts`                                  |
+| Create | `src/hooks/useNewsPolling.ts`                              |
+| Create | `server/__tests__/adapters/news.test.ts`                   |
+| Create | `server/__tests__/routes/news.test.ts`                     |
+| Create | `src/__tests__/newsStore.test.ts`                          |
+| Create | `src/__tests__/useNewsPolling.test.ts`                     |
+| Modify | `server/index.ts` — register `/api/news`                   |
 | Modify | `src/components/layout/AppShell.tsx` — wire useNewsPolling |
 
 ### Phase 17: Notification Center
-| Action | File |
-|--------|------|
-| Create | `server/routes/notifications.ts` |
-| Create | `src/stores/notificationStore.ts` |
-| Create | `src/components/layout/NotificationDrawer.tsx` |
-| Create | `src/components/notifications/NotificationCard.tsx` |
-| Create | `server/__tests__/routes/notifications.test.ts` |
-| Create | `src/__tests__/notificationStore.test.ts` |
-| Create | `src/__tests__/NotificationDrawer.test.tsx` |
-| Modify | `server/index.ts` — register `/api/notifications` |
-| Modify | `src/stores/filterStore.ts` — add `DEFAULT_EVENT_WINDOW_MS` constant |
-| Modify | `src/stores/uiStore.ts` — add `isNotificationDrawerOpen`, actions |
-| Modify | `src/hooks/useEntityLayers.ts` — apply 24h window when `dateStart` is null |
-| Modify | `src/components/layout/AppShell.tsx` — mount NotificationDrawer, add offset var |
+
+| Action | File                                                                                 |
+| ------ | ------------------------------------------------------------------------------------ |
+| Create | `server/routes/notifications.ts`                                                     |
+| Create | `src/stores/notificationStore.ts`                                                    |
+| Create | `src/components/layout/NotificationDrawer.tsx`                                       |
+| Create | `src/components/notifications/NotificationCard.tsx`                                  |
+| Create | `server/__tests__/routes/notifications.test.ts`                                      |
+| Create | `src/__tests__/notificationStore.test.ts`                                            |
+| Create | `src/__tests__/NotificationDrawer.test.tsx`                                          |
+| Modify | `server/index.ts` — register `/api/notifications`                                    |
+| Modify | `src/stores/filterStore.ts` — add `DEFAULT_EVENT_WINDOW_MS` constant                 |
+| Modify | `src/stores/uiStore.ts` — add `isNotificationDrawerOpen`, actions                    |
+| Modify | `src/hooks/useEntityLayers.ts` — apply 24h window when `dateStart` is null           |
+| Modify | `src/components/layout/AppShell.tsx` — mount NotificationDrawer, add offset var      |
 | Modify | `src/components/layout/DetailPanelSlot.tsx` — respect `--notification-drawer-offset` |
 
 ### Phase 18: Oil Markets Tracker
-| Action | File |
-|--------|------|
-| Create | `server/adapters/yahoo-finance.ts` |
-| Create | `server/routes/markets.ts` |
-| Create | `src/stores/marketStore.ts` |
-| Create | `src/hooks/useMarketPolling.ts` |
-| Create | `src/components/layout/MarketsPanelSlot.tsx` |
-| Create | `src/components/markets/SparklineChart.tsx` |
-| Create | `server/__tests__/adapters/yahoo-finance.test.ts` |
-| Create | `server/__tests__/routes/markets.test.ts` |
-| Create | `src/__tests__/marketStore.test.ts` |
-| Create | `src/__tests__/useMarketPolling.test.ts` |
-| Create | `src/__tests__/MarketsPanel.test.tsx` |
-| Modify | `server/index.ts` — register `/api/markets` |
+
+| Action | File                                                                            |
+| ------ | ------------------------------------------------------------------------------- |
+| Create | `server/adapters/yahoo-finance.ts`                                              |
+| Create | `server/routes/markets.ts`                                                      |
+| Create | `src/stores/marketStore.ts`                                                     |
+| Create | `src/hooks/useMarketPolling.ts`                                                 |
+| Create | `src/components/layout/MarketsPanelSlot.tsx`                                    |
+| Create | `src/components/markets/SparklineChart.tsx`                                     |
+| Create | `server/__tests__/adapters/yahoo-finance.test.ts`                               |
+| Create | `server/__tests__/routes/markets.test.ts`                                       |
+| Create | `src/__tests__/marketStore.test.ts`                                             |
+| Create | `src/__tests__/useMarketPolling.test.ts`                                        |
+| Create | `src/__tests__/MarketsPanel.test.tsx`                                           |
+| Modify | `server/index.ts` — register `/api/markets`                                     |
 | Modify | `src/components/layout/AppShell.tsx` — wire useMarketPolling + MarketsPanelSlot |
 
 ### Phase 19: Search, Filter & UI Cleanup
-| Action | File |
-|--------|------|
-| Create | `src/components/layout/SearchBarSlot.tsx` |
-| Create | `src/stores/searchStore.ts` |
-| Create | `src/__tests__/searchStore.test.ts` |
-| Create | `src/__tests__/SearchBar.test.tsx` |
-| Modify | `src/components/layout/AppShell.tsx` — mount SearchBarSlot |
-| Modify | `src/stores/filterStore.ts` — remove `Min` from `STEP_MS`, add `clearAll` |
-| Modify | `src/components/filter/DateRangeFilter.tsx` — remove Min button |
+
+| Action | File                                                                       |
+| ------ | -------------------------------------------------------------------------- |
+| Create | `src/components/layout/SearchBarSlot.tsx`                                  |
+| Create | `src/stores/searchStore.ts`                                                |
+| Create | `src/__tests__/searchStore.test.ts`                                        |
+| Create | `src/__tests__/SearchBar.test.tsx`                                         |
+| Modify | `src/components/layout/AppShell.tsx` — mount SearchBarSlot                 |
+| Modify | `src/stores/filterStore.ts` — remove `Min` from `STEP_MS`, add `clearAll`  |
+| Modify | `src/components/filter/DateRangeFilter.tsx` — remove Min button            |
 | Modify | `src/components/layout/FilterPanelSlot.tsx` — grouped sections + Reset All |
-| Modify | `src/components/layout/LayerTogglesSlot.tsx` — scrollable/max-height |
-| Modify | `src/components/layout/DetailPanelSlot.tsx` — layout audit |
+| Modify | `src/components/layout/LayerTogglesSlot.tsx` — scrollable/max-height       |
+| Modify | `src/components/layout/DetailPanelSlot.tsx` — layout audit                 |
 
 ### Phase 20: Production Review & Deploy Sync
+
 No new files — verification + git only.
 
 ---
@@ -111,6 +117,7 @@ No new files — verification + git only.
 ### Task 15-1: Add SiteEntity to shared types
 
 **Files:**
+
 - Modify: `server/types.ts`
 - Modify: `src/types/entities.ts`
 
@@ -123,7 +130,12 @@ import type { SiteEntity, EntityType } from '../types.js';
 
 it('SiteEntity has type site', () => {
   const e: SiteEntity = {
-    id: '1', type: 'site', lat: 32, lng: 48, timestamp: 0, label: 'Natanz',
+    id: '1',
+    type: 'site',
+    lat: 32,
+    lng: 48,
+    timestamp: 0,
+    label: 'Natanz',
     data: { siteType: 'nuclear', osmId: 'node/123', osmUrl: 'https://osm.org/node/123' },
   };
   expect(e.type).toBe('site');
@@ -140,6 +152,7 @@ it('EntityType includes site', () => {
 ```
 npx vitest run server/__tests__/types.test.ts
 ```
+
 Expected: FAIL — `'site'` not assignable to `EntityType`
 
 - [ ] **Step 3: Add SiteEntity to server/types.ts**
@@ -161,11 +174,13 @@ export interface SiteEntity extends MapEntityBase {
 ```
 
 Update `EntityType`:
+
 ```typescript
 export type EntityType = 'flight' | 'ship' | 'site' | ConflictEventType;
 ```
 
 Update `MapEntity` union:
+
 ```typescript
 export type MapEntity = FlightEntity | ShipEntity | SiteEntity | ConflictEventEntity;
 ```
@@ -173,6 +188,7 @@ export type MapEntity = FlightEntity | ShipEntity | SiteEntity | ConflictEventEn
 - [ ] **Step 4: Re-export from src/types/entities.ts**
 
 Add to the existing re-export block:
+
 ```typescript
 export type { SiteEntity, SiteType } from '../../server/types.js';
 ```
@@ -182,6 +198,7 @@ export type { SiteEntity, SiteType } from '../../server/types.js';
 ```
 npx vitest run server/__tests__/types.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -196,6 +213,7 @@ git commit -m "feat(15): add SiteEntity discriminated union type"
 ### Task 15-2: Overpass adapter
 
 **Files:**
+
 - Create: `server/adapters/overpass.ts`
 - Create: `server/__tests__/adapters/overpass.test.ts`
 
@@ -209,18 +227,33 @@ import { fetchSites } from '../../adapters/overpass.js';
 
 const mockResponse = {
   elements: [
-    { type: 'node', id: 1, lat: 33.7, lon: 51.4, tags: { 'military': 'naval_base', name: 'Bandar Abbas Naval Base' } },
-    { type: 'node', id: 2, lat: 32.3, lon: 53.9, tags: { 'man_made': 'nuclear_facility', name: 'Natanz' } },
-    { type: 'node', id: 3, lat: 32.1, lon: 48.5, tags: { 'amenity': 'cafe', name: 'Some Cafe' } }, // should be filtered
-    { type: 'node', id: 4, lat: 32.0, lon: 49.0, tags: { 'military': 'naval_base' } }, // no name — should be filtered
-  ]
+    {
+      type: 'node',
+      id: 1,
+      lat: 33.7,
+      lon: 51.4,
+      tags: { military: 'naval_base', name: 'Bandar Abbas Naval Base' },
+    },
+    {
+      type: 'node',
+      id: 2,
+      lat: 32.3,
+      lon: 53.9,
+      tags: { man_made: 'nuclear_facility', name: 'Natanz' },
+    },
+    { type: 'node', id: 3, lat: 32.1, lon: 48.5, tags: { amenity: 'cafe', name: 'Some Cafe' } }, // should be filtered
+    { type: 'node', id: 4, lat: 32.0, lon: 49.0, tags: { military: 'naval_base' } }, // no name — should be filtered
+  ],
 };
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-    ok: true,
-    json: () => Promise.resolve(mockResponse),
-  }));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    }),
+  );
 });
 
 describe('fetchSites', () => {
@@ -235,13 +268,13 @@ describe('fetchSites', () => {
 
   it('assigns nuclear siteType for nuclear_facility tag', async () => {
     const sites = await fetchSites();
-    const natanz = sites.find(s => s.label === 'Natanz');
+    const natanz = sites.find((s) => s.label === 'Natanz');
     expect(natanz?.data.siteType).toBe('nuclear');
   });
 
   it('filters out unnamed sites', async () => {
     const sites = await fetchSites();
-    expect(sites.every(s => s.label.length > 0)).toBe(true);
+    expect(sites.every((s) => s.label.length > 0)).toBe(true);
   });
 });
 ```
@@ -251,6 +284,7 @@ describe('fetchSites', () => {
 ```
 npx vitest run server/__tests__/adapters/overpass.test.ts
 ```
+
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement overpass.ts**
@@ -264,10 +298,12 @@ const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 
 /** Classify OSM tags → SiteType. Returns null for unrecognized tags. */
 function classifyTags(tags: Record<string, string>): SiteType | null {
-  if (tags['military'] === 'nuclear_hazard' || tags['man_made'] === 'nuclear_facility') return 'nuclear';
+  if (tags['military'] === 'nuclear_hazard' || tags['man_made'] === 'nuclear_facility')
+    return 'nuclear';
   if (tags['military'] === 'naval_base') return 'naval_base';
   if (tags['military'] === 'airfield' || tags['aeroway'] === 'military') return 'airbase';
-  if (tags['man_made'] === 'petroleum_well' || tags['industrial'] === 'oil_refinery') return 'oil_refinery';
+  if (tags['man_made'] === 'petroleum_well' || tags['industrial'] === 'oil_refinery')
+    return 'oil_refinery';
   if (tags['waterway'] === 'dam') return 'dam';
   if (tags['harbour'] === 'yes') return 'port';
   return null;
@@ -312,30 +348,33 @@ export async function fetchSites(): Promise<SiteEntity[]> {
 
   if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
 
-  const json = await res.json() as { elements: OverpassElement[] };
+  const json = (await res.json()) as { elements: OverpassElement[] };
 
   return json.elements
-    .filter((el): el is OverpassElement & { lat: number; lon: number } =>
-      el.type === 'node' && typeof el.lat === 'number' && typeof el.lon === 'number'
+    .filter(
+      (el): el is OverpassElement & { lat: number; lon: number } =>
+        el.type === 'node' && typeof el.lat === 'number' && typeof el.lon === 'number',
     )
     .flatMap((el): SiteEntity[] => {
       const siteType = classifyTags(el.tags);
       const name = el.tags['name'];
       if (!siteType || !name) return [];
-      return [{
-        id: `site-${el.id}`,
-        type: 'site',
-        lat: el.lat,
-        lng: el.lon,
-        timestamp: 0,
-        label: name,
-        data: {
-          siteType,
-          osmId: `node/${el.id}`,
-          osmUrl: `https://www.openstreetmap.org/node/${el.id}`,
-          operator: el.tags['operator'],
+      return [
+        {
+          id: `site-${el.id}`,
+          type: 'site',
+          lat: el.lat,
+          lng: el.lon,
+          timestamp: 0,
+          label: name,
+          data: {
+            siteType,
+            osmId: `node/${el.id}`,
+            osmUrl: `https://www.openstreetmap.org/node/${el.id}`,
+            operator: el.tags['operator'],
+          },
         },
-      }];
+      ];
     });
 }
 ```
@@ -345,6 +384,7 @@ export async function fetchSites(): Promise<SiteEntity[]> {
 ```
 npx vitest run server/__tests__/adapters/overpass.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -359,6 +399,7 @@ git commit -m "feat(15): add Overpass adapter with whitelist tag filter"
 ### Task 15-3: /api/sites route
 
 **Files:**
+
 - Create: `server/routes/sites.ts`
 - Create: `server/__tests__/routes/sites.test.ts`
 - Modify: `server/index.ts`
@@ -374,8 +415,15 @@ import { createApp } from '../../index.js';
 
 vi.mock('../../adapters/overpass.js', () => ({
   fetchSites: vi.fn().mockResolvedValue([
-    { id: 'site-1', type: 'site', lat: 32, lng: 48, timestamp: 0, label: 'Natanz',
-      data: { siteType: 'nuclear', osmId: 'node/1', osmUrl: 'https://osm.org/node/1' } }
+    {
+      id: 'site-1',
+      type: 'site',
+      lat: 32,
+      lng: 48,
+      timestamp: 0,
+      label: 'Natanz',
+      data: { siteType: 'nuclear', osmId: 'node/1', osmUrl: 'https://osm.org/node/1' },
+    },
   ]),
 }));
 
@@ -402,6 +450,7 @@ describe('GET /api/sites', () => {
 ```
 npx vitest run server/__tests__/routes/sites.test.ts
 ```
+
 Expected: FAIL — route not registered
 
 - [ ] **Step 3: Add `sites` to CACHE_TTL in server/constants.ts**
@@ -452,6 +501,7 @@ app.use('/api/sites', sitesRouter);
 ```
 npx vitest run server/__tests__/routes/sites.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 7: Commit**
@@ -461,13 +511,12 @@ git add server/routes/sites.ts server/__tests__/routes/sites.test.ts server/inde
 git commit -m "feat(15): add /api/sites route with 24h Redis cache"
 ```
 
-
-
 ---
 
 ### Task 15-4: siteStore + useSitePolling
 
 **Files:**
+
 - Create: `src/stores/siteStore.ts`
 - Create: `src/hooks/useSitePolling.ts`
 - Create: `src/__tests__/siteStore.test.ts`
@@ -482,11 +531,18 @@ import { useSiteStore } from '@/stores/siteStore';
 import type { SiteEntity } from '@/types/entities';
 
 const SITE: SiteEntity = {
-  id: 'site-1', type: 'site', lat: 32, lng: 48, timestamp: 0, label: 'Natanz',
+  id: 'site-1',
+  type: 'site',
+  lat: 32,
+  lng: 48,
+  timestamp: 0,
+  label: 'Natanz',
   data: { siteType: 'nuclear', osmId: 'node/1', osmUrl: 'https://osm.org/node/1' },
 };
 
-beforeEach(() => useSiteStore.setState({ sites: [], connectionStatus: 'loading', lastFetchAt: null }));
+beforeEach(() =>
+  useSiteStore.setState({ sites: [], connectionStatus: 'loading', lastFetchAt: null }),
+);
 
 describe('useSiteStore', () => {
   it('setSiteData populates sites', () => {
@@ -512,6 +568,7 @@ describe('useSiteStore', () => {
 ```
 npx vitest run src/__tests__/siteStore.test.ts
 ```
+
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement siteStore.ts**
@@ -535,11 +592,12 @@ export const useSiteStore = create<SiteState>()((set) => ({
   sites: [],
   connectionStatus: 'loading',
   lastFetchAt: null,
-  setSiteData: (response) => set({
-    sites: response.data,
-    connectionStatus: response.stale ? 'stale' : 'connected',
-    lastFetchAt: Date.now(),
-  }),
+  setSiteData: (response) =>
+    set({
+      sites: response.data,
+      connectionStatus: response.stale ? 'stale' : 'connected',
+      lastFetchAt: Date.now(),
+    }),
   setError: () => set({ connectionStatus: 'error' }),
   setLoading: () => set({ connectionStatus: 'loading' }),
 }));
@@ -595,7 +653,8 @@ export function useSitePolling(): void {
         }
       } else {
         // Only re-fetch on resume if data is stale (>24h old)
-        const isStale = lastFetchAtRef.current === null ||
+        const isStale =
+          lastFetchAtRef.current === null ||
           Date.now() - lastFetchAtRef.current > SITE_POLL_INTERVAL;
         if (isStale) fetchSites().then(schedulePoll);
         else schedulePoll();
@@ -620,6 +679,7 @@ export function useSitePolling(): void {
 ```
 npx vitest run src/__tests__/siteStore.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -634,6 +694,7 @@ git commit -m "feat(15): add siteStore and useSitePolling hook"
 ### Task 15-5: Site toggle state in uiStore + LayerToggles
 
 **Files:**
+
 - Modify: `src/types/ui.ts`
 - Modify: `src/stores/uiStore.ts`
 - Modify: `src/components/layout/LayerTogglesSlot.tsx`
@@ -641,6 +702,7 @@ git commit -m "feat(15): add siteStore and useSitePolling hook"
 - [ ] **Step 1: Add site toggle fields to LayerToggles in ui.ts**
 
 Add to `LayerToggles` interface (after `pulseEnabled`):
+
 ```typescript
 showSites: boolean;
 showSitesNuclear: boolean;
@@ -652,6 +714,7 @@ showSitesPort: boolean;
 ```
 
 Add matching defaults to `LAYER_TOGGLE_DEFAULTS`:
+
 ```typescript
 showSites: true,
 showSitesNuclear: true,
@@ -669,6 +732,7 @@ Follow the exact pattern of existing toggles. Add 7 boolean fields + 7 toggle ac
 - [ ] **Step 3: Add "Key Sites" toggle section to LayerTogglesSlot.tsx**
 
 Add after the Targeted row:
+
 ```tsx
 <ToggleRow color="#6b7280" label="Key Sites" active={showSites} onToggle={toggleSites} />
 <ToggleRow color="#ef4444" label="Nuclear" active={showSitesNuclear} onToggle={toggleSitesNuclear} indent disabled={!showSites} />
@@ -684,6 +748,7 @@ Add after the Targeted row:
 ```
 npx vitest run src/__tests__/LayerToggles.test.tsx src/__tests__/uiStore.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -698,6 +763,7 @@ git commit -m "feat(15): add site layer toggles to uiStore and LayerTogglesSlot"
 ### Task 15-6: SiteDetail component + wire into detail panel
 
 **Files:**
+
 - Create: `src/components/detail/SiteDetail.tsx`
 - Modify: `src/components/layout/DetailPanelSlot.tsx`
 - Modify: `src/hooks/useSelectedEntity.ts`
@@ -727,7 +793,9 @@ export function SiteDetail({ entity }: { entity: SiteEntity }) {
       </div>
       <div className="text-sm font-semibold text-text-primary">{entity.label}</div>
       <div className="flex flex-col gap-1 text-xs text-text-secondary">
-        <span>{entity.lat.toFixed(4)}°N, {entity.lng.toFixed(4)}°E</span>
+        <span>
+          {entity.lat.toFixed(4)}°N, {entity.lng.toFixed(4)}°E
+        </span>
         {data.operator && <span>Operator: {data.operator}</span>}
       </div>
       <a
@@ -750,14 +818,14 @@ export function SiteDetail({ entity }: { entity: SiteEntity }) {
 import { useSiteStore } from '@/stores/siteStore';
 
 // Add store subscription inside useSelectedEntity() alongside the other selectors:
-const sites = useSiteStore((s) => s.sites);  // must be here, not inside useMemo
+const sites = useSiteStore((s) => s.sites); // must be here, not inside useMemo
 
 // Update the search inside useMemo:
 const found =
   flights.find((f) => f.id === selectedId) ??
   ships.find((s) => s.id === selectedId) ??
   events.find((e) => e.id === selectedId) ??
-  sites.find((s) => s.id === selectedId) ??  // <-- add
+  sites.find((s) => s.id === selectedId) ?? // <-- add
   null;
 
 // Add sites to useMemo deps array (line 58): [selectedId, flights, ships, events, sites]
@@ -766,10 +834,13 @@ const found =
 - [ ] **Step 3: Add SiteDetail case to DetailPanelSlot.tsx**
 
 Find where `FlightDetail`, `ShipDetail`, `EventDetail` are rendered (the entity.type switch/conditional) and add:
+
 ```tsx
 import { SiteDetail } from '@/components/detail/SiteDetail';
 // in the render switch:
-{entity.type === 'site' && <SiteDetail entity={entity} />}
+{
+  entity.type === 'site' && <SiteDetail entity={entity} />;
+}
 ```
 
 - [ ] **Step 4: Run tests**
@@ -777,6 +848,7 @@ import { SiteDetail } from '@/components/detail/SiteDetail';
 ```
 npx vitest run src/__tests__/useSelectedEntity.test.ts src/__tests__/DetailPanel.test.tsx
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -791,11 +863,13 @@ git commit -m "feat(15): add SiteDetail panel and wire useSelectedEntity for sit
 ### Task 15-7: Site IconLayer in BaseMap + shrink event icons
 
 **Files:**
+
 - Modify: `src/components/map/BaseMap.tsx`
 
 - [ ] **Step 1: Shrink event icon sizing**
 
 Find all event `IconLayer` usages in BaseMap.tsx (currently `sizeScale: 5000, sizeMinPixels: 16, sizeMaxPixels: 120`). Change to:
+
 ```typescript
 sizeScale: 3500,
 sizeMinPixels: 12,
@@ -807,8 +881,9 @@ sizeMaxPixels: 80,
 Following the exact pattern of the existing event `IconLayer`, add a new layer using `useSiteStore`. Map `siteType` to icon name (use existing icon system or add site icons). Apply toggle visibility via `showSites` + per-type sub-toggles.
 
 Sites that should be hidden when their sub-toggle is off should filter the data array:
+
 ```typescript
-const visibleSites = sites.filter(s => {
+const visibleSites = sites.filter((s) => {
   if (!showSites) return false;
   const { siteType } = s.data;
   if (siteType === 'nuclear') return showSitesNuclear;
@@ -836,6 +911,7 @@ useSitePolling();
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -854,6 +930,7 @@ git commit -m "feat(15): add site IconLayer, shrink event icons, wire useSitePol
 ### Task 16-1: News adapter
 
 **Files:**
+
 - Create: `server/adapters/news.ts`
 - Create: `server/__tests__/adapters/news.test.ts`
 
@@ -867,9 +944,19 @@ import { fetchNews, type NewsItem } from '../../adapters/news.js';
 
 const gdeltResponse = {
   articles: [
-    { url: 'https://a.com/1', title: 'Iran airstrike hits site', seendate: '20260319T120000Z', domain: 'a.com' },
-    { url: 'https://b.com/2', title: 'Sports update', seendate: '20260319T110000Z', domain: 'b.com' }, // filtered
-  ]
+    {
+      url: 'https://a.com/1',
+      title: 'Iran airstrike hits site',
+      seendate: '20260319T120000Z',
+      domain: 'a.com',
+    },
+    {
+      url: 'https://b.com/2',
+      title: 'Sports update',
+      seendate: '20260319T110000Z',
+      domain: 'b.com',
+    }, // filtered
+  ],
 };
 
 const bbcRss = `<?xml version="1.0"?>
@@ -885,32 +972,36 @@ const ajRss = `<?xml version="1.0"?>
 
 beforeEach(() => {
   let call = 0;
-  vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-    call++;
-    if (call === 1) return Promise.resolve({ ok: true, json: () => Promise.resolve(gdeltResponse) });
-    if (call === 2) return Promise.resolve({ ok: true, text: () => Promise.resolve(bbcRss) });
-    return Promise.resolve({ ok: true, text: () => Promise.resolve(ajRss) });
-  }));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() => {
+      call++;
+      if (call === 1)
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(gdeltResponse) });
+      if (call === 2) return Promise.resolve({ ok: true, text: () => Promise.resolve(bbcRss) });
+      return Promise.resolve({ ok: true, text: () => Promise.resolve(ajRss) });
+    }),
+  );
 });
 
 describe('fetchNews', () => {
   it('returns deduped, noise-filtered items sorted by date', async () => {
     const items = await fetchNews();
     expect(items.length).toBe(3); // sports + football filtered; 3 conflict items remain
-    expect(items.every(i => i.url && i.title && i.publishedAt)).toBe(true);
+    expect(items.every((i) => i.url && i.title && i.publishedAt)).toBe(true);
   });
 
   it('deduplicates by url', async () => {
     const items = await fetchNews();
-    const urls = items.map(i => i.url);
+    const urls = items.map((i) => i.url);
     expect(new Set(urls).size).toBe(urls.length);
   });
 
   it('assigns correct source fields', async () => {
     const items = await fetchNews();
-    expect(items.some(i => i.source === 'gdelt')).toBe(true);
-    expect(items.some(i => i.source === 'bbc')).toBe(true);
-    expect(items.some(i => i.source === 'aljazeera')).toBe(true);
+    expect(items.some((i) => i.source === 'gdelt')).toBe(true);
+    expect(items.some((i) => i.source === 'bbc')).toBe(true);
+    expect(items.some((i) => i.source === 'aljazeera')).toBe(true);
   });
 });
 ```
@@ -920,6 +1011,7 @@ describe('fetchNews', () => {
 ```
 npx vitest run server/__tests__/adapters/news.test.ts
 ```
+
 Expected: FAIL
 
 - [ ] **Step 3: Implement news.ts**
@@ -939,14 +1031,25 @@ export interface NewsItem {
 }
 
 const CONFLICT_KEYWORDS = [
-  'iran', 'israel', 'iraq', 'syria', 'gaza', 'lebanon',
-  'hezbollah', 'irgc', 'airstrike', 'missile', 'strike',
-  'attack', 'military', 'conflict',
+  'iran',
+  'israel',
+  'iraq',
+  'syria',
+  'gaza',
+  'lebanon',
+  'hezbollah',
+  'irgc',
+  'airstrike',
+  'missile',
+  'strike',
+  'attack',
+  'military',
+  'conflict',
 ];
 
 function passesNoiseFilter(title: string, description = ''): boolean {
   const text = `${title} ${description}`.toLowerCase();
-  return CONFLICT_KEYWORDS.some(k => text.includes(k));
+  return CONFLICT_KEYWORDS.some((k) => text.includes(k));
 }
 
 function urlId(url: string): string {
@@ -954,15 +1057,30 @@ function urlId(url: string): string {
 }
 
 async function fetchGdelt(): Promise<NewsItem[]> {
-  const query = encodeURIComponent('Iran OR "Middle East" OR Iraq OR Israel theme:MILITARY_STRIKE OR theme:TERROR');
+  const query = encodeURIComponent(
+    'Iran OR "Middle East" OR Iraq OR Israel theme:MILITARY_STRIKE OR theme:TERROR',
+  );
   const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=artlist&maxrecords=50&format=json`;
   const res = await fetch(url);
   if (!res.ok) return [];
-  const json = await res.json() as { articles?: Array<{ url: string; title: string; seendate: string; socialimage?: string }> };
+  const json = (await res.json()) as {
+    articles?: Array<{ url: string; title: string; seendate: string; socialimage?: string }>;
+  };
   return (json.articles ?? []).flatMap((a): NewsItem[] => {
     if (!passesNoiseFilter(a.title)) return [];
-    const ms = Date.parse(a.seendate.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/, '$1-$2-$3T$4:$5:$6Z'));
-    return [{ id: urlId(a.url), title: a.title, url: a.url, source: 'gdelt', publishedAt: ms, imageUrl: a.socialimage }];
+    const ms = Date.parse(
+      a.seendate.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/, '$1-$2-$3T$4:$5:$6Z'),
+    );
+    return [
+      {
+        id: urlId(a.url),
+        title: a.title,
+        url: a.url,
+        source: 'gdelt',
+        publishedAt: ms,
+        imageUrl: a.socialimage,
+      },
+    ];
   });
 }
 
@@ -978,7 +1096,9 @@ async function fetchRss(feedUrl: string, source: 'bbc' | 'aljazeera'): Promise<N
     const title = /<title><!\[CDATA\[(.*?)\]\]>|<title>(.*?)<\/title>/s.exec(block);
     const link = /<link>(.*?)<\/link>/.exec(block);
     const pubDate = /<pubDate>(.*?)<\/pubDate>/.exec(block);
-    const desc = /<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/s.exec(block);
+    const desc = /<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/s.exec(
+      block,
+    );
     const t = title?.[1] ?? title?.[2] ?? '';
     const d = desc?.[1] ?? desc?.[2] ?? '';
     const u = link?.[1]?.trim() ?? '';
@@ -1012,7 +1132,11 @@ export async function fetchNews(): Promise<NewsItem[]> {
   // Deduplicate by URL id, keep first occurrence
   const seen = new Set<string>();
   return all
-    .filter(item => { if (seen.has(item.id)) return false; seen.add(item.id); return true; })
+    .filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    })
     .sort((a, b) => b.publishedAt - a.publishedAt)
     .slice(0, 50);
 }
@@ -1023,6 +1147,7 @@ export async function fetchNews(): Promise<NewsItem[]> {
 ```
 npx vitest run server/__tests__/adapters/news.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1037,6 +1162,7 @@ git commit -m "feat(16): add news adapter with GDELT DOC + BBC + AJ RSS sources"
 ### Task 16-2: /api/news route + newsStore + polling
 
 **Files:**
+
 - Create: `server/routes/news.ts`
 - Create: `src/stores/newsStore.ts`
 - Create: `src/hooks/useNewsPolling.ts`
@@ -1044,6 +1170,7 @@ git commit -m "feat(16): add news adapter with GDELT DOC + BBC + AJ RSS sources"
 - [ ] **Step 1: Implement server/routes/news.ts**
 
 Follow the exact pattern of `server/routes/events.ts` (cache-first, stale fallback, error rethrow). Use:
+
 - Import: `fetchNews` from `../adapters/news.js`
 - Cache key: `'news:feed'`
 - Logical TTL: `900_000` (15 min)
@@ -1060,6 +1187,7 @@ app.use('/api/news', newsRouter);
 - [ ] **Step 3: Implement newsStore.ts**
 
 Exact same pattern as `eventStore.ts`. Store shape:
+
 ```typescript
 interface NewsState {
   items: NewsItem[];
@@ -1070,9 +1198,11 @@ interface NewsState {
   setLoading: () => void;
 }
 ```
+
 Import `NewsItem` from `@/types/news` — but since it's a server-only type, create a thin re-export:
 
 Create `src/types/news.ts`:
+
 ```typescript
 export type { NewsItem } from '../../server/adapters/news.js';
 ```
@@ -1094,6 +1224,7 @@ useNewsPolling();
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 7: Commit**
@@ -1112,6 +1243,7 @@ git commit -m "feat(16): add /api/news route, newsStore, useNewsPolling"
 ### Task 17-1: /api/notifications route with severity scoring
 
 **Files:**
+
 - Create: `server/routes/notifications.ts`
 - Create: `server/__tests__/routes/notifications.test.ts`
 - Modify: `server/index.ts`
@@ -1137,16 +1269,54 @@ vi.mock('../../cache/redis.js', () => ({
 const { createApp } = await import('../../index.js');
 
 const BASE_EVENTS = [
-  { id: 'e1', type: 'airstrike', lat: 32, lng: 48, timestamp: Date.now() - 3_600_000, label: 'Baghdad',
-    data: { goldsteinScale: -8, eventType: 'Airstrike', subEventType: 'CAMEO 190', fatalities: 0, actor1: 'ISRAEL', actor2: 'IRAN', notes: '', source: '', locationName: 'Baghdad', cameoCode: '190' }},
-  { id: 'e2', type: 'assault', lat: 33, lng: 44, timestamp: Date.now() - 7_200_000, label: 'Tehran',
-    data: { goldsteinScale: -4, eventType: 'Assault', subEventType: 'CAMEO 180', fatalities: 0, actor1: 'IRAN', actor2: 'ISRAEL', notes: '', source: '', locationName: 'Tehran', cameoCode: '180' }},
+  {
+    id: 'e1',
+    type: 'airstrike',
+    lat: 32,
+    lng: 48,
+    timestamp: Date.now() - 3_600_000,
+    label: 'Baghdad',
+    data: {
+      goldsteinScale: -8,
+      eventType: 'Airstrike',
+      subEventType: 'CAMEO 190',
+      fatalities: 0,
+      actor1: 'ISRAEL',
+      actor2: 'IRAN',
+      notes: '',
+      source: '',
+      locationName: 'Baghdad',
+      cameoCode: '190',
+    },
+  },
+  {
+    id: 'e2',
+    type: 'assault',
+    lat: 33,
+    lng: 44,
+    timestamp: Date.now() - 7_200_000,
+    label: 'Tehran',
+    data: {
+      goldsteinScale: -4,
+      eventType: 'Assault',
+      subEventType: 'CAMEO 180',
+      fatalities: 0,
+      actor1: 'IRAN',
+      actor2: 'ISRAEL',
+      notes: '',
+      source: '',
+      locationName: 'Tehran',
+      cameoCode: '180',
+    },
+  },
 ];
 
 beforeEach(() => {
   mockCacheGet.mockImplementation((key: string) => {
-    if (key === 'events:gdelt') return Promise.resolve({ data: BASE_EVENTS, stale: false, lastFresh: Date.now() });
-    if (key === 'news:feed') return Promise.resolve({ data: [], stale: false, lastFresh: Date.now() });
+    if (key === 'events:gdelt')
+      return Promise.resolve({ data: BASE_EVENTS, stale: false, lastFresh: Date.now() });
+    if (key === 'news:feed')
+      return Promise.resolve({ data: [], stale: false, lastFresh: Date.now() });
     return Promise.resolve(null);
   });
 });
@@ -1164,9 +1334,12 @@ describe('GET /api/notifications', () => {
 
   it('drops events older than 24h', async () => {
     mockCacheGet.mockImplementation((key: string) => {
-      if (key === 'events:gdelt') return Promise.resolve({ data: [
-        { ...BASE_EVENTS[0], timestamp: Date.now() - 86_400_001 },
-      ], stale: false, lastFresh: Date.now() });
+      if (key === 'events:gdelt')
+        return Promise.resolve({
+          data: [{ ...BASE_EVENTS[0], timestamp: Date.now() - 86_400_001 }],
+          stale: false,
+          lastFresh: Date.now(),
+        });
       return Promise.resolve({ data: [], stale: false, lastFresh: Date.now() });
     });
     const app = createApp();
@@ -1181,6 +1354,7 @@ describe('GET /api/notifications', () => {
 ```
 npx vitest run server/__tests__/routes/notifications.test.ts
 ```
+
 Expected: FAIL
 
 - [ ] **Step 3: Implement server/routes/notifications.ts**
@@ -1192,9 +1366,17 @@ import type { ConflictEventEntity } from '../types.js';
 import type { NewsItem } from '../adapters/news.js';
 
 const TYPE_WEIGHTS: Record<string, number> = {
-  airstrike: 10, wmd: 10, shelling: 7, bombing: 7,
-  ground_combat: 6, mass_violence: 6, assassination: 5,
-  blockade: 4, abduction: 4, assault: 3, ceasefire_violation: 3,
+  airstrike: 10,
+  wmd: 10,
+  shelling: 7,
+  bombing: 7,
+  ground_combat: 6,
+  mass_violence: 6,
+  assassination: 5,
+  blockade: 4,
+  abduction: 4,
+  assault: 3,
+  ceasefire_violation: 3,
 };
 
 function recencyDecay(ageMs: number): number {
@@ -1206,10 +1388,12 @@ function recencyDecay(ageMs: number): number {
   return 0;
 }
 
-function scoreEvent(event: ConflictEventEntity & { data: { numMentions?: number; numSources?: number } }): number {
+function scoreEvent(
+  event: ConflictEventEntity & { data: { numMentions?: number; numSources?: number } },
+): number {
   const typeWeight = TYPE_WEIGHTS[event.type] ?? 1;
-  const mentions = (event.data as Record<string, unknown>)['numMentions'] as number ?? 1;
-  const sources = (event.data as Record<string, unknown>)['numSources'] as number ?? 1;
+  const mentions = ((event.data as Record<string, unknown>)['numMentions'] as number) ?? 1;
+  const sources = ((event.data as Record<string, unknown>)['numSources'] as number) ?? 1;
   const age = Date.now() - event.timestamp;
   const decay = recencyDecay(age);
   if (decay === 0) return 0;
@@ -1221,10 +1405,10 @@ function matchNews(event: ConflictEventEntity, newsItems: NewsItem[]): NewsItem[
   const window = 2 * 3_600_000; // ±2h
   const locationKeywords = event.data.locationName.toLowerCase().split(/[\s,]+/);
   return newsItems
-    .filter(n => Math.abs(n.publishedAt - eventTime) <= window)
-    .filter(n => {
+    .filter((n) => Math.abs(n.publishedAt - eventTime) <= window)
+    .filter((n) => {
       const text = `${n.title} ${n.description ?? ''}`.toLowerCase();
-      return locationKeywords.some(k => k.length > 3 && text.includes(k));
+      return locationKeywords.some((k) => k.length > 3 && text.includes(k));
     })
     .slice(0, 3);
 }
@@ -1241,11 +1425,16 @@ notificationsRouter.get('/', async (_req, res) => {
   const news = newsCached?.data ?? [];
 
   const scored = events
-    .map(event => ({ ...event, score: scoreEvent(event as ConflictEventEntity & { data: { numMentions?: number; numSources?: number } }) }))
-    .filter(e => e.score > 0)
+    .map((event) => ({
+      ...event,
+      score: scoreEvent(
+        event as ConflictEventEntity & { data: { numMentions?: number; numSources?: number } },
+      ),
+    }))
+    .filter((e) => e.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 10)
-    .map(event => ({ ...event, matchedNews: matchNews(event, news) }));
+    .map((event) => ({ ...event, matchedNews: matchNews(event, news) }));
 
   res.json(scored);
 });
@@ -1265,6 +1454,7 @@ Note: The `ConflictEventEntity.data` type doesn't currently include `numMentions
 ```
 npx vitest run server/__tests__/routes/notifications.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -1279,6 +1469,7 @@ git commit -m "feat(17): add /api/notifications with severity scoring and news m
 ### Task 17-2: notificationStore + 24h event default
 
 **Files:**
+
 - Create: `src/stores/notificationStore.ts`
 - Modify: `src/stores/filterStore.ts`
 - Modify: `src/hooks/useEntityLayers.ts` (or wherever events are filtered for the map)
@@ -1290,10 +1481,15 @@ git commit -m "feat(17): add /api/notifications with severity scoring and news m
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useNotificationStore } from '@/stores/notificationStore';
 
-beforeEach(() => useNotificationStore.setState({
-  notifications: [], proximityAlerts: [], unreadCount: 0,
-  connectionStatus: 'loading', lastFetchAt: null,
-}));
+beforeEach(() =>
+  useNotificationStore.setState({
+    notifications: [],
+    proximityAlerts: [],
+    unreadCount: 0,
+    connectionStatus: 'loading',
+    lastFetchAt: null,
+  }),
+);
 
 describe('useNotificationStore', () => {
   it('setNotifications populates and resets unread count', () => {
@@ -1309,7 +1505,10 @@ describe('useNotificationStore', () => {
   });
 
   it('clearAll empties notifications and proximity alerts', () => {
-    useNotificationStore.setState({ notifications: [{ id: '1' } as never], proximityAlerts: [{ id: '2' } as never] });
+    useNotificationStore.setState({
+      notifications: [{ id: '1' } as never],
+      proximityAlerts: [{ id: '2' } as never],
+    });
     useNotificationStore.getState().clearAll();
     expect(useNotificationStore.getState().notifications).toHaveLength(0);
     expect(useNotificationStore.getState().proximityAlerts).toHaveLength(0);
@@ -1332,12 +1531,18 @@ export interface ScoredNotification {
   lng: number;
   timestamp: number;
   score: number;
-  matchedNews: Array<{ id: string; title: string; url: string; source: string; publishedAt: number }>;
+  matchedNews: Array<{
+    id: string;
+    title: string;
+    url: string;
+    source: string;
+    publishedAt: number;
+  }>;
   // full ConflictEventEntity.data fields omitted here — cast from API response
 }
 
 export interface ProximityAlert {
-  id: string;        // `${siteId}-${entityId}`
+  id: string; // `${siteId}-${entityId}`
   siteId: string;
   siteLabel: string;
   entityId: string;
@@ -1367,18 +1572,20 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   connectionStatus: 'loading',
   lastFetchAt: null,
 
-  setNotifications: (items) => set({
-    notifications: items,
-    unreadCount: items.length, // replace, not accumulate — server always returns current top-10
-    connectionStatus: 'connected',
-    lastFetchAt: Date.now(),
-  }),
+  setNotifications: (items) =>
+    set({
+      notifications: items,
+      unreadCount: items.length, // replace, not accumulate — server always returns current top-10
+      connectionStatus: 'connected',
+      lastFetchAt: Date.now(),
+    }),
 
-  addProximityAlert: (alert) => set((s) => {
-    const exists = s.proximityAlerts.some(a => a.id === alert.id);
-    if (exists) return {};
-    return { proximityAlerts: [alert, ...s.proximityAlerts], unreadCount: s.unreadCount + 1 };
-  }),
+  addProximityAlert: (alert) =>
+    set((s) => {
+      const exists = s.proximityAlerts.some((a) => a.id === alert.id);
+      if (exists) return {};
+      return { proximityAlerts: [alert, ...s.proximityAlerts], unreadCount: s.unreadCount + 1 };
+    }),
 
   markAllRead: () => set({ unreadCount: 0 }),
   clearAll: () => set({ notifications: [], proximityAlerts: [], unreadCount: 0 }),
@@ -1390,10 +1597,12 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
 - [ ] **Step 3: Add DEFAULT_EVENT_WINDOW_MS to filterStore.ts**
 
 At the top of `src/stores/filterStore.ts`, add:
+
 ```typescript
 /** 24h default event window — applied as soft lower bound when dateStart is null */
 export const DEFAULT_EVENT_WINDOW_MS = 86_400_000;
 ```
+
 This is a module-level constant only. No store fields change.
 
 - [ ] **Step 4: Apply 24h window in event filtering**
@@ -1406,7 +1615,7 @@ import { DEFAULT_EVENT_WINDOW_MS } from '@/stores/filterStore';
 // Inside entityPassesFilters, where dateStart is checked for conflict events:
 // Only apply default window to conflict events (not flights/ships which have separate custom-range behavior)
 if (isConflictEventType(entity.type)) {
-  const windowStart = filterState.dateStart ?? (Date.now() - DEFAULT_EVENT_WINDOW_MS);
+  const windowStart = filterState.dateStart ?? Date.now() - DEFAULT_EVENT_WINDOW_MS;
   if (entity.timestamp < windowStart) return false;
 }
 ```
@@ -1418,6 +1627,7 @@ This targets `src/lib/filters.ts` specifically, not `useEntityLayers.ts` (which 
 ```
 npx vitest run src/__tests__/notificationStore.test.ts src/__tests__/filters.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -1432,6 +1642,7 @@ git commit -m "feat(17): add notificationStore, DEFAULT_EVENT_WINDOW_MS 24h defa
 ### Task 17-3: Notification drawer UI
 
 **Files:**
+
 - Create: `src/components/notifications/NotificationCard.tsx`
 - Create: `src/components/layout/NotificationDrawer.tsx`
 - Modify: `src/stores/uiStore.ts`
@@ -1441,6 +1652,7 @@ git commit -m "feat(17): add notificationStore, DEFAULT_EVENT_WINDOW_MS 24h defa
 - [ ] **Step 1: Add drawer state to uiStore**
 
 Add to `UIState` interface and store:
+
 ```typescript
 isNotificationDrawerOpen: boolean;
 openNotificationDrawer: () => void;
@@ -1485,9 +1697,14 @@ export function NotificationCard({ notification }: { notification: ScoredNotific
       <SeverityBar score={notification.score} />
       {notification.matchedNews.length > 0 && (
         <div className="flex flex-col gap-1">
-          {notification.matchedNews.map(n => (
-            <a key={n.id} href={n.url} target="_blank" rel="noopener noreferrer"
-              className="text-[10px] text-accent-blue hover:underline line-clamp-2">
+          {notification.matchedNews.map((n) => (
+            <a
+              key={n.id}
+              href={n.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-accent-blue hover:underline line-clamp-2"
+            >
               {n.title}
             </a>
           ))}
@@ -1508,30 +1725,37 @@ import { useNotificationStore } from '@/stores/notificationStore';
 import { NotificationCard } from '@/components/notifications/NotificationCard';
 
 export function NotificationDrawer() {
-  const isOpen = useUIStore(s => s.isNotificationDrawerOpen);
-  const open = useUIStore(s => s.openNotificationDrawer);
-  const close = useUIStore(s => s.closeNotificationDrawer);
-  const notifications = useNotificationStore(s => s.notifications);
-  const proximityAlerts = useNotificationStore(s => s.proximityAlerts);
-  const unreadCount = useNotificationStore(s => s.unreadCount);
-  const markAllRead = useNotificationStore(s => s.markAllRead);
-  const clearAll = useNotificationStore(s => s.clearAll);
-  const lastFetchAt = useNotificationStore(s => s.lastFetchAt);
+  const isOpen = useUIStore((s) => s.isNotificationDrawerOpen);
+  const open = useUIStore((s) => s.openNotificationDrawer);
+  const close = useUIStore((s) => s.closeNotificationDrawer);
+  const notifications = useNotificationStore((s) => s.notifications);
+  const proximityAlerts = useNotificationStore((s) => s.proximityAlerts);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const markAllRead = useNotificationStore((s) => s.markAllRead);
+  const clearAll = useNotificationStore((s) => s.clearAll);
+  const lastFetchAt = useNotificationStore((s) => s.lastFetchAt);
   const lastUpdatedRef = useRef<HTMLSpanElement>(null);
 
   // Mark read on open
-  useEffect(() => { if (isOpen) markAllRead(); }, [isOpen, markAllRead]);
+  useEffect(() => {
+    if (isOpen) markAllRead();
+  }, [isOpen, markAllRead]);
 
   // Escape closes drawer (LIFO: closes notification drawer first)
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && isOpen) close(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) close();
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, close]);
 
   // Update CSS var for detail panel offset
   useEffect(() => {
-    document.documentElement.style.setProperty('--notification-drawer-offset', isOpen ? '360px' : '0px');
+    document.documentElement.style.setProperty(
+      '--notification-drawer-offset',
+      isOpen ? '360px' : '0px',
+    );
   }, [isOpen]);
 
   // Relative "last updated" clock
@@ -1552,12 +1776,17 @@ export function NotificationDrawer() {
     <>
       {/* Bell icon */}
       <button
-        onClick={() => isOpen ? close() : open()}
+        onClick={() => (isOpen ? close() : open())}
         className="absolute right-4 top-4 z-[var(--z-notification-bell)] flex h-9 w-9 items-center justify-center rounded bg-surface/80 backdrop-blur text-text-secondary hover:text-text-primary"
         aria-label="Toggle notifications"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-          <path d="M12 22a2 2 0 002-2H10a2 2 0 002 2zm6-6V11a6 6 0 00-5-5.91V4a1 1 0 00-2 0v1.09A6 6 0 006 11v5l-2 2v1h16v-1l-2-2z"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="h-4 w-4"
+        >
+          <path d="M12 22a2 2 0 002-2H10a2 2 0 002 2zm6-6V11a6 6 0 00-5-5.91V4a1 1 0 00-2 0v1.09A6 6 0 006 11v5l-2 2v1h16v-1l-2-2z" />
         </svg>
         {unreadCount > 0 && (
           <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-red text-[9px] font-bold text-white">
@@ -1571,20 +1800,35 @@ export function NotificationDrawer() {
         className={`absolute right-0 top-0 z-[var(--z-detail)] h-full w-[360px] flex flex-col bg-surface/95 backdrop-blur border-l border-surface-raised transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex items-center justify-between border-b border-surface-raised px-4 py-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Notifications</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            Notifications
+          </span>
           <div className="flex gap-2">
-            <button onClick={clearAll} className="text-[10px] text-text-muted hover:text-text-primary">Clear all</button>
-            <button onClick={close} className="text-text-muted hover:text-text-primary">×</button>
+            <button
+              onClick={clearAll}
+              className="text-[10px] text-text-muted hover:text-text-primary"
+            >
+              Clear all
+            </button>
+            <button onClick={close} className="text-text-muted hover:text-text-primary">
+              ×
+            </button>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
           {proximityAlerts.length > 0 && (
             <>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Proximity Alerts</div>
-              {proximityAlerts.map(a => (
-                <div key={a.id} className="rounded border border-accent-yellow/30 bg-accent-yellow/10 p-2 text-xs text-text-secondary">
-                  <strong>{a.entityLabel}</strong> within {a.distanceKm.toFixed(0)}km of <strong>{a.siteLabel}</strong>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                Proximity Alerts
+              </div>
+              {proximityAlerts.map((a) => (
+                <div
+                  key={a.id}
+                  className="rounded border border-accent-yellow/30 bg-accent-yellow/10 p-2 text-xs text-text-secondary"
+                >
+                  <strong>{a.entityLabel}</strong> within {a.distanceKm.toFixed(0)}km of{' '}
+                  <strong>{a.siteLabel}</strong>
                 </div>
               ))}
             </>
@@ -1592,13 +1836,19 @@ export function NotificationDrawer() {
           {notifications.length > 0 && (
             <>
               {proximityAlerts.length > 0 && (
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mt-2">Critical Events</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mt-2">
+                  Critical Events
+                </div>
               )}
-              {notifications.map(n => <NotificationCard key={n.id} notification={n} />)}
+              {notifications.map((n) => (
+                <NotificationCard key={n.id} notification={n} />
+              ))}
             </>
           )}
           {notifications.length === 0 && proximityAlerts.length === 0 && (
-            <div className="text-xs text-text-muted text-center mt-8">No critical events in the last 24h</div>
+            <div className="text-xs text-text-muted text-center mt-8">
+              No critical events in the last 24h
+            </div>
           )}
         </div>
 
@@ -1623,12 +1873,13 @@ import { useNotificationPolling } from '@/hooks/useNotificationPolling';
 // inside AppShell():
 useNotificationPolling();
 // in JSX, add after DetailPanelSlot:
-<NotificationDrawer />
+<NotificationDrawer />;
 ```
 
 - [ ] **Step 6: Apply --notification-drawer-offset to detail panel**
 
 In `DetailPanelSlot.tsx`, find the `right-0` and `translate-x` positioning. Update the translate to account for the CSS var:
+
 ```tsx
 style={{ transform: isOpen ? `translateX(calc(-1 * var(--notification-drawer-offset, 0px)))` : 'translateX(100%)' }}
 ```
@@ -1636,6 +1887,7 @@ style={{ transform: isOpen ? `translateX(calc(-1 * var(--notification-drawer-off
 - [ ] **Step 7: Add z-index var for bell icon**
 
 In `app.css` or wherever CSS vars are defined, add:
+
 ```css
 --z-notification-bell: 52; /* above controls, same level as detail panel toggle */
 ```
@@ -1645,6 +1897,7 @@ In `app.css` or wherever CSS vars are defined, add:
 ```
 npx vitest run src/__tests__/NotificationDrawer.test.tsx src/__tests__/notificationStore.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 9: Commit**
@@ -1663,6 +1916,7 @@ git commit -m "feat(17): add notification drawer with bell icon, cards, and pane
 ### Task 18-1: Yahoo Finance adapter
 
 **Files:**
+
 - Create: `server/adapters/yahoo-finance.ts`
 - Create: `server/__tests__/adapters/yahoo-finance.test.ts`
 
@@ -1676,23 +1930,38 @@ import { fetchMarkets } from '../adapters/yahoo-finance.js';
 
 const mockYahooResponse = (symbol: string, price: number, prevClose: number) => ({
   chart: {
-    result: [{
-      meta: { symbol, regularMarketPrice: price, previousClose: prevClose, marketState: 'REGULAR' },
-      timestamp: [1710000000, 1710086400, 1710172800, 1710259200, 1710345600],
-      indicators: { quote: [{ close: [prevClose - 1, prevClose, price - 0.5, price + 0.2, price] }] }
-    }],
-    error: null
-  }
+    result: [
+      {
+        meta: {
+          symbol,
+          regularMarketPrice: price,
+          previousClose: prevClose,
+          marketState: 'REGULAR',
+        },
+        timestamp: [1710000000, 1710086400, 1710172800, 1710259200, 1710345600],
+        indicators: {
+          quote: [{ close: [prevClose - 1, prevClose, price - 0.5, price + 0.2, price] }],
+        },
+      },
+    ],
+    error: null,
+  },
 });
 
 beforeEach(() => {
   let call = 0;
-  vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-    call++;
-    const symbols = ['BZ=F', 'CL=F', 'XLE', 'USO', 'XOM'];
-    const idx = (call - 1) % symbols.length;
-    return Promise.resolve({ ok: true, json: () => Promise.resolve(mockYahooResponse(symbols[idx], 85 + idx, 82 + idx)) });
-  }));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() => {
+      call++;
+      const symbols = ['BZ=F', 'CL=F', 'XLE', 'USO', 'XOM'];
+      const idx = (call - 1) % symbols.length;
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockYahooResponse(symbols[idx], 85 + idx, 82 + idx)),
+      });
+    }),
+  );
 });
 
 describe('fetchMarkets', () => {
@@ -1723,6 +1992,7 @@ describe('fetchMarkets', () => {
 ```
 npx vitest run server/__tests__/adapters/yahoo-finance.test.ts
 ```
+
 Expected: FAIL
 
 - [ ] **Step 3: Implement yahoo-finance.ts**
@@ -1756,7 +2026,21 @@ async function fetchSymbol(symbol: string): Promise<MarketQuote | null> {
       headers: { 'User-Agent': 'Mozilla/5.0' },
     });
     if (!res.ok) return null;
-    const json = await res.json() as { chart: { result: Array<{ meta: { symbol: string; regularMarketPrice: number; previousClose: number; marketState: string }; timestamp: number[]; indicators: { quote: Array<{ close: number[] }> } }>; error: unknown } };
+    const json = (await res.json()) as {
+      chart: {
+        result: Array<{
+          meta: {
+            symbol: string;
+            regularMarketPrice: number;
+            previousClose: number;
+            marketState: string;
+          };
+          timestamp: number[];
+          indicators: { quote: Array<{ close: number[] }> };
+        }>;
+        error: unknown;
+      };
+    };
     const result = json.chart?.result?.[0];
     if (!result) return null;
     const { meta, indicators } = result;
@@ -1765,7 +2049,7 @@ async function fetchSymbol(symbol: string): Promise<MarketQuote | null> {
     const prevClose = meta.previousClose;
     const change = price - prevClose;
     const changePct = (change / prevClose) * 100;
-    const entry = SYMBOLS.find(s => s.symbol === symbol);
+    const entry = SYMBOLS.find((s) => s.symbol === symbol);
     return {
       symbol,
       name: entry?.name ?? symbol,
@@ -1782,10 +2066,12 @@ async function fetchSymbol(symbol: string): Promise<MarketQuote | null> {
 }
 
 export async function fetchMarkets(): Promise<MarketQuote[]> {
-  const results = await Promise.allSettled(SYMBOLS.map(s => fetchSymbol(s.symbol)));
+  const results = await Promise.allSettled(SYMBOLS.map((s) => fetchSymbol(s.symbol)));
   return results
-    .filter((r): r is PromiseFulfilledResult<MarketQuote> => r.status === 'fulfilled' && r.value !== null)
-    .map(r => r.value);
+    .filter(
+      (r): r is PromiseFulfilledResult<MarketQuote> => r.status === 'fulfilled' && r.value !== null,
+    )
+    .map((r) => r.value);
 }
 ```
 
@@ -1794,6 +2080,7 @@ export async function fetchMarkets(): Promise<MarketQuote[]> {
 ```
 npx vitest run server/__tests__/adapters/yahoo-finance.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1808,12 +2095,14 @@ git commit -m "feat(18): add Yahoo Finance adapter for 5 oil market symbols"
 ### Task 18-2: /api/markets route
 
 **Files:**
+
 - Create: `server/routes/markets.ts`
 - Modify: `server/index.ts`
 
 - [ ] **Step 1: Implement markets.ts**
 
 Follow `sites.ts` pattern. Details:
+
 - Import: `fetchMarkets` from `../adapters/yahoo-finance.js`
 - Cache key: `'markets:quotes'`
 - Logical TTL: `60_000` (60s)
@@ -1832,6 +2121,7 @@ app.use('/api/markets', marketsRouter);
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -1846,6 +2136,7 @@ git commit -m "feat(18): add /api/markets route with 60s Redis cache"
 ### Task 18-3: marketStore + useMarketPolling + MarketsPanel
 
 **Files:**
+
 - Create: `src/stores/marketStore.ts`
 - Create: `src/hooks/useMarketPolling.ts`
 - Create: `src/components/markets/SparklineChart.tsx`
@@ -1855,6 +2146,7 @@ git commit -m "feat(18): add /api/markets route with 60s Redis cache"
 - [ ] **Step 1: Implement marketStore.ts**
 
 Same pattern as `siteStore.ts`. Shape:
+
 ```typescript
 interface MarketState {
   quotes: MarketQuote[];
@@ -1881,7 +2173,8 @@ export function SparklineChart({ data, positive }: { data: number[]; positive: b
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  const w = 60, h = 20;
+  const w = 60,
+    h = 20;
   const pts = data.map((v, i) => {
     const x = (i / (data.length - 1)) * w;
     const y = h - ((v - min) / range) * h;
@@ -1890,7 +2183,13 @@ export function SparklineChart({ data, positive }: { data: number[]; positive: b
   const color = positive ? '#22c55e' : '#ef4444';
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="shrink-0">
-      <polyline points={pts.join(' ')} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" />
+      <polyline
+        points={pts.join(' ')}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -1905,39 +2204,51 @@ import { useMarketStore } from '@/stores/marketStore';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
 import { SparklineChart } from '@/components/markets/SparklineChart';
 
-function fmt(n: number, decimals = 2) { return n.toFixed(decimals); }
+function fmt(n: number, decimals = 2) {
+  return n.toFixed(decimals);
+}
 
 export function MarketsPanelSlot() {
-  const isCollapsed = useUIStore(s => s.isMarketsCollapsed);
-  const toggle = useUIStore(s => s.toggleMarkets);
-  const quotes = useMarketStore(s => s.quotes);
-  const status = useMarketStore(s => s.connectionStatus);
+  const isCollapsed = useUIStore((s) => s.isMarketsCollapsed);
+  const toggle = useUIStore((s) => s.toggleMarkets);
+  const quotes = useMarketStore((s) => s.quotes);
+  const status = useMarketStore((s) => s.connectionStatus);
 
-  const allClosed = quotes.length > 0 && quotes.every(q => !q.marketOpen);
+  const allClosed = quotes.length > 0 && quotes.every((q) => !q.marketOpen);
 
   return (
     <div data-testid="markets-panel">
       <OverlayPanel className={allClosed ? 'opacity-50' : ''}>
-        <button onClick={toggle} className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <button
+          onClick={toggle}
+          className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary"
+        >
           <span>Markets{allClosed ? ' (Closed)' : ''}</span>
           <span className="text-text-muted">{isCollapsed ? '+' : '-'}</span>
         </button>
         {!isCollapsed && (
           <div className="mt-2 flex flex-col gap-2">
             {status === 'loading' && <span className="text-xs text-text-muted">Loading…</span>}
-            {quotes.map(q => {
+            {quotes.map((q) => {
               const positive = q.changePct >= 0;
               return (
                 <div key={q.symbol} className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xs font-semibold text-text-secondary tabular-nums">{q.symbol}</span>
+                      <span className="text-xs font-semibold text-text-secondary tabular-nums">
+                        {q.symbol}
+                      </span>
                       <span className="text-[10px] text-text-muted truncate">{q.name}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-xs tabular-nums text-text-primary">${fmt(q.price)}</span>
-                      <span className={`text-[10px] tabular-nums ${positive ? 'text-green-400' : 'text-accent-red'}`}>
-                        {positive ? '+' : ''}{fmt(q.changePct)}%
+                      <span className="text-xs tabular-nums text-text-primary">
+                        ${fmt(q.price)}
+                      </span>
+                      <span
+                        className={`text-[10px] tabular-nums ${positive ? 'text-green-400' : 'text-accent-red'}`}
+                      >
+                        {positive ? '+' : ''}
+                        {fmt(q.changePct)}%
                       </span>
                     </div>
                   </div>
@@ -1972,6 +2283,7 @@ useMarketPolling();
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 8: Commit**
@@ -1990,6 +2302,7 @@ git commit -m "feat(18): add marketStore, useMarketPolling, and MarketsPanel wit
 ### Task 19-1: Remove Min granularity from date range filter
 
 **Files:**
+
 - Modify: `src/components/filter/DateRangeFilter.tsx` (or wherever `STEP_MS` is defined)
 - Modify: `src/stores/filterStore.ts` (if `STEP_MS` is there)
 
@@ -2008,6 +2321,7 @@ In the `STEP_MS` record, delete the `'minute'` key and its value (the key is low
 ```
 npx vitest run src/__tests__/FilterPanel.test.tsx
 ```
+
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -2022,6 +2336,7 @@ git commit -m "feat(19): remove Min granularity from date range filter"
 ### Task 19-2: Filter panel Reset All + grouped sections
 
 **Files:**
+
 - Modify: `src/stores/filterStore.ts`
 - Modify: `src/components/layout/FilterPanelSlot.tsx`
 
@@ -2039,6 +2354,7 @@ clearAll: () => set({
 - [ ] **Step 2: Add Reset All button to FilterPanelSlot**
 
 At the top of the filter panel, add:
+
 ```tsx
 <button onClick={clearAll} className="text-[10px] text-accent-red hover:text-red-300">
   Reset All
@@ -2052,6 +2368,7 @@ Group existing filter controls under section headings: **Flights**, **Ships**, *
 ```
 npx vitest run src/__tests__/FilterPanel.test.tsx src/__tests__/filterStore.test.ts
 ```
+
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -2066,6 +2383,7 @@ git commit -m "feat(19): add Reset All and grouped sections to filter panel"
 ### Task 19-3: LayerTogglesSlot scrollable + global search bar
 
 **Files:**
+
 - Modify: `src/components/layout/LayerTogglesSlot.tsx`
 - Create: `src/stores/searchStore.ts`
 - Create: `src/components/layout/SearchBarSlot.tsx`
@@ -2119,20 +2437,20 @@ function fuzzyMatch(text: string, query: string): boolean {
 }
 
 export function SearchBarSlot() {
-  const query = useSearchStore(s => s.query);
-  const results = useSearchStore(s => s.results);
-  const isOpen = useSearchStore(s => s.isOpen);
-  const setQuery = useSearchStore(s => s.setQuery);
-  const setResults = useSearchStore(s => s.setResults);
-  const clearSearch = useSearchStore(s => s.clearSearch);
-  const selectEntity = useUIStore(s => s.selectEntity);
-  const openDetailPanel = useUIStore(s => s.openDetailPanel);
+  const query = useSearchStore((s) => s.query);
+  const results = useSearchStore((s) => s.results);
+  const isOpen = useSearchStore((s) => s.isOpen);
+  const setQuery = useSearchStore((s) => s.setQuery);
+  const setResults = useSearchStore((s) => s.setResults);
+  const clearSearch = useSearchStore((s) => s.clearSearch);
+  const selectEntity = useUIStore((s) => s.selectEntity);
+  const openDetailPanel = useUIStore((s) => s.openDetailPanel);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const flights = useFlightStore(s => s.flights);
-  const ships = useShipStore(s => s.ships);
-  const events = useEventStore(s => s.events);
-  const sites = useSiteStore(s => s.sites);
+  const flights = useFlightStore((s) => s.flights);
+  const ships = useShipStore((s) => s.ships);
+  const events = useEventStore((s) => s.events);
+  const sites = useSiteStore((s) => s.sites);
 
   // Cmd+K / Ctrl+K to focus
   useEffect(() => {
@@ -2149,12 +2467,19 @@ export function SearchBarSlot() {
 
   // Search across all stores when query changes
   useEffect(() => {
-    if (!query) { setResults([]); return; }
+    if (!query) {
+      setResults([]);
+      return;
+    }
     const matches: MapEntity[] = [
-      ...flights.filter(f => fuzzyMatch(f.data.callsign, query) || fuzzyMatch(f.data.icao24, query)),
-      ...ships.filter(s => fuzzyMatch(s.data.shipName, query) || fuzzyMatch(String(s.data.mmsi), query)),
-      ...events.filter(e => fuzzyMatch(e.data.locationName, query) || fuzzyMatch(e.type, query)),
-      ...sites.filter(s => fuzzyMatch(s.label, query) || fuzzyMatch(s.data.siteType, query)),
+      ...flights.filter(
+        (f) => fuzzyMatch(f.data.callsign, query) || fuzzyMatch(f.data.icao24, query),
+      ),
+      ...ships.filter(
+        (s) => fuzzyMatch(s.data.shipName, query) || fuzzyMatch(String(s.data.mmsi), query),
+      ),
+      ...events.filter((e) => fuzzyMatch(e.data.locationName, query) || fuzzyMatch(e.type, query)),
+      ...sites.filter((s) => fuzzyMatch(s.label, query) || fuzzyMatch(s.data.siteType, query)),
     ].slice(0, 10);
     setResults(matches);
   }, [query, flights, ships, events, sites, setResults]);
@@ -2166,7 +2491,9 @@ export function SearchBarSlot() {
   };
 
   const GROUP_LABELS: Record<string, string> = {
-    flight: 'Flights', ship: 'Ships', site: 'Sites',
+    flight: 'Flights',
+    ship: 'Ships',
+    site: 'Sites',
   };
 
   return (
@@ -2174,13 +2501,13 @@ export function SearchBarSlot() {
       <input
         ref={inputRef}
         value={query}
-        onChange={e => setQuery(e.target.value)}
+        onChange={(e) => setQuery(e.target.value)}
         placeholder="Search… (⌘K)"
         className="w-full rounded bg-surface/90 backdrop-blur px-3 py-2 text-sm text-text-primary placeholder:text-text-muted border border-surface-raised outline-none focus:border-accent-blue"
       />
       {isOpen && results.length > 0 && (
         <div className="absolute top-full mt-1 w-full rounded bg-surface/95 backdrop-blur border border-surface-raised shadow-xl max-h-64 overflow-y-auto">
-          {results.map(entity => (
+          {results.map((entity) => (
             <button
               key={entity.id}
               onClick={() => handleSelect(entity)}
@@ -2204,7 +2531,7 @@ export function SearchBarSlot() {
 ```tsx
 import { SearchBarSlot } from '@/components/layout/SearchBarSlot';
 // in JSX, add at the top level (sibling to map container):
-<SearchBarSlot />
+<SearchBarSlot />;
 ```
 
 - [ ] **Step 5: Run all tests**
@@ -2212,6 +2539,7 @@ import { SearchBarSlot } from '@/components/layout/SearchBarSlot';
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -2226,6 +2554,7 @@ git commit -m "feat(19): add global search bar and scrollable layer toggles"
 ### Task 19-4: Layout audit
 
 **Files:**
+
 - Modify: `src/components/layout/DetailPanelSlot.tsx`
 - Modify: `src/components/ui/StatusPanel.tsx` (if density issues)
 - Modify: `app.css` (z-index audit)
@@ -2233,6 +2562,7 @@ git commit -m "feat(19): add global search bar and scrollable layer toggles"
 - [ ] **Step 1: Audit z-index CSS vars**
 
 Open `app.css` (or wherever CSS vars are defined). Verify z-index stack is consistent:
+
 ```
 --z-map: 0
 --z-controls: 10
@@ -2240,6 +2570,7 @@ Open `app.css` (or wherever CSS vars are defined). Verify z-index stack is consi
 --z-notification-bell: 22
 --z-modal: 30
 ```
+
 Fix any conflicts.
 
 - [ ] **Step 2: Test at 1280px viewport width**
@@ -2251,6 +2582,7 @@ Manually verify (or add a snapshot test) that panels don't clip at 1280px width.
 ```
 npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -2273,6 +2605,7 @@ git commit -m "feat(19): layout audit — fix z-index stack and 1280px responsiv
 ```bash
 npm run dev
 ```
+
 Expected: Vite on :5173, Express on :3001, no TypeScript errors
 
 - [ ] **Step 2: Verify all 7 API endpoints return data**
@@ -2286,11 +2619,13 @@ curl http://localhost:3001/api/news | jq '.data | length'
 curl http://localhost:3001/api/notifications | jq 'length'
 curl http://localhost:3001/api/markets | jq '.data | length'
 ```
+
 Expected: all return numeric values (sites/news may be 0 if APIs are slow, markets may be 0 if markets closed)
 
 - [ ] **Step 3: Verify UI features in browser**
 
 Open `http://localhost:5173` and check:
+
 - Key sites render on map (toggle on/off works per sub-type)
 - Event icons are smaller than flight/ship icons
 - Events default to last 24h (map should not show events from before yesterday)
@@ -2310,6 +2645,7 @@ Open `http://localhost:5173` and check:
 ```bash
 npx vitest run
 ```
+
 Expected: PASS — zero failures
 
 - [ ] **Step 2: Run production build**
@@ -2317,6 +2653,7 @@ Expected: PASS — zero failures
 ```bash
 npm run build
 ```
+
 Expected: clean exit — Vite + tsup + tsc all pass with zero errors
 
 ---
@@ -2326,6 +2663,7 @@ Expected: clean exit — Vite + tsup + tsc all pass with zero errors
 - [ ] **Step 1: Check required env vars in Vercel dashboard**
 
 Go to your Vercel project → Settings → Environment Variables. Confirm all are present:
+
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 - `OPENSKY_CLIENT_ID`
@@ -2355,6 +2693,7 @@ git merge feature/15-intelligence-layer --no-ff -m "feat: v1.1 Intelligence Laye
 ```bash
 npm run build && npx vitest run
 ```
+
 Expected: PASS
 
 - [ ] **Step 3: Tag v1.1**
@@ -2368,6 +2707,7 @@ git tag v1.1 -m "v1.1: Intelligence Layer — key sites, news, notifications, ma
 ```bash
 git push origin main --tags
 ```
+
 Expected: Vercel auto-deploys from main push
 
 - [ ] **Step 5: Verify production**

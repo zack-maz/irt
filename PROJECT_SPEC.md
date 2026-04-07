@@ -10,18 +10,18 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript 5.9, Vite 6 |
-| Styling | Tailwind CSS v4 (dark theme, CSS-first @theme) |
-| State | Zustand 5 (curried create pattern) |
-| Map | Deck.gl + MapLibre GL JS (2.5D rendering) |
-| Backend | Express 5 (API proxy, port 3001) |
-| Cache | Upstash Redis (serverless-compatible) |
-| Hosting | Vercel (serverless functions + CDN) |
+| Layer        | Technology                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------ |
+| Frontend     | React 19, TypeScript 5.9, Vite 6                                                                       |
+| Styling      | Tailwind CSS v4 (dark theme, CSS-first @theme)                                                         |
+| State        | Zustand 5 (curried create pattern)                                                                     |
+| Map          | Deck.gl + MapLibre GL JS (2.5D rendering)                                                              |
+| Backend      | Express 5 (API proxy, port 3001)                                                                       |
+| Cache        | Upstash Redis (serverless-compatible)                                                                  |
+| Hosting      | Vercel (serverless functions + CDN)                                                                    |
 | Data Sources | OpenSky, ADS-B Exchange, adsb.lol, AISStream.io, GDELT v2, GDELT DOC, RSS, Overpass/OSM, Yahoo Finance |
-| Testing | Vitest + Testing Library |
-| Dev Tooling | tsx watch (server), concurrently (parallel dev), tsup (bundling) |
+| Testing      | Vitest + Testing Library                                                                               |
+| Dev Tooling  | tsx watch (server), concurrently (parallel dev), tsup (bundling)                                       |
 
 ## Architecture
 
@@ -77,11 +77,11 @@ interface MapEntityBase {
 
 ## Data Sources & Refresh Rates
 
-| Source | Data Type | Refresh Rate | Protocol | Auth |
-|--------|-----------|-------------|----------|------|
-| OpenSky Network | Flight positions | ~15s (free tier) | REST | OAuth2 client credentials |
-| AISStream.io | Ship positions | Real-time | WebSocket | API key |
-| ACLED | Conflict events | 1-5 min polling | REST | Email/password |
+| Source          | Data Type        | Refresh Rate     | Protocol  | Auth                      |
+| --------------- | ---------------- | ---------------- | --------- | ------------------------- |
+| OpenSky Network | Flight positions | ~15s (free tier) | REST      | OAuth2 client credentials |
+| AISStream.io    | Ship positions   | Real-time        | WebSocket | API key                   |
+| ACLED           | Conflict events  | 1-5 min polling  | REST      | Email/password            |
 
 ## Design System
 

@@ -20,7 +20,9 @@ function readRange(): MarketRange {
   try {
     const v = localStorage.getItem('markets-range');
     if (v === '1d' || v === '5d' || v === '1mo' || v === 'ytd') return v;
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   return '1d';
 }
 
@@ -42,7 +44,11 @@ export const useMarketStore = create<MarketState>()((set) => ({
   setLoading: () => set({ connectionStatus: 'loading' }),
 
   setRange: (range) => {
-    try { localStorage.setItem('markets-range', range); } catch { /* noop */ }
+    try {
+      localStorage.setItem('markets-range', range);
+    } catch {
+      /* noop */
+    }
     set({ range, connectionStatus: 'loading', quotes: [] });
   },
 }));

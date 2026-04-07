@@ -34,8 +34,8 @@ function parseArgs(argv: string[]) {
 }
 
 function printSummary(records: AuditRecord[]) {
-  const accepted = records.filter(r => r.status === 'accepted');
-  const rejected = records.filter(r => r.status === 'rejected');
+  const accepted = records.filter((r) => r.status === 'accepted');
+  const rejected = records.filter((r) => r.status === 'rejected');
 
   // Count rejection reasons
   const reasonCounts: Record<string, number> = {};
@@ -61,11 +61,11 @@ function printSummary(records: AuditRecord[]) {
 async function runCachedMode(outputPath: string) {
   // Dynamic import to avoid loading Redis at parse time
   const { cacheGet } = await import('../server/cache/redis.js');
-  const { ConflictEventEntity } = await import('../server/types.js') as any;
+  type CachedEvent = { id: string; [key: string]: unknown };
 
   console.error('Fetching cached events from Redis (events:gdelt)...');
 
-  const cached = await cacheGet<any[]>('events:gdelt', 0);
+  const cached = await cacheGet<CachedEvent[]>('events:gdelt', 0);
   if (!cached || !cached.data || cached.data.length === 0) {
     console.error('No cached events found. Try --fresh to backfill from WAR_START.');
     process.exit(1);
@@ -74,7 +74,7 @@ async function runCachedMode(outputPath: string) {
   console.error(`Found ${cached.data.length} cached events (accepted only).`);
 
   // Wrap cached events in minimal AuditRecord format
-  const records: AuditRecord[] = cached.data.map((event: any) => ({
+  const records: AuditRecord[] = cached.data.map((event: CachedEvent) => ({
     id: event.id,
     status: 'accepted' as const,
     event,
@@ -117,7 +117,9 @@ async function runFreshMode(outputPath: string, sampleRate: number) {
   const { backfillEventsWithTrace } = await import('../server/adapters/gdelt.js');
 
   const daysSinceWarStart = Math.ceil((Date.now() - WAR_START) / (24 * 60 * 60 * 1000));
-  console.error(`Backfilling ${daysSinceWarStart} days since WAR_START (Feb 28, 2026) with ${sampleRate}/day sampling...`);
+  console.error(
+    `Backfilling ${daysSinceWarStart} days since WAR_START (Feb 28, 2026) with ${sampleRate}/day sampling...`,
+  );
 
   const records = await backfillEventsWithTrace(daysSinceWarStart, sampleRate);
 

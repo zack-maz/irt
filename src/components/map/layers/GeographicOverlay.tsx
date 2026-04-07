@@ -5,6 +5,38 @@ import { GEO_FEATURES } from './geoFeatures';
 import { setupContourProtocol, CONTOUR_TILE_URL } from './contourSetup';
 
 /**
+ * Color-relief elevation tinting layer.
+ *
+ * maplibre-gl 5.x supports `color-relief` at runtime, but the LayerSpecification
+ * union in @vis.gl/react-maplibre 8.x has not yet added it. We isolate the cast
+ * here so the surrounding component code stays type-safe.
+ */
+function ColorReliefLayer() {
+  /* eslint-disable @typescript-eslint/no-explicit-any -- color-relief layer not yet in @vis.gl/react-maplibre 8 type defs */
+  const layerProps = {
+    id: 'elevation-tint',
+    type: 'color-relief',
+    source: 'terrain-dem',
+    paint: {
+      'color-relief-opacity': 0.5,
+      'color-relief-color': [
+        'interpolate',
+        ['linear'],
+        ['elevation'],
+        0,
+        '#000000',
+        1500,
+        '#334155',
+        4000,
+        '#cccccc',
+      ],
+    },
+  } as any;
+  return <Layer {...layerProps} />;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+}
+
+/**
  * Geographic visualization layer: elevation color tinting, contour lines,
  * and geographic feature labels. Rendered as a child of <Map>.
  */
@@ -19,34 +51,10 @@ export function GeographicOverlay() {
 
   return (
     <>
-      {/* Color-relief elevation tinting (reuses existing terrain-dem source) */}
-      <Layer
-        id="elevation-tint"
-        type={'color-relief' as any}
-        source="terrain-dem"
-        paint={{
-          'color-relief-opacity': 0.5,
-          'color-relief-color': [
-            'interpolate',
-            ['linear'],
-            ['elevation'],
-            0,
-            '#000000',
-            1500,
-            '#334155',
-            4000,
-            '#cccccc',
-          ],
-        }}
-      />
+      <ColorReliefLayer />
 
       {/* Contour lines from maplibre-contour vector tiles */}
-      <Source
-        id="contour-source"
-        type="vector"
-        tiles={[CONTOUR_TILE_URL]}
-        maxzoom={13}
-      />
+      <Source id="contour-source" type="vector" tiles={[CONTOUR_TILE_URL]} maxzoom={13} />
       <Layer
         id="contour-lines"
         type="line"

@@ -14,45 +14,45 @@ v1.3 Data Quality:     [██████████████████�
 
 ## Phase Status
 
-| Phase | Name | Milestone | Status | Date |
-|-------|------|-----------|--------|------|
-| 1 | Project Scaffolding & Theme | v0.9 | Done | 2026-03-14 |
-| 2 | Base Map | v0.9 | Done | 2026-03-14 |
-| 3 | API Proxy | v0.9 | Done | 2026-03-15 |
-| 4 | Flight Data Feed | v0.9 | Done | 2026-03-15 |
-| 5 | Entity Rendering | v0.9 | Done | 2026-03-15 |
-| 6 | Multi-Source Flight Data | v0.9 | Done | 2026-03-16 |
-| 7 | StatusPanel & Source Config | v0.9 | Done | 2026-03-16 |
-| 8 | Ship & Conflict Data | v0.9 | Done | 2026-03-16 |
-| 8.1 | GDELT Conflict Events | v0.9 | Done | 2026-03-17 |
-| 9 | Layer Controls & News Toggle | v0.9 | Done | 2026-03-17 |
-| 10 | Detail Panel & Event Reclassification | v0.9 | Done | 2026-03-18 |
-| 11 | Smart Filters | v0.9 | Done | 2026-03-18 |
-| 12 | Analytics Dashboard | v0.9 | Done | 2026-03-18 |
-| 13 | Serverless Cache Migration | v1.0 | Done | 2026-03-20 |
-| 14 | Vercel Deployment | v1.0 | Done | 2026-03-20 |
-| 15 | Key Sites Overlay | v1.1 | Done | 2026-03-20 |
-| 16 | News Feed | v1.1 | Done | 2026-03-20 |
-| 17 | Notification Center | v1.1 | Done | 2026-03-20 |
-| 18 | Oil Markets Tracker | v1.1 | Done | 2026-03-21 |
-| 19 | Search, Filter & UI Cleanup | v1.1 | Done | 2026-03-22 |
-| 19.1 | Advanced Search with Tag Filtering | v1.1 | Done | 2026-03-22 |
-| 19.2 | Counter Entity Dropdowns | v1.1 | Done | 2026-03-22 |
-| 20 | Visualization Layers & Filter Independence | v1.2 | Done | 2026-03-24 |
-| 20.1 | Geographical & Weather Layers | v1.2 | Done | 2026-03-23 |
-| 20.2 | Threat Heatmap Layer | v1.2 | Done | 2026-03-23 |
-| 21 | Production Review & Deploy Sync | v1.2 | Done | 2026-03-27 |
-| 21.1 | GDELT News Relevance Filtering | v1.2 | Done | 2026-03-26 |
-| 21.2 | GDELT Event Quality Pipeline | v1.2 | Done | 2026-03-28 |
-| 21.3 | Multi-User Load Testing | v1.2 | Done | 2026-03-29 |
-| 22 | GDELT Event Quality & OSINT | v1.3 | Done | 2026-03-30 |
-| 22.1 | Fixing Dispersion | v1.3 | Done | 2026-03-31 |
-| 23 | Threat Density Improvements | v1.3 | Done | 2026-03-31 |
-| 23.1 | Detail Panel Navigation Stack | v1.3 | Done | 2026-04-01 |
-| 23.2 | Threat Density Scatter Plots | v1.3 | Done | 2026-04-01 |
-| 24 | Political Boundaries Layer | v1.3 | Done | 2026-04-02 |
-| 25 | Ethnic Distribution Layer | v1.3 | Done | 2026-04-02 |
-| 26 | Water Stress Layer | v1.3 | Done | 2026-04-03 |
+| Phase | Name                                       | Milestone | Status | Date       |
+| ----- | ------------------------------------------ | --------- | ------ | ---------- |
+| 1     | Project Scaffolding & Theme                | v0.9      | Done   | 2026-03-14 |
+| 2     | Base Map                                   | v0.9      | Done   | 2026-03-14 |
+| 3     | API Proxy                                  | v0.9      | Done   | 2026-03-15 |
+| 4     | Flight Data Feed                           | v0.9      | Done   | 2026-03-15 |
+| 5     | Entity Rendering                           | v0.9      | Done   | 2026-03-15 |
+| 6     | Multi-Source Flight Data                   | v0.9      | Done   | 2026-03-16 |
+| 7     | StatusPanel & Source Config                | v0.9      | Done   | 2026-03-16 |
+| 8     | Ship & Conflict Data                       | v0.9      | Done   | 2026-03-16 |
+| 8.1   | GDELT Conflict Events                      | v0.9      | Done   | 2026-03-17 |
+| 9     | Layer Controls & News Toggle               | v0.9      | Done   | 2026-03-17 |
+| 10    | Detail Panel & Event Reclassification      | v0.9      | Done   | 2026-03-18 |
+| 11    | Smart Filters                              | v0.9      | Done   | 2026-03-18 |
+| 12    | Analytics Dashboard                        | v0.9      | Done   | 2026-03-18 |
+| 13    | Serverless Cache Migration                 | v1.0      | Done   | 2026-03-20 |
+| 14    | Vercel Deployment                          | v1.0      | Done   | 2026-03-20 |
+| 15    | Key Sites Overlay                          | v1.1      | Done   | 2026-03-20 |
+| 16    | News Feed                                  | v1.1      | Done   | 2026-03-20 |
+| 17    | Notification Center                        | v1.1      | Done   | 2026-03-20 |
+| 18    | Oil Markets Tracker                        | v1.1      | Done   | 2026-03-21 |
+| 19    | Search, Filter & UI Cleanup                | v1.1      | Done   | 2026-03-22 |
+| 19.1  | Advanced Search with Tag Filtering         | v1.1      | Done   | 2026-03-22 |
+| 19.2  | Counter Entity Dropdowns                   | v1.1      | Done   | 2026-03-22 |
+| 20    | Visualization Layers & Filter Independence | v1.2      | Done   | 2026-03-24 |
+| 20.1  | Geographical & Weather Layers              | v1.2      | Done   | 2026-03-23 |
+| 20.2  | Threat Heatmap Layer                       | v1.2      | Done   | 2026-03-23 |
+| 21    | Production Review & Deploy Sync            | v1.2      | Done   | 2026-03-27 |
+| 21.1  | GDELT News Relevance Filtering             | v1.2      | Done   | 2026-03-26 |
+| 21.2  | GDELT Event Quality Pipeline               | v1.2      | Done   | 2026-03-28 |
+| 21.3  | Multi-User Load Testing                    | v1.2      | Done   | 2026-03-29 |
+| 22    | GDELT Event Quality & OSINT                | v1.3      | Done   | 2026-03-30 |
+| 22.1  | Fixing Dispersion                          | v1.3      | Done   | 2026-03-31 |
+| 23    | Threat Density Improvements                | v1.3      | Done   | 2026-03-31 |
+| 23.1  | Detail Panel Navigation Stack              | v1.3      | Done   | 2026-04-01 |
+| 23.2  | Threat Density Scatter Plots               | v1.3      | Done   | 2026-04-01 |
+| 24    | Political Boundaries Layer                 | v1.3      | Done   | 2026-04-02 |
+| 25    | Ethnic Distribution Layer                  | v1.3      | Done   | 2026-04-02 |
+| 26    | Water Stress Layer                         | v1.3      | Done   | 2026-04-03 |
 
 ## Current Focus
 
@@ -146,16 +146,16 @@ None.
 
 ## Key Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| Deck.gl + MapLibre | GPU-accelerated 2.5D, free, native layer system |
-| Zustand 5 | Lightweight state with curried create pattern for type inference |
-| Express 5 API proxy | CORS handling, API key protection, data normalization |
-| GDELT v2 over ACLED | Free, no auth required, 15-min updates, global coverage |
-| CAMEO-based event types | 11 granular types replace fabricated drone/missile split |
-| Upstash Redis | REST-based, serverless-compatible, replaces in-memory cache |
-| Vercel deployment | Serverless functions + CDN, zero-config scaling |
-| Overpass/OSM for sites | Free, no auth, comprehensive infrastructure data |
+| Decision                | Rationale                                                        |
+| ----------------------- | ---------------------------------------------------------------- |
+| Deck.gl + MapLibre      | GPU-accelerated 2.5D, free, native layer system                  |
+| Zustand 5               | Lightweight state with curried create pattern for type inference |
+| Express 5 API proxy     | CORS handling, API key protection, data normalization            |
+| GDELT v2 over ACLED     | Free, no auth required, 15-min updates, global coverage          |
+| CAMEO-based event types | 11 granular types replace fabricated drone/missile split         |
+| Upstash Redis           | REST-based, serverless-compatible, replaces in-memory cache      |
+| Vercel deployment       | Serverless functions + CDN, zero-config scaling                  |
+| Overpass/OSM for sites  | Free, no auth, comprehensive infrastructure data                 |
 
 ## Repository
 

@@ -15,6 +15,7 @@
 ## File Map
 
 ### Modified files:
+
 - `src/lib/queryParser.ts` — Remove AND/NOT nodes, make implicit OR
 - `src/lib/querySerializer.ts` — Simplify to OR-only serialization
 - `src/lib/queryEvaluator.ts` — Remove AND/NOT/goldstein/vertical evaluation; all terms are OR'd
@@ -40,12 +41,14 @@
 - `src/components/counters/useCounterData.ts` — Update to account for severity toggles
 
 ### New files:
+
 - `src/components/filter/TextSearchInput.tsx` — Reusable mini search bar for CAMEO, callsign, ICAO, MMSI, ship name
 - `src/components/filter/HeadingSlider.tsx` — Single-thumb circular angle slider (0-360)
 - `src/components/filter/VisibilityButton.tsx` — Reusable toggle button for entity/subtype visibility
 - `src/components/filter/SeverityToggles.tsx` — Three toggle buttons for Low/Medium/High severity
 
 ### Test files to update:
+
 - `src/__tests__/searchStore.test.ts`
 - `src/__tests__/filterStore.test.ts`
 - `src/__tests__/uiStore.test.ts`
@@ -61,6 +64,7 @@
 ## Task 1: Simplify Query Parser (remove AND, NOT, negation)
 
 **Files:**
+
 - Modify: `src/lib/queryParser.ts`
 - Modify: `src/lib/querySerializer.ts`
 
@@ -71,10 +75,7 @@ Remove `AndNode` and `NotNode` from `QueryNode` union. Remove `negated` from `Ta
 In `src/lib/queryParser.ts`, replace the type definitions:
 
 ```typescript
-export type QueryNode =
-  | TagNode
-  | TextNode
-  | OrNode;
+export type QueryNode = TagNode | TextNode | OrNode;
 
 export interface TagNode {
   type: 'tag';
@@ -99,11 +100,13 @@ Remove `AndNode`, `NotNode` interfaces entirely.
 - [ ] **Step 2: Update TokenType and tokenizer**
 
 Remove `'AND'` from `TokenType`. Remove `negated` from `Token`. In `tokenize()`:
+
 - Remove the `AND` keyword check (lines 109-111)
 - Remove the negation `!` prefix handling (lines 83-89, 102-106, 137-143)
 - Keep `OR` keyword, `TAG`, `TEXT`, `LPAREN`, `RPAREN`
 
 Updated `TokenType`:
+
 ```typescript
 export type TokenType = 'TAG' | 'TEXT' | 'OR' | 'LPAREN' | 'RPAREN';
 ```
@@ -113,6 +116,7 @@ Updated `Token` — remove `negated` field.
 - [ ] **Step 3: Simplify parser to implicit OR**
 
 Replace `parseOr`, `parseAnd`, `parseFactor` with simpler grammar:
+
 - `expr = factor (OR|implicit factor)*` — everything is OR'd
 
 ```typescript
@@ -122,9 +126,15 @@ export function parse(input: string): QueryNode | null {
 
   let pos = 0;
 
-  function peek(): Token | undefined { return tokens[pos]; }
-  function consume(): Token { return tokens[pos++]; }
-  function isAtEnd(): boolean { return pos >= tokens.length; }
+  function peek(): Token | undefined {
+    return tokens[pos];
+  }
+  function consume(): Token {
+    return tokens[pos++];
+  }
+  function isAtEnd(): boolean {
+    return pos >= tokens.length;
+  }
 
   // factor = '(' expr ')' | tag | text
   function parseFactor(): QueryNode | null {
@@ -229,6 +239,7 @@ git commit -m "refactor(search): simplify parser to implicit OR, remove AND/NOT/
 ## Task 2: Update Query Evaluator (remove AND/NOT/goldstein/vertical)
 
 **Files:**
+
 - Modify: `src/lib/queryEvaluator.ts`
 
 - [ ] **Step 1: Update evaluateQuery to only handle OR/tag/text**
@@ -245,13 +256,15 @@ export function evaluateQuery(
 
   switch (node.type) {
     case 'or':
-      return evaluateQuery(node.left, entity, context) || evaluateQuery(node.right, entity, context);
+      return (
+        evaluateQuery(node.left, entity, context) || evaluateQuery(node.right, entity, context)
+      );
     case 'tag':
       return evaluateTag(entity, node.prefix, node.value, context);
     case 'text': {
       const fields = getSearchableFields(entity);
       const lower = node.value.toLowerCase();
-      return fields.some(f => f.includes(lower));
+      return fields.some((f) => f.includes(lower));
     }
   }
 }
@@ -279,6 +292,7 @@ git commit -m "refactor(search): update evaluator for OR-only, remove goldstein/
 ## Task 3: Update Tag Registry (remove goldstein/vertical/squawk, fix heading)
 
 **Files:**
+
 - Modify: `src/lib/tagRegistry.ts`
 - Modify: `src/components/search/CheatSheet.tsx`
 
@@ -329,6 +343,7 @@ git commit -m "refactor(search): remove goldstein/vertical/squawk from tag regis
 ## Task 4: Extend FilterStore with new filter fields
 
 **Files:**
+
 - Modify: `src/stores/filterStore.ts`
 - Modify: `src/types/ui.ts`
 - Modify: `src/stores/uiStore.ts`
@@ -357,6 +372,7 @@ showLowSeverity: boolean;
 ```
 
 Add corresponding setters:
+
 ```typescript
 setFlightCallsign: (v: string) => void;
 setFlightIcao: (v: string) => void;
@@ -391,6 +407,7 @@ Remove `isCustomRangeActive` (it referenced savedToggles). Remove `savedToggles`
 - [ ] **Step 3: Add showHealthySites and showAttackedSites to uiStore**
 
 In `src/types/ui.ts`, add to `LayerToggles`:
+
 ```typescript
 showHealthySites: boolean;
 showAttackedSites: boolean;
@@ -399,6 +416,7 @@ showAttackedSites: boolean;
 Defaults: both `true`.
 
 In `src/stores/uiStore.ts`, add the new toggle state and actions:
+
 ```typescript
 showHealthySites: initial.showHealthySites,
 showAttackedSites: initial.showAttackedSites,
@@ -430,6 +448,7 @@ git commit -m "feat(filter): add new filter fields, severity toggles, site healt
 ## Task 5: Update entity filter predicate
 
 **Files:**
+
 - Modify: `src/lib/filters.ts`
 
 - [ ] **Step 1: Add new filter predicates**
@@ -461,7 +480,8 @@ if (filters.shipMmsi) {
 // ── Ship name filter ──
 if (filters.shipNameFilter) {
   if (entity.type === 'ship') {
-    if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase())) return false;
+    if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase()))
+      return false;
   }
 }
 
@@ -532,6 +552,7 @@ git commit -m "feat(filter): add callsign/icao/mmsi/name/cameo/mentions/heading 
 ## Task 6: Add severity classification and update entity layers
 
 **Files:**
+
 - Modify: `src/lib/severity.ts`
 - Modify: `src/hooks/useEntityLayers.ts`
 
@@ -573,6 +594,7 @@ import { classifySeverity } from '@/lib/severity';
 ```
 
 Add severity toggle subscriptions:
+
 ```typescript
 const showHighSeverity = useFilterStore((s) => s.showHighSeverity);
 const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
@@ -580,8 +602,14 @@ const showLowSeverity = useFilterStore((s) => s.showLowSeverity);
 ```
 
 Add a severity filter function:
+
 ```typescript
-function passesSeverityFilter(event: ConflictEventEntity, high: boolean, med: boolean, low: boolean): boolean {
+function passesSeverityFilter(
+  event: ConflictEventEntity,
+  high: boolean,
+  med: boolean,
+  low: boolean,
+): boolean {
   const level = classifySeverity(event);
   if (level === 'high') return high;
   if (level === 'medium') return med;
@@ -594,20 +622,22 @@ Apply to each event category (airstrikeEvents, groundCombatEvents, targetedEvent
 - [ ] **Step 2: Add healthy/attacked site filtering**
 
 Subscribe to new toggles:
+
 ```typescript
 const showHealthySites = useUIStore((s) => s.showHealthySites);
 const showAttackedSites = useUIStore((s) => s.showAttackedSites);
 ```
 
 Update the `visibleSites` memo to also filter by health status:
+
 ```typescript
 const visibleSites = useMemo(() => {
   let filtered = toggleFilteredSites;
   if (showHitOnly) {
-    filtered = filtered.filter(s => siteAttackMap.get(s.id));
+    filtered = filtered.filter((s) => siteAttackMap.get(s.id));
   }
   // Health status filter
-  filtered = filtered.filter(s => {
+  filtered = filtered.filter((s) => {
     const attacked = siteAttackMap.get(s.id) ?? false;
     if (attacked) return showAttackedSites;
     return showHealthySites;
@@ -632,6 +662,7 @@ git commit -m "feat(layers): add severity filtering for events, health filtering
 ## Task 7: Create reusable filter UI components
 
 **Files:**
+
 - Create: `src/components/filter/TextSearchInput.tsx`
 - Create: `src/components/filter/HeadingSlider.tsx`
 - Create: `src/components/filter/VisibilityButton.tsx`
@@ -655,7 +686,9 @@ export function TextSearchInput({ label, value, onChange, placeholder }: TextSea
   const id = useId();
   return (
     <div className="flex flex-col gap-0.5">
-      <label htmlFor={id} className="text-[10px] uppercase tracking-wider text-text-muted">{label}</label>
+      <label htmlFor={id} className="text-[10px] uppercase tracking-wider text-text-muted">
+        {label}
+      </label>
       <input
         id={id}
         type="text"
@@ -688,15 +721,10 @@ export function VisibilityButton({ label, active, onToggle, color }: VisibilityB
       aria-checked={active}
       onClick={onToggle}
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider transition-all ${
-        active
-          ? 'bg-white/10 text-text-secondary'
-          : 'bg-transparent text-text-muted opacity-40'
+        active ? 'bg-white/10 text-text-secondary' : 'bg-transparent text-text-muted opacity-40'
       }`}
     >
-      <span
-        className="inline-block h-2 w-2 rounded-full"
-        style={{ backgroundColor: color }}
-      />
+      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
       {label}
     </button>
   );
@@ -740,7 +768,10 @@ export function SeverityToggles() {
                 : 'bg-transparent text-text-muted opacity-40'
             }`}
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full mr-1" style={{ backgroundColor: color }} />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full mr-1"
+              style={{ backgroundColor: color }}
+            />
             {label}
           </button>
         ))}
@@ -794,7 +825,11 @@ export function HeadingSlider({ value, onChange }: HeadingSliderProps) {
         aria-label="Heading angle"
       />
       <div className="flex justify-between text-[8px] text-text-muted">
-        <span>N</span><span>E</span><span>S</span><span>W</span><span>N</span>
+        <span>N</span>
+        <span>E</span>
+        <span>S</span>
+        <span>W</span>
+        <span>N</span>
       </div>
     </div>
   );
@@ -813,6 +848,7 @@ git commit -m "feat(filter): create reusable filter UI components"
 ## Task 8: Redesign FilterPanelSlot with all new controls
 
 **Files:**
+
 - Modify: `src/components/layout/FilterPanelSlot.tsx`
 
 - [ ] **Step 1: Rewrite FilterPanelContent**
@@ -820,6 +856,7 @@ git commit -m "feat(filter): create reusable filter UI components"
 Replace the entire `FilterPanelContent` with the new layout organized by entity type. Each entity section has:
 
 **Conflicts section:**
+
 - Visibility buttons: Airstrikes, Ground Combat, Targeted
 - Severity toggles: High, Medium, Low (using `SeverityToggles` component)
 - CAMEO search bar (using `TextSearchInput`)
@@ -828,17 +865,20 @@ Replace the entire `FilterPanelContent` with the new layout organized by entity 
 - Date slider (no "live feeds paused" indicator, no savedToggles logic)
 
 **Sites section:**
+
 - Visibility buttons per type: Nuclear, Naval, Oil, Airbase, Desalination, Port
 - Healthy toggle
 - Attacked toggle
 - Hit Only toggle (existing)
 
 **Ships section:**
+
 - Visibility button
 - MMSI search bar
 - Ship name search bar
 
 **Flights section:**
+
 - Visibility button
 - Grounded toggle
 - Unidentified toggle
@@ -849,6 +889,7 @@ Replace the entire `FilterPanelContent` with the new layout organized by entity 
 - Heading slider (single angle)
 
 **Proximity section** (global, keep existing):
+
 - Pin controls
 - Radius slider
 
@@ -878,12 +919,14 @@ git commit -m "feat(filter): redesign filter panel with per-entity controls"
 ## Task 9: Rewrite useQuerySync for full bidirectional sync
 
 **Files:**
+
 - Modify: `src/hooks/useQuerySync.ts`
 
 This is the most complex task. The sync must handle:
 
 **Search -> Filters direction:**
 When the user types a query, parse it and update filter controls:
+
 - `type:flight` → enable showFlights visibility
 - `type:airstrike` → enable showAirstrikes (wraps into group, not granular subtypes)
 - `country:iran` → add to both flightCountries and eventCountries
@@ -910,6 +953,7 @@ When the user types a query, parse it and update filter controls:
 
 **Filters -> Search direction:**
 When filter controls change, rebuild the search query:
+
 - Each active filter generates a corresponding tag in the query
 - Non-filter tags (free text) are preserved
 
@@ -919,11 +963,12 @@ Remove `negated` from the returned tag objects. Remove NOT handling.
 
 - [ ] **Step 2: Update deriveTogglesFromAST**
 
-Remove all negation logic. Remove wildcard (*) handling for negated tags. Simplify to: each `type:X` tag enables its toggle, each `site:X` tag enables its toggle.
+Remove all negation logic. Remove wildcard (\*) handling for negated tags. Simplify to: each `type:X` tag enables its toggle, each `site:X` tag enables its toggle.
 
 - [ ] **Step 3: Update deriveFiltersFromAST**
 
 Add new filter derivations for:
+
 - `callsign:` → flightCallsign
 - `icao:` → flightIcao
 - `mmsi:` → shipMmsi
@@ -937,6 +982,7 @@ Add new filter derivations for:
 - `country:` → **BOTH** `flightCountries` AND `eventCountries` (fix existing bug: currently only syncs to flightCountries)
 
 The existing `deriveFiltersFromAST` sets `result.countries` which only maps to `setFlightCountries`. Fix this by having the search→filter sync set BOTH:
+
 ```typescript
 if (filterUpdates.countries !== undefined) {
   useFilterStore.getState().setFlightCountries(filterUpdates.countries);
@@ -962,6 +1008,7 @@ function buildOrChain(nodes: QueryNode[]): QueryNode | null {
 Update `buildASTFromToggles` to call `buildOrChain` instead of `buildAndChain`.
 
 Add new syncable state fields. Generate tags from:
+
 - All text search fields (callsign, icao, mmsi, shipname, cameo)
 - All range fields (altitude, speed, mentions, heading)
 - All boolean toggles
@@ -973,14 +1020,26 @@ Add new syncable state fields. Generate tags from:
 
 ```typescript
 const SYNCED_PREFIXES = new Set([
-  'type', 'site', 'country', 'since', 'before',
-  'ground', 'unidentified', 'status',  // boolean tags
-  'altitude', 'speed',                 // existing range tags
-  'callsign', 'icao', 'mmsi', 'shipname', 'cameo',  // new text tags
-  'mentions', 'heading',               // new range tags
-  'severity',                          // severity toggles
-  'actor',                             // actor → eventCountries
-  'near',                              // proximity pin
+  'type',
+  'site',
+  'country',
+  'since',
+  'before',
+  'ground',
+  'unidentified',
+  'status', // boolean tags
+  'altitude',
+  'speed', // existing range tags
+  'callsign',
+  'icao',
+  'mmsi',
+  'shipname',
+  'cameo', // new text tags
+  'mentions',
+  'heading', // new range tags
+  'severity', // severity toggles
+  'actor', // actor → eventCountries
+  'near', // proximity pin
 ]);
 
 function extractNonSyncedNodes(node: QueryNode | null): QueryNode[] {
@@ -1018,6 +1077,7 @@ git commit -m "feat(sync): rewrite useQuerySync for full bidirectional search-fi
 ## Task 10: Update SearchModal and SearchStore
 
 **Files:**
+
 - Modify: `src/stores/searchStore.ts`
 - Modify: `src/components/search/SearchModal.tsx`
 - Modify: `src/hooks/useSearchResults.ts`
@@ -1030,6 +1090,7 @@ Remove `isFilterMode` — search is always synced with filters. The `applyAsFilt
 Actually, we still need `matchedIds` for the entity layer dimming when search is active. Keep `matchedIds` and `isFilterMode` but rename the concept: whenever there's a non-empty query, it's "active". The `applyAsFilter` can be simplified to just close the modal (search is always live).
 
 Simplify `applyAsFilter`:
+
 ```typescript
 applyAsFilter: () => {
   const { parsedQuery, recentTags } = get();
@@ -1072,6 +1133,7 @@ git commit -m "feat(search): simplify search store and modal for always-synced b
 ## Task 11: Update useCounterData and LayerTogglesSlot
 
 **Files:**
+
 - Modify: `src/components/counters/useCounterData.ts`
 - Modify: `src/components/layout/LayerTogglesSlot.tsx`
 - Modify: `src/components/layout/Sidebar.tsx`
@@ -1081,6 +1143,7 @@ git commit -m "feat(search): simplify search store and modal for always-synced b
 Add severity-based counter subdivisions if desired. At minimum, ensure counters still work with the new severity toggles — events not passing severity filter should not be counted.
 
 Import severity score computation and filter store:
+
 ```typescript
 const showHighSeverity = useFilterStore((s) => s.showHighSeverity);
 const showMediumSeverity = useFilterStore((s) => s.showMediumSeverity);
@@ -1101,6 +1164,7 @@ const customRangeLock = useFilterStore((s) => s.savedToggles !== null);
 Remove all `disabled={customRangeLock}` props.
 
 Add the new site health toggles to LayerTogglesContent:
+
 ```tsx
 <ToggleRow color="#22c55e" label="Healthy" active={showHealthySites} onToggle={toggleHealthySites} indent disabled={!showSites} />
 <ToggleRow color="#f97316" label="Attacked" active={showAttackedSites} onToggle={toggleAttackedSites} indent disabled={!showSites} />
@@ -1126,6 +1190,7 @@ git commit -m "feat(ui): update counters, layer toggles, and sidebar for new fil
 ## Task 12: Fix all tests
 
 **Files:**
+
 - Modify: `src/__tests__/searchStore.test.ts`
 - Modify: `src/__tests__/filterStore.test.ts`
 - Modify: `src/__tests__/uiStore.test.ts`
@@ -1145,6 +1210,7 @@ Collect all failures.
 - [ ] **Step 2: Fix test failures**
 
 For each failing test:
+
 1. If it tests AND/NOT/negation behavior → remove the test
 2. If it tests goldstein/vertical/squawk → remove the test
 3. If it tests savedToggles/custom range toggle suppression → remove the test

@@ -7,6 +7,7 @@ All notable changes to the Iran Conflict Monitor project.
 ## [v1.2.3] - 2026-03-29
 
 ### Changed
+
 - Excluded CAMEO 192 (territorial occupation) from conflict event pipeline — reduces false positive ground combat events
 
 ## [v1.2.2] - 2026-03-29
@@ -14,11 +15,13 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 21.3: Multi-User Load Testing
 
 #### Added
+
 - k6 load test script (`scripts/load-test.js`) with 6 scenarios (flights, ships, health, markets, slow-poll, static) ramping to 501 VUs over 5 minutes
 - Playwright browser validation test (`scripts/load-test.spec.ts`) with parallel mode for 3 concurrent browser workers
 - Pre/post-test health snapshots comparing Redis latency and source freshness
 
 #### Results (Production — https://irt-monitoring.vercel.app)
+
 - 100% application checks (9536/9536) across all endpoints
 - Flights p95: 136ms, Ships p95: 145ms, Overall p95: 153ms
 - 3/3 Playwright tests passed with 3 concurrent browser workers over 3-minute stability window
@@ -29,6 +32,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 21.2: GDELT Event Quality Pipeline
 
 #### Added
+
 - Geo-validation module (`server/lib/geoValidation.ts`) — validates event coordinates against country polygons and FIPS mappings
 - Event scoring engine (`server/lib/eventScoring.ts`) — composite confidence scoring with CAMEO specificity, Goldstein sanity check, NumSources >= 2 filter
 - NLP extractor (`server/lib/nlpExtractor.ts`) — extracts structured data from GDELT event text
@@ -39,17 +43,20 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 21.1: GDELT News Relevance Filtering
 
 #### Added
+
 - Relevance scoring engine (`server/lib/relevanceScorer.ts`) — multi-signal scoring for news article conflict relevance
 - Configurable `newsRelevanceThreshold` in server config
 - NLP-based keyword extraction for improved conflict detection
 
 #### Changed
+
 - News filter rewritten from keyword whitelist to relevance scoring approach
 - Reduced false positive conflict news articles significantly
 
 ### Phase 21: Production Hardening & Deploy
 
 #### Added
+
 - Helmet security headers with Content-Security-Policy whitelist for map tiles, analytics, and API domains
 - Per-endpoint Cache-Control middleware (`max-age=0, s-maxage=N` for CDN-only caching)
 - Per-endpoint rate limiting via `createRateLimiter` factory (flights 30/min, events 10/min, etc.)
@@ -67,6 +74,7 @@ All notable changes to the Iran Conflict Monitor project.
 - Vitest tuned: 10s timeout, forks pool (maxForks 4)
 
 #### Changed
+
 - All 7 data routes migrated to `cacheGetSafe`/`cacheSetSafe` for Redis graceful degradation
 - All server adapter console calls replaced with structured `log()` calls
 - Bundle splitting: vendor-react (~200KB), vendor-maplibre (~800KB), vendor-deckgl (~700KB), app
@@ -75,6 +83,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 20: Visualization Layers & Filter Independence
 
 #### Added
+
 - Visualization layer system with `layerStore` (`Set<VisualizationLayerId>`) and LayerTogglesSlot with toggle rows
 - Geographic overlay: elevation color-relief tinting, maplibre-contour lines, geographic feature labels (deserts, mountain ranges, seas)
 - Weather overlay: Open-Meteo temperature heatmap (bilinear-interpolated canvas draped onto terrain), wind barb icons, weather grid tooltip
@@ -86,12 +95,14 @@ All notable changes to the Iran Conflict Monitor project.
 - Geographic feature GeoJSON dataset (`geoFeatures.ts`)
 
 #### Changed
+
 - Entity filter toggles (flights, ships, events, sites) now operate independently from visualization layer toggles
 - Layer stacking order: weather → threat → entities (threat tooltips supersede weather)
 - Filter panel redesigned with FilterButton/SliderToggle components
 - Sidebar layout updated for visualization layers section
 
 #### Removed
+
 - Political overlay (deferred — planned but not shipped)
 - Political data module and canvas pattern generation files
 
@@ -100,6 +111,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 19.2: Counter Entity Dropdowns
 
 #### Added
+
 - Click-to-expand counter rows showing individual entities with label + key metric per type
 - Accordion behavior (only one row expanded at a time)
 - Fly-to-entity on click (map flies to entity and opens detail panel)
@@ -111,6 +123,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 19.1: Advanced Search with Tag & Entity Type Filtering
 
 #### Added
+
 - Tag-based query language with ~25 prefixes (type:, site:, country:, near:, callsign:, icao:, mmsi:, cameo:, etc.)
 - Implicit OR evaluation across all entity types
 - Bidirectional sync between search bar and sidebar filters via `useQuerySync`
@@ -122,6 +135,7 @@ All notable changes to the Iran Conflict Monitor project.
 - Negated tag wildcards (`!site:`, `!type:`) for toggle control
 
 #### Changed
+
 - Search parser simplified to implicit OR (removed AND/NOT/parentheses)
 - Search evaluator rewritten for OR-only evaluation
 - Removed goldstein, vertical, squawk from tag registry
@@ -129,6 +143,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 19: Search, Filter & UI Cleanup
 
 #### Added
+
 - Global Cmd+K search bar with fuzzy matching across all entity types
 - SearchModal with keyboard navigation and fly-to-entity on selection
 - Filter panel redesign with per-entity grouped sections (Flights, Ships, Events, Sites)
@@ -138,6 +153,7 @@ All notable changes to the Iran Conflict Monitor project.
 - New filter predicates: callsign, ICAO, MMSI, name, CAMEO, mentions, heading
 
 #### Changed
+
 - Filter panel reordered with logical grouping
 - Removed hit-only toggle (replaced by site health filtering)
 - Simplified filterStore with per-entity filter fields
@@ -147,6 +163,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 18: Oil Markets Tracker
 
 #### Added
+
 - Yahoo Finance adapter (`server/adapters/yahoo-finance.ts`) for commodity prices
 - `/api/markets` route with Redis cache (60s TTL)
 - `marketStore` Zustand store with ConnectionStatus tracking
@@ -161,6 +178,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 17: Notification Center
 
 #### Added
+
 - Severity scoring library (`src/lib/severity.ts`) — type weight × log(mentions) × log(sources) × recency decay
 - News matching library (`src/lib/newsMatching.ts`) — temporal + geographic/keyword correlation between GDELT events and news clusters
 - Time grouping library (`src/lib/timeGroup.ts`) — groups notifications into "Last hour", "Last 6 hours", "Last 24 hours"
@@ -178,6 +196,7 @@ All notable changes to the Iran Conflict Monitor project.
 - 647 tests passing (29 new)
 
 #### Changed
+
 - EventDetail, FlightDetail, SiteDetail panels gain satellite imagery and enhanced formatting
 - News keyword filter upgraded with word-boundary matching and ambiguous-keyword gating
 - Port icon changed from helm wheel to bollard (cleaner at small sizes)
@@ -188,6 +207,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 16: News Feed
 
 #### Added
+
 - GDELT DOC 2.0 adapter (`server/adapters/gdelt-doc.ts`) for conflict news articles
 - RSS adapter (`server/adapters/rss.ts`) — 5 feeds: BBC, Al Jazeera, Tehran Times, Times of Israel, Middle East Eye
 - Conflict keyword filter (`server/lib/newsFilter.ts`) with whitelist matching
@@ -204,6 +224,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 15: Key Sites Overlay
 
 #### Added
+
 - Overpass/OSM adapter (`server/adapters/overpass.ts`) querying nuclear, naval, oil, airbase, desalination, port sites across Middle East
 - SiteEntity type with `siteType` discriminant and OSM metadata (operator, osmId)
 - `siteStore` Zustand store with connection status tracking
@@ -221,6 +242,7 @@ All notable changes to the Iran Conflict Monitor project.
 - 571 tests passing (15 new)
 
 #### Changed
+
 - Icon sizes reduced: flights/ships 4000m (was 8000m), events 3000m (was 5000m), to accommodate site markers
 - `useEntityLayers` expanded with site layer generation and category filtering
 - `useSelectedEntity` extended for site entity lookup from siteStore
@@ -231,6 +253,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 14: Vercel Deployment
 
 #### Added
+
 - Vercel serverless entry point (`server/vercel.ts`) with tsup bundling
 - `vercel.json` configuration routing SPA + API functions
 - Rate limiting middleware (configurable per-route limits)
@@ -238,12 +261,14 @@ All notable changes to the Iran Conflict Monitor project.
 - Node engine pin (>=20) in package.json
 
 #### Changed
+
 - Express app extracted to `createApp()` factory in `server/app.ts`
 - TypeScript build excludes test files from production bundle
 
 ### Phase 13: Serverless Cache Migration
 
 #### Added
+
 - Upstash Redis cache (`@upstash/redis`) replacing in-memory EntityCache
 - `CacheEntry<T>` pattern with `fetchedAt` for staleness computation (hard TTL = 10x logical TTL)
 - AISStream on-demand connection model (connect-collect-close per request)
@@ -254,6 +279,7 @@ All notable changes to the Iran Conflict Monitor project.
 - 556 tests passing
 
 #### Removed
+
 - In-memory EntityCache class (replaced by Redis)
 - Persistent WebSocket connection for AISStream
 
@@ -262,6 +288,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 12: Analytics Dashboard
 
 #### Added
+
 - Counters panel (CountersSlot) with collapsible Flights + Events sections
 - Flight counters: Iranian (originCountry) and Unidentified (hex-only) tallies
 - Event counters: Airstrikes, Ground Combat, Targeted, Fatalities
@@ -276,6 +303,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 10: Detail Panel & GDELT Event Reclassification
 
 #### Added
+
 - Detail panel: 360px right-side slide-out with per-type content (FlightDetail, ShipDetail, EventDetail)
 - Flight detail with dual units (ft/m, kn/m-s, ft-min/m-s) and data source label
 - Event detail with Goldstein scale, CAMEO code, actors, "View source" link
@@ -291,10 +319,12 @@ All notable changes to the Iran Conflict Monitor project.
 - 365 tests passing
 
 #### Fixed
+
 - Unidentified flights now take precedence over Ground filter (visible when Ground OFF if pulse ON)
 - Empty map click preserves detail panel selection (explicit close required)
 
 #### Changed
+
 - Entity types: `drone`/`missile` replaced with 11 granular ConflictEventType values
 - Layer toggles: Drones/Missiles/News replaced with Airstrikes/Ground Combat/Targeted/Other Conflict
 - Tooltip gating: per-category conflict toggles replace single showNews toggle
@@ -305,6 +335,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 9: Layer Controls & News Toggle
 
 #### Added
+
 - Layer toggles panel with 7 rows: Flights, Ground, Unidentified, Ships, Drones, Missiles, News
 - Toggle opacity dimming (40% when OFF) with smooth transitions and localStorage persistence
 - EntityTooltip component with per-type content (flight metadata, ship AIS data, GDELT event details)
@@ -316,11 +347,13 @@ All notable changes to the Iran Conflict Monitor project.
 - 309 tests passing
 
 #### Fixed
+
 - Hover blink caused by glow/highlight layers intercepting picks (set pickable: false)
 - Hover blink caused by active entity alpha=0 breaking deck.gl picking (keep full opacity)
 - Duplicate GDELT markers for same real-world event with different actor fields
 
 #### Changed
+
 - "Pulse" toggle renamed to "Unidentified" for clarity
 - showNews defaults to true (News ON by default)
 
@@ -329,6 +362,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 4: Flight Data Feed
 
 #### Added
+
 - Zustand flight store with connection health tracking (connected/stale/error/loading)
 - `useFlightPolling` hook with recursive setTimeout (5s interval)
 - Tab visibility awareness: polling pauses when hidden, immediate fetch on resume
@@ -345,6 +379,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 3: API Proxy
 
 #### Added
+
 - Express 5 server on port 3001 with health check endpoint
 - MapEntity discriminated union types (flight, ship, missile, drone)
 - OpenSky Network adapter with OAuth2 client credentials and bbox filtering
@@ -358,6 +393,7 @@ All notable changes to the Iran Conflict Monitor project.
 - Concurrent dev workflow (Vite + Express via concurrently)
 
 #### Fixed
+
 - Handle Blob WebSocket messages in AISStream adapter
 - Use `node --import tsx/esm` for dev scripts (ESM compatibility)
 - Remove eager `loadConfig()` from server startup to prevent crashes with missing .env
@@ -368,6 +404,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 2: Base Map
 
 #### Added
+
 - Interactive 2.5D map of Iran using Deck.gl + MapLibre with CARTO Dark Matter tiles
 - DeckGLOverlay bridge component via MapboxOverlay + useControl hook
 - Zustand map store (isMapLoaded, cursorPosition)
@@ -381,6 +418,7 @@ All notable changes to the Iran Conflict Monitor project.
 - 30 tests passing across all map components
 
 #### Fixed
+
 - Switched terrain tiles from Alps-only MapLibre demo to global AWS Terrarium DEM
 - Increased terrain exaggeration to 3.0 with pitch 50 for dramatically visible mountains
 - Boosted hillshade exaggeration to 0.6 with brighter highlights for ridge contrast
@@ -392,6 +430,7 @@ All notable changes to the Iran Conflict Monitor project.
 ### Phase 1: Project Scaffolding & Theme
 
 #### Added
+
 - Vite 6 + React 19 + TypeScript 5.9 project scaffold with ESM
 - Tailwind CSS v4 dark theme with `@theme` semantic color tokens
 - AppShell layout with full-viewport dark shell and z-indexed overlay regions
@@ -401,4 +440,5 @@ All notable changes to the Iran Conflict Monitor project.
 - README and brainstorm notes
 
 #### Fixed
+
 - Moved filters to bottom-left and counters to top-right per layout feedback

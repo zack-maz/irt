@@ -1,10 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import {
-  buildAuditRecord,
-  type PipelineTrace,
-  type AuditRecord,
-} from '../../lib/eventAudit.js';
+import { buildAuditRecord, type PipelineTrace, type AuditRecord } from '../../lib/eventAudit.js';
 import type { ConflictEventEntity } from '../../types.js';
 
 /** Build a minimal ConflictEventEntity for testing. */
@@ -109,9 +105,7 @@ describe('buildAuditRecord', () => {
     expect(record.id).toBe('gdelt-456');
     expect(record.status).toBe('rejected');
     expect(record.event).toBeNull();
-    expect(record.pipelineTrace.rejectionReason).toBe(
-      'Below confidence threshold (0.15 < 0.35)',
-    );
+    expect(record.pipelineTrace.rejectionReason).toBe('Below confidence threshold (0.15 < 0.35)');
   });
 
   it('PipelineTrace sub-scores are present and valid numbers', () => {
@@ -140,7 +134,7 @@ describe('buildAuditRecord', () => {
         originalLat: 35.6892,
         originalLng: 51.389,
         dispersedLat: 35.71,
-        dispersedLng: 51.40,
+        dispersedLng: 51.4,
       },
     });
 
@@ -158,5 +152,4 @@ describe('buildAuditRecord', () => {
     const trace = makeTrace({ bellingcatMatch: true });
     expect(trace.bellingcatMatch).toBe(true);
   });
-
 });

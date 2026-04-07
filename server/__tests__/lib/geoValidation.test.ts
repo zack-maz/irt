@@ -95,16 +95,16 @@ describe('geoValidation', () => {
   describe('detectCentroid', () => {
     it('returns centroid for Tehran exact match', () => {
       // Hardcoded: 35.6892, 51.3890
-      expect(detectCentroid(35.6892, 51.3890)).toBe('centroid');
+      expect(detectCentroid(35.6892, 51.389)).toBe('centroid');
     });
 
     it('returns centroid for Tehran within 0.01 tolerance', () => {
-      expect(detectCentroid(35.690, 51.390)).toBe('centroid');
+      expect(detectCentroid(35.69, 51.39)).toBe('centroid');
     });
 
     it('returns precise for location not near any centroid', () => {
       // Point in empty desert away from any city
-      expect(detectCentroid(26.50, 48.20)).toBe('precise');
+      expect(detectCentroid(26.5, 48.2)).toBe('precise');
     });
 
     it('returns centroid for Baghdad exact', () => {
@@ -124,12 +124,12 @@ describe('geoValidation', () => {
 
     it('returns centroid for boundary tolerance (exactly 0.01 away)', () => {
       // Tehran is 35.6892, 51.3890 -- test at +0.01 on lat
-      expect(detectCentroid(35.6992, 51.3890)).toBe('centroid');
+      expect(detectCentroid(35.6992, 51.389)).toBe('centroid');
     });
 
     it('returns precise for point just outside tolerance (0.011 away)', () => {
       // Tehran is 35.6892, 51.3890 -- test at +0.011 on lat
-      expect(detectCentroid(35.7003, 51.3890)).toBe('precise');
+      expect(detectCentroid(35.7003, 51.389)).toBe('precise');
     });
   });
 });

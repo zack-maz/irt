@@ -8,24 +8,24 @@ import type { ConflictEventEntity, ConflictEventType } from '../types.js';
  * All boolean: true = passed, false = failed.
  */
 export interface PhaseAChecks {
-  rootCode: boolean;       // EventRootCode in CONFLICT_ROOT_CODES
+  rootCode: boolean; // EventRootCode in CONFLICT_ROOT_CODES
   cameoExclusion: boolean; // EventBaseCode not in excluded list
-  middleEast: boolean;     // ActionGeo_CountryCode in MIDDLE_EAST_FIPS
-  geoValid: boolean;       // FullName/FIPS cross-validation passed
-  minSources: boolean;     // NumSources >= threshold
-  actorCountry: boolean;   // At least one actor with country code
+  middleEast: boolean; // ActionGeo_CountryCode in MIDDLE_EAST_FIPS
+  geoValid: boolean; // FullName/FIPS cross-validation passed
+  minSources: boolean; // NumSources >= threshold
+  actorCountry: boolean; // At least one actor with country code
 }
 
 /**
  * Confidence sub-scores computed in Phase B.
  */
 export interface ConfidenceSubScores {
-  mediaCoverage: number;       // 0-1, weight 0.25
-  sourceDiversity: number;     // 0-1, weight 0.15
-  actorSpecificity: number;    // 0-1, weight 0.15
-  geoPrecisionSignal: number;  // 0-1, weight 0.10
+  mediaCoverage: number; // 0-1, weight 0.25
+  sourceDiversity: number; // 0-1, weight 0.15
+  actorSpecificity: number; // 0-1, weight 0.15
+  geoPrecisionSignal: number; // 0-1, weight 0.10
   goldsteinConsistency: number; // 0-1, weight 0.10
-  cameoSpecificity: number;    // 0-1, weight 0.25
+  cameoSpecificity: number; // 0-1, weight 0.25
 }
 
 /**
@@ -33,10 +33,10 @@ export interface ConfidenceSubScores {
  */
 export interface PhaseBChecks {
   originalType: ConflictEventType; // Type before Goldstein reclassification
-  reclassified: boolean;           // Was the type changed by Goldstein sanity?
+  reclassified: boolean; // Was the type changed by Goldstein sanity?
   geoPrecision: 'precise' | 'centroid';
   confidenceSubScores: ConfidenceSubScores;
-  finalConfidence: number;  // 0-1 composite score
+  finalConfidence: number; // 0-1 composite score
   passedThreshold: boolean; // finalConfidence >= threshold
 }
 

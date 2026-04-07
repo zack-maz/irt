@@ -1,6 +1,6 @@
 ---
 status: diagnosed
-trigger: "river lines in water stress layer all appear same color and hard to see at wider zoom"
+trigger: 'river lines in water stress layer all appear same color and hard to see at wider zoom'
 created: 2026-04-03T00:00:00Z
 updated: 2026-04-03T00:00:00Z
 ---
@@ -38,7 +38,7 @@ started: since water layer implementation
 
 - timestamp: 2026-04-03T00:00:00Z
   checked: src/hooks/useWaterLayers.ts lines 75-82
-  found: lineWidthMinPixels=1, lineWidthMaxPixels=6; width formula is (6-scalerank)*500 meters
+  found: lineWidthMinPixels=1, lineWidthMaxPixels=6; width formula is (6-scalerank)\*500 meters
   implication: At wide zoom, lines clamp to 1px minimum which is nearly invisible
 
 - timestamp: 2026-04-03T00:00:00Z
@@ -54,9 +54,10 @@ started: since water layer implementation
 ## Resolution
 
 root_cause: |
-  TWO confirmed root causes:
-  1. MISSING DATA: rivers.json has NO compositeHealth property on any feature. The getLineColor callback at useWaterLayers.ts:72 uses `f.properties?.compositeHealth ?? 0.5`, so the fallback 0.5 fires for ALL 6 rivers, producing identical colors.
-  2. LOW VISIBILITY: lineWidthMinPixels is 1 and lineWidthMaxPixels is 6 (useWaterLayers.ts:80-81). At wider zoom levels, lines clamp to 1px which is nearly invisible against the dark basemap.
-fix: (not applied - diagnosis only)
-verification: (not applicable)
-files_changed: []
+TWO confirmed root causes:
+
+1. MISSING DATA: rivers.json has NO compositeHealth property on any feature. The getLineColor callback at useWaterLayers.ts:72 uses `f.properties?.compositeHealth ?? 0.5`, so the fallback 0.5 fires for ALL 6 rivers, producing identical colors.
+2. LOW VISIBILITY: lineWidthMinPixels is 1 and lineWidthMaxPixels is 6 (useWaterLayers.ts:80-81). At wider zoom levels, lines clamp to 1px which is nearly invisible against the dark basemap.
+   fix: (not applied - diagnosis only)
+   verification: (not applicable)
+   files_changed: []

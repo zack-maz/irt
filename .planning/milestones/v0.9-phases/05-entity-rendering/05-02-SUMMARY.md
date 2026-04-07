@@ -7,10 +7,10 @@ tags: [deck.gl, IconLayer, zoom-responsive, meter-sizing, maplibre]
 # Dependency graph
 requires:
   - phase: 05-entity-rendering
-    provides: "IconLayer entity rendering with canvas icon atlas and altitude opacity"
+    provides: 'IconLayer entity rendering with canvas icon atlas and altitude opacity'
 provides:
-  - "Zoom-responsive icon sizing with meter-based sizeUnits and min/max pixel bounds"
-  - "Icons scale proportionally with zoom level for all 4 entity types"
+  - 'Zoom-responsive icon sizing with meter-based sizeUnits and min/max pixel bounds'
+  - 'Icons scale proportionally with zoom level for all 4 entity types'
 affects: [entity-interaction, ship-data, conflict-events]
 
 # Tech tracking
@@ -26,8 +26,8 @@ key-files:
     - src/__tests__/entityLayers.test.ts
 
 key-decisions:
-  - "Meter-based sizeUnits with min/max pixel bounds for zoom-responsive entity icons"
-  - "Icon sizes increased 3x from plan values after two rounds of user feedback (1600->2400m flight/drone/missile, 1200->1800m ship)"
+  - 'Meter-based sizeUnits with min/max pixel bounds for zoom-responsive entity icons'
+  - 'Icon sizes increased 3x from plan values after two rounds of user feedback (1600->2400m flight/drone/missile, 1200->1800m ship)'
 
 patterns-established:
   - "Zoom-responsive sizing: ICON_SIZE objects contain meters/minPixels/maxPixels, IconLayers use sizeUnits 'meters'"
@@ -52,6 +52,7 @@ completed: 2026-03-16
 - **Files modified:** 3
 
 ## Accomplishments
+
 - All 4 entity IconLayers (flight, ship, drone, missile) now use meter-based sizing that scales with zoom level
 - Icons grow larger when zooming in and shrink when zooming out, with min/max pixel bounds preventing disappearance or blob-ification
 - Altitude-based opacity differences become clearly visible at closer zoom levels due to larger icon size
@@ -70,11 +71,13 @@ Each task was committed atomically:
 _Note: TDD task had 3 commits due to additional size tuning after user feedback_
 
 ## Files Created/Modified
+
 - `src/components/map/layers/constants.ts` - ICON_SIZE changed from flat numbers to structured objects with meters/minPixels/maxPixels
 - `src/hooks/useEntityLayers.ts` - All 4 IconLayers switched from sizeUnits 'pixels' to 'meters' with sizeMinPixels/sizeMaxPixels props
 - `src/__tests__/entityLayers.test.ts` - Tests updated for structured ICON_SIZE shape, meter-based sizeUnits, and min/max pixel assertions
 
 ## Decisions Made
+
 - Meter-based sizeUnits with min/max pixel bounds -- provides natural zoom-responsive scaling without manual zoom-level breakpoints
 - Final icon sizes set to 3x the original plan values (plan: 800m/6min/40max) after two rounds of live user feedback: first doubled, then 1.5x more. Final: flight/drone/missile 2400m/15min/96max, ship 1800m/12min/84max
 
@@ -83,17 +86,19 @@ _Note: TDD task had 3 commits due to additional size tuning after user feedback_
 ### User-Directed Adjustments
 
 **1. Icon size increase -- doubled from plan values**
+
 - **Found during:** Task 2 (human-verify checkpoint)
 - **Issue:** Original plan values (800m/6min/40max) were too small at typical zoom levels; user requested larger icons
 - **Fix:** Doubled all values to 1600m/12min/80max for flight/drone/missile, 1200m/10min/72max for ship
-- **Files modified:** src/components/map/layers/constants.ts, src/__tests__/entityLayers.test.ts
+- **Files modified:** src/components/map/layers/constants.ts, src/**tests**/entityLayers.test.ts
 - **Committed in:** 3d367a5 (part of GREEN commit)
 
 **2. Icon size increase -- 1.5x more per user feedback**
+
 - **Found during:** Task 2 (human-verify checkpoint, second round)
 - **Issue:** User requested additional size increase after first doubling
 - **Fix:** Scaled all values by 1.5x to final: flight/drone/missile 2400m/15min/96max, ship 1800m/12min/84max
-- **Files modified:** src/components/map/layers/constants.ts, src/__tests__/entityLayers.test.ts
+- **Files modified:** src/components/map/layers/constants.ts, src/**tests**/entityLayers.test.ts
 - **Committed in:** 6ec3484
 
 ---
@@ -102,12 +107,15 @@ _Note: TDD task had 3 commits due to additional size tuning after user feedback_
 **Impact on plan:** Icon sizing values differ from plan (3x larger) but the architectural approach (meter-based sizeUnits with min/max pixel bounds) matches exactly. Size tuning was expected -- the plan acknowledged these values needed live verification.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Entity rendering layer complete with zoom-responsive sizing
 - All UAT criteria for Phase 5 addressed (icon sizing was the remaining gap)
 - Phase 5 fully ready for Phase 6 (ADS-B Exchange) and Phase 7 (Ship & Conflict Data)
@@ -118,5 +126,6 @@ None - no external service configuration required.
 All 3 modified files verified on disk. All 3 task commits (c1daa64, 3d367a5, 6ec3484) verified in git history.
 
 ---
-*Phase: 05-entity-rendering*
-*Completed: 2026-03-16*
+
+_Phase: 05-entity-rendering_
+_Completed: 2026-03-16_

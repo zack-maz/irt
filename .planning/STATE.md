@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-07T03:30:25.644Z"
+last_updated: '2026-04-07T03:30:25.644Z'
 progress:
   total_phases: 13
   completed_phases: 8
@@ -47,18 +47,18 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 
 ## v1.3 Phases
 
-| Phase | Name | Status |
-|-------|------|--------|
-| 22 | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans) |
-| 22.1 | Fixing Dispersion | COMPLETE (2/2 plans) |
-| 23 | Threat Density Improvements | COMPLETE (2/2 plans) |
-| 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
-| 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
-| 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (6/6 plans, gap closure complete) |
-| 26.1 | Water Layer Refinements | COMPLETE (3/3 plans) |
-| 26.2 | Conflict Geolocation Improvement | COMPLETE (3/3 plans) |
-| 27 | Performance & Load Testing | Planned |
+| Phase | Name                                    | Status                                        |
+| ----- | --------------------------------------- | --------------------------------------------- |
+| 22    | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans)                          |
+| 22.1  | Fixing Dispersion                       | COMPLETE (2/2 plans)                          |
+| 23    | Threat Density Improvements             | COMPLETE (2/2 plans)                          |
+| 23.2  | Improving Threat Density Scatter Plots  | IN PROGRESS (1/2 plans)                       |
+| 24    | Political Boundaries Layer              | IN PROGRESS (1/2 plans)                       |
+| 25    | Ethnic Distribution Layer               | IN PROGRESS (1/2 plans)                       |
+| 26    | Water Stress Layer                      | IN PROGRESS (6/6 plans, gap closure complete) |
+| 26.1  | Water Layer Refinements                 | COMPLETE (3/3 plans)                          |
+| 26.2  | Conflict Geolocation Improvement        | COMPLETE (3/3 plans)                          |
+| 27    | Performance & Load Testing              | Planned                                       |
 
 ## Key Decisions
 
@@ -168,9 +168,9 @@ None.
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 1 | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/) |
+| #   | Description                                               | Date       | Commit  | Directory                                                                                         |
+| --- | --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------- |
+| 1   | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/) |
 
 ## Accumulated Context
 

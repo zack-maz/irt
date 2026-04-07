@@ -15,13 +15,13 @@ created: 2026-03-20
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run server/__tests__/` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                              |
+| ---------------------- | ---------------------------------- |
+| **Framework**          | Vitest 4.1.0                       |
+| **Config file**        | `vite.config.ts` (test section)    |
+| **Quick run command**  | `npx vitest run server/__tests__/` |
+| **Full suite command** | `npx vitest run`                   |
+| **Estimated runtime**  | ~15 seconds                        |
 
 ---
 
@@ -36,16 +36,16 @@ created: 2026-03-20
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 16-01-01 | 01 | 1 | NEWS-01 | unit | `npx vitest run server/__tests__/adapters/gdelt-doc.test.ts -x` | ❌ W0 | ⬜ pending |
-| 16-01-02 | 01 | 1 | NEWS-01 | unit | `npx vitest run server/__tests__/adapters/rss.test.ts -x` | ❌ W0 | ⬜ pending |
-| 16-01-03 | 01 | 1 | NEWS-02 | unit | `npx vitest run server/__tests__/adapters/gdelt-doc.test.ts -x` | ❌ W0 | ⬜ pending |
-| 16-02-01 | 02 | 2 | NEWS-01 | integration | `npx vitest run server/__tests__/routes/news.test.ts -x` | ❌ W0 | ⬜ pending |
-| 16-02-02 | 02 | 2 | NEWS-02 | unit | `npx vitest run server/__tests__/routes/news.test.ts -x` | ❌ W0 | ⬜ pending |
-| 16-02-03 | 02 | 2 | NEWS-03 | unit | `npx vitest run server/__tests__/routes/news.test.ts -x` | ❌ W0 | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement | Test Type   | Automated Command                                               | File Exists | Status     |
+| -------- | ---- | ---- | ----------- | ----------- | --------------------------------------------------------------- | ----------- | ---------- |
+| 16-01-01 | 01   | 1    | NEWS-01     | unit        | `npx vitest run server/__tests__/adapters/gdelt-doc.test.ts -x` | ❌ W0       | ⬜ pending |
+| 16-01-02 | 01   | 1    | NEWS-01     | unit        | `npx vitest run server/__tests__/adapters/rss.test.ts -x`       | ❌ W0       | ⬜ pending |
+| 16-01-03 | 01   | 1    | NEWS-02     | unit        | `npx vitest run server/__tests__/adapters/gdelt-doc.test.ts -x` | ❌ W0       | ⬜ pending |
+| 16-02-01 | 02   | 2    | NEWS-01     | integration | `npx vitest run server/__tests__/routes/news.test.ts -x`        | ❌ W0       | ⬜ pending |
+| 16-02-02 | 02   | 2    | NEWS-02     | unit        | `npx vitest run server/__tests__/routes/news.test.ts -x`        | ❌ W0       | ⬜ pending |
+| 16-02-03 | 02   | 2    | NEWS-03     | unit        | `npx vitest run server/__tests__/routes/news.test.ts -x`        | ❌ W0       | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -56,16 +56,16 @@ created: 2026-03-20
 - [ ] `server/__tests__/routes/news.test.ts` — stubs for NEWS-01, NEWS-02, NEWS-03 (route integration)
 - [ ] `npm install fast-xml-parser` — new dependency for RSS parsing
 
-*Existing infrastructure covers test framework requirements.*
+_Existing infrastructure covers test framework requirements._
 
 ---
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| GDELT DOC API returns live results | NEWS-01 | External API dependency | Hit `/api/news` locally, verify GDELT articles present |
-| RSS feeds return live articles | NEWS-01 | External feed dependency | Check server logs for RSS fetch results |
+| Behavior                           | Requirement | Why Manual               | Test Instructions                                      |
+| ---------------------------------- | ----------- | ------------------------ | ------------------------------------------------------ |
+| GDELT DOC API returns live results | NEWS-01     | External API dependency  | Hit `/api/news` locally, verify GDELT articles present |
+| RSS feeds return live articles     | NEWS-01     | External feed dependency | Check server logs for RSS fetch results                |
 
 ---
 

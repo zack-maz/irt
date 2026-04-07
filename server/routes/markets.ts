@@ -35,7 +35,10 @@ marketsRouter.get('/', validateQuery(marketsQuerySchema), async (_req, res) => {
       // 3. Cache the fresh data
       await cacheSetSafe(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
 
-      log.info({ count: quotes.length, total: 5, range, tickers: quotes.map((q) => q.symbol) }, 'fetched tickers');
+      log.info(
+        { count: quotes.length, total: 5, range, tickers: quotes.map((q) => q.symbol) },
+        'fetched tickers',
+      );
 
       // 4. Return fresh response
       res.json({ data: quotes, stale: false, lastFresh: Date.now() });
@@ -50,7 +53,9 @@ marketsRouter.get('/', validateQuery(marketsQuerySchema), async (_req, res) => {
     } else {
       // No data at all
       log.error('all tickers failed with no cache available');
-      res.status(502).json({ error: 'No market data available', code: 'UPSTREAM_ERROR', statusCode: 502 });
+      res
+        .status(502)
+        .json({ error: 'No market data available', code: 'UPSTREAM_ERROR', statusCode: 502 });
     }
   } catch (err) {
     log.error({ err }, 'upstream error');

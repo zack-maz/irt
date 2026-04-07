@@ -22,8 +22,8 @@ affects: [phase-27-performance, future-visualization-layers]
 tech-stack:
   added: []
   patterns:
-    - "Water facility integration gated by layer active state"
-    - "Dismissible proximity alerts with 60s cooldown"
+    - 'Water facility integration gated by layer active state'
+    - 'Dismissible proximity alerts with 60s cooldown'
 
 key-files:
   created:
@@ -43,12 +43,12 @@ key-files:
     - src/components/map/ProximityAlertOverlay.tsx
 
 key-decisions:
-  - "Water facilities use same proximity alert system as sites (waterToSiteLike adapter)"
-  - "Proximity alerts now dismissible with 60s cooldown to prevent overwhelm from water facilities"
-  - "Alert click selects site/facility (not flight) for detail panel context"
+  - 'Water facilities use same proximity alert system as sites (waterToSiteLike adapter)'
+  - 'Proximity alerts now dismissible with 60s cooldown to prevent overwhelm from water facilities'
+  - 'Alert click selects site/facility (not flight) for detail panel context'
 
 patterns-established:
-  - "Visualization layer integration checklist: BaseMap layers, AppShell hooks, DetailPanel, counters, search, proximity, legend, toggle"
+  - 'Visualization layer integration checklist: BaseMap layers, AppShell hooks, DetailPanel, counters, search, proximity, legend, toggle'
 
 requirements-completed: [WAT-08, WAT-09, WAT-10, WAT-11]
 
@@ -113,6 +113,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 2 - Missing Critical] Added proximity alert dismiss functionality**
+
 - **Found during:** Task 2 (proximity alerts integration)
 - **Issue:** Adding ~4300 water facilities to proximity checks would generate overwhelming alerts
 - **Fix:** Added dismissible alerts with 60s cooldown, click-to-expand selects facility for detail context
@@ -140,5 +141,6 @@ None - no external service configuration required.
 - Ready for Phase 27 (Performance & Load Testing) after visual approval
 
 ---
-*Phase: 26-water-stress-layer*
-*Completed: 2026-04-03*
+
+_Phase: 26-water-stress-layer_
+_Completed: 2026-04-03_

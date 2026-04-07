@@ -15,13 +15,13 @@ created: 2026-03-15
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1 with jsdom (frontend), node (server) |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run server/__tests__/adapters/` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                           |
+| ---------------------- | ----------------------------------------------- |
+| **Framework**          | Vitest 4.1 with jsdom (frontend), node (server) |
+| **Config file**        | `vite.config.ts` (test section)                 |
+| **Quick run command**  | `npx vitest run server/__tests__/adapters/`     |
+| **Full suite command** | `npx vitest run`                                |
+| **Estimated runtime**  | ~15 seconds                                     |
 
 ---
 
@@ -36,21 +36,21 @@ created: 2026-03-15
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 06-01-01 | 01 | 1 | DATA-04a | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 | pending |
-| 06-01-02 | 01 | 1 | DATA-04b | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 | pending |
-| 06-01-03 | 01 | 1 | DATA-04c | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 | pending |
-| 06-01-04 | 01 | 1 | DATA-04d | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 | pending |
-| 06-01-05 | 01 | 1 | DATA-04e | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 | pending |
-| 06-01-06 | 01 | 1 | DATA-04f | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 | pending |
-| 06-01-07 | 01 | 1 | DATA-04g | integration | `npx vitest run server/__tests__/security.test.ts -x` | Modify existing | pending |
-| 06-01-08 | 01 | 1 | DATA-04h | unit | `npx vitest run src/__tests__/flightStore.test.ts -x` | Modify existing | pending |
-| 06-01-09 | 01 | 1 | DATA-04i | unit | `npx vitest run src/__tests__/useFlightPolling.test.ts -x` | Modify existing | pending |
-| 06-01-10 | 01 | 1 | DATA-04j | unit | `npx vitest run src/__tests__/SourceSelector.test.ts -x` | Wave 0 | pending |
-| 06-01-11 | 01 | 1 | DATA-04k | integration | `npx vitest run src/__tests__/useFlightPolling.test.ts -x` | Modify existing | pending |
+| Task ID  | Plan | Wave | Requirement | Test Type   | Automated Command                                                   | File Exists     | Status  |
+| -------- | ---- | ---- | ----------- | ----------- | ------------------------------------------------------------------- | --------------- | ------- |
+| 06-01-01 | 01   | 1    | DATA-04a    | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          | pending |
+| 06-01-02 | 01   | 1    | DATA-04b    | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          | pending |
+| 06-01-03 | 01   | 1    | DATA-04c    | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          | pending |
+| 06-01-04 | 01   | 1    | DATA-04d    | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          | pending |
+| 06-01-05 | 01   | 1    | DATA-04e    | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          | pending |
+| 06-01-06 | 01   | 1    | DATA-04f    | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          | pending |
+| 06-01-07 | 01   | 1    | DATA-04g    | integration | `npx vitest run server/__tests__/security.test.ts -x`               | Modify existing | pending |
+| 06-01-08 | 01   | 1    | DATA-04h    | unit        | `npx vitest run src/__tests__/flightStore.test.ts -x`               | Modify existing | pending |
+| 06-01-09 | 01   | 1    | DATA-04i    | unit        | `npx vitest run src/__tests__/useFlightPolling.test.ts -x`          | Modify existing | pending |
+| 06-01-10 | 01   | 1    | DATA-04j    | unit        | `npx vitest run src/__tests__/SourceSelector.test.ts -x`            | Wave 0          | pending |
+| 06-01-11 | 01   | 1    | DATA-04k    | integration | `npx vitest run src/__tests__/useFlightPolling.test.ts -x`          | Modify existing | pending |
 
-*Status: pending / green / red / flaky*
+_Status: pending / green / red / flaky_
 
 ---
 
@@ -67,10 +67,10 @@ created: 2026-03-15
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
+| Behavior                                        | Requirement | Why Manual                    | Test Instructions                                                   |
+| ----------------------------------------------- | ----------- | ----------------------------- | ------------------------------------------------------------------- |
 | Source toggle dropdown renders correctly on map | DATA-04 SC2 | Visual layout over map canvas | Toggle source in UI, verify dropdown appears top-right with chevron |
-| Status badge shows correct colors | DATA-04 SC4 | Visual color verification | Verify green/yellow/red/gray dot states match connection status |
+| Status badge shows correct colors               | DATA-04 SC4 | Visual color verification     | Verify green/yellow/red/gray dot states match connection status     |
 
 ---
 

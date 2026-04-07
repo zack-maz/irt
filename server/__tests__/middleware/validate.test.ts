@@ -31,7 +31,11 @@ function mockRes() {
       return body;
     },
   };
-  return res as unknown as Response & { statusCode: number; body: unknown; locals: Record<string, unknown> };
+  return res as unknown as Response & {
+    statusCode: number;
+    body: unknown;
+    locals: Record<string, unknown>;
+  };
 }
 
 describe('validateQuery middleware', () => {
@@ -71,7 +75,10 @@ describe('validateQuery middleware', () => {
 
   it('coerces string "true" to boolean true when schema uses transform', () => {
     const boolSchema = z.object({
-      refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+      refresh: z
+        .enum(['true', 'false'])
+        .optional()
+        .transform((v) => v === 'true'),
     });
 
     const req = mockReq({ refresh: 'true' });

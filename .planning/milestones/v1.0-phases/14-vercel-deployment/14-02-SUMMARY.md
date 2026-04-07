@@ -34,14 +34,14 @@ key-files:
     - .gitignore
 
 key-decisions:
-  - "Moved entry point from api/index.ts to server/vercel-entry.ts bundled with tsup for Vercel ESM compatibility"
-  - "Node 22.x pinned via package.json engines field"
-  - "vercel.json uses framework: vite with 60s maxDuration for AISStream headroom"
-  - "tsup bundles server code into api/index.js CJS output for reliable Vercel function loading"
+  - 'Moved entry point from api/index.ts to server/vercel-entry.ts bundled with tsup for Vercel ESM compatibility'
+  - 'Node 22.x pinned via package.json engines field'
+  - 'vercel.json uses framework: vite with 60s maxDuration for AISStream headroom'
+  - 'tsup bundles server code into api/index.js CJS output for reliable Vercel function loading'
 
 patterns-established:
-  - "tsup bundle pattern: server code bundled to api/index.js for serverless deployment"
-  - "Vercel rewrite ordering: /api/:path* first, then SPA fallback to /index.html"
+  - 'tsup bundle pattern: server code bundled to api/index.js for serverless deployment'
+  - 'Vercel rewrite ordering: /api/:path* first, then SPA fallback to /index.html'
 
 requirements-completed: [DEPLOY-01, DEPLOY-05]
 
@@ -63,6 +63,7 @@ completed: 2026-03-20
 - **Files modified:** 8
 
 ## Accomplishments
+
 - Created Vercel serverless entry point wrapping createApp() with tsup bundling for ESM compatibility
 - Configured vercel.json with Vite framework detection, API rewrites, SPA fallback, and 60s function timeout
 - Pinned Node 22.x in package.json engines field
@@ -79,6 +80,7 @@ Each task was committed atomically:
 5. **Task 2: Verify live Vercel deployment** - checkpoint approved (no code commit)
 
 ## Files Created/Modified
+
 - `server/vercel-entry.ts` - Serverless entry point importing createApp(), bundled by tsup to api/index.js
 - `vercel.json` - Deployment config: framework vite, 60s maxDuration, API rewrites + SPA fallback
 - `server/__tests__/vercel-entry.test.ts` - Unit tests for entry point (default export, GET /health)
@@ -89,6 +91,7 @@ Each task was committed atomically:
 - `package-lock.json` - Updated with tsup dependencies
 
 ## Decisions Made
+
 - **tsup bundling:** Initial api/index.ts approach failed on Vercel because ESM imports with .js extensions weren't resolved in the serverless environment. Switched to tsup bundling server/vercel-entry.ts into api/index.js (CJS) for reliable function loading.
 - **Moved entry to server/vercel-entry.ts:** Keeps source code in the server directory; tsup outputs to api/ which Vercel discovers as the function.
 - **Excluded test files from build:** tsconfig.app.json updated to prevent test files from being included in Vite production builds.
@@ -98,6 +101,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Excluded test files from production build**
+
 - **Found during:** Task 1 (deployment attempt)
 - **Issue:** TypeScript test files were being included in the Vite production build, causing build errors on Vercel
 - **Fix:** Updated tsconfig.app.json to exclude test directories; separated typecheck script
@@ -106,6 +110,7 @@ Each task was committed atomically:
 - **Committed in:** 84134de
 
 **2. [Rule 3 - Blocking] Bundled entry point with tsup for Vercel compatibility**
+
 - **Found during:** Task 1 (deployment attempt)
 - **Issue:** Vercel couldn't resolve ESM imports with .js extensions in the api/index.ts entry point
 - **Fix:** Moved entry to server/vercel-entry.ts, added tsup config to bundle into api/index.js (CJS), updated vercel.json to point to bundled output
@@ -119,12 +124,15 @@ Each task was committed atomically:
 **Impact on plan:** Both fixes were necessary to resolve Vercel's serverless function bundling constraints. The core architecture (Express app wrapped as serverless function) remains as planned; only the bundling mechanism changed.
 
 ## Issues Encountered
+
 - Vercel's Node.js serverless runtime doesn't natively resolve ESM relative imports with .js extensions. Solved by bundling with tsup into a single CJS file.
 
 ## User Setup Required
+
 None - Vercel environment variables (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN) were already configured during deployment verification.
 
 ## Next Phase Readiness
+
 - v1.0 deployment is complete -- application is live at https://myworld-liard.vercel.app
 - All data sources operational: flights (adsb.lol), ships (AISStream), events (GDELT v2)
 - No further phases planned in the current roadmap
@@ -134,5 +142,6 @@ None - Vercel environment variables (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_
 All files verified present, all commit hashes confirmed in git log.
 
 ---
-*Phase: 14-vercel-deployment*
-*Completed: 2026-03-20*
+
+_Phase: 14-vercel-deployment_
+_Completed: 2026-03-20_

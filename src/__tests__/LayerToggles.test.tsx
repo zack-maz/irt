@@ -3,10 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { useLayerStore } from '@/stores/layerStore';
 
 vi.mock('@/stores/uiStore', () => ({
-  useUIStore: (selector: (s: Record<string, unknown>) => unknown) => selector({
-    isLayersCollapsed: false,
-    toggleLayers: vi.fn(),
-  }),
+  useUIStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      isLayersCollapsed: false,
+      toggleLayers: vi.fn(),
+    }),
 }));
 
 import { LayerTogglesSlot } from '@/components/layout/LayerTogglesSlot';

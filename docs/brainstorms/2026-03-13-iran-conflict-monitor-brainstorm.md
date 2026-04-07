@@ -17,6 +17,7 @@ The tool prioritizes concrete, mathematical data — counts, timelines, movement
 ## Why This Approach
 
 **Deck.gl + React** because:
+
 - GPU-accelerated rendering handles thousands of moving points (ships, flights) without frame drops
 - Built-in layer system maps directly to the toggle UX (ships layer, flights layer, etc.)
 - Native support for 2.5D visualization — hexagonal columns, extruded polygons, arc layers
@@ -24,34 +25,35 @@ The tool prioritizes concrete, mathematical data — counts, timelines, movement
 - React component model keeps the detail panels and filter controls clean
 
 **Rejected alternatives:**
+
 - Three.js custom globe — too much effort reinventing map projections, tile loading, interaction
 - Leaflet + D3 — no real 2.5D, performance ceiling with real-time moving points
 
 ## Key Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| Deck.gl + MapLibre for map | GPU-accelerated, free, 2.5D native |
-| React for UI | Component model fits panels, toggles, filters |
-| Public APIs only | ADS-B Exchange, AIS/MarineTraffic, ACLED, OSINT feeds |
-| Mixed refresh rates | Flights/ships every ~5s via WebSocket; conflict events every 1-5 min via polling |
-| User-saved snapshots as JSON | Save snapshots to local JSON files — simple, portable, git-trackable |
-| Dark + clean aesthetic | Black background, white grid, restrained accents (blue, red, green, yellow only) |
-| Detail panel (not drill-down) | Click object → side panel with live stats, history, linked events |
-| Layer toggles + smart filters | Quick category on/off plus attribute filtering (nationality, speed, altitude, proximity) |
-| Non-stat news hidden by default | Data-backed items only; toggle reveals qualitative reports |
-| No alerts | User monitors actively — no push or in-app notifications |
-| Personal tool, no auth | Single user, localhost or simple deploy |
-| No people tracking | Significant persons dropped from scope |
+| Decision                        | Rationale                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| Deck.gl + MapLibre for map      | GPU-accelerated, free, 2.5D native                                                       |
+| React for UI                    | Component model fits panels, toggles, filters                                            |
+| Public APIs only                | ADS-B Exchange, AIS/MarineTraffic, ACLED, OSINT feeds                                    |
+| Mixed refresh rates             | Flights/ships every ~5s via WebSocket; conflict events every 1-5 min via polling         |
+| User-saved snapshots as JSON    | Save snapshots to local JSON files — simple, portable, git-trackable                     |
+| Dark + clean aesthetic          | Black background, white grid, restrained accents (blue, red, green, yellow only)         |
+| Detail panel (not drill-down)   | Click object → side panel with live stats, history, linked events                        |
+| Layer toggles + smart filters   | Quick category on/off plus attribute filtering (nationality, speed, altitude, proximity) |
+| Non-stat news hidden by default | Data-backed items only; toggle reveals qualitative reports                               |
+| No alerts                       | User monitors actively — no push or in-app notifications                                 |
+| Personal tool, no auth          | Single user, localhost or simple deploy                                                  |
+| No people tracking              | Significant persons dropped from scope                                                   |
 
 ## Data Sources
 
-| Category | Source | Refresh |
-|----------|--------|---------|
-| Flights | ADS-B Exchange / OpenSky Network | ~5s (WebSocket/SSE) |
-| Ships | AIS data / MarineTraffic API | ~30s-1min |
-| Conflict events | ACLED API | 1-5 min polling |
-| Missiles/Drones | OSINT aggregators, conflict event APIs | 1-5 min polling |
+| Category        | Source                                 | Refresh             |
+| --------------- | -------------------------------------- | ------------------- |
+| Flights         | ADS-B Exchange / OpenSky Network       | ~5s (WebSocket/SSE) |
+| Ships           | AIS data / MarineTraffic API           | ~30s-1min           |
+| Conflict events | ACLED API                              | 1-5 min polling     |
+| Missiles/Drones | OSINT aggregators, conflict event APIs | 1-5 min polling     |
 
 ## Data Priority (All Four Categories)
 

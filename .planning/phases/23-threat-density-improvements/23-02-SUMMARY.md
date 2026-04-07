@@ -17,7 +17,12 @@ affects: [detail-panel, threat-heatmap, entity-selection, phase-23.1-navigation-
 
 tech-stack:
   added: []
-  patterns: [bfs-flood-fill-on-integer-grid, mutual-exclusion-in-zustand-store, cluster-to-entity-drill-down]
+  patterns:
+    [
+      bfs-flood-fill-on-integer-grid,
+      mutual-exclusion-in-zustand-store,
+      cluster-to-entity-drill-down,
+    ]
 
 key-files:
   created:
@@ -32,15 +37,15 @@ key-files:
     - src/__tests__/ThreatHeatmapOverlay.test.tsx
 
 key-decisions:
-  - "ThreatCluster type defined in ui.ts (not ThreatHeatmapOverlay) to avoid circular imports"
-  - "Integer grid indices (Math.round) for BFS neighbor lookup to avoid floating-point key mismatch"
-  - "selectedCluster and selectedEntityId mutually exclusive in uiStore via cross-clearing"
-  - "Cluster picker radius proportional to bounding box diagonal with 50km floor"
+  - 'ThreatCluster type defined in ui.ts (not ThreatHeatmapOverlay) to avoid circular imports'
+  - 'Integer grid indices (Math.round) for BFS neighbor lookup to avoid floating-point key mismatch'
+  - 'selectedCluster and selectedEntityId mutually exclusive in uiStore via cross-clearing'
+  - 'Cluster picker radius proportional to bounding box diagonal with 50km floor'
 
 patterns-established:
-  - "Cluster-to-entity drill-down: cluster detail -> event click -> entity detail with fly-to"
-  - "Mutual exclusion pattern in Zustand: setter A clears field B, setter B clears field A"
-  - "DetailPanelSlot ternary chain: selectedCluster ? cluster : entity ? entity : placeholder"
+  - 'Cluster-to-entity drill-down: cluster detail -> event click -> entity detail with fly-to'
+  - 'Mutual exclusion pattern in Zustand: setter A clears field B, setter B clears field A'
+  - 'DetailPanelSlot ternary chain: selectedCluster ? cluster : entity ? entity : placeholder'
 
 requirements-completed: [P23-06, P23-07, P23-08]
 
@@ -61,6 +66,7 @@ completed: 2026-04-02
 - **Files modified:** 8
 
 ## Accomplishments
+
 - Adjacent non-empty 0.25-degree grid cells merge into connected-component clusters via BFS flood fill using integer grid indices
 - Clicking a threat cluster on the map opens a detail panel with "Threat Cluster -- N events" header and scrollable event list
 - Clicking an individual event within the cluster detail flies to it and opens EventDetail
@@ -81,6 +87,7 @@ Each task was committed atomically:
    - `da0965c` feat: wire cluster click to detail panel with ThreatClusterDetail
 
 ## Files Created/Modified
+
 - `src/types/ui.ts` - Added ThreatCluster interface and selectedCluster/setSelectedCluster to UIState
 - `src/stores/uiStore.ts` - Added selectedCluster state with mutual exclusion against selectedEntityId
 - `src/components/map/layers/ThreatHeatmapOverlay.tsx` - Added mergeClusters BFS function, updated picker layer to cluster-level
@@ -91,6 +98,7 @@ Each task was committed atomically:
 - `src/__tests__/ThreatClusterDetail.test.tsx` - New test suite for cluster detail component
 
 ## Decisions Made
+
 - ThreatCluster type defined in ui.ts to avoid circular imports between ui.ts and ThreatHeatmapOverlay
 - Integer grid indices (Math.round) used for BFS neighbor lookup to avoid floating-point key mismatch (per research pitfall 1)
 - selectedCluster and selectedEntityId use cross-clearing for mutual exclusion (setting one always nulls the other)
@@ -101,6 +109,7 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - Test for boundingBox initially used diagonal (non-adjacent) cells which formed separate clusters under 4-connected BFS -- fixed by using L-shaped test data
 
 ## User Setup Required
@@ -108,6 +117,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Threat heatmap is now fully interactive: clusters are clickable and drill down to individual events
 - Phase 23.1 (navigation stack) can build on the selectedCluster/selectedEntityId mutual exclusion pattern
 - Phase 24 (political boundaries) has no dependencies on this plan
@@ -117,5 +127,6 @@ None - no external service configuration required.
 All files exist, all 4 commits verified in git log.
 
 ---
-*Phase: 23-threat-density-improvements*
-*Completed: 2026-04-02*
+
+_Phase: 23-threat-density-improvements_
+_Completed: 2026-04-02_

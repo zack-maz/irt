@@ -15,13 +15,13 @@ created: 2026-04-02
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                                        |
+| ---------------------- | ------------------------------------------------------------ |
+| **Framework**          | Vitest 4.1.0                                                 |
+| **Config file**        | `vite.config.ts` (test section)                              |
+| **Quick run command**  | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx` |
+| **Full suite command** | `npx vitest run`                                             |
+| **Estimated runtime**  | ~15 seconds                                                  |
 
 ---
 
@@ -36,19 +36,19 @@ created: 2026-04-02
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 23-01-01 | 01 | 1 | P23-01 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial | ⬜ pending |
-| 23-01-02 | 01 | 1 | P23-02 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial | ⬜ pending |
-| 23-01-03 | 01 | 1 | P23-03 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial | ⬜ pending |
-| 23-01-04 | 01 | 1 | P23-04 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No | ⬜ pending |
-| 23-01-05 | 01 | 1 | P23-05 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No | ⬜ pending |
-| 23-02-01 | 02 | 1 | P23-06 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No | ⬜ pending |
-| 23-02-02 | 02 | 1 | P23-07 | unit | `npx vitest run src/__tests__/ThreatClusterDetail.test.tsx -x` | No | ⬜ pending |
-| 23-02-03 | 02 | 1 | P23-08 | unit | `npx vitest run src/__tests__/ThreatClusterDetail.test.tsx -x` | No | ⬜ pending |
-| 23-02-04 | 02 | 1 | P23-09 | unit | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement | Test Type | Automated Command                                               | File Exists | Status     |
+| -------- | ---- | ---- | ----------- | --------- | --------------------------------------------------------------- | ----------- | ---------- |
+| 23-01-01 | 01   | 1    | P23-01      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial     | ⬜ pending |
+| 23-01-02 | 01   | 1    | P23-02      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial     | ⬜ pending |
+| 23-01-03 | 01   | 1    | P23-03      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial     | ⬜ pending |
+| 23-01-04 | 01   | 1    | P23-04      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No          | ⬜ pending |
+| 23-01-05 | 01   | 1    | P23-05      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No          | ⬜ pending |
+| 23-02-01 | 02   | 1    | P23-06      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | No          | ⬜ pending |
+| 23-02-02 | 02   | 1    | P23-07      | unit      | `npx vitest run src/__tests__/ThreatClusterDetail.test.tsx -x`  | No          | ⬜ pending |
+| 23-02-03 | 02   | 1    | P23-08      | unit      | `npx vitest run src/__tests__/ThreatClusterDetail.test.tsx -x`  | No          | ⬜ pending |
+| 23-02-04 | 02   | 1    | P23-09      | unit      | `npx vitest run src/__tests__/ThreatHeatmapOverlay.test.tsx -x` | Partial     | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -65,11 +65,11 @@ created: 2026-04-02
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Military thermal palette looks correct visually | P23-01 | Visual rendering judgment | Toggle threat layer, verify dark blue/purple → yellow → orange → red gradient |
-| P90 normalization makes quieter areas visible | P23-05 | Visual perception | Compare Iran interior vs Syria border — both should have visible color variation |
-| Cluster click opens detail panel with event list | P23-07 | Full interaction flow | Click a cluster hotspot, verify detail panel opens with scrollable event cards |
+| Behavior                                         | Requirement | Why Manual                | Test Instructions                                                                |
+| ------------------------------------------------ | ----------- | ------------------------- | -------------------------------------------------------------------------------- |
+| Military thermal palette looks correct visually  | P23-01      | Visual rendering judgment | Toggle threat layer, verify dark blue/purple → yellow → orange → red gradient    |
+| P90 normalization makes quieter areas visible    | P23-05      | Visual perception         | Compare Iran interior vs Syria border — both should have visible color variation |
+| Cluster click opens detail panel with event list | P23-07      | Full interaction flow     | Click a cluster hotspot, verify detail panel opens with scrollable event cards   |
 
 ---
 

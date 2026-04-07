@@ -66,19 +66,19 @@ After CAMEO classification, cross-check the assigned type against the Goldstein 
 
 Expected Goldstein ceilings per ConflictEventType:
 
-| Type | Ceiling | Downgrade Target |
-|------|---------|-----------------|
-| `mass_violence` | -7 | `assault` |
-| `wmd` | -7 | `assault` |
-| `airstrike` | -5 | `shelling` |
-| `bombing` | -5 | `shelling` |
-| `ground_combat` | -4 | `assault` |
-| `shelling` | -4 | `assault` |
-| `assassination` | -3 | `assault` |
-| `abduction` | -3 | `assault` |
-| `assault` | -1 | (no downgrade — already lowest) |
-| `blockade` | -1 | `assault` |
-| `ceasefire_violation` | -1 | `assault` |
+| Type                  | Ceiling | Downgrade Target                |
+| --------------------- | ------- | ------------------------------- |
+| `mass_violence`       | -7      | `assault`                       |
+| `wmd`                 | -7      | `assault`                       |
+| `airstrike`           | -5      | `shelling`                      |
+| `bombing`             | -5      | `shelling`                      |
+| `ground_combat`       | -4      | `assault`                       |
+| `shelling`            | -4      | `assault`                       |
+| `assassination`       | -3      | `assault`                       |
+| `abduction`           | -3      | `assault`                       |
+| `assault`             | -1      | (no downgrade — already lowest) |
+| `blockade`            | -1      | `assault`                       |
+| `ceasefire_violation` | -1      | `assault`                       |
 
 If an event's Goldstein score exceeds its type's ceiling by more than 3 points, reclassify to the downgrade target.
 
@@ -88,13 +88,13 @@ New module `server/lib/eventScoring.ts` exports `computeEventConfidence()`.
 
 #### Signals and weights
 
-| Signal | Weight | Logic |
-|--------|--------|-------|
-| Media coverage | 0.30 | `log2((numMentions ?? 1) + 1) / log2(50)` clamped to 1.0 |
-| Source diversity | 0.20 | `log2((numSources ?? 1) + 1) / log2(15)` clamped to 1.0 |
-| Actor specificity | 0.20 | Both actor **names** non-empty = 1.0, one non-empty = 0.5, both empty = 0.0 |
-| Geo precision | 0.15 | `'precise'` = 1.0, `'centroid'` = 0.3 |
-| Goldstein consistency | 0.15 | 1.0 if within expected range; linear decay outside; 0.5 if Goldstein = 0 or positive (unknown) |
+| Signal                | Weight | Logic                                                                                          |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| Media coverage        | 0.30   | `log2((numMentions ?? 1) + 1) / log2(50)` clamped to 1.0                                       |
+| Source diversity      | 0.20   | `log2((numSources ?? 1) + 1) / log2(15)` clamped to 1.0                                        |
+| Actor specificity     | 0.20   | Both actor **names** non-empty = 1.0, one non-empty = 0.5, both empty = 0.0                    |
+| Geo precision         | 0.15   | `'precise'` = 1.0, `'centroid'` = 0.3                                                          |
+| Goldstein consistency | 0.15   | 1.0 if within expected range; linear decay outside; 0.5 if Goldstein = 0 or positive (unknown) |
 
 - `undefined` numMentions/numSources default to 1 (single source assumed), producing a low but non-NaN contribution.
 - Actor specificity checks Actor1Name/Actor2Name (columns 6/16), not country codes.
@@ -118,6 +118,7 @@ confidence?: number  // 0-1 composite score
 ```
 
 Optional because:
+
 - Existing cached events in Redis (`events:gdelt`) lack these fields — they'll naturally get replaced as fresh events come in, but during the transition window old and new events coexist.
 - Client code should treat missing fields as "unscored" (no special handling needed this phase).
 
@@ -126,17 +127,12 @@ Optional because:
 Split `parseAndFilter` into a two-phase pipeline to resolve the normalization timing issue:
 
 **Phase A — Raw row filtering (operates on `string[]` columns):**
+
 1. Existing filters (root code, country code, actor presence, lat/lng validity)
 2. **Geo cross-validation (1a)** — discard misplaced events
 3. Existing deduplication (date + EventCode + lat/lng, highest mentions wins)
 
-**Phase B — Normalize and score (operates on `ConflictEventEntity`):**
-4. `normalizeGdeltEvent()` — creates entity objects from surviving rows
-5. **CAMEO classification (2a)** — expanded mapping (already runs inside normalizeGdeltEvent)
-6. **Goldstein sanity check (2c)** — reclassify outliers on entity objects
-7. **Centroid detection (1c)** — set `geoPrecision` on entity
-8. **Confidence scoring (3a)** — compute and attach `confidence`
-9. **Threshold filter** — discard below configurable threshold
+**Phase B — Normalize and score (operates on `ConflictEventEntity`):** 4. `normalizeGdeltEvent()` — creates entity objects from surviving rows 5. **CAMEO classification (2a)** — expanded mapping (already runs inside normalizeGdeltEvent) 6. **Goldstein sanity check (2c)** — reclassify outliers on entity objects 7. **Centroid detection (1c)** — set `geoPrecision` on entity 8. **Confidence scoring (3a)** — compute and attach `confidence` 9. **Threshold filter** — discard below configurable threshold
 
 This preserves the existing dedup structure (operates on raw columns before normalization) while allowing the scoring pipeline to write directly to entity objects.
 

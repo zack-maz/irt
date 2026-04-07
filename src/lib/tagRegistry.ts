@@ -51,7 +51,7 @@ function countValues(values: string[]): TagValue[] {
 
 /** Return static enum values with count 0 */
 function staticValues(values: string[]): TagValue[] {
-  return values.map(value => ({ value, count: 0 }));
+  return values.map((value) => ({ value, count: 0 }));
 }
 
 // --- Value Extractors ---
@@ -241,7 +241,8 @@ export const TAG_REGISTRY: Record<string, TagDefinition> = {
   speed: {
     prefix: 'speed',
     label: 'Speed',
-    description: 'Filter by ground speed (m/s for flights, knots for ships, supports >/< operators)',
+    description:
+      'Filter by ground speed (m/s for flights, knots for ships, supports >/< operators)',
     color: 'text-yellow-400',
     entityTypes: ['flight', 'ship'],
     examples: ['speed:>200', 'speed:<50'],

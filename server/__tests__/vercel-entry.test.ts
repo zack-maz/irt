@@ -6,12 +6,17 @@ import type { Server } from 'node:http';
 vi.mock('../config.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../config.js')>();
   const mockCfg = {
-    port: 0, corsOrigin: '*',
+    port: 0,
+    corsOrigin: '*',
     opensky: { clientId: '', clientSecret: '' },
     aisstream: { apiKey: '' },
     acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
-    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
   };
   return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
 });
@@ -20,8 +25,14 @@ vi.mock('../config.js', async (importOriginal) => {
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../middleware/rateLimit.js', () => ({
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
   },
@@ -44,9 +55,14 @@ vi.mock('../adapters/gdelt.js', () => ({
 vi.mock('../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
 vi.mock('../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
+vi.mock('../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
 vi.mock('../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })) }));
+vi.mock('../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
+}));
 vi.mock('../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
 vi.mock('../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
 

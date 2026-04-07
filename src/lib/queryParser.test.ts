@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tokenize, parse, type Token, type QueryNode } from './queryParser';
+import { tokenize, parse } from './queryParser';
 
 describe('tokenize', () => {
   it('tokenizes a single TAG token', () => {

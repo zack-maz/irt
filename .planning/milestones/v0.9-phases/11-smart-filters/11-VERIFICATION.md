@@ -6,17 +6,17 @@ score: 5/5 success criteria verified
 re_verification: false
 human_verification:
   - test: "Open filter panel, apply nationality filter (e.g., 'United States'), confirm flight count in StatusPanel decreases and yellow markers disappear for non-US flights"
-    expected: "Visible flight count drops; only US-origin flights remain on map"
-    why_human: "Live data required; filter predicate verified in tests but end-to-end map rendering needs visual confirmation"
-  - test: "Toggle Events master toggle OFF, verify Airstrikes/Ground Combat/Targeted sub-rows are visually dimmed and unclickable"
-    expected: "Sub-event toggle rows appear at 20% opacity with not-allowed cursor; clicking them has no effect"
-    why_human: "Visual opacity and cursor style require browser rendering to verify"
+    expected: 'Visible flight count drops; only US-origin flights remain on map'
+    why_human: 'Live data required; filter predicate verified in tests but end-to-end map rendering needs visual confirmation'
+  - test: 'Toggle Events master toggle OFF, verify Airstrikes/Ground Combat/Targeted sub-rows are visually dimmed and unclickable'
+    expected: 'Sub-event toggle rows appear at 20% opacity with not-allowed cursor; clicking them has no effect'
+    why_human: 'Visual opacity and cursor style require browser rendering to verify'
   - test: "Enable proximity pin: click 'Set pin', click a map location, verify blue semi-transparent circle appears at that location"
-    expected: "Crosshair cursor during pin mode; blue ScatterplotLayer circle renders at clicked coordinates with radius matching slider value"
-    why_human: "Deck.gl layer rendering requires a live WebGL context to verify visually"
+    expected: 'Crosshair cursor during pin mode; blue ScatterplotLayer circle renders at clicked coordinates with radius matching slider value'
+    why_human: 'Deck.gl layer rendering requires a live WebGL context to verify visually'
   - test: "Apply date filter '1h' preset, verify events older than 1 hour disappear from map and event count in StatusPanel decreases"
-    expected: "Events count drops or reaches 0; only events within the last 1 hour remain"
-    why_human: "Requires live GDELT event data with timestamps spanning more than 1 hour"
+    expected: 'Events count drops or reaches 0; only events within the last 1 hour remain'
+    why_human: 'Requires live GDELT event data with timestamps spanning more than 1 hour'
 ---
 
 # Phase 11: Smart Filters Verification Report
@@ -30,13 +30,13 @@ human_verification:
 
 ### Observable Truths (from ROADMAP.md Success Criteria)
 
-| # | Truth | Status | Evidence |
-|---|-------|--------|----------|
-| 1 | Filter controls exist for nationality, speed range, altitude range, proximity radius, and date range | VERIFIED | `FilterPanelSlot.tsx` renders all 5 sections: CountryFilter, RangeSlider (speed/kn), RangeSlider (altitude/ft), ProximityFilter, DateRangeFilter |
-| 2 | Applying filters immediately updates which entities are visible on the map | VERIFIED | `useEntityLayers.ts` consumes `useFilteredEntities()` not raw stores; `useFilteredEntities` runs `entityPassesFilters` via `useMemo` on every filter state change |
-| 3 | Multiple filters can be combined (AND logic) | VERIFIED | `entityPassesFilters` in `src/lib/filters.ts` applies each filter block sequentially, returning false on any failure — 41 test cases including combination scenarios, all pass |
-| 4 | Clearing all filters restores full unfiltered view | VERIFIED | `clearAll()` in filterStore resets to `DEFAULTS` object; `Clear all filters` button in FilterPanelSlot calls `clearAll()`; covered by filterStore tests |
-| 5 | Active filter state is visible to the user | VERIFIED | Badge `({activeCount})` in FilterPanelSlot header shows count when >0; SectionHeader shows arrow indicator (active) or "---" (inactive); 91-line FilterPanel test suite covers badge and header states |
+| #   | Truth                                                                                                | Status   | Evidence                                                                                                                                                                                               |
+| --- | ---------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Filter controls exist for nationality, speed range, altitude range, proximity radius, and date range | VERIFIED | `FilterPanelSlot.tsx` renders all 5 sections: CountryFilter, RangeSlider (speed/kn), RangeSlider (altitude/ft), ProximityFilter, DateRangeFilter                                                       |
+| 2   | Applying filters immediately updates which entities are visible on the map                           | VERIFIED | `useEntityLayers.ts` consumes `useFilteredEntities()` not raw stores; `useFilteredEntities` runs `entityPassesFilters` via `useMemo` on every filter state change                                      |
+| 3   | Multiple filters can be combined (AND logic)                                                         | VERIFIED | `entityPassesFilters` in `src/lib/filters.ts` applies each filter block sequentially, returning false on any failure — 41 test cases including combination scenarios, all pass                         |
+| 4   | Clearing all filters restores full unfiltered view                                                   | VERIFIED | `clearAll()` in filterStore resets to `DEFAULTS` object; `Clear all filters` button in FilterPanelSlot calls `clearAll()`; covered by filterStore tests                                                |
+| 5   | Active filter state is visible to the user                                                           | VERIFIED | Badge `({activeCount})` in FilterPanelSlot header shows count when >0; SectionHeader shows arrow indicator (active) or "---" (inactive); 91-line FilterPanel test suite covers badge and header states |
 
 **Score:** 5/5 success criteria verified
 
@@ -44,52 +44,52 @@ human_verification:
 
 #### Plan 01 Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `src/stores/filterStore.ts` | Zustand filter state store | VERIFIED | 112 lines; exports `useFilterStore`, `FilterState`, `ProximityPin`, `FilterKey`; full curried `create<FilterState>()()` pattern; no localStorage persistence |
-| `src/lib/geo.ts` | Haversine distance utility | VERIFIED | 17 lines; exports `haversineKm`; standard R_KM=6371 formula with sin/cos/atan2 |
-| `src/lib/filters.ts` | Pure entity filter predicate | VERIFIED | 89 lines; exports `entityPassesFilters`; handles all 5 filter types with correct cross-type AND logic |
-| `src/types/ui.ts` | UIState with isFiltersCollapsed + toggleFilters | VERIFIED | Line 67: `isFiltersCollapsed: boolean`; line 83: `toggleFilters: () => void` |
+| Artifact                    | Expected                                        | Status   | Details                                                                                                                                                      |
+| --------------------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/stores/filterStore.ts` | Zustand filter state store                      | VERIFIED | 112 lines; exports `useFilterStore`, `FilterState`, `ProximityPin`, `FilterKey`; full curried `create<FilterState>()()` pattern; no localStorage persistence |
+| `src/lib/geo.ts`            | Haversine distance utility                      | VERIFIED | 17 lines; exports `haversineKm`; standard R_KM=6371 formula with sin/cos/atan2                                                                               |
+| `src/lib/filters.ts`        | Pure entity filter predicate                    | VERIFIED | 89 lines; exports `entityPassesFilters`; handles all 5 filter types with correct cross-type AND logic                                                        |
+| `src/types/ui.ts`           | UIState with isFiltersCollapsed + toggleFilters | VERIFIED | Line 67: `isFiltersCollapsed: boolean`; line 83: `toggleFilters: () => void`                                                                                 |
 
 #### Plan 02 Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `src/hooks/useFilteredEntities.ts` | Hook returning filtered flight/ship/event arrays | VERIFIED | 54 lines; imports all three raw stores + filterStore + entityPassesFilters; uses `useShallow` for filter selector; returns `{ flights, ships, events }` |
-| `src/hooks/useEntityLayers.ts` | Refactored entity layers consuming filtered data | VERIFIED | Line 5 imports `useFilteredEntities`; line 62 consumes it; proximity circle ScatterplotLayer at index 0 |
-| `src/components/ui/StatusPanel.tsx` | StatusPanel with filter-aware counts | VERIFIED | Line 6 imports `useFilteredEntities`; line 54 destructures `{ flights, ships: filteredShips, events }`; counts use filtered arrays |
+| Artifact                            | Expected                                         | Status   | Details                                                                                                                                                 |
+| ----------------------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/hooks/useFilteredEntities.ts`  | Hook returning filtered flight/ship/event arrays | VERIFIED | 54 lines; imports all three raw stores + filterStore + entityPassesFilters; uses `useShallow` for filter selector; returns `{ flights, ships, events }` |
+| `src/hooks/useEntityLayers.ts`      | Refactored entity layers consuming filtered data | VERIFIED | Line 5 imports `useFilteredEntities`; line 62 consumes it; proximity circle ScatterplotLayer at index 0                                                 |
+| `src/components/ui/StatusPanel.tsx` | StatusPanel with filter-aware counts             | VERIFIED | Line 6 imports `useFilteredEntities`; line 54 destructures `{ flights, ships: filteredShips, events }`; counts use filtered arrays                      |
 
 #### Plan 03 Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `src/components/layout/FilterPanelSlot.tsx` | Main filter panel with 5 filter sections | VERIFIED | 207 lines; all 5 sections: Country, Speed, Altitude, Proximity, Date Range; SectionHeader with arrow/dash; badge; Clear all |
-| `src/components/filter/RangeSlider.tsx` | Reusable dual-thumb range slider | VERIFIED | 124 lines; two overlaid `<input type="range">` with CSS pointer-events trick; dual thumb isolation; value display |
-| `src/components/filter/CountryFilter.tsx` | Country text input with autocomplete and chips | VERIFIED | 84 lines; `<datalist>` with availableCountries; Enter key handler; chip display with remove button |
-| `src/components/filter/ProximityFilter.tsx` | Proximity pin and radius controls | VERIFIED | 115 lines; Set pin / Click map... states; pin coordinate display; radius slider with 5 tick marks |
-| `src/components/filter/DateRangeFilter.tsx` | Date range filter with relative presets | VERIFIED | 62 lines; PRESETS array (1h, 6h, 24h, 7d, All); active preset highlighted; "Events only" label |
-| `src/components/layout/AppShell.tsx` | AppShell with FilterPanelSlot below LayerTogglesSlot | VERIFIED | Line 33: `<FilterPanelSlot />` after `<LayerTogglesSlot />`; import at line 4 |
-| `src/components/map/BaseMap.tsx` | BaseMap with pin placement click handler | VERIFIED | Lines 57-59: filterStore subscriptions; line 177: crosshair cursor; lines 180-185: onClick pin placement |
+| Artifact                                    | Expected                                             | Status   | Details                                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/components/layout/FilterPanelSlot.tsx` | Main filter panel with 5 filter sections             | VERIFIED | 207 lines; all 5 sections: Country, Speed, Altitude, Proximity, Date Range; SectionHeader with arrow/dash; badge; Clear all |
+| `src/components/filter/RangeSlider.tsx`     | Reusable dual-thumb range slider                     | VERIFIED | 124 lines; two overlaid `<input type="range">` with CSS pointer-events trick; dual thumb isolation; value display           |
+| `src/components/filter/CountryFilter.tsx`   | Country text input with autocomplete and chips       | VERIFIED | 84 lines; `<datalist>` with availableCountries; Enter key handler; chip display with remove button                          |
+| `src/components/filter/ProximityFilter.tsx` | Proximity pin and radius controls                    | VERIFIED | 115 lines; Set pin / Click map... states; pin coordinate display; radius slider with 5 tick marks                           |
+| `src/components/filter/DateRangeFilter.tsx` | Date range filter with relative presets              | VERIFIED | 62 lines; PRESETS array (1h, 6h, 24h, 7d, All); active preset highlighted; "Events only" label                              |
+| `src/components/layout/AppShell.tsx`        | AppShell with FilterPanelSlot below LayerTogglesSlot | VERIFIED | Line 33: `<FilterPanelSlot />` after `<LayerTogglesSlot />`; import at line 4                                               |
+| `src/components/map/BaseMap.tsx`            | BaseMap with pin placement click handler             | VERIFIED | Lines 57-59: filterStore subscriptions; line 177: crosshair cursor; lines 180-185: onClick pin placement                    |
 
 ### Key Link Verification
 
-| From | To | Via | Status | Evidence |
-|------|----|-----|--------|----------|
-| `src/lib/filters.ts` | `src/stores/filterStore.ts` | imports FilterState type | WIRED | Line 2: `import type { FilterState } from '@/stores/filterStore'` |
-| `src/lib/filters.ts` | `src/lib/geo.ts` | imports haversineKm for proximity | WIRED | Line 4: `import { haversineKm } from '@/lib/geo'` |
-| `src/lib/filters.ts` | `src/types/ui.ts` | imports isConflictEventType | WIRED | Line 3: `import { isConflictEventType } from '@/types/ui'` |
-| `src/hooks/useFilteredEntities.ts` | `src/lib/filters.ts` | imports entityPassesFilters | WIRED | Line 7: `import { entityPassesFilters } from '@/lib/filters'` |
-| `src/hooks/useEntityLayers.ts` | `src/hooks/useFilteredEntities.ts` | imports useFilteredEntities | WIRED | Line 5: `import { useFilteredEntities } from '@/hooks/useFilteredEntities'` |
-| `src/components/ui/StatusPanel.tsx` | `src/hooks/useFilteredEntities.ts` | imports useFilteredEntities | WIRED | Line 6: `import { useFilteredEntities } from '@/hooks/useFilteredEntities'` |
-| `src/components/layout/FilterPanelSlot.tsx` | `src/stores/filterStore.ts` | useFilterStore for all filter state | WIRED | Line 3: `import { useFilterStore } from '@/stores/filterStore'` |
-| `src/components/map/BaseMap.tsx` | `src/stores/filterStore.ts` | isSettingPin mode and setProximityPin | WIRED | Lines 57-59: filterStore subscriptions; line 81: DeckGLOverlay guard; lines 181-183: pin placement |
-| `src/components/layout/AppShell.tsx` | `src/components/layout/FilterPanelSlot.tsx` | FilterPanelSlot rendered below LayerTogglesSlot | WIRED | Line 4 import; line 33 render after LayerTogglesSlot |
+| From                                        | To                                          | Via                                             | Status | Evidence                                                                                           |
+| ------------------------------------------- | ------------------------------------------- | ----------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| `src/lib/filters.ts`                        | `src/stores/filterStore.ts`                 | imports FilterState type                        | WIRED  | Line 2: `import type { FilterState } from '@/stores/filterStore'`                                  |
+| `src/lib/filters.ts`                        | `src/lib/geo.ts`                            | imports haversineKm for proximity               | WIRED  | Line 4: `import { haversineKm } from '@/lib/geo'`                                                  |
+| `src/lib/filters.ts`                        | `src/types/ui.ts`                           | imports isConflictEventType                     | WIRED  | Line 3: `import { isConflictEventType } from '@/types/ui'`                                         |
+| `src/hooks/useFilteredEntities.ts`          | `src/lib/filters.ts`                        | imports entityPassesFilters                     | WIRED  | Line 7: `import { entityPassesFilters } from '@/lib/filters'`                                      |
+| `src/hooks/useEntityLayers.ts`              | `src/hooks/useFilteredEntities.ts`          | imports useFilteredEntities                     | WIRED  | Line 5: `import { useFilteredEntities } from '@/hooks/useFilteredEntities'`                        |
+| `src/components/ui/StatusPanel.tsx`         | `src/hooks/useFilteredEntities.ts`          | imports useFilteredEntities                     | WIRED  | Line 6: `import { useFilteredEntities } from '@/hooks/useFilteredEntities'`                        |
+| `src/components/layout/FilterPanelSlot.tsx` | `src/stores/filterStore.ts`                 | useFilterStore for all filter state             | WIRED  | Line 3: `import { useFilterStore } from '@/stores/filterStore'`                                    |
+| `src/components/map/BaseMap.tsx`            | `src/stores/filterStore.ts`                 | isSettingPin mode and setProximityPin           | WIRED  | Lines 57-59: filterStore subscriptions; line 81: DeckGLOverlay guard; lines 181-183: pin placement |
+| `src/components/layout/AppShell.tsx`        | `src/components/layout/FilterPanelSlot.tsx` | FilterPanelSlot rendered below LayerTogglesSlot | WIRED  | Line 4 import; line 33 render after LayerTogglesSlot                                               |
 
 ### Requirements Coverage
 
-| Requirement | Source Plan | Description | Status | Evidence |
-|-------------|------------|-------------|--------|----------|
-| CTRL-03 | 11-01, 11-02, 11-03 | Smart filters by nationality, speed, altitude, proximity, and date range | SATISFIED | FilterPanelSlot renders all 5 filter dimensions; entityPassesFilters applies them as AND predicates; useFilteredEntities feeds filtered arrays to all rendering consumers; 463 tests passing |
+| Requirement | Source Plan         | Description                                                              | Status    | Evidence                                                                                                                                                                                     |
+| ----------- | ------------------- | ------------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CTRL-03     | 11-01, 11-02, 11-03 | Smart filters by nationality, speed, altitude, proximity, and date range | SATISFIED | FilterPanelSlot renders all 5 filter dimensions; entityPassesFilters applies them as AND predicates; useFilteredEntities feeds filtered arrays to all rendering consumers; 463 tests passing |
 
 **Note:** REQUIREMENTS.md traceability table lists `CTRL-03 | Phase 9 | Complete` — this phase number is stale (Phase 9 was "Layer Controls & News Toggle"; CTRL-03 was re-assigned to Phase 11 when the roadmap was structured). The ROADMAP.md is the authoritative source and correctly maps CTRL-03 to Phase 11. The requirement is marked [x] complete in the requirements list. This is a documentation inconsistency only — no implementation gap.
 

@@ -64,8 +64,14 @@ const mockFetchAllRssFeeds = vi.fn(async (): Promise<NewsArticle[]> => []);
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
   },
@@ -75,12 +81,17 @@ vi.mock('../../middleware/rateLimit.js', () => ({
 vi.mock('../../config.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../config.js')>();
   const mockCfg = {
-    port: 0, corsOrigin: '*',
+    port: 0,
+    corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
-    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
   };
   return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
 });
@@ -119,7 +130,11 @@ vi.mock('../../adapters/rss.js', () => ({
     { url: 'https://www.aljazeera.com/rss', name: 'Al Jazeera', country: 'Qatar' },
     { url: 'https://www.tehrantimes.com/rss', name: 'Tehran Times', country: 'Iran' },
     { url: 'https://www.timesofisrael.com/feed/', name: 'Times of Israel', country: 'Israel' },
-    { url: 'https://www.middleeasteye.net/rss', name: 'Middle East Eye', country: 'United Kingdom' },
+    {
+      url: 'https://www.middleeasteye.net/rss',
+      name: 'Middle East Eye',
+      country: 'United Kingdom',
+    },
   ],
 }));
 
@@ -130,8 +145,12 @@ vi.mock('../../adapters/yahoo-finance.js', () => ({
 vi.mock('../../adapters/nominatim.js', () => ({
   reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
 }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis cache module with in-memory store
 const mockRedisGet = vi.fn(async (key: string) => rawRedisStore.get(key) ?? null);
@@ -139,15 +158,19 @@ const mockRedisSet = vi.fn(async (key: string, value: unknown, _opts?: unknown) 
   rawRedisStore.set(key, value);
 });
 
-const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-});
-const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-  redisStore.set(key, { data, fetchedAt: Date.now() });
-});
+const _mockCacheGet = vi.fn(
+  async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  },
+);
+const _mockCacheSet = vi.fn(
+  async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  },
+);
 vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: (...args: unknown[]) => mockRedisGet(...(args as [string])),
@@ -289,8 +312,8 @@ describe('News Route (/api/news)', () => {
 
     expect(res.ok).toBe(true);
     // Old article (8 days) should be pruned, only recent article remains
-    const allArticleUrls = body.data.flatMap(
-      (c: NewsCluster) => c.articles.map((a: NewsArticle) => a.url),
+    const allArticleUrls = body.data.flatMap((c: NewsCluster) =>
+      c.articles.map((a: NewsArticle) => a.url),
     );
     expect(allArticleUrls).not.toContain('https://example.com/old');
   });

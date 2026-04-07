@@ -14,11 +14,11 @@ export type { WaterStressIndicators };
 
 /** 5-stop blue gradient: deep navy → navy → blue → sky → light blue */
 export const STRESS_COLORS: [number, number, number][] = [
-  [10, 20, 60],      // score 1: deep navy — extreme stress
-  [20, 50, 120],     // score 3: navy
-  [40, 100, 180],    // score 5: blue
-  [80, 160, 220],    // score 7: sky blue
-  [140, 210, 250],   // score 10: light blue — healthy
+  [10, 20, 60], // score 1: deep navy — extreme stress
+  [20, 50, 120], // score 3: navy
+  [40, 100, 180], // score 5: blue
+  [80, 160, 220], // score 7: sky blue
+  [140, 210, 250], // score 10: light blue — healthy
 ];
 
 // ---------- Color Interpolation ----------
@@ -28,10 +28,7 @@ export const STRESS_COLORS: [number, number, number][] = [
  * Linearly interpolates across the 5 color stops.
  * Clamps input to [0, 1].
  */
-export function stressToRGBA(
-  health: number,
-  alpha = 200,
-): [number, number, number, number] {
+export function stressToRGBA(health: number, alpha = 200): [number, number, number, number] {
   const t = Math.max(0, Math.min(1, health));
   const segment = t * (STRESS_COLORS.length - 1);
   const i = Math.floor(segment);
@@ -59,18 +56,12 @@ export function stressToRGBA(
  * @param precipAnomalyRatio - Ratio of actual/normal precipitation (<1 = drier, >1 = wetter)
  * @returns 0-1 health score (0=worst, 1=best)
  */
-export function compositeHealth(
-  bwsScore: number,
-  precipAnomalyRatio: number,
-): number {
+export function compositeHealth(bwsScore: number, precipAnomalyRatio: number): number {
   // Sqrt curve: spreads distribution so high-stress facilities don't all pile up at 0
   const baselineHealth = Math.sqrt(Math.max(0, 1 - bwsScore / 5));
 
   // Precipitation modifier: wetter = healthier, drier = worse
-  const precipModifier = Math.max(
-    -0.15,
-    Math.min(0.15, (precipAnomalyRatio - 1.0) * 0.3),
-  );
+  const precipModifier = Math.max(-0.15, Math.min(0.15, (precipAnomalyRatio - 1.0) * 0.3));
 
   return Math.max(0, Math.min(1, baselineHealth + precipModifier));
 }

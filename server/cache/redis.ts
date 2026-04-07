@@ -44,11 +44,7 @@ export async function cacheGet<T>(
  * The hard TTL should be generously larger than the logical TTL so that
  * stale-but-servable data remains available for upstream error fallback.
  */
-export async function cacheSet<T>(
-  key: string,
-  data: T,
-  redisTtlSec: number,
-): Promise<void> {
+export async function cacheSet<T>(key: string, data: T, redisTtlSec: number): Promise<void> {
   const entry: CacheEntry<T> = { data, fetchedAt: Date.now() };
   await redis.set(key, entry, { ex: redisTtlSec });
 }
@@ -97,11 +93,7 @@ export async function cacheGetSafe<T>(
  *
  * Always writes to memCache regardless of Redis success.
  */
-export async function cacheSetSafe<T>(
-  key: string,
-  data: T,
-  redisTtlSec: number,
-): Promise<void> {
+export async function cacheSetSafe<T>(key: string, data: T, redisTtlSec: number): Promise<void> {
   // Always update memCache first
   memCache.set(key, { data, fetchedAt: Date.now() });
   try {

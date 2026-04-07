@@ -29,9 +29,7 @@ export function computeProximityAlerts(
   sites: SiteEntity[],
 ): ProximityAlert[] {
   // Filter to unidentified airborne flights only
-  const unidentified = flights.filter(
-    (f) => f.data.unidentified === true && !f.data.onGround,
-  );
+  const unidentified = flights.filter((f) => f.data.unidentified === true && !f.data.onGround);
   if (unidentified.length === 0 || sites.length === 0) return [];
 
   // For each site, find the closest unidentified flight within threshold
@@ -68,9 +66,7 @@ export function computeProximityAlerts(
   }
 
   // Sort by distance ascending (most urgent first)
-  return Array.from(alertsBySite.values()).sort(
-    (a, b) => a.distanceKm - b.distanceKm,
-  );
+  return Array.from(alertsBySite.values()).sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 /** Convert water facilities to site-like shape for proximity check */

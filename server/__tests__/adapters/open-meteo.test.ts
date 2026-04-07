@@ -110,9 +110,7 @@ describe('Open-Meteo Adapter', () => {
 
   it('throws on non-OK response from Open-Meteo', async () => {
     const mockFetch = vi.mocked(globalThis.fetch);
-    mockFetch.mockResolvedValueOnce(
-      new Response('Server Error', { status: 500 }),
-    );
+    mockFetch.mockResolvedValueOnce(new Response('Server Error', { status: 500 }));
 
     await expect(fetchWeather()).rejects.toThrow();
   });

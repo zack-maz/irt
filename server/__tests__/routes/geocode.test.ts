@@ -23,8 +23,14 @@ const redisStore = new Map<string, CacheEntry<unknown>>();
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
   },
@@ -34,12 +40,17 @@ vi.mock('../../middleware/rateLimit.js', () => ({
 vi.mock('../../config.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../config.js')>();
   const mockCfg = {
-    port: 0, corsOrigin: '*',
+    port: 0,
+    corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7, eventConfidenceThreshold: 0.35, eventMinSources: 2,
-    eventCentroidPenalty: 0.7, eventExcludedCameo: ['180', '192'], bellingcatCorroborationBoost: 0.2,
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
   };
   return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
 });
@@ -75,23 +86,23 @@ vi.mock('../../adapters/open-meteo.js', () => ({
 vi.mock('../../adapters/nominatim.js', () => ({
   reverseGeocode: (...args: unknown[]) => mockReverseGeocode(...args),
 }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis cache module with in-memory store
-const _mockCacheGetSafe = vi.fn(
-  async <T>(key: string, logicalTtlMs: number) => {
-    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-    if (!entry) return null;
-    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-  },
-);
-const _mockCacheSetSafe = vi.fn(
-  async <T>(key: string, data: T, _redisTtlSec: number) => {
-    redisStore.set(key, { data, fetchedAt: Date.now() });
-  },
-);
+const _mockCacheGetSafe = vi.fn(async <T>(key: string, logicalTtlMs: number) => {
+  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+  if (!entry) return null;
+  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+});
+const _mockCacheSetSafe = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number) => {
+  redisStore.set(key, { data, fetchedAt: Date.now() });
+});
 vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: vi.fn(async () => null),
@@ -194,10 +205,7 @@ describe('Geocode Route (/api/geocode)', () => {
     expect(res.ok).toBe(true);
 
     // Verify cache was checked with quantized key
-    expect(_mockCacheGetSafe).toHaveBeenCalledWith(
-      'geocode:33.99,44.12',
-      expect.any(Number),
-    );
+    expect(_mockCacheGetSafe).toHaveBeenCalledWith('geocode:33.99,44.12', expect.any(Number));
 
     // Verify Nominatim was called with quantized coords
     expect(mockReverseGeocode).toHaveBeenCalledWith(33.99, 44.12);

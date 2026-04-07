@@ -117,10 +117,24 @@ export function BaseMap() {
   const searchMatchedIds = useSearchStore((s) => s.matchedIds);
 
   const [hover, setHover] = useState<HoverState | null>(null);
-  const [weatherHover, setWeatherHover] = useState<{ point: WeatherGridPoint; x: number; y: number } | null>(null);
-  const [threatHover, setThreatHover] = useState<{ zone: ThreatZoneData; x: number; y: number } | null>(null);
-  const [ethnicHover, setEthnicHover] = useState<{ groups: string[]; x: number; y: number } | null>(null);
-  const [waterHover, setWaterHover] = useState<{ facility: WaterFacility; x: number; y: number } | null>(null);
+  const [weatherHover, setWeatherHover] = useState<{
+    point: WeatherGridPoint;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [threatHover, setThreatHover] = useState<{
+    zone: ThreatZoneData;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [ethnicHover, setEthnicHover] = useState<{ groups: string[]; x: number; y: number } | null>(
+    null,
+  );
+  const [waterHover, setWaterHover] = useState<{
+    facility: WaterFacility;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const handleDeckHover = useCallback(
     (info: PickingInfo) => {
@@ -153,7 +167,8 @@ export function BaseMap() {
         (info.layer?.id === 'ethnic-zones' || info.layer?.id?.startsWith('ethnic-overlap-')) &&
         isEthnicActive
       ) {
-        const props = (info.object as { properties: { group?: string; groups?: string[] } }).properties;
+        const props = (info.object as { properties: { group?: string; groups?: string[] } })
+          .properties;
         const groups = props.groups ?? (props.group ? [props.group] : []);
         setEthnicHover({ groups, x: info.x, y: info.y });
         setHover(null);
@@ -232,7 +247,10 @@ export function BaseMap() {
         // Fly to fit the entire cluster bounding box
         const { minLat, maxLat, minLng, maxLng } = cluster.boundingBox;
         mapRef.current?.fitBounds(
-          [[minLng, minLat], [maxLng, maxLat]],
+          [
+            [minLng, minLat],
+            [maxLng, maxLat],
+          ],
           { padding: 80, duration: 1500, maxZoom: 10 },
         );
         return;
@@ -254,7 +272,14 @@ export function BaseMap() {
         setFlyToTarget({ lng: entity.lng, lat: entity.lat, zoom: 10 });
       }
     },
-    [selectedEntityId, selectEntity, setSelectedCluster, openDetailPanel, closeDetailPanel, setFlyToTarget],
+    [
+      selectedEntityId,
+      selectEntity,
+      setSelectedCluster,
+      openDetailPanel,
+      closeDetailPanel,
+      setFlyToTarget,
+    ],
   );
 
   const handleLoad = useCallback(
@@ -313,14 +338,11 @@ export function BaseMap() {
 
   const rawTooltipEntity = hover?.entity ?? null;
   // Suppress tooltip for non-matching entities during search filter
-  const tooltipEntity = rawTooltipEntity && (
-    isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id)
-  )
-    ? null
-    : rawTooltipEntity;
-  const tooltipPos = hover
-    ? { x: hover.x, y: hover.y }
-    : { x: 0, y: 0 };
+  const tooltipEntity =
+    rawTooltipEntity && isSearchFilterActive && !searchMatchedIds.has(rawTooltipEntity.id)
+      ? null
+      : rawTooltipEntity;
+  const tooltipPos = hover ? { x: hover.x, y: hover.y } : { x: 0, y: 0 };
 
   return (
     <div className="relative h-full w-full">
@@ -375,9 +397,29 @@ export function BaseMap() {
         />
         <ScaleControl unit="metric" position="bottom-right" />
         <DeckGLOverlay
-          layers={isBelowCrossover
-            ? [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...conflictLayers, ...threatLayers, ...entityLayers, ...facilityLayers]
-            : [...politicalLayers, ...ethnicLayers, ...riverLayers, ...weatherLayers, ...threatLayers, ...conflictLayers, ...entityLayers, ...facilityLayers]}
+          layers={
+            isBelowCrossover
+              ? [
+                  ...politicalLayers,
+                  ...ethnicLayers,
+                  ...riverLayers,
+                  ...weatherLayers,
+                  ...conflictLayers,
+                  ...threatLayers,
+                  ...entityLayers,
+                  ...facilityLayers,
+                ]
+              : [
+                  ...politicalLayers,
+                  ...ethnicLayers,
+                  ...riverLayers,
+                  ...weatherLayers,
+                  ...threatLayers,
+                  ...conflictLayers,
+                  ...entityLayers,
+                  ...facilityLayers,
+                ]
+          }
           onHover={handleDeckHover}
           onClick={handleDeckClick}
           pickingRadius={12}
@@ -392,26 +434,12 @@ export function BaseMap() {
         <UtcClock />
         <CoordinateReadout />
       </div>
-      {tooltipEntity && (
-        <EntityTooltip
-          entity={tooltipEntity}
-          x={tooltipPos.x}
-          y={tooltipPos.y}
-        />
-      )}
+      {tooltipEntity && <EntityTooltip entity={tooltipEntity} x={tooltipPos.x} y={tooltipPos.y} />}
       {!tooltipEntity && threatHover && (
-        <ThreatTooltip
-          zone={threatHover.zone}
-          x={threatHover.x}
-          y={threatHover.y}
-        />
+        <ThreatTooltip zone={threatHover.zone} x={threatHover.x} y={threatHover.y} />
       )}
       {!tooltipEntity && !threatHover && ethnicHover && (
-        <EthnicTooltip
-          groups={ethnicHover.groups}
-          x={ethnicHover.x}
-          y={ethnicHover.y}
-        />
+        <EthnicTooltip groups={ethnicHover.groups} x={ethnicHover.x} y={ethnicHover.y} />
       )}
       {!tooltipEntity && !threatHover && !ethnicHover && waterHover && (
         <div
@@ -419,16 +447,15 @@ export function BaseMap() {
           style={{ left: waterHover.x + 12, top: waterHover.y - 12 }}
         >
           <div className="rounded bg-surface-overlay px-2 py-1.5 backdrop-blur-sm shadow-lg border border-border/50">
-            <WaterTooltip facility={waterHover.facility} isAttacked={waterDestroyedIds.has(waterHover.facility.id)} />
+            <WaterTooltip
+              facility={waterHover.facility}
+              isAttacked={waterDestroyedIds.has(waterHover.facility.id)}
+            />
           </div>
         </div>
       )}
       {!tooltipEntity && !threatHover && !ethnicHover && !waterHover && weatherHover && (
-        <WeatherTooltip
-          point={weatherHover.point}
-          x={weatherHover.x}
-          y={weatherHover.y}
-        />
+        <WeatherTooltip point={weatherHover.point} x={weatherHover.x} y={weatherHover.y} />
       )}
     </div>
   );

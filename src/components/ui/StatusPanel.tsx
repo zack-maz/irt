@@ -34,9 +34,7 @@ function FeedLine({ status, count, label }: { status: FeedStatus; count: number;
         data-testid={`status-dot-${label}`}
         className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT_CLASS[status]}`}
       />
-      <span className="text-text-secondary tabular-nums">
-        {isLoading ? '\u2014' : count}
-      </span>
+      <span className="text-text-secondary tabular-nums">{isLoading ? '\u2014' : count}</span>
       <span className="text-text-muted">{label}</span>
     </div>
   );
@@ -77,7 +75,10 @@ export function StatusPanel() {
       </button>
       {!isCollapsed && (
         <div className="mt-2 flex flex-col gap-1">
-          <span data-testid="utc-clock" className="text-xs text-text-secondary tabular-nums tracking-wide">
+          <span
+            data-testid="utc-clock"
+            className="text-xs text-text-secondary tabular-nums tracking-wide"
+          >
             {utc}
           </span>
           {anyDegraded && (

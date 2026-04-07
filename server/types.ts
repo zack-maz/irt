@@ -133,20 +133,20 @@ export interface NewsCluster {
 export type FlightSource = 'opensky' | 'adsblol';
 
 export interface MarketQuote {
-  symbol: string;           // "BZ=F", "CL=F", "XLE", "USO", "XOM"
-  displayName: string;      // "Brent", "WTI", "XLE", "USO", "XOM"
-  price: number;            // regularMarketPrice
-  previousClose: number;    // For delta calculation
-  change: number;           // price - previousClose
-  changePercent: number;    // ((price - previousClose) / previousClose) * 100
-  currency: string;         // "USD"
-  marketOpen: boolean;      // Derived from currentTradingPeriod.regular
-  lastTradeTime: number;    // Unix ms
+  symbol: string; // "BZ=F", "CL=F", "XLE", "USO", "XOM"
+  displayName: string; // "Brent", "WTI", "XLE", "USO", "XOM"
+  price: number; // regularMarketPrice
+  previousClose: number; // For delta calculation
+  change: number; // price - previousClose
+  changePercent: number; // ((price - previousClose) / previousClose) * 100
+  currency: string; // "USD"
+  marketOpen: boolean; // Derived from currentTradingPeriod.regular
+  lastTradeTime: number; // Unix ms
   history: {
-    timestamps: number[];   // Unix ms
-    closes: number[];       // Daily close prices (nulls filtered)
-    highs: number[];        // Daily high prices (nulls filtered)
-    lows: number[];         // Daily low prices (nulls filtered)
+    timestamps: number[]; // Unix ms
+    closes: number[]; // Daily close prices (nulls filtered)
+    highs: number[]; // Daily high prices (nulls filtered)
+    lows: number[]; // Daily low prices (nulls filtered)
   };
 }
 
@@ -158,9 +158,9 @@ export interface MarketSnapshot {
 export interface WeatherGridPoint {
   lat: number;
   lng: number;
-  temperature: number;     // Celsius
-  windSpeed: number;        // knots
-  windDirection: number;    // degrees (0-360)
+  temperature: number; // Celsius
+  windSpeed: number; // knots
+  windDirection: number; // degrees (0-360)
 }
 
 // ---------- Water Stress Types ----------
@@ -168,18 +168,18 @@ export interface WeatherGridPoint {
 export type WaterFacilityType = 'dam' | 'reservoir' | 'desalination' | 'treatment_plant';
 
 export interface WaterStressIndicators {
-  bws_raw: number;    // baseline water stress raw value
-  bws_score: number;  // 0-5 normalized score
-  bws_label: string;  // human label
-  drr_score: number;  // drought risk 0-5
-  gtd_score: number;  // groundwater table decline 0-5
-  sev_score: number;  // seasonal variability 0-5
-  iav_score: number;  // interannual variability 0-5
+  bws_raw: number; // baseline water stress raw value
+  bws_score: number; // 0-5 normalized score
+  bws_label: string; // human label
+  drr_score: number; // drought risk 0-5
+  gtd_score: number; // groundwater table decline 0-5
+  sev_score: number; // seasonal variability 0-5
+  iav_score: number; // interannual variability 0-5
   compositeHealth: number; // 0-1 (0=worst, 1=best)
 }
 
 export interface WaterFacility {
-  id: string;           // "water-{osmId}"
+  id: string; // "water-{osmId}"
   type: 'water';
   facilityType: WaterFacilityType;
   lat: number;

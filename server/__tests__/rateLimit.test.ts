@@ -36,7 +36,11 @@ function createMockReq(ip = '127.0.0.1'): Partial<Request> {
   };
 }
 
-function createMockRes(): Partial<Response> & { _status: number; _json: unknown; _headers: Record<string, string> } {
+function createMockRes(): Partial<Response> & {
+  _status: number;
+  _json: unknown;
+  _headers: Record<string, string>;
+} {
   const res = {
     _status: 200,
     _json: null as unknown,
@@ -54,7 +58,11 @@ function createMockRes(): Partial<Response> & { _status: number; _json: unknown;
       return res;
     },
   };
-  return res as unknown as Partial<Response> & { _status: number; _json: unknown; _headers: Record<string, string> };
+  return res as unknown as Partial<Response> & {
+    _status: number;
+    _json: unknown;
+    _headers: Record<string, string>;
+  };
 }
 
 describe('rateLimitMiddleware', () => {
@@ -95,7 +103,11 @@ describe('rateLimitMiddleware', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(res._status).toBe(429);
-    expect(res._json).toEqual({ error: 'Too many requests', code: 'RATE_LIMITED', statusCode: 429 });
+    expect(res._json).toEqual({
+      error: 'Too many requests',
+      code: 'RATE_LIMITED',
+      statusCode: 429,
+    });
   });
 
   it('sets X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset headers', async () => {

@@ -51,7 +51,13 @@ const COUNTRY_CENTROIDS_FULL: [string, number, number][] = [
 
 /** Countries where all facility types are kept (conflict zones with strategic water infrastructure) */
 const PRIORITY_COUNTRIES = new Set([
-  'Israel', 'Jordan', 'Lebanon', 'Syria', 'Iraq', 'Iran', 'Afghanistan',
+  'Israel',
+  'Jordan',
+  'Lebanon',
+  'Syria',
+  'Iraq',
+  'Iran',
+  'Afghanistan',
 ]);
 
 /**
@@ -63,7 +69,10 @@ export function isPriorityCountry(lat: number, lng: number): boolean {
   let nearest = '';
   for (const [name, clat, clng] of COUNTRY_CENTROIDS_FULL) {
     const d = haversine(lat, lng, clat, clng);
-    if (d < minDist) { minDist = d; nearest = name; }
+    if (d < minDist) {
+      minDist = d;
+      nearest = name;
+    }
   }
   return PRIORITY_COUNTRIES.has(nearest);
 }
@@ -75,7 +84,7 @@ export function isPriorityCountry(lat: number, lng: number): boolean {
 export function isNotable(tags: Record<string, string>): boolean {
   if (tags.wikidata) return true;
   if (tags.wikipedia) return true;
-  if (Object.keys(tags).some(k => k.startsWith('wikipedia:'))) return true;
+  if (Object.keys(tags).some((k) => k.startsWith('wikipedia:'))) return true;
   return false;
 }
 
@@ -85,10 +94,12 @@ const EXCLUDED_COUNTRIES = new Set(['Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'K
 /** Haversine distance in km (lightweight, no import needed) */
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const toRad = (d: number) => d * Math.PI / 180;
+  const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -111,7 +122,10 @@ function isExcludedLocation(lat: number, lng: number): boolean {
   let nearest = '';
   for (const [name, clat, clng] of COUNTRY_CENTROIDS_FULL) {
     const d = haversine(lat, lng, clat, clng);
-    if (d < minDist) { minDist = d; nearest = name; }
+    if (d < minDist) {
+      minDist = d;
+      nearest = name;
+    }
   }
   if (EXCLUDED_COUNTRIES.has(nearest)) return true;
 
@@ -125,8 +139,14 @@ function isExcludedLocation(lat: number, lng: number): boolean {
  */
 const FACILITY_QUERIES: { label: string; nwr: string }[] = [
   { label: 'dams', nwr: 'nwr["waterway"="dam"]["name"]' },
-  { label: 'reservoirs', nwr: '(way["natural"="water"]["water"="reservoir"]["name"];relation["natural"="water"]["water"="reservoir"]["name"];)' },
-  { label: 'desalination', nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)' },
+  {
+    label: 'reservoirs',
+    nwr: '(way["natural"="water"]["water"="reservoir"]["name"];relation["natural"="water"]["water"="reservoir"]["name"];)',
+  },
+  {
+    label: 'desalination',
+    nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)',
+  },
   { label: 'treatment_plants', nwr: 'nwr["man_made"="water_works"]["name"]' },
 ];
 
@@ -210,7 +230,8 @@ export function normalizeWaterElement(
   // Tiered country filtering: priority countries keep all, non-priority apply notability checks
   if (!isPriorityCountry(lat, lon)) {
     if (facilityType === 'treatment_plant') return null; // Always excluded in non-priority
-    if ((facilityType === 'dam' || facilityType === 'reservoir') && !isNotable(el.tags)) return null;
+    if ((facilityType === 'dam' || facilityType === 'reservoir') && !isNotable(el.tags))
+      return null;
     // desalination always passes through
   }
 
@@ -221,7 +242,8 @@ export function normalizeWaterElement(
     lat,
     lng: lon,
     label: extractLabel(el.tags, facilityType),
-    operator: el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
+    operator:
+      el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
     osmId: el.id,
     stress: stressLookup(lat, lon),
   };
@@ -230,9 +252,7 @@ export function normalizeWaterElement(
 /**
  * Fetch one facility type from Overpass, trying primary then fallback.
  */
-async function fetchFacilityType(
-  entry: { label: string; nwr: string },
-): Promise<WaterFacility[]> {
+async function fetchFacilityType(entry: { label: string; nwr: string }): Promise<WaterFacility[]> {
   const query = buildQuery(entry.nwr);
   for (const url of [OVERPASS_URL, OVERPASS_FALLBACK]) {
     try {
@@ -243,7 +263,10 @@ async function fetchFacilityType(
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (!res.ok) {
-        log.warn({ facilityType: entry.label, url, status: res.status }, 'Overpass returned error status');
+        log.warn(
+          { facilityType: entry.label, url, status: res.status },
+          'Overpass returned error status',
+        );
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
@@ -285,10 +308,7 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
       succeeded++;
       all.push(...result.value);
     } else if (result.status === 'rejected') {
-      log.warn(
-        { facilityType: FACILITY_QUERIES[i]?.label, err: result.reason },
-        'query rejected',
-      );
+      log.warn({ facilityType: FACILITY_QUERIES[i]?.label, err: result.reason }, 'query rejected');
     }
   }
 
@@ -300,6 +320,9 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
   const unique = new Map<string, WaterFacility>();
   for (const f of all) unique.set(f.id, f);
 
-  log.info({ total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length }, 'water facilities fetch complete');
+  log.info(
+    { total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length },
+    'water facilities fetch complete',
+  );
   return Array.from(unique.values());
 }

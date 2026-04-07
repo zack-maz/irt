@@ -33,13 +33,13 @@ key-files:
     - server/__tests__/gdelt.test.ts
 
 key-decisions:
-  - "Dispersion only activates for ActionGeo_Type 3 (city) and 4 (landmark), not 1 (country) or 2 (state)"
-  - "Centroid penalty (0.7x) applied to confidence score, not as a hard filter"
-  - "Events without actionGeoType pass through undispersed for backward compatibility"
+  - 'Dispersion only activates for ActionGeo_Type 3 (city) and 4 (landmark), not 1 (country) or 2 (state)'
+  - 'Centroid penalty (0.7x) applied to confidence score, not as a hard filter'
+  - 'Events without actionGeoType pass through undispersed for backward compatibility'
 
 patterns-established:
-  - "Config-driven pipeline thresholds: all filter parameters loadable from env vars with safe defaults"
-  - "Concentric ring dispersion: 3-ring polar coordinate layout with cosine longitude correction"
+  - 'Config-driven pipeline thresholds: all filter parameters loadable from env vars with safe defaults'
+  - 'Concentric ring dispersion: 3-ring polar coordinate layout with cosine longitude correction'
 
 requirements-completed: [EQ-01, EQ-02, EQ-03, EQ-04]
 
@@ -61,6 +61,7 @@ completed: 2026-04-01
 - **Files modified:** 8
 
 ## Accomplishments
+
 - Concentric ring dispersion algorithm (3/6/9km rings with 6/12/18 slots) that deterministically spreads city-centroid events into visually distinguishable map positions
 - Config-driven pipeline thresholds replacing hardcoded values: eventMinSources, eventCentroidPenalty, eventExcludedCameo, bellingcatCorroborationBoost -- all loadable from env vars
 - PipelineTrace and AuditRecord types capturing every decision point in the GDELT processing pipeline (foundation for Plan 03 audit-first filter tuning)
@@ -74,6 +75,7 @@ Each task was committed atomically:
 2. **Task 2: Integrate ActionGeo_Type, dispersion, and config-driven thresholds into GDELT adapter** - `c636f44` (feat)
 
 ## Files Created/Modified
+
 - `server/lib/dispersion.ts` - Concentric ring dispersion algorithm with cosine longitude correction
 - `server/lib/eventAudit.ts` - PipelineTrace, AuditRecord types and buildAuditRecord helper
 - `server/config.ts` - 4 new config fields with env var loading and safe defaults
@@ -84,6 +86,7 @@ Each task was committed atomically:
 - `server/__tests__/gdelt.test.ts` - 11 new tests for ActionGeo_Type, config thresholds, dispersion integration
 
 ## Decisions Made
+
 - Dispersion only applies to events with ActionGeo_Type 3 (city) or 4 (landmark) that also match a known city centroid from the CITY_CENTROIDS list. Events without actionGeoType or with type 1/2 pass through unchanged.
 - Centroid penalty is multiplicative on the confidence score (0.7x default), not a hard exclusion. This allows high-signal centroid events to still pass the threshold.
 - Config mock in gdelt.test.ts uses a mutable object to allow per-test threshold overrides without module re-imports.
@@ -93,12 +96,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Dispersion algorithm and audit types ready for Plan 02 (Bellingcat RSS corroboration) and Plan 03 (audit-first filter tuning)
 - Config-driven thresholds can be adjusted via Vercel env vars without redeployment
 - All 367 server tests pass (including 30 new tests from this plan)
@@ -108,5 +114,6 @@ None - no external service configuration required.
 All 8 created/modified files verified on disk. Both task commits (5d57ca3, c636f44) verified in git log.
 
 ---
-*Phase: 22-gdelt-event-quality-osint-integration*
-*Completed: 2026-04-01*
+
+_Phase: 22-gdelt-event-quality-osint-integration_
+_Completed: 2026-04-01_

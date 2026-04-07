@@ -207,7 +207,6 @@ export function DateRangeFilter({
         <span>{startLabel}</span>
         <span>{endLabel}</span>
       </div>
-
     </div>
   );
 }

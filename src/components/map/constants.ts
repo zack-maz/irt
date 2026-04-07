@@ -8,8 +8,7 @@ export const INITIAL_VIEW_STATE = {
 
 export const MAX_BOUNDS: [number, number, number, number] = [20, 0, 80, 50]; // [west, south, east, north]
 
-export const MAP_STYLE =
-  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+export const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 export const TERRAIN_SOURCE_TILES = [
   'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
@@ -26,10 +25,7 @@ export const ROAD_LABEL_LAYERS = [
   'roadname_major',
 ];
 
-export const BORDER_LAYERS = [
-  'boundary_country_outline',
-  'boundary_country_inner',
-];
+export const BORDER_LAYERS = ['boundary_country_outline', 'boundary_country_inner'];
 
 export const WATER_LAYERS = ['water', 'water_shadow', 'waterway'];
 

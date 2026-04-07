@@ -37,10 +37,10 @@ function getStatusText(status: ConnectionStatus, flightCount: number): string {
 }
 
 export function SourceSelector() {
-  const activeSource = useFlightStore(s => s.activeSource);
-  const connectionStatus = useFlightStore(s => s.connectionStatus);
-  const flightCount = useFlightStore(s => s.flightCount);
-  const setActiveSource = useFlightStore(s => s.setActiveSource);
+  const activeSource = useFlightStore((s) => s.activeSource);
+  const connectionStatus = useFlightStore((s) => s.connectionStatus);
+  const flightCount = useFlightStore((s) => s.flightCount);
+  const setActiveSource = useFlightStore((s) => s.setActiveSource);
 
   const [isOpen, setIsOpen] = useState(false);
   const [sourceConfig, setSourceConfig] = useState<SourceConfig | null>(null);
@@ -49,9 +49,11 @@ export function SourceSelector() {
   // Fetch source configuration once on mount
   useEffect(() => {
     fetch('/api/sources')
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((data: SourceConfig) => setSourceConfig(data))
-      .catch(() => { /* silently fail -- optimistic defaults */ });
+      .catch(() => {
+        /* silently fail -- optimistic defaults */
+      });
   }, []);
 
   // Close dropdown when clicking outside
@@ -80,7 +82,7 @@ export function SourceSelector() {
         <button
           role="combobox"
           aria-expanded={isOpen}
-          onClick={() => setIsOpen(prev => !prev)}
+          onClick={() => setIsOpen((prev) => !prev)}
           className="flex w-full items-center justify-between text-sm text-text-primary"
         >
           <span>{SOURCE_LABELS[activeSource]}</span>
@@ -100,7 +102,7 @@ export function SourceSelector() {
         {/* Dropdown options */}
         {isOpen && (
           <div className="mt-2 border-t border-border pt-2">
-            {SOURCES.map(source => {
+            {SOURCES.map((source) => {
               const isConfigured = sourceConfig?.[source]?.configured ?? true;
 
               return (

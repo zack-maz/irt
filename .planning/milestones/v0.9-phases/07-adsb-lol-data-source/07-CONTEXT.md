@@ -14,12 +14,14 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 ## Implementation Decisions
 
 ### Source labeling
+
 - Dropdown label: "adsb.lol" (lowercase, matches service name)
 - FlightSource type value: `'adsblol'` — no hyphens, consistent with `'opensky'` and `'adsb'` pattern
 - Query param: `/api/flights?source=adsblol`
 - localStorage key value: `"adsblol"`
 
 ### Adapter architecture
+
 - Extract shared V2 normalization into `server/adapters/adsb-v2-normalize.ts`
 - Both `adsb-exchange.ts` and `adsb-lol.ts` import the shared normalizer
 - `adsb-lol.ts` only handles fetch (no auth headers — free API)
@@ -27,11 +29,13 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 - Same 250 NM radius from Iran center (32.5, 53.75) as ADS-B Exchange
 
 ### Default source
+
 - Default source changes from `'opensky'` to `'adsblol'` — best out-of-box experience (no config required)
 - Existing users with saved localStorage preference keep their saved choice (no migration)
 - Only new/fresh installs get adsb.lol as default
 
 ### Unconfigured source visibility
+
 - Sources missing required credentials shown in dropdown but **disabled/grayed out** with "(API key required)" hint
 - Consistent treatment: applies to both OpenSky (needs CLIENT_ID/SECRET) and ADS-B Exchange (needs ADSB_EXCHANGE_API_KEY)
 - adsb.lol is always available (no credentials needed)
@@ -39,10 +43,12 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 - Response shape: `{ opensky: { configured: boolean }, adsb: { configured: boolean }, adsblol: { configured: true } }` (adsblol always true)
 
 ### Polling
+
 - 30-second polling interval for adsb.lol (respectful of community API with dynamic rate limits)
 - Same recursive setTimeout pattern as other sources
 
 ### Claude's Discretion
+
 - Exact disabled styling for unconfigured sources in dropdown (grayed text, cursor, etc.)
 - How /api/sources endpoint is wired (inline in flights router or separate route file)
 - Whether to add adsb.lol polling constant to server/constants.ts or client-side constants
@@ -63,9 +69,11 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/adapters/adsb-exchange.ts`: normalizeAircraft() and interfaces to extract into shared module
 - `server/constants.ts`: IRAN_CENTER, ADSB_RADIUS_NM already defined — reused by adsb-lol adapter
 - `server/constants.ts`: KNOTS_TO_MS, FEET_TO_METERS, FPM_TO_MS conversion constants — already shared
@@ -76,6 +84,7 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 - `src/hooks/useFlightPolling.ts`: Source-specific polling interval logic — add adsblol case
 
 ### Established Patterns
+
 - Zustand 5 curried create<T>()() for type inference
 - Zustand selector s => s.field for minimal re-renders
 - EntityCache with source-specific TTL
@@ -83,6 +92,7 @@ adsb.lol as a third flight data source alongside OpenSky and ADS-B Exchange. Fre
 - FlightSource type in ui.ts (not server types) to avoid circular imports
 
 ### Integration Points
+
 - `server/routes/flights.ts` line 15: source parsing — add 'adsblol' case
 - `server/routes/flights.ts` line 19: API key check — adsblol needs no key check
 - `src/hooks/useFlightPolling.ts`: Polling interval map — add adsblol: 30_000
@@ -101,5 +111,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 07-adsb-lol-data-source*
-*Context gathered: 2026-03-16*
+_Phase: 07-adsb-lol-data-source_
+_Context gathered: 2026-03-16_

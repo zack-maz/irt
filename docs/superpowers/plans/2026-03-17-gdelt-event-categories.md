@@ -13,6 +13,7 @@
 ## Task 1: Server Types — ConflictEventType Union
 
 **Files:**
+
 - Modify: `server/types.ts`
 
 - [ ] **Step 1: Update EntityType and ConflictEventEntity in server/types.ts**
@@ -42,8 +43,8 @@ Update `ConflictEventEntity`:
 export interface ConflictEventEntity extends MapEntityBase {
   type: ConflictEventType;
   data: {
-    eventType: string;      // Human-readable CAMEO description
-    subEventType: string;   // "CAMEO <code>"
+    eventType: string; // Human-readable CAMEO description
+    subEventType: string; // "CAMEO <code>"
     fatalities: number;
     actor1: string;
     actor2: string;
@@ -84,6 +85,7 @@ Expected: Errors in downstream files referencing `'drone' | 'missile'` — confi
 ## Task 2: GDELT Adapter — classifyByBaseCode
 
 **Files:**
+
 - Modify: `server/adapters/gdelt.ts`
 - Modify: `server/__tests__/gdelt.test.ts`
 
@@ -294,11 +296,7 @@ function describeEvent(eventBaseCode: string): string {
 Update `normalizeGdeltEvent` to use `EventBaseCode` (col 27):
 
 ```typescript
-export function normalizeGdeltEvent(
-  cols: string[],
-  lat: number,
-  lng: number,
-): ConflictEventEntity {
+export function normalizeGdeltEvent(cols: string[], lat: number, lng: number): ConflictEventEntity {
   const eventBaseCode = cols[COL.EventBaseCode];
   const eventRootCode = cols[COL.EventRootCode];
   const eventCode = cols[COL.EventCode];
@@ -344,6 +342,7 @@ git commit -m "feat(10): replace drone/missile types with 10 CAMEO-based Conflic
 ## Task 3: UI Types — Shared Constants and New Toggles
 
 **Files:**
+
 - Modify: `src/types/ui.ts`
 
 - [ ] **Step 1: Add ConflictEventType import and shared constants to ui.ts**
@@ -360,15 +359,19 @@ export const CONFLICT_TOGGLE_GROUPS = {
   showAirstrikes: ['airstrike'] as const,
   showGroundCombat: ['ground_combat', 'shelling', 'bombing'] as const,
   showTargeted: ['assassination', 'abduction'] as const,
-  showOtherConflict: ['assault', 'blockade', 'ceasefire_violation', 'mass_violence', 'wmd'] as const,
+  showOtherConflict: [
+    'assault',
+    'blockade',
+    'ceasefire_violation',
+    'mass_violence',
+    'wmd',
+  ] as const,
 } as const;
 
 export type ConflictToggleKey = keyof typeof CONFLICT_TOGGLE_GROUPS;
 
 // Derived from toggle groups — single source of truth
-const CONFLICT_EVENT_TYPES = new Set<string>(
-  Object.values(CONFLICT_TOGGLE_GROUPS).flat(),
-);
+const CONFLICT_EVENT_TYPES = new Set<string>(Object.values(CONFLICT_TOGGLE_GROUPS).flat());
 
 export function isConflictEventType(type: string): type is ConflictEventType {
   return CONFLICT_EVENT_TYPES.has(type);
@@ -464,6 +467,7 @@ Expected: Errors in uiStore.ts, LayerTogglesSlot.tsx, StatusPanel.tsx, BaseMap.t
 ## Task 4: UI Store — New Toggles + localStorage Migration
 
 **Files:**
+
 - Modify: `src/stores/uiStore.ts`
 - Modify: `src/__tests__/uiStore.test.ts`
 
@@ -549,7 +553,9 @@ export function loadPersistedToggles(): LayerToggles {
       }
       return { ...LAYER_TOGGLE_DEFAULTS, ...parsed };
     }
-  } catch { /* localStorage unavailable or corrupted JSON */ }
+  } catch {
+    /* localStorage unavailable or corrupted JSON */
+  }
   return { ...LAYER_TOGGLE_DEFAULTS };
 }
 ```
@@ -571,6 +577,7 @@ git commit -m "feat(10): replace drone/missile/news toggles with 4 CAMEO-based c
 ## Task 5: Layer Constants — Colors, Dot Colors, Icon Sizes
 
 **Files:**
+
 - Modify: `src/components/map/layers/constants.ts`
 
 - [ ] **Step 1: Replace drone/missile entries with 4 conflict category entries**
@@ -598,11 +605,11 @@ export const ENTITY_DOT_COLORS = {
 } as const;
 
 export const ICON_SIZE = {
-  flight:        { meters: 8000, minPixels: 24, maxPixels: 160 },
-  ship:          { meters: 8000, minPixels: 24, maxPixels: 160 },
-  airstrike:     { meters: 8000, minPixels: 24, maxPixels: 160 },
-  groundCombat:  { meters: 8000, minPixels: 24, maxPixels: 160 },
-  targeted:      { meters: 8000, minPixels: 24, maxPixels: 160 },
+  flight: { meters: 8000, minPixels: 24, maxPixels: 160 },
+  ship: { meters: 8000, minPixels: 24, maxPixels: 160 },
+  airstrike: { meters: 8000, minPixels: 24, maxPixels: 160 },
+  groundCombat: { meters: 8000, minPixels: 24, maxPixels: 160 },
+  targeted: { meters: 8000, minPixels: 24, maxPixels: 160 },
   otherConflict: { meters: 8000, minPixels: 24, maxPixels: 160 },
 } as const;
 ```
@@ -612,6 +619,7 @@ export const ICON_SIZE = {
 ## Task 6: Icon Atlas — New Shapes
 
 **Files:**
+
 - Modify: `src/components/map/layers/icons.ts`
 
 - [ ] **Step 1: Add explosion and crosshair icons**
@@ -680,12 +688,14 @@ git commit -m "feat(10): add conflict category colors, icon sizes, explosion and
 ## Task 7: useEntityLayers — 4 Conflict Layers
 
 **Files:**
+
 - Modify: `src/hooks/useEntityLayers.ts`
 - Modify: `src/__tests__/entityLayers.test.ts`
 
 - [ ] **Step 1: Update entityLayers.test.ts**
 
 Replace all `drone`/`missile` references:
+
 - `mockDroneEvent` → `mockAirstrikeEvent` with `type: 'airstrike'`
 - `mockMissileEvent` → `mockGroundCombatEvent` with `type: 'ground_combat'`
 - Add `mockTargetedEvent` with `type: 'assassination'` and `mockOtherEvent` with `type: 'blockade'`
@@ -718,18 +728,34 @@ Import `isConflictEventType` and `CONFLICT_TOGGLE_GROUPS` from `@/types/ui`.
 Replace the `drones`/`missiles` useMemo with 4 filtered arrays:
 
 ```typescript
-const airstrikeEvents = useMemo(() =>
-  events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)),
-  [events]);
-const groundCombatEvents = useMemo(() =>
-  events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)),
-  [events]);
-const targetedEvents = useMemo(() =>
-  events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)),
-  [events]);
-const otherConflictEvents = useMemo(() =>
-  events.filter((e) => (CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(e.type)),
-  [events]);
+const airstrikeEvents = useMemo(
+  () =>
+    events.filter((e) =>
+      (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type),
+    ),
+  [events],
+);
+const groundCombatEvents = useMemo(
+  () =>
+    events.filter((e) =>
+      (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type),
+    ),
+  [events],
+);
+const targetedEvents = useMemo(
+  () =>
+    events.filter((e) =>
+      (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type),
+    ),
+  [events],
+);
+const otherConflictEvents = useMemo(
+  () =>
+    events.filter((e) =>
+      (CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(e.type),
+    ),
+  [events],
+);
 ```
 
 Update `getIconForEntity`:
@@ -737,15 +763,21 @@ Update `getIconForEntity`:
 ```typescript
 function getIconForEntity(entity: MapEntity): string {
   switch (entity.type) {
-    case 'flight': return (entity as FlightEntity).data.onGround ? 'chevronGround' : 'chevron';
-    case 'ship': return 'chevron';
-    case 'airstrike': return 'starburst';
+    case 'flight':
+      return (entity as FlightEntity).data.onGround ? 'chevronGround' : 'chevron';
+    case 'ship':
+      return 'chevron';
+    case 'airstrike':
+      return 'starburst';
     case 'ground_combat':
     case 'shelling':
-    case 'bombing': return 'explosion';
+    case 'bombing':
+      return 'explosion';
     case 'assassination':
-    case 'abduction': return 'crosshair';
-    default: return 'xmark'; // assault, blockade, ceasefire_violation, mass_violence, wmd
+    case 'abduction':
+      return 'crosshair';
+    default:
+      return 'xmark'; // assault, blockade, ceasefire_violation, mass_violence, wmd
   }
 }
 ```
@@ -755,16 +787,23 @@ Update `getColorForEntity`:
 ```typescript
 function getColorForEntity(entity: MapEntity): [number, number, number] {
   switch (entity.type) {
-    case 'flight': return (entity as FlightEntity).data.unidentified
-      ? [...ENTITY_COLORS.flightUnidentified] : [...ENTITY_COLORS.flight];
-    case 'ship': return [...ENTITY_COLORS.ship];
-    case 'airstrike': return [...ENTITY_COLORS.airstrike];
+    case 'flight':
+      return (entity as FlightEntity).data.unidentified
+        ? [...ENTITY_COLORS.flightUnidentified]
+        : [...ENTITY_COLORS.flight];
+    case 'ship':
+      return [...ENTITY_COLORS.ship];
+    case 'airstrike':
+      return [...ENTITY_COLORS.airstrike];
     case 'ground_combat':
     case 'shelling':
-    case 'bombing': return [...ENTITY_COLORS.groundCombat];
+    case 'bombing':
+      return [...ENTITY_COLORS.groundCombat];
     case 'assassination':
-    case 'abduction': return [...ENTITY_COLORS.targeted];
-    default: return [...ENTITY_COLORS.otherConflict];
+    case 'abduction':
+      return [...ENTITY_COLORS.targeted];
+    default:
+      return [...ENTITY_COLORS.otherConflict];
   }
 }
 ```
@@ -772,28 +811,32 @@ function getColorForEntity(entity: MapEntity): [number, number, number] {
 Replace the 2 event layers (droneLayer, missileLayer) with 4:
 
 ```typescript
-const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
-  id: 'airstrikes',
-  visible: showAirstrikes,
-  data: airstrikeEvents,
-  iconAtlas: getIconAtlas(),
-  iconMapping: ICON_MAPPING,
-  getIcon: () => 'starburst',
-  getPosition: (d) => [d.lng, d.lat],
-  getSize: ICON_SIZE.airstrike.meters,
-  sizeUnits: 'meters' as const,
-  sizeMinPixels: ICON_SIZE.airstrike.minPixels,
-  sizeMaxPixels: ICON_SIZE.airstrike.maxPixels,
-  getAngle: () => 0,
-  getColor: (d) => {
-    const [r, g, b] = ENTITY_COLORS.airstrike;
-    if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-    return [r, g, b, 255];
-  },
-  billboard: false,
-  pickable: true,
-  updateTriggers: { getColor: [activeId] },
-}), [airstrikeEvents, showAirstrikes, activeId]);
+const airstrikeLayer = useMemo(
+  () =>
+    new IconLayer<ConflictEventEntity>({
+      id: 'airstrikes',
+      visible: showAirstrikes,
+      data: airstrikeEvents,
+      iconAtlas: getIconAtlas(),
+      iconMapping: ICON_MAPPING,
+      getIcon: () => 'starburst',
+      getPosition: (d) => [d.lng, d.lat],
+      getSize: ICON_SIZE.airstrike.meters,
+      sizeUnits: 'meters' as const,
+      sizeMinPixels: ICON_SIZE.airstrike.minPixels,
+      sizeMaxPixels: ICON_SIZE.airstrike.maxPixels,
+      getAngle: () => 0,
+      getColor: (d) => {
+        const [r, g, b] = ENTITY_COLORS.airstrike;
+        if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+        return [r, g, b, 255];
+      },
+      billboard: false,
+      pickable: true,
+      updateTriggers: { getColor: [activeId] },
+    }),
+  [airstrikeEvents, showAirstrikes, activeId],
+);
 
 // groundCombatLayer, targetedLayer, otherConflictLayer follow the same pattern
 // with their respective icon, color, size, and data
@@ -802,7 +845,16 @@ const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
 Return all 8 layers:
 
 ```typescript
-return [shipLayer, flightLayer, airstrikeLayer, groundCombatLayer, targetedLayer, otherConflictLayer, glowLayer, highlightLayer];
+return [
+  shipLayer,
+  flightLayer,
+  airstrikeLayer,
+  groundCombatLayer,
+  targetedLayer,
+  otherConflictLayer,
+  glowLayer,
+  highlightLayer,
+];
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -822,6 +874,7 @@ git commit -m "feat(10): replace drone/missile layers with 4 CAMEO-based conflic
 ## Task 8: LayerTogglesSlot — New Toggle Rows
 
 **Files:**
+
 - Modify: `src/components/layout/LayerTogglesSlot.tsx`
 - Modify: `src/__tests__/LayerToggles.test.tsx`
 
@@ -830,6 +883,7 @@ git commit -m "feat(10): replace drone/missile layers with 4 CAMEO-based conflic
 Update `mockState` — replace `showDrones`/`showMissiles`/`showNews` and their toggle fns with `showAirstrikes`/`showGroundCombat`/`showTargeted`/`showOtherConflict` and `toggleAirstrikes`/`toggleGroundCombat`/`toggleTargeted`/`toggleOtherConflict`.
 
 Update assertions:
+
 - 8 toggle rows (Flights, Ground, Unidentified, Ships, Airstrikes, Ground Combat, Targeted, Other Conflict)
 - Order test: `['Flights', 'Ground', 'Unidentified', 'Ships', 'Airstrikes', 'Ground Combat', 'Targeted', 'Other Conflict']`
 - Remove News toggle click test; add tests for each new toggle
@@ -884,6 +938,7 @@ git commit -m "feat(10): update layer toggles with 4 conflict categories replaci
 ## Task 9: StatusPanel — Updated Event Counts
 
 **Files:**
+
 - Modify: `src/components/ui/StatusPanel.tsx`
 - Modify: `src/__tests__/StatusPanel.test.tsx`
 
@@ -896,8 +951,24 @@ import type { ConflictEventType } from '@/types/ui';
 
 function makeEvent(id: string, type: ConflictEventType): ConflictEventEntity {
   return {
-    id, type, lat: 32, lng: 51, timestamp: Date.now(), label: id,
-    data: { eventType: '', subEventType: '', fatalities: 0, actor1: '', actor2: '', notes: '', source: '', goldsteinScale: 0, locationName: '', cameoCode: '' },
+    id,
+    type,
+    lat: 32,
+    lng: 51,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      eventType: '',
+      subEventType: '',
+      fatalities: 0,
+      actor1: '',
+      actor2: '',
+      notes: '',
+      source: '',
+      goldsteinScale: 0,
+      locationName: '',
+      cameoCode: '',
+    },
   };
 }
 
@@ -911,6 +982,7 @@ const allEvents = [...airstrikes, ...groundCombat, ...targeted, ...otherConflict
 Update `beforeEach`: `showAirstrikes: true, showGroundCombat: true, showTargeted: true, showOtherConflict: true`.
 
 Replace the drone/missile count tests with per-toggle-group tests:
+
 - All toggles ON: shows total event count (5)
 - showAirstrikes OFF: shows 3 (groundCombat + targeted + other)
 - showGroundCombat OFF: shows 4 (airstrikes + targeted + other)
@@ -938,14 +1010,22 @@ Replace the event count computation:
 
 ```typescript
 let visibleEvents = 0;
-if (showAirstrikes) visibleEvents += events.filter((e) =>
-  (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)).length;
-if (showGroundCombat) visibleEvents += events.filter((e) =>
-  (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)).length;
-if (showTargeted) visibleEvents += events.filter((e) =>
-  (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)).length;
-if (showOtherConflict) visibleEvents += events.filter((e) =>
-  (CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(e.type)).length;
+if (showAirstrikes)
+  visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type),
+  ).length;
+if (showGroundCombat)
+  visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type),
+  ).length;
+if (showTargeted)
+  visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type),
+  ).length;
+if (showOtherConflict)
+  visibleEvents += events.filter((e) =>
+    (CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(e.type),
+  ).length;
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -965,6 +1045,7 @@ git commit -m "feat(10): update StatusPanel event counts for 4 conflict toggle g
 ## Task 10: BaseMap — Tooltip Gating
 
 **Files:**
+
 - Modify: `src/components/map/BaseMap.tsx`
 - Modify: `src/__tests__/BaseMap.test.tsx`
 
@@ -973,6 +1054,7 @@ git commit -m "feat(10): update StatusPanel event counts for 4 conflict toggle g
 Replace `mockDroneEntity` with `mockAirstrikeEntity` (type: `'airstrike'`). Replace `showNews`/`showDrones`/`showMissiles` in `beforeEach` and test setState with new toggles.
 
 Update tooltip gating tests:
+
 - "shows tooltip for airstrike entity when showAirstrikes is ON"
 - "hides tooltip for airstrike entity when showAirstrikes is OFF"
 - "still shows tooltip for flight entity when showAirstrikes is OFF"
@@ -1001,17 +1083,20 @@ Replace the tooltip gating logic:
 // Tooltip gating — conflict events only show when their category toggle is ON
 function isEntityTooltipVisible(entity: MapEntity): boolean {
   if (!isConflictEventType(entity.type)) return true;
-  if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(entity.type)) return showAirstrikes;
-  if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(entity.type)) return showGroundCombat;
-  if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(entity.type)) return showTargeted;
-  if ((CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(entity.type)) return showOtherConflict;
+  if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(entity.type))
+    return showAirstrikes;
+  if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(entity.type))
+    return showGroundCombat;
+  if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(entity.type))
+    return showTargeted;
+  if ((CONFLICT_TOGGLE_GROUPS.showOtherConflict as readonly string[]).includes(entity.type))
+    return showOtherConflict;
   return true;
 }
 
 const rawTooltipEntity = hover?.entity ?? null;
-const tooltipEntity = rawTooltipEntity && !isEntityTooltipVisible(rawTooltipEntity)
-  ? null
-  : rawTooltipEntity;
+const tooltipEntity =
+  rawTooltipEntity && !isEntityTooltipVisible(rawTooltipEntity) ? null : rawTooltipEntity;
 ```
 
 Note: `isEntityTooltipVisible` must be declared inside the component body since it reads the toggle state from the closure.
@@ -1033,6 +1118,7 @@ git commit -m "feat(10): replace showNews tooltip gating with per-category confl
 ## Task 11: EntityTooltip — Specific Event Type Labels
 
 **Files:**
+
 - Modify: `src/components/map/EntityTooltip.tsx`
 
 - [ ] **Step 1: Update EntityTooltip.tsx**
@@ -1058,12 +1144,14 @@ Update the render condition at the bottom:
 ## Task 12: DetailPanelSlot — Updated Type Switches
 
 **Files:**
+
 - Modify: `src/components/layout/DetailPanelSlot.tsx`
 - Modify: `src/__tests__/DetailPanel.test.tsx`
 
 - [ ] **Step 1: Update DetailPanel.test.tsx**
 
 Replace `mockDrone` (type `'drone'`) with `mockAirstrike` (type `'airstrike'`). Update assertions:
+
 - Header should show `'AIRSTRIKE'` instead of `'DRONE'`
 - Event type should still show `'Explosions/Remote violence'` (from `data.eventType`)
 
@@ -1079,9 +1167,12 @@ function getDotColor(type: string): string {
   if (type === 'flight') return ENTITY_DOT_COLORS.flights;
   if (type === 'ship') return ENTITY_DOT_COLORS.ships;
   if (isConflictEventType(type)) {
-    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
-    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
-    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.targeted;
+    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.airstrikes;
+    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.groundCombat;
+    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.targeted;
     return ENTITY_DOT_COLORS.otherConflict;
   }
   return '#9ca3af';
@@ -1131,6 +1222,7 @@ import { EVENT_TYPE_LABELS } from '@/types/ui';
 ```
 
 Replace line 11:
+
 ```typescript
 // OLD: const typeLabel = entity.type === 'drone' ? 'Drone' : 'Missile';
 const typeLabel = EVENT_TYPE_LABELS[entity.type] ?? entity.type;
@@ -1155,6 +1247,7 @@ git commit -m "feat(10): update tooltip and detail panel for CAMEO-based event c
 These files still reference `'drone'`/`'missile'`/`'showNews'` and will fail compilation. Update each one:
 
 **Files:**
+
 - Modify: `server/__tests__/types.test.ts`
 - Modify: `server/adapters/acled.ts`
 - Modify: `server/__tests__/adapters/acled.test.ts`
@@ -1163,7 +1256,7 @@ These files still reference `'drone'`/`'missile'`/`'showNews'` and will fail com
 - Modify: `src/__tests__/useSelectedEntity.test.ts`
 - Modify: `src/__tests__/useEventPolling.test.ts`
 
-- [ ] **Step 1: Update server/__tests__/types.test.ts**
+- [ ] **Step 1: Update server/**tests**/types.test.ts**
 
 Replace `type: 'missile'` → `type: 'ground_combat'` and `type: 'drone'` → `type: 'airstrike'`. Add missing `goldsteinScale`, `locationName`, `cameoCode` fields to the mock data objects. Update EntityType assertion to list new types.
 
@@ -1171,23 +1264,23 @@ Replace `type: 'missile'` → `type: 'ground_combat'` and `type: 'drone'` → `t
 
 Replace the `classifyEventType` return type from `'missile' | 'drone'` to `ConflictEventType`. Import `ConflictEventType` from `../types.js`. Map ACLED event subtypes to appropriate CAMEO-based categories (e.g., `'Air/drone strike'` → `'airstrike'`, `'Shelling/artillery'` → `'shelling'`, etc.).
 
-- [ ] **Step 3: Update server/__tests__/adapters/acled.test.ts**
+- [ ] **Step 3: Update server/**tests**/adapters/acled.test.ts**
 
 Update type assertions from `'drone'`/`'missile'` to the new categories matching the updated ACLED adapter mappings.
 
-- [ ] **Step 4: Update server/__tests__/security.test.ts**
+- [ ] **Step 4: Update server/**tests**/security.test.ts**
 
 Replace mock ACLED data `type: 'missile' as const` with `type: 'ground_combat' as const`. Add missing `goldsteinScale`, `locationName`, `cameoCode` fields.
 
-- [ ] **Step 5: Update src/__tests__/eventStore.test.ts**
+- [ ] **Step 5: Update src/**tests**/eventStore.test.ts**
 
 Replace `mockDroneEvent` (`type: 'drone'`) with `type: 'airstrike'`. Replace `mockMissileEvent` (`type: 'missile'`) with `type: 'ground_combat'`.
 
-- [ ] **Step 6: Update src/__tests__/useSelectedEntity.test.ts**
+- [ ] **Step 6: Update src/**tests**/useSelectedEntity.test.ts**
 
 Replace mock event `type: 'drone'` with `type: 'airstrike'`.
 
-- [ ] **Step 7: Update src/__tests__/useEventPolling.test.ts**
+- [ ] **Step 7: Update src/**tests**/useEventPolling.test.ts**
 
 Replace inline entity `type: 'drone'` with `type: 'airstrike'`.
 

@@ -30,8 +30,10 @@ const LOGICAL_TTLS: Record<FlightSource, number> = {
 
 function getFetcher(source: FlightSource): () => Promise<FlightEntity[]> {
   switch (source) {
-    case 'opensky': return () => fetchOpenSky(IRAN_BBOX);
-    case 'adsblol': return fetchAdsbLol;
+    case 'opensky':
+      return () => fetchOpenSky(IRAN_BBOX);
+    case 'adsblol':
+      return fetchAdsbLol;
   }
 }
 
@@ -44,8 +46,15 @@ flightsRouter.get('/', validateQuery(flightsQuerySchema), async (_req, res) => {
   const redisTtl = Math.ceil((logicalTtl * 10) / 1000); // 10x multiplier, ms → seconds
 
   // Credential checks for sources that require API keys
-  if (source === 'opensky' && !(process.env.OPENSKY_CLIENT_ID && process.env.OPENSKY_CLIENT_SECRET)) {
-    return res.status(503).json({ error: 'OpenSky credentials not configured', code: 'UPSTREAM_ERROR', statusCode: 503 });
+  if (
+    source === 'opensky' &&
+    !(process.env.OPENSKY_CLIENT_ID && process.env.OPENSKY_CLIENT_SECRET)
+  ) {
+    return res.status(503).json({
+      error: 'OpenSky credentials not configured',
+      code: 'UPSTREAM_ERROR',
+      statusCode: 503,
+    });
   }
 
   // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
@@ -67,7 +76,9 @@ flightsRouter.get('/', validateQuery(flightsQuerySchema), async (_req, res) => {
       if (cached) {
         return res.json({ ...cached, rateLimited: true });
       }
-      return res.status(429).json({ error: 'Rate limited', code: 'RATE_LIMITED', statusCode: 429, rateLimited: true });
+      return res
+        .status(429)
+        .json({ error: 'Rate limited', code: 'RATE_LIMITED', statusCode: 429, rateLimited: true });
     }
 
     if (cached) {

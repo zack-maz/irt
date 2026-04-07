@@ -61,6 +61,7 @@ completed: 2026-04-02
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Extracted GeoEPR-2021 ethnic boundaries for 9 Middle East groups with cross-border merging and Douglas-Peucker simplification (139KB, under 200KB target)
 - Created ethnicGroups.ts config with 10-group taxonomy (colors, rgba, population, context) following factions.ts pattern
 - Installed @deck.gl/extensions with FillStyleExtension test mock and vendor chunk entry
@@ -75,6 +76,7 @@ Each task was committed atomically:
 3. **Task 2: GeoEPR extraction script with overlap detection and ethnic-zones.json** - `703d283` (feat)
 
 ## Files Created/Modified
+
 - `src/data/ethnic-zones.json` - Static GeoJSON FeatureCollection: 9 single-group + 23 overlap features
 - `src/lib/ethnicGroups.ts` - EthnicGroup type, EthnicGroupConfig interface, ETHNIC_GROUPS record (10 entries)
 - `scripts/extract-ethnic-data.ts` - GeoEPR download, filter, merge, simplify, overlap detection pipeline
@@ -84,6 +86,7 @@ Each task was committed atomically:
 - `package.json` - Added @deck.gl/extensions@^9.2.11
 
 ## Decisions Made
+
 - Used GeoEPR-2021 from ETH Zurich as the authoritative ethnic boundary dataset (direct GeoJSON download, 1685 features worldwide, 596 in Middle East bbox)
 - Applied Douglas-Peucker simplification at epsilon=0.05 degrees (~5km tolerance) to reduce file size from 580KB to 139KB while preserving recognizable boundaries
 - Yazidi group is absent from GeoEPR dataset (GeoEPR maps "Kurds/Yezidis" as a single Kurdish entry) -- per CONTEXT.md policy ("only include groups covered by the dataset"), Yazidi polygons are not hand-drawn
@@ -94,6 +97,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Added Douglas-Peucker polygon simplification to meet 200KB file size target**
+
 - **Found during:** Task 2 (GeoEPR extraction)
 - **Issue:** Raw GeoEPR data produced 580KB output, exceeding the 200KB target
 - **Fix:** Implemented Ramer-Douglas-Peucker line simplification algorithm with 0.05-degree epsilon, reducing to 139KB
@@ -107,12 +111,15 @@ Each task was committed atomically:
 **Impact on plan:** Simplification was necessary to meet the stated file size requirement. No scope creep.
 
 ## Issues Encountered
+
 - GeoEPR "Kurds/Yezidis" entry maps to kurdish (not yazidi), leaving Yazidi without dedicated polygons -- this is expected behavior per CONTEXT.md
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - ethnic-zones.json ready for Plan 02 to consume via Vite static import
 - ethnicGroups.ts provides all type/config infrastructure Plan 02 needs for rendering
 - @deck.gl/extensions installed and mocked for FillStyleExtension hatched fill rendering
@@ -125,5 +132,6 @@ None - no external service configuration required.
 All 5 created files verified present. All 3 task commits verified in git log.
 
 ---
-*Phase: 25-ethnic-distribution-layer*
-*Completed: 2026-04-02*
+
+_Phase: 25-ethnic-distribution-layer_
+_Completed: 2026-04-02_

@@ -14,12 +14,14 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 ## Implementation Decisions
 
 ### Filter panel placement
+
 - New "Filters" OverlayPanel below the existing Layers panel in the left-side stack
 - Collapsible with +/- header, same pattern as Layers panel
 - Collapsed by default on page load (advanced feature, most sessions won't need it)
 - Header shows badge count when collapsed: "Filters (3)" indicating active filter count
 
 ### Filter controls
+
 - **Country/nationality**: Text input with autocomplete, populated from currently visible entities. Supports multiple country selections displayed as chips. Matches `originCountry` for flights, `actor1` OR `actor2` for events. Ships always included (no nationality in AIS data — non-applicable)
 - **Speed range**: Dual-thumb range slider (min/max). Applies to flights (`velocity` in m/s) and ships (`speedOverGround` in knots — display in knots for both)
 - **Altitude range**: Dual-thumb range slider (min/max). Applies to flights only (`altitude` in meters — display in feet). Ships and events always included (non-applicable)
@@ -27,30 +29,36 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 - **Date range**: Applies to conflict events only (GDELT timestamp). Flights and ships are live data — always included (non-applicable)
 
 ### Cross-type filter behavior
+
 - Non-applicable filters include the entity (not exclude). e.g., ships remain visible when altitude filter is active because altitude doesn't apply to ships
 - Multiple filters combine with AND logic — entity must pass all applicable filters to remain visible
 - Date range filter applies to events only; flights and ships are always live and pass through
 
 ### Active filter visibility & clearing
+
 - Badge count on collapsed panel header: "Filters (3)"
 - When expanded, active filter rows are visually highlighted (arrow indicator ▸), inactive show "---"
 - Per-filter reset: small × on each active filter row to clear individually
 - "Clear all" button at the bottom to reset everything at once
 
 ### Filter persistence
+
 - Filters do NOT persist to localStorage — reset on page reload
 - Filters are transient analysis tools, not permanent preferences (unlike layer toggles)
 
 ### StatusPanel integration
+
 - StatusPanel entity counts reflect filtered results (only entities passing all filters)
 - Consistent with how layer toggles already affect counts
 
 ### Events toggle hierarchy fix
+
 - The Events master toggle should toggle all sub-event categories (Airstrikes, Ground Combat, Targeted, Other Conflict) together
 - When Events is toggled OFF, all sub-events are hidden regardless of individual sub-toggle state
 - When Events is toggled ON, sub-events respect their individual toggle states
 
 ### Claude's Discretion
+
 - Exact slider styling and tick mark design for range inputs
 - Proximity pin icon/marker design
 - Circle overlay color and opacity for proximity radius
@@ -73,9 +81,11 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `OverlayPanel` (`src/components/ui/OverlayPanel.tsx`): Dark panel container — reuse for Filters panel
 - `LayerTogglesSlot` (`src/components/layout/LayerTogglesSlot.tsx`): Collapsible panel pattern with +/- header to follow
 - `useUIStore` (`src/stores/uiStore.ts`): Extend with filter state or create dedicated filterStore
@@ -84,6 +94,7 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 - `loadPersistedToggles`/`persistToggles` pattern: Reference for localStorage approach (though filters won't persist)
 
 ### Established Patterns
+
 - Zustand curried `create<T>()()` with selector pattern `s => s.field`
 - OverlayPanel for dark overlay containers
 - `useEntityLayers` filters entity arrays via `useMemo` — extend with filter predicates
@@ -91,6 +102,7 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 - `isCollapsed` + `toggleX` pattern for collapsible panels
 
 ### Integration Points
+
 - `src/hooks/useEntityLayers.ts`: Add filter predicates to existing `useMemo` flight/ship/event filtering
 - `src/stores/uiStore.ts` or new `src/stores/filterStore.ts`: Filter state (country, ranges, proximity pin, date)
 - `src/types/ui.ts`: Filter state type interface
@@ -111,5 +123,5 @@ Advanced multi-criteria filtering to narrow visible entities on the map. Users c
 
 ---
 
-*Phase: 11-smart-filters*
-*Context gathered: 2026-03-18*
+_Phase: 11-smart-filters_
+_Context gathered: 2026-03-18_

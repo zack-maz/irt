@@ -70,7 +70,10 @@ describe('computeThreatWeight', () => {
   });
 
   it('uses default weight of 3 for unknown event types', () => {
-    const event = makeEvent({ type: 'unknown_type' as ConflictEventEntity['type'], timestamp: Date.now() });
+    const event = makeEvent({
+      type: 'unknown_type' as ConflictEventEntity['type'],
+      timestamp: Date.now(),
+    });
     const weight = computeThreatWeight(event);
     // 3 * 1 * 1 * 1.75 = 5.25 (no decay)
     expect(weight).toBeCloseTo(5.25, 0);
@@ -181,7 +184,11 @@ describe('computeP90', () => {
 describe('mergeClusters', () => {
   const CELL_SIZE = 0.25;
 
-  function makeCell(lat: number, lng: number, overrides: Partial<import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData> = {}): import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData {
+  function makeCell(
+    lat: number,
+    lng: number,
+    overrides: Partial<import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData> = {},
+  ): import('@/components/map/layers/ThreatHeatmapOverlay').ThreatZoneData {
     const eventCount = overrides.eventCount ?? 1;
     return {
       lat,
@@ -211,10 +218,7 @@ describe('mergeClusters', () => {
 
   it('merges 2 adjacent cells (N-S neighbors at 0.25-deg) into 1 cluster', () => {
     // Cell centers 0.25 degrees apart in latitude
-    const cells = [
-      makeCell(33.125, 44.125),
-      makeCell(33.375, 44.125),
-    ];
+    const cells = [makeCell(33.125, 44.125), makeCell(33.375, 44.125)];
     const clusters = mergeClusters(cells, CELL_SIZE);
     expect(clusters).toHaveLength(1);
     expect(clusters[0].cells).toHaveLength(2);
@@ -233,9 +237,9 @@ describe('mergeClusters', () => {
 
   it('merges L-shaped group of 3 cells into 1 cluster', () => {
     const cells = [
-      makeCell(33.125, 44.125),  // bottom-left
-      makeCell(33.375, 44.125),  // above it
-      makeCell(33.375, 44.375),  // to its right
+      makeCell(33.125, 44.125), // bottom-left
+      makeCell(33.375, 44.125), // above it
+      makeCell(33.375, 44.375), // to its right
     ];
     const clusters = mergeClusters(cells, CELL_SIZE);
     expect(clusters).toHaveLength(1);
@@ -254,14 +258,24 @@ describe('mergeClusters', () => {
   it('computes mean of actual event coordinates as centroid', () => {
     // Cell 1: 5 events averaging lat 33.10, Cell 2: 3 events averaging lat 33.40
     const cells = [
-      makeCell(33.125, 44.125, { eventCount: 5, clusterWeight: 10, realLatSum: 33.10 * 5, realLngSum: 44.10 * 5 }),
-      makeCell(33.375, 44.125, { eventCount: 3, clusterWeight: 30, realLatSum: 33.40 * 3, realLngSum: 44.15 * 3 }),
+      makeCell(33.125, 44.125, {
+        eventCount: 5,
+        clusterWeight: 10,
+        realLatSum: 33.1 * 5,
+        realLngSum: 44.1 * 5,
+      }),
+      makeCell(33.375, 44.125, {
+        eventCount: 3,
+        clusterWeight: 30,
+        realLatSum: 33.4 * 3,
+        realLngSum: 44.15 * 3,
+      }),
     ];
     const clusters = mergeClusters(cells, CELL_SIZE);
     // True centroid: weighted by event count, not bbox center
     // (33.10*5 + 33.40*3) / 8 = (165.5 + 100.2) / 8 = 33.2125
-    expect(clusters[0].centroidLat).toBeCloseTo((33.10 * 5 + 33.40 * 3) / 8, 4);
-    expect(clusters[0].centroidLng).toBeCloseTo((44.10 * 5 + 44.15 * 3) / 8, 4);
+    expect(clusters[0].centroidLat).toBeCloseTo((33.1 * 5 + 33.4 * 3) / 8, 4);
+    expect(clusters[0].centroidLng).toBeCloseTo((44.1 * 5 + 44.15 * 3) / 8, 4);
   });
 
   it('computes correct eventIds as union of all cell eventIds', () => {
@@ -277,9 +291,9 @@ describe('mergeClusters', () => {
   it('computes correct boundingBox', () => {
     // Use an L-shape so bounding box spans both lat and lng
     const cells = [
-      makeCell(33.125, 44.125),  // bottom-left
-      makeCell(33.375, 44.125),  // above it (adjacent N)
-      makeCell(33.375, 44.375),  // to its right (adjacent E)
+      makeCell(33.125, 44.125), // bottom-left
+      makeCell(33.375, 44.125), // above it (adjacent N)
+      makeCell(33.375, 44.375), // to its right (adjacent E)
     ];
     const clusters = mergeClusters(cells, CELL_SIZE);
     expect(clusters).toHaveLength(1);
@@ -293,14 +307,8 @@ describe('mergeClusters', () => {
 
   it('produces deterministic id based on sorted cell coordinates', () => {
     // Same cells in different order should produce same id
-    const cells1 = [
-      makeCell(33.375, 44.125),
-      makeCell(33.125, 44.125),
-    ];
-    const cells2 = [
-      makeCell(33.125, 44.125),
-      makeCell(33.375, 44.125),
-    ];
+    const cells1 = [makeCell(33.375, 44.125), makeCell(33.125, 44.125)];
+    const cells2 = [makeCell(33.125, 44.125), makeCell(33.375, 44.125)];
     const clusters1 = mergeClusters(cells1, CELL_SIZE);
     const clusters2 = mergeClusters(cells2, CELL_SIZE);
     expect(clusters1[0].id).toBe(clusters2[0].id);
@@ -329,10 +337,18 @@ describe('THERMAL_COLOR_RANGE', () => {
 
 describe('useThreatHeatmapLayers', () => {
   beforeEach(() => {
-    useEventStore.setState({ events: [], connectionStatus: 'loading', lastFetchAt: null, eventCount: 0 });
+    useEventStore.setState({
+      events: [],
+      connectionStatus: 'loading',
+      lastFetchAt: null,
+      eventCount: 0,
+    });
     useLayerStore.getState().resetLayers();
     // Set date range to include current time (default snaps to hour boundary which may exclude Date.now())
-    useFilterStore.setState({ dateStart: Date.now() - 48 * 60 * 60 * 1000, dateEnd: Date.now() + 60000 });
+    useFilterStore.setState({
+      dateStart: Date.now() - 48 * 60 * 60 * 1000,
+      dateEnd: Date.now() + 60000,
+    });
   });
 
   it('returns empty array when layer is inactive', () => {
@@ -425,9 +441,7 @@ describe('useThreatHeatmapLayers', () => {
   });
 
   it('getFillColor returns 255 alpha for hovered cluster', () => {
-    const events = [
-      makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 }),
-    ];
+    const events = [makeEvent({ type: 'airstrike', lat: 33.0, lng: 44.0 })];
     useEventStore.setState({ events, eventCount: events.length });
     useLayerStore.getState().toggleLayer('threat');
     // First get the clusters to find the real cluster ID
@@ -451,9 +465,7 @@ describe('useThreatHeatmapLayers', () => {
     expect(picker.props.updateTriggers).toBeDefined();
     // updateTriggers is a tuple of [hoveredClusterId, isBelowCrossover]
     // so re-renders happen on hover changes AND zoom-crossover changes
-    expect(picker.props.updateTriggers.getFillColor).toEqual(
-      expect.arrayContaining([hoveredId])
-    );
+    expect(picker.props.updateTriggers.getFillColor).toEqual(expect.arrayContaining([hoveredId]));
   });
 });
 
@@ -463,8 +475,16 @@ describe('ThreatTooltip', () => {
     render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 12, dominantType: 'airstrike', latestTime: fiveMinAgo,
-          totalFatalities: 0, totalMentions: 45, totalSources: 8, avgGoldstein: -5, clusterWeight: 50,
+          lat: 33,
+          lng: 44,
+          eventCount: 12,
+          dominantType: 'airstrike',
+          latestTime: fiveMinAgo,
+          totalFatalities: 0,
+          totalMentions: 45,
+          totalSources: 8,
+          avgGoldstein: -5,
+          clusterWeight: 50,
           eventIds: [],
         }}
         x={100}
@@ -486,8 +506,16 @@ describe('ThreatTooltip', () => {
     render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 3, dominantType: 'ground_combat', latestTime: twoHoursAgo,
-          totalFatalities: 5, totalMentions: 10, totalSources: 3, avgGoldstein: -8, clusterWeight: 30,
+          lat: 33,
+          lng: 44,
+          eventCount: 3,
+          dominantType: 'ground_combat',
+          latestTime: twoHoursAgo,
+          totalFatalities: 5,
+          totalMentions: 10,
+          totalSources: 3,
+          avgGoldstein: -8,
+          clusterWeight: 30,
           eventIds: [],
         }}
         x={50}
@@ -505,8 +533,16 @@ describe('ThreatTooltip', () => {
     const { container } = render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 2, dominantType: 'shelling', latestTime: recent,
-          totalFatalities: 0, totalMentions: 5, totalSources: 2, avgGoldstein: -3, clusterWeight: 10,
+          lat: 33,
+          lng: 44,
+          eventCount: 2,
+          dominantType: 'shelling',
+          latestTime: recent,
+          totalFatalities: 0,
+          totalMentions: 5,
+          totalSources: 2,
+          avgGoldstein: -3,
+          clusterWeight: 10,
           eventIds: [],
         }}
         x={0}
@@ -520,8 +556,16 @@ describe('ThreatTooltip', () => {
     render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 1, dominantType: 'airstrike', latestTime: Date.now(),
-          totalFatalities: 0, totalMentions: 1, totalSources: 1, avgGoldstein: -9, clusterWeight: 10,
+          lat: 33,
+          lng: 44,
+          eventCount: 1,
+          dominantType: 'airstrike',
+          latestTime: Date.now(),
+          totalFatalities: 0,
+          totalMentions: 1,
+          totalSources: 1,
+          avgGoldstein: -9,
+          clusterWeight: 10,
           eventIds: [],
         }}
         x={0}
@@ -535,8 +579,16 @@ describe('ThreatTooltip', () => {
     render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 1, dominantType: 'bombing', latestTime: Date.now(),
-          totalFatalities: 0, totalMentions: 1, totalSources: 1, avgGoldstein: -2, clusterWeight: 10,
+          lat: 33,
+          lng: 44,
+          eventCount: 1,
+          dominantType: 'bombing',
+          latestTime: Date.now(),
+          totalFatalities: 0,
+          totalMentions: 1,
+          totalSources: 1,
+          avgGoldstein: -2,
+          clusterWeight: 10,
           eventIds: [],
         }}
         x={0}
@@ -550,8 +602,16 @@ describe('ThreatTooltip', () => {
     render(
       <ThreatTooltip
         zone={{
-          lat: 33, lng: 44, eventCount: 1, dominantType: 'assault', latestTime: Date.now(),
-          totalFatalities: 0, totalMentions: 1, totalSources: 1, avgGoldstein: 0, clusterWeight: 5,
+          lat: 33,
+          lng: 44,
+          eventCount: 1,
+          dominantType: 'assault',
+          latestTime: Date.now(),
+          totalFatalities: 0,
+          totalMentions: 1,
+          totalSources: 1,
+          avgGoldstein: 0,
+          clusterWeight: 5,
           eventIds: [],
         }}
         x={0}

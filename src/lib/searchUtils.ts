@@ -1,4 +1,10 @@
-import type { MapEntity, SiteEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  SiteEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+} from '@/types/entities';
 import type { WaterFacility } from '../../server/types';
 
 /** Broader entity union supported across search/query/result helpers. */

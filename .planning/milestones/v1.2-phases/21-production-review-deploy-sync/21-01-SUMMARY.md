@@ -31,15 +31,15 @@ key-files:
     - server/lib/logger.ts
 
 key-decisions:
-  - "createRateLimiter factory pattern for per-endpoint rate limit configuration"
-  - "Helmet CSP whitelists map tiles, Vercel analytics, Open-Meteo, ArcGIS, CARTO"
-  - "max-age=0 with s-maxage for CDN-only caching (browser always revalidates)"
-  - "rateLimitMiddleware kept as deprecated export for backward compatibility"
+  - 'createRateLimiter factory pattern for per-endpoint rate limit configuration'
+  - 'Helmet CSP whitelists map tiles, Vercel analytics, Open-Meteo, ArcGIS, CARTO'
+  - 'max-age=0 with s-maxage for CDN-only caching (browser always revalidates)'
+  - 'rateLimitMiddleware kept as deprecated export for backward compatibility'
 
 patterns-established:
-  - "cacheControl(sMaxAge, swr) factory: returns Express middleware setting Cache-Control header"
-  - "requestLogger: level derived from status code (500+=error, 400+=warn, else info)"
-  - "Per-route middleware chaining: rateLimiters.X, cacheControl(X, Y), router"
+  - 'cacheControl(sMaxAge, swr) factory: returns Express middleware setting Cache-Control header'
+  - 'requestLogger: level derived from status code (500+=error, 400+=warn, else info)'
+  - 'Per-route middleware chaining: rateLimiters.X, cacheControl(X, Y), router'
 
 requirements-completed: []
 
@@ -61,6 +61,7 @@ completed: 2026-03-25
 - **Files modified:** 14
 
 ## Accomplishments
+
 - Cache-Control middleware factory produces correct headers for all 8 API endpoints (s-maxage from 5s to 3600s)
 - Helmet wired with full CSP directives whitelisting all external tile/API/analytics domains
 - Rate limits tuned per endpoint: flights 120/60s, ships 60/60s, events/news 20/60s, markets 30/60s, weather/sites 10/60s
@@ -78,6 +79,7 @@ Each task was committed atomically:
 _Note: TDD Task 1 had RED committed in a prior session, GREEN completed in this session._
 
 ## Files Created/Modified
+
 - `server/middleware/cacheControl.ts` - Cache-Control header factory (s-maxage + stale-while-revalidate or no-store)
 - `server/middleware/requestLogger.ts` - Structured JSON request logging on res finish
 - `server/lib/logger.ts` - LogEntry interface + JSON.stringify to stdout/stderr by level
@@ -89,6 +91,7 @@ _Note: TDD Task 1 had RED committed in a prior session, GREEN completed in this 
 - 8 test files updated to mock new rateLimiters export
 
 ## Decisions Made
+
 - **createRateLimiter factory**: Allows per-endpoint configuration with separate Upstash Ratelimit instances per route, preserving identifier extraction logic
 - **Helmet CSP whitelists**: Includes OpenStreetMap tiles, AWS terrain tiles, ArcGIS imagery, CARTO basemaps, Open-Meteo API, and Vercel analytics scripts
 - **max-age=0 with s-maxage**: Browser always revalidates with origin/CDN, CDN serves from cache -- prevents stale browser cache for real-time data
@@ -99,10 +102,11 @@ _Note: TDD Task 1 had RED committed in a prior session, GREEN completed in this 
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Updated 8 test file mocks for new rateLimiters export**
+
 - **Found during:** Task 2 (wiring middleware into createApp)
 - **Issue:** 7 route test files + vercel-entry test mock rateLimitMiddleware but not rateLimiters; createApp now imports rateLimiters causing undefined errors in all route tests
 - **Fix:** Added rateLimiters passthrough mock alongside existing rateLimitMiddleware mock in all 8 test files
-- **Files modified:** server/__tests__/routes/{flights,ships,events,sources,news,weather}.test.ts, server/__tests__/{server,vercel-entry}.test.ts
+- **Files modified:** server/**tests**/routes/{flights,ships,events,sources,news,weather}.test.ts, server/**tests**/{server,vercel-entry}.test.ts
 - **Verification:** All 229 server tests pass
 - **Committed in:** bc15e90 (Task 2 commit)
 
@@ -112,12 +116,15 @@ _Note: TDD Task 1 had RED committed in a prior session, GREEN completed in this 
 **Impact on plan:** Test mock update was necessary for correctness. No scope creep.
 
 ## Issues Encountered
+
 - server/lib/logger.ts existed from prior session but was not committed (only test files were in 500b12d). Included in Task 2 commit.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - All middleware in place for production traffic
 - Cache-Control headers ready for Vercel CDN edge caching
 - Per-endpoint rate limits will protect upstream API budgets
@@ -132,5 +139,6 @@ None - no external service configuration required.
 - [x] Commit bc15e90 found
 
 ---
-*Phase: 21-production-review-deploy-sync*
-*Completed: 2026-03-25*
+
+_Phase: 21-production-review-deploy-sync_
+_Completed: 2026-03-25_

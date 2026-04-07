@@ -14,30 +14,36 @@ Deploy the application to Vercel with serverless functions. Frontend served from
 ## Implementation Decisions
 
 ### Function architecture
+
 - Single catch-all serverless function wrapping `createApp()` in `api/index.ts`
 - vercel.json rewrites `/api/*` to the catch-all function
 - 60s `maxDuration` for API functions (AISStream WebSocket collect needs headroom beyond 10s default)
 - Pin Node 22.x in vercel.json for stable ESM support
 
 ### Local dev workflow
+
 - Keep current setup unchanged: `concurrently` runs Vite + Express, Vite proxies `/api` to localhost:3001
 - No `vercel dev` integration — production config only
 
 ### Domain & access
+
 - Vercel free subdomain only (yourapp.vercel.app), no custom domain
 - Public access, no authentication layer
 - Production deployments only (main branch) — no preview deploys on feature branches
 
 ### CORS & origin
+
 - Wildcard `*` CORS origin for public API access
 - API is read-only with no user data, server-side secrets only — no security risk from open CORS
 - Easy to restrict later by switching to explicit origin list
 
 ### Rate limiting
+
 - Basic rate limiting to protect upstream API credits (OpenSky, AISStream) from abuse
 - Upstash Redis available as backing store for rate limit counters
 
 ### Environment management
+
 - All secrets managed via Vercel CLI (`vercel env add`)
 - Add `.env.example` file documenting all required/optional vars with placeholder values
 - Required: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
@@ -45,6 +51,7 @@ Deploy the application to Vercel with serverless functions. Frontend served from
 - Routes with missing API keys return clear error message, never crash
 
 ### Claude's Discretion
+
 - Rate limiting implementation approach (express-rate-limit + Upstash, or Vercel edge config)
 - Exact vercel.json rewrite rules and configuration
 - Build command configuration for Vercel
@@ -61,20 +68,24 @@ Deploy the application to Vercel with serverless functions. Frontend served from
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/index.ts`: `createApp()` factory pattern already exists — catch-all function just wraps it
 - `server/cache/redis.ts`: Upstash Redis client already initialized — can back rate limiter
 - `server/middleware/errorHandler.ts`: existing error handler middleware
 
 ### Established Patterns
+
 - `isMainModule` guard in server/index.ts — `app.listen()` only runs locally, not in serverless
 - `process.env.CORS_ORIGIN ?? 'http://localhost:5173'` — env var with fallback already in place
 - `"type": "module"` in package.json — ESM throughout, needs Node 22.x for stable support
 - Vite proxy config in vite.config.ts — `/api` proxied to localhost:3001 for local dev
 
 ### Integration Points
+
 - `api/index.ts` (new) — serverless entry point wrapping createApp()
 - `vercel.json` (new) — rewrites, function config, node version
 - `.env.example` (new) — documents all env vars
@@ -93,5 +104,5 @@ Deploy the application to Vercel with serverless functions. Frontend served from
 
 ---
 
-*Phase: 14-vercel-deployment*
-*Context gathered: 2026-03-19*
+_Phase: 14-vercel-deployment_
+_Context gathered: 2026-03-19_

@@ -71,15 +71,14 @@ export function MarketRow({ quote, showPercent, isExpanded, onToggle }: MarketRo
         <div className="flex items-center gap-1 min-w-[52px]">
           {quote.marketOpen ? (
             <>
-              <span className={`text-[10px] tabular-nums ${changeColor}`}>
-                {changeText}
-              </span>
+              <span className={`text-[10px] tabular-nums ${changeColor}`}>{changeText}</span>
               {delta !== null && (
                 <span
                   key={deltaKey}
                   className="text-accent-green text-[10px] tabular-nums animate-delta"
                 >
-                  {delta > 0 ? '+' : ''}{priceFmt.format(Math.abs(delta))}
+                  {delta > 0 ? '+' : ''}
+                  {priceFmt.format(Math.abs(delta))}
                 </span>
               )}
             </>

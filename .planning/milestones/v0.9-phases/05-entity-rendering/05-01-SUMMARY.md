@@ -7,13 +7,13 @@ tags: [deck.gl, IconLayer, canvas-atlas, zustand, animation, maplibre]
 # Dependency graph
 requires:
   - phase: 04-flight-data-feed
-    provides: "FlightEntity[] in flightStore, useFlightPolling pipeline"
+    provides: 'FlightEntity[] in flightStore, useFlightPolling pipeline'
 provides:
-  - "Entity rendering layer with 4 IconLayer types (flight, ship, drone, missile)"
-  - "Canvas icon atlas with chevron, diamond, starburst, xmark shapes"
-  - "Pulse animation for unidentified flights (0.7-1.0 opacity, 2s period)"
-  - "Altitude-based opacity for regular flights (0.6-1.0)"
-  - "Entity color constants and icon size configuration"
+  - 'Entity rendering layer with 4 IconLayer types (flight, ship, drone, missile)'
+  - 'Canvas icon atlas with chevron, diamond, starburst, xmark shapes'
+  - 'Pulse animation for unidentified flights (0.7-1.0 opacity, 2s period)'
+  - 'Altitude-based opacity for regular flights (0.6-1.0)'
+  - 'Entity color constants and icon size configuration'
 affects: [entity-interaction, ship-data, conflict-events, ui-panels]
 
 # Tech tracking
@@ -35,16 +35,16 @@ key-files:
     - vite.config.ts
 
 key-decisions:
-  - "Canvas icon atlas with mask mode for getColor tinting instead of pre-colored PNGs"
-  - "Graceful canvas fallback in jsdom (skip drawing, return blank canvas) instead of full canvas npm package"
-  - "Explicit null check for heading instead of negation to avoid -0 vs 0 edge case"
-  - "Static layers in separate useMemo with empty deps for ship/drone/missile (Phase 6 ready)"
+  - 'Canvas icon atlas with mask mode for getColor tinting instead of pre-colored PNGs'
+  - 'Graceful canvas fallback in jsdom (skip drawing, return blank canvas) instead of full canvas npm package'
+  - 'Explicit null check for heading instead of negation to avoid -0 vs 0 edge case'
+  - 'Static layers in separate useMemo with empty deps for ship/drone/missile (Phase 6 ready)'
 
 patterns-established:
-  - "Entity layer hook pattern: useEntityLayers() returns IconLayer[] for DeckGLOverlay"
-  - "Canvas icon atlas: 128x32 sprite sheet with ICON_MAPPING for Deck.gl mask mode"
-  - "Pulse animation: rAF loop throttled to ~15fps, controlled by pulseEnabled store toggle"
-  - "Altitude opacity: linear 0.6-1.0 mapping from 0m-13000m ceiling"
+  - 'Entity layer hook pattern: useEntityLayers() returns IconLayer[] for DeckGLOverlay'
+  - 'Canvas icon atlas: 128x32 sprite sheet with ICON_MAPPING for Deck.gl mask mode'
+  - 'Pulse animation: rAF loop throttled to ~15fps, controlled by pulseEnabled store toggle'
+  - 'Altitude opacity: linear 0.6-1.0 mapping from 0m-13000m ceiling'
 
 requirements-completed: [MAP-02]
 
@@ -66,6 +66,7 @@ completed: 2026-03-15
 - **Files modified:** 9
 
 ## Accomplishments
+
 - Flight entities render as green directional chevrons rotated to heading with altitude-based opacity
 - Unidentified flights render as yellow chevrons with pulsing opacity animation (0.7-1.0 at 2s period)
 - Ship, drone, and missile layer infrastructure in place with correct icons/colors (awaiting Phase 6 data)
@@ -80,6 +81,7 @@ Each task was committed atomically:
 2. **Task 2: useEntityLayers hook with pulse animation and BaseMap wiring** - `7f1b877` (feat)
 
 ## Files Created/Modified
+
 - `src/components/map/layers/constants.ts` - Entity colors, icon sizes, altitude-to-opacity, pulse config
 - `src/components/map/layers/icons.ts` - Canvas icon atlas (chevron, diamond, starburst, xmark) with ICON_MAPPING
 - `src/hooks/useEntityLayers.ts` - Hook returning 4 IconLayer instances driven by Zustand store
@@ -91,6 +93,7 @@ Each task was committed atomically:
 - `vite.config.ts` - Added @deck.gl/layers mock alias for tests
 
 ## Decisions Made
+
 - Canvas icon atlas with Deck.gl mask mode for getColor tinting -- avoids pre-colored PNG assets, keeps all coloring dynamic
 - Graceful canvas fallback in jsdom (return blank canvas) instead of requiring the canvas npm package -- keeps dev dependencies lean
 - Explicit null check for heading (`heading === null ? 0 : -heading`) to avoid JavaScript's -0 edge case with negation
@@ -101,6 +104,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed -0 from negating null-coalesced heading**
+
 - **Found during:** Task 2 (useEntityLayers hook)
 - **Issue:** `-(d.data.heading ?? 0)` produces `-0` when heading is null, failing strict equality with `0`
 - **Fix:** Changed to explicit null check: `d.data.heading === null ? 0 : -d.data.heading`
@@ -109,6 +113,7 @@ Each task was committed atomically:
 - **Committed in:** 7f1b877 (Task 2 commit)
 
 **2. [Rule 3 - Blocking] Added graceful canvas context fallback for jsdom**
+
 - **Found during:** Task 2 (useEntityLayers hook tests)
 - **Issue:** `getIconAtlas()` threw "Canvas 2D context not available" in jsdom which lacks canvas
 - **Fix:** Return blank cached canvas when 2D context is null instead of throwing
@@ -122,12 +127,15 @@ Each task was committed atomically:
 **Impact on plan:** Both fixes necessary for correctness and test compatibility. No scope creep.
 
 ## Issues Encountered
+
 - Vitest v4.1.0 does not support `-x` flag (used `--bail` equivalent or no flag) -- adjusted verification commands accordingly
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Entity rendering layer fully operational for live flight data
 - Ship/drone/missile layers ready -- just need store data from Phase 6
 - Pulse animation toggle available via uiStore for future UI controls
@@ -138,5 +146,6 @@ None - no external service configuration required.
 All created files verified on disk. Both task commits (1926594, 7f1b877) verified in git history.
 
 ---
-*Phase: 05-entity-rendering*
-*Completed: 2026-03-15*
+
+_Phase: 05-entity-rendering_
+_Completed: 2026-03-15_

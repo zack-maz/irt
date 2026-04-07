@@ -18,7 +18,11 @@ const parser = new XMLParser({
 
 /** RSS feed configurations */
 export const RSS_FEEDS: { url: string; name: string; country: string }[] = [
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', name: 'BBC', country: 'United Kingdom' },
+  {
+    url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
+    name: 'BBC',
+    country: 'United Kingdom',
+  },
   { url: 'https://www.aljazeera.com/xml/rss/all.xml', name: 'Al Jazeera', country: 'Qatar' },
   { url: 'https://www.tehrantimes.com/rss', name: 'Tehran Times', country: 'Iran' },
   { url: 'https://www.timesofisrael.com/feed/', name: 'Times of Israel', country: 'Israel' },

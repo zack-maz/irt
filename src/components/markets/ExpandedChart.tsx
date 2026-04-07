@@ -66,8 +66,16 @@ export function ExpandedChart({ quote }: ExpandedChartProps) {
   const showBand = highs.length === closes.length && lows.length === closes.length;
   let bandPath = '';
   if (showBand) {
-    const topPoints = highs.map((h, i) => `${i === 0 ? 'M' : 'L'}${scaleX(i).toFixed(1)},${scaleY(h).toFixed(1)}`).join(' ');
-    const bottomPoints = lows.map((_l, i) => `${scaleX(lows.length - 1 - i).toFixed(1)},${scaleY(lows[lows.length - 1 - i]).toFixed(1)}`).map((p, i) => `${i === 0 ? 'L' : 'L'}${p}`).join(' ');
+    const topPoints = highs
+      .map((h, i) => `${i === 0 ? 'M' : 'L'}${scaleX(i).toFixed(1)},${scaleY(h).toFixed(1)}`)
+      .join(' ');
+    const bottomPoints = lows
+      .map(
+        (_l, i) =>
+          `${scaleX(lows.length - 1 - i).toFixed(1)},${scaleY(lows[lows.length - 1 - i]).toFixed(1)}`,
+      )
+      .map((p, i) => `${i === 0 ? 'L' : 'L'}${p}`)
+      .join(' ');
     bandPath = topPoints + ' ' + bottomPoints + ' Z';
   }
 
@@ -86,7 +94,10 @@ export function ExpandedChart({ quote }: ExpandedChartProps) {
   }
 
   return (
-    <div className="overflow-hidden transition-[max-height] duration-300 ease-in-out" style={{ maxHeight: 160 }}>
+    <div
+      className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+      style={{ maxHeight: 160 }}
+    >
       <svg
         width={CHART_WIDTH}
         height={CHART_HEIGHT}
@@ -94,15 +105,20 @@ export function ExpandedChart({ quote }: ExpandedChartProps) {
         className="mt-1"
       >
         {/* High/low band */}
-        {showBand && (
-          <path d={bandPath} fill={color} opacity={0.06} />
-        )}
+        {showBand && <path d={bandPath} fill={color} opacity={0.06} />}
 
         {/* Shaded area under line */}
         <path d={areaPath} fill={color} opacity={0.12} />
 
         {/* Line */}
-        <path d={linePath} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
         {/* Y-axis labels */}
         {yTicks.map((tick) => (

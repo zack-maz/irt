@@ -15,9 +15,15 @@ import {
   PULSE_CONFIG,
   altitudeToOpacity,
 } from '@/components/map/layers/constants';
-import { getIconAtlas, ICON_MAPPING } from '@/components/map/layers/icons';
+import { getIconAtlasForLayer, ICON_MAPPING } from '@/components/map/layers/icons';
 import { CONFLICT_TOGGLE_GROUPS } from '@/types/ui';
-import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+  SiteEntity,
+} from '@/types/entities';
 
 const DIM_ALPHA = 40;
 const SEARCH_DIM_ALPHA = 15;
@@ -45,44 +51,74 @@ const SITE_ICON_MAP: Record<string, string> = {
 
 function getIconForEntity(entity: MapEntity | SiteEntity): string {
   switch (entity.type) {
-    case 'flight': return (entity as FlightEntity).data.onGround ? 'chevronGround' : 'chevron';
-    case 'ship': return 'chevron';
-    case 'site': return SITE_ICON_MAP[(entity as SiteEntity).siteType] ?? 'diamond';
-    case 'airstrike': return 'starburst';
+    case 'flight':
+      return (entity as FlightEntity).data.onGround ? 'chevronGround' : 'chevron';
+    case 'ship':
+      return 'chevron';
+    case 'site':
+      return SITE_ICON_MAP[(entity as SiteEntity).siteType] ?? 'diamond';
+    case 'airstrike':
+      return 'starburst';
     case 'ground_combat':
     case 'shelling':
-    case 'bombing': return 'explosion';
+    case 'bombing':
+      return 'explosion';
     case 'assassination':
-    case 'abduction': return 'crosshair';
-    default: return 'xmark'; // assault, blockade, ceasefire_violation, mass_violence, wmd
+    case 'abduction':
+      return 'crosshair';
+    default:
+      return 'xmark'; // assault, blockade, ceasefire_violation, mass_violence, wmd
   }
 }
 
-function getColorForEntity(entity: MapEntity | SiteEntity, attackMap?: Map<string, boolean>): [number, number, number] {
+function getColorForEntity(
+  entity: MapEntity | SiteEntity,
+  attackMap?: Map<string, boolean>,
+): [number, number, number] {
   switch (entity.type) {
-    case 'flight': return (entity as FlightEntity).data.unidentified
-      ? [...ENTITY_COLORS.flightUnidentified] : [...ENTITY_COLORS.flight];
-    case 'ship': return [...ENTITY_COLORS.ship];
-    case 'site': return (attackMap?.get(entity.id) ? [...ENTITY_COLORS.siteAttacked] : [...ENTITY_COLORS.siteHealthy]);
-    case 'airstrike': return [...ENTITY_COLORS.airstrike];
+    case 'flight':
+      return (entity as FlightEntity).data.unidentified
+        ? [...ENTITY_COLORS.flightUnidentified]
+        : [...ENTITY_COLORS.flight];
+    case 'ship':
+      return [...ENTITY_COLORS.ship];
+    case 'site':
+      return attackMap?.get(entity.id)
+        ? [...ENTITY_COLORS.siteAttacked]
+        : [...ENTITY_COLORS.siteHealthy];
+    case 'airstrike':
+      return [...ENTITY_COLORS.airstrike];
     case 'ground_combat':
     case 'shelling':
-    case 'bombing': return [...ENTITY_COLORS.groundCombat];
+    case 'bombing':
+      return [...ENTITY_COLORS.groundCombat];
     case 'assassination':
-    case 'abduction': return [...ENTITY_COLORS.targeted];
-    default: return [...ENTITY_COLORS.groundCombat];
+    case 'abduction':
+      return [...ENTITY_COLORS.targeted];
+    default:
+      return [...ENTITY_COLORS.groundCombat];
   }
 }
 
 function getAngleForEntity(entity: MapEntity | SiteEntity): number {
   switch (entity.type) {
-    case 'flight': return (entity as FlightEntity).data.heading === null ? 0 : -(entity as FlightEntity).data.heading!;
-    case 'ship': return -((entity as ShipEntity).data.courseOverGround ?? 0);
-    default: return 0;
+    case 'flight':
+      return (entity as FlightEntity).data.heading === null
+        ? 0
+        : -(entity as FlightEntity).data.heading!;
+    case 'ship':
+      return -((entity as ShipEntity).data.courseOverGround ?? 0);
+    default:
+      return 0;
   }
 }
 
-function passesSeverityFilter(event: MapEntity, high: boolean, med: boolean, low: boolean): boolean {
+function passesSeverityFilter(
+  event: MapEntity,
+  high: boolean,
+  med: boolean,
+  low: boolean,
+): boolean {
   const level = classifySeverity(event as ConflictEventEntity);
   if (level === 'high') return high;
   if (level === 'medium') return med;
@@ -109,7 +145,7 @@ export function useEntityLayers() {
 
   // Cluster event IDs for dimming non-cluster events when a cluster is selected
   const clusterEventIds = useMemo(
-    () => selectedCluster ? new Set(selectedCluster.eventIds) : null,
+    () => (selectedCluster ? new Set(selectedCluster.eventIds) : null),
     [selectedCluster],
   );
 
@@ -163,34 +199,52 @@ export function useEntityLayers() {
     });
   }, [allFlights, showFlights, showUnidentified, showGroundTraffic]);
 
-  const airstrikeEvents = useMemo(() =>
-    showAirstrikes
-      ? events
-          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
-          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
-      : [],
-    [events, showAirstrikes, showHighSeverity, showMediumSeverity, showLowSeverity]);
-  const groundCombatEvents = useMemo(() =>
-    showGroundCombatToggle
-      ? events
-          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
-          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
-      : [],
-    [events, showGroundCombatToggle, showHighSeverity, showMediumSeverity, showLowSeverity]);
-  const targetedEvents = useMemo(() =>
-    showTargetedToggle
-      ? events
-          .filter((e) => (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
-          .filter((e) => passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity))
-      : [],
-    [events, showTargetedToggle, showHighSeverity, showMediumSeverity, showLowSeverity]);
+  const airstrikeEvents = useMemo(
+    () =>
+      showAirstrikes
+        ? events
+            .filter((e) =>
+              (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type),
+            )
+            .filter((e) =>
+              passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
+            )
+        : [],
+    [events, showAirstrikes, showHighSeverity, showMediumSeverity, showLowSeverity],
+  );
+  const groundCombatEvents = useMemo(
+    () =>
+      showGroundCombatToggle
+        ? events
+            .filter((e) =>
+              (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type),
+            )
+            .filter((e) =>
+              passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
+            )
+        : [],
+    [events, showGroundCombatToggle, showHighSeverity, showMediumSeverity, showLowSeverity],
+  );
+  const targetedEvents = useMemo(
+    () =>
+      showTargetedToggle
+        ? events
+            .filter((e) =>
+              (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type),
+            )
+            .filter((e) =>
+              passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
+            )
+        : [],
+    [events, showTargetedToggle, showHighSeverity, showMediumSeverity, showLowSeverity],
+  );
 
   // Sites filtered by enabled types, proximity pin, and healthy/attacked toggles
   const visibleSites = useMemo(() => {
-    let filtered = sites.filter(s => enabledSiteTypes.includes(s.siteType));
+    let filtered = sites.filter((s) => enabledSiteTypes.includes(s.siteType));
     if (proximityPin) {
-      filtered = filtered.filter(s =>
-        haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm
+      filtered = filtered.filter(
+        (s) => haversineKm(proximityPin.lat, proximityPin.lng, s.lat, s.lng) <= proximityRadiusKm,
       );
     }
     return filtered;
@@ -238,19 +292,23 @@ export function useEntityLayers() {
   }, []);
 
   // Proximity circle layer
-  const proximityCircleLayer = useMemo(() => new ScatterplotLayer({
-    id: 'proximity-circle',
-    data: proximityPin ? [proximityPin] : [],
-    getPosition: (d: { lat: number; lng: number }) => [d.lng, d.lat],
-    getRadius: proximityRadiusKm * 1000,
-    radiusUnits: 'meters' as const,
-    getFillColor: [59, 130, 246, 30],
-    getLineColor: [59, 130, 246, 120],
-    stroked: true,
-    filled: true,
-    lineWidthMinPixels: 2,
-    pickable: false,
-  }), [proximityPin, proximityRadiusKm]);
+  const proximityCircleLayer = useMemo(
+    () =>
+      new ScatterplotLayer({
+        id: 'proximity-circle',
+        data: proximityPin ? [proximityPin] : [],
+        getPosition: (d: { lat: number; lng: number }) => [d.lng, d.lat],
+        getRadius: proximityRadiusKm * 1000,
+        radiusUnits: 'meters' as const,
+        getFillColor: [59, 130, 246, 30],
+        getLineColor: [59, 130, 246, 120],
+        stroked: true,
+        filled: true,
+        lineWidthMinPixels: 2,
+        pickable: false,
+      }),
+    [proximityPin, proximityRadiusKm],
+  );
 
   // Filter ships to Middle East region (smooth elliptical boundary) + visibility toggle
   const filteredShips = useMemo(() => {
@@ -259,233 +317,276 @@ export function useEntityLayers() {
   }, [ships, showShips]);
 
   // Ship layer (always visible)
-  const shipLayer = useMemo(() => new IconLayer<ShipEntity>({
-    id: 'ships',
-    data: filteredShips,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: () => 'chevron',
-    getPosition: (d: ShipEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.ship.meters,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.ship.minPixels,
-    sizeMaxPixels: ICON_SIZE.ship.maxPixels,
-    getAngle: (d: ShipEntity) => -(d.data.courseOverGround ?? 0),
-    getColor: (d: ShipEntity) => {
-      const [r, g, b] = ENTITY_COLORS.ship;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      return [r, g, b, 255];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
-  }), [filteredShips, activeId, isFilterActive, matchedIds, clusterEventIds]);
+  const shipLayer = useMemo(
+    () =>
+      new IconLayer<ShipEntity>({
+        id: 'ships',
+        data: filteredShips,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: () => 'chevron',
+        getPosition: (d: ShipEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.ship.meters,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.ship.minPixels,
+        sizeMaxPixels: ICON_SIZE.ship.maxPixels,
+        getAngle: (d: ShipEntity) => -(d.data.courseOverGround ?? 0),
+        getColor: (d: ShipEntity) => {
+          const [r, g, b] = ENTITY_COLORS.ship;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          return [r, g, b, 255];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
+      }),
+    [filteredShips, activeId, isFilterActive, matchedIds, clusterEventIds],
+  );
 
   // Airstrike layer (always visible)
-  const airstrikeLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
-    id: 'airstrikes',
-    data: airstrikeEvents,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: () => 'starburst',
-    getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.airstrike.meters,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.airstrike.minPixels,
-    sizeMaxPixels: ICON_SIZE.airstrike.maxPixels,
-    getAngle: () => 0,
-    getColor: (d: ConflictEventEntity) => {
-      const [r, g, b] = ENTITY_COLORS.airstrike;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      return [r, g, b, 255];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
-  }), [airstrikeEvents, activeId, isFilterActive, matchedIds, clusterEventIds]);
+  const airstrikeLayer = useMemo(
+    () =>
+      new IconLayer<ConflictEventEntity>({
+        id: 'airstrikes',
+        data: airstrikeEvents,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: () => 'starburst',
+        getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.airstrike.meters,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.airstrike.minPixels,
+        sizeMaxPixels: ICON_SIZE.airstrike.maxPixels,
+        getAngle: () => 0,
+        getColor: (d: ConflictEventEntity) => {
+          const [r, g, b] = ENTITY_COLORS.airstrike;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          return [r, g, b, 255];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
+      }),
+    [airstrikeEvents, activeId, isFilterActive, matchedIds, clusterEventIds],
+  );
 
   // Ground combat layer (always visible)
-  const groundCombatLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
-    id: 'groundCombat',
-    data: groundCombatEvents,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: (d: ConflictEventEntity) => getIconForEntity(d),
-    getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.groundCombat.meters,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.groundCombat.minPixels,
-    sizeMaxPixels: ICON_SIZE.groundCombat.maxPixels,
-    getAngle: () => 0,
-    getColor: (d: ConflictEventEntity) => {
-      const [r, g, b] = ENTITY_COLORS.groundCombat;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      return [r, g, b, 255];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
-  }), [groundCombatEvents, activeId, isFilterActive, matchedIds]);
+  const groundCombatLayer = useMemo(
+    () =>
+      new IconLayer<ConflictEventEntity>({
+        id: 'groundCombat',
+        data: groundCombatEvents,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: (d: ConflictEventEntity) => getIconForEntity(d),
+        getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.groundCombat.meters,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.groundCombat.minPixels,
+        sizeMaxPixels: ICON_SIZE.groundCombat.maxPixels,
+        getAngle: () => 0,
+        getColor: (d: ConflictEventEntity) => {
+          const [r, g, b] = ENTITY_COLORS.groundCombat;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          return [r, g, b, 255];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
+      }),
+    [groundCombatEvents, activeId, isFilterActive, matchedIds],
+  );
 
   // Targeted layer (always visible)
-  const targetedLayer = useMemo(() => new IconLayer<ConflictEventEntity>({
-    id: 'targeted',
-    data: targetedEvents,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: () => 'crosshair',
-    getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.targeted.meters,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.targeted.minPixels,
-    sizeMaxPixels: ICON_SIZE.targeted.maxPixels,
-    getAngle: () => 0,
-    getColor: (d: ConflictEventEntity) => {
-      const [r, g, b] = ENTITY_COLORS.targeted;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      return [r, g, b, 255];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
-  }), [targetedEvents, activeId, isFilterActive, matchedIds, clusterEventIds]);
+  const targetedLayer = useMemo(
+    () =>
+      new IconLayer<ConflictEventEntity>({
+        id: 'targeted',
+        data: targetedEvents,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: () => 'crosshair',
+        getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.targeted.meters,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.targeted.minPixels,
+        sizeMaxPixels: ICON_SIZE.targeted.maxPixels,
+        getAngle: () => 0,
+        getColor: (d: ConflictEventEntity) => {
+          const [r, g, b] = ENTITY_COLORS.targeted;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          return [r, g, b, 255];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
+      }),
+    [targetedEvents, activeId, isFilterActive, matchedIds, clusterEventIds],
+  );
 
   // Flight layer (always visible)
-  const flightLayer = useMemo(() => new IconLayer<FlightEntity>({
-    id: 'flights',
-    data: flights,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: (d: FlightEntity) => d.data.onGround ? 'chevronGround' : 'chevron',
-    getPosition: (d: FlightEntity) => [d.lng, d.lat],
-    getSize: (d: FlightEntity) => {
-      if (d.data.unidentified) {
-        // Size pulses between 1.0x and 1.5x
-        return ICON_SIZE.flight.meters * (1.0 + 0.5 * pulseOpacity);
-      }
-      return ICON_SIZE.flight.meters;
-    },
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.flight.minPixels,
-    sizeMaxPixels: ICON_SIZE.flight.maxPixels,
-    getAngle: (d: FlightEntity) => d.data.heading === null ? 0 : -d.data.heading,
-    getColor: (d: FlightEntity) => {
-      const [r, g, b] = d.data.unidentified
-        ? ENTITY_COLORS.flightUnidentified
-        : ENTITY_COLORS.flight;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      const alpha = d.data.unidentified
-        ? Math.round(pulseOpacity * 255)
-        : Math.round(altitudeToOpacity(d.data.altitude) * 255);
-      return [r, g, b, alpha];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: {
-      getColor: [pulseOpacity, activeId, isFilterActive, matchedIds.size, clusterEventIds],
-      getSize: [pulseOpacity],
-    },
-  }), [flights, pulseOpacity, activeId, isFilterActive, matchedIds, clusterEventIds]);
+  const flightLayer = useMemo(
+    () =>
+      new IconLayer<FlightEntity>({
+        id: 'flights',
+        data: flights,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: (d: FlightEntity) => (d.data.onGround ? 'chevronGround' : 'chevron'),
+        getPosition: (d: FlightEntity) => [d.lng, d.lat],
+        getSize: (d: FlightEntity) => {
+          if (d.data.unidentified) {
+            // Size pulses between 1.0x and 1.5x
+            return ICON_SIZE.flight.meters * (1.0 + 0.5 * pulseOpacity);
+          }
+          return ICON_SIZE.flight.meters;
+        },
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.flight.minPixels,
+        sizeMaxPixels: ICON_SIZE.flight.maxPixels,
+        getAngle: (d: FlightEntity) => (d.data.heading === null ? 0 : -d.data.heading),
+        getColor: (d: FlightEntity) => {
+          const [r, g, b] = d.data.unidentified
+            ? ENTITY_COLORS.flightUnidentified
+            : ENTITY_COLORS.flight;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          const alpha = d.data.unidentified
+            ? Math.round(pulseOpacity * 255)
+            : Math.round(altitudeToOpacity(d.data.altitude) * 255);
+          return [r, g, b, alpha];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: {
+          getColor: [pulseOpacity, activeId, isFilterActive, matchedIds.size, clusterEventIds],
+          getSize: [pulseOpacity],
+        },
+      }),
+    [flights, pulseOpacity, activeId, isFilterActive, matchedIds, clusterEventIds],
+  );
 
   // Site layer (filtered by type + healthy/attacked toggles)
-  const siteLayer = useMemo(() => new IconLayer<SiteEntity>({
-    id: 'site-icons',
-    data: displaySites,
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: (d: SiteEntity) => SITE_ICON_MAP[d.siteType] ?? 'diamond',
-    getPosition: (d: SiteEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.site.meters,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.site.minPixels,
-    sizeMaxPixels: ICON_SIZE.site.maxPixels,
-    getAngle: () => 0,
-    getColor: (d: SiteEntity) => {
-      const attacked = siteAttackMap.get(d.id) ?? false;
-      const [r, g, b] = attacked ? ENTITY_COLORS.siteAttacked : ENTITY_COLORS.siteHealthy;
-      if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
-      if (clusterEventIds) return [r, g, b, DIM_ALPHA];
-      if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
-      return [r, g, b, 255];
-    },
-    billboard: false,
-    pickable: true,
-    updateTriggers: { getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size, clusterEventIds] },
-  }), [displaySites, activeId, siteAttackMap, isFilterActive, matchedIds, clusterEventIds]);
+  const siteLayer = useMemo(
+    () =>
+      new IconLayer<SiteEntity>({
+        id: 'site-icons',
+        data: displaySites,
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: (d: SiteEntity) => SITE_ICON_MAP[d.siteType] ?? 'diamond',
+        getPosition: (d: SiteEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.site.meters,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.site.minPixels,
+        sizeMaxPixels: ICON_SIZE.site.maxPixels,
+        getAngle: () => 0,
+        getColor: (d: SiteEntity) => {
+          const attacked = siteAttackMap.get(d.id) ?? false;
+          const [r, g, b] = attacked ? ENTITY_COLORS.siteAttacked : ENTITY_COLORS.siteHealthy;
+          if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
+          if (clusterEventIds) return [r, g, b, DIM_ALPHA];
+          if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
+          return [r, g, b, 255];
+        },
+        billboard: false,
+        pickable: true,
+        updateTriggers: {
+          getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size, clusterEventIds],
+        },
+      }),
+    [displaySites, activeId, siteAttackMap, isFilterActive, matchedIds, clusterEventIds],
+  );
 
   // Find active entity across all data sources
   const activeEntity = useMemo<MapEntity | SiteEntity | null>(() => {
     if (!activeId) return null;
-    return flights.find((f) => f.id === activeId)
-      ?? filteredShips.find((s) => s.id === activeId)
-      ?? events.find((e) => e.id === activeId)
-      ?? displaySites.find((s) => s.id === activeId)
-      ?? null;
+    return (
+      flights.find((f) => f.id === activeId) ??
+      filteredShips.find((s) => s.id === activeId) ??
+      events.find((e) => e.id === activeId) ??
+      displaySites.find((s) => s.id === activeId) ??
+      null
+    );
   }, [activeId, flights, filteredShips, events, displaySites]);
 
   // Glow layer for active entity (hidden when filter active and entity not matched)
   type AnyEntity = MapEntity | SiteEntity;
   const glowVisible = !!activeEntity && (!isFilterActive || matchedIds.has(activeEntity.id));
-  const glowLayer = useMemo(() => new IconLayer<AnyEntity>({
-    id: 'entity-glow',
-    visible: glowVisible,
-    data: activeEntity ? [activeEntity] : [],
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: (d: AnyEntity) => getIconForEntity(d),
-    getPosition: (d: AnyEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.flight.meters * 2.0,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.flight.minPixels * 2.0,
-    sizeMaxPixels: ICON_SIZE.flight.maxPixels * 2.0,
-    getAngle: (d: AnyEntity) => getAngleForEntity(d),
-    getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 60],
-    billboard: false,
-    pickable: false,
-  }), [activeEntity, siteAttackMap, glowVisible]);
+  const glowLayer = useMemo(
+    () =>
+      new IconLayer<AnyEntity>({
+        id: 'entity-glow',
+        visible: glowVisible,
+        data: activeEntity ? [activeEntity] : [],
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: (d: AnyEntity) => getIconForEntity(d),
+        getPosition: (d: AnyEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.flight.meters * 2.0,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.flight.minPixels * 2.0,
+        sizeMaxPixels: ICON_SIZE.flight.maxPixels * 2.0,
+        getAngle: (d: AnyEntity) => getAngleForEntity(d),
+        getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 60],
+        billboard: false,
+        pickable: false,
+      }),
+    [activeEntity, siteAttackMap, glowVisible],
+  );
 
   // Highlight layer for active entity (hidden when filter active and entity not matched)
   const highlightVisible = !!activeEntity && (!isFilterActive || matchedIds.has(activeEntity.id));
-  const highlightLayer = useMemo(() => new IconLayer<AnyEntity>({
-    id: 'entity-highlight',
-    visible: highlightVisible,
-    data: activeEntity ? [activeEntity] : [],
-    // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-    iconAtlas: getIconAtlas() as any,
-    iconMapping: ICON_MAPPING,
-    getIcon: (d: AnyEntity) => getIconForEntity(d),
-    getPosition: (d: AnyEntity) => [d.lng, d.lat],
-    getSize: ICON_SIZE.flight.meters * 1.2,
-    sizeUnits: 'meters' as const,
-    sizeMinPixels: ICON_SIZE.flight.minPixels * 1.2,
-    sizeMaxPixels: ICON_SIZE.flight.maxPixels * 1.2,
-    getAngle: (d: AnyEntity) => getAngleForEntity(d),
-    getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 255],
-    billboard: false,
-    pickable: false,
-  }), [activeEntity, siteAttackMap, highlightVisible]);
+  const highlightLayer = useMemo(
+    () =>
+      new IconLayer<AnyEntity>({
+        id: 'entity-highlight',
+        visible: highlightVisible,
+        data: activeEntity ? [activeEntity] : [],
+        // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
+        iconAtlas: getIconAtlasForLayer(),
+        iconMapping: ICON_MAPPING,
+        getIcon: (d: AnyEntity) => getIconForEntity(d),
+        getPosition: (d: AnyEntity) => [d.lng, d.lat],
+        getSize: ICON_SIZE.flight.meters * 1.2,
+        sizeUnits: 'meters' as const,
+        sizeMinPixels: ICON_SIZE.flight.minPixels * 1.2,
+        sizeMaxPixels: ICON_SIZE.flight.maxPixels * 1.2,
+        getAngle: (d: AnyEntity) => getAngleForEntity(d),
+        getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 255],
+        billboard: false,
+        pickable: false,
+      }),
+    [activeEntity, siteAttackMap, highlightVisible],
+  );
 
   return {
     /** Conflict event layers — zoom-dependent stacking with threat clusters */
     conflictLayers: [airstrikeLayer, groundCombatLayer, targetedLayer],
     /** Non-conflict layers (flights, ships, sites, glow/highlight) — always on top of threats */
-    entityLayers: [proximityCircleLayer, shipLayer, flightLayer, siteLayer, glowLayer, highlightLayer],
+    entityLayers: [
+      proximityCircleLayer,
+      shipLayer,
+      flightLayer,
+      siteLayer,
+      glowLayer,
+      highlightLayer,
+    ],
   };
 }

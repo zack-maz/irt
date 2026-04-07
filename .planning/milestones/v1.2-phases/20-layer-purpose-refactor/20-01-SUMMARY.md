@@ -9,20 +9,21 @@ requires:
   - phase: 19.1-advanced-search
     provides: Query sync bidirectional system, filterStore
 provides:
-  - "Entity toggle state fully removed from UIState and uiStore"
-  - "New layerStore with Set-based VisualizationLayerId state"
-  - "Simplified useEntityLayers rendering all entities unconditionally"
-  - "Simplified useCounterData counting all entities unconditionally"
-  - "Simplified useProximityAlerts using all sites"
-  - "Simplified useQuerySync syncing only filter state (no toggle mapping)"
-affects: [20-02-PLAN, 20-03-PLAN, LayerTogglesSlot, FilterPanelSlot, StatusPanel, BaseMap, Topbar, Sidebar]
+  - 'Entity toggle state fully removed from UIState and uiStore'
+  - 'New layerStore with Set-based VisualizationLayerId state'
+  - 'Simplified useEntityLayers rendering all entities unconditionally'
+  - 'Simplified useCounterData counting all entities unconditionally'
+  - 'Simplified useProximityAlerts using all sites'
+  - 'Simplified useQuerySync syncing only filter state (no toggle mapping)'
+affects:
+  [20-02-PLAN, 20-03-PLAN, LayerTogglesSlot, FilterPanelSlot, StatusPanel, BaseMap, Topbar, Sidebar]
 
 # Tech tracking
 tech-stack:
   added: []
   patterns:
-    - "Set-based layer toggle pattern in layerStore (add/delete on new Set)"
-    - "Always-visible entity rendering (no toggle gating on Deck.gl layers)"
+    - 'Set-based layer toggle pattern in layerStore (add/delete on new Set)'
+    - 'Always-visible entity rendering (no toggle gating on Deck.gl layers)'
 
 key-files:
   created:
@@ -36,15 +37,15 @@ key-files:
     - src/hooks/useQuerySync.ts
 
 key-decisions:
-  - "readBool kept in uiStore for isMarketsCollapsed persistence (only remaining localStorage usage)"
-  - "Pulse animation always active (no pulseEnabled toggle) since unidentified flights always render"
-  - "CONFLICT_TOGGLE_GROUPS keys preserved as event type grouping constants (structural, not visibility)"
-  - "buildASTFromToggles renamed to buildASTFromFilters to reflect new purpose"
-  - "SyncableState stripped of all 15 toggle fields, keeping only filter fields"
+  - 'readBool kept in uiStore for isMarketsCollapsed persistence (only remaining localStorage usage)'
+  - 'Pulse animation always active (no pulseEnabled toggle) since unidentified flights always render'
+  - 'CONFLICT_TOGGLE_GROUPS keys preserved as event type grouping constants (structural, not visibility)'
+  - 'buildASTFromToggles renamed to buildASTFromFilters to reflect new purpose'
+  - 'SyncableState stripped of all 15 toggle fields, keeping only filter fields'
 
 patterns-established:
-  - "Always-visible entities: Deck.gl layers never use visible prop for toggle gating"
-  - "Filter-only narrowing: search/filter system is the only way to reduce visible entities"
+  - 'Always-visible entities: Deck.gl layers never use visible prop for toggle gating'
+  - 'Filter-only narrowing: search/filter system is the only way to reduce visible entities'
 
 requirements-completed: [LREF-01, LREF-02, LREF-05]
 
@@ -66,6 +67,7 @@ completed: 2026-03-23
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Deleted LayerToggles interface, LAYER_TOGGLE_DEFAULTS, and all 18 toggle fields/functions from UIState
 - Created layerStore.ts with VisualizationLayerId type and Set-based toggle state
 - Simplified useEntityLayers to render all entity types unconditionally (flights, ships, events, sites)
@@ -81,6 +83,7 @@ Each task was committed atomically:
 2. **Task 2: Simplify hooks that consumed toggle state** - `35125dc` (refactor)
 
 ## Files Created/Modified
+
 - `src/stores/layerStore.ts` - New visualization layer store with Set-based VisualizationLayerId state
 - `src/types/ui.ts` - Removed LayerToggles interface, LAYER_TOGGLE_DEFAULTS, 18 toggle fields/functions from UIState
 - `src/stores/uiStore.ts` - Stripped toggle state, persistence functions, initialization from store
@@ -90,6 +93,7 @@ Each task was committed atomically:
 - `src/hooks/useQuerySync.ts` - Removed toggle sync maps/derivation, renamed buildASTFromToggles to buildASTFromFilters
 
 ## Decisions Made
+
 - Kept readBool in uiStore since it's still used for isMarketsCollapsed persistence
 - Pulse animation runs unconditionally (no early return when disabled) since unidentified flights always render
 - CONFLICT_TOGGLE_GROUPS preserved as event type grouping constants for splitting events into separate Deck.gl layers
@@ -101,12 +105,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Component files (LayerTogglesSlot, FilterPanelSlot, StatusPanel, BaseMap, Topbar, StatusDropdown) still reference removed toggle state and will fail TypeScript compilation
 - These are expected errors addressed in Plan 02 (UI component updates)
 - Test files (uiStore.test.ts, LayerToggles.test.tsx) also need updating in Plan 02
@@ -116,5 +123,6 @@ None - no external service configuration required.
 All 7 files verified present. Both task commits (d316498, 35125dc) verified in git log.
 
 ---
-*Phase: 20-layer-purpose-refactor*
-*Completed: 2026-03-23*
+
+_Phase: 20-layer-purpose-refactor_
+_Completed: 2026-03-23_

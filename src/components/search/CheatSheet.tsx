@@ -85,9 +85,7 @@ export function CheatSheet({ onClose }: CheatSheetProps) {
                 <div key={prefix} className="flex items-baseline gap-2 text-xs">
                   <code className={`shrink-0 font-medium ${tag.color}`}>{tag.prefix}:</code>
                   <span className="flex-1 text-text-muted">{tag.description}</span>
-                  <span className="shrink-0 text-[10px] text-text-muted/50">
-                    {tag.examples[0]}
-                  </span>
+                  <span className="shrink-0 text-[10px] text-text-muted/50">{tag.examples[0]}</span>
                 </div>
               );
             })}

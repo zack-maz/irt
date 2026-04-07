@@ -45,8 +45,8 @@ describe('EthnicOverlay', () => {
   });
 
   it('overlap features have groups array with 2+ entries', () => {
-    const overlapFeatures = ethnicZonesData.features.filter(
-      (f) => Array.isArray((f.properties as Record<string, unknown>).groups)
+    const overlapFeatures = ethnicZonesData.features.filter((f) =>
+      Array.isArray((f.properties as Record<string, unknown>).groups),
     );
     expect(overlapFeatures.length).toBeGreaterThan(0);
 

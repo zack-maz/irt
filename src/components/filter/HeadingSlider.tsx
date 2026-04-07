@@ -37,7 +37,11 @@ export function HeadingSlider({ value, onChange }: HeadingSliderProps) {
         aria-label="Heading angle"
       />
       <div className="flex justify-between text-[8px] text-text-muted">
-        <span>N</span><span>E</span><span>S</span><span>W</span><span>N</span>
+        <span>N</span>
+        <span>E</span>
+        <span>S</span>
+        <span>W</span>
+        <span>N</span>
       </div>
     </div>
   );

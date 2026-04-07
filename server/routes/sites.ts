@@ -11,7 +11,10 @@ import type { SiteEntity } from '../types.js';
 
 /** Zod schema for /api/sites query params */
 const sitesQuerySchema = z.object({
-  refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+  refresh: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 /** Redis key for all cached infrastructure sites */

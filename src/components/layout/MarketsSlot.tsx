@@ -20,7 +20,10 @@ const RANGES: { value: MarketRange; label: string }[] = [
   { value: 'ytd', label: 'YTD' },
 ];
 
-const DEFAULT_POSITION = { x: typeof window !== 'undefined' ? window.innerWidth - 604 : 900, y: 56 };
+const DEFAULT_POSITION = {
+  x: typeof window !== 'undefined' ? window.innerWidth - 604 : 900,
+  y: 56,
+};
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -50,7 +53,9 @@ export function MarketsSlot() {
   });
 
   const isNotDefault = useMemo(() => {
-    return Math.abs(position.x - DEFAULT_POSITION.x) > 2 || Math.abs(position.y - DEFAULT_POSITION.y) > 2;
+    return (
+      Math.abs(position.x - DEFAULT_POSITION.x) > 2 || Math.abs(position.y - DEFAULT_POSITION.y) > 2
+    );
   }, [position]);
 
   const isCollapsed = useUIStore((s) => s.isMarketsCollapsed);
@@ -82,10 +87,7 @@ export function MarketsSlot() {
     >
       <OverlayPanel>
         {/* Drag handle header */}
-        <div
-          className="flex items-center gap-2"
-          {...handleProps}
-        >
+        <div className="flex items-center gap-2" {...handleProps}>
           {/* Grip icon */}
           <svg
             width="8"
@@ -110,9 +112,7 @@ export function MarketsSlot() {
             data-testid="markets-status-dot"
           />
           {allClosed && (
-            <span className="text-[10px] text-text-muted uppercase">
-              Market Closed
-            </span>
+            <span className="text-[10px] text-text-muted uppercase">Market Closed</span>
           )}
           <div className="ml-auto flex items-center gap-1">
             {isNotDefault && (
@@ -125,7 +125,16 @@ export function MarketsSlot() {
                 aria-label="Reset position"
                 title="Reset position"
               >
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M2 8a6 6 0 0 1 10.47-4" />
                   <path d="M14 8a6 6 0 0 1-10.47 4" />
                   <polyline points="13 2 13 5 10 5" />

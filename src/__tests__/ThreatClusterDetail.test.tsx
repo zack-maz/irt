@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThreatClusterDetail } from '@/components/detail/ThreatClusterDetail';
 import { useEventStore } from '@/stores/eventStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useNotificationStore } from '@/stores/notificationStore';
 import type { ThreatCluster } from '@/types/ui';
 import type { ConflictEventEntity } from '@/types/entities';
 

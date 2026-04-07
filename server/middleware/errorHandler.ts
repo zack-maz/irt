@@ -27,15 +27,18 @@ export class AppError extends Error {
  * - Stack traces are included in non-production environments.
  * - Uses pino-http's request-scoped logger (req.log) when available.
  */
-export function errorHandler(
-  err: Error,
-  req: Request,
-  res: Response,
-  _next: NextFunction,
-): void {
+/**
+ * pino-http injects a request-scoped child logger as `req.log`. The base Express
+ * Request type doesn't declare it, so we narrow at the call site instead of
+ * mutating the global Request type.
+ */
+type PinoLogger = { error: (obj: unknown, msg?: string) => void };
+
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction): void {
   const statusCode = err instanceof AppError ? err.statusCode : 500;
   const code = err instanceof AppError ? err.code : 'INTERNAL_ERROR';
-  const requestId = (req as any).id ?? 'unknown';
+  // pino-http sets req.id to a string; the Express type widens it to ReqId.
+  const requestId = (req.id as string | undefined) ?? 'unknown';
 
   const body: Record<string, unknown> = {
     error: err.message || 'Internal server error',
@@ -50,8 +53,9 @@ export function errorHandler(
 
   // Use pino-http's request-scoped logger when available (carries request ID),
   // fall back silently if pino-http is not wired (e.g. in tests without it).
-  if ('log' in req && typeof (req as any).log?.error === 'function') {
-    (req as any).log.error({ err, statusCode, code }, 'request error');
+  const reqWithLog = req as Request & { log?: PinoLogger };
+  if (typeof reqWithLog.log?.error === 'function') {
+    reqWithLog.log.error({ err, statusCode, code }, 'request error');
   }
 
   res.status(statusCode).json(body);

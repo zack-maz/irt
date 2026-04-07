@@ -159,7 +159,7 @@ function makeRequest(endpoint, path, expectedKey) {
 }
 
 // VU-scoped cold start tracker (reset per VU iteration via init code)
-// eslint-disable-next-line no-var
+
 var __VU_COLD_TRACKER = {};
 
 // ---------------------------------------------------------------------------
@@ -178,7 +178,9 @@ export function setup() {
   if (res.status === 200) {
     try {
       healthData = res.json();
-      console.log(`Pre-test health: status=${healthData.status}, redis=${healthData.redis}, latencyMs=${healthData.latencyMs}`);
+      console.log(
+        `Pre-test health: status=${healthData.status}, redis=${healthData.redis}, latencyMs=${healthData.latencyMs}`,
+      );
       if (healthData.estimatedDailyCommands) {
         console.log(`Pre-test estimated daily commands: ${healthData.estimatedDailyCommands}`);
       }
@@ -202,12 +204,16 @@ export function teardown(data) {
   if (res.status === 200) {
     try {
       const postHealth = res.json();
-      console.log(`Post-test health: status=${postHealth.status}, redis=${postHealth.redis}, latencyMs=${postHealth.latencyMs}`);
+      console.log(
+        `Post-test health: status=${postHealth.status}, redis=${postHealth.redis}, latencyMs=${postHealth.latencyMs}`,
+      );
 
       if (data.preTestHealth) {
         console.log('\n--- Health Comparison ---');
         console.log(`Redis status: ${data.preTestHealth.redis} -> ${postHealth.redis}`);
-        console.log(`Redis latency: ${data.preTestHealth.latencyMs}ms -> ${postHealth.latencyMs}ms`);
+        console.log(
+          `Redis latency: ${data.preTestHealth.latencyMs}ms -> ${postHealth.latencyMs}ms`,
+        );
 
         if (data.preTestHealth.sources && postHealth.sources) {
           const pre = data.preTestHealth.sources;

@@ -18,7 +18,15 @@ affects: [base-map-plan-02, entity-rendering, layer-controls]
 
 # Tech tracking
 tech-stack:
-  added: [maplibre-gl@5.20.1, "@vis.gl/react-maplibre@8.1.0", "@deck.gl/core@9.2.11", "@deck.gl/react@9.2.11", "@deck.gl/mapbox@9.2.11", "@deck.gl/layers@9.2.11"]
+  added:
+    [
+      maplibre-gl@5.20.1,
+      '@vis.gl/react-maplibre@8.1.0',
+      '@deck.gl/core@9.2.11',
+      '@deck.gl/react@9.2.11',
+      '@deck.gl/mapbox@9.2.11',
+      '@deck.gl/layers@9.2.11',
+    ]
   patterns: [deckgl-overlay-via-useControl, maplibre-jsdom-mocking, wave-0-todo-stubs]
 
 key-files:
@@ -38,14 +46,14 @@ key-files:
     - vite.config.ts
 
 key-decisions:
-  - "Mocked maplibre-gl and @deck.gl/mapbox via vite.config.ts test.alias for jsdom compatibility"
-  - "Used it.todo() for unimplemented component stubs to avoid import errors while keeping test presence"
-  - "Created CSS import mock (maplibre-gl-css.ts) to suppress CSS import errors in test environment"
+  - 'Mocked maplibre-gl and @deck.gl/mapbox via vite.config.ts test.alias for jsdom compatibility'
+  - 'Used it.todo() for unimplemented component stubs to avoid import errors while keeping test presence'
+  - 'Created CSS import mock (maplibre-gl-css.ts) to suppress CSS import errors in test environment'
 
 patterns-established:
-  - "Test alias mocking: register WebGL-dependent libraries in vite.config.ts test.alias pointing to src/test/__mocks__/"
-  - "Wave 0 stubs: use it.todo() for tests referencing unimplemented components -- Plan 02 will convert to real tests"
-  - "MapboxOverlay bridge: DeckGLOverlay component wraps MapboxOverlay via useControl hook from react-maplibre"
+  - 'Test alias mocking: register WebGL-dependent libraries in vite.config.ts test.alias pointing to src/test/__mocks__/'
+  - 'Wave 0 stubs: use it.todo() for tests referencing unimplemented components -- Plan 02 will convert to real tests'
+  - 'MapboxOverlay bridge: DeckGLOverlay component wraps MapboxOverlay via useControl hook from react-maplibre'
 
 requirements-completed: [MAP-01]
 
@@ -128,5 +136,6 @@ None - no external service configuration required.
 All 11 key files verified present. Both task commits (bc8ecd3, dc66f23) verified in git log.
 
 ---
-*Phase: 02-base-map*
-*Completed: 2026-03-14*
+
+_Phase: 02-base-map_
+_Completed: 2026-03-14_

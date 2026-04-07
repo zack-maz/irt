@@ -13,6 +13,7 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 **Goal:** Add key infrastructure sites overlay, news feed, notification center with severity scoring, oil markets tracker, search/filter/UI cleanup, and production deploy sync.
 
 **Target features:**
+
 - Key infrastructure sites overlay (nuclear, naval, oil, airbase, dam, port) via Overpass API
 - Multi-source news feed (GDELT DOC + BBC + Al Jazeera) with noise filtering
 - Notification center with severity scoring, news matching, and proximity alerts
@@ -75,19 +76,20 @@ Brainstorm document: docs/brainstorms/2026-03-13-iran-conflict-monitor-brainstor
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Deck.gl + MapLibre for map | GPU-accelerated 2.5D, free, native layer system | ✓ Good — smooth rendering, zoom-responsive icons |
-| React 19 + Vite 6 + Zustand 5 | Modern stack, fast HMR, minimal boilerplate | ✓ Good — curried store pattern works well |
-| Express 5 API proxy | CORS handling, API key protection, data normalization | ✓ Good — clean adapter pattern |
-| Mixed refresh rates | Flights ~5-30s, ships 30s, events 15min | ✓ Good — independent polling loops |
-| adsb.lol as default flight source | Free, no API key, community-driven | ✓ Good — best out-of-box experience |
-| GDELT v2 over ACLED | Free, no auth, 15-min updates, CAMEO codes | ✓ Good — replaced ACLED which needs approval |
-| Hide non-stat news by default | Core value is mathematical data, not narratives | ✓ Good — clean default view |
-| No people tracking | Dropped — unclear data sources, high complexity | ✓ Good — kept scope manageable |
-| Recursive setTimeout over setInterval | Prevents overlapping async fetches | ✓ Good — no race conditions |
-| Tailwind CSS v4 CSS-first config | No tailwind.config.js, @theme in CSS | ✓ Good — cleaner setup |
-| TypeScript pinned to ~5.9.3 | Avoid TS 6.0 breaking changes | ✓ Good — stable build |
+| Decision                              | Rationale                                             | Outcome                                          |
+| ------------------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
+| Deck.gl + MapLibre for map            | GPU-accelerated 2.5D, free, native layer system       | ✓ Good — smooth rendering, zoom-responsive icons |
+| React 19 + Vite 6 + Zustand 5         | Modern stack, fast HMR, minimal boilerplate           | ✓ Good — curried store pattern works well        |
+| Express 5 API proxy                   | CORS handling, API key protection, data normalization | ✓ Good — clean adapter pattern                   |
+| Mixed refresh rates                   | Flights ~5-30s, ships 30s, events 15min               | ✓ Good — independent polling loops               |
+| adsb.lol as default flight source     | Free, no API key, community-driven                    | ✓ Good — best out-of-box experience              |
+| GDELT v2 over ACLED                   | Free, no auth, 15-min updates, CAMEO codes            | ✓ Good — replaced ACLED which needs approval     |
+| Hide non-stat news by default         | Core value is mathematical data, not narratives       | ✓ Good — clean default view                      |
+| No people tracking                    | Dropped — unclear data sources, high complexity       | ✓ Good — kept scope manageable                   |
+| Recursive setTimeout over setInterval | Prevents overlapping async fetches                    | ✓ Good — no race conditions                      |
+| Tailwind CSS v4 CSS-first config      | No tailwind.config.js, @theme in CSS                  | ✓ Good — cleaner setup                           |
+| TypeScript pinned to ~5.9.3           | Avoid TS 6.0 breaking changes                         | ✓ Good — stable build                            |
 
 ---
-*Last updated: 2026-03-19 after v1.1 milestone start*
+
+_Last updated: 2026-03-19 after v1.1 milestone start_

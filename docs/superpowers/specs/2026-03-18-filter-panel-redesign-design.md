@@ -53,6 +53,7 @@ The current filter panel lives in the top-left overlay stack and gets cut off at
 - Event filters (country, date) apply to all conflict event types collectively, independent of the per-type layer toggles (airstrikes, ground combat, targeted)
 
 **Header hierarchy:**
+
 - **Entity section headers** (Flights/Ships/Events) — clickable to expand/collapse, no clear button (clearing is per-filter or "Clear all")
 - **Filter sub-headers** (Country/Speed/Altitude/Date Range) — reuse existing `SectionHeader` pattern with per-filter clear (x) button and active indicator
 
@@ -60,15 +61,15 @@ The current filter panel lives in the top-left overlay stack and gets cut off at
 
 Split shared fields into entity-scoped ones:
 
-| Old | New | Scope |
-|-----|-----|-------|
-| `selectedCountries` | `flightCountries` | Flights only |
-| (new) | `eventCountries` | Events only |
-| `speedMin/speedMax` | `flightSpeedMin/flightSpeedMax` | Flights only |
-| (new) | `shipSpeedMin/shipSpeedMax` | Ships only (max ~30 kn) |
-| `altitudeMin/altitudeMax` | `altitudeMin/altitudeMax` | Flights only (unchanged) |
-| `dateStart/dateEnd` | `dateStart/dateEnd` | Events only (unchanged) |
-| `proximityPin/proximityRadiusKm` | `proximityPin/proximityRadiusKm` | Global (unchanged) |
+| Old                              | New                              | Scope                    |
+| -------------------------------- | -------------------------------- | ------------------------ |
+| `selectedCountries`              | `flightCountries`                | Flights only             |
+| (new)                            | `eventCountries`                 | Events only              |
+| `speedMin/speedMax`              | `flightSpeedMin/flightSpeedMax`  | Flights only             |
+| (new)                            | `shipSpeedMin/shipSpeedMax`      | Ships only (max ~30 kn)  |
+| `altitudeMin/altitudeMax`        | `altitudeMin/altitudeMax`        | Flights only (unchanged) |
+| `dateStart/dateEnd`              | `dateStart/dateEnd`              | Events only (unchanged)  |
+| `proximityPin/proximityRadiusKm` | `proximityPin/proximityRadiusKm` | Global (unchanged)       |
 
 Update `FilterKey` union type to match new field names: `'flightCountry' | 'eventCountry' | 'flightSpeed' | 'shipSpeed' | 'altitude' | 'proximity' | 'date'`
 
@@ -85,15 +86,15 @@ Update `FilterKey` union type to match new field names: `'flightCountry' | 'even
 
 **`clearFilter` mapping:**
 
-| FilterKey | Resets |
-|-----------|--------|
-| `flightCountry` | `flightCountries: []` |
-| `eventCountry` | `eventCountries: []` |
-| `flightSpeed` | `flightSpeedMin: null, flightSpeedMax: null` |
-| `shipSpeed` | `shipSpeedMin: null, shipSpeedMax: null` |
-| `altitude` | `altitudeMin: null, altitudeMax: null` |
-| `proximity` | `proximityPin: null, proximityRadiusKm: 100` |
-| `date` | `dateStart: null, dateEnd: null` |
+| FilterKey       | Resets                                       |
+| --------------- | -------------------------------------------- |
+| `flightCountry` | `flightCountries: []`                        |
+| `eventCountry`  | `eventCountries: []`                         |
+| `flightSpeed`   | `flightSpeedMin: null, flightSpeedMax: null` |
+| `shipSpeed`     | `shipSpeedMin: null, shipSpeedMax: null`     |
+| `altitude`      | `altitudeMin: null, altitudeMax: null`       |
+| `proximity`     | `proximityPin: null, proximityRadiusKm: 100` |
+| `date`          | `dateStart: null, dateEnd: null`             |
 
 `activeFilterCount` counts each non-default group as 1 (7 possible max).
 
@@ -110,6 +111,7 @@ Filter state is **not** persisted to localStorage (resets on page reload). This 
 ### UI Store Changes (`uiStore.ts`)
 
 Add three booleans for section collapse state:
+
 - `isFlightFiltersOpen: boolean` (default `true`)
 - `isShipFiltersOpen: boolean` (default `true`)
 - `isEventFiltersOpen: boolean` (default `true`)

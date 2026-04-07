@@ -35,16 +35,16 @@ key-files:
     - src/__tests__/LayerToggles.test.tsx
 
 key-decisions:
-  - "Natural Earth disputed areas file is ne_10m_admin_0_disputed_areas (not breakaway_disputed_areas) at 10m scale"
-  - "Extended filter bbox (lat 0-50, lng 20-80) captures 57 countries including peripheral overlap"
-  - "ISO_A3 -99 fallback to ADM0_A3 applied for N. Cyprus (CYN), Somaliland (SOL), Kosovo (KOS)"
-  - "Canvas-generated 16x16 hatching pattern with 8px line spacing in amber #f59e0b"
-  - "Disputed hover labels use MapLibre feature-state for show-on-hover behavior"
-  - "Source nesting: Layer components nested inside Source for cleaner JSX (react-maplibre pattern)"
+  - 'Natural Earth disputed areas file is ne_10m_admin_0_disputed_areas (not breakaway_disputed_areas) at 10m scale'
+  - 'Extended filter bbox (lat 0-50, lng 20-80) captures 57 countries including peripheral overlap'
+  - 'ISO_A3 -99 fallback to ADM0_A3 applied for N. Cyprus (CYN), Somaliland (SOL), Kosovo (KOS)'
+  - 'Canvas-generated 16x16 hatching pattern with 8px line spacing in amber #f59e0b'
+  - 'Disputed hover labels use MapLibre feature-state for show-on-hover behavior'
+  - 'Source nesting: Layer components nested inside Source for cleaner JSX (react-maplibre pattern)'
 
 patterns-established:
-  - "Canvas fill-pattern: generate ImageData on canvas, register via map.addImage(), gate Layer render on isPatternReady state"
-  - "Feature-state hover: assign numeric IDs to features, use mouseenter/mouseleave to toggle feature-state, drive paint properties from feature-state"
+  - 'Canvas fill-pattern: generate ImageData on canvas, register via map.addImage(), gate Layer render on isPatternReady state'
+  - 'Feature-state hover: assign numeric IDs to features, use mouseenter/mouseleave to toggle feature-state, drive paint properties from feature-state'
 
 requirements-completed: [POL-01, POL-02, POL-03, POL-04, POL-05, POL-06]
 
@@ -65,6 +65,7 @@ completed: 2026-04-02
 - **Files modified:** 11
 
 ## Accomplishments
+
 - Faction type system with 10 country assignments (7 US-aligned, 3 Iran-aligned) and neutral fallback
 - Static GeoJSON data extraction: 57 Middle East country polygons (50KB) + 3 disputed territories (5.5KB)
 - PoliticalOverlay component: faction-colored fills (15% opacity), faction-colored borders (1px, 60% opacity), diagonal amber hatching for disputed zones, hover labels via feature-state
@@ -80,6 +81,7 @@ Each task was committed atomically:
 2. **Task 2: PoliticalOverlay component with legend registration** - `713eaa5` (feat)
 
 ## Files Created/Modified
+
 - `src/lib/factions.ts` - Faction type, FACTION_ASSIGNMENTS, FACTION_COLORS, getFaction helper
 - `src/components/map/layers/PoliticalOverlay.tsx` - Political overlay with country fills, borders, disputed hatching, hover labels
 - `src/data/countries.json` - 57 Middle East country polygons from Natural Earth 110m (50KB)
@@ -93,6 +95,7 @@ Each task was committed atomically:
 - `src/__tests__/LayerToggles.test.tsx` - Updated toggle counts (4 active / 3 coming-soon)
 
 ## Decisions Made
+
 - Natural Earth 10m disputed areas filename is `ne_10m_admin_0_disputed_areas` (not `breakaway_disputed_areas` which only exists at 50m)
 - Extended bbox filter (lat 0-50, lng 20-80) captures 57 countries -- broader than plan's ~25-35 estimate, but correct for catching polygons that partially overlap the display region
 - Applied ISO_A3 fallback to ADM0_A3 for 3 countries with -99 codes (N. Cyprus, Somaliland, Kosovo)
@@ -105,6 +108,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Corrected Natural Earth disputed areas URL**
+
 - **Found during:** Task 1 (data extraction)
 - **Issue:** Plan specified `ne_10m_admin_0_breakaway_disputed_areas.geojson` which returns 404 at 10m scale
 - **Fix:** Used correct filename `ne_10m_admin_0_disputed_areas.geojson` (verified via GitHub API)
@@ -113,10 +117,11 @@ Each task was committed atomically:
 - **Committed in:** d7f6769 (Task 1 commit)
 
 **2. [Rule 1 - Bug] Adjusted test country count range**
+
 - **Found during:** Task 1 (test verification)
 - **Issue:** Plan estimated 25-35 countries, but extended bbox yields 57 features
 - **Fix:** Updated test assertion range to 40-70 (matches actual Natural Earth data with extended bbox)
-- **Files modified:** src/__tests__/factions.test.ts
+- **Files modified:** src/**tests**/factions.test.ts
 - **Verification:** All faction tests pass
 - **Committed in:** d7f6769 (Task 1 commit)
 
@@ -126,12 +131,15 @@ Each task was committed atomically:
 **Impact on plan:** Both fixes necessary for correct data extraction. No scope creep.
 
 ## Issues Encountered
+
 None beyond the auto-fixed deviations.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - PoliticalOverlay component ready for integration into BaseMap (Plan 02)
 - Plan 02 needs to add `<PoliticalOverlay />` inside `<Map>` in BaseMap.tsx
 - Layer ordering (beforeId) will need visual testing in Plan 02
@@ -142,5 +150,6 @@ None - no external service configuration required.
 All 8 created files verified on disk. All 3 task commits verified in git log.
 
 ---
-*Phase: 24-political-boundaries-layer*
-*Completed: 2026-04-02*
+
+_Phase: 24-political-boundaries-layer_
+_Completed: 2026-04-02_

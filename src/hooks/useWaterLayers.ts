@@ -5,7 +5,7 @@ import { useLayerStore } from '@/stores/layerStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { stressToRGBA } from '@/lib/waterStress';
-import { getIconAtlas, ICON_MAPPING } from '@/components/map/layers/icons';
+import { getIconAtlasForLayer, ICON_MAPPING } from '@/components/map/layers/icons';
 import riversGeoJson from '@/data/rivers.json';
 import type { WaterFacility, WaterFacilityType } from '../../server/types';
 import type { Layer } from '@deck.gl/core';
@@ -206,8 +206,7 @@ export function useWaterLayers(): WaterLayerGroup {
       getAngle: () => 0,
       billboard: false,
       pickable: true,
-      // deck.gl IconLayer accepts HTMLCanvasElement at runtime; type defs require Texture.
-      iconAtlas: getIconAtlas() as any,
+      iconAtlas: getIconAtlasForLayer(),
       iconMapping: ICON_MAPPING,
     });
 

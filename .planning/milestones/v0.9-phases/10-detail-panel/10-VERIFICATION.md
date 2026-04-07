@@ -19,20 +19,20 @@ re_verification: false
 
 ### Observable Truths
 
-| #  | Truth | Status | Evidence |
-|----|-------|--------|----------|
-| 1  | Clicking an entity opens a detail panel showing live stats | VERIFIED | `BaseMap.tsx` `handleDeckClick` calls `selectEntity(id)` + `openDetailPanel()` on entity click; `DetailPanelSlot.tsx` renders `FlightDetail`, `ShipDetail`, or `EventDetail` based on `entity.type` |
-| 2  | Detail panel updates in real-time as new data arrives | VERIFIED | `useSelectedEntity` subscribes to all three stores via Zustand selectors; `DetailValue` flashes on value change; `useRelativeTime` ticks every second |
-| 3  | Close button and Escape key dismiss the panel | VERIFIED | `DetailPanelSlot` `dismiss()` wired to close button (`aria-label="Close"`) and `keydown` Escape handler via `useEffect`; test coverage confirmed |
-| 4  | Panel does not obscure the selected entity | VERIFIED | Panel is `absolute top-0 right-0 w-[var(--width-detail-panel)]` (360px), slides in from right edge only; center of map remains unobstructed |
-| 5  | useSelectedEntity searches all three stores | VERIFIED | `useSelectedEntity.ts` lines 35-39: `flights.find() ?? ships.find() ?? events.find() ?? null` |
-| 6  | Lost contact: isLost=true with last-known data when entity disappears | VERIFIED | `useRef<LastKnown>` caches last entity; returns `{ entity: ref.entity, isLost: true }` when entity not found in any store |
-| 7  | DetailValue flashes on value change, not on initial render | VERIFIED | `useRef<string>(value)` initialized to current value; `useEffect` only fires flash when `prevRef.current !== value` |
-| 8  | AppShell layout: all controls in top-left, right side clear | VERIFIED | `AppShell.tsx`: single `absolute top-4 left-4 flex-col` div contains TitleSlot, StatusPanel, CountersSlot, LayerTogglesSlot; `DetailPanelSlot` is standalone (right side) |
-| 9  | Empty map click does NOT clear selectedEntityId | VERIFIED | `BaseMap.tsx` `handleDeckClick`: `if (!info.object) { return; }` — no selectEntity call on empty click |
-| 10 | Copy-to-clipboard copies coordinates with feedback | VERIFIED | `handleCopy` calls `navigator.clipboard.writeText(\`${lat.toFixed(6)}, ${lng.toFixed(6)}\`)` then sets `copied=true` for 2s |
-| 11 | CSS --width-detail-panel is 360px and flash keyframe exists | VERIFIED | `app.css` line 32: `--width-detail-panel: 360px`; lines 67-73: `@keyframes flash` + `.animate-flash` class |
-| 12 | Per-type content: flight dual units, ship AIS, event GDELT | VERIFIED | `FlightDetail` has MS_TO_KNOTS/M_TO_FT/MS_TO_FTMIN conversions; `ShipDetail` shows SOG/COG/HDG; `EventDetail` shows CAMEO/Goldstein/actors/source link |
+| #   | Truth                                                                 | Status   | Evidence                                                                                                                                                                                            |
+| --- | --------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Clicking an entity opens a detail panel showing live stats            | VERIFIED | `BaseMap.tsx` `handleDeckClick` calls `selectEntity(id)` + `openDetailPanel()` on entity click; `DetailPanelSlot.tsx` renders `FlightDetail`, `ShipDetail`, or `EventDetail` based on `entity.type` |
+| 2   | Detail panel updates in real-time as new data arrives                 | VERIFIED | `useSelectedEntity` subscribes to all three stores via Zustand selectors; `DetailValue` flashes on value change; `useRelativeTime` ticks every second                                               |
+| 3   | Close button and Escape key dismiss the panel                         | VERIFIED | `DetailPanelSlot` `dismiss()` wired to close button (`aria-label="Close"`) and `keydown` Escape handler via `useEffect`; test coverage confirmed                                                    |
+| 4   | Panel does not obscure the selected entity                            | VERIFIED | Panel is `absolute top-0 right-0 w-[var(--width-detail-panel)]` (360px), slides in from right edge only; center of map remains unobstructed                                                         |
+| 5   | useSelectedEntity searches all three stores                           | VERIFIED | `useSelectedEntity.ts` lines 35-39: `flights.find() ?? ships.find() ?? events.find() ?? null`                                                                                                       |
+| 6   | Lost contact: isLost=true with last-known data when entity disappears | VERIFIED | `useRef<LastKnown>` caches last entity; returns `{ entity: ref.entity, isLost: true }` when entity not found in any store                                                                           |
+| 7   | DetailValue flashes on value change, not on initial render            | VERIFIED | `useRef<string>(value)` initialized to current value; `useEffect` only fires flash when `prevRef.current !== value`                                                                                 |
+| 8   | AppShell layout: all controls in top-left, right side clear           | VERIFIED | `AppShell.tsx`: single `absolute top-4 left-4 flex-col` div contains TitleSlot, StatusPanel, CountersSlot, LayerTogglesSlot; `DetailPanelSlot` is standalone (right side)                           |
+| 9   | Empty map click does NOT clear selectedEntityId                       | VERIFIED | `BaseMap.tsx` `handleDeckClick`: `if (!info.object) { return; }` — no selectEntity call on empty click                                                                                              |
+| 10  | Copy-to-clipboard copies coordinates with feedback                    | VERIFIED | `handleCopy` calls `navigator.clipboard.writeText(\`${lat.toFixed(6)}, ${lng.toFixed(6)}\`)`then sets`copied=true` for 2s                                                                           |
+| 11  | CSS --width-detail-panel is 360px and flash keyframe exists           | VERIFIED | `app.css` line 32: `--width-detail-panel: 360px`; lines 67-73: `@keyframes flash` + `.animate-flash` class                                                                                          |
+| 12  | Per-type content: flight dual units, ship AIS, event GDELT            | VERIFIED | `FlightDetail` has MS_TO_KNOTS/M_TO_FT/MS_TO_FTMIN conversions; `ShipDetail` shows SOG/COG/HDG; `EventDetail` shows CAMEO/Goldstein/actors/source link                                              |
 
 **Score:** 12/12 truths verified
 
@@ -40,43 +40,43 @@ re_verification: false
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `src/hooks/useSelectedEntity.ts` | Cross-store entity lookup with lost contact tracking | VERIFIED | 59 lines; exports `useSelectedEntity` and `SelectedEntityResult`; searches flights, ships, events in order; uses `useRef` for last-known caching |
-| `src/components/detail/DetailValue.tsx` | Reusable value cell with flash-on-change animation | VERIFIED | 41 lines; exports `DetailValue`; flash triggered on value change via `useEffect`; initial render does not flash; timeout cleanup implemented |
-| `src/styles/app.css` | Flash keyframe animation and panel width 360px | VERIFIED | `--width-detail-panel: 360px` confirmed; `@keyframes flash` and `.animate-flash` confirmed at lines 67-73 |
-| `src/components/layout/AppShell.tsx` | Left-side control stack, right-side detail panel | VERIFIED | 39 lines; TitleSlot+StatusPanel+CountersSlot+LayerTogglesSlot in single `top-4 left-4` div; `DetailPanelSlot` standalone |
-| `src/components/map/BaseMap.tsx` | Fixed click handler preserving selection on empty click | VERIFIED | `handleDeckClick` returns early on `!info.object`; entity click calls `selectEntity(id)` + `openDetailPanel()`; re-click calls `selectEntity(null)` + `closeDetailPanel()` |
-| `src/components/layout/DetailPanelSlot.tsx` | Right-side slide-out panel with content routing | VERIFIED | 207 lines; routes to FlightDetail/ShipDetail/EventDetail; header with colored dot+type+name; dismiss via button and Escape; clipboard copy; lost contact overlay; relative timestamp |
-| `src/components/detail/FlightDetail.tsx` | Flight sections: Identity, Position, Movement, Source | VERIFIED | 76 lines; exports `FlightDetail`; dual unit conversions (kn/m-s, ft/m, ft-min/m-s); reads `activeSource` from flightStore |
-| `src/components/detail/ShipDetail.tsx` | Ship sections: Identity, Position, Movement, Source | VERIFIED | 38 lines; exports `ShipDetail`; shows name, MMSI, SOG, COG, HDG; "AISStream" source |
-| `src/components/detail/EventDetail.tsx` | Event sections: Event, Location, Actors, Source | VERIFIED | 59 lines; exports `EventDetail`; shows CAMEO, Goldstein, actors, source link (`<a target="_blank">`); "GDELT v2" source |
-| `src/__tests__/useSelectedEntity.test.ts` | 6 tests for hook behaviors | VERIFIED | 6 tests: null state, flight lookup, ship lookup, event lookup, lost contact, null reset — all pass |
-| `src/__tests__/DetailValue.test.tsx` | 5 tests for flash component | VERIFIED | 5 tests: render, no initial flash, flash on change, flash timeout, unit suffix — all pass |
-| `src/__tests__/DetailPanel.test.tsx` | 11 tests for panel rendering, dismiss, clipboard, lost contact | VERIFIED | 11 tests covering all panel behaviors — all pass |
+| Artifact                                    | Expected                                                       | Status   | Details                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/hooks/useSelectedEntity.ts`            | Cross-store entity lookup with lost contact tracking           | VERIFIED | 59 lines; exports `useSelectedEntity` and `SelectedEntityResult`; searches flights, ships, events in order; uses `useRef` for last-known caching                                     |
+| `src/components/detail/DetailValue.tsx`     | Reusable value cell with flash-on-change animation             | VERIFIED | 41 lines; exports `DetailValue`; flash triggered on value change via `useEffect`; initial render does not flash; timeout cleanup implemented                                         |
+| `src/styles/app.css`                        | Flash keyframe animation and panel width 360px                 | VERIFIED | `--width-detail-panel: 360px` confirmed; `@keyframes flash` and `.animate-flash` confirmed at lines 67-73                                                                            |
+| `src/components/layout/AppShell.tsx`        | Left-side control stack, right-side detail panel               | VERIFIED | 39 lines; TitleSlot+StatusPanel+CountersSlot+LayerTogglesSlot in single `top-4 left-4` div; `DetailPanelSlot` standalone                                                             |
+| `src/components/map/BaseMap.tsx`            | Fixed click handler preserving selection on empty click        | VERIFIED | `handleDeckClick` returns early on `!info.object`; entity click calls `selectEntity(id)` + `openDetailPanel()`; re-click calls `selectEntity(null)` + `closeDetailPanel()`           |
+| `src/components/layout/DetailPanelSlot.tsx` | Right-side slide-out panel with content routing                | VERIFIED | 207 lines; routes to FlightDetail/ShipDetail/EventDetail; header with colored dot+type+name; dismiss via button and Escape; clipboard copy; lost contact overlay; relative timestamp |
+| `src/components/detail/FlightDetail.tsx`    | Flight sections: Identity, Position, Movement, Source          | VERIFIED | 76 lines; exports `FlightDetail`; dual unit conversions (kn/m-s, ft/m, ft-min/m-s); reads `activeSource` from flightStore                                                            |
+| `src/components/detail/ShipDetail.tsx`      | Ship sections: Identity, Position, Movement, Source            | VERIFIED | 38 lines; exports `ShipDetail`; shows name, MMSI, SOG, COG, HDG; "AISStream" source                                                                                                  |
+| `src/components/detail/EventDetail.tsx`     | Event sections: Event, Location, Actors, Source                | VERIFIED | 59 lines; exports `EventDetail`; shows CAMEO, Goldstein, actors, source link (`<a target="_blank">`); "GDELT v2" source                                                              |
+| `src/__tests__/useSelectedEntity.test.ts`   | 6 tests for hook behaviors                                     | VERIFIED | 6 tests: null state, flight lookup, ship lookup, event lookup, lost contact, null reset — all pass                                                                                   |
+| `src/__tests__/DetailValue.test.tsx`        | 5 tests for flash component                                    | VERIFIED | 5 tests: render, no initial flash, flash on change, flash timeout, unit suffix — all pass                                                                                            |
+| `src/__tests__/DetailPanel.test.tsx`        | 11 tests for panel rendering, dismiss, clipboard, lost contact | VERIFIED | 11 tests covering all panel behaviors — all pass                                                                                                                                     |
 
 ---
 
 ### Key Link Verification
 
-| From | To | Via | Status | Details |
-|------|----|-----|--------|---------|
-| `useSelectedEntity.ts` | `flightStore`, `shipStore`, `eventStore` | Zustand selector subscriptions | WIRED | Lines 21-23: `useFlightStore(s=>s.flights)`, `useShipStore(s=>s.ships)`, `useEventStore(s=>s.events)` |
-| `useSelectedEntity.ts` | `uiStore` | `selectedEntityId` selector | WIRED | Line 20: `useUIStore((s) => s.selectedEntityId)` |
-| `DetailPanelSlot.tsx` | `useSelectedEntity.ts` | `useSelectedEntity()` hook call | WIRED | Line 78: `const { entity, isLost } = useSelectedEntity()` |
-| `DetailPanelSlot.tsx` | `uiStore` | `isDetailPanelOpen` and `closeDetailPanel` | WIRED | Lines 75-77: all three uiStore selectors used |
-| `FlightDetail.tsx` | `DetailValue.tsx` | `<DetailValue label="..." value="..." />` | WIRED | Lines 43-44, 59-60, 65-68, 73 — all data fields use DetailValue |
-| `DetailPanelSlot.tsx` | `FlightDetail`, `ShipDetail`, `EventDetail` | Entity type switch in JSX | WIRED | Lines 161-169: type-conditional rendering of all three detail components |
-| `DetailPanelSlot.tsx` | `ENTITY_DOT_COLORS` | `getDotColor()` helper | WIRED | Line 7 import; `getDotColor(entity.type)` used in header dot (line 141) |
-| `BaseMap.tsx` | `uiStore` | `openDetailPanel`, `closeDetailPanel`, `selectEntity` | WIRED | Lines 47-49: all three actions bound; used in `handleDeckClick` lines 80-85 |
+| From                   | To                                          | Via                                                   | Status | Details                                                                                               |
+| ---------------------- | ------------------------------------------- | ----------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------- |
+| `useSelectedEntity.ts` | `flightStore`, `shipStore`, `eventStore`    | Zustand selector subscriptions                        | WIRED  | Lines 21-23: `useFlightStore(s=>s.flights)`, `useShipStore(s=>s.ships)`, `useEventStore(s=>s.events)` |
+| `useSelectedEntity.ts` | `uiStore`                                   | `selectedEntityId` selector                           | WIRED  | Line 20: `useUIStore((s) => s.selectedEntityId)`                                                      |
+| `DetailPanelSlot.tsx`  | `useSelectedEntity.ts`                      | `useSelectedEntity()` hook call                       | WIRED  | Line 78: `const { entity, isLost } = useSelectedEntity()`                                             |
+| `DetailPanelSlot.tsx`  | `uiStore`                                   | `isDetailPanelOpen` and `closeDetailPanel`            | WIRED  | Lines 75-77: all three uiStore selectors used                                                         |
+| `FlightDetail.tsx`     | `DetailValue.tsx`                           | `<DetailValue label="..." value="..." />`             | WIRED  | Lines 43-44, 59-60, 65-68, 73 — all data fields use DetailValue                                       |
+| `DetailPanelSlot.tsx`  | `FlightDetail`, `ShipDetail`, `EventDetail` | Entity type switch in JSX                             | WIRED  | Lines 161-169: type-conditional rendering of all three detail components                              |
+| `DetailPanelSlot.tsx`  | `ENTITY_DOT_COLORS`                         | `getDotColor()` helper                                | WIRED  | Line 7 import; `getDotColor(entity.type)` used in header dot (line 141)                               |
+| `BaseMap.tsx`          | `uiStore`                                   | `openDetailPanel`, `closeDetailPanel`, `selectEntity` | WIRED  | Lines 47-49: all three actions bound; used in `handleDeckClick` lines 80-85                           |
 
 ---
 
 ### Requirements Coverage
 
-| Requirement | Source Plans | Description | Status | Evidence |
-|-------------|-------------|-------------|--------|----------|
-| CTRL-02 | 10-01-PLAN.md, 10-02-PLAN.md | Detail panel on entity click showing live stats (speed, heading, origin, metadata) | SATISFIED | `DetailPanelSlot.tsx` fully implemented with `FlightDetail` (speed/heading/altitude), `ShipDetail` (SOG/COG/HDG), `EventDetail` (CAMEO/Goldstein); panel opens on entity click via `BaseMap.tsx`; all 38 tests pass |
+| Requirement | Source Plans                 | Description                                                                        | Status    | Evidence                                                                                                                                                                                                            |
+| ----------- | ---------------------------- | ---------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CTRL-02     | 10-01-PLAN.md, 10-02-PLAN.md | Detail panel on entity click showing live stats (speed, heading, origin, metadata) | SATISFIED | `DetailPanelSlot.tsx` fully implemented with `FlightDetail` (speed/heading/altitude), `ShipDetail` (SOG/COG/HDG), `EventDetail` (CAMEO/Goldstein); panel opens on entity click via `BaseMap.tsx`; all 38 tests pass |
 
 **Note on REQUIREMENTS.md status table:** The table at line 78 of REQUIREMENTS.md lists CTRL-02 as "Phase 8 / Complete" — this is a stale status entry predating Phase 10. The ROADMAP.md correctly maps Phase 10 to CTRL-02 and marks it complete. The code fully satisfies CTRL-02. The status table in REQUIREMENTS.md should be updated to "Phase 10" to reflect where the full implementation was completed.
 
@@ -87,6 +87,7 @@ re_verification: false
 ### Anti-Patterns Found
 
 No anti-patterns detected. Scanned all 8 modified/created source files for:
+
 - TODO/FIXME/XXX/HACK/PLACEHOLDER comments: none found
 - Placeholder return values (return null, return {}, return []): none found
 - Stub handlers (only console.log or only preventDefault): none found

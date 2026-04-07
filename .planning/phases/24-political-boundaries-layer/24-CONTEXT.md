@@ -14,6 +14,7 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 ## Implementation Decisions
 
 ### Faction Assignments
+
 - 3-tier model: US-aligned, Iran-aligned, Neutral
 - US-aligned (blue): Israel, Saudi Arabia, UAE, Bahrain, Jordan, Kuwait, Egypt
 - Iran-aligned (red): Iran, Syria, Yemen
@@ -21,12 +22,14 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 - Faction data stored in a separate TypeScript `Record<string, Faction>` keyed by ISO A3 code — not baked into GeoJSON properties
 
 ### Data Delivery
+
 - Natural Earth 110m country polygons (~50KB after simplification)
 - Static bundle: TypeScript import as .json module (Vite handles natively), not runtime fetch
 - Middle East countries only (within IRAN_BBOX region)
 - Join key: ISO A3 codes (IRN, ISR, SAU, etc.) from Natural Earth `ISO_A3` property
 
 ### Visual Presentation
+
 - Fill opacity: very subtle ~15% — tinted wash, map details show through
 - Faction colors (muted military palette):
   - US-aligned: steel blue `#3b82f6`
@@ -36,6 +39,7 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 - Non-interactive: no hover, no click, no tooltips on country polygons (entity tooltips remain primary interaction)
 
 ### Disputed Territories
+
 - 3 disputed zones with diagonal line hatching in yellow/amber: West Bank, Golan Heights, Gaza
 - Southern Lebanon deferred (no authoritative polygon source; UNIFIL zone doesn't map to a single boundary)
 - Data source: Natural Earth `ne_10m_admin_0_disputed_areas.geojson` — public domain, deterministic, version-pinned
@@ -44,6 +48,7 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 - Hover exception: disputed zones show label (zone name) on hover — only interactive element in the political layer
 
 ### Legend & Toggle Behavior
+
 - Discrete swatch legend in bottom-left corner, visible only when political layer is active
 - 3 faction swatches (blue/red/gray) + 1 hatched swatch for disputed territories
 - Layer stacking: below all other visualization layers (geographic, weather, threat) and all entity markers — background context only. May adjust during visual testing.
@@ -51,6 +56,7 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 - Remove `comingSoon: true` from the Political toggle row in LayerTogglesSlot as part of this phase
 
 ### Claude's Discretion
+
 - Exact hatching pattern parameters (line spacing, angle, stroke width)
 - Coordinate rounding/simplification strategy for the Natural Earth polygons
 - Legend component layout and typography
@@ -59,21 +65,25 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `layerStore.ts`: `political` already registered as `VisualizationLayerId`, toggle infrastructure exists
 - `LayerTogglesSlot.tsx`: Political row exists with `comingSoon: true` — just remove the flag
 - `GeographicOverlay.tsx`: Established pattern for visualization layers (Source + Layer as Map children, gated by `isActive` from layerStore)
 - `@vis.gl/react-maplibre` Source/Layer components for declarative MapLibre layer rendering
 
 ### Established Patterns
+
 - Visualization layers: React component renders null when `!isActive`, returns Source + Layer JSX when active
 - Layer state: `useLayerStore(s => s.activeLayers.has('political'))` selector pattern
 - Static data: GeoJSON imported as TypeScript module (Vite JSON import)
 - Map children: overlay components rendered inside `<Map>` in BaseMap.tsx
 
 ### Integration Points
+
 - `BaseMap.tsx`: new `<PoliticalOverlay />` component rendered as Map child
 - `LayerTogglesSlot.tsx`: remove `comingSoon` flag from political entry
 - `src/components/map/layers/`: new `PoliticalOverlay.tsx` alongside existing overlay files
@@ -102,5 +112,5 @@ Toggleable political overlay showing country borders color-coded by alliance/fac
 
 ---
 
-*Phase: 24-political-boundaries-layer*
-*Context gathered: 2026-04-02*
+_Phase: 24-political-boundaries-layer_
+_Context gathered: 2026-04-02_

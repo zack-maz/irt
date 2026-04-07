@@ -1,4 +1,10 @@
-import type { MapEntity, SiteEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  SiteEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+} from '@/types/entities';
 import type { WaterFacility } from '../../server/types';
 import type { PanelView, ThreatCluster } from '@/types/ui';
 import { isConflictEventType, EVENT_TYPE_LABELS } from '@/types/ui';

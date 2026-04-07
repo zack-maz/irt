@@ -10,11 +10,7 @@ vi.mock('@upstash/redis', () => {
       const val = store.get(key);
       return (val as T) ?? null;
     }
-    async set(
-      key: string,
-      value: unknown,
-      opts?: { ex?: number },
-    ): Promise<'OK'> {
+    async set(key: string, value: unknown, opts?: { ex?: number }): Promise<'OK'> {
       void opts; // Redis TTL not tracked in mock
       store.set(key, value);
       return 'OK';
@@ -86,11 +82,8 @@ describe('Redis cache helpers', () => {
 });
 
 describe('cacheGetSafe / cacheSetSafe (in-memory fallback)', () => {
-  let shouldThrow = false;
-
   beforeEach(() => {
     store.clear();
-    shouldThrow = false;
     vi.useFakeTimers();
   });
 

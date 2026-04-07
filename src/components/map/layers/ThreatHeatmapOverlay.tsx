@@ -21,10 +21,10 @@ const CELL_SIZE_DEG = 0.25;
  * Deep purple -> magenta -> orange -> bright red.
  */
 export const THERMAL_COLOR_RANGE: [number, number, number][] = [
-  [80, 20, 120],     // deep purple (low threat)
-  [180, 30, 100],    // magenta (moderate)
-  [230, 120, 30],    // orange (high)
-  [255, 40, 30],     // bright red (extreme)
+  [80, 20, 120], // deep purple (low threat)
+  [180, 30, 100], // magenta (moderate)
+  [230, 120, 30], // orange (high)
+  [255, 40, 30], // bright red (extreme)
 ];
 
 // --- Types ---
@@ -121,10 +121,19 @@ export function aggregateToGrid(
     let cell = cells.get(key);
     if (!cell) {
       cell = {
-        lat: cellLat, lng: cellLng, count: 0, types: new Map(),
-        latest: 0, fatalities: 0, mentions: 0, sources: 0,
-        goldsteinSum: 0, weightSum: 0, eventIds: [],
-        realLatSum: 0, realLngSum: 0,
+        lat: cellLat,
+        lng: cellLng,
+        count: 0,
+        types: new Map(),
+        latest: 0,
+        fatalities: 0,
+        mentions: 0,
+        sources: 0,
+        goldsteinSum: 0,
+        weightSum: 0,
+        eventIds: [],
+        realLatSum: 0,
+        realLngSum: 0,
       };
       cells.set(key, cell);
     }
@@ -177,10 +186,7 @@ export function aggregateToGrid(
  * Merge adjacent non-empty grid cells into connected-component clusters via BFS.
  * Uses integer grid indices as keys to avoid floating-point mismatch.
  */
-export function mergeClusters(
-  cells: ThreatZoneData[],
-  cellSize = CELL_SIZE_DEG,
-): ThreatCluster[] {
+export function mergeClusters(cells: ThreatZoneData[], cellSize = CELL_SIZE_DEG): ThreatCluster[] {
   if (cells.length === 0) return [];
 
   // Build a lookup by integer grid indices
@@ -196,7 +202,10 @@ export function mergeClusters(
 
   // 4-connected neighbors: N, S, E, W
   const NEIGHBORS = [
-    [1, 0], [-1, 0], [0, 1], [0, -1],
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
   ];
 
   for (const cell of cells) {
@@ -234,8 +243,10 @@ export function mergeClusters(
     let realLngSum = 0;
     const allEventIds: string[] = [];
     const typeCounts = new Map<string, number>();
-    let minLat = Infinity, maxLat = -Infinity;
-    let minLng = Infinity, maxLng = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+    let minLng = Infinity,
+      maxLng = -Infinity;
 
     for (const c of component) {
       totalWeight += c.clusterWeight;
@@ -254,7 +265,6 @@ export function mergeClusters(
       if (c.lat > maxLat) maxLat = c.lat;
       if (c.lng < minLng) minLng = c.lng;
       if (c.lng > maxLng) maxLng = c.lng;
-
     }
 
     // Dominant type across all cells
@@ -309,7 +319,10 @@ function formatRelativeTime(timestamp: number): string {
 
 // --- Hook ---
 
-export function useThreatHeatmapLayers(hoveredClusterId: string | null = null, isBelowCrossover = true) {
+export function useThreatHeatmapLayers(
+  hoveredClusterId: string | null = null,
+  isBelowCrossover = true,
+) {
   // Consume events already filtered by useFilteredEntities (date, proximity, country, CAMEO, mentions, etc.)
   const { events } = useFilteredEntities();
   const isActive = useLayerStore((s) => s.activeLayers.has('threat'));
@@ -323,9 +336,12 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null, i
     if (!isActive || events.length === 0) return [];
 
     const filtered = events.filter((e) => {
-      if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type)) return showAirstrikes;
-      if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type)) return showGroundCombatToggle;
-      if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type)) return showTargetedToggle;
+      if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
+        return showAirstrikes;
+      if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
+        return showGroundCombatToggle;
+      if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
+        return showTargetedToggle;
       return false;
     });
     if (filtered.length === 0) return [];
@@ -385,7 +401,15 @@ export function useThreatHeatmapLayers(hoveredClusterId: string | null = null, i
     });
 
     return [clusterPickerLayer];
-  }, [isActive, events, showAirstrikes, showGroundCombatToggle, showTargetedToggle, hoveredClusterId, isBelowCrossover]);
+  }, [
+    isActive,
+    events,
+    showAirstrikes,
+    showGroundCombatToggle,
+    showTargetedToggle,
+    hoveredClusterId,
+    isBelowCrossover,
+  ]);
 }
 
 // --- Tooltip ---

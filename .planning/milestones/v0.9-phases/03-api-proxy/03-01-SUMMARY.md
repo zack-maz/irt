@@ -42,17 +42,17 @@ key-files:
     - .gitignore
 
 key-decisions:
-  - "Lazy config loading via loadConfig() to allow tests to run without env vars"
-  - "Proxy object for config convenience access with cached lazy evaluation"
-  - "createApp() factory pattern for Express app to enable test isolation"
-  - "erasableSyntaxOnly compatibility: explicit field + constructor assignment instead of parameter properties"
-  - "vitest-environment node directive per test file instead of workspace config"
+  - 'Lazy config loading via loadConfig() to allow tests to run without env vars'
+  - 'Proxy object for config convenience access with cached lazy evaluation'
+  - 'createApp() factory pattern for Express app to enable test isolation'
+  - 'erasableSyntaxOnly compatibility: explicit field + constructor assignment instead of parameter properties'
+  - 'vitest-environment node directive per test file instead of workspace config'
 
 patterns-established:
-  - "EntityCache<T>: generic in-memory cache with TTL and stale/lastFresh response"
-  - "createApp() factory: returns configured Express app, listen() only when run directly"
-  - "loadConfig() lazy validation: env vars validated on first call, not module import"
-  - "@vitest-environment node: inline directive for server test files"
+  - 'EntityCache<T>: generic in-memory cache with TTL and stale/lastFresh response'
+  - 'createApp() factory: returns configured Express app, listen() only when run directly'
+  - 'loadConfig() lazy validation: env vars validated on first call, not module import'
+  - '@vitest-environment node: inline directive for server test files'
 
 requirements-completed: [INFRA-01]
 
@@ -74,6 +74,7 @@ completed: 2026-03-14
 - **Files modified:** 15
 
 ## Accomplishments
+
 - MapEntity discriminated union with FlightEntity, ShipEntity, ConflictEventEntity types shared between server and frontend
 - Express 5 server on port 3001 with CORS, health endpoint, and error handling middleware
 - EntityCache with TTL-based staleness detection for upstream API data
@@ -89,6 +90,7 @@ Each task was committed atomically:
 2. **Task 2: Create cache module, error handler, and Express server entry point with health check** - `b7ea42f` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - MapEntity discriminated union (FlightEntity, ShipEntity, ConflictEventEntity), BoundingBox, CacheResponse
 - `server/config.ts` - Lazy environment config validation with loadConfig(), getConfig(), and Proxy-based config alias
 - `server/constants.ts` - IRAN_BBOX bounding box and CACHE_TTL values per data source
@@ -103,9 +105,10 @@ Each task was committed atomically:
 - `server/__tests__/server.test.ts` - 3 tests for health check, 404, and CORS headers
 - `package.json` - Added express, cors, concurrently, tsx; updated scripts
 - `tsconfig.json` - Added tsconfig.server.json reference
-- `.gitignore` - Added .env, .env.* protection with .env.example exception
+- `.gitignore` - Added .env, .env.\* protection with .env.example exception
 
 ## Decisions Made
+
 - Used lazy config loading via `loadConfig()` function (not top-level execution) so tests can import server modules without requiring env vars
 - Used Proxy-based `config` convenience alias that lazily calls `getConfig()` on property access
 - Used `createApp()` factory pattern so tests get isolated Express instances without port conflicts
@@ -117,6 +120,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed erasableSyntaxOnly incompatibility in EntityCache**
+
 - **Found during:** Task 2 (cache module)
 - **Issue:** TypeScript parameter property `constructor(private ttlMs: number)` is not erasable syntax, causing tsc error with `erasableSyntaxOnly: true` in tsconfig.server.json
 - **Fix:** Changed to explicit field declaration (`private ttlMs: number`) with manual assignment in constructor body
@@ -130,11 +134,13 @@ Each task was committed atomically:
 **Impact on plan:** Minor syntax adjustment required by strict TypeScript config. No scope creep.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
 
 **External services require manual configuration before the server can start.** Users must:
+
 - Register at OpenSky Network and create OAuth2 client credentials
 - Register at AISStream.io and copy API key
 - Register at ACLED and use account credentials
@@ -143,6 +149,7 @@ None
 See `.env.example` for detailed instructions on where to obtain each credential.
 
 ## Next Phase Readiness
+
 - Server foundation complete: Express 5 running, types defined, cache ready, config validates
 - Plan 02 (data adapters) can build against: EntityCache, MapEntity types, config, constants, and server entry point
 - All 46 tests pass (16 server + 30 frontend) -- no regressions
@@ -152,5 +159,6 @@ See `.env.example` for detailed instructions on where to obtain each credential.
 All 12 created files verified on disk. Both task commits (5cc0182, b7ea42f) verified in git log.
 
 ---
-*Phase: 03-api-proxy*
-*Completed: 2026-03-14*
+
+_Phase: 03-api-proxy_
+_Completed: 2026-03-14_

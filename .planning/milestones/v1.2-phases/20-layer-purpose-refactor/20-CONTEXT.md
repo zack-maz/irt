@@ -14,6 +14,7 @@ Replace the entity toggle system with a stackable visualization layer architectu
 ## Implementation Decisions
 
 ### Layer Architecture
+
 - Entity toggles (showFlights, showShips, showEvents, showSites, all sub-toggles) are removed entirely
 - All entities are always rendered on the map — no visibility controls
 - Search/filter system (`type:flight`, etc.) is the only way to narrow visible entities
@@ -23,16 +24,19 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - Toggling a layer uses ~300ms opacity fade in/out transition
 
 ### Sidebar Integration
+
 - Replaces the current "Layers" section in the sidebar in-place
 - Same UI slot, new content: visualization layer toggles instead of entity toggles
 - Clean toggle rows for each visualization layer
 
 ### Inline Legends
+
 - When a layer is active, a small color scale legend appears on the map (corner position)
 - Multiple active layers stack their legends
 - Legend disappears when layer is toggled off
 
 ### Phase Structure
+
 - Phase 20: Layer architecture refactor (remove entity toggles, build layer toggle system, inline legend framework)
 - Phase 20.1: Geographical + Weather layers
 - Phase 20.2: Threat Heatmap layer
@@ -41,6 +45,7 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - Phase 20.5: Infrastructure Focus layer
 
 ### Geographical Layer (Phase 20.1)
+
 - Monochrome elevation gradient (dark to light gray/blue) for terrain tinting — fits dark theme
 - Elevation contour lines overlaid at regular intervals
 - Major geographic feature labels only (Zagros Mountains, Dasht-e Kavir, Tigris/Euphrates, etc.)
@@ -48,6 +53,7 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - No entity color changes — just terrain visualization
 
 ### Weather Layer (Phase 20.1)
+
 - Real-time temperature overlay from Open-Meteo API (free, no API key)
 - Grid heatmap rendering (Deck.gl HeatmapLayer or GridLayer)
 - Color scale: blue (cold) → green → yellow → red (hot)
@@ -56,23 +62,28 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - Adds server route `/api/weather` + Redis cache entry
 
 ### Threat Heatmap Layer (Phase 20.2)
+
 - Color-codes regions by GDELT conflict event density
 - Uses existing event data (no new API)
 - Hot zones glow red, quiet areas stay dark
 
 ### Satellite Imagery Layer (Phase 20.4)
+
 - Switches/overlays aerial tiles (ArcGIS World Imagery, already used for site thumbnails)
 - Renders as semi-transparent overlay on top of Dark Matter basemap
 
 ### Political Boundaries Layer (Phase 20.3)
+
 - Emphasizes country borders, disputed territories
 - Color-codes countries by alliance/faction
 
 ### Infrastructure Focus Layer (Phase 20.5)
+
 - Dims non-site entities, highlights sites with enhanced labels
 - Infrastructure-only X-ray view of the region
 
 ### Claude's Discretion
+
 - Exact legend positioning and stacking layout
 - Contour line interval spacing
 - Grid resolution for weather temperature sampling
@@ -83,9 +94,11 @@ Replace the entity toggle system with a stackable visualization layer architectu
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `src/components/map/layers/constants.ts`: Entity colors, icon sizes, altitude-to-opacity mapping — altitude logic reusable for geographical layer
 - `src/components/map/constants.ts`: TERRAIN_SOURCE_TILES (AWS Terrarium) already configured — elevation data source for geographical layer
 - `src/components/map/layers/icons.ts`: Canvas-generated icon atlas — entities continue using this as-is
@@ -97,6 +110,7 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - `src/hooks/useFilteredEntities.ts`: Also reads toggle state — needs cleanup
 
 ### Established Patterns
+
 - Zustand stores with curried `create<T>()()` pattern for all state
 - OverlayPanel component for sidebar sections
 - Deck.gl layers for all map rendering (IconLayer, HeatmapLayer available)
@@ -105,6 +119,7 @@ Replace the entity toggle system with a stackable visualization layer architectu
 - Recursive setTimeout polling with tab visibility awareness
 
 ### Integration Points
+
 - `src/stores/uiStore.ts` — remove ~18 entity toggle fields and their toggle functions
 - `src/components/layout/LayerTogglesSlot.tsx` — replace content with visualization layer toggles
 - `src/components/layout/Sidebar.tsx` — uses LayerTogglesContent
@@ -134,5 +149,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 20-layer-purpose-refactor*
-*Context gathered: 2026-03-22*
+_Phase: 20-layer-purpose-refactor_
+_Context gathered: 2026-03-22_

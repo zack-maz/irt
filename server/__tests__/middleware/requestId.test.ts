@@ -55,9 +55,15 @@ vi.mock('../../config.js', () => ({
 const passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
   rateLimiters: {
-    flights: passThrough, ships: passThrough, events: passThrough,
-    news: passThrough, markets: passThrough, weather: passThrough,
-    sites: passThrough, sources: passThrough, geocode: passThrough,
+    flights: passThrough,
+    ships: passThrough,
+    events: passThrough,
+    news: passThrough,
+    markets: passThrough,
+    weather: passThrough,
+    sites: passThrough,
+    sources: passThrough,
+    geocode: passThrough,
     water: passThrough,
   },
 }));
@@ -74,12 +80,24 @@ vi.mock('../../adapters/aisstream.js', () => ({
 vi.mock('../../adapters/gdelt.js', () => ({ fetchEvents: vi.fn(async () => []) }));
 vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
-vi.mock('../../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
+vi.mock('../../adapters/rss.js', () => ({
+  fetchAllRssFeeds: vi.fn(async () => []),
+  RSS_FEEDS: [],
+}));
+vi.mock('../../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
 vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown' })) }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown' })),
+}));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis
 vi.mock('../../cache/redis.js', () => ({
@@ -123,9 +141,7 @@ describe('X-Request-ID tracing', () => {
 
     expect(requestId).toBeTruthy();
     // UUID v4 format: 8-4-4-4-12 hex chars
-    expect(requestId).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    );
+    expect(requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   });
 
   it('echoes back X-Request-ID from request header', async () => {

@@ -34,7 +34,7 @@ key-files:
     - src/components/map/layers/constants.ts
 
 key-decisions:
-  - "Only removed desalination from SiteType, left WaterFacilityType (added by 26-01) untouched -- clean parallel execution"
+  - 'Only removed desalination from SiteType, left WaterFacilityType (added by 26-01) untouched -- clean parallel execution'
 
 patterns-established: []
 
@@ -58,6 +58,7 @@ completed: 2026-04-03
 - **Files modified:** 10
 
 ## Accomplishments
+
 - Removed 'desalination' from SiteType union in server/types.ts (now 5 types)
 - Removed 3 desalination Overpass nwr query lines and all classification logic
 - Cleaned all 8 client files: filterStore, useEntityLayers, useCounterData, CountersSlot, Sidebar, ui.ts labels, tagRegistry, layer constants
@@ -70,6 +71,7 @@ Each task was committed atomically:
 2. **Task 2: Update all client references to desalination and fix tests** - `ab16d72` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - SiteType union narrowed to 5 types (removed 'desalination')
 - `server/adapters/overpass.ts` - Removed desalination nwr queries, SITE_TYPE_LABELS entry, and classifySiteType cases
 - `src/stores/filterStore.ts` - Removed 'desalination' from ALL_SITE_TYPES
@@ -82,6 +84,7 @@ Each task was committed atomically:
 - `src/components/map/layers/constants.ts` - Removed desalination color entry
 
 ## Decisions Made
+
 - Only removed desalination from SiteType, left WaterFacilityType (added by Plan 01 in parallel) untouched for clean parallel execution
 
 ## Deviations from Plan
@@ -89,12 +92,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - SiteType is clean (5 types) and ready for Plan 03 to introduce WaterFacility overlay
 - WaterFacilityType already added by Plan 01 with 'desalination' as one of its types
 - All 1134 tests passing, TypeScript compiles cleanly
@@ -106,5 +112,6 @@ None - no external service configuration required.
 - Zero desalination references remain in src/
 
 ---
-*Phase: 26-water-stress-layer*
-*Completed: 2026-04-03*
+
+_Phase: 26-water-stress-layer_
+_Completed: 2026-04-03_

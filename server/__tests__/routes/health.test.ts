@@ -17,8 +17,14 @@ function createReqRes() {
   let statusCode = 200;
   let body: unknown;
   const res = {
-    status(code: number) { statusCode = code; return res; },
-    json(data: unknown) { body = data; return res; },
+    status(code: number) {
+      statusCode = code;
+      return res;
+    },
+    json(data: unknown) {
+      body = data;
+      return res;
+    },
   } as unknown as import('express').Response;
   return { req, res, getStatus: () => statusCode, getBody: () => body as Record<string, unknown> };
 }

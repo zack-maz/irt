@@ -14,6 +14,7 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 ## Implementation Decisions
 
 ### Toggle granularity
+
 - 6 independent toggles total: Flights, Ships, Drones, Missiles, Ground Traffic, Pulse
 - All toggles are fully independent — no parent/child gating (e.g. Ground Traffic ON with Flights OFF shows only ground aircraft)
 - Flights = airborne flights, Ground Traffic = ground-level aircraft, Pulse = unidentified flight animation
@@ -22,6 +23,7 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 - News toggle is a separate control (see News content section below)
 
 ### Toggle visual design
+
 - Labeled rows with colored entity dots inside an OverlayPanel, matching StatusPanel HUD aesthetic
 - Each row: colored dot (entity color from constants) + text label. Full row is clickable
 - On/off state indicated by opacity: full brightness when on, ~40% opacity when off
@@ -32,6 +34,7 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 - "Layers" header at top (already stubbed in LayerTogglesSlot)
 
 ### News content (CTRL-04)
+
 - "Non-statistical news" = GDELT event metadata shown as tooltips on event markers
 - Tooltip appears on hover over drone/missile markers when news toggle is ON
 - Tooltip shows full GDELT metadata: event type, actor names, location name, date, CAMEO code, Goldstein scale, source article URL
@@ -40,12 +43,14 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 - News toggle appears in the Layers panel alongside entity toggles
 
 ### Toggle persistence
+
 - All toggle states persist via localStorage as a single object (key: 'layerToggles')
 - Same try/catch guard pattern as existing flight source persistence
 - On load: read stored object, merge with defaults for any missing keys
 - Default values: entities ON, news OFF (matching CTRL-04 requirement)
 
 ### Claude's Discretion
+
 - Default strategy for new toggle keys not yet in localStorage (sensible default approach)
 - Exact tooltip component implementation (Deck.gl pickingInfo vs custom overlay)
 - Which GDELT metadata fields are available in the normalized ConflictEventEntity (may need to pass through additional fields from adapter)
@@ -65,9 +70,11 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `LayerTogglesSlot` (`src/components/layout/LayerTogglesSlot.tsx`): Stub component already positioned in AppShell, wraps OverlayPanel with "Layers" header
 - `OverlayPanel` (`src/components/ui/OverlayPanel.tsx`): Dark panel container used by StatusPanel — reuse for consistent styling
 - `useUIStore` (`src/stores/uiStore.ts`): Already has `pulseEnabled`, `showGroundTraffic` with toggle actions — extend with new layer visibility booleans
@@ -76,12 +83,14 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 - `loadPersistedSource`/`persistSource` (`src/stores/flightStore.ts`): localStorage pattern to follow for toggle persistence
 
 ### Established Patterns
+
 - Zustand curried `create<T>()()` with selector pattern `s => s.field`
 - OverlayPanel component for dark overlay containers
 - localStorage persistence with try/catch guards (flightStore pattern)
 - useEntityLayers hook conditionally includes layers — add visibility filtering here
 
 ### Integration Points
+
 - `src/hooks/useEntityLayers.ts`: Filter returned layers array based on toggle state (conditionally exclude layers)
 - `src/stores/uiStore.ts`: Add showFlights, showShips, showDrones, showMissiles, showNews booleans
 - `src/types/ui.ts`: Extend UIState interface with new toggle fields
@@ -101,5 +110,5 @@ Toggle controls for showing/hiding entity categories on the map, plus a news con
 
 ---
 
-*Phase: 09-layer-controls-news-toggle*
-*Context gathered: 2026-03-17*
+_Phase: 09-layer-controls-news-toggle_
+_Context gathered: 2026-03-17_

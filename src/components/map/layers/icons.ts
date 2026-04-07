@@ -11,27 +11,40 @@ interface IconEntry {
 
 /** Icon mapping for the 17 entity shapes */
 export const ICON_MAPPING: Record<string, IconEntry> = {
-  chevron:           { x: 0,   y: 0, width: 32, height: 32, mask: true },
-  diamond:           { x: 32,  y: 0, width: 32, height: 32, mask: true },
-  starburst:         { x: 64,  y: 0, width: 32, height: 32, mask: true },
-  xmark:             { x: 96,  y: 0, width: 32, height: 32, mask: true },
-  chevronGround:     { x: 128, y: 0, width: 32, height: 32, mask: true },
-  explosion:         { x: 160, y: 0, width: 32, height: 32, mask: true },
-  crosshair:         { x: 192, y: 0, width: 32, height: 32, mask: true },
-  siteNuclear:       { x: 224, y: 0, width: 32, height: 32, mask: true },
-  siteNaval:         { x: 256, y: 0, width: 32, height: 32, mask: true },
-  siteOil:           { x: 288, y: 0, width: 32, height: 32, mask: true },
-  siteAirbase:       { x: 320, y: 0, width: 32, height: 32, mask: true },
-  siteDesalination:  { x: 352, y: 0, width: 32, height: 32, mask: true },
-  sitePort:          { x: 384, y: 0, width: 32, height: 32, mask: true },
-  waterDam:          { x: 416, y: 0, width: 32, height: 32, mask: true },
-  waterReservoir:    { x: 448, y: 0, width: 32, height: 32, mask: true },
-  waterTreatment:    { x: 480, y: 0, width: 32, height: 32, mask: true },
+  chevron: { x: 0, y: 0, width: 32, height: 32, mask: true },
+  diamond: { x: 32, y: 0, width: 32, height: 32, mask: true },
+  starburst: { x: 64, y: 0, width: 32, height: 32, mask: true },
+  xmark: { x: 96, y: 0, width: 32, height: 32, mask: true },
+  chevronGround: { x: 128, y: 0, width: 32, height: 32, mask: true },
+  explosion: { x: 160, y: 0, width: 32, height: 32, mask: true },
+  crosshair: { x: 192, y: 0, width: 32, height: 32, mask: true },
+  siteNuclear: { x: 224, y: 0, width: 32, height: 32, mask: true },
+  siteNaval: { x: 256, y: 0, width: 32, height: 32, mask: true },
+  siteOil: { x: 288, y: 0, width: 32, height: 32, mask: true },
+  siteAirbase: { x: 320, y: 0, width: 32, height: 32, mask: true },
+  siteDesalination: { x: 352, y: 0, width: 32, height: 32, mask: true },
+  sitePort: { x: 384, y: 0, width: 32, height: 32, mask: true },
+  waterDam: { x: 416, y: 0, width: 32, height: 32, mask: true },
+  waterReservoir: { x: 448, y: 0, width: 32, height: 32, mask: true },
+  waterTreatment: { x: 480, y: 0, width: 32, height: 32, mask: true },
   waterDesalination: { x: 512, y: 0, width: 32, height: 32, mask: true },
 };
 
 /** Cached atlas canvas */
 let atlas: HTMLCanvasElement | null = null;
+
+/**
+ * Returns the icon atlas in the shape deck.gl IconLayer's `iconAtlas` prop expects.
+ *
+ * The deck.gl v9 type defs declare `iconAtlas?: string | Texture`, but the runtime
+ * loader accepts any drawable source — including `HTMLCanvasElement` — via the
+ * internal `loadImageOrCanvas` helper. This wrapper performs the cast once so call
+ * sites stay type-safe and free of `as any` escape hatches.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- deck.gl v9 type is overly strict; runtime accepts HTMLCanvasElement
+export function getIconAtlasForLayer(): any {
+  return getIconAtlas();
+}
 
 /**
  * Lazily generates a 544x32 canvas icon atlas with 17 white shapes.
@@ -57,19 +70,19 @@ export function getIconAtlas(): HTMLCanvasElement {
 
   // Icon 0 (offset 0): Chevron -- upward-pointing arrow/triangle
   ctx.beginPath();
-  ctx.moveTo(16, 4);   // top center
-  ctx.lineTo(28, 28);  // bottom right
-  ctx.lineTo(16, 20);  // center notch
-  ctx.lineTo(4, 28);   // bottom left
+  ctx.moveTo(16, 4); // top center
+  ctx.lineTo(28, 28); // bottom right
+  ctx.lineTo(16, 20); // center notch
+  ctx.lineTo(4, 28); // bottom left
   ctx.closePath();
   ctx.fill();
 
   // Icon 1 (offset 32): Diamond -- rotated square
   ctx.beginPath();
-  ctx.moveTo(48, 6);   // top
-  ctx.lineTo(58, 16);  // right
-  ctx.lineTo(48, 26);  // bottom
-  ctx.lineTo(38, 16);  // left
+  ctx.moveTo(48, 6); // top
+  ctx.lineTo(58, 16); // right
+  ctx.lineTo(48, 26); // bottom
+  ctx.lineTo(38, 16); // left
   ctx.closePath();
   ctx.fill();
 
@@ -104,10 +117,10 @@ export function getIconAtlas(): HTMLCanvasElement {
 
   // Icon 4 (offset 128): Chevron-ground -- chevron with diagonal hash lines
   ctx.beginPath();
-  ctx.moveTo(144, 4);   // top center
-  ctx.lineTo(156, 28);  // bottom right
-  ctx.lineTo(144, 20);  // center notch
-  ctx.lineTo(132, 28);  // bottom left
+  ctx.moveTo(144, 4); // top center
+  ctx.lineTo(156, 28); // bottom right
+  ctx.lineTo(144, 20); // center notch
+  ctx.lineTo(132, 28); // bottom left
   ctx.closePath();
   ctx.fill();
   // Hash lines clipped to chevron shape
@@ -227,10 +240,10 @@ export function getIconAtlas(): HTMLCanvasElement {
   const strutY1 = 12;
   const strutY2 = 20;
   // Left leg x at y: x = 296 - (296-288)*(y-4)/(28-4) = 296 - 8*(y-4)/24
-  const lx1 = 296 - 8 * (strutY1 - 4) / 24;
-  const rx1 = 296 + 8 * (strutY1 - 4) / 24;
-  const lx2 = 296 - 8 * (strutY2 - 4) / 24;
-  const rx2 = 296 + 8 * (strutY2 - 4) / 24;
+  const lx1 = 296 - (8 * (strutY1 - 4)) / 24;
+  const rx1 = 296 + (8 * (strutY1 - 4)) / 24;
+  const lx2 = 296 - (8 * (strutY2 - 4)) / 24;
+  const rx2 = 296 + (8 * (strutY2 - 4)) / 24;
   ctx.beginPath();
   ctx.moveTo(lx1, strutY1);
   ctx.lineTo(rx1, strutY1);
@@ -299,10 +312,10 @@ export function getIconAtlas(): HTMLCanvasElement {
 
   // Icon 13 (offset 416): Dam -- trapezoid (4px padding on all sides)
   ctx.beginPath();
-  ctx.moveTo(426, 6);    // top-left
-  ctx.lineTo(438, 6);    // top-right
-  ctx.lineTo(442, 26);   // bottom-right
-  ctx.lineTo(422, 26);   // bottom-left
+  ctx.moveTo(426, 6); // top-left
+  ctx.lineTo(438, 6); // top-right
+  ctx.lineTo(442, 26); // bottom-right
+  ctx.lineTo(422, 26); // bottom-left
   ctx.closePath();
   ctx.fill();
 
@@ -314,9 +327,9 @@ export function getIconAtlas(): HTMLCanvasElement {
   // Icon 15 (offset 480): Treatment plant -- triangle (4px padding)
   ctx.fillStyle = 'white';
   ctx.beginPath();
-  ctx.moveTo(496, 6);    // top center
-  ctx.lineTo(507, 26);   // bottom right
-  ctx.lineTo(485, 26);   // bottom left
+  ctx.moveTo(496, 6); // top center
+  ctx.lineTo(507, 26); // bottom right
+  ctx.lineTo(485, 26); // bottom left
   ctx.closePath();
   ctx.fill();
 
@@ -329,7 +342,12 @@ export function getIconAtlas(): HTMLCanvasElement {
   ctx.arc(cx16, 20, 9, 0.05 * Math.PI, 0.95 * Math.PI, false);
   // Curve up to pointed tip via quadratic bezier for smooth bulge
   ctx.quadraticCurveTo(cx16 + 4, 10, cx16, 5);
-  ctx.quadraticCurveTo(cx16 - 4, 10, cx16 - 9 * Math.cos(0.05 * Math.PI), 20 - 9 * Math.sin(0.05 * Math.PI));
+  ctx.quadraticCurveTo(
+    cx16 - 4,
+    10,
+    cx16 - 9 * Math.cos(0.05 * Math.PI),
+    20 - 9 * Math.sin(0.05 * Math.PI),
+  );
   ctx.closePath();
   ctx.fill();
 

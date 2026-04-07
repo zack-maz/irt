@@ -32,13 +32,13 @@ key-files:
     - server/__tests__/gdelt.test.ts
 
 key-decisions:
-  - "RSS_FEEDS changed from const assertion to typed array for extensibility when adding Bellingcat"
-  - "haversineKm imported from src/lib/geo.js into server module (cross-boundary import bundled by tsup)"
-  - "Events route uses cacheGetSafe with logicalTtlMs=0 to read news cache regardless of staleness"
+  - 'RSS_FEEDS changed from const assertion to typed array for extensibility when adding Bellingcat'
+  - 'haversineKm imported from src/lib/geo.js into server module (cross-boundary import bundled by tsup)'
+  - 'Events route uses cacheGetSafe with logicalTtlMs=0 to read news cache regardless of staleness'
 
 patterns-established:
-  - "Three-gate corroboration: temporal AND geographic AND keyword must ALL pass for confidence boost"
-  - "Opportunistic cache lookup: Bellingcat articles fetched from news cache, graceful fallback to empty array on failure"
+  - 'Three-gate corroboration: temporal AND geographic AND keyword must ALL pass for confidence boost'
+  - 'Opportunistic cache lookup: Bellingcat articles fetched from news cache, graceful fallback to empty array on failure'
 
 requirements-completed: [EQ-05, EQ-06]
 
@@ -60,6 +60,7 @@ completed: 2026-04-01
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Bellingcat added as 6th RSS feed source, articles flow through existing keyword filter, relevance scoring, and dedup/clustering pipeline
 - Three-gate corroboration function (temporal +-24h, geographic <=200km, keyword >=2 matches) prevents false positive boosts
 - GDELT parseAndFilter pipeline wired end-to-end: events route fetches Bellingcat articles from news cache, passes to parseAndFilter, matched events get +0.2 confidence boost (clamped to 1.0)
@@ -74,6 +75,7 @@ Each task was committed atomically:
 3. **Task 3: Wire Bellingcat corroboration into GDELT event pipeline** - `54dbf77` (feat) - TDD: `4172f8e` (test) -> `54dbf77` (feat)
 
 ## Files Created/Modified
+
 - `server/adapters/rss.ts` - Added Bellingcat as 6th RSS feed entry with Netherlands country
 - `server/lib/eventScoring.ts` - Added checkBellingcatCorroboration (3-gate matching) and extractBellingcatGeo (city name to coordinate mapper)
 - `server/adapters/gdelt.ts` - parseAndFilter accepts optional bellingcatArticles, applies corroboration boost after confidence threshold
@@ -83,6 +85,7 @@ Each task was committed atomically:
 - `server/__tests__/gdelt.test.ts` - 5 new tests for corroboration pipeline integration
 
 ## Decisions Made
+
 - Changed `RSS_FEEDS` from `as const` to typed array (`{ url: string; name: string; country: string }[]`) since the const narrowing is not used downstream, and it makes adding entries cleaner.
 - Used cross-boundary import (`../../src/lib/geo.js`) for haversineKm in server code -- tsup bundles this correctly for the serverless function.
 - Events route fetches news cache with `logicalTtlMs=0` so it reads whatever Bellingcat articles are available regardless of cache age. This is intentional: the corroboration is opportunistic, and articles from any recent cache are valid for matching.
@@ -92,12 +95,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Bellingcat corroboration fully wired and tested, ready for Plan 03 (audit-first filter tuning)
 - 117 tests pass across the 3 modified test files (10 RSS + 39 eventScoring + 68 GDELT)
 - Pre-existing timeout in security.test.ts (unrelated to this plan's changes)
@@ -107,5 +113,6 @@ None - no external service configuration required.
 All 7 modified files verified on disk. All 5 task commits (f0f95f7, fa06746, bae5f1b, 4172f8e, 54dbf77) verified in git log.
 
 ---
-*Phase: 22-gdelt-event-quality-osint-integration*
-*Completed: 2026-04-01*
+
+_Phase: 22-gdelt-event-quality-osint-integration_
+_Completed: 2026-04-01_

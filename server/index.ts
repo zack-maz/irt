@@ -31,11 +31,7 @@ export function createApp() {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            'https://va.vercel-scripts.com',
-          ],
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https://va.vercel-scripts.com'],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: [
             "'self'",
@@ -65,13 +61,15 @@ export function createApp() {
     app.use(compression());
   }
 
-  app.use(pinoHttp({
-    logger,
-    genReqId: (req) => (req.headers['x-request-id'] as string) ?? randomUUID(),
-    autoLogging: { ignore: (req) => req.url === '/health' },
-    customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
-    customErrorMessage: (req, _res, err) => `${req.method} ${req.url} failed: ${err.message}`,
-  }));
+  app.use(
+    pinoHttp({
+      logger,
+      genReqId: (req) => (req.headers['x-request-id'] as string) ?? randomUUID(),
+      autoLogging: { ignore: (req) => req.url === '/health' },
+      customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+      customErrorMessage: (req, _res, err) => `${req.method} ${req.url} failed: ${err.message}`,
+    }),
+  );
 
   // Propagate request ID to response headers for traceability
   app.use((req, res, next) => {
@@ -106,8 +104,7 @@ export function createApp() {
 
 // Only start listening when run directly (not imported for testing)
 const isMainModule =
-  process.argv[1] &&
-  import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
+  process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
 
 if (isMainModule) {
   try {

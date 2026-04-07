@@ -67,12 +67,7 @@ export function matchNewsToEvent(
 
     // Geographic score: proximity boost if both have coordinates
     let geoScore = 0;
-    if (
-      article.lat != null &&
-      article.lng != null &&
-      !isNaN(article.lat) &&
-      !isNaN(article.lng)
-    ) {
+    if (article.lat != null && article.lng != null && !isNaN(article.lat) && !isNaN(article.lng)) {
       const distKm = haversineKm(event.lat, event.lng, article.lat, article.lng);
       if (distKm <= GEO_PROXIMITY_KM) {
         geoScore = GEO_WEIGHT * (1 - distKm / GEO_PROXIMITY_KM);

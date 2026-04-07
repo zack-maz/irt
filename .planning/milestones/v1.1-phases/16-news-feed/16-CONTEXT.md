@@ -14,6 +14,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 ## Implementation Decisions
 
 ### Source fetching strategy
+
 - **GDELT DOC API** is the backbone — broad query (region/country terms), server-side keyword filtering
 - **6 RSS feeds** as enrichment sources: BBC Middle East, Al Jazeera English, Tehran Times, Times of Israel, Reuters, Middle East Eye
 - GDELT is required (endpoint errors if GDELT fails); all RSS feeds are best-effort (silently skip on failure)
@@ -21,6 +22,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - Article data model includes geolocation (lat/lng) when available from GDELT metadata; RSS articles won't have geo and that's fine
 
 ### Conflict filtering rules
+
 - Broad geopolitical keyword whitelist — includes military terms (airstrike, missile, bomb, strike, troops, drone, casualties) AND diplomatic/political terms (sanctions, negotiations, ceasefire, escalation, tensions, IAEA, UN)
 - Filter applied to both title AND description/summary text
 - No separate geographic term filtering layer — keyword list already includes country names (Iran, Israel, etc.) and org names (IRGC, Hezbollah, Hamas)
@@ -28,6 +30,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - All keyword-matched articles treated equally regardless of tone
 
 ### Deduplication & story clustering
+
 - **Two-pass deduplication**: URL hash (exact match) first, then fuzzy title similarity (token overlap above ~80%) within a 24-hour window
 - **Story clusters, not discards**: duplicate articles grouped as clusters with one primary article + linked alternates
 - Cluster model: `NewsCluster { id, primaryArticle, articles[], firstSeen, lastUpdated }`
@@ -35,6 +38,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - Phase 17 can display "N sources reporting this" from cluster size
 
 ### Article data model
+
 - Rich model for maximum Phase 17 flexibility:
   - `NewsArticle { id, title, url, source, publishedAt, summary?, imageUrl?, lat?, lng?, tone?, keywords[] }`
   - `NewsCluster { id, primaryArticle, articles[], firstSeen, lastUpdated }`
@@ -42,6 +46,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - `source` = human-readable source name (e.g., "BBC", "Al Jazeera", "GDELT")
 
 ### Caching & refresh cadence
+
 - **15-minute polling interval** — matches GDELT events cadence; RSS feeds update similarly
 - **Per-source Redis keys** (`news:gdelt`, `news:bbc`, `news:aljazeera`, `news:tehrantimes`, `news:timesofisrael`, `news:reuters`, `news:middleeasteye`) for per-source health inspection
 - **Merged feed key** (`news:feed`) storing the deduplicated, clustered feed for API reads
@@ -49,11 +54,13 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - Cache-first route pattern matching existing events route (check cache → fresh fetch → merge → stale fallback)
 
 ### Client integration
+
 - newsStore (Zustand) + useNewsPolling hook added now (not deferred to Phase 17)
 - Follows existing polling patterns (recursive setTimeout, tab visibility awareness)
 - 15-minute client polling interval matching server refresh
 
 ### Claude's Discretion
+
 - Exact keyword whitelist terms (researcher should test against real GDELT DOC results and tune)
 - Fuzzy title similarity algorithm choice (Levenshtein, Jaccard, token overlap)
 - RSS feed URL discovery and validation for each source
@@ -74,9 +81,11 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/cache/redis.ts`: `cacheGet`/`cacheSet` with `CacheEntry<T>` pattern — reuse for news cache keys
 - `server/adapters/gdelt.ts`: Existing GDELT events adapter — DOC API adapter follows same module structure
 - `server/routes/events.ts`: Cache-first route with accumulator merge — news route follows same pattern with sliding window prune
@@ -85,6 +94,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - `src/stores/eventStore.ts`: Zustand store with connection health — template for newsStore
 
 ### Established Patterns
+
 - Zustand curried `create<T>()()` for new newsStore
 - `CacheResponse<T>` contract (data, stale, lastFresh) for API response shape
 - Adapter → Route → Cache flow (adapter fetches/normalizes, route handles cache logic)
@@ -92,6 +102,7 @@ System silently aggregates conflict-relevant news from multiple sources into a u
 - `ConnectionStatus` type for store health tracking
 
 ### Integration Points
+
 - `server/types.ts`: New `NewsArticle` and `NewsCluster` types
 - `server/adapters/`: New `gdelt-doc.ts` (GDELT DOC API) + `rss.ts` (generic RSS parser for 6 feeds)
 - `server/routes/`: New `news.ts` route
@@ -111,5 +122,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 16-news-feed*
-*Context gathered: 2026-03-20*
+_Phase: 16-news-feed_
+_Context gathered: 2026-03-20_

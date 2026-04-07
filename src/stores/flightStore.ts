@@ -34,7 +34,9 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
       flightCount: response.data.length,
       connectionStatus: response.rateLimited
         ? 'rate_limited'
-        : response.stale ? 'stale' : 'connected',
+        : response.stale
+          ? 'stale'
+          : 'connected',
       degraded: response.degraded ?? false,
       lastFetchAt: Date.now(),
       lastFresh: response.stale ? get().lastFresh : Date.now(),
@@ -47,6 +49,5 @@ export const useFlightStore = create<FlightState>()((set, get) => ({
 
   setLoading: () => set({ connectionStatus: 'loading' }),
 
-  clearStaleData: () =>
-    set({ flights: [], flightCount: 0, connectionStatus: 'error' }),
+  clearStaleData: () => set({ flights: [], flightCount: 0, connectionStatus: 'error' }),
 }));

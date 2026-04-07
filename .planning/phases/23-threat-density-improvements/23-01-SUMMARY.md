@@ -20,7 +20,8 @@ affects: [23-02, threat-heatmap, detail-panel, map-layers]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [P90-normalization for heatmap color domain, eventIds array in grid cells for cross-referencing]
+  patterns:
+    [P90-normalization for heatmap color domain, eventIds array in grid cells for cross-referencing]
 
 key-files:
   created: []
@@ -29,13 +30,13 @@ key-files:
     - src/__tests__/ThreatHeatmapOverlay.test.tsx
 
 key-decisions:
-  - "Thermal palette uses 8 FLIR Ironbow-inspired stops: indigo->purple->violet->magenta->orange->amber->yellow->red"
-  - "Legend endpoint colors: #1e0f50 (Low) and #ff2820 (High) matching first and last thermal stops"
-  - "computeP90 floor-clamped to 1 to prevent degenerate zero-range colorDomain"
+  - 'Thermal palette uses 8 FLIR Ironbow-inspired stops: indigo->purple->violet->magenta->orange->amber->yellow->red'
+  - 'Legend endpoint colors: #1e0f50 (Low) and #ff2820 (High) matching first and last thermal stops'
+  - 'computeP90 floor-clamped to 1 to prevent degenerate zero-range colorDomain'
 
 patterns-established:
-  - "P90 normalization: compute 90th percentile of weights, set colorDomain=[0, p90] to prevent outlier washout"
-  - "eventIds tracking: grid cells accumulate event IDs for downstream detail lookups"
+  - 'P90 normalization: compute 90th percentile of weights, set colorDomain=[0, p90] to prevent outlier washout'
+  - 'eventIds tracking: grid cells accumulate event IDs for downstream detail lookups'
 
 requirements-completed: [P23-01, P23-02, P23-03, P23-04, P23-05, P23-09]
 
@@ -57,6 +58,7 @@ completed: 2026-04-02
 - **Files modified:** 2
 
 ## Accomplishments
+
 - Replaced 5-stop red palette with 8-stop military thermal (FLIR Ironbow) for better threat intensity differentiation
 - Removed temporal decay from computeThreatWeight so all events score equally regardless of age
 - Increased grid resolution from 0.75-degree (~83km) to 0.25-degree (~28km) for ~9x spatial fidelity
@@ -73,10 +75,12 @@ Each task was committed atomically (TDD):
    - `fe0ffdd` (feat) - GREEN: implementation passing all 30 tests
 
 ## Files Created/Modified
+
 - `src/components/map/layers/ThreatHeatmapOverlay.tsx` - Updated heatmap with thermal palette, no decay, 0.25-deg grid, P90 normalization, eventIds tracking
 - `src/__tests__/ThreatHeatmapOverlay.test.tsx` - Updated test suite: 30 tests covering computeP90, no-decay weight, 0.25-deg grid, eventIds, thermal palette, colorDomain
 
 ## Decisions Made
+
 - Thermal palette colors chosen as FLIR Ironbow-inspired (deep indigo through bright red) -- provides better contrast than monochrome red at both low and high intensity
 - Legend endpoint hex values (#1e0f50, #ff2820) derived from first and last THERMAL_COLOR_RANGE RGB stops
 - computeP90 returns floor of 1 rather than 0 to prevent degenerate zero-range colorDomain that would make all cells render as maximum intensity
@@ -86,12 +90,15 @@ Each task was committed atomically (TDD):
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - eventIds field on ThreatZoneData is ready for Plan 02 (cluster detail panel navigation)
 - THERMAL_COLOR_RANGE is exported for any downstream consumers needing palette reference
 - computeP90 is exported and reusable for other normalization needs
@@ -105,5 +112,6 @@ None - no external service configuration required.
 - [x] Commit fe0ffdd (GREEN) exists
 
 ---
-*Phase: 23-threat-density-improvements*
-*Completed: 2026-04-02*
+
+_Phase: 23-threat-density-improvements_
+_Completed: 2026-04-02_

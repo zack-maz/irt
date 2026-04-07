@@ -73,8 +73,16 @@ describe('BaseMap', () => {
     expect(mockMap.setLayoutProperty).toHaveBeenCalledWith('poi', 'visibility', 'none');
 
     // Verify borders brightened
-    expect(mockMap.setPaintProperty).toHaveBeenCalledWith('boundary_country_outline', 'line-color', '#888888');
-    expect(mockMap.setPaintProperty).toHaveBeenCalledWith('boundary_country_outline', 'line-width', 1.5);
+    expect(mockMap.setPaintProperty).toHaveBeenCalledWith(
+      'boundary_country_outline',
+      'line-color',
+      '#888888',
+    );
+    expect(mockMap.setPaintProperty).toHaveBeenCalledWith(
+      'boundary_country_outline',
+      'line-width',
+      1.5,
+    );
 
     // Verify water tinted
     expect(mockMap.setPaintProperty).toHaveBeenCalledWith('water', 'fill-color', '#0a1628');

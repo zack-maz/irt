@@ -28,9 +28,7 @@ export async function fetchFlights(): Promise<FlightEntity[]> {
   const data = (await res.json()) as AdsbResponse;
   const aircraft = data.ac ?? [];
 
-  const flights = aircraft
-    .map(normalizeAircraft)
-    .filter((f): f is FlightEntity => f !== null);
+  const flights = aircraft.map(normalizeAircraft).filter((f): f is FlightEntity => f !== null);
 
   log.info({ count: flights.length, durationMs: Date.now() - start }, 'fetched flights');
   return flights;

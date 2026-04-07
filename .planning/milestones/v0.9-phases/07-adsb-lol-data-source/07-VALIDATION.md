@@ -15,13 +15,13 @@ created: 2026-03-16
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4 with jsdom (frontend) / node (server) |
-| **Config file** | vite.config.ts (test section) |
-| **Quick run command** | `npx vitest run server/__tests__/adapters/ -x` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                          |
+| ---------------------- | ---------------------------------------------- |
+| **Framework**          | Vitest 4 with jsdom (frontend) / node (server) |
+| **Config file**        | vite.config.ts (test section)                  |
+| **Quick run command**  | `npx vitest run server/__tests__/adapters/ -x` |
+| **Full suite command** | `npx vitest run`                               |
+| **Estimated runtime**  | ~15 seconds                                    |
 
 ---
 
@@ -36,21 +36,21 @@ created: 2026-03-16
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| DATA-04-norm | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/adapters/adsb-v2-normalize.test.ts -x` | ❌ W0 | ⬜ pending |
-| DATA-04-lol-fetch | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x` | ❌ W0 | ⬜ pending |
-| DATA-04-lol-noauth | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x` | ❌ W0 | ⬜ pending |
-| DATA-04-lol-429 | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x` | ❌ W0 | ⬜ pending |
-| DATA-04-route3 | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | ✅ modify | ⬜ pending |
-| DATA-04-sources | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/routes/sources.test.ts -x` | ❌ W0 | ⬜ pending |
-| DATA-04-default | 02 | 2 | DATA-04 | unit | `npx vitest run src/__tests__/flightStore.test.ts -x` | ✅ modify | ⬜ pending |
-| DATA-04-poll30 | 02 | 2 | DATA-04 | unit | `npx vitest run src/__tests__/useFlightPolling.test.ts -x` | ✅ modify | ⬜ pending |
-| DATA-04-disabled | 02 | 2 | DATA-04 | unit | `npx vitest run src/__tests__/SourceSelector.test.tsx -x` | ✅ modify | ⬜ pending |
-| DATA-04-3opts | 02 | 2 | DATA-04 | unit | `npx vitest run src/__tests__/SourceSelector.test.tsx -x` | ✅ modify | ⬜ pending |
-| DATA-04-adsb-refactor | 01 | 1 | DATA-04 | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | ✅ verify | ⬜ pending |
+| Task ID               | Plan | Wave | Requirement | Test Type | Automated Command                                                       | File Exists | Status     |
+| --------------------- | ---- | ---- | ----------- | --------- | ----------------------------------------------------------------------- | ----------- | ---------- |
+| DATA-04-norm          | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/adapters/adsb-v2-normalize.test.ts -x` | ❌ W0       | ⬜ pending |
+| DATA-04-lol-fetch     | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x`          | ❌ W0       | ⬜ pending |
+| DATA-04-lol-noauth    | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x`          | ❌ W0       | ⬜ pending |
+| DATA-04-lol-429       | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/adapters/adsb-lol.test.ts -x`          | ❌ W0       | ⬜ pending |
+| DATA-04-route3        | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/routes/flights.test.ts -x`             | ✅ modify   | ⬜ pending |
+| DATA-04-sources       | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/routes/sources.test.ts -x`             | ❌ W0       | ⬜ pending |
+| DATA-04-default       | 02   | 2    | DATA-04     | unit      | `npx vitest run src/__tests__/flightStore.test.ts -x`                   | ✅ modify   | ⬜ pending |
+| DATA-04-poll30        | 02   | 2    | DATA-04     | unit      | `npx vitest run src/__tests__/useFlightPolling.test.ts -x`              | ✅ modify   | ⬜ pending |
+| DATA-04-disabled      | 02   | 2    | DATA-04     | unit      | `npx vitest run src/__tests__/SourceSelector.test.tsx -x`               | ✅ modify   | ⬜ pending |
+| DATA-04-3opts         | 02   | 2    | DATA-04     | unit      | `npx vitest run src/__tests__/SourceSelector.test.tsx -x`               | ✅ modify   | ⬜ pending |
+| DATA-04-adsb-refactor | 01   | 1    | DATA-04     | unit      | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x`     | ✅ verify   | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -69,10 +69,10 @@ created: 2026-03-16
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| adsb.lol returns data in regions with feeder coverage | DATA-04 | Requires live API with actual feeder network | Query London area (51.5, -0.1) via dev server, verify aircraft appear |
-| Disabled dropdown items prevent selection | DATA-04 | Visual/interaction behavior | Click disabled source in SourceSelector, verify no source change |
+| Behavior                                              | Requirement | Why Manual                                   | Test Instructions                                                     |
+| ----------------------------------------------------- | ----------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| adsb.lol returns data in regions with feeder coverage | DATA-04     | Requires live API with actual feeder network | Query London area (51.5, -0.1) via dev server, verify aircraft appear |
+| Disabled dropdown items prevent selection             | DATA-04     | Visual/interaction behavior                  | Click disabled source in SourceSelector, verify no source change      |
 
 ---
 

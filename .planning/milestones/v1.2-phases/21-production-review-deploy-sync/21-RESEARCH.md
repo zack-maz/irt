@@ -13,9 +13,11 @@ The server code uses Express 5.2.1 with a clean `createApp()` factory pattern. M
 **Primary recommendation:** Add Vercel edge caching headers as the first priority (eliminates thundering herd), then helmet security, then structured logging, then Redis budget monitoring. Bundle optimization and code polish can run in parallel.
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Target audience: 1000+ concurrent users (public/viral potential)
 - HTTP Cache-Control headers: `s-maxage` per endpoint matching logical TTLs (flights 30s, events 900s, sites 86400s) -- Vercel edge CDN serves cached responses
 - Compression: verify whether Vercel auto-compresses responses; add express compression middleware only if needed
@@ -41,6 +43,7 @@ The server code uses Express 5.2.1 with a clean `createApp()` factory pattern. M
 - Error pages: skip custom error pages -- Vercel defaults are fine
 
 ### Claude's Discretion
+
 - Exact Cache-Control header values per endpoint (within the "match logical TTLs" strategy)
 - Specific rate limit numbers per endpoint
 - Bundle splitting strategy (which chunks to lazy-load)
@@ -49,39 +52,45 @@ The server code uses Express 5.2.1 with a clean `createApp()` factory pattern. M
 - In-memory fallback implementation approach
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 None -- discussion stayed within phase scope
 </user_constraints>
 
 ## Standard Stack
 
 ### Core (New Dependencies)
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| helmet | ^8.1.0 | Security headers (CSP, XSS, clickjacking, MIME sniffing) | Express official recommendation; 15 headers in one `app.use(helmet())` call |
-| @vercel/analytics | ^1.x | Page views, geographic breakdown | Official Vercel package for Vite+React projects |
-| @vercel/speed-insights | ^1.x | Core Web Vitals (LCP, CLS, INP) | Official Vercel package, separate from analytics |
-| rollup-plugin-visualizer | ^5.x | Bundle analysis treemap | Standard Vite/Rollup plugin for identifying bloat |
+
+| Library                  | Version | Purpose                                                  | Why Standard                                                                |
+| ------------------------ | ------- | -------------------------------------------------------- | --------------------------------------------------------------------------- |
+| helmet                   | ^8.1.0  | Security headers (CSP, XSS, clickjacking, MIME sniffing) | Express official recommendation; 15 headers in one `app.use(helmet())` call |
+| @vercel/analytics        | ^1.x    | Page views, geographic breakdown                         | Official Vercel package for Vite+React projects                             |
+| @vercel/speed-insights   | ^1.x    | Core Web Vitals (LCP, CLS, INP)                          | Official Vercel package, separate from analytics                            |
+| rollup-plugin-visualizer | ^5.x    | Bundle analysis treemap                                  | Standard Vite/Rollup plugin for identifying bloat                           |
 
 ### Existing (Already Installed)
-| Library | Version | Purpose | Notes |
-|---------|---------|---------|-------|
-| @upstash/ratelimit | 2.0.8 | Rate limiting via Redis | Already wired; needs per-endpoint configuration |
-| @upstash/redis | 1.37.0 | Redis client (REST-based) | Core caching; add budget tracking |
-| express | 5.2.1 | Server framework | Helmet is compatible with Express 5 |
+
+| Library            | Version | Purpose                   | Notes                                           |
+| ------------------ | ------- | ------------------------- | ----------------------------------------------- |
+| @upstash/ratelimit | 2.0.8   | Rate limiting via Redis   | Already wired; needs per-endpoint configuration |
+| @upstash/redis     | 1.37.0  | Redis client (REST-based) | Core caching; add budget tracking               |
+| express            | 5.2.1   | Server framework          | Helmet is compatible with Express 5             |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Structured JSON via manual formatting | pino / winston | Over-engineered for serverless; manual `JSON.stringify` is simpler and smaller, no extra dependency |
-| rollup-plugin-visualizer | vite-bundle-analyzer | Both work; visualizer is more mature and widely used |
+
+| Instead of                            | Could Use            | Tradeoff                                                                                            |
+| ------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| Structured JSON via manual formatting | pino / winston       | Over-engineered for serverless; manual `JSON.stringify` is simpler and smaller, no extra dependency |
+| rollup-plugin-visualizer              | vite-bundle-analyzer | Both work; visualizer is more mature and widely used                                                |
 
 ### NOT Needed
-| Library | Why Not |
-|---------|---------|
+
+| Library                          | Why Not                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | compression (express middleware) | **Vercel automatically compresses** all responses with Brotli/gzip when client sends `Accept-Encoding` header. No middleware needed. |
-| express-rate-limit | Already using `@upstash/ratelimit` which is serverless-compatible and persists across function invocations |
+| express-rate-limit               | Already using `@upstash/ratelimit` which is serverless-compatible and persists across function invocations                           |
 
 **Installation:**
+
 ```bash
 npm install helmet @vercel/analytics @vercel/speed-insights
 npm install -D rollup-plugin-visualizer
@@ -94,6 +103,7 @@ npm install -D rollup-plugin-visualizer
 **What:** Set `Cache-Control` headers on each API route response so Vercel's CDN serves cached responses at the edge, preventing serverless function invocations for most requests.
 
 **How it works on Vercel:**
+
 1. Serverless function responds with `Cache-Control: public, s-maxage=N, stale-while-revalidate=M`
 2. Vercel edge CDN caches the response for `N` seconds
 3. During `stale-while-revalidate` window (`M` seconds after `N` expires), CDN serves stale response while revalidating in background
@@ -101,26 +111,30 @@ npm install -D rollup-plugin-visualizer
 
 **Recommended Cache-Control values per endpoint:**
 
-| Endpoint | s-maxage | stale-while-revalidate | Rationale |
-|----------|----------|------------------------|-----------|
-| `/api/flights` | 5 | 25 | Real-time; adsb.lol polls at 30s, match short freshness |
-| `/api/ships` | 10 | 20 | 30s client polling; slightly more aggressive cache |
-| `/api/events` | 300 | 600 | 15-min GDELT updates; 5-min edge cache is fine |
-| `/api/news` | 300 | 600 | 15-min update cycle; same as events |
-| `/api/markets` | 30 | 30 | 60s client polling; market data ages fast |
-| `/api/weather` | 600 | 1200 | 30-min updates; aggressive edge caching fine |
-| `/api/sites` | 3600 | 82800 | Static data; cache for 1 hour, serve stale for 23h |
-| `/api/sources` | 60 | 60 | Config data; rarely changes |
-| `/health` | 0 | 0 | Never cache health checks |
+| Endpoint       | s-maxage | stale-while-revalidate | Rationale                                               |
+| -------------- | -------- | ---------------------- | ------------------------------------------------------- |
+| `/api/flights` | 5        | 25                     | Real-time; adsb.lol polls at 30s, match short freshness |
+| `/api/ships`   | 10       | 20                     | 30s client polling; slightly more aggressive cache      |
+| `/api/events`  | 300      | 600                    | 15-min GDELT updates; 5-min edge cache is fine          |
+| `/api/news`    | 300      | 600                    | 15-min update cycle; same as events                     |
+| `/api/markets` | 30       | 30                     | 60s client polling; market data ages fast               |
+| `/api/weather` | 600      | 1200                   | 30-min updates; aggressive edge caching fine            |
+| `/api/sites`   | 3600     | 82800                  | Static data; cache for 1 hour, serve stale for 23h      |
+| `/api/sources` | 60       | 60                     | Config data; rarely changes                             |
+| `/health`      | 0        | 0                      | Never cache health checks                               |
 
 **Critical gotcha:** Vercel strips `s-maxage` and `stale-while-revalidate` from `Cache-Control` before sending to browser. Use `Vercel-CDN-Cache-Control` header for Vercel-specific cache control if you want different browser vs CDN behavior. For this project, `max-age=0, s-maxage=N, stale-while-revalidate=M` works perfectly -- browsers always fetch fresh (hitting CDN), CDN serves cached.
 
 **Implementation pattern:**
+
 ```typescript
 // Middleware approach -- add before route handlers
 function cacheControl(sMaxAge: number, swr: number) {
   return (_req: Request, res: Response, next: NextFunction) => {
-    res.set('Cache-Control', `public, max-age=0, s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`);
+    res.set(
+      'Cache-Control',
+      `public, max-age=0, s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`,
+    );
     next();
   };
 }
@@ -141,18 +155,33 @@ app.use('/api/sites', cacheControl(3600, 82800), sitesRouter);
 import helmet from 'helmet';
 
 // In createApp():
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://va.vercel-scripts.com"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://*.amazonaws.com", "https://server.arcgisonline.com"],
-      connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "https://*.amazonaws.com", "https://api.open-meteo.com", "https://va.vercel-scripts.com"],
-      workerSrc: ["'self'", "blob:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://va.vercel-scripts.com'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://*.tile.openstreetmap.org',
+          'https://*.amazonaws.com',
+          'https://server.arcgisonline.com',
+        ],
+        connectSrc: [
+          "'self'",
+          'https://*.tile.openstreetmap.org',
+          'https://*.amazonaws.com',
+          'https://api.open-meteo.com',
+          'https://va.vercel-scripts.com',
+        ],
+        workerSrc: ["'self'", 'blob:'],
+      },
     },
-  },
-}));
+  }),
+);
 ```
 
 **Key consideration:** Must whitelist all external resources (map tiles, terrain tiles, API endpoints, Vercel analytics script) in CSP directives or they will be blocked.
@@ -182,6 +211,7 @@ function log(entry: LogEntry) {
 ```
 
 **Request logging middleware:**
+
 ```typescript
 function requestLogger(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();
@@ -206,16 +236,16 @@ function requestLogger(req: Request, res: Response, next: NextFunction) {
 
 **Recommended limits:**
 
-| Endpoint | Limit | Window | Rationale |
-|----------|-------|--------|-----------|
-| `/api/flights` | 120 | 60s | Clients poll every 5-30s; need headroom |
-| `/api/ships` | 60 | 60s | 30s polling; standard |
-| `/api/events` | 20 | 60s | 15-min polling; low frequency |
-| `/api/news` | 20 | 60s | 15-min polling; low frequency |
-| `/api/markets` | 30 | 60s | 60s polling; moderate |
-| `/api/weather` | 10 | 60s | 30-min polling; very low frequency |
-| `/api/sites` | 10 | 60s | One-time fetch; very low |
-| `/api/sources` | 30 | 60s | Config check on mount |
+| Endpoint       | Limit | Window | Rationale                               |
+| -------------- | ----- | ------ | --------------------------------------- |
+| `/api/flights` | 120   | 60s    | Clients poll every 5-30s; need headroom |
+| `/api/ships`   | 60    | 60s    | 30s polling; standard                   |
+| `/api/events`  | 20    | 60s    | 15-min polling; low frequency           |
+| `/api/news`    | 20    | 60s    | 15-min polling; low frequency           |
+| `/api/markets` | 30    | 60s    | 60s polling; moderate                   |
+| `/api/weather` | 10    | 60s    | 30-min polling; very low frequency      |
+| `/api/sites`   | 10    | 60s    | One-time fetch; very low                |
+| `/api/sources` | 30    | 60s    | Config check on mount                   |
 
 **Note:** With edge caching active, most requests never reach the serverless function, so rate limits mainly protect against cache-busting attacks or misconfigured clients.
 
@@ -228,7 +258,10 @@ function requestLogger(req: Request, res: Response, next: NextFunction) {
 // In redis.ts -- add in-memory LRU cache as fallback
 const memCache = new Map<string, { data: unknown; fetchedAt: number }>();
 
-export async function cacheGetSafe<T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> {
+export async function cacheGetSafe<T>(
+  key: string,
+  logicalTtlMs: number,
+): Promise<CacheResponse<T> | null> {
   try {
     const result = await cacheGet<T>(key, logicalTtlMs);
     if (result) {
@@ -253,6 +286,7 @@ export async function cacheGetSafe<T>(key: string, logicalTtlMs: number): Promis
 **Current state:** Single 2,218 KB chunk (607 KB gzipped).
 
 **Strategy:**
+
 1. Run `rollup-plugin-visualizer` to identify top contributors
 2. Split deck.gl into a vendor chunk (it's the largest dependency)
 3. Split maplibre-gl into a separate vendor chunk
@@ -322,56 +356,63 @@ function App() {
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Security headers | Custom header middleware | `helmet` | 15 headers with correct values; CSP, HSTS, XSS protection |
-| Rate limiting | Custom token bucket | `@upstash/ratelimit` | Already using; serverless-safe, persists across invocations |
-| Bundle analysis | Manual chunk inspection | `rollup-plugin-visualizer` | Interactive treemap shows exact module sizes |
-| Web Vitals tracking | Manual performance API | `@vercel/speed-insights` | Automatic LCP, CLS, INP collection with Vercel dashboard |
-| Edge CDN caching | Server-side request coalescing | `Cache-Control: s-maxage` | Vercel CDN handles dedup natively; zero server code |
-| Response compression | `compression` middleware | Vercel automatic compression | Vercel CDN compresses with Brotli/gzip automatically |
+| Problem              | Don't Build                    | Use Instead                  | Why                                                         |
+| -------------------- | ------------------------------ | ---------------------------- | ----------------------------------------------------------- |
+| Security headers     | Custom header middleware       | `helmet`                     | 15 headers with correct values; CSP, HSTS, XSS protection   |
+| Rate limiting        | Custom token bucket            | `@upstash/ratelimit`         | Already using; serverless-safe, persists across invocations |
+| Bundle analysis      | Manual chunk inspection        | `rollup-plugin-visualizer`   | Interactive treemap shows exact module sizes                |
+| Web Vitals tracking  | Manual performance API         | `@vercel/speed-insights`     | Automatic LCP, CLS, INP collection with Vercel dashboard    |
+| Edge CDN caching     | Server-side request coalescing | `Cache-Control: s-maxage`    | Vercel CDN handles dedup natively; zero server code         |
+| Response compression | `compression` middleware       | Vercel automatic compression | Vercel CDN compresses with Brotli/gzip automatically        |
 
 **Key insight:** Vercel's edge CDN handles two of the biggest scaling challenges (caching and compression) with zero server code -- just response headers.
 
 ## Common Pitfalls
 
 ### Pitfall 1: CSP Blocking Map Tiles
+
 **What goes wrong:** Helmet's default CSP blocks all external resources, breaking map tiles, terrain, weather API calls, and analytics scripts.
 **Why it happens:** Default `helmet()` sets `default-src: 'self'` which blocks cross-origin requests.
 **How to avoid:** Explicitly whitelist all external domains in CSP directives (map tile servers, terrain S3 buckets, Open-Meteo API, Vercel analytics script URL).
 **Warning signs:** Map shows no tiles, blank terrain, weather overlay missing after adding helmet.
 
 ### Pitfall 2: Cache-Control on Error Responses
+
 **What goes wrong:** Setting Cache-Control headers via middleware means error responses (500, 502) also get cached at the edge.
 **Why it happens:** Middleware runs before route handler, headers are set regardless of response status.
 **How to avoid:** Only set Cache-Control on successful (200) responses, OR set headers inside route handlers after determining success. Vercel CDN only caches specific status codes (200, 301, 302, 307, 308, 404, 410), so 500s are naturally excluded. But 502 from upstream failures could be cached if returned as 200 with stale data.
 **Warning signs:** Stale error responses served for extended periods.
 
 ### Pitfall 3: Upstash Rate Limit Consuming Redis Commands
+
 **What goes wrong:** `@upstash/ratelimit` uses Redis commands for every rate limit check. With 1000+ users, rate limiting alone could consume significant Redis budget.
 **Why it happens:** Each `ratelimit.limit()` call = 2-3 Redis commands (GET + SET + possible EXPIRE).
 **How to avoid:** With edge caching active, most requests never hit the serverless function. Rate limit checks only apply to cache misses. Monitor via `/health` endpoint.
 **Warning signs:** Redis command count rising faster than expected.
 
 ### Pitfall 4: Helmet Breaks Inline Styles
+
 **What goes wrong:** CSP `style-src` directive blocking Tailwind's runtime-injected styles or inline styles used by deck.gl.
 **Why it happens:** Tailwind v4 uses `@tailwindcss/vite` plugin which may inject inline `<style>` tags.
 **How to avoid:** Include `'unsafe-inline'` in `style-src` directive. This is acceptable for a dashboard application.
 **Warning signs:** Styles missing, unstyled content flash after adding helmet.
 
 ### Pitfall 5: `set-cookie` Header Preventing CDN Caching
+
 **What goes wrong:** Vercel CDN will NOT cache any response that includes a `set-cookie` header.
 **Why it happens:** Express session middleware or other middleware might set cookies.
 **How to avoid:** Ensure no middleware sets cookies on API routes. Currently no session middleware is used -- keep it that way.
 **Warning signs:** `x-vercel-cache: MISS` on every request despite Cache-Control headers.
 
 ### Pitfall 6: manualChunks Breaking Module Initialization
+
 **What goes wrong:** Splitting React into a separate chunk can cause "Cannot access before initialization" errors.
 **Why it happens:** Module evaluation order changes when chunks are split; circular dependencies surface.
 **How to avoid:** Test the build locally with `vite preview` after adding manualChunks. Keep React and React-DOM together. Keep deck.gl packages together (they have internal cross-imports).
 **Warning signs:** Runtime errors on page load that don't occur in dev mode.
 
 ### Pitfall 7: Vercel Hobby Cron Limitations
+
 **What goes wrong:** Expecting 5-15 minute cron monitoring on Hobby plan.
 **Why it happens:** Hobby plan limits cron to once-per-day minimum frequency, max 2 cron jobs.
 **How to avoid:** Use cron for daily health summaries only. For real-time monitoring, rely on Vercel's built-in monitoring or external uptime services (e.g., UptimeRobot free tier).
@@ -380,6 +421,7 @@ function App() {
 ## Code Examples
 
 ### Cache-Control Middleware
+
 ```typescript
 // Source: Vercel CDN Cache docs (https://vercel.com/docs/caching/cdn-cache)
 import type { Request, Response, NextFunction } from 'express';
@@ -399,6 +441,7 @@ export function cacheControl(sMaxAge: number, staleWhileRevalidate: number) {
 ```
 
 ### Rich Health Endpoint
+
 ```typescript
 // Source: Project-specific pattern
 app.get('/health', async (_req, res) => {
@@ -407,7 +450,9 @@ app.get('/health', async (_req, res) => {
   try {
     await redis.ping();
     redisOk = true;
-  } catch { /* Redis down */ }
+  } catch {
+    /* Redis down */
+  }
 
   res.json({
     status: redisOk ? 'ok' : 'degraded',
@@ -430,6 +475,7 @@ app.get('/health', async (_req, res) => {
 ```
 
 ### Smoke Test Script
+
 ```typescript
 // scripts/smoke-test.ts
 // Run: npx tsx scripts/smoke-test.ts https://your-app.vercel.app
@@ -458,13 +504,13 @@ for (const path of endpoints) {
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| `express-rate-limit` (in-memory) | `@upstash/ratelimit` (Redis-backed) | 2024 | Serverless-compatible rate limiting |
-| Manual security headers | `helmet` v8+ | Ongoing | 15 headers with one call |
-| Server-side response compression | Vercel automatic Brotli/gzip | Always on Vercel | No middleware needed; 14-21% smaller than gzip |
-| `Cache-Control: s-maxage` only | `s-maxage` + `stale-while-revalidate` | Vercel CDN standard | Background revalidation eliminates thundering herd |
-| `Vercel-CDN-Cache-Control` | `Cache-Control` with `s-maxage` | Current | Vercel strips `s-maxage` from browser response automatically |
+| Old Approach                     | Current Approach                      | When Changed        | Impact                                                       |
+| -------------------------------- | ------------------------------------- | ------------------- | ------------------------------------------------------------ |
+| `express-rate-limit` (in-memory) | `@upstash/ratelimit` (Redis-backed)   | 2024                | Serverless-compatible rate limiting                          |
+| Manual security headers          | `helmet` v8+                          | Ongoing             | 15 headers with one call                                     |
+| Server-side response compression | Vercel automatic Brotli/gzip          | Always on Vercel    | No middleware needed; 14-21% smaller than gzip               |
+| `Cache-Control: s-maxage` only   | `s-maxage` + `stale-while-revalidate` | Vercel CDN standard | Background revalidation eliminates thundering herd           |
+| `Vercel-CDN-Cache-Control`       | `Cache-Control` with `s-maxage`       | Current             | Vercel strips `s-maxage` from browser response automatically |
 
 **Verified:** Vercel auto-compresses all JSON/text responses when `Accept-Encoding` is present. No `compression` middleware needed. (Source: Vercel CDN Compression docs)
 
@@ -488,33 +534,36 @@ for (const path of endpoints) {
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 4.1.0 with jsdom (frontend) and node (server) |
-| Config file | `vite.config.ts` (test section) |
-| Quick run command | `npx vitest run` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| Framework          | Vitest 4.1.0 with jsdom (frontend) and node (server) |
+| Config file        | `vite.config.ts` (test section)                      |
+| Quick run command  | `npx vitest run`                                     |
+| Full suite command | `npx vitest run`                                     |
 
 ### Phase Requirements -> Test Map
 
 This is a verification phase with no formal requirement IDs. Validation is structured around the locked decisions:
 
-| Area | Behavior | Test Type | Automated Command | File Exists? |
-|------|----------|-----------|-------------------|-------------|
-| Edge caching | Cache-Control headers set on each route | integration | `npx vitest run server/__tests__/` | Wave 0 |
-| Security headers | Helmet headers present in responses | integration | `npx vitest run server/__tests__/` | Wave 0 |
-| Rate limiting | Per-endpoint limits enforced | unit | `npx vitest run server/__tests__/rateLimit.test.ts` | Exists (needs update) |
-| Health endpoint | Rich health response shape | integration | `npx vitest run server/__tests__/` | Wave 0 |
-| Smoke tests | All production endpoints return valid JSON | e2e (script) | `npx tsx scripts/smoke-test.ts $URL` | Wave 0 |
-| Bundle size | Main chunk under warning threshold | build | `npx vite build` | N/A (build output check) |
-| Redis fallback | In-memory fallback on Redis failure | unit | `npx vitest run server/__tests__/redis-cache.test.ts` | Exists (needs update) |
+| Area             | Behavior                                   | Test Type    | Automated Command                                     | File Exists?             |
+| ---------------- | ------------------------------------------ | ------------ | ----------------------------------------------------- | ------------------------ |
+| Edge caching     | Cache-Control headers set on each route    | integration  | `npx vitest run server/__tests__/`                    | Wave 0                   |
+| Security headers | Helmet headers present in responses        | integration  | `npx vitest run server/__tests__/`                    | Wave 0                   |
+| Rate limiting    | Per-endpoint limits enforced               | unit         | `npx vitest run server/__tests__/rateLimit.test.ts`   | Exists (needs update)    |
+| Health endpoint  | Rich health response shape                 | integration  | `npx vitest run server/__tests__/`                    | Wave 0                   |
+| Smoke tests      | All production endpoints return valid JSON | e2e (script) | `npx tsx scripts/smoke-test.ts $URL`                  | Wave 0                   |
+| Bundle size      | Main chunk under warning threshold         | build        | `npx vite build`                                      | N/A (build output check) |
+| Redis fallback   | In-memory fallback on Redis failure        | unit         | `npx vitest run server/__tests__/redis-cache.test.ts` | Exists (needs update)    |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run`
 - **Per wave merge:** `npx vitest run` + `npx vite build`
 - **Phase gate:** Full suite green + successful production deploy + smoke test pass
 
 ### Wave 0 Gaps
+
 - [ ] `server/__tests__/middleware/cacheControl.test.ts` -- covers edge caching header verification
 - [ ] `server/__tests__/health.test.ts` -- covers rich health endpoint response shape
 - [ ] `scripts/smoke-test.ts` -- production endpoint smoke test script
@@ -523,6 +572,7 @@ This is a verification phase with no formal requirement IDs. Validation is struc
 ## Existing Code Inventory (for Code Polish)
 
 ### Server Files (31 source files)
+
 - `server/index.ts` -- Express app factory (`createApp`)
 - `server/vercel-entry.ts` -- Vercel serverless entry point
 - `server/config.ts` -- Env var loading with graceful defaults
@@ -536,33 +586,36 @@ This is a verification phase with no formal requirement IDs. Validation is struc
 - 2 lib files (`newsFilter`, `newsClustering`)
 
 ### Env Vars Inventory (for Vercel audit)
-| Variable | Used In | Required |
-|----------|---------|----------|
-| `UPSTASH_REDIS_REST_URL` | `server/cache/redis.ts` | Yes (crashes without) |
-| `UPSTASH_REDIS_REST_TOKEN` | `server/cache/redis.ts` | Yes (crashes without) |
-| `CORS_ORIGIN` | `server/index.ts`, `server/config.ts` | No (defaults to `*`) |
-| `PORT` | `server/index.ts`, `server/config.ts` | No (defaults to 3001) |
-| `OPENSKY_CLIENT_ID` | `server/config.ts`, `server/routes/flights.ts` | No (OpenSky disabled) |
-| `OPENSKY_CLIENT_SECRET` | `server/config.ts`, `server/routes/flights.ts` | No (OpenSky disabled) |
-| `ADSB_EXCHANGE_API_KEY` | `server/adapters/adsb-exchange.ts`, `server/routes/flights.ts` | No (ADS-B Exchange disabled) |
-| `AISSTREAM_API_KEY` | `server/adapters/aisstream.ts` | No (ships disabled without) |
-| `AISSTREAM_COLLECT_MS` | `server/adapters/aisstream.ts` | No (defaults to internal value) |
-| `ACLED_EMAIL` | `server/config.ts` | No (ACLED not active) |
-| `ACLED_PASSWORD` | `server/config.ts` | No (ACLED not active) |
+
+| Variable                   | Used In                                                        | Required                        |
+| -------------------------- | -------------------------------------------------------------- | ------------------------------- |
+| `UPSTASH_REDIS_REST_URL`   | `server/cache/redis.ts`                                        | Yes (crashes without)           |
+| `UPSTASH_REDIS_REST_TOKEN` | `server/cache/redis.ts`                                        | Yes (crashes without)           |
+| `CORS_ORIGIN`              | `server/index.ts`, `server/config.ts`                          | No (defaults to `*`)            |
+| `PORT`                     | `server/index.ts`, `server/config.ts`                          | No (defaults to 3001)           |
+| `OPENSKY_CLIENT_ID`        | `server/config.ts`, `server/routes/flights.ts`                 | No (OpenSky disabled)           |
+| `OPENSKY_CLIENT_SECRET`    | `server/config.ts`, `server/routes/flights.ts`                 | No (OpenSky disabled)           |
+| `ADSB_EXCHANGE_API_KEY`    | `server/adapters/adsb-exchange.ts`, `server/routes/flights.ts` | No (ADS-B Exchange disabled)    |
+| `AISSTREAM_API_KEY`        | `server/adapters/aisstream.ts`                                 | No (ships disabled without)     |
+| `AISSTREAM_COLLECT_MS`     | `server/adapters/aisstream.ts`                                 | No (defaults to internal value) |
+| `ACLED_EMAIL`              | `server/config.ts`                                             | No (ACLED not active)           |
+| `ACLED_PASSWORD`           | `server/config.ts`                                             | No (ACLED not active)           |
 
 ### Bundle Composition (estimated)
-| Dependency | Approx Size | Splittable |
-|------------|-------------|-----------|
-| deck.gl (5 packages) | ~800-1000 KB | Yes -- vendor chunk |
-| maplibre-gl | ~500-700 KB | Yes -- vendor chunk |
-| React + React-DOM | ~140 KB | Yes -- vendor chunk |
-| Zustand | ~5 KB | No (too small) |
-| Tailwind CSS runtime | ~100 KB | No (CSS, not JS) |
-| App code | ~200-400 KB | Partially (lazy components) |
+
+| Dependency           | Approx Size  | Splittable                  |
+| -------------------- | ------------ | --------------------------- |
+| deck.gl (5 packages) | ~800-1000 KB | Yes -- vendor chunk         |
+| maplibre-gl          | ~500-700 KB  | Yes -- vendor chunk         |
+| React + React-DOM    | ~140 KB      | Yes -- vendor chunk         |
+| Zustand              | ~5 KB        | No (too small)              |
+| Tailwind CSS runtime | ~100 KB      | No (CSS, not JS)            |
+| App code             | ~200-400 KB  | Partially (lazy components) |
 
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - [Vercel CDN Cache docs](https://vercel.com/docs/caching/cdn-cache) -- Edge caching with `s-maxage`, `stale-while-revalidate`, response criteria, CDN-Cache-Control
 - [Vercel CDN Compression docs](https://vercel.com/docs/compression) -- Automatic Brotli/gzip compression for all responses
 - [Vercel Cron Jobs Quickstart](https://vercel.com/docs/cron-jobs/quickstart) -- `vercel.json` cron configuration, Hobby plan limits
@@ -570,17 +623,20 @@ This is a verification phase with no formal requirement IDs. Validation is struc
 - Codebase analysis -- Direct inspection of all server files, routes, middleware, tests
 
 ### Secondary (MEDIUM confidence)
+
 - [Vercel Analytics Quickstart](https://vercel.com/docs/analytics/quickstart) -- `@vercel/analytics` React component setup
 - [Vercel Speed Insights](https://vercel.com/docs/speed-insights/quickstart) -- `@vercel/speed-insights` React component setup
 - [Helmet.js official site](https://helmetjs.github.io/) -- Express security middleware, 15 headers
 - [rollup-plugin-visualizer GitHub](https://github.com/btd/rollup-plugin-visualizer) -- Vite/Rollup bundle analysis plugin
 
 ### Tertiary (LOW confidence)
+
 - Vercel Hobby plan cron frequency limits -- multiple community sources suggest once-per-day minimum on Hobby, but official docs don't state this clearly
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH -- all libraries verified via official docs and npm
 - Architecture: HIGH -- Vercel CDN caching pattern verified via official docs with code examples
 - Pitfalls: HIGH -- derived from direct codebase analysis + official docs on caching criteria

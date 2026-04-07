@@ -52,7 +52,6 @@ export function AppShell() {
 
       {/* Floating markets panel */}
       <MarketsSlot />
-
     </div>
   );
 }

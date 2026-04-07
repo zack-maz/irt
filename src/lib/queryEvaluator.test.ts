@@ -321,7 +321,9 @@ describe('evaluateTag', () => {
     });
 
     it('matches absolute date', () => {
-      expect(evaluateTag(mockFlight, 'since', '2026-03-22', { ...emptyContext, now: NOW })).toBe(true);
+      expect(evaluateTag(mockFlight, 'since', '2026-03-22', { ...emptyContext, now: NOW })).toBe(
+        true,
+      );
     });
   });
 

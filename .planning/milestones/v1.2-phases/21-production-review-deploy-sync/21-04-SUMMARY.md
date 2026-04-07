@@ -7,7 +7,7 @@ tags: [cacheGetSafe, structured-logging, redis-degradation, code-polish, test-fi
 # Dependency graph
 requires:
   - phase: 21
-    provides: "cacheGetSafe/cacheSetSafe wrappers (Plan 02), structured log() (Plan 01)"
+    provides: 'cacheGetSafe/cacheSetSafe wrappers (Plan 02), structured log() (Plan 01)'
 provides:
   - All 7 data routes use Redis graceful degradation via cacheGetSafe
   - Zero console.log/error in production server code (structured logging only)
@@ -47,16 +47,16 @@ key-files:
     - src/lib/tagRegistry.ts
 
 key-decisions:
-  - "cacheGetSafe/cacheSetSafe replaces cacheGet/cacheSet in all data routes (backward-compat exports preserved)"
-  - "health route keeps cacheGet (diagnostic, should not fall back to memCache)"
-  - "events route keeps direct redis import for backfill timestamp (not cache pattern)"
-  - "server/index.ts isMainModule console.log kept (local dev only, not serverless)"
-  - "ENTITY_DOT_COLORS.sites -> .siteHealthy (pre-existing bug fix)"
+  - 'cacheGetSafe/cacheSetSafe replaces cacheGet/cacheSet in all data routes (backward-compat exports preserved)'
+  - 'health route keeps cacheGet (diagnostic, should not fall back to memCache)'
+  - 'events route keeps direct redis import for backfill timestamp (not cache pattern)'
+  - 'server/index.ts isMainModule console.log kept (local dev only, not serverless)'
+  - 'ENTITY_DOT_COLORS.sites -> .siteHealthy (pre-existing bug fix)'
 
 patterns-established:
-  - "All server routes import cacheGetSafe/cacheSetSafe from cache/redis.js"
-  - "All server files import log from lib/logger.js for console output"
-  - "Test mock pattern: extract _mockCacheGet/_mockCacheSet and alias to both cacheGet/cacheGetSafe"
+  - 'All server routes import cacheGetSafe/cacheSetSafe from cache/redis.js'
+  - 'All server files import log from lib/logger.js for console output'
+  - 'Test mock pattern: extract _mockCacheGet/_mockCacheSet and alias to both cacheGet/cacheGetSafe'
 
 requirements-completed: []
 
@@ -78,11 +78,12 @@ completed: 2026-03-25
 - **Files modified:** 29
 
 ## Accomplishments
+
 - All 7 data routes (flights, ships, events, news, markets, weather, sites) migrated from cacheGet/cacheSet to cacheGetSafe/cacheSetSafe
 - All 27 console.log/error/warn calls in 15 server files replaced with structured log() calls
 - 7 test files updated with cacheGetSafe/cacheSetSafe mock exports
 - 6 pre-existing ThreatHeatmapOverlay tooltip tests fixed (stale assertions from component evolution)
-- 4 computeThreatWeight tests updated for compound formula (typeWeight * media * fatality * goldstein * decay)
+- 4 computeThreatWeight tests updated for compound formula (typeWeight _ media _ fatality _ goldstein _ decay)
 - 1 aggregateToGrid test fixed for 0.75-degree cell size
 - 6 unused imports and 1 dead function removed from frontend code
 - 2 ENTITY_DOT_COLORS.sites type errors fixed (pre-existing bug: key didn't exist)
@@ -96,6 +97,7 @@ Each task was committed atomically:
 2. **Task 2: Fix pre-existing test failures and frontend polish** - `7242f3a` (fix)
 
 ## Files Created/Modified
+
 - `server/routes/{flights,ships,events,news,markets,weather,sites}.ts` - cacheGetSafe/cacheSetSafe + structured logging
 - `server/adapters/{gdelt,rss,yahoo-finance,overpass,opensky,adsb-lol,adsb-exchange,acled}.ts` - structured logging
 - `server/__tests__/routes/{flights,ships,events,news,weather}.test.ts` - cacheGetSafe/cacheSetSafe mock exports
@@ -104,11 +106,12 @@ Each task was committed atomically:
 - `src/components/layout/DetailPanelSlot.tsx` - Removed unused SITE_TYPE_LABELS import, fixed .sites -> .siteHealthy
 - `src/components/map/BaseMap.tsx` - Removed unused useRef import
 - `src/components/map/layers/WeatherOverlay.tsx` - Removed unused tempToColor function
-- `src/components/markets/ExpandedChart.tsx` - Fixed unused variable (l -> _l)
+- `src/components/markets/ExpandedChart.tsx` - Fixed unused variable (l -> \_l)
 - `src/components/search/SearchResultItem.tsx` - Fixed .sites -> .siteHealthy
 - `src/lib/tagRegistry.ts` - Removed unused ConflictEventType/EntityType imports
 
 ## Decisions Made
+
 - **health route keeps cacheGet**: Health endpoint is a diagnostic tool that should report actual Redis status, not fall back to memCache silently
 - **events route keeps direct redis**: The `redis.get`/`redis.set` calls for backfill timestamps are simple key-value operations, not the cache pattern -- no need for Safe wrappers
 - **isMainModule console.log preserved**: The startup message in `server/index.ts` only runs in local dev (not serverless), explicitly excluded per plan
@@ -119,6 +122,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed ENTITY_DOT_COLORS.sites type error in DetailPanelSlot and SearchResultItem**
+
 - **Found during:** Task 2 (frontend audit)
 - **Issue:** `ENTITY_DOT_COLORS.sites` referenced a non-existent key (TS2339), causing type error
 - **Fix:** Changed to `ENTITY_DOT_COLORS.siteHealthy` which is the correct green color for site entities
@@ -132,16 +136,20 @@ Each task was committed atomically:
 **Impact on plan:** Minor color key fix. No scope creep.
 
 ## Issues Encountered
+
 - Pre-existing TypeScript errors (35 total) exist across the codebase, mostly from deck.gl type gaps (`HTMLCanvasElement` not assignable to `Texture`), SiteEntity missing `timestamp` field, and vite.config.ts type mismatch. These are structural/library-level issues that require broader refactoring beyond this polish pass. Fixed the 6 that were simple unused imports/dead code.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - All routes now gracefully degrade when Redis is unavailable
 - Structured logging enables log-based observability in production
 - All 859 tests green, ready for final deployment in Plan 05
 
 ---
-*Phase: 21-production-review-deploy-sync*
-*Completed: 2026-03-25*
+
+_Phase: 21-production-review-deploy-sync_
+_Completed: 2026-03-25_

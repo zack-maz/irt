@@ -241,167 +241,169 @@ Deferred to future releases. Tracked but not in current roadmap.
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| Standalone news feed UI | Contradicts "numbers over narratives" core value -- news is infrastructure for notifications only |
-| Real-time WebSocket for notifications | Polling is sufficient for single-user tool; WebSocket adds serverless complexity |
-| Paid market data APIs | Free-tier constraint; Yahoo Finance unofficial API with graceful degradation |
-| Full-text article scraping | Copyright concerns; title + URL linking is sufficient |
-| User-configurable alert thresholds | Over-engineering for single user; hardcoded thresholds in v1.1, configurable in v1.2+ |
+| Feature                               | Reason                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Standalone news feed UI               | Contradicts "numbers over narratives" core value -- news is infrastructure for notifications only |
+| Real-time WebSocket for notifications | Polling is sufficient for single-user tool; WebSocket adds serverless complexity                  |
+| Paid market data APIs                 | Free-tier constraint; Yahoo Finance unofficial API with graceful degradation                      |
+| Full-text article scraping            | Copyright concerns; title + URL linking is sufficient                                             |
+| User-configurable alert thresholds    | Over-engineering for single user; hardcoded thresholds in v1.1, configurable in v1.2+             |
 
 ## Traceability
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| SITE-01 | Phase 15 | Complete |
-| SITE-02 | Phase 15 | Complete |
-| SITE-03 | Phase 15 | Complete |
-| NEWS-01 | Phase 16 | Complete |
-| NEWS-02 | Phase 16 | Complete |
-| NEWS-03 | Phase 16 | Complete |
-| NOTF-01 | Phase 17 | Complete |
-| NOTF-02 | Phase 17 | Complete |
-| NOTF-03 | Phase 17 | Complete |
-| NOTF-04 | Phase 17 | Complete |
-| NOTF-05 | Phase 17 | Complete |
-| MRKT-01 | Phase 18 | Complete |
-| MRKT-02 | Phase 18 | Complete |
-| MRKT-03 | Phase 18 | Complete |
-| SRCH-01 | Phase 19 | Complete |
-| SRCH-02 | Phase 19 | Complete |
-| SRCH-03 | Phase 19 | Complete |
-| ASRCH-01 | Phase 19.1 | Complete |
-| ASRCH-02 | Phase 19.1 | Complete |
-| ASRCH-03 | Phase 19.1 | Complete |
-| ASRCH-04 | Phase 19.1 | Complete |
-| ASRCH-05 | Phase 19.1 | Complete |
-| ASRCH-06 | Phase 19.1 | Complete |
-| CNTR-01 | Phase 19.2 | Complete |
-| CNTR-02 | Phase 19.2 | Complete |
-| CNTR-03 | Phase 19.2 | Complete |
-| CNTR-04 | Phase 19.2 | Complete |
-| CNTR-05 | Phase 19.2 | Complete |
-| CNTR-06 | Phase 19.2 | Complete |
-| LREF-01 | Phase 20 | Complete |
-| LREF-02 | Phase 20 | Complete |
-| LREF-03 | Phase 20 | Complete |
-| LREF-04 | Phase 20 | Complete |
-| LREF-05 | Phase 20 | Complete |
-| EQ-01 | Phase 22 | Planned |
-| EQ-02 | Phase 22 | Planned |
-| EQ-03 | Phase 22 | Planned |
-| EQ-04 | Phase 22 | Planned |
-| EQ-05 | Phase 22 | Planned |
-| EQ-06 | Phase 22 | Planned |
-| EQ-07 | Phase 22 | Planned |
-| EQ-08 | Phase 22 | Planned |
-| EQ-09 | Phase 22 | Planned |
-| POL-01 | Phase 24 | Planned |
-| POL-02 | Phase 24 | Planned |
-| POL-03 | Phase 24 | Planned |
-| POL-04 | Phase 24 | Planned |
-| POL-05 | Phase 24 | Planned |
-| POL-06 | Phase 24 | Planned |
-| ETH-01 | Phase 25 | Planned |
-| ETH-02 | Phase 25 | Planned |
-| ETH-03 | Phase 25 | Planned |
-| ETH-04 | Phase 25 | Planned |
-| ETH-05 | Phase 25 | Planned |
-| ETH-06 | Phase 25 | Planned |
-| ETH-07 | Phase 25 | Planned |
-| ETH-08 | Phase 25 | Planned |
-| WAT-01 | Phase 26 | Planned |
-| WAT-02 | Phase 26 | Planned |
-| WAT-03 | Phase 26 | Planned |
-| WAT-04 | Phase 26 | Planned |
-| WAT-05 | Phase 26 | Planned |
-| WAT-06 | Phase 26 | Planned |
-| WAT-07 | Phase 26 | Planned |
-| WAT-08 | Phase 26 | Planned |
-| WAT-09 | Phase 26 | Planned |
-| WAT-10 | Phase 26 | Planned |
-| WAT-11 | Phase 26 | Planned |
-| WR-01 | Phase 26.1 | Planned |
-| WR-02 | Phase 26.1 | Planned |
-| WR-03 | Phase 26.1 | Planned |
-| WR-04 | Phase 26.1 | Planned |
-| WR-05 | Phase 26.1 | Planned |
-| WR-06 | Phase 26.1 | Planned |
-| WR-07 | Phase 26.1 | Planned |
-| NLP-01 | Phase 26.2 | Planned |
-| NLP-02 | Phase 26.2 | Planned |
-| GEO-01 | Phase 26.2 | Planned |
-| GEO-02 | Phase 26.2 | Planned |
-| GEO-03 | Phase 26.2 | Planned |
-| GEO-04 | Phase 26.2 | Planned |
-| TITLE-01 | Phase 26.2 | Planned |
-| TITLE-02 | Phase 26.2 | Planned |
-| PIPE-01 | Phase 26.2 | Planned |
-| PIPE-02 | Phase 26.2 | Planned |
-| PIPE-03 | Phase 26.2 | Planned |
-| SCRIPT-01 | Phase 26.2 | Planned |
-| CLN-01 | Phase 26.3 | Complete |
-| CLN-02 | Phase 26.3 | Complete |
-| CLN-03 | Phase 26.3 | Complete |
-| CLN-04 | Phase 26.3 | Complete |
-| CLN-05 | Phase 26.3 | Complete |
-| CLN-06 | Phase 26.3 | Complete |
-| CLN-07 | Phase 26.3 | Complete |
-| CLN-08 | Phase 26.3 | Complete |
-| CLN-09 | Phase 26.3 | Complete |
-| CLN-10 | Phase 26.3 | Complete |
-| CLN-11 | Phase 26.3 | Complete |
-| CLN-12 | Phase 26.3 | Complete |
-| CLN-13 | Phase 26.3 | Complete |
-| PRES-01 | Phase 26.4 | Planned |
-| PRES-02 | Phase 26.4 | Planned |
-| PRES-03 | Phase 26.4 | Planned |
-| PRES-04 | Phase 26.4 | Planned |
-| PRES-05 | Phase 26.4 | Planned |
-| PRES-06 | Phase 26.4 | Planned |
-| PRES-07 | Phase 26.4 | Planned |
-| PRES-10 | Phase 26.4 | Planned |
-| PRES-11 | Phase 26.4 | Planned |
-| PRES-12 | Phase 26.4 | Planned |
-| PRES-13 | Phase 26.4 | Planned |
-| PRES-14 | Phase 26.4 | Planned |
-| PRES-15 | Phase 26.4 | Planned |
-| PRES-20 | Phase 26.4 | Planned |
-| PRES-21 | Phase 26.4 | Planned |
-| PRES-22 | Phase 26.4 | Planned |
-| PRES-23 | Phase 26.4 | Planned |
-| PRES-24 | Phase 26.4 | Planned |
-| PRES-25 | Phase 26.4 | Planned |
-| PRES-26 | Phase 26.4 | Planned |
-| PRES-30 | Phase 26.4 | Planned |
-| PRES-31 | Phase 26.4 | Planned |
-| PRES-32 | Phase 26.4 | Planned |
-| PRES-33 | Phase 26.4 | Planned |
-| PRES-34 | Phase 26.4 | Planned |
-| PRES-40 | Phase 26.4 | Planned |
-| PRES-41 | Phase 26.4 | Planned |
-| PRES-42 | Phase 26.4 | Planned |
-| PRES-43 | Phase 26.4 | Planned |
-| PRES-44 | Phase 26.4 | Planned |
-| PRES-45 | Phase 26.4 | Planned |
-| PRES-46 | Phase 26.4 | Planned |
-| PRES-47 | Phase 26.4 | Planned |
-| PRES-48 | Phase 26.4 | Planned |
-| PRES-50 | Phase 26.4 | Planned |
-| PRES-51 | Phase 26.4 | Planned |
-| PRES-52 | Phase 26.4 | Planned |
-| PRES-53 | Phase 26.4 | Planned |
-| PRES-54 | Phase 26.4 | Planned |
-| PRES-55 | Phase 26.4 | Planned |
+| Requirement | Phase      | Status   |
+| ----------- | ---------- | -------- |
+| SITE-01     | Phase 15   | Complete |
+| SITE-02     | Phase 15   | Complete |
+| SITE-03     | Phase 15   | Complete |
+| NEWS-01     | Phase 16   | Complete |
+| NEWS-02     | Phase 16   | Complete |
+| NEWS-03     | Phase 16   | Complete |
+| NOTF-01     | Phase 17   | Complete |
+| NOTF-02     | Phase 17   | Complete |
+| NOTF-03     | Phase 17   | Complete |
+| NOTF-04     | Phase 17   | Complete |
+| NOTF-05     | Phase 17   | Complete |
+| MRKT-01     | Phase 18   | Complete |
+| MRKT-02     | Phase 18   | Complete |
+| MRKT-03     | Phase 18   | Complete |
+| SRCH-01     | Phase 19   | Complete |
+| SRCH-02     | Phase 19   | Complete |
+| SRCH-03     | Phase 19   | Complete |
+| ASRCH-01    | Phase 19.1 | Complete |
+| ASRCH-02    | Phase 19.1 | Complete |
+| ASRCH-03    | Phase 19.1 | Complete |
+| ASRCH-04    | Phase 19.1 | Complete |
+| ASRCH-05    | Phase 19.1 | Complete |
+| ASRCH-06    | Phase 19.1 | Complete |
+| CNTR-01     | Phase 19.2 | Complete |
+| CNTR-02     | Phase 19.2 | Complete |
+| CNTR-03     | Phase 19.2 | Complete |
+| CNTR-04     | Phase 19.2 | Complete |
+| CNTR-05     | Phase 19.2 | Complete |
+| CNTR-06     | Phase 19.2 | Complete |
+| LREF-01     | Phase 20   | Complete |
+| LREF-02     | Phase 20   | Complete |
+| LREF-03     | Phase 20   | Complete |
+| LREF-04     | Phase 20   | Complete |
+| LREF-05     | Phase 20   | Complete |
+| EQ-01       | Phase 22   | Planned  |
+| EQ-02       | Phase 22   | Planned  |
+| EQ-03       | Phase 22   | Planned  |
+| EQ-04       | Phase 22   | Planned  |
+| EQ-05       | Phase 22   | Planned  |
+| EQ-06       | Phase 22   | Planned  |
+| EQ-07       | Phase 22   | Planned  |
+| EQ-08       | Phase 22   | Planned  |
+| EQ-09       | Phase 22   | Planned  |
+| POL-01      | Phase 24   | Planned  |
+| POL-02      | Phase 24   | Planned  |
+| POL-03      | Phase 24   | Planned  |
+| POL-04      | Phase 24   | Planned  |
+| POL-05      | Phase 24   | Planned  |
+| POL-06      | Phase 24   | Planned  |
+| ETH-01      | Phase 25   | Planned  |
+| ETH-02      | Phase 25   | Planned  |
+| ETH-03      | Phase 25   | Planned  |
+| ETH-04      | Phase 25   | Planned  |
+| ETH-05      | Phase 25   | Planned  |
+| ETH-06      | Phase 25   | Planned  |
+| ETH-07      | Phase 25   | Planned  |
+| ETH-08      | Phase 25   | Planned  |
+| WAT-01      | Phase 26   | Planned  |
+| WAT-02      | Phase 26   | Planned  |
+| WAT-03      | Phase 26   | Planned  |
+| WAT-04      | Phase 26   | Planned  |
+| WAT-05      | Phase 26   | Planned  |
+| WAT-06      | Phase 26   | Planned  |
+| WAT-07      | Phase 26   | Planned  |
+| WAT-08      | Phase 26   | Planned  |
+| WAT-09      | Phase 26   | Planned  |
+| WAT-10      | Phase 26   | Planned  |
+| WAT-11      | Phase 26   | Planned  |
+| WR-01       | Phase 26.1 | Planned  |
+| WR-02       | Phase 26.1 | Planned  |
+| WR-03       | Phase 26.1 | Planned  |
+| WR-04       | Phase 26.1 | Planned  |
+| WR-05       | Phase 26.1 | Planned  |
+| WR-06       | Phase 26.1 | Planned  |
+| WR-07       | Phase 26.1 | Planned  |
+| NLP-01      | Phase 26.2 | Planned  |
+| NLP-02      | Phase 26.2 | Planned  |
+| GEO-01      | Phase 26.2 | Planned  |
+| GEO-02      | Phase 26.2 | Planned  |
+| GEO-03      | Phase 26.2 | Planned  |
+| GEO-04      | Phase 26.2 | Planned  |
+| TITLE-01    | Phase 26.2 | Planned  |
+| TITLE-02    | Phase 26.2 | Planned  |
+| PIPE-01     | Phase 26.2 | Planned  |
+| PIPE-02     | Phase 26.2 | Planned  |
+| PIPE-03     | Phase 26.2 | Planned  |
+| SCRIPT-01   | Phase 26.2 | Planned  |
+| CLN-01      | Phase 26.3 | Complete |
+| CLN-02      | Phase 26.3 | Complete |
+| CLN-03      | Phase 26.3 | Complete |
+| CLN-04      | Phase 26.3 | Complete |
+| CLN-05      | Phase 26.3 | Complete |
+| CLN-06      | Phase 26.3 | Complete |
+| CLN-07      | Phase 26.3 | Complete |
+| CLN-08      | Phase 26.3 | Complete |
+| CLN-09      | Phase 26.3 | Complete |
+| CLN-10      | Phase 26.3 | Complete |
+| CLN-11      | Phase 26.3 | Complete |
+| CLN-12      | Phase 26.3 | Complete |
+| CLN-13      | Phase 26.3 | Complete |
+| PRES-01     | Phase 26.4 | Planned  |
+| PRES-02     | Phase 26.4 | Planned  |
+| PRES-03     | Phase 26.4 | Planned  |
+| PRES-04     | Phase 26.4 | Planned  |
+| PRES-05     | Phase 26.4 | Planned  |
+| PRES-06     | Phase 26.4 | Planned  |
+| PRES-07     | Phase 26.4 | Planned  |
+| PRES-10     | Phase 26.4 | Planned  |
+| PRES-11     | Phase 26.4 | Planned  |
+| PRES-12     | Phase 26.4 | Planned  |
+| PRES-13     | Phase 26.4 | Planned  |
+| PRES-14     | Phase 26.4 | Planned  |
+| PRES-15     | Phase 26.4 | Planned  |
+| PRES-20     | Phase 26.4 | Planned  |
+| PRES-21     | Phase 26.4 | Planned  |
+| PRES-22     | Phase 26.4 | Planned  |
+| PRES-23     | Phase 26.4 | Planned  |
+| PRES-24     | Phase 26.4 | Planned  |
+| PRES-25     | Phase 26.4 | Planned  |
+| PRES-26     | Phase 26.4 | Planned  |
+| PRES-30     | Phase 26.4 | Planned  |
+| PRES-31     | Phase 26.4 | Planned  |
+| PRES-32     | Phase 26.4 | Planned  |
+| PRES-33     | Phase 26.4 | Planned  |
+| PRES-34     | Phase 26.4 | Planned  |
+| PRES-40     | Phase 26.4 | Planned  |
+| PRES-41     | Phase 26.4 | Planned  |
+| PRES-42     | Phase 26.4 | Planned  |
+| PRES-43     | Phase 26.4 | Planned  |
+| PRES-44     | Phase 26.4 | Planned  |
+| PRES-45     | Phase 26.4 | Planned  |
+| PRES-46     | Phase 26.4 | Planned  |
+| PRES-47     | Phase 26.4 | Planned  |
+| PRES-48     | Phase 26.4 | Planned  |
+| PRES-50     | Phase 26.4 | Planned  |
+| PRES-51     | Phase 26.4 | Planned  |
+| PRES-52     | Phase 26.4 | Planned  |
+| PRES-53     | Phase 26.4 | Planned  |
+| PRES-54     | Phase 26.4 | Planned  |
+| PRES-55     | Phase 26.4 | Planned  |
 
 **Coverage:**
+
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 106 total, 13 complete (66 prior + 40 PRES-* Phase 26.4)
+- v1.3 requirements: 106 total, 13 complete (66 prior + 40 PRES-\* Phase 26.4)
 - Total: 140 mapped, 47 complete
 
 ---
-*Requirements defined: 2026-03-19*
-*Last updated: 2026-04-07 -- Phase 26.4 production presentation requirements (PRES-01..PRES-55) added during planning*
+
+_Requirements defined: 2026-03-19_
+_Last updated: 2026-04-07 -- Phase 26.4 production presentation requirements (PRES-01..PRES-55) added during planning_

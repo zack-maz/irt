@@ -1,6 +1,6 @@
 ---
 status: resolved
-trigger: "Investigate why 3D terrain bumps are not visible on the MapLibre map"
+trigger: 'Investigate why 3D terrain bumps are not visible on the MapLibre map'
 created: 2026-03-14T00:00:00Z
 updated: 2026-03-14T23:30:00Z
 ---
@@ -23,7 +23,7 @@ started: Never worked - data source doesn't cover region
 ## Eliminated
 
 - hypothesis: Terrain prop not wired correctly in react-maplibre
-  evidence: Inspected @vis.gl/react-maplibre v8.1 source - _updateStyleComponents correctly handles terrain prop, calls map.setTerrain() when source is available, retries on sourcedata events
+  evidence: Inspected @vis.gl/react-maplibre v8.1 source - \_updateStyleComponents correctly handles terrain prop, calls map.setTerrain() when source is available, retries on sourcedata events
   timestamp: 2026-03-14
 
 - hypothesis: DEM tile source URL unreachable
@@ -43,7 +43,7 @@ started: Never worked - data source doesn't cover region
 
 - timestamp: 2026-03-14
   checked: React-maplibre terrain prop handling in @vis.gl/react-maplibre v8.1
-  found: _updateStyleComponents in maplibre.js correctly calls map.setTerrain() when source is available; sourcedata event retries terrain attachment; code path is correct
+  found: \_updateStyleComponents in maplibre.js correctly calls map.setTerrain() when source is available; sourcedata event retries terrain attachment; code path is correct
   implication: The wiring is correct -- this is not a code bug
 
 - timestamp: 2026-03-14

@@ -7,7 +7,6 @@ import {
   EXCLUSION_PATTERNS,
 } from '../../lib/relevanceScorer.js';
 import { extractTriple } from '../../lib/nlpExtractor.js';
-import type { ScoringInput } from '../../lib/relevanceScorer.js';
 
 /** Helper: create ScoringInput from headline text */
 function scoreHeadline(title: string, source = 'GDELT', summary?: string): number {

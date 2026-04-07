@@ -15,13 +15,13 @@ created: 2026-04-02
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 + jsdom |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx src/__tests__/factions.test.ts` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| **Framework**          | Vitest 4.1.0 + jsdom                                                                    |
+| **Config file**        | `vite.config.ts` (test section)                                                         |
+| **Quick run command**  | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx src/__tests__/factions.test.ts` |
+| **Full suite command** | `npx vitest run`                                                                        |
+| **Estimated runtime**  | ~15 seconds                                                                             |
 
 ---
 
@@ -36,18 +36,18 @@ created: 2026-04-02
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 24-01-01 | 01 | 1 | Data prep | unit | `npx vitest run src/__tests__/factions.test.ts` | ❌ W0 | ⬜ pending |
-| 24-01-02 | 01 | 1 | GeoJSON integrity | unit | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0 | ⬜ pending |
-| 24-01-03 | 01 | 1 | Overlay render gate | unit | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0 | ⬜ pending |
-| 24-01-04 | 01 | 1 | Disputed territory hatching | unit | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0 | ⬜ pending |
-| 24-01-05 | 01 | 1 | Faction assignments complete | unit | `npx vitest run src/__tests__/factions.test.ts` | ❌ W0 | ⬜ pending |
-| 24-02-01 | 02 | 1 | Legend renders discrete swatches | unit | `npx vitest run src/__tests__/MapLegend.test.tsx` | ✅ (update) | ⬜ pending |
-| 24-02-02 | 02 | 1 | Toggle removes comingSoon | unit | `npx vitest run src/__tests__/LayerToggles.test.tsx` | ✅ (update) | ⬜ pending |
-| 24-02-03 | 02 | 1 | Disputed hover label | unit | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0 | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement                      | Test Type | Automated Command                                        | File Exists | Status     |
+| -------- | ---- | ---- | -------------------------------- | --------- | -------------------------------------------------------- | ----------- | ---------- |
+| 24-01-01 | 01   | 1    | Data prep                        | unit      | `npx vitest run src/__tests__/factions.test.ts`          | ❌ W0       | ⬜ pending |
+| 24-01-02 | 01   | 1    | GeoJSON integrity                | unit      | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0       | ⬜ pending |
+| 24-01-03 | 01   | 1    | Overlay render gate              | unit      | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0       | ⬜ pending |
+| 24-01-04 | 01   | 1    | Disputed territory hatching      | unit      | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0       | ⬜ pending |
+| 24-01-05 | 01   | 1    | Faction assignments complete     | unit      | `npx vitest run src/__tests__/factions.test.ts`          | ❌ W0       | ⬜ pending |
+| 24-02-01 | 02   | 1    | Legend renders discrete swatches | unit      | `npx vitest run src/__tests__/MapLegend.test.tsx`        | ✅ (update) | ⬜ pending |
+| 24-02-02 | 02   | 1    | Toggle removes comingSoon        | unit      | `npx vitest run src/__tests__/LayerToggles.test.tsx`     | ✅ (update) | ⬜ pending |
+| 24-02-03 | 02   | 1    | Disputed hover label             | unit      | `npx vitest run src/__tests__/PoliticalOverlay.test.tsx` | ❌ W0       | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -58,17 +58,17 @@ created: 2026-04-02
 - [ ] Update `src/__tests__/LayerToggles.test.tsx` — political no longer comingSoon
 - [ ] Update `src/__tests__/MapLegend.test.tsx` — political legend discrete swatch assertion
 
-*Existing infrastructure covers framework installation.*
+_Existing infrastructure covers framework installation._
 
 ---
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Fill opacity looks correct on dark base map | Visual presentation | Subjective visual assessment | Toggle political layer, verify ~15% tinted wash visible but not overwhelming |
-| Layer stacking below other layers | Z-ordering | Visual layer interaction | Enable political + geographic + threat layers, verify political is behind all |
-| Disputed territory hatching visible | Canvas pattern rendering | WebGL/canvas rendering | Toggle political layer, zoom to Golan Heights, verify diagonal yellow lines |
+| Behavior                                    | Requirement              | Why Manual                   | Test Instructions                                                             |
+| ------------------------------------------- | ------------------------ | ---------------------------- | ----------------------------------------------------------------------------- |
+| Fill opacity looks correct on dark base map | Visual presentation      | Subjective visual assessment | Toggle political layer, verify ~15% tinted wash visible but not overwhelming  |
+| Layer stacking below other layers           | Z-ordering               | Visual layer interaction     | Enable political + geographic + threat layers, verify political is behind all |
+| Disputed territory hatching visible         | Canvas pattern rendering | WebGL/canvas rendering       | Toggle political layer, zoom to Golan Heights, verify diagonal yellow lines   |
 
 ---
 

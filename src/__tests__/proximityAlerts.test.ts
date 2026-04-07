@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { computeProximityAlerts } from '../hooks/useProximityAlerts';
 import type { FlightEntity, SiteEntity } from '@/types/entities';
 
-function makeFlight(overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {}): FlightEntity {
+function makeFlight(
+  overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {},
+): FlightEntity {
   const { data: dataOverrides, ...rest } = overrides;
   return {
     id: 'flight-1',
@@ -55,8 +57,18 @@ describe('computeProximityAlerts', () => {
 
   it('returns empty array when all flights are identified (unidentified=false)', () => {
     const flights = [
-      makeFlight({ id: 'f1', lat: 32.0, lng: 51.0, data: { unidentified: false } } as Partial<FlightEntity>),
-      makeFlight({ id: 'f2', lat: 32.01, lng: 51.01, data: { unidentified: false } } as Partial<FlightEntity>),
+      makeFlight({
+        id: 'f1',
+        lat: 32.0,
+        lng: 51.0,
+        data: { unidentified: false },
+      } as Partial<FlightEntity>),
+      makeFlight({
+        id: 'f2',
+        lat: 32.01,
+        lng: 51.01,
+        data: { unidentified: false },
+      } as Partial<FlightEntity>),
     ];
     const sites = [makeSite()];
     const result = computeProximityAlerts(flights, sites);

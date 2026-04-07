@@ -35,11 +35,7 @@ export function useGeoContext(cluster: ThreatCluster): GeoContext | null {
     const padMaxLng = maxLng + BBOX_PADDING;
 
     const matched = sites.filter(
-      (s) =>
-        s.lat >= padMinLat &&
-        s.lat <= padMaxLat &&
-        s.lng >= padMinLng &&
-        s.lng <= padMaxLng,
+      (s) => s.lat >= padMinLat && s.lat <= padMaxLat && s.lng >= padMinLng && s.lng <= padMaxLng,
     );
 
     if (matched.length === 0) return null;
@@ -74,7 +70,7 @@ export function useGeoContext(cluster: ThreatCluster): GeoContext | null {
         const data = body.data;
         const label = data?.city
           ? `${data.city}, ${data.country ?? ''}`
-          : data?.country ?? data?.display ?? 'Unknown location';
+          : (data?.country ?? data?.display ?? 'Unknown location');
         setGeocodeResult({ label, type: 'geocode' });
         setLoading(false);
       })

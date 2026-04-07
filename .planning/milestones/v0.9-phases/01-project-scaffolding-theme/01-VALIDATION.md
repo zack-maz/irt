@@ -15,13 +15,13 @@ created: 2026-03-13
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 3.2.4 + @testing-library/react 16.3.2 |
-| **Config file** | vite.config.ts (Vitest reads Vite config) or vitest.config.ts |
-| **Quick run command** | `npx vitest run --reporter=verbose` |
-| **Full suite command** | `npx vitest run && npx tsc --noEmit` |
-| **Estimated runtime** | ~5 seconds |
+| Property               | Value                                                         |
+| ---------------------- | ------------------------------------------------------------- |
+| **Framework**          | Vitest 3.2.4 + @testing-library/react 16.3.2                  |
+| **Config file**        | vite.config.ts (Vitest reads Vite config) or vitest.config.ts |
+| **Quick run command**  | `npx vitest run --reporter=verbose`                           |
+| **Full suite command** | `npx vitest run && npx tsc --noEmit`                          |
+| **Estimated runtime**  | ~5 seconds                                                    |
 
 ---
 
@@ -36,17 +36,17 @@ created: 2026-03-13
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 0 | INFRA-02 | setup | `npx tsc --noEmit && npx vite build 2>&1 \| tail -5` | N/A | pending |
-| 01-01-02 | 01 | 0 | INFRA-02-a,b,c,d | wave-0 stubs | `npx vitest run src/__tests__/uiStore.test.ts src/__tests__/theme.test.ts --reporter=verbose` | created in Task 2 | pending |
-| 01-01-03 | 01 | 1 | INFRA-02-a | smoke | `npx vitest run src/__tests__/App.test.tsx -t "renders"` | created in Task 2 (RED) | pending |
-| 01-01-04 | 01 | 1 | INFRA-02-b | unit | `npx vitest run src/__tests__/theme.test.ts -t "theme"` | created in Task 2 (GREEN) | pending |
-| 01-01-05 | 01 | 1 | INFRA-02-c | unit | `npx vitest run src/__tests__/AppShell.test.tsx -t "layout"` | created in Task 2 (RED) | pending |
-| 01-01-06 | 01 | 1 | INFRA-02-d | unit | `npx vitest run src/__tests__/uiStore.test.ts -t "store"` | created in Task 2 (GREEN) | pending |
-| 01-01-07 | 01 | 1 | INFRA-02-e | smoke | `npx tsc --noEmit` | N/A | pending |
+| Task ID  | Plan | Wave | Requirement      | Test Type    | Automated Command                                                                             | File Exists               | Status  |
+| -------- | ---- | ---- | ---------------- | ------------ | --------------------------------------------------------------------------------------------- | ------------------------- | ------- |
+| 01-01-01 | 01   | 0    | INFRA-02         | setup        | `npx tsc --noEmit && npx vite build 2>&1 \| tail -5`                                          | N/A                       | pending |
+| 01-01-02 | 01   | 0    | INFRA-02-a,b,c,d | wave-0 stubs | `npx vitest run src/__tests__/uiStore.test.ts src/__tests__/theme.test.ts --reporter=verbose` | created in Task 2         | pending |
+| 01-01-03 | 01   | 1    | INFRA-02-a       | smoke        | `npx vitest run src/__tests__/App.test.tsx -t "renders"`                                      | created in Task 2 (RED)   | pending |
+| 01-01-04 | 01   | 1    | INFRA-02-b       | unit         | `npx vitest run src/__tests__/theme.test.ts -t "theme"`                                       | created in Task 2 (GREEN) | pending |
+| 01-01-05 | 01   | 1    | INFRA-02-c       | unit         | `npx vitest run src/__tests__/AppShell.test.tsx -t "layout"`                                  | created in Task 2 (RED)   | pending |
+| 01-01-06 | 01   | 1    | INFRA-02-d       | unit         | `npx vitest run src/__tests__/uiStore.test.ts -t "store"`                                     | created in Task 2 (GREEN) | pending |
+| 01-01-07 | 01   | 1    | INFRA-02-e       | smoke        | `npx tsc --noEmit`                                                                            | N/A                       | pending |
 
-*Status: pending / green / red / flaky*
+_Status: pending / green / red / flaky_
 
 ---
 
@@ -65,10 +65,10 @@ All test files are established in Task 2 (Wave 0) before any component implement
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Dark theme visual appearance | INFRA-02 | Visual correctness needs human eye | 1. Run `npm run dev` 2. Verify dark background, white text 3. Check accent colors render correctly |
-| HMR hot reload works | Success Criteria 1 | Dev server behavior | 1. Run `npm run dev` 2. Edit a component 3. Verify change appears without full reload |
+| Behavior                     | Requirement        | Why Manual                         | Test Instructions                                                                                  |
+| ---------------------------- | ------------------ | ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Dark theme visual appearance | INFRA-02           | Visual correctness needs human eye | 1. Run `npm run dev` 2. Verify dark background, white text 3. Check accent colors render correctly |
+| HMR hot reload works         | Success Criteria 1 | Dev server behavior                | 1. Run `npm run dev` 2. Edit a component 3. Verify change appears without full reload              |
 
 ---
 

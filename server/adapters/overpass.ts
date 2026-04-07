@@ -11,12 +11,29 @@ const TIMEOUT_MS = 60_000;
 // Excludes Europe, Russia, Kazakhstan, Kyrgyzstan, Tajikistan, Uzbekistan
 // Africa limited to Egypt + Djibouti only
 const ALLOWED_COUNTRIES = [
-  'IR', 'IQ', 'SY', 'LB', 'IL', 'PS', 'JO', // Core conflict zone
-  'SA', 'AE', 'OM', 'KW', 'BH', 'QA', 'YE', // Gulf states
-  'TR', 'EG',                                  // Broader region (Africa: Egypt only)
-  'AF', 'PK',                                  // South/Central Asia neighbors
-  'AM', 'AZ', 'GE', 'TM',                     // Caucasus + Turkmenistan
-  'DJ',                                         // Horn of Africa (Djibouti only)
+  'IR',
+  'IQ',
+  'SY',
+  'LB',
+  'IL',
+  'PS',
+  'JO', // Core conflict zone
+  'SA',
+  'AE',
+  'OM',
+  'KW',
+  'BH',
+  'QA',
+  'YE', // Gulf states
+  'TR',
+  'EG', // Broader region (Africa: Egypt only)
+  'AF',
+  'PK', // South/Central Asia neighbors
+  'AM',
+  'AZ',
+  'GE',
+  'TM', // Caucasus + Turkmenistan
+  'DJ', // Horn of Africa (Djibouti only)
 ];
 
 // Turkey spatial filter — exclude north coast (Black Sea) and west coast (Aegean/Marmara)
@@ -24,7 +41,7 @@ const ALLOWED_COUNTRIES = [
 const TURKEY_BOUNDS = { minLat: 36, maxLat: 40, minLng: 35 };
 
 // Build Overpass area union for country filtering
-const areaUnion = ALLOWED_COUNTRIES.map(c => `area["ISO3166-1"="${c}"]`).join(';');
+const areaUnion = ALLOWED_COUNTRIES.map((c) => `area["ISO3166-1"="${c}"]`).join(';');
 
 const QUERY = `
 [out:json][timeout:60];
@@ -92,11 +109,13 @@ function extractLabel(tags: Record<string, string>, siteType: SiteType): string 
 }
 
 export function classifySiteType(tags: Record<string, string>): SiteType | null {
-  if (tags['plant:source'] === 'nuclear' || tags['generator:source'] === 'nuclear') return 'nuclear';
+  if (tags['plant:source'] === 'nuclear' || tags['generator:source'] === 'nuclear')
+    return 'nuclear';
   if (tags['military'] === 'naval_base' || tags['military_service'] === 'navy') return 'naval';
   if (tags['industrial'] === 'refinery' || tags['industrial'] === 'oil_refinery') return 'oil';
   if (tags['military'] === 'airfield' || tags['aerodrome:type'] === 'military') return 'airbase';
-  if (tags['industrial'] === 'port' || tags['harbour'] === 'yes' || tags['landuse'] === 'port') return 'port';
+  if (tags['industrial'] === 'port' || tags['harbour'] === 'yes' || tags['landuse'] === 'port')
+    return 'port';
   return null;
 }
 
@@ -117,7 +136,8 @@ export function normalizeElement(el: OverpassElement): SiteEntity | null {
     lat,
     lng: lon,
     label: extractLabel(el.tags, siteType),
-    operator: el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
+    operator:
+      el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
     wikidata: el.tags.wikidata || undefined,
     osmId: el.id,
   };
@@ -148,12 +168,9 @@ export async function fetchSites(): Promise<SiteEntity[]> {
       // Filter out Turkey sites on north/west coasts (keep only southeast)
       // Turkey bbox ~(36-42°N, 26-45°E) — keep only south of 40°N AND east of 35°E
       // Use lng < 44 guard to avoid filtering Armenia/Georgia/Azerbaijan
-      return Array.from(siteMap.values()).filter(site => {
+      return Array.from(siteMap.values()).filter((site) => {
         const inTurkeyRegion =
-          site.lat >= TURKEY_BOUNDS.minLat &&
-          site.lat <= 43 &&
-          site.lng >= 26 &&
-          site.lng <= 44;
+          site.lat >= TURKEY_BOUNDS.minLat && site.lat <= 43 && site.lng >= 26 && site.lng <= 44;
         if (inTurkeyRegion) {
           if (site.lat > TURKEY_BOUNDS.maxLat || site.lng < TURKEY_BOUNDS.minLng) {
             return false;

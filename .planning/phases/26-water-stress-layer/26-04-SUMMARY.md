@@ -20,7 +20,8 @@ affects: [26-05-integration]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [water-store-precipitation-merge, stress-colored-river-rendering, italic-serif-river-labels]
+  patterns:
+    [water-store-precipitation-merge, stress-colored-river-rendering, italic-serif-river-labels]
 
 key-files:
   created:
@@ -34,14 +35,14 @@ key-files:
   modified: []
 
 key-decisions:
-  - "PrecipitationData interface defined in waterStore (not server/types.ts) since server-side plan 26-03 not yet executed"
-  - "Water facility icons use existing atlas entries as placeholders (diamond, siteDesalination) pending dedicated water icons"
-  - "River labels use serif italic font to distinguish from ethnic overlay sans-serif labels"
-  - "Precipitation polling errors logged but do not clear facilities (stale precip is acceptable)"
+  - 'PrecipitationData interface defined in waterStore (not server/types.ts) since server-side plan 26-03 not yet executed'
+  - 'Water facility icons use existing atlas entries as placeholders (diamond, siteDesalination) pending dedicated water icons'
+  - 'River labels use serif italic font to distinguish from ethnic overlay sans-serif labels'
+  - 'Precipitation polling errors logged but do not clear facilities (stale precip is acceptable)'
 
 patterns-established:
-  - "Water store precipitation merge: match by lat/lng proximity (0.01 deg threshold), recompute compositeHealth"
-  - "Italic serif font for hydrographic labels (distinct from sans-serif ethnic labels)"
+  - 'Water store precipitation merge: match by lat/lng proximity (0.01 deg threshold), recompute compositeHealth'
+  - 'Italic serif font for hydrographic labels (distinct from sans-serif ethnic labels)'
 
 requirements-completed: [WAT-05, WAT-06]
 
@@ -63,6 +64,7 @@ completed: 2026-04-03
 - **Files modified:** 7
 
 ## Accomplishments
+
 - waterStore manages full facility lifecycle (idle -> loading -> connected/error) with precipitation merge recomputing compositeHealth
 - useWaterFetch fetches /api/water once on mount following useSiteFetch pattern
 - useWaterPrecipPolling polls /api/water/precip every 6 hours with tab visibility awareness
@@ -81,6 +83,7 @@ Each task was committed atomically:
 2. **Task 2: Water rendering layers and tooltip** - `875721f` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/waterStore.ts` - Zustand store with facilities, connectionStatus, precipitation merge with compositeHealth recomputation
 - `src/hooks/useWaterFetch.ts` - One-time /api/water fetch on mount (follows useSiteFetch pattern)
 - `src/hooks/useWaterPrecipPolling.ts` - 6-hour recursive setTimeout polling with tab visibility awareness
@@ -90,6 +93,7 @@ Each task was committed atomically:
 - `src/__tests__/WaterOverlay.test.tsx` - 9 tests for tooltip rendering and layer hook behavior
 
 ## Decisions Made
+
 - **PrecipitationData defined locally:** The `PrecipitationData` interface is defined in `waterStore.ts` rather than `server/types.ts` because plan 26-03 (server routes) has not yet been executed. When 26-03 runs, the type can be consolidated.
 - **Placeholder icons:** Water facility icons reuse existing atlas entries (`diamond` for dam/treatment/canal, `siteDesalination` for reservoir/desalination) since dedicated water icons don't exist yet. Plan notes these can be refined in a follow-up.
 - **Serif italic river labels:** River labels use `fontFamily: 'serif'` with `fontStyle: 'italic'` to create clear visual distinction from ethnic overlay labels which use `Inter, sans-serif`.
@@ -100,6 +104,7 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - Pre-existing failing test `server/__tests__/adapters/overpass-water.test.ts` from plan 26-03 TDD RED phase (imports `overpass-water.js` which does not exist yet). Not caused by this plan's changes. Out of scope.
 
 ## User Setup Required
@@ -107,6 +112,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Client-side water infrastructure complete and ready for integration (Plan 05)
 - Hooks consume `/api/water` and `/api/water/precip` endpoints that Plan 03 will create
 - All 1151 existing tests passing (excluding pre-existing 26-03 RED-phase test)

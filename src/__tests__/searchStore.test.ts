@@ -229,10 +229,7 @@ describe('searchStore', () => {
     // The loadRecentTags function is called at store creation time; we test the save path instead
     useSearchStore.getState().setQuery('type:ship');
     useSearchStore.getState().applyAsFilter();
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'recentSearchTags',
-      expect.any(String),
-    );
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('recentSearchTags', expect.any(String));
     const savedValue = localStorageMock.setItem.mock.calls.find(
       (c: string[]) => c[0] === 'recentSearchTags',
     );

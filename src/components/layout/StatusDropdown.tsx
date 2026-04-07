@@ -27,9 +27,7 @@ function FeedLine({ status, count, label }: { status: FeedStatus; count: number;
         data-testid={`status-dot-${label}`}
         className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT_CLASS[status]}`}
       />
-      <span className="text-text-secondary tabular-nums">
-        {isLoading ? '\u2014' : count}
-      </span>
+      <span className="text-text-secondary tabular-nums">{isLoading ? '\u2014' : count}</span>
       <span className="text-text-muted">{label}</span>
     </div>
   );
@@ -77,7 +75,13 @@ export function StatusDropdown() {
   const hasError = statuses.some((s) => s === 'error' || s === 'rate_limited');
   const hasStale = statuses.some((s) => s === 'stale');
   const allConnected = statuses.every((s) => s === 'connected');
-  const overallDotClass = hasError ? 'bg-accent-red' : hasStale ? 'bg-accent-yellow' : allConnected ? 'bg-accent-green' : 'bg-text-muted animate-pulse';
+  const overallDotClass = hasError
+    ? 'bg-accent-red'
+    : hasStale
+      ? 'bg-accent-yellow'
+      : allConnected
+        ? 'bg-accent-green'
+        : 'bg-text-muted animate-pulse';
 
   return (
     <div ref={containerRef} className="relative" data-testid="topbar-status">
@@ -101,7 +105,14 @@ export function StatusDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full z-[var(--z-modal)] mt-2 rounded-lg border border-border bg-surface-overlay px-4 py-3 shadow-lg backdrop-blur-sm min-w-[180px] transition-[left] duration-300" style={{ left: isSidebarOpen ? 'calc(var(--width-icon-strip) + var(--width-sidebar) - 1rem)' : 'calc(var(--width-icon-strip) - 1rem)' }}>
+        <div
+          className="absolute top-full z-[var(--z-modal)] mt-2 rounded-lg border border-border bg-surface-overlay px-4 py-3 shadow-lg backdrop-blur-sm min-w-[180px] transition-[left] duration-300"
+          style={{
+            left: isSidebarOpen
+              ? 'calc(var(--width-icon-strip) + var(--width-sidebar) - 1rem)'
+              : 'calc(var(--width-icon-strip) - 1rem)',
+          }}
+        >
           <div className="flex flex-col gap-1">
             <FeedLine status={flightStatus} count={visibleFlights} label="flights" />
             <FeedLine status={shipStatus} count={visibleShips} label="ships" />

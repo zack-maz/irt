@@ -167,7 +167,7 @@ export function assignBasinStress(lat: number, lng: number): WaterStressIndicato
   // Uses a deterministic hash of lat/lng to pick from the sorted basin range,
   // so nearby facilities get similar (but not identical) stress values.
   const sorted = [...basins]
-    .filter(b => b.bws_score >= 0) // exclude no-data basins
+    .filter((b) => b.bws_score >= 0) // exclude no-data basins
     .sort((a, b) => a.bws_score - b.bws_score);
 
   if (sorted.length === 0) {

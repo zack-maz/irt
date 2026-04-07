@@ -43,16 +43,16 @@ key-files:
     - src/__tests__/AppShell.test.tsx
 
 key-decisions:
-  - "NotificationBell moved from absolute positioning to topbar flex layout (no longer detail-panel-aware)"
-  - "LayerTogglesContent and FilterPanelContent extracted as separate exports for sidebar reuse"
-  - "Iranian flights counter row removed per locked decision"
-  - "Sidebar overlays map with absolute positioning (does not resize map)"
-  - "Icon strip always visible; content panel slides with translate-x transition"
-  - "StatusDropdown shows aggregate health dot plus per-source breakdown in dropdown"
+  - 'NotificationBell moved from absolute positioning to topbar flex layout (no longer detail-panel-aware)'
+  - 'LayerTogglesContent and FilterPanelContent extracted as separate exports for sidebar reuse'
+  - 'Iranian flights counter row removed per locked decision'
+  - 'Sidebar overlays map with absolute positioning (does not resize map)'
+  - 'Icon strip always visible; content panel slides with translate-x transition'
+  - 'StatusDropdown shows aggregate health dot plus per-source breakdown in dropdown'
 
 patterns-established:
-  - "Extracted content pattern: Slot components export inner Content component for sidebar embedding"
-  - "Sidebar icon-strip: 48px icon column with accent highlight for active section"
+  - 'Extracted content pattern: Slot components export inner Content component for sidebar embedding'
+  - 'Sidebar icon-strip: 48px icon column with accent highlight for active section'
 
 requirements-completed: [SRCH-03]
 
@@ -74,6 +74,7 @@ completed: 2026-03-22
 - **Files modified:** 13
 
 ## Accomplishments
+
 - Restructured AppShell from floating panel stack to Topbar + Sidebar + Map layout
 - Created StatusDropdown with 6 data source health dots (flights, ships, events, sites, news, markets)
 - Built Sidebar with icon strip (always visible) and expandable content panel containing Counters, Layers, and Filters sections
@@ -89,6 +90,7 @@ Each task was committed atomically:
 2. **Task 2: Restructure AppShell layout and update tests** - `bd7b280` (feat)
 
 ## Files Created/Modified
+
 - `src/components/layout/Topbar.tsx` - Full-width topbar with StatusDropdown, Cmd+K search hint, NotificationBell
 - `src/components/layout/StatusDropdown.tsx` - Clickable title with dropdown showing 6 data source health dots
 - `src/components/layout/Sidebar.tsx` - Left sidebar with 48px icon strip and 280px expandable content panel
@@ -104,6 +106,7 @@ Each task was committed atomically:
 - `src/__tests__/AppShell.test.tsx` - Updated to validate new layout structure (topbar, sidebar, icon strip)
 
 ## Decisions Made
+
 - NotificationBell moved from absolute positioning to topbar flex layout (no longer independently detail-panel-aware)
 - LayerTogglesContent and FilterPanelContent extracted as separate exports so Sidebar can embed them without duplicating code
 - Iranian flights counter row removed per locked decision
@@ -116,10 +119,11 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Updated AppShell test for combobox assertion**
+
 - **Found during:** Task 2 (AppShell test update)
 - **Issue:** Original test `queryByRole('combobox')` finding multiple combobox elements from FilterPanelContent country filter inputs now rendered inside Sidebar
 - **Fix:** Changed test to assert old TitleSlot is not rendered instead of checking for SourceSelector combobox
-- **Files modified:** src/__tests__/AppShell.test.tsx
+- **Files modified:** src/**tests**/AppShell.test.tsx
 - **Verification:** All 11 AppShell tests pass
 - **Committed in:** bd7b280 (Task 2 commit)
 
@@ -129,12 +133,15 @@ Each task was committed atomically:
 **Impact on plan:** Minor test adjustment necessary for correctness. No scope creep.
 
 ## Issues Encountered
+
 None beyond the test adjustment documented above.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Layout restructure complete, ready for Plan 02 (search modal with Cmd+K)
 - Topbar search hint button exists as placeholder for Plan 02 to wire click handler
 - Sidebar infrastructure ready for any future section additions
@@ -144,5 +151,6 @@ None - no external service configuration required.
 All created files verified present. All commit hashes verified in git log.
 
 ---
-*Phase: 19-search-filter-ui-cleanup*
-*Completed: 2026-03-22*
+
+_Phase: 19-search-filter-ui-cleanup_
+_Completed: 2026-03-22_

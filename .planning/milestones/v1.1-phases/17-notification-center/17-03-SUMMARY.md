@@ -2,29 +2,44 @@
 phase: 17-notification-center
 plan: 03
 subsystem: ui
-tags: [zustand, react, notifications, bell-icon, dropdown, fly-to-event, severity-ranking, news-matching]
+tags:
+  [
+    zustand,
+    react,
+    notifications,
+    bell-icon,
+    dropdown,
+    fly-to-event,
+    severity-ranking,
+    news-matching,
+  ]
 
 # Dependency graph
 requires:
   - phase: 17-01
-    provides: "severity scoring (computeSeverityScore), news matching (matchNewsToEvent), time grouping (getTimeGroup)"
+    provides: 'severity scoring (computeSeverityScore), news matching (matchNewsToEvent), time grouping (getTimeGroup)'
   - phase: 16
-    provides: "newsStore with clusters for news headline matching"
+    provides: 'newsStore with clusters for news headline matching'
   - phase: 8.1
-    provides: "eventStore with ConflictEventEntity data"
+    provides: 'eventStore with ConflictEventEntity data'
 provides:
-  - "notificationStore with notifications array, readIds, unreadCount, flyToTarget"
-  - "useNotifications hook deriving scored notifications from events + news"
-  - "NotificationBell component with unread badge and dropdown"
-  - "NotificationDropdown with time-grouped notification cards"
-  - "NotificationCard with event info, coordinates, matched news headlines"
-  - "FlyToHandler for map fly-to animation on notification click"
+  - 'notificationStore with notifications array, readIds, unreadCount, flyToTarget'
+  - 'useNotifications hook deriving scored notifications from events + news'
+  - 'NotificationBell component with unread badge and dropdown'
+  - 'NotificationDropdown with time-grouped notification cards'
+  - 'NotificationCard with event info, coordinates, matched news headlines'
+  - 'FlyToHandler for map fly-to animation on notification click'
 affects: [phase-19, phase-20]
 
 # Tech tracking
 tech-stack:
   added: []
-  patterns: ["FlyToHandler child component inside Map for map.flyTo via useMap hook", "Outside-click + Escape dismiss pattern for dropdowns", "localStorage-persisted readIds surviving notification regeneration"]
+  patterns:
+    [
+      'FlyToHandler child component inside Map for map.flyTo via useMap hook',
+      'Outside-click + Escape dismiss pattern for dropdowns',
+      'localStorage-persisted readIds surviving notification regeneration',
+    ]
 
 key-files:
   created:
@@ -40,14 +55,14 @@ key-files:
     - src/components/map/BaseMap.tsx
 
 key-decisions:
-  - "FlyToHandler as child of Map component (uses useMap hook, renders null) rather than ref-based approach"
-  - "NotificationBell absolute positioning with detail panel offset transition matching FilterPanelSlot pattern"
-  - "readIds persisted to localStorage as JSON array, loaded on store init with try/catch"
-  - "markRead is idempotent (no-op if already read, no double-decrement)"
+  - 'FlyToHandler as child of Map component (uses useMap hook, renders null) rather than ref-based approach'
+  - 'NotificationBell absolute positioning with detail panel offset transition matching FilterPanelSlot pattern'
+  - 'readIds persisted to localStorage as JSON array, loaded on store init with try/catch'
+  - 'markRead is idempotent (no-op if already read, no double-decrement)'
 
 patterns-established:
-  - "FlyToHandler pattern: null-rendering child component inside Map for imperative map operations"
-  - "Dropdown dismiss pattern: mousedown + keydown listeners only active when dropdown is open"
+  - 'FlyToHandler pattern: null-rendering child component inside Map for imperative map operations'
+  - 'Dropdown dismiss pattern: mousedown + keydown listeners only active when dropdown is open'
 
 requirements-completed: [NOTF-01, NOTF-02, NOTF-03]
 
@@ -69,6 +84,7 @@ completed: 2026-03-20
 - **Files modified:** 9
 
 ## Accomplishments
+
 - Notification store with readIds persistence, unreadCount derivation, and flyToTarget for map animation
 - useNotifications hook that derives scored, news-matched notifications from eventStore + newsStore
 - Bell icon with unread badge (99+ cap), time-grouped dropdown, and notification cards with event info + matched news
@@ -83,6 +99,7 @@ Each task was committed atomically:
 2. **Task 2: Build bell icon, dropdown, notification cards, and wire fly-to into BaseMap** - `616e1f9` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/notificationStore.ts` - Zustand store with notifications, readIds, unreadCount, flyToTarget, localStorage persistence
 - `src/hooks/useNotifications.ts` - Derives scored notifications from events + news with 7-day window
 - `src/components/layout/NotificationBell.tsx` - Bell button with unread badge, outside-click/Escape dismiss, detail panel offset
@@ -94,6 +111,7 @@ Each task was committed atomically:
 - `src/__tests__/NotificationBell.test.tsx` - 7 component tests (aria-label, badge, toggle, dismiss)
 
 ## Decisions Made
+
 - FlyToHandler as child of Map component: uses useMap() hook which only works inside Map context; renders null (behavior-only), following CompassControl/ProximityAlertOverlay pattern
 - NotificationBell absolute positioning with detail panel offset transition: matches FilterPanelSlot's right offset pattern for consistent layout behavior
 - readIds persisted as JSON array in localStorage: loaded on store init, persisted on markRead/markAllRead, survives notification regeneration cycles
@@ -104,6 +122,7 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - Pre-existing flaky test in severity.test.ts ("ranks wmd and airstrike equally") fails intermittently due to Date.now() timing difference between two makeEvent() calls causing recency decay divergence. Not caused by this plan's changes. Out of scope per deviation rules.
 
 ## User Setup Required
@@ -111,10 +130,12 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Notification center UI complete with all core interactions
 - Plan 17-04 (proximity alerts) already completed in wave 1
 - Phase 17 is now fully complete, ready for Phase 18 (Oil Markets Tracker)
 
 ---
-*Phase: 17-notification-center*
-*Completed: 2026-03-20*
+
+_Phase: 17-notification-center_
+_Completed: 2026-03-20_

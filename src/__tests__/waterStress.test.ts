@@ -175,9 +175,7 @@ describe('WATER_STRESS_LEGEND_STOPS', () => {
   });
 
   it('includes Destroyed entry with black color', () => {
-    const destroyedStop = WATER_STRESS_LEGEND_STOPS.find(
-      (s) => s.label.includes('Destroyed'),
-    );
+    const destroyedStop = WATER_STRESS_LEGEND_STOPS.find((s) => s.label.includes('Destroyed'));
     expect(destroyedStop).toBeDefined();
     expect(destroyedStop!.color).toBe('#000000');
   });

@@ -18,7 +18,10 @@ import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
 
 /** Zod schema for /api/water and /api/water/precip query params */
 const waterQuerySchema = z.object({
-  refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+  refresh: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 /** Redis key for cached water facilities */
@@ -45,7 +48,10 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   const { refresh } = res.locals.validatedQuery as z.infer<typeof waterQuerySchema>;
   const forceRefresh = refresh && (isCron || process.env.NODE_ENV !== 'production');
   const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
-  log.info({ cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale }, 'cache result');
+  log.info(
+    { cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale },
+    'cache result',
+  );
 
   if (cached && !cached.stale && !forceRefresh) {
     return res.json(cached);
@@ -91,7 +97,7 @@ waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) =>
     }
 
     // Extract coordinates and fetch precipitation
-    const locations = facilities.map(f => ({ lat: f.lat, lng: f.lng }));
+    const locations = facilities.map((f) => ({ lat: f.lat, lng: f.lng }));
     const precipData = await fetchPrecipitation(locations);
 
     // Only cache non-empty results — empty means all batches failed

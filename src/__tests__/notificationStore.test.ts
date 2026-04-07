@@ -6,8 +6,12 @@ import type { Notification } from '@/stores/notificationStore';
 const storage: Record<string, string> = {};
 vi.stubGlobal('localStorage', {
   getItem: (key: string) => storage[key] ?? null,
-  setItem: (key: string, value: string) => { storage[key] = value; },
-  removeItem: (key: string) => { delete storage[key]; },
+  setItem: (key: string, value: string) => {
+    storage[key] = value;
+  },
+  removeItem: (key: string) => {
+    delete storage[key];
+  },
 });
 
 function makeNotification(id: string, overrides: Partial<Notification> = {}): Notification {
@@ -29,7 +33,12 @@ describe('notificationStore', () => {
   beforeEach(() => {
     const store = useNotificationStore.getState();
     store.setNotifications([]);
-    useNotificationStore.setState({ readIds: new Set(), unreadCount: 0, isDropdownOpen: false, flyToTarget: null });
+    useNotificationStore.setState({
+      readIds: new Set(),
+      unreadCount: 0,
+      isDropdownOpen: false,
+      flyToTarget: null,
+    });
     Object.keys(storage).forEach((k) => delete storage[k]);
   });
 

@@ -8,17 +8,16 @@ import { fetchGdeltArticles } from '../adapters/gdelt-doc.js';
 import { fetchAllRssFeeds } from '../adapters/rss.js';
 import { filterAndScoreArticles } from '../lib/newsFilter.js';
 import { deduplicateAndCluster } from '../lib/newsClustering.js';
-import {
-  NEWS_CACHE_TTL,
-  NEWS_REDIS_TTL_SEC,
-  NEWS_SLIDING_WINDOW_MS,
-} from '../config.js';
+import { NEWS_CACHE_TTL, NEWS_REDIS_TTL_SEC, NEWS_SLIDING_WINDOW_MS } from '../config.js';
 import { validateQuery } from '../middleware/validate.js';
 import type { NewsArticle, NewsCluster } from '../types.js';
 
 /** Zod schema for /api/news query params */
 const newsQuerySchema = z.object({
-  refresh: z.enum(['true', 'false']).optional().transform((v) => v === 'true'),
+  refresh: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 /** Redis key for the merged news feed */

@@ -14,6 +14,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 ## Implementation Decisions
 
 ### Site icons & visual style
+
 - 6 new canvas-drawn symbolic silhouettes added to existing icon atlas: atom (nuclear), anchor (naval), oil derrick (oil), jet silhouette (airbase), water waves (dam), ship's helm wheel (port)
 - Same mask-mode approach as existing icons — white shapes tinted via `getColor`
 - Two-state color: green (#22c55e) for healthy sites, orange (#f97316) for attacked sites
@@ -23,6 +24,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 - Sizing: 4000m base, minPixels:12, maxPixels:80 — smaller than events, sites are reference points not active threats
 
 ### Toggle structure
+
 - Parent "Sites" toggle + 6 indented sub-toggles (Nuclear, Naval, Oil, Airbase, Dam, Port)
 - Positioned after Events (bottom of Layers panel)
 - All ON by default
@@ -31,6 +33,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 - Toggle state persisted to localStorage following existing pattern
 
 ### Detail panel content
+
 - **Hover tooltip**: site name, location in Iran (city/region), attack status with date if attacked
 - **Click detail panel**: new SiteDetail component with full info
   - Name, site type, operator, coordinates (with copy button)
@@ -39,6 +42,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
   - Clicking an event in the dropdown cross-links to that GDELT event (selects it on map, swaps to EventDetail)
 
 ### Data fetching & caching
+
 - Single fetch on app load — GET /api/sites, no polling
 - Server: 24h Redis cache (key: `sites:all`), cache miss queries Overpass API
 - Single combined Overpass QL query with OR clauses for all 6 site types, scoped to Greater Middle East bbox
@@ -49,6 +53,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 - Own Deck.gl IconLayer, own detail component (SiteDetail)
 
 ### Claude's Discretion
+
 - Exact Overpass QL tag queries per site type (researcher should identify correct OSM tags)
 - Canvas drawing details for the 6 new icon shapes
 - Minimap embed implementation approach (static image vs iframe vs MapLibre mini instance)
@@ -68,9 +73,11 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `src/components/map/layers/icons.ts`: Canvas icon atlas (224x32, 7 shapes) — extend with 6 new site shapes
 - `src/components/map/layers/constants.ts`: ENTITY_COLORS, ENTITY_DOT_COLORS, ICON_SIZE — add site entries
 - `src/components/detail/DetailValue.tsx`: Reusable value cell with flash-on-change for detail panel
@@ -78,6 +85,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 - `server/cache/redis.ts`: cacheGet/cacheSet with CacheEntry<T> pattern — reuse for 24h site cache
 
 ### Established Patterns
+
 - Zustand curried `create<T>()()` pattern for new siteStore
 - LayerToggles interface + localStorage persistence + LAYER_TOGGLE_DEFAULTS for new site toggles
 - ToggleRow component in LayerTogglesSlot for consistent toggle rendering
@@ -86,6 +94,7 @@ Display key infrastructure sites (nuclear, naval, oil refinery, airbase, dam, po
 - DetailPanelSlot per-type routing (FlightDetail/ShipDetail/EventDetail → add SiteDetail)
 
 ### Integration Points
+
 - `server/types.ts`: New SiteEntity type (separate from MapEntity union)
 - `server/adapters/`: New overpass.ts adapter
 - `server/routes/`: New sites.ts route
@@ -110,5 +119,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 15-key-sites-overlay*
-*Context gathered: 2026-03-20*
+_Phase: 15-key-sites-overlay_
+_Context gathered: 2026-03-20_

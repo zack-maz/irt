@@ -134,10 +134,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
       price,
       previousClose,
       change: price - previousClose,
-      changePercent:
-        previousClose !== 0
-          ? ((price - previousClose) / previousClose) * 100
-          : 0,
+      changePercent: previousClose !== 0 ? ((price - previousClose) / previousClose) * 100 : 0,
       currency: meta.currency ?? 'USD',
       marketOpen,
       lastTradeTime: meta.regularMarketTime * 1000,
@@ -157,10 +154,7 @@ export async function fetchMarkets(range: MarketRange = '1d'): Promise<MarketQuo
   const results = await Promise.allSettled(TICKERS.map((t) => fetchTicker(t, range)));
 
   return results
-    .filter(
-      (r): r is PromiseFulfilledResult<MarketQuote | null> =>
-        r.status === 'fulfilled',
-    )
+    .filter((r): r is PromiseFulfilledResult<MarketQuote | null> => r.status === 'fulfilled')
     .map((r) => r.value)
     .filter((q): q is MarketQuote => q !== null);
 }

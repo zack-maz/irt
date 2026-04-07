@@ -5,7 +5,9 @@ function readBool(key: string, fallback: boolean): boolean {
   try {
     const v = localStorage.getItem(key);
     return v === null ? fallback : v === 'true';
-  } catch { return fallback; }
+  } catch {
+    return fallback;
+  }
 }
 
 export const useUIStore = create<UIState>()((set, get) => ({
@@ -65,34 +67,45 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleMarkets: () => {
     const next = !get().isMarketsCollapsed;
     set({ isMarketsCollapsed: next });
-    try { localStorage.setItem('markets-collapsed', String(next)); } catch { /* */ }
+    try {
+      localStorage.setItem('markets-collapsed', String(next));
+    } catch {
+      /* */
+    }
   },
   collapseMarkets: () => {
     set({ isMarketsCollapsed: true });
-    try { localStorage.setItem('markets-collapsed', 'true'); } catch { /* */ }
+    try {
+      localStorage.setItem('markets-collapsed', 'true');
+    } catch {
+      /* */
+    }
   },
   selectEntity: (id) => set({ selectedEntityId: id, selectedCluster: null }),
   setSelectedCluster: (cluster) => set({ selectedCluster: cluster, selectedEntityId: null }),
   hoverEntity: (id) => set({ hoveredEntityId: id }),
   setExpandedAlertSiteId: (id) => set({ expandedAlertSiteId: id }),
-  pushView: (view: PanelView) => set((s) => ({
-    navigationStack: [...s.navigationStack, view],
-    slideDirection: 'forward' as const,
-  })),
-  goBack: () => set((s) => {
-    const stack = [...s.navigationStack];
-    const prev = stack.pop();
-    if (!prev) return {};
-    // Bypass mutual exclusion — set both directly in one atomic call
-    return {
-      navigationStack: stack,
-      selectedEntityId: prev.entityId,
-      selectedCluster: prev.cluster,
-      slideDirection: 'back' as const,
-    };
-  }),
-  clearStack: () => set({
-    navigationStack: [],
-    slideDirection: null,
-  }),
+  pushView: (view: PanelView) =>
+    set((s) => ({
+      navigationStack: [...s.navigationStack, view],
+      slideDirection: 'forward' as const,
+    })),
+  goBack: () =>
+    set((s) => {
+      const stack = [...s.navigationStack];
+      const prev = stack.pop();
+      if (!prev) return {};
+      // Bypass mutual exclusion — set both directly in one atomic call
+      return {
+        navigationStack: stack,
+        selectedEntityId: prev.entityId,
+        selectedCluster: prev.cluster,
+        slideDirection: 'back' as const,
+      };
+    }),
+  clearStack: () =>
+    set({
+      navigationStack: [],
+      slideDirection: null,
+    }),
 }));

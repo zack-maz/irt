@@ -66,6 +66,7 @@ completed: 2026-04-03
 - **Files modified:** 8
 
 ## Accomplishments
+
 - WaterFacility, WaterFacilityType, and WaterStressIndicators types defined in server/types.ts
 - stressToRGBA 4-stop gradient interpolation with 21 unit tests passing
 - Real WRI Aqueduct 4.0 baseline annual data: 6377 Middle East basins across 29 countries
@@ -82,6 +83,7 @@ Each task was committed atomically:
 2. **Task 2: Create data extraction scripts and produce static JSON files** - `2006306` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - Added WaterFacility, WaterFacilityType, WaterStressIndicators types
 - `src/lib/waterStress.ts` - stressToRGBA, compositeHealth, bwsScoreToLabel, STRESS_COLORS, WATER_STRESS_LEGEND_STOPS
 - `src/__tests__/waterStress.test.ts` - 21 unit tests for all exported functions
@@ -92,6 +94,7 @@ Each task was committed atomically:
 - `package.json` - Added shapefile and @types/shapefile as devDependencies
 
 ## Decisions Made
+
 - **Karun/Litani manual addition**: Neither river is in Natural Earth 10m rivers dataset. Karun added with approximate coordinates from Zagros Mountains to Shatt al-Arab confluence. Litani added with coordinates from Baalbek to Mediterranean.
 - **Geographic validation**: Added ME bounding box check to prevent matching same-named rivers on other continents (the NE dataset contains a "Litani" in French Guiana).
 - **Exact country matching**: Changed from substring matching to exact equality for country filtering after discovering "Romania" matched "Oman" as a substring.
@@ -103,6 +106,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Filtered out South American "Litani" river**
+
 - **Found during:** Task 2 (river extraction)
 - **Issue:** Natural Earth 10m dataset contains a "Litani" river in French Guiana (lng -54, lat 2-3), not the Lebanese Litani
 - **Fix:** Added ME bounding box geographic validation before accepting name matches; added manual Litani coordinates for Lebanon
@@ -111,6 +115,7 @@ Each task was committed atomically:
 - **Committed in:** 2006306
 
 **2. [Rule 1 - Bug] Fixed substring country matching false positive**
+
 - **Found during:** Task 2 (aqueduct extraction)
 - **Issue:** "Romania" matched "Oman" via substring check, including 326 Romanian basins in Middle East data
 - **Fix:** Changed from `.includes()` to exact `Set.has()` matching for country names
@@ -119,6 +124,7 @@ Each task was committed atomically:
 - **Committed in:** 2006306
 
 **3. [Rule 3 - Blocking] Added manual Karun river data**
+
 - **Found during:** Task 2 (river extraction)
 - **Issue:** Karun River (Iran's largest) is not in Natural Earth 10m rivers dataset
 - **Fix:** Added manual LineString coordinates from Zagros Mountains source to Shatt al-Arab confluence
@@ -132,6 +138,7 @@ Each task was committed atomically:
 **Impact on plan:** All auto-fixes necessary for data correctness. No scope creep.
 
 ## Issues Encountered
+
 - WRI Aqueduct CSV has no lat/lng columns for basin centroids; filtering falls back to country name matching only. Basin-to-coordinate mapping will need to use the GeoPackage in a future plan if point-in-polygon is needed.
 - WRI uses sentinel values 9999 and -9999 for no-data; handled by treating values >= 9998 or <= -9998 as -1.
 
@@ -140,6 +147,7 @@ Each task was committed atomically:
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Types are ready for waterStore (Plan 02/03)
 - Static data files ready for basin lookup and river rendering (Plan 03/04)
 - Color interpolation ready for facility markers and river lines (Plan 04)
@@ -150,5 +158,6 @@ None - no external service configuration required.
 All 6 created files verified on disk. All 3 task commits verified in git log.
 
 ---
-*Phase: 26-water-stress-layer*
-*Completed: 2026-04-03*
+
+_Phase: 26-water-stress-layer_
+_Completed: 2026-04-03_

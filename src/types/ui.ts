@@ -7,16 +7,23 @@ import type { ConflictEventType } from '../../server/types.js';
 
 export const CONFLICT_TOGGLE_GROUPS = {
   showAirstrikes: ['airstrike'] as const,
-  showGroundCombat: ['ground_combat', 'shelling', 'bombing', 'assault', 'blockade', 'ceasefire_violation', 'mass_violence', 'wmd'] as const,
+  showGroundCombat: [
+    'ground_combat',
+    'shelling',
+    'bombing',
+    'assault',
+    'blockade',
+    'ceasefire_violation',
+    'mass_violence',
+    'wmd',
+  ] as const,
   showTargeted: ['assassination', 'abduction'] as const,
 } as const;
 
 export type ConflictToggleKey = keyof typeof CONFLICT_TOGGLE_GROUPS;
 
 // Derived from toggle groups — single source of truth
-const CONFLICT_EVENT_TYPES = new Set<string>(
-  Object.values(CONFLICT_TOGGLE_GROUPS).flat(),
-);
+const CONFLICT_EVENT_TYPES = new Set<string>(Object.values(CONFLICT_TOGGLE_GROUPS).flat());
 
 export function isConflictEventType(type: string): type is ConflictEventType {
   return CONFLICT_EVENT_TYPES.has(type);

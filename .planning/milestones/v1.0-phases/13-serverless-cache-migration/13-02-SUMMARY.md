@@ -19,7 +19,8 @@ affects: [13-03, 14-vercel-deployment]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: ["On-demand WebSocket connect-collect-close", "Redis merge/prune accumulator for ship data"]
+  patterns:
+    ['On-demand WebSocket connect-collect-close', 'Redis merge/prune accumulator for ship data']
 
 key-files:
   created:
@@ -32,13 +33,13 @@ key-files:
     - server/__tests__/routes/flights.test.ts
 
 key-decisions:
-  - "On-demand WebSocket pattern: connect, collect for N ms, close -- no persistent connections"
-  - "Ship merge/prune: fresh ships merged with cached by ID, ships older than 10 min pruned"
-  - "30s logical TTL / 300s Redis hard TTL for ships cache"
+  - 'On-demand WebSocket pattern: connect, collect for N ms, close -- no persistent connections'
+  - 'Ship merge/prune: fresh ships merged with cached by ID, ships older than 10 min pruned'
+  - '30s logical TTL / 300s Redis hard TTL for ships cache'
 
 patterns-established:
-  - "On-demand WebSocket: open, collect for configurable window (AISSTREAM_COLLECT_MS), close and return"
-  - "Redis merge/prune: seed Map from cached data, overwrite with fresh, prune by timestamp age"
+  - 'On-demand WebSocket: open, collect for configurable window (AISSTREAM_COLLECT_MS), close and return'
+  - 'Redis merge/prune: seed Map from cached data, overwrite with fresh, prune by timestamp age'
 
 requirements-completed: []
 
@@ -100,6 +101,7 @@ _Note: TDD tasks have separate test and implementation commits_
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Removed connectAISStream from server/index.ts**
+
 - **Found during:** Task 1 (collectShips implementation)
 - **Issue:** server/index.ts imported connectAISStream which no longer exists after adapter rewrite
 - **Fix:** Removed import and startup code that called connectAISStream()
@@ -108,10 +110,11 @@ _Note: TDD tasks have separate test and implementation commits_
 - **Committed in:** 8046244 (Task 1 GREEN commit)
 
 **2. [Rule 3 - Blocking] Updated flights test aisstream mock**
+
 - **Found during:** Task 1 (collectShips implementation)
 - **Issue:** flights.test.ts mocked old exports (getShips, getLastMessageTime, connectAISStream) that no longer exist
 - **Fix:** Changed mock to export collectShips instead
-- **Files modified:** server/__tests__/routes/flights.test.ts
+- **Files modified:** server/**tests**/routes/flights.test.ts
 - **Verification:** All 11 flights tests pass
 - **Committed in:** 8046244 (Task 1 GREEN commit)
 
@@ -140,14 +143,15 @@ None - no new external service configuration required. AISStream API key (AISSTR
 - server/adapters/aisstream.ts: FOUND
 - server/routes/ships.ts: FOUND
 - server/index.ts: FOUND
-- server/__tests__/adapters/aisstream.test.ts: FOUND
-- server/__tests__/routes/ships.test.ts: FOUND
-- server/__tests__/routes/flights.test.ts: FOUND
+- server/**tests**/adapters/aisstream.test.ts: FOUND
+- server/**tests**/routes/ships.test.ts: FOUND
+- server/**tests**/routes/flights.test.ts: FOUND
 - Commit 261ee61: FOUND
 - Commit 8046244: FOUND
 - Commit b16810e: FOUND
 - Commit 9a5f149: FOUND
 
 ---
-*Phase: 13-serverless-cache-migration*
-*Completed: 2026-03-20*
+
+_Phase: 13-serverless-cache-migration_
+_Completed: 2026-03-20_

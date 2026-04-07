@@ -103,9 +103,7 @@ export async function fetchFlights(bbox: BoundingBox): Promise<FlightEntity[]> {
   const data = (await res.json()) as { time: number; states: unknown[][] | null };
   const states = data.states ?? [];
 
-  const flights = states
-    .map(normalizeFlightState)
-    .filter((f): f is FlightEntity => f !== null);
+  const flights = states.map(normalizeFlightState).filter((f): f is FlightEntity => f !== null);
 
   log.info({ count: flights.length, durationMs: Date.now() - start }, 'fetched flights');
   return flights;

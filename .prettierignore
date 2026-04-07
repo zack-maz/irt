@@ -1,0 +1,10 @@
+dist
+coverage
+node_modules
+api/*.mjs
+api/*.js
+api/*.cjs
+.planning/phases/*/quick/**
+docs/screenshots
+docs/hero.gif
+package-lock.json

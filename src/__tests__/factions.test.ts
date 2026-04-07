@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  type Faction,
-  FACTION_ASSIGNMENTS,
-  FACTION_COLORS,
-  getFaction,
-} from '@/lib/factions';
+import { FACTION_ASSIGNMENTS, FACTION_COLORS, getFaction } from '@/lib/factions';
 
 // Import static GeoJSON data for integrity checks
 import countriesData from '@/data/countries.json';
@@ -88,9 +83,7 @@ describe('disputed.json integrity', () => {
   });
 
   it('includes Gaza, West Bank, and Golan Heights by NAME', () => {
-    const names = disputedData.features.map(
-      (f) => (f.properties as Record<string, string>).NAME
-    );
+    const names = disputedData.features.map((f) => (f.properties as Record<string, string>).NAME);
     expect(names.some((n) => n.includes('Gaza'))).toBe(true);
     expect(names.some((n) => n.includes('West Bank'))).toBe(true);
     expect(names.some((n) => n.includes('Golan'))).toBe(true);

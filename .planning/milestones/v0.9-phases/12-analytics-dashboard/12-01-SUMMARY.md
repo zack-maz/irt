@@ -22,7 +22,12 @@ affects: [12-analytics-dashboard]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [useRef delta tracking with 3s timeout, Intl.NumberFormat for counter display, CSS animation restart via key prop]
+  patterns:
+    [
+      useRef delta tracking with 3s timeout,
+      Intl.NumberFormat for counter display,
+      CSS animation restart via key prop,
+    ]
 
 key-files:
   created:
@@ -35,15 +40,15 @@ key-files:
     - src/styles/app.css
 
 key-decisions:
-  - "CounterRow tracks delta via useRef + useEffect with 3s setTimeout clear"
-  - "CSS animation restart via key prop tied to delta render counter"
-  - "Flight counters derive from raw flights (no filter/toggle narrowing per plan spec)"
-  - "Event filtered counts require BOTH smart filter passing AND toggle gating"
-  - "CountersSlot wired in Task 1 commit to satisfy TDD green requirement"
+  - 'CounterRow tracks delta via useRef + useEffect with 3s setTimeout clear'
+  - 'CSS animation restart via key prop tied to delta render counter'
+  - 'Flight counters derive from raw flights (no filter/toggle narrowing per plan spec)'
+  - 'Event filtered counts require BOTH smart filter passing AND toggle gating'
+  - 'CountersSlot wired in Task 1 commit to satisfy TDD green requirement'
 
 patterns-established:
-  - "Delta display: useRef prev tracking + setTimeout clear + CSS key restart"
-  - "Counter ratio format: filtered/total pct% when narrowed, plain number when equal"
+  - 'Delta display: useRef prev tracking + setTimeout clear + CSS key restart'
+  - 'Counter ratio format: filtered/total pct% when narrowed, plain number when equal'
 
 requirements-completed: [STAT-01]
 
@@ -65,6 +70,7 @@ completed: 2026-03-18
 - **Files modified:** 6
 
 ## Accomplishments
+
 - useCounterData hook derives all counter values reactively from flightStore, eventStore, uiStore, and useFilteredEntities
 - Event counters are filter-aware: show x/total ratio with percentage when toggles or smart filters narrow the count
 - Green +N delta text appears next to changed values and fades out after 3 seconds via CSS animation
@@ -78,6 +84,7 @@ Each task was committed atomically:
 2. **Task 2: Wire CountersSlot with counter content replacing placeholder** - verified through Task 1 commit (wiring included in TDD green phase)
 
 ## Files Created/Modified
+
 - `src/components/counters/useCounterData.ts` - Hook deriving CounterValues from stores with toggle gating
 - `src/components/counters/CounterRow.tsx` - Presentational counter row with delta display, ratio format
 - `src/components/layout/CountersSlot.tsx` - Wired counters dashboard replacing placeholder
@@ -86,6 +93,7 @@ Each task was committed atomically:
 - `src/__tests__/CountersSlot.test.tsx` - 7 tests for component rendering
 
 ## Decisions Made
+
 - CounterRow tracks delta via useRef comparing previous value, with 3s setTimeout to clear
 - CSS animation restart achieved via key prop tied to incrementing render counter
 - Flight counters always derive from raw flights (no filter/toggle narrowing) per user decision documented in plan
@@ -97,16 +105,20 @@ Each task was committed atomically:
 None -- plan executed exactly as written. CountersSlot wiring was pulled into Task 1 to satisfy TDD green requirement (tests required the wired component).
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Counters panel fully functional with reactive updates from all stores
 - Ready for any additional Phase 12 plans (charts, trends, etc.)
 - Full test suite green (534 tests, 42 files)
 
 ---
-*Phase: 12-analytics-dashboard*
-*Completed: 2026-03-18*
+
+_Phase: 12-analytics-dashboard_
+_Completed: 2026-03-18_

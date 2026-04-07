@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { GeoJsonLayer } from '@deck.gl/layers';
+import type { Feature, FeatureCollection } from 'geojson';
 import { useLayerStore } from '@/stores/layerStore';
 import { FACTION_COLORS, getFaction } from '@/lib/factions';
 import { LEGEND_REGISTRY } from '@/components/map/MapLegend';
@@ -39,16 +40,16 @@ LEGEND_REGISTRY.push({
 /**
  * Pre-compute fill/line colors per feature so deck.gl gets flat arrays.
  */
-function getCountryFillColor(feature: Record<string, unknown>): [number, number, number, number] {
-  const props = feature.properties as Record<string, string> | undefined;
+function getCountryFillColor(feature: Feature): [number, number, number, number] {
+  const props = feature.properties as Record<string, string> | null;
   const iso = props?.ISO_A3 ?? '';
   const faction = getFaction(iso);
   const rgb = FACTION_RGB[faction] ?? NEUTRAL_RGB;
   return [rgb[0], rgb[1], rgb[2], 38]; // ~15% opacity
 }
 
-function getCountryLineColor(feature: Record<string, unknown>): [number, number, number, number] {
-  const props = feature.properties as Record<string, string> | undefined;
+function getCountryLineColor(feature: Feature): [number, number, number, number] {
+  const props = feature.properties as Record<string, string> | null;
   const iso = props?.ISO_A3 ?? '';
   const faction = getFaction(iso);
   const rgb = FACTION_RGB[faction] ?? NEUTRAL_RGB;
@@ -65,29 +66,38 @@ export function usePoliticalLayers(): GeoJsonLayer[] {
   return useMemo(() => {
     if (!isActive) return [];
 
+    // deck.gl GeoJsonLayer accepts FeatureCollection at runtime; static GeoJSON imports
+    // type as Record<string, unknown> via Vite's JSON loader, so we narrow via `unknown`.
     const countryLayer = new GeoJsonLayer({
       id: 'political-countries',
-      // deck.gl GeoJsonLayer accepts FeatureCollection at runtime; static GeoJSON imports
-// type as Record<string, unknown> via Vite's JSON loader.
-data: countriesData as any,
+      data: countriesData as unknown as FeatureCollection,
       pickable: false,
       stroked: true,
       filled: true,
-      getFillColor: getCountryFillColor as any,
-      getLineColor: getCountryLineColor as any,
+      getFillColor: getCountryFillColor,
+      getLineColor: getCountryLineColor,
       getLineWidth: 1,
       lineWidthUnits: 'pixels' as const,
     });
 
     const disputedLayer = new GeoJsonLayer({
       id: 'political-disputed',
-      // deck.gl GeoJsonLayer accepts FeatureCollection at runtime.
-data: disputedData as any,
+      data: disputedData as unknown as FeatureCollection,
       pickable: false,
       stroked: true,
       filled: true,
-      getFillColor: [DISPUTED_RGB[0], DISPUTED_RGB[1], DISPUTED_RGB[2], 50] as [number, number, number, number],
-      getLineColor: [DISPUTED_RGB[0], DISPUTED_RGB[1], DISPUTED_RGB[2], 200] as [number, number, number, number],
+      getFillColor: [DISPUTED_RGB[0], DISPUTED_RGB[1], DISPUTED_RGB[2], 50] as [
+        number,
+        number,
+        number,
+        number,
+      ],
+      getLineColor: [DISPUTED_RGB[0], DISPUTED_RGB[1], DISPUTED_RGB[2], 200] as [
+        number,
+        number,
+        number,
+        number,
+      ],
       getLineWidth: 2,
       lineWidthUnits: 'pixels' as const,
     });

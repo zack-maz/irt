@@ -45,9 +45,7 @@ export function SiteDetail({ entity }: SiteDetailProps) {
         </div>
       )}
 
-      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-0">
-        Site Info
-      </h3>
+      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-0">Site Info</h3>
       <DetailValue label="Type" value={typeLabel} />
       <DetailValue label="Operator" value={entity.operator || 'Unknown'} />
       <DetailValue label="OSM ID" value={String(entity.osmId)} />
@@ -56,15 +54,11 @@ export function SiteDetail({ entity }: SiteDetailProps) {
         value={attack.isAttacked ? `Attacked (${attack.attackCount})` : 'Healthy'}
       />
 
-      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
-        Location
-      </h3>
+      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">Location</h3>
       <DetailValue label="Latitude" value={entity.lat.toFixed(6)} />
       <DetailValue label="Longitude" value={entity.lng.toFixed(6)} />
       <div className="flex items-center justify-between px-3 py-1">
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
-          Map
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">Map</span>
         <a
           href={osmUrl}
           target="_blank"
@@ -75,9 +69,7 @@ export function SiteDetail({ entity }: SiteDetailProps) {
         </a>
       </div>
 
-      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
-        Source
-      </h3>
+      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">Source</h3>
       <DetailValue label="Data Source" value="Overpass API" />
 
       {attack.isAttacked && (
@@ -110,7 +102,9 @@ export function SiteDetail({ entity }: SiteDetailProps) {
                   <span className="text-text-secondary">{date}</span>
                   <span className="text-text-primary">{evtLabel}</span>
                   {evt.data.actor1 && (
-                    <span className="text-text-muted truncate max-w-[100px]">{evt.data.actor1}</span>
+                    <span className="text-text-muted truncate max-w-[100px]">
+                      {evt.data.actor1}
+                    </span>
                   )}
                 </button>
               );

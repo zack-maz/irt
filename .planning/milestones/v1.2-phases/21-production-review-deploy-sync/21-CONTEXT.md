@@ -14,6 +14,7 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 ## Implementation Decisions
 
 ### Scale Hardening
+
 - Target audience: 1000+ concurrent users (public/viral potential)
 - HTTP Cache-Control headers: `s-maxage` per endpoint matching logical TTLs (flights 30s, events 900s, sites 86400s) — Vercel edge CDN serves cached responses
 - Compression: verify whether Vercel auto-compresses responses; add express compression middleware only if needed
@@ -26,17 +27,20 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 - Frontend analytics: add `@vercel/analytics` for page views, Web Vitals (LCP, CLS, FID), geographic breakdown
 
 ### Code Polish
+
 - Scope: comprehensive pass covering correctness, maintainability, AND performance (all three)
 - Approach: autonomous — Claude scans and fixes directly, user reviews diff at the end
 - Audit method: fresh full-codebase audit, no pre-specified focus areas
 - Bundle optimization: run vite build with rollup-plugin-visualizer, identify large chunks, split lazy-loadable pieces, tree-shake unused code
 
 ### Redis Budget Protection
+
 - Strategy: optimize TTLs first, upgrade Upstash plan ($10/mo) as fallback if monitoring shows pressure
 - Budget monitor: add daily Redis command count estimate to `/health` endpoint response
 - Graceful degradation: if Redis goes down or hits budget limit, serve last known cached data from in-memory fallback with a "data may be outdated" indicator in the client — no direct upstream fetch fallback
 
 ### Deploy Verification
+
 - API smoke tests: local Node script that hits each `/api/*` endpoint against production URL, verifies 200 responses + valid JSON shapes
 - Ongoing monitoring: Vercel cron health check that pings endpoints every 5-15min and logs failures
 - Visual verification: manual checklist for map overlays, panels, interactions, polling health
@@ -45,6 +49,7 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 - Error pages: skip custom error pages — Vercel defaults are fine
 
 ### Claude's Discretion
+
 - Exact Cache-Control header values per endpoint (within the "match logical TTLs" strategy)
 - Specific rate limit numbers per endpoint
 - Bundle splitting strategy (which chunks to lazy-load)
@@ -64,9 +69,11 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/cache/redis.ts`: Upstash REST client with `cacheGet<T>`, `cacheSet<T>` — add budget tracking here
 - `server/middleware/rateLimit.ts`: express-rate-limit with single 60/60s config — refactor to per-endpoint
 - `server/middleware/errorHandler.ts`: minimal error handler — enhance with structured logging
@@ -75,6 +82,7 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 - `server/app.ts`: Express app factory with `createApp()` — wire new middleware here
 
 ### Established Patterns
+
 - Cache-first route pattern: all `/api/*` routes check Redis before upstream fetch
 - `CacheEntry<T>` with `fetchedAt` timestamp for staleness computation
 - Recursive `setTimeout` polling (not `setInterval`) — avoids overlapping async fetches
@@ -82,6 +90,7 @@ Harden the application for 1000+ concurrent users on Vercel, perform a comprehen
 - `StatusPanel` already shows connection dots — could show degradation state
 
 ### Integration Points
+
 - `vercel.json` rewrites: all `/api/*` → serverless function, SPA catch-all → `index.html`
 - Build pipeline: `vite build` (frontend) + `tsup` (server) + `tsc` (typecheck)
 - 8 polling API routes: flights, ships, events, sites, news, markets, weather, sources
@@ -97,5 +106,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 21-production-review-deploy-sync*
-*Context gathered: 2026-03-24*
+_Phase: 21-production-review-deploy-sync_
+_Context gathered: 2026-03-24_

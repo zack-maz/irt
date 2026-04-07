@@ -13,9 +13,11 @@ The implementation requires three data sources: (1) Overpass API for water infra
 **Primary recommendation:** Use a static pre-processed Aqueduct lookup JSON (basin ID -> stress indicators) combined with a coordinate-to-basin mapping script, rather than runtime API calls. River and basin data are extracted offline; only Overpass facility queries and Open-Meteo precipitation polling happen at runtime.
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - **Point-based approach** -- water stress shown at specific facility locations, NOT blanket country/watershed polygon fills
 - **WRI Aqueduct baseline stress** -- annual basin-level data; each facility gets stress level from its WRI watershed via coordinate-to-basin intersection
 - **Multiple Aqueduct indicators** -- baseline water stress + drought risk + groundwater depletion + seasonal variability (all shown in detail panel)
@@ -23,7 +25,7 @@ The implementation requires three data sources: (1) Overpass API for water infra
 - **Facility markers** -- type-specific icons (dam, reservoir, plant, canal) tinted by stress color
 - **Open-Meteo precipitation** -- real-time 30-day precipitation anomaly per facility, polled every 6 hours, Redis cache 6h TTL
 - **Water Facility Data Source** -- Overpass API query for Middle East water infrastructure (same pattern as Phase 15)
-- **Facility types** -- 4 types from OSM: Dams (waterway=dam), Reservoirs (natural=water + reservoir=*), Water treatment plants (man_made=water_works), Canals/Aqueducts (waterway=canal)
+- **Facility types** -- 4 types from OSM: Dams (waterway=dam), Reservoirs (natural=water + reservoir=\*), Water treatment plants (man_made=water_works), Canals/Aqueducts (waterway=canal)
 - **Desalination plants** -- moved entirely from Sites overlay to Water layer; remove desalination toggle from Sites section
 - **Fetch pattern** -- one-time fetch on mount (same as useSiteFetch), Redis cache 24h TTL
 - **Attack status** -- cross-reference facility locations with GDELT events within 5km
@@ -37,6 +39,7 @@ The implementation requires three data sources: (1) Overpass API for water infra
 - **Search tags** -- type:dam/reservoir/plant/canal, stress:low/high/extreme, name:, near:
 
 ### Claude's Discretion
+
 - River/lake label styling (font, size, italic -- must be visually distinct from ethnic labels)
 - Overpass query optimization (canal size filtering to avoid excessive results)
 - Composite water health formula (how WRI baseline + precipitation anomaly combine)
@@ -45,44 +48,49 @@ The implementation requires three data sources: (1) Overpass API for water infra
 - WRI Aqueduct data download/extraction approach
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Threat cluster hover/unhover bug -- from Phase 25 discussion
 - Southern Lebanon disputed zone -- needs better boundary data (from Phase 24)
 - Yazidi ethnic zone -- absent from GeoEPR, deferred from Phase 25
 - Real-time reservoir level data -- satellite-based reservoir monitoring (NASA/ESA)
 - Groundwater depletion animation -- GRACE satellite data
-</user_constraints>
+  </user_constraints>
 
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| @deck.gl/layers | existing | GeoJsonLayer for rivers, IconLayer for facilities | Already used for all overlays |
-| @vis.gl/react-maplibre | existing | Map component integration | Already the map framework |
-| zustand | existing | waterStore for facility state | Project store pattern |
-| @upstash/redis | existing | Server-side caching | Already the cache layer |
-| express | existing | API route for /api/water | Already the server framework |
+
+| Library                | Version  | Purpose                                           | Why Standard                  |
+| ---------------------- | -------- | ------------------------------------------------- | ----------------------------- |
+| @deck.gl/layers        | existing | GeoJsonLayer for rivers, IconLayer for facilities | Already used for all overlays |
+| @vis.gl/react-maplibre | existing | Map component integration                         | Already the map framework     |
+| zustand                | existing | waterStore for facility state                     | Project store pattern         |
+| @upstash/redis         | existing | Server-side caching                               | Already the cache layer       |
+| express                | existing | API route for /api/water                          | Already the server framework  |
 
 ### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| Natural Earth 10m rivers | 5.0.0 | Static river line GeoJSON | Pre-extracted during build script |
-| WRI Aqueduct 4.0 | latest | Basin-level water stress data | Pre-processed to static JSON lookup |
-| Open-Meteo Forecast API | free tier | 30-day precipitation anomaly | Polled every 6h server-side |
-| shapefile (npm) | ^0.6 | Parse Natural Earth .shp to GeoJSON | One-time extraction script only |
+
+| Library                  | Version   | Purpose                             | When to Use                         |
+| ------------------------ | --------- | ----------------------------------- | ----------------------------------- |
+| Natural Earth 10m rivers | 5.0.0     | Static river line GeoJSON           | Pre-extracted during build script   |
+| WRI Aqueduct 4.0         | latest    | Basin-level water stress data       | Pre-processed to static JSON lookup |
+| Open-Meteo Forecast API  | free tier | 30-day precipitation anomaly        | Polled every 6h server-side         |
+| shapefile (npm)          | ^0.6      | Parse Natural Earth .shp to GeoJSON | One-time extraction script only     |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Static Aqueduct JSON | Earth Engine runtime API | Earth Engine requires auth + Google Cloud; static JSON is zero-dependency |
+
+| Instead of           | Could Use                | Tradeoff                                                                        |
+| -------------------- | ------------------------ | ------------------------------------------------------------------------------- |
+| Static Aqueduct JSON | Earth Engine runtime API | Earth Engine requires auth + Google Cloud; static JSON is zero-dependency       |
 | Natural Earth rivers | OSM Overpass river query | Overpass would return too many segments; NE has named rivers as single features |
-| shapefile npm | ogr2ogr CLI | ogr2ogr requires GDAL install; shapefile npm is pure JS |
+| shapefile npm        | ogr2ogr CLI              | ogr2ogr requires GDAL install; shapefile npm is pure JS                         |
 
 **No new npm production dependencies needed.** The `shapefile` npm package is a dev-only dependency for the one-time extraction script.
 
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 src/
   stores/waterStore.ts                    # Water facility state (facilities, connectionStatus, precipitation)
@@ -107,6 +115,7 @@ scripts/
 ```
 
 ### Pattern 1: Static Data Pre-Processing (WRI Aqueduct + Rivers)
+
 **What:** Download WRI Aqueduct 4.0 data and Natural Earth 10m rivers once. Run extraction scripts to produce compact static JSON files that ship with the app.
 **When to use:** Data that changes annually (Aqueduct) or never (river geometry).
 **Approach:**
@@ -125,6 +134,7 @@ scripts/
    - Each feature has `properties.name` and optionally `properties.pfaf_ids` (basin IDs the river passes through)
 
 ### Pattern 2: Coordinate-to-Basin Assignment
+
 **What:** Map each water facility (lat/lng) to its WRI Aqueduct basin to get stress indicators.
 **When to use:** Server-side when building the water facility response.
 **Approach:**
@@ -138,6 +148,7 @@ The WRI Aqueduct data uses HydroBASINS Level 6 (Pfafstetter codes). For coordina
 **Recommendation:** Option A if the GeoPackage is available and basin polygons can be extracted to a reasonable size (< 2MB for ME region). Otherwise Option C -- pre-compute assignments in the extraction script using the full GeoPackage, then ship only the lookup table (no runtime polygon intersection needed).
 
 ### Pattern 3: Composite Water Health Score
+
 **What:** Combine WRI Aqueduct baseline stress with Open-Meteo precipitation anomaly into a single 0-1 health score.
 **When to use:** Color-coding facility markers and river segments.
 **Formula (recommended):**
@@ -145,7 +156,7 @@ The WRI Aqueduct data uses HydroBASINS Level 6 (Pfafstetter codes). For coordina
 ```typescript
 // WRI baseline stress score is 0-5 (0=low stress, 5=extremely high)
 // Normalize to 0-1 where 0 = worst health (extreme stress), 1 = best health
-const baselineHealth = 1 - (bws_score / 5);
+const baselineHealth = 1 - bws_score / 5;
 
 // Precipitation anomaly: ratio of actual 30-day precip to climatological normal
 // < 1.0 = drier than normal (stress), > 1.0 = wetter than normal (relief)
@@ -157,6 +168,7 @@ const compositeHealth = Math.max(0, Math.min(1, baselineHealth + precipModifier)
 ```
 
 ### Pattern 4: Desalination Migration
+
 **What:** Move desalination plants from siteStore/Sites overlay to waterStore/Water layer.
 **When to use:** During the store and adapter refactoring.
 **Approach:**
@@ -169,6 +181,7 @@ const compositeHealth = Math.max(0, Math.min(1, baselineHealth + precipModifier)
 6. Update `filterStore` `enabledSiteTypes` default to remove desalination
 
 ### Pattern 5: River Line Rendering
+
 **What:** Render 6 major rivers as stress-colored GeoJsonLayer lines.
 **When to use:** When water layer is active.
 **Example:**
@@ -196,6 +209,7 @@ const riverLayer = new GeoJsonLayer({
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Runtime polygon intersection on client:** Never ship basin polygons to the frontend for point-in-polygon. All basin assignment happens server-side or at build time.
 - **Polling Aqueduct API:** WRI Aqueduct data is annual. Never poll it. Use static pre-extracted JSON.
 - **Merging water facilities into siteStore:** Water facilities need their own store because they have different data shape (stress indicators, precipitation) and their visibility is gated by a different mechanism (visualization layer toggle vs entity toggle).
@@ -203,50 +217,56 @@ const riverLayer = new GeoJsonLayer({
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Shapefile parsing | Custom binary parser | `shapefile` npm package | SHP format is complex with DBF companion files |
-| Point-in-polygon | Manual ray casting | Pre-computed basin assignments | Runtime polygon intersection is expensive and unnecessary for static basins |
-| Stress color interpolation | Manual RGB math | Simple linear lerp between color stops | Black-to-blue is a simple 2-stop gradient |
-| Overpass query structure | New query builder | Follow existing `server/adapters/overpass.ts` pattern | Proven query structure with country filtering + fallback |
-| Cache pattern | Custom Redis wrapper | Existing `cacheGetSafe`/`cacheSetSafe` | Already handles Redis failures with in-memory fallback |
-| Attack status | New proximity logic | Existing `computeAttackStatus` from `src/lib/attackStatus.ts` | Same 5km radius cross-reference with GDELT events |
+| Problem                    | Don't Build          | Use Instead                                                   | Why                                                                         |
+| -------------------------- | -------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Shapefile parsing          | Custom binary parser | `shapefile` npm package                                       | SHP format is complex with DBF companion files                              |
+| Point-in-polygon           | Manual ray casting   | Pre-computed basin assignments                                | Runtime polygon intersection is expensive and unnecessary for static basins |
+| Stress color interpolation | Manual RGB math      | Simple linear lerp between color stops                        | Black-to-blue is a simple 2-stop gradient                                   |
+| Overpass query structure   | New query builder    | Follow existing `server/adapters/overpass.ts` pattern         | Proven query structure with country filtering + fallback                    |
+| Cache pattern              | Custom Redis wrapper | Existing `cacheGetSafe`/`cacheSetSafe`                        | Already handles Redis failures with in-memory fallback                      |
+| Attack status              | New proximity logic  | Existing `computeAttackStatus` from `src/lib/attackStatus.ts` | Same 5km radius cross-reference with GDELT events                           |
 
 **Key insight:** The hardest part of this phase is data preparation (Aqueduct extraction, river extraction, basin assignment), not runtime rendering. Invest in the extraction scripts; the runtime code follows established project patterns.
 
 ## Common Pitfalls
 
 ### Pitfall 1: Overpass Canal Query Returning Too Many Results
+
 **What goes wrong:** `waterway=canal` in the Middle East returns thousands of small irrigation channels, overwhelming the map with markers.
 **Why it happens:** OSM tags irrigation ditches and small channels the same as major aqueducts.
 **How to avoid:** Filter by name tag presence (`["name"]` selector) or by minimum way length. Only show canals that have names in OSM -- this naturally filters to significant infrastructure.
 **Warning signs:** Overpass query returning 1000+ canal features; map becoming cluttered with tiny markers.
 
 ### Pitfall 2: WRI Aqueduct Data Format Surprise
+
 **What goes wrong:** The downloaded ZIP may contain GeoPackage (spatial) and/or CSV (tabular). The CSV lacks geometry; the GeoPackage requires spatial library support.
 **Why it happens:** WRI provides data in multiple formats but the exact contents of the ZIP are not documented clearly.
 **How to avoid:** Download the ZIP first, inspect contents, then write the extraction script. If GeoPackage is available, use it for polygon extraction (basin assignment). If only CSV, use nearest-centroid fallback for basin assignment.
 **Warning signs:** Script fails to find expected file format in ZIP.
 
 ### Pitfall 3: Open-Meteo 1000-Location Limit
+
 **What goes wrong:** If there are more than ~200 water facilities, the batch precipitation request exceeds the 1000-location API limit (since `past_days=30` with `daily` variables carries higher API weight).
 **Why it happens:** Open-Meteo's free tier weighs requests by data volume. 200 locations x 30 days x daily variables may hit internal limits.
 **How to avoid:** Batch precipitation requests into groups of 100 locations max. Use the existing pattern from `server/adapters/open-meteo.ts` (split into bands). Cache aggressively with 6h TTL since precipitation data changes slowly.
 **Warning signs:** 429 rate limit errors from Open-Meteo; API responses timing out.
 
 ### Pitfall 4: Redis Command Budget at ~92%
+
 **What goes wrong:** Adding new cache keys (water facilities, precipitation) pushes Redis command usage over the Upstash free tier limit.
 **Why it happens:** STATE.md notes Redis at ~92% command budget. New polling adds more reads/writes.
 **How to avoid:** Use generous cache TTLs (24h for facilities, 6h for precipitation). Avoid per-facility cache keys -- cache the entire response as a single key. Minimize Redis round-trips.
 **Warning signs:** Upstash dashboard showing >95% command usage; `cacheGetSafe` returning `degraded: true` frequently.
 
 ### Pitfall 5: Desalination Migration Breaking Existing Tests
+
 **What goes wrong:** Removing `desalination` from `SiteType` breaks type checks and tests that reference it.
 **Why it happens:** Desalination is referenced in `useCounterData`, `filterStore`, `LayerTogglesSlot`, and potentially test fixtures.
 **How to avoid:** Grep for all references to `desalination` in the codebase before removing. Update test fixtures, type definitions, and UI components in a single coordinated change.
 **Warning signs:** TypeScript compilation errors after removing from SiteType union; test failures in counter or filter tests.
 
 ### Pitfall 6: River GeoJSON File Size
+
 **What goes wrong:** Natural Earth 10m river data for 6 rivers could be large (especially the Nile at full length), inflating bundle size.
 **Why it happens:** High-resolution river geometry has many coordinate points.
 **How to avoid:** Apply Douglas-Peucker simplification during extraction (same pattern as Phase 25 ethnic zones at epsilon=0.05). Target < 200KB for all 6 rivers combined.
@@ -255,6 +275,7 @@ const riverLayer = new GeoJsonLayer({
 ## Code Examples
 
 ### Water Facility Store Pattern
+
 ```typescript
 // Follows siteStore.ts pattern
 import { create } from 'zustand';
@@ -263,7 +284,7 @@ import type { CacheResponse } from '@/types/entities';
 export type WaterFacilityType = 'dam' | 'reservoir' | 'treatment_plant' | 'canal' | 'desalination';
 
 export interface WaterFacility {
-  id: string;           // "water-{osmId}"
+  id: string; // "water-{osmId}"
   type: 'water';
   facilityType: WaterFacilityType;
   lat: number;
@@ -273,11 +294,11 @@ export interface WaterFacility {
   osmId: number;
   // WRI Aqueduct indicators (assigned server-side via basin lookup)
   stress: {
-    bws_score: number;  // 0-5 baseline water stress
-    bws_label: string;  // "Low", "Medium", "High", "Extremely High"
-    drr_score: number;  // drought risk
-    gtd_score: number;  // groundwater table decline
-    sev_score: number;  // seasonal variability
+    bws_score: number; // 0-5 baseline water stress
+    bws_label: string; // "Low", "Medium", "High", "Extremely High"
+    drr_score: number; // drought risk
+    gtd_score: number; // groundwater table decline
+    sev_score: number; // seasonal variability
     compositeHealth: number; // 0-1 computed health (0=worst, 1=best)
   };
   // Precipitation (updated via polling)
@@ -301,13 +322,14 @@ interface WaterState {
 ```
 
 ### Stress-to-Color Interpolation
+
 ```typescript
 // Black (#000000) = extreme stress (health=0) to Light Blue (#7dd3fc) = healthy (health=1)
 const STRESS_COLORS: [number, number, number][] = [
-  [0, 0, 0],         // health=0: black (extreme stress)
-  [30, 58, 95],      // health=0.33: dark blue
-  [59, 130, 180],    // health=0.66: medium blue
-  [125, 211, 252],   // health=1.0: light blue (healthy)
+  [0, 0, 0], // health=0: black (extreme stress)
+  [30, 58, 95], // health=0.33: dark blue
+  [59, 130, 180], // health=0.66: medium blue
+  [125, 211, 252], // health=1.0: light blue (healthy)
 ];
 
 export function stressToRGBA(health: number, alpha = 200): [number, number, number, number] {
@@ -327,6 +349,7 @@ export function stressToRGBA(health: number, alpha = 200): [number, number, numb
 ```
 
 ### Overpass Water Infrastructure Query
+
 ```typescript
 // Follows server/adapters/overpass.ts pattern
 const WATER_QUERY = `
@@ -343,18 +366,22 @@ const WATER_QUERY = `
 out center tags;
 `;
 ```
+
 Note: Canal query includes `["name"]` filter to exclude unnamed irrigation channels.
 
 ### Open-Meteo Precipitation Batch Request
+
 ```typescript
 // Batch locations into groups of 100 to stay under API limits
 // Use past_days=30 to get 30-day precipitation history
-const url = `https://api.open-meteo.com/v1/forecast?` +
+const url =
+  `https://api.open-meteo.com/v1/forecast?` +
   `latitude=${lats.join(',')}&longitude=${lngs.join(',')}&` +
   `daily=precipitation_sum&past_days=30&forecast_days=0&timezone=UTC`;
 ```
 
 ### Legend Registration
+
 ```typescript
 // Register water stress legend in MapLegend.tsx pattern
 LEGEND_REGISTRY.push({
@@ -372,14 +399,15 @@ LEGEND_REGISTRY.push({
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| Aqueduct 3.0 | Aqueduct 4.0 | 2023 | New HydroBASINS L6 unit; CMIP6 projections; 13 indicators |
-| Country-level stress | Basin-level stress | Aqueduct 4.0 | Much finer granularity per hydrological basin |
-| Shapefile-only downloads | CSV + GeoPackage | Aqueduct 4.0 | Easier programmatic access |
-| Open-Meteo history API | Forecast API with past_days | 2024 | Simpler for recent precipitation -- single endpoint |
+| Old Approach             | Current Approach            | When Changed | Impact                                                    |
+| ------------------------ | --------------------------- | ------------ | --------------------------------------------------------- |
+| Aqueduct 3.0             | Aqueduct 4.0                | 2023         | New HydroBASINS L6 unit; CMIP6 projections; 13 indicators |
+| Country-level stress     | Basin-level stress          | Aqueduct 4.0 | Much finer granularity per hydrological basin             |
+| Shapefile-only downloads | CSV + GeoPackage            | Aqueduct 4.0 | Easier programmatic access                                |
+| Open-Meteo history API   | Forecast API with past_days | 2024         | Simpler for recent precipitation -- single endpoint       |
 
 **Deprecated/outdated:**
+
 - Aqueduct 3.0 data format (different column names, different basin system) -- use 4.0
 - Open-Meteo `archive` endpoint for recent data -- use `forecast` with `past_days` instead
 
@@ -403,33 +431,37 @@ LEGEND_REGISTRY.push({
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 3.x with jsdom (frontend) / node (server) |
-| Config file | vite.config.ts (test section) |
-| Quick run command | `npx vitest run --reporter=verbose` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                                            |
+| ------------------ | ------------------------------------------------ |
+| Framework          | Vitest 3.x with jsdom (frontend) / node (server) |
+| Config file        | vite.config.ts (test section)                    |
+| Quick run command  | `npx vitest run --reporter=verbose`              |
+| Full suite command | `npx vitest run`                                 |
 
 ### Phase Requirements -> Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| W-01 | Overpass water query returns facilities | unit | `npx vitest run server/__tests__/adapters/overpass-water.test.ts -x` | Wave 0 |
-| W-02 | Basin lookup assigns stress to facility | unit | `npx vitest run server/__tests__/lib/basinLookup.test.ts -x` | Wave 0 |
-| W-03 | waterStore state management | unit | `npx vitest run src/__tests__/waterStore.test.ts -x` | Wave 0 |
-| W-04 | Stress-to-color interpolation | unit | `npx vitest run src/__tests__/waterStress.test.ts -x` | Wave 0 |
-| W-05 | Composite health formula | unit | `npx vitest run src/__tests__/waterStress.test.ts -x` | Wave 0 |
-| W-06 | Desalination removed from siteStore | unit | `npx vitest run src/__tests__/entityLayers.test.ts -x` | Existing (update) |
-| W-07 | Water legend registers correctly | unit | `npx vitest run src/__tests__/MapLegend.test.ts -x` | Existing (update) |
-| W-08 | /api/water route returns facilities | unit | `npx vitest run server/__tests__/routes/water.test.ts -x` | Wave 0 |
-| W-09 | Open-Meteo precip adapter | unit | `npx vitest run server/__tests__/adapters/open-meteo-precip.test.ts -x` | Wave 0 |
-| W-10 | LayerTogglesSlot water no longer comingSoon | unit | `npx vitest run src/__tests__/LayerToggles.test.ts -x` | Existing (update) |
+
+| Req ID | Behavior                                    | Test Type | Automated Command                                                       | File Exists?      |
+| ------ | ------------------------------------------- | --------- | ----------------------------------------------------------------------- | ----------------- |
+| W-01   | Overpass water query returns facilities     | unit      | `npx vitest run server/__tests__/adapters/overpass-water.test.ts -x`    | Wave 0            |
+| W-02   | Basin lookup assigns stress to facility     | unit      | `npx vitest run server/__tests__/lib/basinLookup.test.ts -x`            | Wave 0            |
+| W-03   | waterStore state management                 | unit      | `npx vitest run src/__tests__/waterStore.test.ts -x`                    | Wave 0            |
+| W-04   | Stress-to-color interpolation               | unit      | `npx vitest run src/__tests__/waterStress.test.ts -x`                   | Wave 0            |
+| W-05   | Composite health formula                    | unit      | `npx vitest run src/__tests__/waterStress.test.ts -x`                   | Wave 0            |
+| W-06   | Desalination removed from siteStore         | unit      | `npx vitest run src/__tests__/entityLayers.test.ts -x`                  | Existing (update) |
+| W-07   | Water legend registers correctly            | unit      | `npx vitest run src/__tests__/MapLegend.test.ts -x`                     | Existing (update) |
+| W-08   | /api/water route returns facilities         | unit      | `npx vitest run server/__tests__/routes/water.test.ts -x`               | Wave 0            |
+| W-09   | Open-Meteo precip adapter                   | unit      | `npx vitest run server/__tests__/adapters/open-meteo-precip.test.ts -x` | Wave 0            |
+| W-10   | LayerTogglesSlot water no longer comingSoon | unit      | `npx vitest run src/__tests__/LayerToggles.test.ts -x`                  | Existing (update) |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run --reporter=verbose`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `server/__tests__/adapters/overpass-water.test.ts` -- covers W-01
 - [ ] `server/__tests__/lib/basinLookup.test.ts` -- covers W-02
 - [ ] `src/__tests__/waterStore.test.ts` -- covers W-03
@@ -442,6 +474,7 @@ LEGEND_REGISTRY.push({
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Existing codebase: `server/adapters/overpass.ts`, `src/stores/siteStore.ts`, `src/hooks/useSiteFetch.ts`, `src/lib/attackStatus.ts` -- proven patterns for site fetching, caching, attack status
 - Existing codebase: `src/components/map/layers/WeatherOverlay.tsx`, `server/adapters/open-meteo.ts` -- Open-Meteo integration pattern
 - Existing codebase: `src/stores/layerStore.ts` -- `water` already registered as VisualizationLayerId
@@ -449,6 +482,7 @@ LEGEND_REGISTRY.push({
 - deck.gl GeoJsonLayer docs -- `getLineColor` accessor for feature-based line coloring
 
 ### Secondary (MEDIUM confidence)
+
 - [WRI Aqueduct 4.0 Data Dictionary](https://github.com/wri/Aqueduct40/blob/master/data_dictionary_water-risk-atlas.md) -- field names: bws_raw, bws_score, bws_cat, drr_score, gtd_score, sev_score, pfaf_id
 - [WRI Aqueduct 4.0 Download](https://www.wri.org/data/aqueduct-global-maps-40-data) -- direct download link at files.wri.org
 - [Google Earth Engine Aqueduct catalog](https://developers.google.com/earth-engine/datasets/catalog/WRI_Aqueduct_Water_Risk_V4_baseline_annual) -- confirmed field names and data structure
@@ -457,6 +491,7 @@ LEGEND_REGISTRY.push({
 - [Natural Earth 10m rivers](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/) -- named river features with scale ranks
 
 ### Tertiary (LOW confidence)
+
 - WRI Aqueduct ZIP file contents -- needs validation by actually downloading the file
 - Open-Meteo free tier exact rate limits (10K calls/day, 5K/hour, 600/min reported) -- needs verification against actual usage
 - Canal count from Overpass with name filter -- needs empirical testing on overpass-turbo
@@ -464,6 +499,7 @@ LEGEND_REGISTRY.push({
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - all libraries already in use; only `shapefile` npm added as devDependency
 - Architecture: MEDIUM - data extraction approach needs validation (Aqueduct ZIP contents, basin assignment method)
 - Pitfalls: HIGH - Redis budget concern is documented in STATE.md; Overpass query patterns well-established

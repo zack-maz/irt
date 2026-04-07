@@ -46,9 +46,7 @@ export function BreadcrumbRow({ stack, onBack }: BreadcrumbRowProps) {
                   {entry.breadcrumbLabel}
                 </button>
               ) : (
-                <span title={entry.breadcrumbLabel}>
-                  {entry.breadcrumbLabel}
-                </span>
+                <span title={entry.breadcrumbLabel}>{entry.breadcrumbLabel}</span>
               )}
             </span>
           );

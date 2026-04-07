@@ -23,7 +23,11 @@ export async function collectShips(): Promise<ShipEntity[]> {
   return new Promise<ShipEntity[]>((resolve, reject) => {
     const collected = new Map<number, ShipEntity>();
     const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
-    let timer: ReturnType<typeof setTimeout>;
+    // Declared up top so the WebSocket 'error' handler below can clearTimeout() it.
+    // ESLint considers this a single-assignment let, but the separation between
+    // declaration and assignment is required by the closure structure (the error
+    // handler closes over `timer` before the setTimeout call below).
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     ws.addEventListener('open', () => {
       ws.send(
@@ -85,14 +89,19 @@ export async function collectShips(): Promise<ShipEntity[]> {
       }
     });
 
+    // eslint-disable-next-line prefer-const -- timer is captured by the error handler closure declared above
     timer = setTimeout(() => {
       ws.close();
       resolve(Array.from(collected.values()));
     }, collectMs);
 
     ws.addEventListener('error', () => {
-      clearTimeout(timer);
-      try { ws.close(); } catch { /* ignore */ }
+      if (timer !== undefined) clearTimeout(timer);
+      try {
+        ws.close();
+      } catch {
+        /* ignore */
+      }
       reject(new Error('AISStream WebSocket connection failed'));
     });
   });

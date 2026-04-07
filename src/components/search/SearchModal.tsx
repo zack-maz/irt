@@ -19,16 +19,25 @@ type SearchableEntity = MapEntity | SiteEntity | WaterFacility;
 
 // --- Word-at-cursor extraction (for autocomplete acceptance) ---
 
-function getWordBounds(
-  query: string,
-  cursorPos: number,
-): { start: number; end: number } {
+function getWordBounds(query: string, cursorPos: number): { start: number; end: number } {
   let start = cursorPos;
   let end = cursorPos;
-  while (start > 0 && query[start - 1] !== ' ' && query[start - 1] !== '\t' && query[start - 1] !== '(' && query[start - 1] !== ')') {
+  while (
+    start > 0 &&
+    query[start - 1] !== ' ' &&
+    query[start - 1] !== '\t' &&
+    query[start - 1] !== '(' &&
+    query[start - 1] !== ')'
+  ) {
     start--;
   }
-  while (end < query.length && query[end] !== ' ' && query[end] !== '\t' && query[end] !== '(' && query[end] !== ')') {
+  while (
+    end < query.length &&
+    query[end] !== ' ' &&
+    query[end] !== '\t' &&
+    query[end] !== '(' &&
+    query[end] !== ')'
+  ) {
     end++;
   }
   return { start, end };
@@ -67,7 +76,9 @@ export function SearchModal() {
     const sites = useSiteStore.getState().sites;
     const siteMatch = sites.find((s) => s.label.toLowerCase() === name.toLowerCase());
     if (siteMatch) {
-      useNotificationStore.getState().setFlyToTarget({ lng: siteMatch.lng, lat: siteMatch.lat, zoom: 8 });
+      useNotificationStore
+        .getState()
+        .setFlyToTarget({ lng: siteMatch.lng, lat: siteMatch.lat, zoom: 8 });
       return;
     }
     // Then cities
@@ -271,10 +282,7 @@ export function SearchModal() {
             {/* Input container with overlay */}
             <div className="relative flex-1">
               {/* Syntax overlay (behind) */}
-              <SyntaxOverlay
-                query={query}
-                className="absolute inset-0 text-lg leading-normal"
-              />
+              <SyntaxOverlay query={query} className="absolute inset-0 text-lg leading-normal" />
               {/* Transparent input (on top, caret visible) */}
               <input
                 ref={inputRef}
@@ -300,7 +308,13 @@ export function SearchModal() {
               aria-label="Tag reference"
               type="button"
             >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -315,7 +329,13 @@ export function SearchModal() {
                 aria-label="Clear search"
                 type="button"
               >
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
@@ -331,18 +351,14 @@ export function SearchModal() {
           />
 
           {/* Cheat sheet popover */}
-          {showCheatSheet && (
-            <CheatSheet onClose={() => setShowCheatSheet(false)} />
-          )}
+          {showCheatSheet && <CheatSheet onClose={() => setShowCheatSheet(false)} />}
         </div>
 
         {/* Results area — hidden while autocomplete dropdown is open */}
         {query.trim() && suggestions.length === 0 && (
           <div className="max-h-[400px] overflow-y-auto">
             {results.totalCount === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-text-muted">
-                No results found
-              </div>
+              <div className="px-4 py-8 text-center text-sm text-text-muted">No results found</div>
             ) : (
               <>
                 <SearchResultGroup
@@ -350,26 +366,10 @@ export function SearchModal() {
                   results={results.flights}
                   onSelect={handleSelect}
                 />
-                <SearchResultGroup
-                  type="Ships"
-                  results={results.ships}
-                  onSelect={handleSelect}
-                />
-                <SearchResultGroup
-                  type="Events"
-                  results={results.events}
-                  onSelect={handleSelect}
-                />
-                <SearchResultGroup
-                  type="Sites"
-                  results={results.sites}
-                  onSelect={handleSelect}
-                />
-                <SearchResultGroup
-                  type="Water"
-                  results={results.water}
-                  onSelect={handleSelect}
-                />
+                <SearchResultGroup type="Ships" results={results.ships} onSelect={handleSelect} />
+                <SearchResultGroup type="Events" results={results.events} onSelect={handleSelect} />
+                <SearchResultGroup type="Sites" results={results.sites} onSelect={handleSelect} />
+                <SearchResultGroup type="Water" results={results.water} onSelect={handleSelect} />
               </>
             )}
 

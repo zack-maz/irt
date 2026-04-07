@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { useLayerStore } from '@/stores/layerStore';
 
@@ -44,9 +44,7 @@ describe('PoliticalOverlay data integrity', () => {
   });
 
   it('disputed features include Gaza, West Bank, and Golan Heights', () => {
-    const names = disputedData.features.map(
-      (f) => (f.properties as Record<string, string>).NAME
-    );
+    const names = disputedData.features.map((f) => (f.properties as Record<string, string>).NAME);
     expect(names).toContain('Gaza');
     expect(names).toContain('West Bank');
     expect(names).toContain('Golan Heights');

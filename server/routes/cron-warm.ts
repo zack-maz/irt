@@ -40,12 +40,14 @@ cronWarmRouter.get('/', async (_req, res) => {
   ]);
 
   const summary = {
-    sites: results[0].status === 'fulfilled'
-      ? { ok: true, count: results[0].value }
-      : { ok: false, error: String((results[0] as PromiseRejectedResult).reason) },
-    water: results[1].status === 'fulfilled'
-      ? { ok: true, count: results[1].value }
-      : { ok: false, error: String((results[1] as PromiseRejectedResult).reason) },
+    sites:
+      results[0].status === 'fulfilled'
+        ? { ok: true, count: results[0].value }
+        : { ok: false, error: String((results[0] as PromiseRejectedResult).reason) },
+    water:
+      results[1].status === 'fulfilled'
+        ? { ok: true, count: results[1].value }
+        : { ok: false, error: String((results[1] as PromiseRejectedResult).reason) },
     durationMs: Date.now() - start,
   };
 

@@ -18,7 +18,8 @@ function getEntityColor(entity: SearchableEntity): string {
   if (entity.type === 'site') return ENTITY_DOT_COLORS.siteHealthy;
   if (entity.type === 'water') return '#4ade80';
   if (entity.type === 'airstrike') return ENTITY_DOT_COLORS.airstrikes;
-  if (entity.type === 'assassination' || entity.type === 'abduction') return ENTITY_DOT_COLORS.targeted;
+  if (entity.type === 'assassination' || entity.type === 'abduction')
+    return ENTITY_DOT_COLORS.targeted;
   return ENTITY_DOT_COLORS.groundCombat;
 }
 
@@ -30,7 +31,12 @@ function getEntityTypeBadge(entity: SearchableEntity): string {
   return EVENT_TYPE_LABELS[entity.type] ?? entity.type;
 }
 
-export function SearchResultItem({ entity, matchField, matchValue, onSelect }: SearchResultItemProps) {
+export function SearchResultItem({
+  entity,
+  matchField,
+  matchValue,
+  onSelect,
+}: SearchResultItemProps) {
   const color = getEntityColor(entity);
   const badge = getEntityTypeBadge(entity);
 
@@ -40,16 +46,11 @@ export function SearchResultItem({ entity, matchField, matchValue, onSelect }: S
       onClick={() => onSelect(entity)}
     >
       {/* Color dot */}
-      <span
-        className="h-2.5 w-2.5 shrink-0 rounded-full"
-        style={{ backgroundColor: color }}
-      />
+      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
 
       {/* Label + match info */}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-text-primary">
-          {entity.label}
-        </div>
+        <div className="truncate text-sm font-medium text-text-primary">{entity.label}</div>
         {matchField !== 'name' && matchField !== 'callsign' && matchField !== 'label' && (
           <div className="truncate text-xs text-text-secondary">
             {matchField}: {matchValue}

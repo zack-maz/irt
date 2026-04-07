@@ -14,12 +14,14 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 ## Implementation Decisions
 
 ### Ship polling & staleness
+
 - Frontend polls `/api/ships` every 30 seconds (recursive setTimeout, same pattern as flights)
 - Ships use full-replace on each poll — server accumulates via WebSocket Map, frontend replaces atomically
 - Stale threshold: 120 seconds (2x poll interval) — if no fresh WebSocket messages for 4 polls, clear ships
 - Tab visibility aware: pause polling on hidden, immediate fetch on visible (same as flights)
 
 ### Conflict event polling & freshness
+
 - Frontend polls `/api/events` every 5 minutes (matches 5-min server cache TTL)
 - Events persist until next successful fetch — no stale clearing (historical data doesn't "go stale")
 - No special data-age indicator — user understands ACLED is retrospective
@@ -27,6 +29,7 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 - Expand ACLED query to Greater Middle East region (multiple countries, not just Iran) to match expanded flight coverage
 
 ### Status display (replaces SourceSelector)
+
 - Remove SourceSelector dropdown entirely — no source switching UI
 - Backend keeps adsb.lol as default flight source, multi-source support preserved but not exposed
 - Replace with clean HUD-style status panel in top-right: three lines showing colored dot + count + entity type
@@ -35,6 +38,7 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 - Format: `● 247 flights` / `● 42 ships` / `● 17 events`
 
 ### Store & hook architecture
+
 - Separate Zustand stores: `shipStore.ts` + `eventStore.ts` alongside existing `flightStore.ts`
 - Same curried `create<T>()()` pattern, each store owns its data, connectionStatus, count, lastFresh
 - Separate polling hooks: `useShipPolling.ts` + `useEventPolling.ts` (same recursive setTimeout pattern)
@@ -43,6 +47,7 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 - Static layers (ship/drone/missile) become dynamic — need useMemo deps on store data
 
 ### Claude's Discretion
+
 - EventStore interface details (whether to track separate connectionStatus or simplified version)
 - How to expand ACLED query to multiple countries (country list, bbox filter, or region param)
 - Status panel component implementation (new component vs refactor of SourceSelector)
@@ -63,9 +68,11 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `server/adapters/aisstream.ts`: WebSocket adapter, accumulates ships in Map<MMSI, ShipEntity> — fully functional
 - `server/adapters/acled.ts`: REST adapter with OAuth2 token caching, fetches last 7 days — fully functional
 - `server/routes/ships.ts`: Returns `{ data, stale, lastFresh }` — CacheResponse pattern
@@ -75,6 +82,7 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 - `src/hooks/useEntityLayers.ts`: Ship/drone/missile layers already stubbed with `data: []`, correct icons/colors/sizing
 
 ### Established Patterns
+
 - Zustand 5 curried `create<T>()()` for type inference
 - Zustand selector `s => s.field` for minimal re-renders
 - CacheResponse<T> with `stale: boolean` and `lastFresh: number`
@@ -83,6 +91,7 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 - ConnectionStatus type: `'connected' | 'stale' | 'error' | 'loading'`
 
 ### Integration Points
+
 - `src/components/layout/AppShell.tsx`: Add useShipPolling() and useEventPolling() calls
 - `src/hooks/useEntityLayers.ts` line 58-108: Replace `data: []` with store selectors
 - `src/components/ui/SourceSelector.tsx`: Replace/remove — becomes status panel
@@ -102,5 +111,5 @@ Ship positions (AIS) and conflict events (ACLED) flow into the frontend alongsid
 
 ---
 
-*Phase: 08-ship-conflict-data-feeds*
-*Context gathered: 2026-03-16*
+_Phase: 08-ship-conflict-data-feeds_
+_Context gathered: 2026-03-16_

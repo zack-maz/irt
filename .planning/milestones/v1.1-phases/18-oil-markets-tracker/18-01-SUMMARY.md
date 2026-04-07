@@ -33,14 +33,14 @@ key-files:
     - src/types/entities.ts
 
 key-decisions:
-  - "Yahoo Finance v8 chart API with User-Agent header for bot detection avoidance"
-  - "Per-ticker fault isolation via Promise.allSettled (0-5 partial results)"
-  - "5-min logical cache TTL matching planned client polling interval"
-  - "MarketQuote re-exported from src/types/entities.ts for frontend consumption"
+  - 'Yahoo Finance v8 chart API with User-Agent header for bot detection avoidance'
+  - 'Per-ticker fault isolation via Promise.allSettled (0-5 partial results)'
+  - '5-min logical cache TTL matching planned client polling interval'
+  - 'MarketQuote re-exported from src/types/entities.ts for frontend consumption'
 
 patterns-established:
-  - "Market adapter pattern: parallel fetch with individual ticker error handling"
-  - "Empty result handling: 0 quotes + stale cache = serve stale; 0 quotes + no cache = 502"
+  - 'Market adapter pattern: parallel fetch with individual ticker error handling'
+  - 'Empty result handling: 0 quotes + stale cache = serve stale; 0 quotes + no cache = 502'
 
 requirements-completed: [MRKT-01]
 
@@ -62,6 +62,7 @@ completed: 2026-03-21
 - **Files modified:** 6
 
 ## Accomplishments
+
 - MarketQuote and MarketSnapshot types defined and re-exported for frontend
 - Yahoo Finance adapter fetches 5 instruments (Brent, WTI, XLE, USO, XOM) with per-ticker fault isolation
 - Cache-first /api/markets route with 5-min TTL, stale fallback on upstream failure
@@ -74,6 +75,7 @@ Each task was committed atomically:
 2. **Task 2: Yahoo Finance adapter, cache-first route, and server wiring** - `6ff5e98` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - Added MarketQuote and MarketSnapshot interfaces
 - `server/constants.ts` - Added MARKETS_CACHE_TTL (5 min) and MARKETS_REDIS_TTL_SEC (50 min)
 - `src/types/entities.ts` - Re-exported MarketQuote and MarketSnapshot for frontend
@@ -82,6 +84,7 @@ Each task was committed atomically:
 - `server/index.ts` - Wired marketsRouter into createApp factory
 
 ## Decisions Made
+
 - Yahoo Finance v8 chart API with `User-Agent: Mozilla/5.0 (compatible)` header to avoid bot detection
 - Per-ticker fault isolation via Promise.allSettled -- failed tickers don't block response (0-5 partial results)
 - 5-min logical cache TTL with 50-min hard Redis TTL (10x ratio matching existing pattern)
@@ -94,12 +97,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required. Yahoo Finance v8 chart API is public (no API key needed).
 
 ## Next Phase Readiness
+
 - /api/markets endpoint ready for Plan 02 (client-side MarketPanel component)
 - MarketQuote type available for frontend import from src/types/entities.ts
 - Yahoo Finance API is unofficial -- graceful degradation built in for reliability
@@ -109,5 +115,6 @@ None - no external service configuration required. Yahoo Finance v8 chart API is
 All files exist, all commits verified.
 
 ---
-*Phase: 18-oil-markets-tracker*
-*Completed: 2026-03-21*
+
+_Phase: 18-oil-markets-tracker_
+_Completed: 2026-03-21_

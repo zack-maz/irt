@@ -22,7 +22,13 @@ affects: [06-02 frontend source selector, 06-03 polling hook wiring]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [source-dispatch route, per-source caching, RateLimitError distinction, inline env var credential pattern]
+  patterns:
+    [
+      source-dispatch route,
+      per-source caching,
+      RateLimitError distinction,
+      inline env var credential pattern,
+    ]
 
 key-files:
   created:
@@ -36,15 +42,15 @@ key-files:
     - server/__tests__/security.test.ts
 
 key-decisions:
-  - "Inline process.env.ADSB_EXCHANGE_API_KEY read instead of config.ts integration -- follows AISStream optional-service pattern"
-  - "Separate EntityCache instances per source to prevent cross-contamination between OpenSky and ADS-B data"
-  - "260s polling interval (4 min 20 sec) for sustainable 10K requests/month free-tier budget"
-  - "Single 250 NM radius query from Iran center (32.5, 53.75) covers core airspace, accepts edge coverage gap"
+  - 'Inline process.env.ADSB_EXCHANGE_API_KEY read instead of config.ts integration -- follows AISStream optional-service pattern'
+  - 'Separate EntityCache instances per source to prevent cross-contamination between OpenSky and ADS-B data'
+  - '260s polling interval (4 min 20 sec) for sustainable 10K requests/month free-tier budget'
+  - 'Single 250 NM radius query from Iran center (32.5, 53.75) covers core airspace, accepts edge coverage gap'
 
 patterns-established:
-  - "Source dispatch pattern: route reads ?source= param and selects adapter + cache pair"
-  - "RateLimitError class for structured 429 handling with stale cache fallback"
-  - "Module-level mock fn + wrapper pattern for vitest integration tests with vi.resetModules()"
+  - 'Source dispatch pattern: route reads ?source= param and selects adapter + cache pair'
+  - 'RateLimitError class for structured 429 handling with stale cache fallback'
+  - 'Module-level mock fn + wrapper pattern for vitest integration tests with vi.resetModules()'
 
 requirements-completed: [DATA-04]
 
@@ -66,6 +72,7 @@ completed: 2026-03-16
 - **Files modified:** 7
 
 ## Accomplishments
+
 - ADS-B Exchange adapter normalizes V2 aircraft data to FlightEntity with correct unit conversions (knots to m/s, feet to meters, ft/min to m/s)
 - Flight route dispatches between OpenSky and ADS-B Exchange based on ?source= query param with separate caches
 - Rate limit (429) responses distinguished from generic errors, stale cache served with rateLimited flag
@@ -86,6 +93,7 @@ Each task was committed atomically:
 _TDD tasks each have two commits (test then implementation)_
 
 ## Files Created/Modified
+
 - `server/adapters/adsb-exchange.ts` - ADS-B Exchange V2 adapter with normalizeAircraft and fetchFlights
 - `server/types.ts` - Added FlightSource type and RateLimitError class
 - `server/constants.ts` - Added IRAN_CENTER, ADSB_RADIUS_NM, ADSB_POLL_INTERVAL, unit conversion constants, adsbFlights cache TTL
@@ -95,6 +103,7 @@ _TDD tasks each have two commits (test then implementation)_
 - `server/__tests__/security.test.ts` - Added ADS-B Exchange API key leak prevention test
 
 ## Decisions Made
+
 - Used inline `process.env.ADSB_EXCHANGE_API_KEY` read instead of adding to config.ts -- follows the established AISStream optional-service pattern where the key is only needed when the source is requested
 - Created separate EntityCache instances per source (openskyCache with 10s TTL, adsbCache with 260s TTL) to prevent serving stale OpenSky data when user switches to ADS-B and vice versa
 - Set ADSB_POLL_INTERVAL to 260_000ms (4 min 20 sec) based on 10K requests/month budget calculation
@@ -105,6 +114,7 @@ _TDD tasks each have two commits (test then implementation)_
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - Test cache isolation: module-level EntityCache instances persisted across vitest tests causing cross-test contamination. Resolved by using `vi.resetModules()` in beforeEach and re-importing the app module for each test, ensuring fresh cache instances per test.
 - Mock function timing: `vi.mock()` factory functions run lazily, so mock fns assigned inside factories weren't available at test setup time. Resolved by defining mock fns at module scope and using wrapper functions (`(...args) => mockFn(...args)`) inside `vi.mock()` factories.
 
@@ -113,11 +123,13 @@ None - plan executed exactly as written.
 None - no external service configuration required for this plan. The `ADSB_EXCHANGE_API_KEY` env var is needed at runtime but is handled gracefully (503 when missing).
 
 ## Next Phase Readiness
+
 - Server-side ADS-B Exchange integration complete
 - `/api/flights?source=adsb` endpoint ready for frontend polling hook (Plan 02)
 - `/api/flights?source=opensky` backward compatible (default behavior unchanged)
 - FlightSource type and rate limit handling ready for frontend store integration (Plan 02/03)
 
 ---
-*Phase: 06-ads-b-exchange-data-source*
-*Completed: 2026-03-16*
+
+_Phase: 06-ads-b-exchange-data-source_
+_Completed: 2026-03-16_

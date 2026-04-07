@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -86,13 +85,19 @@ export default defineConfig({
       },
     },
     alias: {
-      'maplibre-gl/dist/maplibre-gl.css': path.resolve(__dirname, './src/test/__mocks__/maplibre-gl-css.ts'),
+      'maplibre-gl/dist/maplibre-gl.css': path.resolve(
+        __dirname,
+        './src/test/__mocks__/maplibre-gl-css.ts',
+      ),
       'maplibre-gl': path.resolve(__dirname, './src/test/__mocks__/maplibre-gl.ts'),
       '@deck.gl/mapbox': path.resolve(__dirname, './src/test/__mocks__/deck-gl-mapbox.ts'),
       '@vis.gl/react-maplibre': path.resolve(__dirname, './src/test/__mocks__/react-maplibre.tsx'),
       '@deck.gl/layers': path.resolve(__dirname, './src/test/__mocks__/deck-gl-layers.ts'),
       'maplibre-contour': path.resolve(__dirname, './src/test/__mocks__/maplibre-contour.ts'),
-      '@deck.gl/aggregation-layers': path.resolve(__dirname, './src/test/__mocks__/deck-gl-aggregation-layers.ts'),
+      '@deck.gl/aggregation-layers': path.resolve(
+        __dirname,
+        './src/test/__mocks__/deck-gl-aggregation-layers.ts',
+      ),
       '@deck.gl/extensions': path.resolve(__dirname, './src/test/__mocks__/deck-gl-extensions.ts'),
     },
   },

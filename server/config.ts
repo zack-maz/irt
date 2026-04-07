@@ -34,7 +34,12 @@ const envSchema = z.object({
   EVENT_EXCLUDED_CAMEO: z
     .string()
     .default('180,192')
-    .transform((s) => s.split(',').map((t) => t.trim()).filter(Boolean)),
+    .transform((s) =>
+      s
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+    ),
   BELLINGCAT_CORROBORATION_BOOST: z.coerce.number().min(0).max(1).default(0.2),
   NEWS_RELEVANCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.7),
 });
@@ -49,7 +54,8 @@ function parseEnv(): Env {
   if (isTest) {
     // In test: provide safe defaults for Redis vars, but let real env vars override
     const merged = { ...process.env };
-    if (!merged.UPSTASH_REDIS_REST_URL) merged.UPSTASH_REDIS_REST_URL = 'https://test-redis.upstash.io';
+    if (!merged.UPSTASH_REDIS_REST_URL)
+      merged.UPSTASH_REDIS_REST_URL = 'https://test-redis.upstash.io';
     if (!merged.UPSTASH_REDIS_REST_TOKEN) merged.UPSTASH_REDIS_REST_TOKEN = 'test-token';
     return envSchema.parse(merged);
   }

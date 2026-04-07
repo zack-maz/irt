@@ -20,7 +20,8 @@ affects: [04-frontend-integration]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [adapter-pattern, oauth2-token-caching, websocket-push-with-map-cache, stale-cache-fallback]
+  patterns:
+    [adapter-pattern, oauth2-token-caching, websocket-push-with-map-cache, stale-cache-fallback]
 
 key-files:
   created:
@@ -38,15 +39,15 @@ key-files:
     - server/index.ts
 
 key-decisions:
-  - "UTC date formatting in ACLED adapter to avoid timezone-dependent date drift"
-  - "Mock adapter modules in security tests instead of mocking fetch globally, to test actual HTTP responses"
-  - "AISStream reconnect uses simple 5s setTimeout (not exponential backoff) matching plan spec"
+  - 'UTC date formatting in ACLED adapter to avoid timezone-dependent date drift'
+  - 'Mock adapter modules in security tests instead of mocking fetch globally, to test actual HTTP responses'
+  - 'AISStream reconnect uses simple 5s setTimeout (not exponential backoff) matching plan spec'
 
 patterns-established:
-  - "OAuth2 token caching: module-level { token, expiresAt } with safe TTL margin"
-  - "Adapter pattern: each upstream API isolated with fetch/normalize/export functions"
-  - "Stale cache fallback: try upstream, on error serve cached, on no cache re-throw to errorHandler"
-  - "WebSocket push adapter: in-memory Map keyed by unique ID, staleness from last message time"
+  - 'OAuth2 token caching: module-level { token, expiresAt } with safe TTL margin'
+  - 'Adapter pattern: each upstream API isolated with fetch/normalize/export functions'
+  - 'Stale cache fallback: try upstream, on error serve cached, on no cache re-throw to errorHandler'
+  - 'WebSocket push adapter: in-memory Map keyed by unique ID, staleness from last message time'
 
 requirements-completed: [INFRA-01]
 
@@ -68,6 +69,7 @@ completed: 2026-03-14
 - **Files modified:** 11
 
 ## Accomplishments
+
 - OpenSky adapter with OAuth2 client credentials, 25-minute token cache, state vector array normalization to FlightEntity
 - ACLED adapter with OAuth2 password grant, 23-hour token cache, missile/drone classification from sub_event_type
 - AISStream adapter with native WebSocket, auto-reconnect on close, MMSI-keyed in-memory Map for live ship positions
@@ -85,6 +87,7 @@ Each task was committed atomically:
 _Note: TDD Task 1 has separate RED (test) and GREEN (feat) commits_
 
 ## Files Created/Modified
+
 - `server/adapters/opensky.ts` - OpenSky OAuth2 token management, state vector normalization, bbox flight fetching
 - `server/adapters/acled.ts` - ACLED OAuth2 password grant, event classification (missile/drone), 7-day Iran data query
 - `server/adapters/aisstream.ts` - AISStream WebSocket connection, PositionReport normalization, auto-reconnect, MMSI Map
@@ -98,6 +101,7 @@ _Note: TDD Task 1 has separate RED (test) and GREEN (feat) commits_
 - `server/__tests__/security.test.ts` - 3 tests: no credential leaks in flights, ships, events responses
 
 ## Decisions Made
+
 - Used UTC date methods (getUTCFullYear, getUTCMonth, getUTCDate) in ACLED date formatting to prevent timezone-dependent date drift in test environments
 - Mocked adapter modules directly in security tests rather than global fetch, allowing real HTTP requests to test server while isolating upstream API calls
 - AISStream reconnect uses simple 5-second setTimeout rather than exponential backoff, matching the plan specification for this phase
@@ -107,6 +111,7 @@ _Note: TDD Task 1 has separate RED (test) and GREEN (feat) commits_
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed timezone-dependent date formatting in ACLED adapter**
+
 - **Found during:** Task 1 (ACLED adapter tests)
 - **Issue:** `formatDate()` used local timezone methods (getFullYear, getMonth, getDate) causing dates to shift by one day when system timezone differs from UTC
 - **Fix:** Changed to UTC methods (getUTCFullYear, getUTCMonth, getUTCDate)
@@ -120,11 +125,13 @@ _Note: TDD Task 1 has separate RED (test) and GREEN (feat) commits_
 **Impact on plan:** Minor timezone correctness fix. No scope creep.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
 
 **External services require manual configuration before endpoints return real data.** Users must have the following environment variables set in `.env`:
+
 - `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET` - OAuth2 client from OpenSky dashboard
 - `AISSTREAM_API_KEY` - API key from AISStream.io
 - `ACLED_EMAIL` / `ACLED_PASSWORD` - ACLED account credentials
@@ -132,6 +139,7 @@ None
 See `.env.example` for detailed instructions on where to obtain each credential.
 
 ## Next Phase Readiness
+
 - All three API proxy endpoints are functional and tested
 - Phase 3 (API Proxy) is fully complete
 - Frontend can now integrate via fetch to /api/flights, /api/ships, /api/events
@@ -142,5 +150,6 @@ See `.env.example` for detailed instructions on where to obtain each credential.
 All 11 created/modified files verified on disk. All 3 task commits (5c5eab0, e70cd70, 48f5134) verified in git log.
 
 ---
-*Phase: 03-api-proxy*
-*Completed: 2026-03-14*
+
+_Phase: 03-api-proxy_
+_Completed: 2026-03-14_

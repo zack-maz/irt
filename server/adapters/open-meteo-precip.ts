@@ -20,7 +20,7 @@ export interface PrecipitationData {
 
 /** Approximate regional monthly precipitation normals (mm) */
 const REGIONAL_NORMALS_MM = {
-  arid: 20,    // Arabian Peninsula, central Iran, Sahara
+  arid: 20, // Arabian Peninsula, central Iran, Sahara
   fertile: 50, // Fertile Crescent, coastal areas, Turkey
 } as const;
 
@@ -79,15 +79,22 @@ export async function fetchPrecipitation(
   }
   const uniqueCells = Array.from(cellMap.values());
 
-  log.info({ locations: locations.length, uniqueCells: uniqueCells.length, batches: Math.ceil(uniqueCells.length / BATCH_SIZE) }, 'starting precipitation fetch');
+  log.info(
+    {
+      locations: locations.length,
+      uniqueCells: uniqueCells.length,
+      batches: Math.ceil(uniqueCells.length / BATCH_SIZE),
+    },
+    'starting precipitation fetch',
+  );
 
   // Fetch precipitation for unique grid cells
   const cellResults = new Map<string, { totalMm: number; anomalyRatio: number }>();
 
   for (let i = 0; i < uniqueCells.length; i += BATCH_SIZE) {
     const batch = uniqueCells.slice(i, i + BATCH_SIZE);
-    const lats = batch.map(c => c.lat.toFixed(2)).join(',');
-    const lngs = batch.map(c => c.lng.toFixed(2)).join(',');
+    const lats = batch.map((c) => c.lat.toFixed(2)).join(',');
+    const lngs = batch.map((c) => c.lng.toFixed(2)).join(',');
 
     const url =
       `https://api.open-meteo.com/v1/forecast?` +
@@ -100,7 +107,10 @@ export async function fetchPrecipitation(
       });
 
       if (!res.ok) {
-        log.warn({ batch: Math.floor(i / BATCH_SIZE), status: res.status }, 'batch returned error, skipping');
+        log.warn(
+          { batch: Math.floor(i / BATCH_SIZE), status: res.status },
+          'batch returned error, skipping',
+        );
         continue;
       }
 
@@ -146,6 +156,9 @@ export async function fetchPrecipitation(
     });
   }
 
-  log.info({ cells: cellResults.size, mappedLocations: results.length }, 'precipitation fetch complete');
+  log.info(
+    { cells: cellResults.size, mappedLocations: results.length },
+    'precipitation fetch complete',
+  );
   return results;
 }

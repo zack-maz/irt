@@ -68,7 +68,17 @@ describe('useFlightPolling', () => {
 
   it('rate limited response propagates rateLimited flag to store', async () => {
     const rateLimitedResponse = {
-      data: [{ id: 'flight-1', type: 'flight', lat: 32, lng: 53, timestamp: Date.now(), label: 'TEST', data: {} }],
+      data: [
+        {
+          id: 'flight-1',
+          type: 'flight',
+          lat: 32,
+          lng: 53,
+          timestamp: Date.now(),
+          label: 'TEST',
+          data: {},
+        },
+      ],
       stale: true,
       lastFresh: Date.now(),
       rateLimited: true,

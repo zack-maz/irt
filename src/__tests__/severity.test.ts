@@ -3,7 +3,9 @@ import { computeSeverityScore } from '../lib/severity';
 import type { ConflictEventEntity } from '../../server/types';
 
 /** Helper to create a ConflictEventEntity with sensible defaults */
-function makeEvent(overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {}): ConflictEventEntity {
+function makeEvent(
+  overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {},
+): ConflictEventEntity {
   const now = Date.now();
   const { data: dataOverrides, ...rest } = overrides;
   return {

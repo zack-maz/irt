@@ -14,7 +14,9 @@ function makeArticle(overrides: Partial<NewsArticle> = {}): NewsArticle {
   };
 }
 
-function makeCluster(overrides: Partial<NewsCluster> & { primaryArticle?: Partial<NewsArticle> } = {}): NewsCluster {
+function makeCluster(
+  overrides: Partial<NewsCluster> & { primaryArticle?: Partial<NewsArticle> } = {},
+): NewsCluster {
   const primaryArticle = makeArticle(overrides.primaryArticle);
   return {
     id: primaryArticle.id,
@@ -28,7 +30,9 @@ function makeCluster(overrides: Partial<NewsCluster> & { primaryArticle?: Partia
   };
 }
 
-function makeEvent(overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {}): ConflictEventEntity {
+function makeEvent(
+  overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {},
+): ConflictEventEntity {
   const now = Date.now();
   const { data: dataOverrides, ...rest } = overrides;
   return {

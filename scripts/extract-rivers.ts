@@ -10,9 +10,8 @@
  * Output: src/data/rivers.json
  */
 
-import { writeFileSync, mkdirSync, existsSync, createWriteStream, unlinkSync } from 'fs';
+import { writeFileSync, mkdirSync, createWriteStream } from 'fs';
 import { join } from 'path';
-import { createUnzip } from 'zlib';
 import { pipeline } from 'stream/promises';
 import * as shapefile from 'shapefile';
 
@@ -34,14 +33,7 @@ interface GeoJSONCollection {
 
 // ---------- Config ----------
 
-const TARGET_RIVERS = [
-  'Tigris',
-  'Euphrates',
-  'Nile',
-  'Jordan',
-  'Karun',
-  'Litani',
-];
+const TARGET_RIVERS = ['Tigris', 'Euphrates', 'Nile', 'Jordan', 'Karun', 'Litani'];
 
 const NE_URLS = [
   'https://naciscdn.org/naturalearth/10m/physical/ne_10m_rivers_lake_centerlines.zip',
@@ -65,35 +57,35 @@ const MANUAL_RIVERS: GeoJSONFeature[] = [
     geometry: {
       type: 'LineString',
       coordinates: [
-        [50.07, 32.42],  // Source area in Zagros Mountains (Bakhtiari region)
-        [50.15, 32.30],
+        [50.07, 32.42], // Source area in Zagros Mountains (Bakhtiari region)
+        [50.15, 32.3],
         [50.28, 32.15],
         [50.35, 32.05],
-        [50.42, 31.90],
-        [50.50, 31.75],
-        [50.55, 31.60],
+        [50.42, 31.9],
+        [50.5, 31.75],
+        [50.55, 31.6],
         [50.45, 31.45],
         [50.35, 31.32],
-        [50.15, 31.20],
+        [50.15, 31.2],
         [49.95, 31.15],
         [49.75, 31.05],
-        [49.55, 31.00],
+        [49.55, 31.0],
         [49.35, 30.95],
-        [49.15, 30.90],
+        [49.15, 30.9],
         [48.95, 30.85],
-        [48.80, 30.75],
-        [48.70, 30.65],
-        [48.60, 30.55],
-        [48.50, 30.45],  // Ahvaz area
-        [48.42, 30.40],
+        [48.8, 30.75],
+        [48.7, 30.65],
+        [48.6, 30.55],
+        [48.5, 30.45], // Ahvaz area
+        [48.42, 30.4],
         [48.35, 30.38],
         [48.25, 30.42],
         [48.15, 30.48],
         [48.05, 30.55],
-        [47.95, 30.60],
-        [47.90, 30.65],
-        [47.85, 30.80],
-        [47.80, 30.90],  // Confluence with Shatt al-Arab
+        [47.95, 30.6],
+        [47.9, 30.65],
+        [47.85, 30.8],
+        [47.8, 30.9], // Confluence with Shatt al-Arab
       ],
     },
   },
@@ -104,21 +96,21 @@ const MANUAL_RIVERS: GeoJSONFeature[] = [
     geometry: {
       type: 'LineString',
       coordinates: [
-        [36.08, 34.00],  // Source near Baalbek in Bekaa Valley
-        [36.05, 33.90],
-        [36.00, 33.80],
-        [35.95, 33.70],
-        [35.90, 33.60],
-        [35.85, 33.50],
-        [35.80, 33.40],  // Central Bekaa
+        [36.08, 34.0], // Source near Baalbek in Bekaa Valley
+        [36.05, 33.9],
+        [36.0, 33.8],
+        [35.95, 33.7],
+        [35.9, 33.6],
+        [35.85, 33.5],
+        [35.8, 33.4], // Central Bekaa
         [35.72, 33.35],
         [35.65, 33.32],
-        [35.55, 33.30],
-        [35.48, 33.32],  // Bend toward west
+        [35.55, 33.3],
+        [35.48, 33.32], // Bend toward west
         [35.42, 33.35],
-        [35.38, 33.30],
+        [35.38, 33.3],
         [35.35, 33.25],
-        [35.32, 33.20],  // Toward Mediterranean
+        [35.32, 33.2], // Toward Mediterranean
       ],
     },
   },
@@ -187,11 +179,7 @@ function simplifyLine(points: number[][], epsilon: number): number[][] {
 }
 
 /** Simplify coordinates for LineString or MultiLineString */
-function simplifyCoords(
-  type: string,
-  coords: unknown,
-  epsilon: number,
-): unknown {
+function simplifyCoords(type: string, coords: unknown, epsilon: number): unknown {
   if (type === 'LineString') {
     return simplifyLine(coords as number[][], epsilon);
   }
@@ -213,8 +201,12 @@ function isInMiddleEast(feature: GeoJSONFeature): boolean {
     if (c.length >= 2 && typeof c[0] === 'number' && typeof c[1] === 'number') {
       const lng = c[0] as number;
       const lat = c[1] as number;
-      if (lng >= ME_BBOX.lngMin && lng <= ME_BBOX.lngMax &&
-          lat >= ME_BBOX.latMin && lat <= ME_BBOX.latMax) {
+      if (
+        lng >= ME_BBOX.lngMin &&
+        lng <= ME_BBOX.lngMax &&
+        lat >= ME_BBOX.latMin &&
+        lat <= ME_BBOX.latMax
+      ) {
         hasCoordInBbox = true;
       }
       return;
@@ -268,7 +260,12 @@ async function extractShapefilesFromZip(zipPath: string, tmpDir: string): Promis
   let shpBaseName = '';
   for (const entry of entries) {
     const name = entry.entryName;
-    if (name.endsWith('.shp') || name.endsWith('.dbf') || name.endsWith('.prj') || name.endsWith('.shx')) {
+    if (
+      name.endsWith('.shp') ||
+      name.endsWith('.dbf') ||
+      name.endsWith('.prj') ||
+      name.endsWith('.shx')
+    ) {
       const outPath = join(tmpDir, name.split('/').pop()!);
       zip.extractEntryTo(entry, tmpDir, false, true);
       if (name.endsWith('.shp')) {
@@ -332,7 +329,9 @@ async function main() {
           // Geographic validation: ensure the feature is in the Middle East region
           // (prevents matching rivers with same name in other continents)
           if (!isInMiddleEast(f)) {
-            console.log(`  Skipped: "${name.trim()}" (matched "${target}" but outside Middle East bbox)`);
+            console.log(
+              `  Skipped: "${name.trim()}" (matched "${target}" but outside Middle East bbox)`,
+            );
             break;
           }
           matchedFeatures.push(f);
@@ -358,9 +357,7 @@ async function main() {
     const riverMap = new Map<string, GeoJSONFeature[]>();
     for (const f of matchedFeatures) {
       const name = (f.properties.name || f.properties.name_en || '') as string;
-      const matched = TARGET_RIVERS.find((t) =>
-        name.toLowerCase().includes(t.toLowerCase()),
-      );
+      const matched = TARGET_RIVERS.find((t) => name.toLowerCase().includes(t.toLowerCase()));
       if (matched) {
         const existing = riverMap.get(matched) ?? [];
         existing.push(f);
@@ -420,7 +417,9 @@ async function main() {
       );
       f.geometry.coordinates = roundCoords(f.geometry.coordinates, 3);
       const after = JSON.stringify(f.geometry.coordinates).length;
-      console.log(`  ${f.properties.name}: ${before} -> ${after} chars (${((1 - after / before) * 100).toFixed(0)}% reduction)`);
+      console.log(
+        `  ${f.properties.name}: ${before} -> ${after} chars (${((1 - after / before) * 100).toFixed(0)}% reduction)`,
+      );
     }
 
     // Step 7: Write output
@@ -436,7 +435,9 @@ async function main() {
     const sizeKB = (Buffer.byteLength(jsonStr) / 1024).toFixed(1);
     console.log(`\n=== Output ===`);
     console.log(`Rivers found: ${[...foundRivers].join(', ')}`);
-    console.log(`Rivers missing: ${TARGET_RIVERS.filter((r) => !foundRivers.has(r)).join(', ') || 'none'}`);
+    console.log(
+      `Rivers missing: ${TARGET_RIVERS.filter((r) => !foundRivers.has(r)).join(', ') || 'none'}`,
+    );
     console.log(`Features: ${mergedFeatures.length}`);
     console.log(`File size: ${sizeKB} KB`);
     console.log(`Output: ${outPath}`);
