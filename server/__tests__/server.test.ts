@@ -27,7 +27,6 @@ vi.mock('../config.js', async (importOriginal) => {
 // Mock rate limiter -- pass through for server tests
 const passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: passThrough,
   rateLimiters: {
     flights: passThrough,
     ships: passThrough,

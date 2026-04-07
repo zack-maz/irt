@@ -50,7 +50,6 @@ const redisStore = new Map<string, CacheEntry<unknown>>();
 // Mock rate limiter -- pass through for route tests
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
     flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
     markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,

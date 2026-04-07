@@ -24,8 +24,10 @@ vi.mock('../cache/redis.js', () => ({
 // Force production mode so the rate limiter actually runs in tests
 vi.stubEnv('NODE_ENV', 'production');
 
-// Import after mocks
-const { rateLimitMiddleware } = await import('../middleware/rateLimit.js');
+// Import after mocks. Use the production `flights` limiter as the canonical
+// fixture since the deprecated `rateLimitMiddleware` export was removed in 26.3-05.
+const { rateLimiters } = await import('../middleware/rateLimit.js');
+const rateLimitMiddleware = rateLimiters.flights;
 
 function createMockReq(ip = '127.0.0.1'): Partial<Request> {
   return {
