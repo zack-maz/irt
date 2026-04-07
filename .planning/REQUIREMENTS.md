@@ -140,6 +140,22 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **PIPE-03**: Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)
 - [x] **SCRIPT-01**: GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities
 
+### Production Cleanup
+
+- [x] **CLN-01**: Server codebase is free of Phase 26.2 NLP dead code (nlpGeoValidator, titleFetcher, me-cities lexicon, extract-geonames script all deleted; files modified by Phase 26.2 surgically reverted to pre-26.2 state)
+- [x] **CLN-02**: All server logging goes through pino structured JSON logger; zero `console.log`/`console.error`/`console.warn` calls remain in server production code
+- [x] **CLN-03**: Every HTTP request receives a unique X-Request-ID header (accepted from client or generated via crypto.randomUUID) and the ID appears in all log entries for that request via pino-http request-scoped child loggers
+- [x] **CLN-04**: All server error responses follow a consistent `{ error, code, statusCode, requestId }` JSON envelope via an `AppError` class and centralized `errorHandler` middleware; dev mode includes stack traces, production strips them
+- [x] **CLN-05**: `server/config.ts` is the single source of truth for env vars and constants, validated at startup via Zod schema; missing required vars (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN) crash the app at module load; `server/constants.ts` is deleted
+- [x] **CLN-06**: All API routes with query parameters use a `validateQuery` Zod middleware; no raw `req.query.X` access remains in route handlers; invalid query params return a consistent 400 error with validation details
+- [x] **CLN-07**: `tsconfig.server.json` has `noUncheckedIndexedAccess: true` enabled; `npx tsc -b` exits 0 with zero errors across both server and app tsconfigs
+- [x] **CLN-08**: `@vitest/coverage-v8` is installed and configured in `vite.config.ts` with v8 provider, text+lcov reporters, and baseline coverage threshold gates; `npx vitest run --coverage` passes configured thresholds
+- [x] **CLN-09**: Server has a SIGTERM graceful shutdown handler (10s force-exit timeout, guarded to local dev only); response compression middleware is active in non-Vercel environments
+- [x] **CLN-10**: All per-endpoint rate limiters in `server/middleware/rateLimit.ts` are JSDoc-documented with rationale (polling cadence, upstream cache TTL, cost profile); deprecated `rateLimitMiddleware` export removed
+- [x] **CLN-11**: Test suite contains zero `it.todo()` / `test.todo()` stubs; every remaining test asserts real behavior
+- [x] **CLN-12**: Hand-written OpenAPI 3.0.3 spec at `server/openapi.yaml` documents all 14 `/api/*` endpoints with request/response schemas, consistent error responses, and the `CacheResponse<T>` wrapper shape
+- [x] **CLN-13**: Server TypeScript compiles with zero unused-import or unused-variable warnings; dead code from deleted Phase 26.2 modules is fully purged from the import graph
+
 ## v1.2+ Requirements
 
 Deferred to future releases. Tracked but not in current roadmap.
@@ -264,13 +280,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PIPE-02 | Phase 26.2 | Planned |
 | PIPE-03 | Phase 26.2 | Planned |
 | SCRIPT-01 | Phase 26.2 | Planned |
+| CLN-01 | Phase 26.3 | Complete |
+| CLN-02 | Phase 26.3 | Complete |
+| CLN-03 | Phase 26.3 | Complete |
+| CLN-04 | Phase 26.3 | Complete |
+| CLN-05 | Phase 26.3 | Complete |
+| CLN-06 | Phase 26.3 | Complete |
+| CLN-07 | Phase 26.3 | Complete |
+| CLN-08 | Phase 26.3 | Complete |
+| CLN-09 | Phase 26.3 | Complete |
+| CLN-10 | Phase 26.3 | Complete |
+| CLN-11 | Phase 26.3 | Complete |
+| CLN-12 | Phase 26.3 | Complete |
+| CLN-13 | Phase 26.3 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 53 total, 0 complete
-- Total: 87 mapped, 34 complete
+- v1.3 requirements: 66 total, 13 complete
+- Total: 100 mapped, 47 complete
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-05 -- Phase 26.2 conflict geolocation improvement requirements added*
+*Last updated: 2026-04-07 -- Phase 26.3 production cleanup requirements (CLN-01..CLN-13) backfilled*
