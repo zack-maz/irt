@@ -219,9 +219,14 @@ Express createApp() (serverless function)
     └── Upstash failure → withTimeout(Promise.race, 2000ms) → in-memory fallback
 ```
 
-_Full mermaid diagrams live in `docs/architecture/` — see Plan 26.4-05
-output: system-context, data-flows-per-source, frontend component graph,
-deployment topology, full type/class ontology._
+_Full mermaid diagrams live in [`docs/architecture/`](docs/architecture/README.md):
+[system context](docs/architecture/system-context.md),
+[data flows per source](docs/architecture/data-flows.md),
+[frontend component graph](docs/architecture/frontend.md),
+[deployment topology](docs/architecture/deployment.md), and a
+[four-file ontology deep dive](docs/architecture/ontology/README.md)
+covering types, algorithms, state machines, and complexity. 21 Mermaid
+blocks, all rendering natively on GitHub._
 
 ---
 
@@ -389,6 +394,46 @@ the spec and the implementation.
   `{status: 'degraded', redis: false}` when Upstash is unreachable while
   still returning HTTP 200 so Vercel cron doesn't retry unnecessarily.
 
+Full contract in [`docs/degradation.md`](docs/degradation.md) — documents
+every layer (cache, data source, response validation, rate limiter,
+frontend, `/health`), the failure modes each catches, and the test or
+code path that proves each contract. The cache layer contract is
+**proven** by the Redis-death chaos test at
+[`server/__tests__/resilience/redis-death.test.ts`](server/__tests__/resilience/redis-death.test.ts).
+
+### Engineering Documentation
+
+This directory ships four additional sets of artifacts that document
+the project's engineering story beyond the code itself:
+
+- **[Architecture](docs/architecture/README.md)** — 10 markdown files
+  with 21 Mermaid diagrams covering system context, per-source data
+  flows, frontend composition, deployment topology, and a four-file
+  ontology deep dive (types, algorithms, state machines, complexity).
+  Known tech debt labeled inline with `TODO(26.2)` markers.
+- **[Architecture Decision Records](docs/adr/README.md)** — 8 ADRs in
+  Michael Nygard short format documenting the load-bearing decisions
+  from Phase 13 through Phase 26.4: Upstash, Vercel, GDELT,
+  RadialGradientExtension shader, Pino+Zod hardening, water stress
+  point-facility pivot, GeoEPR hatched overlays, and the honest
+  retrospective on the scrapped Phase 26.2 NLP approach.
+  **[ADR-0005](docs/adr/0005-phase-26-2-nlp-approach-scrapped.md)** is
+  the highest-signal artifact in this directory — a 300-line
+  retrospective on two weeks of work that was deleted wholesale. See
+  also the [What I Learned](#what-i-learned--what-id-do-differently)
+  section below.
+- **[Operations Runbook](docs/runbook.md)** — 9 real failure modes
+  with Symptom / Detection / Cause / Remediation / Prevention per
+  section, grounded in actual code paths (`cacheGetSafe` +
+  `REDIS_OP_TIMEOUT_MS` timeout, GDELT backfill cooldown, Overpass
+  mirror fallback, AISStream on-demand pattern, etc.). Plus a log
+  query patterns appendix with `jq` recipes for filtering Pino
+  structured logs.
+- **[Graceful Degradation Contract](docs/degradation.md)** — the
+  layered contract the app makes to operators and users when
+  dependencies fail, with a summary table of failure modes and the
+  test/code-path proof for each contract.
+
 ---
 
 ## Environment Variables
@@ -463,6 +508,14 @@ actually reads to assess judgment. I'm not going to pretend everything went
 smoothly.
 
 ### Phase 26.2: the NLP approach I had to scrap
+
+> **Full ADR:** [ADR-0005 — Phase 26.2 NLP Geolocation Approach Scrapped](docs/adr/0005-phase-26-2-nlp-approach-scrapped.md).
+> The section below is the short version; the ADR is the long version
+> with the exact files deleted, the revert commits, a "What I Learned"
+> section with four rules for next time, and the forward-looking plan
+> for a future GDELT redo on a clean foundation. If you're evaluating
+> this project as a work sample, that ADR is the single most
+> portfolio-relevant artifact in the repo.
 
 Phase 26.2 was supposed to be "Conflict Geolocation Improvement." The idea
 was to use NLP entity extraction (via `compromise`, a browser-compatible NLP
