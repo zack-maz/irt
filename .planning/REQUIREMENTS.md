@@ -172,19 +172,19 @@ Phase 26.4 — portfolio-grade external artifacts and Palantir-grade engineering
 
 **Plan 02 — CI/CD + husky + gitleaks**
 
-- [ ] **PRES-10**: `.github/workflows/ci.yml` runs on every PR with lint, typecheck, full vitest suite, npm audit, and codecov upload jobs
-- [ ] **PRES-11**: `.github/workflows/codeql.yml` runs CodeQL JS/TS analysis on every PR and on a weekly schedule
-- [ ] **PRES-12**: Codecov badge renders in README from CI uploads; coverage delta is visible on PRs
-- [ ] **PRES-13**: `gitleaks` pre-commit hook blocks commits containing planted fake API keys; verified by a removable fixture test
-- [ ] **PRES-14**: `husky` v9 pre-commit hook runs `lint-staged` (Prettier + ESLint) on staged files only and completes in under 2 seconds
-- [ ] **PRES-15**: Vercel preview deploys are documented as a manual GitHub-integration step (no custom YAML required) in the CI README or repo docs
+- [x] **PRES-10**: `.github/workflows/ci.yml` runs on every PR with lint, typecheck, full vitest suite, npm audit, and codecov upload jobs
+- [x] **PRES-11**: `.github/workflows/codeql.yml` runs CodeQL JS/TS analysis on every PR and on a weekly schedule
+- [x] **PRES-12**: Codecov badge renders in README from CI uploads; coverage delta is visible on PRs
+- [x] **PRES-13**: `gitleaks` pre-commit hook blocks commits containing planted fake API keys; verified by a removable fixture test
+- [x] **PRES-14**: `husky` v9 pre-commit hook runs `lint-staged` (Prettier + ESLint) on staged files only and completes in under 2 seconds
+- [x] **PRES-15**: Vercel preview deploys are documented as a manual GitHub-integration step (no custom YAML required) in the CI README or repo docs
 
 **Plan 03 — Palantir-grade gap closure**
 
 - [x] **PRES-20**: Pino logger redacts `authorization` headers, `x-api-key`, cookies, `set-cookie`, and known upstream tokens (Upstash, OpenSky, AISStream, ADSB) before any sink output
 - [x] **PRES-21**: `server/__tests__/lib/logger-redaction.test.ts` verifies known sensitive paths appear as `[REDACTED]` in captured pino write-stream output
 - [x] **PRES-22**: `type-coverage` CLI installed; baseline measured; CI gate set at `floor(baseline)` with TODO note for the 99% target
-- [ ] **PRES-23**: Type coverage badge renders in README from a static shields.io badge sourced from the latest measurement
+- [x] **PRES-23**: Type coverage badge renders in README from a static shields.io badge sourced from the latest measurement
 - [x] **PRES-24**: Chaos test `server/__tests__/resilience/redis-death.test.ts` proves all cached routes return 200 (with `degraded: true`) or 503 (never 500) when `@upstash/redis` throws on every call; `/health` reports `redis: false`
 - [x] **PRES-25**: A `sendValidated` helper parses outbound API responses through Zod schemas before `res.json()`; dev mode throws on mismatch, prod mode logs warn and sends anyway
 - [x] **PRES-26**: At least three representative routes (flights, events, water) are wired to `sendValidated` with response schemas matching `server/openapi.yaml`
@@ -362,16 +362,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRES-05     | Phase 26.4 | Complete |
 | PRES-06     | Phase 26.4 | Complete |
 | PRES-07     | Phase 26.4 | Complete |
-| PRES-10     | Phase 26.4 | Planned  |
-| PRES-11     | Phase 26.4 | Planned  |
-| PRES-12     | Phase 26.4 | Planned  |
-| PRES-13     | Phase 26.4 | Planned  |
-| PRES-14     | Phase 26.4 | Planned  |
-| PRES-15     | Phase 26.4 | Planned  |
+| PRES-10     | Phase 26.4 | Complete |
+| PRES-11     | Phase 26.4 | Complete |
+| PRES-12     | Phase 26.4 | Complete |
+| PRES-13     | Phase 26.4 | Complete |
+| PRES-14     | Phase 26.4 | Complete |
+| PRES-15     | Phase 26.4 | Complete |
 | PRES-20     | Phase 26.4 | Complete |
 | PRES-21     | Phase 26.4 | Complete |
 | PRES-22     | Phase 26.4 | Complete |
-| PRES-23     | Phase 26.4 | Planned  |
+| PRES-23     | Phase 26.4 | Complete |
 | PRES-24     | Phase 26.4 | Complete |
 | PRES-25     | Phase 26.4 | Complete |
 | PRES-26     | Phase 26.4 | Complete |
@@ -380,30 +380,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRES-32     | Phase 26.4 | Complete |
 | PRES-33     | Phase 26.4 | Complete |
 | PRES-34     | Phase 26.4 | Complete |
-| PRES-40     | Phase 26.4 | Planned  |
-| PRES-41     | Phase 26.4 | Planned  |
-| PRES-42     | Phase 26.4 | Planned  |
-| PRES-43     | Phase 26.4 | Planned  |
-| PRES-44     | Phase 26.4 | Planned  |
-| PRES-45     | Phase 26.4 | Planned  |
-| PRES-46     | Phase 26.4 | Planned  |
-| PRES-47     | Phase 26.4 | Planned  |
-| PRES-48     | Phase 26.4 | Planned  |
-| PRES-50     | Phase 26.4 | Planned  |
-| PRES-51     | Phase 26.4 | Planned  |
-| PRES-52     | Phase 26.4 | Planned  |
-| PRES-53     | Phase 26.4 | Planned  |
-| PRES-54     | Phase 26.4 | Planned  |
-| PRES-55     | Phase 26.4 | Planned  |
+| PRES-40     | Phase 26.4 | Complete |
+| PRES-41     | Phase 26.4 | Complete |
+| PRES-42     | Phase 26.4 | Complete |
+| PRES-43     | Phase 26.4 | Complete |
+| PRES-44     | Phase 26.4 | Complete |
+| PRES-45     | Phase 26.4 | Complete |
+| PRES-46     | Phase 26.4 | Complete |
+| PRES-47     | Phase 26.4 | Complete |
+| PRES-48     | Phase 26.4 | Complete |
+| PRES-50     | Phase 26.4 | Complete |
+| PRES-51     | Phase 26.4 | Complete |
+| PRES-52     | Phase 26.4 | Complete |
+| PRES-53     | Phase 26.4 | Complete |
+| PRES-54     | Phase 26.4 | Complete |
+| PRES-55     | Phase 26.4 | Complete |
 
 **Coverage:**
 
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 106 total, 24 complete (66 prior + 40 PRES-\* Phase 26.4)
-- Total: 140 mapped, 58 complete
+- v1.3 requirements: 106 total, 46 complete (66 prior + 40 PRES-\* Phase 26.4)
+- Total: 140 mapped, 80 complete
 
 ---
 
 _Requirements defined: 2026-03-19_
-_Last updated: 2026-04-08 -- Phase 26.4 Plan 04 (README + visuals + live demo hardening) marked PRES-30..34 complete_
+_Last updated: 2026-04-08 -- Phase 26.4 traceability backfill: PRES-10..15, PRES-23, PRES-40..48, PRES-50..55 flipped to Complete_
