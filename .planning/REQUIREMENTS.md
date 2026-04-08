@@ -191,11 +191,11 @@ Phase 26.4 — portfolio-grade external artifacts and Palantir-grade engineering
 
 **Plan 04 — README + visuals + live demo hardening**
 
-- [ ] **PRES-30**: `README.md` is rewritten as a portfolio-grade hero document with hero block, ToC, structured sections, engineering badges, retrospective, and is at least 200 lines
-- [ ] **PRES-31**: `docs/hero.gif` exists, is under 3 MB, and demonstrates a Strait of Hormuz zoom with all visualization layers active
-- [ ] **PRES-32**: `docs/screenshots/` contains 4–6 PNG screenshots of distinct visualization layers
-- [ ] **PRES-33**: `rateLimiters.public` tier exists with stricter per-IP throttle than per-endpoint limits, JSDoc-documented, with a passing rate-limit test verifying 429 response
-- [ ] **PRES-34**: `public/robots.txt` disallows `/api/*` and `/health`; live demo URL is published in README with a "please be gentle" callout
+- [x] **PRES-30**: `README.md` is rewritten as a portfolio-grade hero document with hero block, ToC, structured sections, engineering badges, retrospective, and is at least 200 lines
+- [x] **PRES-31**: `docs/hero.gif` exists, is under 3 MB, and demonstrates a Strait of Hormuz zoom with all visualization layers active
+- [x] **PRES-32**: `docs/screenshots/` contains 4–6 PNG screenshots of distinct visualization layers
+- [x] **PRES-33**: `rateLimiters.public` tier exists with stricter per-IP throttle than per-endpoint limits, JSDoc-documented, with a passing rate-limit test verifying 429 response
+- [x] **PRES-34**: `public/robots.txt` disallows `/api/*` and `/health`; live demo URL is published in README with a "please be gentle" callout
 
 **Plan 05 — Mermaid architecture diagrams + ontology deep dive**
 
@@ -375,11 +375,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRES-24     | Phase 26.4 | Complete |
 | PRES-25     | Phase 26.4 | Complete |
 | PRES-26     | Phase 26.4 | Complete |
-| PRES-30     | Phase 26.4 | Planned  |
-| PRES-31     | Phase 26.4 | Planned  |
-| PRES-32     | Phase 26.4 | Planned  |
-| PRES-33     | Phase 26.4 | Planned  |
-| PRES-34     | Phase 26.4 | Planned  |
+| PRES-30     | Phase 26.4 | Complete |
+| PRES-31     | Phase 26.4 | Complete |
+| PRES-32     | Phase 26.4 | Complete |
+| PRES-33     | Phase 26.4 | Complete |
+| PRES-34     | Phase 26.4 | Complete |
 | PRES-40     | Phase 26.4 | Planned  |
 | PRES-41     | Phase 26.4 | Planned  |
 | PRES-42     | Phase 26.4 | Planned  |
@@ -400,10 +400,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 106 total, 19 complete (66 prior + 40 PRES-\* Phase 26.4)
-- Total: 140 mapped, 53 complete
+- v1.3 requirements: 106 total, 24 complete (66 prior + 40 PRES-\* Phase 26.4)
+- Total: 140 mapped, 58 complete
 
 ---
 
 _Requirements defined: 2026-03-19_
-_Last updated: 2026-04-07 -- Phase 26.4 Plan 03 (Palantir gap closure) marked PRES-20..22, 24..26 complete_
+_Last updated: 2026-04-08 -- Phase 26.4 Plan 04 (README + visuals + live demo hardening) marked PRES-30..34 complete_

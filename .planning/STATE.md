@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v0.9
 milestone_name: milestone
 status: unknown
-last_updated: '2026-04-08T22:20:35.179Z'
+last_updated: '2026-04-08T23:30:00.000Z'
 progress:
   total_phases: 13
   completed_phases: 8
   total_plans: 39
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -22,6 +22,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Milestone: v1.3 Data Quality & Layers — IN PROGRESS
+Phase 26.4: Plan 04 COMPLETE (6 of 6 plans done — phase execution complete; README 564-line portfolio rewrite, 1354 KB Playwright-captured hero GIF, 6 layer screenshots, rateLimiters.public tier wired globally on /api/\*, public/robots.txt, permanent scripts/capture-hero.ts agentic tooling)
 Phase 26.4: Plan 06 COMPLETE (ADRs + runbook + degradation contract + README link closure — 12 new doc files, 2672 lines, ADR-0005 at 300 lines is the highest portfolio signal)
 Phase 26.4: Plan 05 COMPLETE (Mermaid architecture docs — 10 files, 21 diagrams, ontology deep dive)
 Phase 26.4: Plan 03 COMPLETE (Palantir gap closure — redaction, type-coverage gate, chaos test, sendValidated)
@@ -195,6 +196,12 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - ADR template uses Positive/Negative/Neutral consequence split (not unstructured "Consequences") to force honest tradeoff consideration; ADR index README documents immutability rule (status line mutable, body frozen) and numbering convention (4-digit zero-padded) so future ADRs have clear conventions (26.4-06)
 - README Plan 06 edits are additive and scoped: new Engineering Documentation subsection after Graceful Degradation with headline-linked paragraphs for architecture/adr/runbook/degradation, upgraded Architecture section prose to clickable per-file links, and ADR-0005 blockquote at the top of the Phase 26.2 retrospective — does NOT touch hero GIF area, Quick Start, or test metrics table from Plan 04 (26.4-06)
 - ADR cross-referencing pattern established: ADRs link to each other (ADR-0003 ↔ ADR-0005), to runbook failure modes, to architecture data-flow diagrams, and to specific code files — the ADR directory is navigable from any entry point rather than a flat list (26.4-06)
+- Agentic hero GIF capture via Playwright (scripts/capture-hero.ts, 527 lines, `npm run capture:hero`) chosen over manual Kap recording — ~45s repeatable regeneration survives UI changes, committed as permanent portfolio tooling rather than a one-off recording (26.4-04)
+- Playwright recordVideo does not work for WebGL content in headless + software-GL mode (produces all-black frames because the compositor receives zeroed frames for WebGL canvases) — `page.screenshot()` frame-sequence stitched by gifski is the reliable fallback because screenshot reads the canvas backbuffer synchronously (26.4-04)
+- Skip ffmpeg in the gifski pipeline — gifski accepts PNG frames directly on stdin and handles lanczos scaling via `--width`, avoiding rgb24→yuv4mpegpipe pixel-format errors and reducing the pipeline to 2 processes (Playwright → gifski) (26.4-04)
+- MapDevExposer dev-only React component added to src/components/map/BaseMap.tsx, gated by `import.meta.env.DEV`, exposes the maplibre Map instance on `window.__map` for programmatic flyTo and layer toggling during capture — Vite tree-shakes entirely out of production builds, zero bundle impact (26.4-04)
+- rateLimiters.public tier (6 req/min per-IP, prefix `ratelimit:public`) wired globally on `/api/*` BEFORE per-endpoint limiters in server/index.ts — protects the Upstash command budget from scraper abuse on the live demo URL while leaving per-endpoint budgets intact for legitimate high-volume users; paired with public/robots.txt disallowing /api/ and /health for polite crawlers (26.4-04)
+- README live demo URL left as `_TBD_` placeholder (commit bd453cf replaced an earlier hardcoded URL) — user will substitute the actual Vercel URL at publication time rather than committing hardcoded production URLs mid-plan (26.4-04)
 
 ## Pending Todos
 
