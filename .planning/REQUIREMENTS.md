@@ -211,12 +211,12 @@ Phase 26.4 — portfolio-grade external artifacts and Palantir-grade engineering
 
 **Plan 06 — ADRs + runbook + degradation contract**
 
-- [ ] **PRES-50**: `docs/adr/template.md` provides a Michael Nygard short-format ADR template; `docs/adr/README.md` indexes all ADRs and documents conventions (status values, immutability rule, numbering scheme)
-- [ ] **PRES-51**: ADRs 0001–0004 document infrastructure decisions (Upstash Redis, Vercel serverless, GDELT v2, threat density shader) each at least 40 lines following the template structure
-- [ ] **PRES-52**: ADR-0005 documents the Phase 26.2 NLP scrap honestly with Context, Decision, Consequences, and a "What I Learned" section; status `Superseded`; at least 60 lines
-- [ ] **PRES-53**: ADRs 0006–0008 document later infrastructure decisions (pino + Zod hardening, water stress as point facilities, ethnic distribution via GeoEPR) each at least 40 lines following the template
-- [ ] **PRES-54**: `docs/runbook.md` documents at least 9 failure modes (Upstash unreachable, GDELT 404, Overpass timeout, AISStream disconnect, Yahoo throttle, Vercel function timeout, Upstash budget exhausted, CORS misconfig, cron failure) each with Symptom/Detection/Cause/Remediation/Prevention; at least 150 lines
-- [ ] **PRES-55**: `docs/degradation.md` documents the graceful degradation contract for cache, data sources, response validation, and frontend layers with a summary table; at least 60 lines; `README.md` Engineering section links all new artifacts
+- [x] **PRES-50**: `docs/adr/template.md` provides a Michael Nygard short-format ADR template; `docs/adr/README.md` indexes all ADRs and documents conventions (status values, immutability rule, numbering scheme)
+- [x] **PRES-51**: ADRs 0001–0004 document infrastructure decisions (Upstash Redis, Vercel serverless, GDELT v2, threat density shader) each at least 40 lines following the template structure
+- [x] **PRES-52**: ADR-0005 documents the Phase 26.2 NLP scrap honestly with Context, Decision, Consequences, and a "What I Learned" section; status `Superseded`; at least 60 lines
+- [x] **PRES-53**: ADRs 0006–0008 document later infrastructure decisions (pino + Zod hardening, water stress as point facilities, ethnic distribution via GeoEPR) each at least 40 lines following the template
+- [x] **PRES-54**: `docs/runbook.md` documents at least 9 failure modes (Upstash unreachable, GDELT 404, Overpass timeout, AISStream disconnect, Yahoo throttle, Vercel function timeout, Upstash budget exhausted, CORS misconfig, cron failure) each with Symptom/Detection/Cause/Remediation/Prevention; at least 150 lines
+- [x] **PRES-55**: `docs/degradation.md` documents the graceful degradation contract for cache, data sources, response validation, and frontend layers with a summary table; at least 60 lines; `README.md` Engineering section links all new artifacts
 
 ## v1.2+ Requirements
 
