@@ -8,6 +8,8 @@ import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
 import { fetchFlights as fetchAdsbLol } from '../adapters/adsb-lol.js';
 import { IRAN_BBOX, CACHE_TTL } from '../config.js';
 import { validateQuery } from '../middleware/validate.js';
+import { sendValidated } from '../middleware/validateResponse.js';
+import { flightsResponseSchema } from '../schemas/cacheResponse.js';
 import { RateLimitError } from '../types.js';
 import type { FlightEntity, FlightSource } from '../types.js';
 
@@ -60,21 +62,25 @@ flightsRouter.get('/', validateQuery(flightsQuerySchema), async (_req, res) => {
   // Check cache first -- avoid unnecessary upstream calls (API credit conservation)
   const cached = await cacheGetSafe<FlightEntity[]>(cacheKey, logicalTtl);
   if (cached && !cached.stale) {
-    return res.json(cached);
+    return sendValidated(res, flightsResponseSchema, cached);
   }
 
   try {
     const flights = await getFetcher(source)();
 
     await cacheSetSafe(cacheKey, flights, redisTtl);
-    res.json({ data: flights, stale: false, lastFresh: Date.now() });
+    sendValidated(res, flightsResponseSchema, {
+      data: flights,
+      stale: false,
+      lastFresh: Date.now(),
+    });
   } catch (err) {
     log.error({ err, source }, 'upstream error');
 
     // Distinguish rate limit errors from generic errors
     if (err instanceof RateLimitError) {
       if (cached) {
-        return res.json({ ...cached, rateLimited: true });
+        return sendValidated(res, flightsResponseSchema, { ...cached, rateLimited: true });
       }
       return res
         .status(429)
@@ -82,7 +88,7 @@ flightsRouter.get('/', validateQuery(flightsQuerySchema), async (_req, res) => {
     }
 
     if (cached) {
-      res.json(cached); // Serve stale cache on error
+      sendValidated(res, flightsResponseSchema, cached); // Serve stale cache on error
     } else {
       throw err; // Express 5 catches and forwards to errorHandler
     }

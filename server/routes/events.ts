@@ -8,6 +8,8 @@ import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
 import { extractBellingcatGeo } from '../lib/eventScoring.js';
 import { WAR_START, CACHE_TTL } from '../config.js';
 import { validateQuery } from '../middleware/validate.js';
+import { sendValidated } from '../middleware/validateResponse.js';
+import { eventsResponseSchema } from '../schemas/cacheResponse.js';
 import type { ConflictEventEntity, NewsCluster } from '../types.js';
 
 /** Zod schema for /api/events query params */
@@ -79,7 +81,7 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     : await cacheGetSafe<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
 
   if (cached && !cached.stale) {
-    return res.json(cached);
+    return sendValidated(res, eventsResponseSchema, cached);
   }
 
   try {
@@ -151,14 +153,22 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     // Store raw (undispersed) coordinates — dispersion is applied client-side
     // in useFilteredEntities so it dynamically adjusts when filters change.
     await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
-    res.json({ data: merged, stale: false, lastFresh: Date.now() });
+    sendValidated(res, eventsResponseSchema, {
+      data: merged,
+      stale: false,
+      lastFresh: Date.now(),
+    });
   } catch (err) {
     log.error({ err }, 'upstream error');
 
     if (cached) {
       // Prune stale entries even on error
       const pruned = cached.data.filter((e) => e.timestamp >= WAR_START);
-      res.json({ data: pruned, stale: true, lastFresh: cached.lastFresh });
+      sendValidated(res, eventsResponseSchema, {
+        data: pruned,
+        stale: true,
+        lastFresh: cached.lastFresh,
+      });
     } else {
       throw err; // Express 5 catches and forwards to errorHandler
     }

@@ -13,6 +13,8 @@ import {
   WATER_PRECIP_REDIS_TTL_SEC,
 } from '../config.js';
 import { validateQuery } from '../middleware/validate.js';
+import { sendValidated } from '../middleware/validateResponse.js';
+import { waterResponseSchema } from '../schemas/cacheResponse.js';
 import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
 
@@ -54,20 +56,28 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   );
 
   if (cached && !cached.stale && !forceRefresh) {
-    return res.json(cached);
+    return sendValidated(res, waterResponseSchema, cached);
   }
 
   try {
     const facilities = await fetchWaterFacilities();
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
-    res.json({ data: facilities, stale: false, lastFresh: Date.now() });
+    sendValidated(res, waterResponseSchema, {
+      data: facilities,
+      stale: false,
+      lastFresh: Date.now(),
+    });
   } catch (err) {
     log.error({ err }, 'Overpass error');
     if (cached) {
-      res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
+      sendValidated(res, waterResponseSchema, {
+        data: cached.data,
+        stale: true,
+        lastFresh: cached.lastFresh,
+      });
     } else {
       log.warn('Overpass failed, returning empty');
-      res.json({ data: [], stale: true, lastFresh: 0 });
+      sendValidated(res, waterResponseSchema, { data: [], stale: true, lastFresh: 0 });
     }
   }
 });
