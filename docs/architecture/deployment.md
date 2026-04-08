@@ -199,8 +199,8 @@ least-likely failure:
 2. **Stale-while-revalidate via CDN.** When Redis is healthy but an
    upstream is slow, the CDN's `stale-while-revalidate` window lets
    Vercel return the last known response immediately while triggering
-   a background refresh. Worst case: users see data that's `s-maxage
-   - swr` seconds old.
+   a background refresh. Worst case: users see data that's up to
+   `(s-maxage seconds) + (swr seconds)` old before the next write.
 
 3. **`/health` degraded state.** The `/health` endpoint inspects the
    last-seen timestamps of every cache key and returns a
