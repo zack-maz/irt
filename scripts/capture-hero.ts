@@ -1,0 +1,527 @@
+#!/usr/bin/env tsx
+/**
+ * capture-hero.ts — Agentic hero GIF + layer screenshot capture
+ *
+ * Generates the portfolio hero GIF (Strait of Hormuz zoom with all visualization
+ * layers active) and 6 PNG layer screenshots by driving a headed Playwright
+ * Chromium instance against the local dev server.
+ *
+ * Prerequisites:
+ * - `npm run dev` running in another terminal (http://localhost:5173)
+ * - `ffmpeg` and `gifski` on PATH (`brew install ffmpeg gifski`)
+ * - Playwright chromium already installed (comes with @playwright/test devDep)
+ *
+ * Outputs:
+ * - docs/hero.gif       (hero animated GIF, target <3MB)
+ * - docs/screenshots/political-layer.png
+ * - docs/screenshots/ethnic-layer.png
+ * - docs/screenshots/water-stress.png
+ * - docs/screenshots/threat-density.png
+ * - docs/screenshots/detail-panel.png
+ * - docs/screenshots/search-modal.png
+ *
+ * Runtime: ~45 seconds end-to-end on a warm dev server.
+ *
+ * Usage:
+ *   npm run capture:hero             # full capture (GIF + all screenshots)
+ *   npm run capture:hero -- --gif    # GIF only
+ *   npm run capture:hero -- --shots  # screenshots only
+ */
+
+import { chromium, type Page } from '@playwright/test';
+import { execSync } from 'node:child_process';
+import { mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
+// ---------- Configuration ----------
+
+const DEV_URL = 'http://localhost:5173';
+const REPO_ROOT = resolve(import.meta.dirname, '..');
+const TMP_DIR = join(REPO_ROOT, 'tmp', 'capture-hero');
+const DOCS_DIR = join(REPO_ROOT, 'docs');
+const SCREENSHOTS_DIR = join(DOCS_DIR, 'screenshots');
+const HERO_GIF = join(DOCS_DIR, 'hero.gif');
+const MAX_GIF_BYTES = 3 * 1024 * 1024; // 3 MB ceiling
+
+const VIEWPORT = { width: 1280, height: 720 };
+
+// Geographic coordinates (lng, lat) for the hero zoom animation
+const WIDE_VIEW = { center: [45, 30] as [number, number], zoom: 4, pitch: 0, bearing: 0 };
+const HORMUZ_VIEW = {
+  center: [56.25, 26.57] as [number, number],
+  zoom: 7,
+  pitch: 45,
+  bearing: 0,
+};
+
+// All layer toggles by aria-label. LayerTogglesSlot builds `Toggle ${label} layer`
+// where label comes from LAYER_CONFIGS in LayerTogglesSlot.tsx. The weather layer
+// is labeled "Climate" in the UI, not "Weather" — keep this in sync with the source.
+const ALL_LAYERS = ['Geographic', 'Climate', 'Political', 'Ethnic', 'Water', 'Threat Density'];
+
+// ---------- Utilities ----------
+
+type Mode = 'full' | 'gif' | 'shots';
+
+function parseArgs(): Mode {
+  const args = process.argv.slice(2);
+  if (args.includes('--gif')) return 'gif';
+  if (args.includes('--shots')) return 'shots';
+  return 'full';
+}
+
+function log(msg: string): void {
+  console.log(`[capture-hero] ${msg}`);
+}
+
+function die(msg: string, code = 1): never {
+  console.error(`[capture-hero] ERROR: ${msg}`);
+  process.exit(code);
+}
+
+async function checkPrereqs(): Promise<void> {
+  // Check dev server is reachable
+  try {
+    const res = await fetch(DEV_URL);
+    if (!res.ok) die(`Dev server returned ${res.status} at ${DEV_URL}`);
+  } catch {
+    die(`Dev server not reachable at ${DEV_URL}. Run \`npm run dev\` in another terminal first.`);
+  }
+
+  // Check CLI tools
+  for (const bin of ['ffmpeg', 'gifski']) {
+    try {
+      execSync(`command -v ${bin}`, { stdio: 'ignore' });
+    } catch {
+      die(`${bin} not found on PATH. Install with: brew install ${bin}`);
+    }
+  }
+}
+
+async function waitForMap(page: Page): Promise<void> {
+  log('waiting for map instance…');
+  // Phase 1: wait for window.__map to exist (MapDevExposer in BaseMap.tsx sets it
+  // when the react-maplibre ref resolves).
+  await page.waitForFunction(
+    () => {
+      const w = window as unknown as { __map?: unknown };
+      return w.__map != null;
+    },
+    { timeout: 15_000 },
+  );
+  log('  map instance acquired');
+
+  // Phase 2: wait for style to be loaded (faster than map.loaded() which also
+  // requires all currently-needed sources to finish — terrain tiles can drag).
+  log('  waiting for style…');
+  await page.waitForFunction(
+    () => {
+      const w = window as unknown as {
+        __map?: { isStyleLoaded?: () => boolean };
+      };
+      return w.__map?.isStyleLoaded?.() === true;
+    },
+    { timeout: 15_000 },
+  );
+  log('  style loaded');
+
+  // Phase 3: dwell to let terrain, entity sources, and deck.gl layers render
+  await page.waitForTimeout(3000);
+  log('map ready');
+}
+
+/**
+ * Opens the Sidebar's Layers content panel. The layer toggle switches live
+ * inside a slide-in panel that has `!pointer-events-none` when closed, so
+ * clicking a switch directly times out — we need to click the Layers icon
+ * button in the sidebar icon strip first.
+ */
+async function openLayersPanel(page: Page): Promise<void> {
+  // The icon strip has a button with aria-label="Layers" (from SECTIONS[].label)
+  const layersButton = page.getByRole('button', { name: 'Layers', exact: true });
+  const count = await layersButton.count();
+  if (count === 0) {
+    log('  ! Layers sidebar button not found — continuing anyway');
+    return;
+  }
+  await layersButton.first().click();
+  // Wait for the sidebar content slide-in animation (~300ms per Tailwind duration)
+  await page.waitForTimeout(500);
+}
+
+async function enableAllLayers(page: Page): Promise<void> {
+  log('opening Layers sidebar panel…');
+  await openLayersPanel(page);
+
+  log('enabling all visualization layers…');
+  for (const layer of ALL_LAYERS) {
+    const toggle = page.getByRole('switch', { name: new RegExp(`Toggle ${layer} layer`, 'i') });
+    const count = await toggle.count();
+    if (count === 0) {
+      log(`  ! no toggle found for "${layer}" — skipping`);
+      continue;
+    }
+    const state = await toggle.first().getAttribute('aria-checked');
+    if (state !== 'true') {
+      await toggle.first().click();
+      log(`  ✓ ${layer} toggled on`);
+      await page.waitForTimeout(250);
+    } else {
+      log(`  ✓ ${layer} already on`);
+    }
+  }
+  // Let all layers finish their first render pass
+  await page.waitForTimeout(1500);
+}
+
+async function setOnlyLayer(page: Page, keepOn: string): Promise<void> {
+  await openLayersPanel(page);
+  for (const layer of ALL_LAYERS) {
+    const toggle = page.getByRole('switch', { name: new RegExp(`Toggle ${layer} layer`, 'i') });
+    const count = await toggle.count();
+    if (count === 0) continue;
+    const state = await toggle.first().getAttribute('aria-checked');
+    const shouldBeOn = layer === keepOn;
+    if ((state === 'true') !== shouldBeOn) {
+      await toggle.first().click();
+      await page.waitForTimeout(200);
+    }
+  }
+  await page.waitForTimeout(1200);
+}
+
+/**
+ * Closes the sidebar panel by clicking the currently-active icon strip button
+ * again. The hero video wants the map to fill the viewport with no sidebar in
+ * the frame. The screenshots also look cleaner without the sidebar open.
+ */
+async function closeSidebar(page: Page): Promise<void> {
+  // Pressing Escape typically closes modals/panels; if that doesn't work for
+  // this app, click outside the sidebar as a fallback.
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+  // If the sidebar is still open, click on the map center to defocus
+  const sidebarOpen = await page
+    .locator('[data-testid="sidebar-content"]')
+    .evaluate((el) => {
+      // Check if the sidebar content is visible (not translated off-screen)
+      const rect = el.getBoundingClientRect();
+      return rect.left >= 0;
+    })
+    .catch(() => false);
+  if (sidebarOpen) {
+    // Click a neutral map area (right side of viewport)
+    await page.mouse.click(VIEWPORT.width - 100, VIEWPORT.height / 2);
+    await page.waitForTimeout(400);
+  }
+}
+
+async function jumpTo(
+  page: Page,
+  target: { center: [number, number]; zoom: number; pitch?: number; bearing?: number },
+): Promise<void> {
+  await page.evaluate((t) => {
+    const w = window as unknown as { __map?: { jumpTo?: (opts: unknown) => void } };
+    w.__map?.jumpTo?.({
+      center: t.center,
+      zoom: t.zoom,
+      pitch: t.pitch ?? 0,
+      bearing: t.bearing ?? 0,
+    });
+  }, target);
+  await page.waitForTimeout(800);
+}
+
+// ---------- Capture: Hero GIF ----------
+
+async function captureHeroGif(): Promise<void> {
+  log('=== HERO GIF CAPTURE ===');
+
+  // Prepare temp frame directory.
+  //
+  // Note on approach: Playwright's `recordVideo` does NOT capture WebGL content
+  // in headless + software-GL mode (the browser compositor receives zeroed
+  // frames for WebGL canvases rendered by SwiftShader). `page.screenshot()`
+  // however reads the canvas backbuffer synchronously and does render the map
+  // correctly. So we take a sequence of screenshots at ~10fps during the
+  // flyTo animation and stitch them into a GIF with ffmpeg + gifski.
+  const frameDir = join(TMP_DIR, 'frames');
+  mkdirSync(frameDir, { recursive: true });
+  for (const f of readdirSync(frameDir)) {
+    try {
+      unlinkSync(join(frameDir, f));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const browser = await chromium.launch({
+    headless: true,
+    args: [
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--enable-webgl',
+      '--ignore-gpu-blocklist',
+      '--enable-accelerated-2d-canvas',
+    ],
+  });
+  const context = await browser.newContext({
+    viewport: VIEWPORT,
+    deviceScaleFactor: 1,
+  });
+  const page = await context.newPage();
+
+  const FRAME_INTERVAL_MS = 150;
+  const ANIMATION_DURATION_MS = 6000;
+  const DWELL_MS = 1200;
+  const TOTAL_FRAMES = Math.ceil((ANIMATION_DURATION_MS + DWELL_MS) / FRAME_INTERVAL_MS);
+  const TARGET_FPS = Math.round(1000 / FRAME_INTERVAL_MS); // ~7 fps effective
+
+  try {
+    await page.goto(DEV_URL, { waitUntil: 'domcontentloaded' });
+    await waitForMap(page);
+    await enableAllLayers(page);
+    await closeSidebar(page);
+
+    // Start wide
+    await jumpTo(page, WIDE_VIEW);
+    await page.waitForTimeout(800);
+
+    // Kick off the flyTo animation WITHOUT awaiting — it needs to run while
+    // we snapshot frames. The `essential: true` flag disables motion-prefers-
+    // reduced-motion shortcut that would skip animation entirely.
+    await page.evaluate(
+      (t) => {
+        const w = window as unknown as {
+          __map?: { flyTo?: (opts: unknown) => void };
+        };
+        w.__map?.flyTo?.({
+          center: t.center,
+          zoom: t.zoom,
+          pitch: t.pitch,
+          bearing: t.bearing,
+          duration: t.duration,
+          essential: true,
+        });
+      },
+      { ...HORMUZ_VIEW, duration: ANIMATION_DURATION_MS },
+    );
+
+    // Snapshot frames at intervals during the animation + dwell
+    log(`capturing ${TOTAL_FRAMES} frames at ${FRAME_INTERVAL_MS}ms intervals…`);
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      const frameStart = Date.now();
+      const framePath = join(frameDir, `frame-${String(i).padStart(4, '0')}.png`);
+      await page.screenshot({ path: framePath, fullPage: false });
+      const elapsed = Date.now() - frameStart;
+      const sleep = Math.max(0, FRAME_INTERVAL_MS - elapsed);
+      if (sleep > 0) {
+        await page.waitForTimeout(sleep);
+      }
+    }
+    log(`  captured ${TOTAL_FRAMES} frames`);
+  } finally {
+    await page.close();
+    await context.close();
+    await browser.close();
+  }
+
+  // Stitch frames into a GIF via ffmpeg → gifski
+  const frameCount = readdirSync(frameDir).filter((f) => f.endsWith('.png')).length;
+  if (frameCount === 0) die('No frames captured');
+  log(`stitching ${frameCount} frames → gif…`);
+
+  mkdirSync(DOCS_DIR, { recursive: true });
+
+  const stitch = (fps: number, width: number, quality: number): void => {
+    // gifski accepts PNG files directly and handles lanczos scaling via --width.
+    // No intermediate ffmpeg step needed for PNG → GIF.
+    const cmd = `gifski -o "${HERO_GIF}" --fps ${fps} --width ${width} --quality ${quality} ${frameDir}/frame-*.png`;
+    execSync(cmd, { shell: '/bin/bash', stdio: 'inherit' });
+  };
+
+  stitch(TARGET_FPS, 1280, 85);
+  let gifBytes = statSync(HERO_GIF).size;
+  log(`first pass: ${(gifBytes / 1024).toFixed(0)} KB`);
+
+  if (gifBytes > MAX_GIF_BYTES) {
+    log(`over 3MB ceiling — re-encoding at width=960 quality=70`);
+    stitch(TARGET_FPS, 960, 70);
+    gifBytes = statSync(HERO_GIF).size;
+    log(`second pass: ${(gifBytes / 1024).toFixed(0)} KB`);
+  }
+
+  if (gifBytes > MAX_GIF_BYTES) {
+    log(`still over ceiling — re-encoding at width=800 quality=60`);
+    stitch(TARGET_FPS, 800, 60);
+    gifBytes = statSync(HERO_GIF).size;
+    log(`third pass: ${(gifBytes / 1024).toFixed(0)} KB`);
+  }
+
+  if (gifBytes > MAX_GIF_BYTES) {
+    die(
+      `GIF still over ${MAX_GIF_BYTES} bytes after 3 encoding passes — manual intervention needed`,
+    );
+  }
+
+  log(
+    `✓ docs/hero.gif written (${(gifBytes / 1024).toFixed(0)} KB, ${frameCount} frames @ ${TARGET_FPS}fps)`,
+  );
+
+  // Clean up frame PNGs
+  for (const f of readdirSync(frameDir)) {
+    try {
+      unlinkSync(join(frameDir, f));
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+// ---------- Capture: Layer screenshots ----------
+
+async function captureScreenshots(): Promise<void> {
+  log('=== LAYER SCREENSHOTS ===');
+
+  mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+
+  const browser = await chromium.launch({
+    headless: true,
+    args: [
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--enable-webgl',
+      '--ignore-gpu-blocklist',
+      '--enable-accelerated-2d-canvas',
+    ],
+  });
+  const context = await browser.newContext({
+    viewport: VIEWPORT,
+    deviceScaleFactor: 2, // higher res for screenshots
+  });
+  const page = await context.newPage();
+
+  try {
+    await page.goto(DEV_URL, { waitUntil: 'domcontentloaded' });
+    await waitForMap(page);
+
+    // --- political-layer.png ---
+    log('capturing political-layer.png');
+    await setOnlyLayer(page, 'Political');
+    await closeSidebar(page);
+    await jumpTo(page, { center: [45, 30], zoom: 4.2, pitch: 0, bearing: 0 });
+    await page.waitForTimeout(1500);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'political-layer.png'),
+      fullPage: false,
+    });
+
+    // --- ethnic-layer.png ---
+    log('capturing ethnic-layer.png');
+    await setOnlyLayer(page, 'Ethnic');
+    await closeSidebar(page);
+    await jumpTo(page, { center: [42, 34], zoom: 5, pitch: 0, bearing: 0 });
+    await page.waitForTimeout(1500);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'ethnic-layer.png'),
+      fullPage: false,
+    });
+
+    // --- water-stress.png ---
+    log('capturing water-stress.png');
+    await setOnlyLayer(page, 'Water');
+    await closeSidebar(page);
+    await jumpTo(page, { center: [45, 32], zoom: 5, pitch: 20, bearing: 0 });
+    await page.waitForTimeout(1800);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'water-stress.png'),
+      fullPage: false,
+    });
+
+    // --- threat-density.png ---
+    log('capturing threat-density.png');
+    await setOnlyLayer(page, 'Threat Density');
+    await closeSidebar(page);
+    await jumpTo(page, { center: [45, 32], zoom: 5, pitch: 0, bearing: 0 });
+    await page.waitForTimeout(1800);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'threat-density.png'),
+      fullPage: false,
+    });
+
+    // --- search-modal.png ---
+    // Capture BEFORE detail-panel so leftover panel state doesn't interfere.
+    // Click the topbar search hint button directly rather than rely on Cmd+K,
+    // which doesn't always register through Playwright's keyboard API in
+    // headless mode (it calls useSearchStore.getState().openSearchModal()).
+    log('capturing search-modal.png');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    const searchHint = page.locator('[data-testid="topbar-search-hint"]');
+    const hintCount = await searchHint.count();
+    if (hintCount === 0) {
+      log('  ! topbar search hint not found — search modal capture will be blank');
+    } else {
+      await searchHint.first().click();
+      await page.waitForTimeout(500);
+    }
+    // Type a sample query to show autocomplete
+    await page.keyboard.type('type:flight', { delay: 50 });
+    await page.waitForTimeout(800);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'search-modal.png'),
+      fullPage: false,
+    });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // --- detail-panel.png ---
+    // Enable all layers so there's something to click, then click-center
+    log('capturing detail-panel.png');
+    await enableAllLayers(page);
+    await closeSidebar(page);
+    await jumpTo(page, { center: [51.4, 35.7], zoom: 7, pitch: 30, bearing: 0 });
+    await page.waitForTimeout(2000);
+    // Click somewhere in the middle of the viewport to try to hit an entity
+    await page.mouse.click(VIEWPORT.width / 2, VIEWPORT.height / 2);
+    await page.waitForTimeout(800);
+    await page.screenshot({
+      path: join(SCREENSHOTS_DIR, 'detail-panel.png'),
+      fullPage: false,
+    });
+  } finally {
+    await page.close();
+    await context.close();
+    await browser.close();
+  }
+
+  const shots = readdirSync(SCREENSHOTS_DIR).filter((f) => f.endsWith('.png'));
+  log(`✓ ${shots.length} screenshots in docs/screenshots/`);
+  for (const s of shots) {
+    const bytes = statSync(join(SCREENSHOTS_DIR, s)).size;
+    log(`  - ${s} (${(bytes / 1024).toFixed(0)} KB)`);
+  }
+}
+
+// ---------- Main ----------
+
+async function main(): Promise<void> {
+  const mode = parseArgs();
+  log(`mode: ${mode}`);
+
+  await checkPrereqs();
+
+  if (mode === 'full' || mode === 'gif') {
+    await captureHeroGif();
+  }
+  if (mode === 'full' || mode === 'shots') {
+    await captureScreenshots();
+  }
+
+  log('done.');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
