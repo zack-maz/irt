@@ -14,7 +14,7 @@ Hormuz right now, quantitatively?_
 
 ---
 
-**Live demo:** <https://irt-monitoring.vercel.app>
+**Live demo:** _TBD — Vercel URL coming soon_
 
 > Please be gentle. This is a single-user Redis budget (Upstash free tier, ~92%
 > of the monthly command ceiling already in use). The live demo is protected by
@@ -496,7 +496,7 @@ npm run format:check
 **Smoke test against production:**
 
 ```bash
-npx tsx scripts/smoke-test.ts https://irt-monitoring.vercel.app
+npx tsx scripts/smoke-test.ts https://<your-prod-url>
 ```
 
 ---
