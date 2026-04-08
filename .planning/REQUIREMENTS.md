@@ -181,13 +181,13 @@ Phase 26.4 — portfolio-grade external artifacts and Palantir-grade engineering
 
 **Plan 03 — Palantir-grade gap closure**
 
-- [ ] **PRES-20**: Pino logger redacts `authorization` headers, `x-api-key`, cookies, `set-cookie`, and known upstream tokens (Upstash, OpenSky, AISStream, ADSB) before any sink output
-- [ ] **PRES-21**: `server/__tests__/lib/logger-redaction.test.ts` verifies known sensitive paths appear as `[REDACTED]` in captured pino write-stream output
-- [ ] **PRES-22**: `type-coverage` CLI installed; baseline measured; CI gate set at `floor(baseline)` with TODO note for the 99% target
+- [x] **PRES-20**: Pino logger redacts `authorization` headers, `x-api-key`, cookies, `set-cookie`, and known upstream tokens (Upstash, OpenSky, AISStream, ADSB) before any sink output
+- [x] **PRES-21**: `server/__tests__/lib/logger-redaction.test.ts` verifies known sensitive paths appear as `[REDACTED]` in captured pino write-stream output
+- [x] **PRES-22**: `type-coverage` CLI installed; baseline measured; CI gate set at `floor(baseline)` with TODO note for the 99% target
 - [ ] **PRES-23**: Type coverage badge renders in README from a static shields.io badge sourced from the latest measurement
-- [ ] **PRES-24**: Chaos test `server/__tests__/chaos-redis.test.ts` proves all cached routes return 200 (with `degraded: true`) or 503 (never 500) when `@upstash/redis` throws on every call; `/health` reports `redis: false`
-- [ ] **PRES-25**: A `sendValidated` helper parses outbound API responses through Zod schemas before `res.json()`; dev mode throws on mismatch, prod mode logs warn and sends anyway
-- [ ] **PRES-26**: At least three representative routes (flights, events, water) are wired to `sendValidated` with response schemas matching `server/openapi.yaml`
+- [x] **PRES-24**: Chaos test `server/__tests__/resilience/redis-death.test.ts` proves all cached routes return 200 (with `degraded: true`) or 503 (never 500) when `@upstash/redis` throws on every call; `/health` reports `redis: false`
+- [x] **PRES-25**: A `sendValidated` helper parses outbound API responses through Zod schemas before `res.json()`; dev mode throws on mismatch, prod mode logs warn and sends anyway
+- [x] **PRES-26**: At least three representative routes (flights, events, water) are wired to `sendValidated` with response schemas matching `server/openapi.yaml`
 
 **Plan 04 — README + visuals + live demo hardening**
 
@@ -368,13 +368,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRES-13     | Phase 26.4 | Planned  |
 | PRES-14     | Phase 26.4 | Planned  |
 | PRES-15     | Phase 26.4 | Planned  |
-| PRES-20     | Phase 26.4 | Planned  |
-| PRES-21     | Phase 26.4 | Planned  |
-| PRES-22     | Phase 26.4 | Planned  |
+| PRES-20     | Phase 26.4 | Complete |
+| PRES-21     | Phase 26.4 | Complete |
+| PRES-22     | Phase 26.4 | Complete |
 | PRES-23     | Phase 26.4 | Planned  |
-| PRES-24     | Phase 26.4 | Planned  |
-| PRES-25     | Phase 26.4 | Planned  |
-| PRES-26     | Phase 26.4 | Planned  |
+| PRES-24     | Phase 26.4 | Complete |
+| PRES-25     | Phase 26.4 | Complete |
+| PRES-26     | Phase 26.4 | Complete |
 | PRES-30     | Phase 26.4 | Planned  |
 | PRES-31     | Phase 26.4 | Planned  |
 | PRES-32     | Phase 26.4 | Planned  |
@@ -400,10 +400,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 106 total, 13 complete (66 prior + 40 PRES-\* Phase 26.4)
-- Total: 140 mapped, 47 complete
+- v1.3 requirements: 106 total, 19 complete (66 prior + 40 PRES-\* Phase 26.4)
+- Total: 140 mapped, 53 complete
 
 ---
 
 _Requirements defined: 2026-03-19_
-_Last updated: 2026-04-07 -- Phase 26.4 production presentation requirements (PRES-01..PRES-55) added during planning_
+_Last updated: 2026-04-07 -- Phase 26.4 Plan 03 (Palantir gap closure) marked PRES-20..22, 24..26 complete_

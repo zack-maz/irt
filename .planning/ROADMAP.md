@@ -175,13 +175,13 @@ Plans:
 **Goal:** Portfolio-grade external presentation: professional README with architecture diagram, API documentation, setup guide, screenshots, architecture decision records (ADRs), CI/CD pipeline, pre-commit hooks, performance baselines, graceful degradation documentation.
 **Depends on:** Phase 26.3
 **Requirements:** [PRES-01, PRES-02, PRES-03, PRES-04, PRES-05, PRES-06, PRES-07]
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 
 Plans:
 
 - [x] 26.4-01-PLAN.md -- Final code grooming pass: Prettier + knip install, format repo, clear 81 pre-existing lint errors, knip cleanup, .env.example drift checker (completed 2026-04-07)
-- [ ] 26.4-02-PLAN.md -- CI/CD: GitHub Actions + CodeQL + husky + lint-staged + gitleaks pre-commit
-- [ ] 26.4-03-PLAN.md -- Palantir gaps: pino log redaction, type-coverage CI gate, Redis chaos test, Zod output-boundary validation
+- [x] 26.4-02-PLAN.md -- CI/CD: GitHub Actions + CodeQL + husky + lint-staged + gitleaks pre-commit (completed 2026-04-07)
+- [x] 26.4-03-PLAN.md -- Palantir gaps: pino log redaction, type-coverage CI gate, Redis chaos test, Zod output-boundary validation (completed 2026-04-07)
 - [ ] 26.4-04-PLAN.md -- Portfolio README with Hormuz GIF, layer screenshots, engineering badges, retrospective, live demo hardening
 - [ ] 26.4-05-PLAN.md -- Exhaustive Mermaid architecture docs under docs/architecture/ (4 altitudes + ontology)
 - [ ] 26.4-06-PLAN.md -- ADRs, runbook, graceful degradation doc + README wiring
