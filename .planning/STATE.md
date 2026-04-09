@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: 'Phase 26.4 shipped — PR #4 (v1.3 closeout: 26.3 + 26.4)'
-last_updated: '2026-04-09T03:07:17.987Z'
+status: 'v1.3 audit closed — 5 wiring gaps fixed on PR #4 (quick 260408-tbv); ready for merge'
+last_updated: '2026-04-09T04:31:47.217Z'
 progress:
   total_phases: 13
   completed_phases: 8
