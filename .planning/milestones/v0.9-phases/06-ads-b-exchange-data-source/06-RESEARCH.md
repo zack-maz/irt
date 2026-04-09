@@ -17,6 +17,7 @@ The existing codebase has a clean adapter pattern (`server/adapters/opensky.ts`)
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Source switching behavior: Flush and refetch on toggle -- clear all flights immediately, show loading state, fetch from new source
 - No auto-fallback -- stay on selected source when it fails, show error status. User manually switches if needed
 - Selected source persists in localStorage across page reloads
@@ -35,6 +36,7 @@ The existing codebase has a clean adapter pattern (`server/adapters/opensky.ts`)
 - Same ground traffic filter (onGround=false only) and unidentified flag logic as OpenSky adapter
 
 ### Claude's Discretion
+
 - Exact ADS-B Exchange polling interval (based on free-tier rate limits)
 - OpenSky backoff behavior on rate limit (or keep fixed 5s)
 - Dropdown component implementation details (custom vs native select)
@@ -43,6 +45,7 @@ The existing codebase has a clean adapter pattern (`server/adapters/opensky.ts`)
 - Exact status dot colors and styling within the dark theme
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 None -- discussion stayed within phase scope
 
 </user_constraints>
@@ -51,8 +54,8 @@ None -- discussion stayed within phase scope
 
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|-----------------|
+| ID      | Description                                                                                                  | Research Support                                                                                                                                            |
+| ------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | DATA-04 | ADS-B Exchange as alternative flight data source with UI toggle to switch between OpenSky and ADS-B Exchange | Full research: API endpoints, rate limits, field mapping, adapter pattern, polling interval calculation, UI component design, source switching architecture |
 
 </phase_requirements>
@@ -60,24 +63,28 @@ None -- discussion stayed within phase scope
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| Express 5 | ^5.2.1 | Server route with source param dispatch | Already in use, add query param routing |
-| Zustand 5 | ^5.0.11 | Store active source + per-source connection state | Already in use, extend flightStore |
-| React 19 | ^19.1.0 | Dropdown UI component | Already in use |
+
+| Library   | Version | Purpose                                           | Why Standard                            |
+| --------- | ------- | ------------------------------------------------- | --------------------------------------- |
+| Express 5 | ^5.2.1  | Server route with source param dispatch           | Already in use, add query param routing |
+| Zustand 5 | ^5.0.11 | Store active source + per-source connection state | Already in use, extend flightStore      |
+| React 19  | ^19.1.0 | Dropdown UI component                             | Already in use                          |
 
 ### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| (none needed) | - | No new dependencies | All functionality built with existing stack |
+
+| Library       | Version | Purpose             | When to Use                                 |
+| ------------- | ------- | ------------------- | ------------------------------------------- |
+| (none needed) | -       | No new dependencies | All functionality built with existing stack |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
+
+| Instead of      | Could Use         | Tradeoff                                                                                                      |
+| --------------- | ----------------- | ------------------------------------------------------------------------------------------------------------- |
 | Custom dropdown | Native `<select>` | Custom gives dark-theme control, native gives accessibility for free; custom preferred for visual consistency |
-| RapidAPI SDK | Raw `fetch()` | SDK adds dependency; raw fetch is sufficient for 1 endpoint with 2 headers |
+| RapidAPI SDK    | Raw `fetch()`     | SDK adds dependency; raw fetch is sufficient for 1 endpoint with 2 headers                                    |
 
 **Installation:**
+
 ```bash
 # No new packages needed -- all functionality builds on existing stack
 ```
@@ -85,6 +92,7 @@ None -- discussion stayed within phase scope
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 server/
   adapters/
@@ -110,9 +118,11 @@ src/
 ```
 
 ### Pattern 1: Server-Side Adapter Dispatch
+
 **What:** Single `/api/flights` route accepts `?source=adsb|opensky` and dispatches to the correct adapter, each with its own cache instance.
 **When to use:** Always -- this is the locked architecture decision.
 **Example:**
+
 ```typescript
 // server/routes/flights.ts
 import { fetchFlights as fetchOpenSky } from '../adapters/opensky.js';
@@ -152,9 +162,11 @@ flightsRouter.get('/', async (req, res) => {
 ```
 
 ### Pattern 2: ADS-B Exchange Adapter with Unit Conversion
+
 **What:** Adapter fetches from RapidAPI, filters ground traffic, converts units, normalizes to FlightEntity.
 **When to use:** Every ADS-B Exchange fetch.
 **Example:**
+
 ```typescript
 // server/adapters/adsb-exchange.ts
 const RAPIDAPI_BASE = 'https://adsbexchange-com1.p.rapidapi.com';
@@ -165,12 +177,12 @@ interface AdsbAircraft {
   lat?: number;
   lon?: number;
   alt_baro?: number | 'ground';
-  gs?: number;         // knots
-  track?: number;      // degrees
-  baro_rate?: number;  // feet/min
-  t?: string;          // ICAO type
-  r?: string;          // registration
-  dbFlags?: number;    // bitfield: 1=military
+  gs?: number; // knots
+  track?: number; // degrees
+  baro_rate?: number; // feet/min
+  t?: string; // ICAO type
+  r?: string; // registration
+  dbFlags?: number; // bitfield: 1=military
 }
 
 interface AdsbResponse {
@@ -182,7 +194,7 @@ interface AdsbResponse {
 
 function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
   if (ac.lat == null || ac.lon == null) return null;
-  if (ac.alt_baro === 'ground') return null;  // ground traffic filter
+  if (ac.alt_baro === 'ground') return null; // ground traffic filter
 
   const callsign = typeof ac.flight === 'string' ? ac.flight.trim() : '';
 
@@ -196,12 +208,12 @@ function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
     data: {
       icao24: ac.hex,
       callsign: callsign || ac.hex,
-      originCountry: '',           // ADS-B Exchange does not provide origin country
-      velocity: ac.gs != null ? ac.gs * 0.514444 : null,  // knots -> m/s
+      originCountry: '', // ADS-B Exchange does not provide origin country
+      velocity: ac.gs != null ? ac.gs * 0.514444 : null, // knots -> m/s
       heading: ac.track ?? null,
-      altitude: ac.alt_baro != null ? (ac.alt_baro as number) * 0.3048 : null,  // feet -> meters
+      altitude: ac.alt_baro != null ? (ac.alt_baro as number) * 0.3048 : null, // feet -> meters
       onGround: false,
-      verticalRate: ac.baro_rate != null ? ac.baro_rate * 0.00508 : null,  // ft/min -> m/s
+      verticalRate: ac.baro_rate != null ? ac.baro_rate * 0.00508 : null, // ft/min -> m/s
       unidentified: callsign === '',
     },
   };
@@ -209,20 +221,24 @@ function normalizeAircraft(ac: AdsbAircraft): FlightEntity | null {
 ```
 
 ### Pattern 3: Source-Aware Polling Hook
+
 **What:** The polling hook reads `activeSource` from the store and adjusts both the fetch URL and polling interval accordingly.
 **When to use:** Frontend polling refactor.
 **Example:**
+
 ```typescript
 // Conceptual -- useFlightPolling modifications
-const activeSource = useFlightStore(s => s.activeSource);
+const activeSource = useFlightStore((s) => s.activeSource);
 const interval = activeSource === 'adsb' ? ADSB_POLL_INTERVAL : OPENSKY_POLL_INTERVAL;
 const url = `/api/flights?source=${activeSource}`;
 ```
 
 ### Pattern 4: Custom Dropdown with Status Badge
+
 **What:** A floating dropdown in the top-right map overlay area, using the existing OverlayPanel styling, with integrated connection status below.
 **When to use:** New SourceSelector component.
 **Example:**
+
 ```typescript
 // Conceptual SourceSelector component structure
 <OverlayPanel className="min-w-[180px]">
@@ -241,6 +257,7 @@ const url = `/api/flights?source=${activeSource}`;
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Shared cache between sources:** Each source has different data freshness and rate limits. Separate caches prevent stale OpenSky data being served when user switches to ADS-B and vice versa.
 - **Polling interval in the component:** Keep the polling interval in constants, not hardcoded in the hook. The hook reads the active source and selects the correct interval.
 - **Auto-fallback between sources:** User decision locks this -- no automatic switching. Show the error and let the user decide.
@@ -248,59 +265,67 @@ const url = `/api/flights?source=${activeSource}`;
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Unit conversion (knots/ft to m/s/meters) | Custom math scattered everywhere | Centralized conversion constants | Easy to get wrong, should be single-source-of-truth |
-| Bounding box to radius | Complex geographic math | Pre-computed center point + fixed 250 NM radius | The Iran center (32.5, 53.75) with 250 NM is a fixed constant |
-| Rate limit detection | String parsing of error messages | Custom `RateLimitError` class thrown on 429 status | Structured error handling is more reliable |
-| localStorage persistence | Manual `JSON.parse`/`stringify` with try-catch | Zustand `persist` middleware or simple utility | Edge cases with storage quota, SSR, invalid JSON |
+| Problem                                  | Don't Build                                    | Use Instead                                        | Why                                                           |
+| ---------------------------------------- | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------- |
+| Unit conversion (knots/ft to m/s/meters) | Custom math scattered everywhere               | Centralized conversion constants                   | Easy to get wrong, should be single-source-of-truth           |
+| Bounding box to radius                   | Complex geographic math                        | Pre-computed center point + fixed 250 NM radius    | The Iran center (32.5, 53.75) with 250 NM is a fixed constant |
+| Rate limit detection                     | String parsing of error messages               | Custom `RateLimitError` class thrown on 429 status | Structured error handling is more reliable                    |
+| localStorage persistence                 | Manual `JSON.parse`/`stringify` with try-catch | Zustand `persist` middleware or simple utility     | Edge cases with storage quota, SSR, invalid JSON              |
 
 **Key insight:** The ADS-B Exchange adapter is structurally identical to the OpenSky adapter -- both take a bounding box (or equivalent), call an API, and return `FlightEntity[]`. The complexity is in the field mapping and unit conversions, not the architecture.
 
 ## Common Pitfalls
 
 ### Pitfall 1: Bounding Box vs Radius Coverage Gap
+
 **What goes wrong:** ADS-B Exchange uses radius-based queries (max 250 NM) while OpenSky uses bounding box. A single 250 NM radius from Iran's center (32.5, 53.75) covers lat 28.3-36.7, lon 48.8-58.7 -- missing the corners and edges of the full Iran bbox (25-40 lat, 44-63.5 lon).
 **Why it happens:** Iran's bbox spans ~900x987 NM but the API max radius is 250 NM.
 **How to avoid:** Accept reduced geographic coverage with a single query (covers core Iran airspace). Document this tradeoff in the UI or use it as-is since most flight traffic concentrates in the center. If full coverage is needed, use multiple queries but accept 17+ minute polling intervals.
 **Warning signs:** Users notice flights appearing/disappearing near the edges when switching sources.
 
 ### Pitfall 2: Unit Conversion Errors
+
 **What goes wrong:** ADS-B Exchange returns altitude in feet, speed in knots, and vertical rate in feet/minute. OpenSky returns altitude in meters, speed in m/s, and vertical rate in m/s. If conversions are wrong, entity rendering (altitude-based opacity, speed-based coloring) breaks.
 **Why it happens:** Both sources populate the same FlightEntity fields but use different units upstream.
 **How to avoid:** Centralize conversion factors as named constants. Test with known values.
 **Warning signs:** Flights appear at wildly different opacity/size when switching sources.
 
 **Conversion factors:**
+
 - Altitude: feet to meters = multiply by 0.3048
 - Speed: knots to m/s = multiply by 0.514444
 - Vertical rate: ft/min to m/s = multiply by 0.00508 (0.3048/60)
 
 ### Pitfall 3: `alt_baro: "ground"` String Value
+
 **What goes wrong:** ADS-B Exchange returns `"ground"` as a string for `alt_baro` when aircraft is on the ground, not a number. If the adapter tries `alt_baro * 0.3048` without checking the type, it produces NaN.
 **Why it happens:** The V2 API uses a union type (`number | "ground"`) for barometric altitude.
 **How to avoid:** Check `ac.alt_baro === 'ground'` as the ground traffic filter (equivalent to OpenSky's `on_ground === true`). Return null for ground aircraft.
 **Warning signs:** NaN values in altitude field, ground aircraft appearing on map.
 
 ### Pitfall 4: Rate Limit Exhaustion
+
 **What goes wrong:** With 10,000 requests/month free tier, overly aggressive polling exhausts the budget mid-month.
 **Why it happens:** 10,000 requests / 30 days = ~333 requests/day. At one request per poll, that's one poll every ~260 seconds (~4.3 min).
 **How to avoid:** Set polling interval to 260,000 ms (260 seconds). Add budget tracking (count requests) as a nice-to-have. Serve stale cache when rate limited.
 **Warning signs:** 429 responses consistently, connection status stuck on "Rate limited."
 
 ### Pitfall 5: Missing `originCountry` Field
+
 **What goes wrong:** ADS-B Exchange V2 does not return `origin_country` like OpenSky does. If downstream code assumes `originCountry` is always a non-empty string, it may filter incorrectly or display poorly.
 **Why it happens:** Different APIs expose different data.
 **How to avoid:** Set `originCountry: ''` (empty string) in the adapter. Downstream code must handle empty origin country gracefully (already the case for the current UI which just displays it).
 **Warning signs:** Empty strings where country names should be.
 
 ### Pitfall 6: `hex` Field with Tilde Prefix
+
 **What goes wrong:** ADS-B Exchange V2 prefixes non-ICAO hex addresses with `~`. If the ID construction uses `flight-${hex}`, the tilde could cause issues in selectors or URLs.
 **Why it happens:** Non-ICAO addresses (TIS-B, ADS-R) use a different addressing scheme.
 **How to avoid:** Strip the tilde when constructing the entity ID, or replace it: `ac.hex.replace(/^~/, '')`. The hex with tilde can still be stored in `data.icao24` for display.
 **Warning signs:** Entity IDs with `~` characters breaking CSS selectors or URL parameters.
 
 ### Pitfall 7: Server Startup Failure Without API Key
+
 **What goes wrong:** The locked decision says "server fails without ADSB_EXCHANGE_API_KEY." But the current `config.ts` uses `required()` which throws immediately at config load time, blocking ALL server functionality (including OpenSky).
 **Why it happens:** Lazy config loads everything at once.
 **How to avoid:** Make ADS-B Exchange API key optional at startup (like AISStream is guarded). Validate it when the adsb source is actually requested. Or use a separate config section that is only loaded on demand.
@@ -311,6 +336,7 @@ const url = `/api/flights?source=${activeSource}`;
 Verified patterns from official sources:
 
 ### ADS-B Exchange V2 API Call via RapidAPI
+
 ```typescript
 // Source: ADS-B Exchange official docs + RapidAPI endpoint structure
 // Endpoint: /v2/lat/{lat}/lon/{lon}/dist/{dist}/
@@ -321,7 +347,7 @@ const RAPIDAPI_HOST = 'adsbexchange-com1.p.rapidapi.com';
 async function fetchAdsbExchange(
   center: { lat: number; lon: number },
   radiusNM: number,
-  apiKey: string
+  apiKey: string,
 ): Promise<AdsbResponse> {
   const url = `https://${RAPIDAPI_HOST}/v2/lat/${center.lat}/lon/${center.lon}/dist/${radiusNM}/`;
 
@@ -345,6 +371,7 @@ async function fetchAdsbExchange(
 ```
 
 ### V2 Response Format (from adsb.one -- ADSBExchange v2 compatible)
+
 ```json
 {
   "ac": [
@@ -386,6 +413,7 @@ async function fetchAdsbExchange(
 ```
 
 ### Field Mapping: ADS-B Exchange V2 -> FlightEntity
+
 ```typescript
 // Source: ADS-B Exchange V2 API fields documentation
 // https://www.adsbexchange.com/version-2-api-wip/
@@ -410,6 +438,7 @@ const FPM_TO_MS = 0.00508; // feet per minute to meters per second
 ```
 
 ### Rate Limit Budget Calculation
+
 ```typescript
 // Source: RapidAPI ADSBExchange pricing page
 // Free tier: 10,000 requests/month
@@ -435,6 +464,7 @@ export const ADSB_RADIUS_NM = 250;
 ```
 
 ### Source Persistence with localStorage
+
 ```typescript
 // Pattern for persisting active source across page reloads
 type FlightSource = 'opensky' | 'adsb';
@@ -462,14 +492,15 @@ function persistSource(source: FlightSource): void {
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| ADS-B Exchange direct API (api-auth header) | RapidAPI proxy (X-RapidAPI-Key header) | ~2023 | Must use RapidAPI headers, not direct api-auth |
-| V1 API format | V2 API format (current) | ~2022 | V2 uses `ac` array with modern field names |
-| Free tier (500 req/month) | Free tier (10,000 req/month) | ~2024 | Much more viable for polling use case |
-| ADSBx Flight Sim Traffic API | Discontinued (March 2025) | March 2025 | Only `adsbexchange-com1` remains on RapidAPI |
+| Old Approach                                | Current Approach                       | When Changed | Impact                                         |
+| ------------------------------------------- | -------------------------------------- | ------------ | ---------------------------------------------- |
+| ADS-B Exchange direct API (api-auth header) | RapidAPI proxy (X-RapidAPI-Key header) | ~2023        | Must use RapidAPI headers, not direct api-auth |
+| V1 API format                               | V2 API format (current)                | ~2022        | V2 uses `ac` array with modern field names     |
+| Free tier (500 req/month)                   | Free tier (10,000 req/month)           | ~2024        | Much more viable for polling use case          |
+| ADSBx Flight Sim Traffic API                | Discontinued (March 2025)              | March 2025   | Only `adsbexchange-com1` remains on RapidAPI   |
 
 **Deprecated/outdated:**
+
 - Direct API access (`adsbexchange.com/api/aircraft/...` with `api-auth` header) -- still works with enterprise/direct keys, but personal/hobby access is via RapidAPI
 - V1 field format -- V2 is current standard, all compatible services (adsb.one, adsb.lol, adsb.fi) implement V2
 
@@ -495,21 +526,27 @@ function persistSource(source: FlightSource): void {
 Based on research findings, here are recommendations for areas marked as Claude's discretion:
 
 ### Polling Interval: 260 seconds (4 min 20 sec)
+
 Single 250 NM query per poll. 10,000 requests/month / 30 days / 24 hours = ~13.9 requests/hour = one request every ~260 seconds. This is sustainable and stays well under the monthly budget with a safety margin.
 
 ### OpenSky Backoff: No change
+
 Keep OpenSky at fixed 5s interval. OpenSky uses OAuth tokens and has different rate limiting (per-user, not per-request-count). Adding backoff complexity is not justified for a source that works reliably. If OpenSky gets a 429, the existing error handling (serve stale cache, show error status) is sufficient.
 
 ### Dropdown: Custom component
+
 Use a custom dropdown built with the existing `OverlayPanel` component for visual consistency with the dark theme. A native `<select>` cannot be styled to match the dark overlay aesthetic. The dropdown has only 2 options so accessibility complexity is minimal -- use `role="listbox"` and `aria-expanded` for basic a11y.
 
 ### Polling Hook Wiring
+
 The `useFlightPolling` hook should read `activeSource` from the flight store. When the source changes, the hook's `useEffect` should clean up the current timeout and restart polling with the new source and interval. The `activeSource` goes in the `useEffect` dependency array.
 
 ### Cache Strategy: Separate caches per source
+
 Use two `EntityCache` instances in `flights.ts` -- one for OpenSky, one for ADS-B Exchange. This prevents cross-contamination: OpenSky's 10s cache TTL differs from ADS-B's longer TTL, and switching sources should not serve data from the other source.
 
 ### Status Dot Colors
+
 - Connected: `accent-green` (oklch(0.723 0.219 149.58)) -- existing theme color
 - Stale: `accent-yellow` (oklch(0.795 0.184 86.05)) -- existing theme color
 - Error: `accent-red` (oklch(0.577 0.245 27.33)) -- existing theme color
@@ -519,34 +556,38 @@ Use two `EntityCache` instances in `flights.ts` -- one for OpenSky, one for ADS-
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 4.1 with jsdom (frontend), node (server) |
-| Config file | `vite.config.ts` (test section) |
-| Quick run command | `npx vitest run server/__tests__/adapters/` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                                           |
+| ------------------ | ----------------------------------------------- |
+| Framework          | Vitest 4.1 with jsdom (frontend), node (server) |
+| Config file        | `vite.config.ts` (test section)                 |
+| Quick run command  | `npx vitest run server/__tests__/adapters/`     |
+| Full suite command | `npx vitest run`                                |
 
 ### Phase Requirements -> Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| DATA-04a | ADS-B Exchange adapter normalizes V2 response to FlightEntity | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 |
-| DATA-04b | ADS-B Exchange adapter filters ground traffic (alt_baro === "ground") | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 |
-| DATA-04c | ADS-B Exchange adapter converts units (knots->m/s, feet->m) | unit | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0 |
-| DATA-04d | Flight route dispatches to correct adapter by source param | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 |
-| DATA-04e | Flight route returns rateLimited flag on 429 | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 |
-| DATA-04f | Flight route serves stale cache when rate limited | unit | `npx vitest run server/__tests__/routes/flights.test.ts -x` | Wave 0 |
-| DATA-04g | ADS-B Exchange API key not leaked in responses | integration | `npx vitest run server/__tests__/security.test.ts -x` | Modify existing |
-| DATA-04h | FlightStore handles rateLimited connection status | unit | `npx vitest run src/__tests__/flightStore.test.ts -x` | Modify existing |
-| DATA-04i | useFlightPolling uses source-specific URL and interval | unit | `npx vitest run src/__tests__/useFlightPolling.test.ts -x` | Modify existing |
-| DATA-04j | SourceSelector renders dropdown with current source | unit | `npx vitest run src/__tests__/SourceSelector.test.ts -x` | Wave 0 |
-| DATA-04k | Source toggle flushes flights and triggers refetch | integration | `npx vitest run src/__tests__/useFlightPolling.test.ts -x` | Modify existing |
+
+| Req ID   | Behavior                                                              | Test Type   | Automated Command                                                   | File Exists?    |
+| -------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------- | --------------- |
+| DATA-04a | ADS-B Exchange adapter normalizes V2 response to FlightEntity         | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          |
+| DATA-04b | ADS-B Exchange adapter filters ground traffic (alt_baro === "ground") | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          |
+| DATA-04c | ADS-B Exchange adapter converts units (knots->m/s, feet->m)           | unit        | `npx vitest run server/__tests__/adapters/adsb-exchange.test.ts -x` | Wave 0          |
+| DATA-04d | Flight route dispatches to correct adapter by source param            | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          |
+| DATA-04e | Flight route returns rateLimited flag on 429                          | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          |
+| DATA-04f | Flight route serves stale cache when rate limited                     | unit        | `npx vitest run server/__tests__/routes/flights.test.ts -x`         | Wave 0          |
+| DATA-04g | ADS-B Exchange API key not leaked in responses                        | integration | `npx vitest run server/__tests__/security.test.ts -x`               | Modify existing |
+| DATA-04h | FlightStore handles rateLimited connection status                     | unit        | `npx vitest run src/__tests__/flightStore.test.ts -x`               | Modify existing |
+| DATA-04i | useFlightPolling uses source-specific URL and interval                | unit        | `npx vitest run src/__tests__/useFlightPolling.test.ts -x`          | Modify existing |
+| DATA-04j | SourceSelector renders dropdown with current source                   | unit        | `npx vitest run src/__tests__/SourceSelector.test.ts -x`            | Wave 0          |
+| DATA-04k | Source toggle flushes flights and triggers refetch                    | integration | `npx vitest run src/__tests__/useFlightPolling.test.ts -x`          | Modify existing |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run server/__tests__/ src/__tests__/`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `server/__tests__/adapters/adsb-exchange.test.ts` -- covers DATA-04a, DATA-04b, DATA-04c
 - [ ] `server/__tests__/routes/flights.test.ts` -- covers DATA-04d, DATA-04e, DATA-04f (new file, existing route tests were inline in security.test.ts)
 - [ ] `src/__tests__/SourceSelector.test.ts` -- covers DATA-04j
@@ -557,21 +598,25 @@ Use two `EntityCache` instances in `flights.ts` -- one for OpenSky, one for ADS-
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - [ADS-B Exchange V2 API Fields](https://www.adsbexchange.com/version-2-api-wip/) - Complete field documentation with types and units
 - [ADSB One API (v2-compatible)](https://github.com/airplanes-live/api) - Verified response format and endpoint structure, confirmed 250 NM max radius
 - [RapidAPI ADSBexchange-com1 details page](https://rapidapi.com/adsbx/api/adsbexchange-com1/details) - Confirmed base URL, 15 endpoints, endpoint patterns
 
 ### Secondary (MEDIUM confidence)
+
 - [RapidAPI pricing](https://rapidapi.com/adsbx/api/adsbexchange-com1/pricing) - 10,000 requests/month, $10/month for basic tier; free tier existence unclear for 2026
 - [ADS-B Exchange API Lite page](https://www.adsbexchange.com/api-lite/) - Personal/non-commercial use via RapidAPI
 - [ADS-B Exchange REST API samples](https://www.adsbexchange.com/data/rest-api-samples/) - Endpoint format, auth header pattern
 
 ### Tertiary (LOW confidence)
+
 - Rate limit free tier status (conflicting sources about free vs. paid-only) -- needs validation at implementation time
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - No new dependencies, extends existing patterns
 - Architecture: HIGH - Adapter pattern proven with OpenSky, route dispatch is straightforward
 - ADS-B Exchange API format: HIGH - V2 format confirmed across multiple compatible implementations (adsb.one, adsb.lol, adsb.fi)

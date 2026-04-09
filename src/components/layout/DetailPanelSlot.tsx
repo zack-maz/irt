@@ -22,9 +22,12 @@ function getDotColor(type: string): string {
   if (type === 'site') return ENTITY_DOT_COLORS.siteHealthy;
   if (type === 'water') return '#4ade80';
   if (isConflictEventType(type)) {
-    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.airstrikes;
-    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.groundCombat;
-    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type)) return ENTITY_DOT_COLORS.targeted;
+    if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.airstrikes;
+    if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.groundCombat;
+    if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type))
+      return ENTITY_DOT_COLORS.targeted;
     return ENTITY_DOT_COLORS.groundCombat;
   }
   return '#9ca3af';
@@ -66,7 +69,9 @@ export function DetailPanelSlot() {
   const { entity, isLost } = useSelectedEntity();
   const [copied, setCopied] = useState(false);
 
-  const relativeTime = useRelativeTime(entity?.timestamp ?? null);
+  // Site/water entities lack a top-level timestamp (they're static infrastructure).
+  const entityTimestamp = entity && 'timestamp' in entity ? entity.timestamp : null;
+  const relativeTime = useRelativeTime(entityTimestamp);
 
   const dismiss = useCallback(() => {
     closeDetailPanel();
@@ -97,9 +102,7 @@ export function DetailPanelSlot() {
 
   const handleCopy = useCallback(() => {
     if (!entity) return;
-    navigator.clipboard.writeText(
-      `${entity.lat.toFixed(6)}, ${entity.lng.toFixed(6)}`
-    ).then(() => {
+    navigator.clipboard.writeText(`${entity.lat.toFixed(6)}, ${entity.lng.toFixed(6)}`).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -156,8 +159,8 @@ export function DetailPanelSlot() {
                 slideDirection === 'forward'
                   ? 'animate-slide-in-right'
                   : slideDirection === 'back'
-                  ? 'animate-slide-in-left'
-                  : ''
+                    ? 'animate-slide-in-left'
+                    : ''
               }`}
             >
               <ThreatClusterDetail cluster={selectedCluster} />
@@ -213,23 +216,17 @@ export function DetailPanelSlot() {
                 slideDirection === 'forward'
                   ? 'animate-slide-in-right'
                   : slideDirection === 'back'
-                  ? 'animate-slide-in-left'
-                  : ''
+                    ? 'animate-slide-in-left'
+                    : ''
               }`}
             >
               {/* Per-type content */}
-              {entity.type === 'flight' && (
-                <FlightDetail entity={entity as FlightEntity} />
-              )}
-              {entity.type === 'ship' && (
-                <ShipDetail entity={entity as ShipEntity} />
-              )}
+              {entity.type === 'flight' && <FlightDetail entity={entity as FlightEntity} />}
+              {entity.type === 'ship' && <ShipDetail entity={entity as ShipEntity} />}
               {isConflictEventType(entity.type) && (
                 <EventDetail entity={entity as ConflictEventEntity} />
               )}
-              {entity.type === 'site' && (
-                <SiteDetail entity={entity as SiteEntity} />
-              )}
+              {entity.type === 'site' && <SiteDetail entity={entity as SiteEntity} />}
               {entity.type === 'water' && (
                 <WaterFacilityDetail facility={entity as unknown as WaterFacility} />
               )}
@@ -255,9 +252,7 @@ export function DetailPanelSlot() {
 
               {/* Relative timestamp */}
               <div className="mt-3 px-3 py-1">
-                <span className="text-[10px] text-text-muted">
-                  {relativeTime}
-                </span>
+                <span className="text-[10px] text-text-muted">{relativeTime}</span>
               </div>
             </div>
           </>

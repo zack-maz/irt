@@ -6,7 +6,9 @@
  * to minimize API calls, then fans results back to all original locations.
  */
 
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'open-meteo-precip' });
 
 export interface PrecipitationData {
   lat: number;
@@ -17,10 +19,10 @@ export interface PrecipitationData {
 }
 
 /** Approximate regional monthly precipitation normals (mm) */
-const REGIONAL_NORMALS_MM: Record<string, number> = {
-  arid: 20,    // Arabian Peninsula, central Iran, Sahara
+const REGIONAL_NORMALS_MM = {
+  arid: 20, // Arabian Peninsula, central Iran, Sahara
   fertile: 50, // Fertile Crescent, coastal areas, Turkey
-};
+} as const;
 
 /**
  * Estimate the regional monthly normal precipitation for a coordinate.
@@ -77,15 +79,22 @@ export async function fetchPrecipitation(
   }
   const uniqueCells = Array.from(cellMap.values());
 
-  log({ level: 'info', message: `[open-meteo-precip] ${locations.length} locations → ${uniqueCells.length} unique grid cells (${Math.ceil(uniqueCells.length / BATCH_SIZE)} batches)` });
+  log.info(
+    {
+      locations: locations.length,
+      uniqueCells: uniqueCells.length,
+      batches: Math.ceil(uniqueCells.length / BATCH_SIZE),
+    },
+    'starting precipitation fetch',
+  );
 
   // Fetch precipitation for unique grid cells
   const cellResults = new Map<string, { totalMm: number; anomalyRatio: number }>();
 
   for (let i = 0; i < uniqueCells.length; i += BATCH_SIZE) {
     const batch = uniqueCells.slice(i, i + BATCH_SIZE);
-    const lats = batch.map(c => c.lat.toFixed(2)).join(',');
-    const lngs = batch.map(c => c.lng.toFixed(2)).join(',');
+    const lats = batch.map((c) => c.lat.toFixed(2)).join(',');
+    const lngs = batch.map((c) => c.lng.toFixed(2)).join(',');
 
     const url =
       `https://api.open-meteo.com/v1/forecast?` +
@@ -98,7 +107,10 @@ export async function fetchPrecipitation(
       });
 
       if (!res.ok) {
-        log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} returned ${res.status}, skipping` });
+        log.warn(
+          { batch: Math.floor(i / BATCH_SIZE), status: res.status },
+          'batch returned error, skipping',
+        );
         continue;
       }
 
@@ -108,7 +120,7 @@ export async function fetchPrecipitation(
       for (let j = 0; j < responses.length; j++) {
         const cell = batch[j];
         const data = responses[j];
-        if (!data?.daily?.precipitation_sum) continue;
+        if (!cell || !data?.daily?.precipitation_sum) continue;
 
         const totalMm = data.daily.precipitation_sum.reduce(
           (sum: number, v: number | null) => sum + (v ?? 0),
@@ -124,7 +136,7 @@ export async function fetchPrecipitation(
         });
       }
     } catch (batchErr) {
-      log({ level: 'warn', message: `[open-meteo-precip] Batch ${Math.floor(i / BATCH_SIZE)} failed: ${(batchErr as Error).message}, skipping` });
+      log.warn({ err: batchErr, batch: Math.floor(i / BATCH_SIZE) }, 'batch failed, skipping');
       continue;
     }
   }
@@ -144,6 +156,9 @@ export async function fetchPrecipitation(
     });
   }
 
-  log({ level: 'info', message: `[open-meteo-precip] Fetched precipitation for ${cellResults.size} cells, mapped to ${results.length} locations` });
+  log.info(
+    { cells: cellResults.size, mappedLocations: results.length },
+    'precipitation fetch complete',
+  );
   return results;
 }

@@ -11,7 +11,9 @@ export function TextSearchInput({ label, value, onChange, placeholder }: TextSea
   const id = useId();
   return (
     <div className="flex flex-col gap-0.5">
-      <label htmlFor={id} className="text-[10px] uppercase tracking-wider text-text-muted">{label}</label>
+      <label htmlFor={id} className="text-[10px] uppercase tracking-wider text-text-muted">
+        {label}
+      </label>
       <input
         id={id}
         type="text"

@@ -15,12 +15,14 @@
 ### Task 1: Restructure filterStore with entity-scoped fields
 
 **Files:**
+
 - Modify: `src/stores/filterStore.ts`
 - Modify: `src/__tests__/filterStore.test.ts`
 
 - [ ] **Step 1: Update the test file for new field names and actions**
 
 Replace the entire test file to match the new store shape. Key changes:
+
 - `selectedCountries` → `flightCountries` / `eventCountries`
 - `speedMin/speedMax` → `flightSpeedMin/flightSpeedMax`
 - New: `shipSpeedMin/shipSpeedMax`
@@ -39,6 +41,7 @@ Expected: FAIL — old field names no longer match
 - [ ] **Step 3: Update filterStore.ts with new fields and actions**
 
 Changes to `src/stores/filterStore.ts`:
+
 - Replace `FilterKey` type with: `'flightCountry' | 'eventCountry' | 'flightSpeed' | 'shipSpeed' | 'altitude' | 'proximity' | 'date'`
 - Replace `selectedCountries: string[]` with `flightCountries: string[]` and `eventCountries: string[]`
 - Replace `speedMin/speedMax` with `flightSpeedMin/flightSpeedMax`
@@ -67,18 +70,21 @@ git commit -m "refactor: split filterStore into entity-scoped fields"
 ### Task 2: Update filter predicate for entity-scoped logic
 
 **Files:**
+
 - Modify: `src/lib/filters.ts`
 - Modify: `src/__tests__/filters.test.ts`
 
 - [ ] **Step 1: Update test file for entity-scoped filter behavior**
 
 Update `makeDefaults()` to return the new `FilterState` shape:
+
 - `flightCountries: []`, `eventCountries: []`
 - `flightSpeedMin/flightSpeedMax: null`
 - `shipSpeedMin/shipSpeedMax: null`
 - All new action stubs (no-op functions)
 
 Update all test cases:
+
 - Country filter tests: use `flightCountries` for flight tests, `eventCountries` for event tests
 - Speed filter tests: use `flightSpeedMin/flightSpeedMax` for flight tests
 - Add new tests: ship speed uses `shipSpeedMin/shipSpeedMax`
@@ -97,11 +103,13 @@ Expected: FAIL — old field names
 Rewrite the predicate to use entity-scoped fields:
 
 **Country filter section:**
+
 - Flights: check against `filters.flightCountries` (case-insensitive match on `originCountry`)
 - Events: check against `filters.eventCountries` (case-insensitive includes on `actor1`/`actor2`)
 - Ships: always pass (no country data)
 
 **Speed filter section — split into two blocks:**
+
 - Flight speed: if `filters.flightSpeedMin !== null || filters.flightSpeedMax !== null`, only check `entity.type === 'flight'`. Convert `velocity` (m/s) to knots. Ships and events pass through.
 - Ship speed: if `filters.shipSpeedMin !== null || filters.shipSpeedMax !== null`, only check `entity.type === 'ship'`. Use `speedOverGround` (already in knots). Flights and events pass through.
 
@@ -128,6 +136,7 @@ git commit -m "refactor: scope filter predicates by entity type"
 ### Task 3: Update useFilteredEntities hook, UI store, and dependent tests
 
 **Files:**
+
 - Modify: `src/hooks/useFilteredEntities.ts`
 - Modify: `src/types/ui.ts`
 - Modify: `src/stores/uiStore.ts`
@@ -137,10 +146,20 @@ git commit -m "refactor: scope filter predicates by entity type"
 - [ ] **Step 1: Update useFilteredEntities shallow selector**
 
 In `src/hooks/useFilteredEntities.ts`, update the `useShallow` selector to pull:
+
 ```ts
-flightCountries, eventCountries, flightSpeedMin, flightSpeedMax,
-shipSpeedMin, shipSpeedMax, altitudeMin, altitudeMax,
-proximityPin, proximityRadiusKm, dateStart, dateEnd
+(flightCountries,
+  eventCountries,
+  flightSpeedMin,
+  flightSpeedMax,
+  shipSpeedMin,
+  shipSpeedMax,
+  altitudeMin,
+  altitudeMax,
+  proximityPin,
+  proximityRadiusKm,
+  dateStart,
+  dateEnd);
 ```
 
 The rest of the hook (filter calls, return shape) stays the same — `entityPassesFilters` still takes full `FilterState`.
@@ -148,6 +167,7 @@ The rest of the hook (filter calls, return shape) stays the same — `entityPass
 - [ ] **Step 2: Add filter section toggle state to UIState**
 
 In `src/types/ui.ts`, add to `UIState` interface:
+
 ```ts
 isFlightFiltersOpen: boolean;
 isShipFiltersOpen: boolean;
@@ -160,6 +180,7 @@ toggleEventFilters: () => void;
 - [ ] **Step 3: Implement toggles in uiStore.ts**
 
 Add defaults (all `true`) and toggle actions to the Zustand store:
+
 ```ts
 isFlightFiltersOpen: true,
 isShipFiltersOpen: true,
@@ -194,6 +215,7 @@ git commit -m "refactor: update useFilteredEntities selector, add filter section
 ### Task 4: Reposition FilterPanelSlot and restructure AppShell
 
 **Files:**
+
 - Modify: `src/components/layout/AppShell.tsx`
 - Modify: `src/components/layout/FilterPanelSlot.tsx`
 - Delete: `src/components/layout/FiltersSlot.tsx`
@@ -201,6 +223,7 @@ git commit -m "refactor: update useFilteredEntities selector, add filter section
 - [ ] **Step 1: Move FilterPanelSlot out of the top-left stack in AppShell**
 
 In `src/components/layout/AppShell.tsx`:
+
 - Remove `<FilterPanelSlot />` from the top-left flex column (line 33)
 - Add `<FilterPanelSlot />` as a sibling to `<DetailPanelSlot />`, both absolutely positioned:
 
@@ -213,6 +236,7 @@ In `src/components/layout/AppShell.tsx`:
 - [ ] **Step 2: Rewrite FilterPanelSlot with right-side positioning**
 
 Replace the outer wrapper in `FilterPanelSlot` from `<div data-testid="filter-panel-slot">` to:
+
 ```tsx
 <div
   data-testid="filter-panel-slot"
@@ -224,6 +248,7 @@ Replace the outer wrapper in `FilterPanelSlot` from `<div data-testid="filter-pa
 ```
 
 Read `isDetailPanelOpen` from uiStore:
+
 ```ts
 const isDetailPanelOpen = useUIStore((s) => s.isDetailPanelOpen);
 ```
@@ -253,12 +278,14 @@ git commit -m "feat: reposition filter panel to right side with detail panel awa
 ### Task 5: Rebuild FilterPanelSlot internals with entity sections
 
 **Files:**
+
 - Modify: `src/components/layout/FilterPanelSlot.tsx`
 - Modify: `src/__tests__/FilterPanel.test.tsx`
 
 - [ ] **Step 1: Update FilterPanel.test.tsx for new panel structure**
 
 Rewrite tests for:
+
 - Collapsed state still shows "Filters" header
 - Expanded state shows entity section headers: "Flights", "Ships", "Events"
 - Proximity section appears at top level (outside entity sections)
@@ -319,6 +346,7 @@ git commit -m "feat: restructure filter panel with entity-scoped sections"
 ### Task 6: Final verification and cleanup
 
 **Files:**
+
 - None (verification only)
 
 - [ ] **Step 1: Run full test suite**
@@ -334,6 +362,7 @@ Expected: No errors
 - [ ] **Step 3: Verify no dead imports referencing old field names**
 
 Search for old names that should be gone:
+
 ```
 grep -rE "selectedCountries|[^a-zA-Z]speedMin|[^a-zA-Z]speedMax|setCountries|[^a-zA-Z]addCountry|[^a-zA-Z]removeCountry|[^a-zA-Z]setSpeedRange|clearFilter\('country'\)|clearFilter\('speed'\)" src/ --include="*.ts" --include="*.tsx"
 ```

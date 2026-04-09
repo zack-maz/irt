@@ -13,9 +13,11 @@ The primary complexity is in the cross-type filter semantics: each filter must c
 **Primary recommendation:** Create a dedicated `filterStore.ts` (not extend `uiStore`) to keep filter state cleanly separated from layer toggles. Implement a single `applyFilters(entities, filters)` pure function that handles all cross-type logic, tested independently of React.
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Filter panel placement: New "Filters" OverlayPanel below existing Layers panel in left-side stack, collapsible with +/- header, collapsed by default, badge count "Filters (3)" when collapsed
 - Country/nationality: Text input with autocomplete from visible entities, multiple selections as chips, matches originCountry for flights, actor1/actor2 for events, ships always included
 - Speed range: Dual-thumb range slider (min/max), applies to flights (velocity m/s) and ships (speedOverGround knots), display in knots
@@ -29,6 +31,7 @@ The primary complexity is in the cross-type filter semantics: each filter must c
 - Events toggle hierarchy fix: Events master toggle controls all sub-event categories
 
 ### Claude's Discretion
+
 - Exact slider styling and tick mark design for range inputs
 - Proximity pin icon/marker design
 - Circle overlay color and opacity for proximity radius
@@ -38,42 +41,49 @@ The primary complexity is in the cross-type filter semantics: each filter must c
 - Keyboard accessibility for slider controls
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Conflict event filtering by sub-type (beyond show/hide toggles)
 - Saved filter presets ("Military high-altitude", "Near Tehran")
 - Filter by Goldstein scale range for conflict severity
-</user_constraints>
+  </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|-----------------|
+| ID      | Description                                                              | Research Support                                                                                                                                                                                                                                     |
+| ------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CTRL-03 | Smart filters by nationality, speed, altitude, proximity, and date range | Full architecture: filterStore for state, applyFilters pure function for cross-type AND logic, FilterPanelSlot UI component, proximity ScatterplotLayer circle overlay, haversine distance utility, integration into useEntityLayers and StatusPanel |
+
 </phase_requirements>
 
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| zustand | ^5.0.11 | Filter state store | Already in project, curried create pattern established |
-| @deck.gl/layers | ^9.2.11 | ScatterplotLayer for proximity circle | Already imported, used for entity rendering |
-| react | ^19.1.0 | Filter panel UI components | Already in project |
-| tailwindcss | ^4.2.1 | Filter panel styling | Already in project, CSS-first @theme |
+
+| Library         | Version | Purpose                               | Why Standard                                           |
+| --------------- | ------- | ------------------------------------- | ------------------------------------------------------ |
+| zustand         | ^5.0.11 | Filter state store                    | Already in project, curried create pattern established |
+| @deck.gl/layers | ^9.2.11 | ScatterplotLayer for proximity circle | Already imported, used for entity rendering            |
+| react           | ^19.1.0 | Filter panel UI components            | Already in project                                     |
+| tailwindcss     | ^4.2.1  | Filter panel styling                  | Already in project, CSS-first @theme                   |
 
 ### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| (none needed) | -- | -- | All filter logic is pure TypeScript |
+
+| Library       | Version | Purpose | When to Use                         |
+| ------------- | ------- | ------- | ----------------------------------- |
+| (none needed) | --      | --      | All filter logic is pure TypeScript |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Custom haversine | haversine-distance npm | Only 15 lines of code, no dependency justified |
-| Native HTML range | rc-slider or similar | Adds dependency for dual-thumb; native input[type=range] with two inputs is simpler |
-| GeoJsonLayer for circle | ScatterplotLayer | ScatterplotLayer is simpler for a single circle with radius in meters |
+
+| Instead of              | Could Use              | Tradeoff                                                                            |
+| ----------------------- | ---------------------- | ----------------------------------------------------------------------------------- |
+| Custom haversine        | haversine-distance npm | Only 15 lines of code, no dependency justified                                      |
+| Native HTML range       | rc-slider or similar   | Adds dependency for dual-thumb; native input[type=range] with two inputs is simpler |
+| GeoJsonLayer for circle | ScatterplotLayer       | ScatterplotLayer is simpler for a single circle with radius in meters               |
 
 **Installation:**
+
 ```bash
 # No new dependencies needed
 ```
@@ -81,6 +91,7 @@ The primary complexity is in the cross-type filter semantics: each filter must c
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 src/
   stores/
@@ -106,9 +117,11 @@ src/
 ```
 
 ### Pattern 1: Dedicated Filter Store (Zustand)
+
 **What:** Separate Zustand store for all filter state, following the same curried `create<T>()()` pattern as existing stores.
 **When to use:** Always -- filter state is distinct from UI toggle state.
 **Example:**
+
 ```typescript
 // src/stores/filterStore.ts
 import { create } from 'zustand';
@@ -153,9 +166,11 @@ export interface FilterState {
 ```
 
 ### Pattern 2: Pure Filter Predicate Function
+
 **What:** A single pure function that takes a MapEntity and the current FilterState, returns boolean. Handles cross-type applicability logic.
 **When to use:** In `useFilteredEntities` hook and in StatusPanel count computation.
 **Example:**
+
 ```typescript
 // src/lib/filters.ts
 import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
@@ -175,7 +190,7 @@ export function entityPassesFilters(entity: MapEntity, filters: FilterState): bo
     } else if (isConflictEventType(entity.type)) {
       const d = (entity as ConflictEventEntity).data;
       const matches = filters.selectedCountries.some(
-        c => d.actor1.includes(c) || d.actor2.includes(c)
+        (c) => d.actor1.includes(c) || d.actor2.includes(c),
       );
       if (!matches) return false;
     }
@@ -215,8 +230,10 @@ export function entityPassesFilters(entity: MapEntity, filters: FilterState): bo
   // Proximity filter
   if (filters.proximityPin) {
     const dist = haversineKm(
-      filters.proximityPin.lat, filters.proximityPin.lng,
-      entity.lat, entity.lng,
+      filters.proximityPin.lat,
+      filters.proximityPin.lng,
+      entity.lat,
+      entity.lng,
     );
     if (dist > filters.proximityRadiusKm) return false;
   }
@@ -235,9 +252,11 @@ export function entityPassesFilters(entity: MapEntity, filters: FilterState): bo
 ```
 
 ### Pattern 3: Filtered Entities Hook
+
 **What:** A hook that applies filter predicates to the raw entity arrays from the data stores, producing filtered arrays consumed by `useEntityLayers`.
 **When to use:** Between data stores and the entity layers hook.
 **Example:**
+
 ```typescript
 // src/hooks/useFilteredEntities.ts
 import { useMemo } from 'react';
@@ -248,11 +267,11 @@ import { useFilterStore } from '@/stores/filterStore';
 import { entityPassesFilters } from '@/lib/filters';
 
 export function useFilteredEntities() {
-  const flights = useFlightStore(s => s.flights);
-  const ships = useShipStore(s => s.ships);
-  const events = useEventStore(s => s.events);
+  const flights = useFlightStore((s) => s.flights);
+  const ships = useShipStore((s) => s.ships);
+  const events = useEventStore((s) => s.events);
   // Subscribe to all filter fields that affect predicate
-  const filters = useFilterStore(s => ({
+  const filters = useFilterStore((s) => ({
     selectedCountries: s.selectedCountries,
     speedMin: s.speedMin,
     speedMax: s.speedMax,
@@ -265,15 +284,15 @@ export function useFilteredEntities() {
   }));
 
   const filteredFlights = useMemo(
-    () => flights.filter(f => entityPassesFilters(f, filters)),
+    () => flights.filter((f) => entityPassesFilters(f, filters)),
     [flights, filters],
   );
   const filteredShips = useMemo(
-    () => ships.filter(s => entityPassesFilters(s, filters)),
+    () => ships.filter((s) => entityPassesFilters(s, filters)),
     [ships, filters],
   );
   const filteredEvents = useMemo(
-    () => events.filter(e => entityPassesFilters(e, filters)),
+    () => events.filter((e) => entityPassesFilters(e, filters)),
     [events, filters],
   );
 
@@ -282,9 +301,11 @@ export function useFilteredEntities() {
 ```
 
 ### Pattern 4: Proximity Circle Layer (ScatterplotLayer)
+
 **What:** A Deck.gl ScatterplotLayer rendering a single dashed/semi-transparent circle at the proximity pin location.
 **When to use:** When proximity pin is placed and proximity filter is active.
 **Example:**
+
 ```typescript
 // In useEntityLayers or a separate useProximityLayer hook
 import { ScatterplotLayer } from '@deck.gl/layers';
@@ -295,7 +316,7 @@ const proximityCircleLayer = new ScatterplotLayer({
   getPosition: (d: ProximityPin) => [d.lng, d.lat],
   getRadius: proximityRadiusKm * 1000, // convert km to meters
   radiusUnits: 'meters',
-  getFillColor: [59, 130, 246, 30],  // blue, very transparent
+  getFillColor: [59, 130, 246, 30], // blue, very transparent
   getLineColor: [59, 130, 246, 120], // blue, semi-transparent
   stroked: true,
   filled: true,
@@ -305,10 +326,12 @@ const proximityCircleLayer = new ScatterplotLayer({
 ```
 
 ### Pattern 5: Events Toggle Hierarchy Fix
+
 **What:** When Events master toggle is OFF, all sub-event layers should be hidden regardless of individual toggle state. Currently each sub-toggle uses `showEvents && showAirstrikes` which is correct in `useEntityLayers`, but the `toggleEvents` action in uiStore should also propagate to ensure consistent behavior.
 **When to use:** The `visible` prop already gates on `showEvents &&` so the hierarchy is partially implemented. The fix is to ensure the LayerTogglesSlot visually communicates this (dimming sub-toggles when Events is OFF) and that toggleEvents toggles all sub-events together.
 
 ### Anti-Patterns to Avoid
+
 - **Storing filtered arrays in Zustand:** Filters are derived state -- compute via `useMemo` in hooks, never store filtered results
 - **Mutating filter state inline:** Always use store actions to update filter state
 - **Adding filter logic inside IconLayer constructors:** Keep filtering in the data pipeline (hooks), not in layer configuration
@@ -316,47 +339,53 @@ const proximityCircleLayer = new ScatterplotLayer({
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Haversine distance | Complex geodesic library | Simple haversine function (~15 lines) | Only need point-to-point distance, not routing or polygon operations |
-| Dual-thumb slider | Complex custom drag handler | Two native `<input type="range">` overlaid with CSS | Native inputs have accessibility built in (keyboard, screen readers) |
-| Autocomplete dropdown | Full combobox from scratch | Simple filtered list with native `<datalist>` or minimal custom dropdown | Country list is small (~30 visible countries max) |
+| Problem               | Don't Build                 | Use Instead                                                              | Why                                                                  |
+| --------------------- | --------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Haversine distance    | Complex geodesic library    | Simple haversine function (~15 lines)                                    | Only need point-to-point distance, not routing or polygon operations |
+| Dual-thumb slider     | Complex custom drag handler | Two native `<input type="range">` overlaid with CSS                      | Native inputs have accessibility built in (keyboard, screen readers) |
+| Autocomplete dropdown | Full combobox from scratch  | Simple filtered list with native `<datalist>` or minimal custom dropdown | Country list is small (~30 visible countries max)                    |
 
 **Key insight:** The filter logic is pure data transformation. The UI is the only complex part, and even that is simple HTML controls styled with Tailwind. No external libraries are needed.
 
 ## Common Pitfalls
 
 ### Pitfall 1: Re-render Cascade from Filter Store
+
 **What goes wrong:** Subscribing to the entire filter store object causes all consuming components to re-render on any filter change.
 **Why it happens:** Zustand shallow comparison fails if you subscribe to a new object literal each render.
 **How to avoid:** Use individual selectors (`s => s.speedMin`) or Zustand's `useShallow` for object selections. For the `useFilteredEntities` hook, accept that filter changes legitimately require re-filtering.
 **Warning signs:** Sluggish UI when adjusting sliders.
 
 ### Pitfall 2: Cross-Type Filter Exclusion vs Inclusion
+
 **What goes wrong:** Entities are incorrectly hidden because a non-applicable filter excludes them (e.g., ships disappearing when altitude filter is active).
 **Why it happens:** The predicate checks altitude on ships even though altitude doesn't apply.
 **How to avoid:** Each filter block must check entity type first and only apply to applicable types. Non-applicable entities skip that filter block entirely (return true implicitly by not returning false).
 **Warning signs:** Setting an altitude filter causes ships/events to vanish.
 
 ### Pitfall 3: Unit Conversion Errors
+
 **What goes wrong:** Speed or altitude values are compared in wrong units, causing filters to appear broken.
 **Why it happens:** Flight velocity is in m/s, ship speed is in knots, altitude is in meters. UI displays knots for speed and feet for altitude.
 **How to avoid:** Define conversion constants (`KNOTS_PER_MS = 1.94384`, `FEET_PER_METER = 3.28084`) and convert entity values to display units before comparison. Store filter bounds in display units (knots for speed, feet for altitude).
 **Warning signs:** Speed filter at "200 knots" hides flights going 200 m/s (~389 knots).
 
 ### Pitfall 4: Proximity Pin Click Conflict with Entity Selection
+
 **What goes wrong:** Clicking map to place proximity pin triggers entity selection or vice versa.
 **Why it happens:** Both pin placement and entity click use the same Deck.gl onClick handler.
 **How to avoid:** Use an `isSettingPin` mode flag in filter store. When `isSettingPin` is true, map clicks set the pin coordinates (on the Map component's onClick, not Deck's), and when false, clicks behave normally for entity selection.
 **Warning signs:** Clicking to set pin opens detail panel, or entity clicks move the pin.
 
 ### Pitfall 5: Country Autocomplete Stale Data
+
 **What goes wrong:** Country options don't update as new flights arrive or old ones leave.
 **Why it happens:** Country list is computed once from initial data and not re-derived.
 **How to avoid:** Derive available countries from current filtered entity arrays in a `useMemo` that depends on the flight/event arrays. This ensures the autocomplete always reflects live data.
 **Warning signs:** Countries appear in dropdown that have no visible entities.
 
 ### Pitfall 6: Null Velocity/Altitude Values
+
 **What goes wrong:** Flights with null velocity or altitude are incorrectly excluded by range filters.
 **Why it happens:** Comparing `null < speedMin` evaluates to false in JS, causing unexpected behavior.
 **How to avoid:** When velocity or altitude is null, either include the entity (conservative, data is unknown) or exclude it (strict). Decision: include entities with null values since null means "no data" not "zero."
@@ -365,14 +394,12 @@ const proximityCircleLayer = new ScatterplotLayer({
 ## Code Examples
 
 ### Haversine Distance Utility
+
 ```typescript
 // src/lib/geo.ts
 const R_KM = 6371;
 
-export function haversineKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
+export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);
@@ -384,6 +411,7 @@ export function haversineKm(
 ```
 
 ### Dual-Thumb Range Slider (CSS approach)
+
 ```typescript
 // src/components/filter/RangeSlider.tsx
 // Two overlaid native range inputs with CSS for the dual-thumb effect
@@ -403,6 +431,7 @@ interface RangeSliderProps {
 ```
 
 ### Filter Panel Collapsible Header with Badge
+
 ```typescript
 // Header pattern consistent with LayerTogglesSlot / StatusPanel
 <button
@@ -419,6 +448,7 @@ interface RangeSliderProps {
 ```
 
 ### Integration with useEntityLayers
+
 ```typescript
 // Key change: useEntityLayers receives filtered arrays instead of raw store data
 // Option A: useEntityLayers calls useFilteredEntities internally
@@ -432,6 +462,7 @@ export function useEntityLayers() {
 ```
 
 ### Map Pin Placement (BaseMap integration)
+
 ```typescript
 // In BaseMap.tsx -- separate onClick for MapLibre (ground clicks)
 // vs Deck.gl onClick (entity clicks)
@@ -454,13 +485,14 @@ const setSettingPin = useFilterStore(s => s.setSettingPin);
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| External slider libs (rc-slider) | Dual native range inputs with CSS | React 18+ | No dependency, better a11y |
-| GeoJSON circle polygon | ScatterplotLayer single point | deck.gl v8+ | Simpler, GPU-rendered circle |
-| Complex autocomplete (downshift) | Native datalist or simple filtered list | Always valid for small datasets | No dependency for ~30 items |
+| Old Approach                     | Current Approach                        | When Changed                    | Impact                       |
+| -------------------------------- | --------------------------------------- | ------------------------------- | ---------------------------- |
+| External slider libs (rc-slider) | Dual native range inputs with CSS       | React 18+                       | No dependency, better a11y   |
+| GeoJSON circle polygon           | ScatterplotLayer single point           | deck.gl v8+                     | Simpler, GPU-rendered circle |
+| Complex autocomplete (downshift) | Native datalist or simple filtered list | Always valid for small datasets | No dependency for ~30 items  |
 
 **Deprecated/outdated:**
+
 - None relevant -- all patterns use current library versions already in the project
 
 ## Open Questions
@@ -488,32 +520,36 @@ const setSettingPin = useFilterStore(s => s.setSettingPin);
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 4.1.0 with jsdom |
-| Config file | `vite.config.ts` (test section) |
-| Quick run command | `npx vitest run` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                           |
+| ------------------ | ------------------------------- |
+| Framework          | Vitest 4.1.0 with jsdom         |
+| Config file        | `vite.config.ts` (test section) |
+| Quick run command  | `npx vitest run`                |
+| Full suite command | `npx vitest run`                |
 
 ### Phase Requirements -> Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| CTRL-03a | Filter store defaults and actions | unit | `npx vitest run src/__tests__/filterStore.test.ts -x` | No -- Wave 0 |
-| CTRL-03b | entityPassesFilters pure function | unit | `npx vitest run src/__tests__/filters.test.ts -x` | No -- Wave 0 |
-| CTRL-03c | Haversine distance function | unit | `npx vitest run src/__tests__/geo.test.ts -x` | No -- Wave 0 |
-| CTRL-03d | FilterPanelSlot renders filter controls | unit | `npx vitest run src/__tests__/FilterPanel.test.tsx -x` | No -- Wave 0 |
-| CTRL-03e | useEntityLayers consumes filtered arrays | unit | `npx vitest run src/__tests__/entityLayers.test.ts -x` | Yes (extend) |
-| CTRL-03f | StatusPanel counts reflect filtered entities | unit | `npx vitest run src/__tests__/StatusPanel.test.tsx -x` | Yes (extend) |
-| CTRL-03g | Events master toggle hides all sub-events | unit | `npx vitest run src/__tests__/entityLayers.test.ts -x` | Yes (verify) |
-| CTRL-03h | Active filter count badge | unit | `npx vitest run src/__tests__/FilterPanel.test.tsx -x` | No -- Wave 0 |
-| CTRL-03i | Clear all resets filter state | unit | `npx vitest run src/__tests__/filterStore.test.ts -x` | No -- Wave 0 |
+
+| Req ID   | Behavior                                     | Test Type | Automated Command                                      | File Exists? |
+| -------- | -------------------------------------------- | --------- | ------------------------------------------------------ | ------------ |
+| CTRL-03a | Filter store defaults and actions            | unit      | `npx vitest run src/__tests__/filterStore.test.ts -x`  | No -- Wave 0 |
+| CTRL-03b | entityPassesFilters pure function            | unit      | `npx vitest run src/__tests__/filters.test.ts -x`      | No -- Wave 0 |
+| CTRL-03c | Haversine distance function                  | unit      | `npx vitest run src/__tests__/geo.test.ts -x`          | No -- Wave 0 |
+| CTRL-03d | FilterPanelSlot renders filter controls      | unit      | `npx vitest run src/__tests__/FilterPanel.test.tsx -x` | No -- Wave 0 |
+| CTRL-03e | useEntityLayers consumes filtered arrays     | unit      | `npx vitest run src/__tests__/entityLayers.test.ts -x` | Yes (extend) |
+| CTRL-03f | StatusPanel counts reflect filtered entities | unit      | `npx vitest run src/__tests__/StatusPanel.test.tsx -x` | Yes (extend) |
+| CTRL-03g | Events master toggle hides all sub-events    | unit      | `npx vitest run src/__tests__/entityLayers.test.ts -x` | Yes (verify) |
+| CTRL-03h | Active filter count badge                    | unit      | `npx vitest run src/__tests__/FilterPanel.test.tsx -x` | No -- Wave 0 |
+| CTRL-03i | Clear all resets filter state                | unit      | `npx vitest run src/__tests__/filterStore.test.ts -x`  | No -- Wave 0 |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `src/__tests__/filterStore.test.ts` -- covers CTRL-03a, CTRL-03i (store defaults, actions, clearAll)
 - [ ] `src/__tests__/filters.test.ts` -- covers CTRL-03b (pure function cross-type logic)
 - [ ] `src/__tests__/geo.test.ts` -- covers CTRL-03c (haversine distance calculation)
@@ -522,6 +558,7 @@ const setSettingPin = useFilterStore(s => s.setSettingPin);
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Project codebase analysis -- all source files read directly
 - `server/types.ts` -- MapEntity, FlightEntity, ShipEntity, ConflictEventEntity field structures
 - `src/stores/uiStore.ts` -- existing Zustand store pattern with curried create
@@ -531,15 +568,18 @@ const setSettingPin = useFilterStore(s => s.setSettingPin);
 - `src/components/ui/StatusPanel.tsx` -- entity count computation from toggle state
 
 ### Secondary (MEDIUM confidence)
+
 - [deck.gl ScatterplotLayer docs](https://deck.gl/docs/api-reference/layers/scatterplot-layer) -- radiusUnits, stroked, filled properties
 - [Haversine formula reference](https://www.movable-type.co.uk/scripts/latlong.html) -- distance calculation formula
 
 ### Tertiary (LOW confidence)
+
 - None
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH -- no new dependencies, all libraries already in project
 - Architecture: HIGH -- follows established Zustand + hooks + useMemo pattern exactly
 - Pitfalls: HIGH -- derived from direct codebase analysis of entity types and existing filter patterns

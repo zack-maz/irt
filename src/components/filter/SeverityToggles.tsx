@@ -30,7 +30,10 @@ export function SeverityToggles() {
                 : 'bg-transparent text-text-muted opacity-40'
             }`}
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full mr-1" style={{ backgroundColor: color }} />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full mr-1"
+              style={{ backgroundColor: color }}
+            />
             {label}
           </button>
         ))}

@@ -45,10 +45,10 @@ This is the second verification of Phase 3. A previous VERIFICATION.md existed w
 
 **Previous gaps — now resolved:**
 
-| Gap | Was | Now |
-|-----|-----|-----|
+| Gap                                                                    | Was    | Now                                                                                         |
+| ---------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
 | Server crashed at startup without API credentials (eager loadConfig()) | FAILED | RESOLVED — server/index.ts reads process.env.PORT directly, no loadConfig() call at startup |
-| npm run dev crashed when .env was absent (--env-file flag) | FAILED | RESOLVED — package.json now uses --env-file-if-exists=.env |
+| npm run dev crashed when .env was absent (--env-file flag)             | FAILED | RESOLVED — package.json now uses --env-file-if-exists=.env                                  |
 
 ---
 
@@ -56,16 +56,16 @@ This is the second verification of Phase 3. A previous VERIFICATION.md existed w
 
 ### Observable Truths
 
-| # | Truth | Status | Evidence |
-|---|-------|--------|----------|
-| 1 | Express server starts and proxies requests to OpenSky, AIS, and ACLED APIs | VERIFIED | createApp() in server/index.ts mounts /api/flights, /api/ships, /api/events; each route calls the corresponding adapter; 37 server tests pass |
-| 2 | API keys are stored in environment variables and never exposed to the browser | VERIFIED | config.ts reads all credentials from process.env; security tests confirm no credential leaks in response bodies; frontend receives only normalized MapEntity data |
-| 3 | Proxy returns normalized data in a common MapEntity format | VERIFIED | server/types.ts defines FlightEntity, ShipEntity, ConflictEventEntity as a discriminated union; all adapters return these types; src/types/entities.ts re-exports for frontend use |
-| 4 | CORS headers are correctly set so the React frontend can fetch from the proxy without errors | VERIFIED | app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173' })) in createApp(); server test confirms Access-Control-Allow-Origin header is set |
-| 5 | Server boots on port 3001 without crashing when no API credentials are present | VERIFIED | server/index.ts removed all loadConfig() calls; reads PORT from process.env directly; AISStream guarded by AISSTREAM_API_KEY env var check; confirmed by commits ff4287c and c0f4193 |
-| 6 | npm run dev starts both Vite and Express concurrently even without a .env file | VERIFIED | package.json uses --env-file-if-exists=.env (Node 22.14+ flag that silently ignores missing .env); confirmed by commit c0f4193 |
-| 7 | When upstream APIs fail, stale cached data is served with stale:true | VERIFIED | flights.ts and events.ts catch upstream errors and serve flightCache.get() / eventsCache.get() as fallback; ships uses time-based staleness (60s threshold) |
-| 8 | AISStream WebSocket reconnects automatically on disconnection | VERIFIED | ws.addEventListener('close') handler calls setTimeout(connectAISStream, 5000); reconnect test passes |
+| #   | Truth                                                                                        | Status   | Evidence                                                                                                                                                                             |
+| --- | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Express server starts and proxies requests to OpenSky, AIS, and ACLED APIs                   | VERIFIED | createApp() in server/index.ts mounts /api/flights, /api/ships, /api/events; each route calls the corresponding adapter; 37 server tests pass                                        |
+| 2   | API keys are stored in environment variables and never exposed to the browser                | VERIFIED | config.ts reads all credentials from process.env; security tests confirm no credential leaks in response bodies; frontend receives only normalized MapEntity data                    |
+| 3   | Proxy returns normalized data in a common MapEntity format                                   | VERIFIED | server/types.ts defines FlightEntity, ShipEntity, ConflictEventEntity as a discriminated union; all adapters return these types; src/types/entities.ts re-exports for frontend use   |
+| 4   | CORS headers are correctly set so the React frontend can fetch from the proxy without errors | VERIFIED | app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173' })) in createApp(); server test confirms Access-Control-Allow-Origin header is set                         |
+| 5   | Server boots on port 3001 without crashing when no API credentials are present               | VERIFIED | server/index.ts removed all loadConfig() calls; reads PORT from process.env directly; AISStream guarded by AISSTREAM_API_KEY env var check; confirmed by commits ff4287c and c0f4193 |
+| 6   | npm run dev starts both Vite and Express concurrently even without a .env file               | VERIFIED | package.json uses --env-file-if-exists=.env (Node 22.14+ flag that silently ignores missing .env); confirmed by commit c0f4193                                                       |
+| 7   | When upstream APIs fail, stale cached data is served with stale:true                         | VERIFIED | flights.ts and events.ts catch upstream errors and serve flightCache.get() / eventsCache.get() as fallback; ships uses time-based staleness (60s threshold)                          |
+| 8   | AISStream WebSocket reconnects automatically on disconnection                                | VERIFIED | ws.addEventListener('close') handler calls setTimeout(connectAISStream, 5000); reconnect test passes                                                                                 |
 
 **Score:** 8/8 truths verified (4 from phase Success Criteria + 4 from plan 03-03 gap closure truths)
 
@@ -73,51 +73,51 @@ This is the second verification of Phase 3. A previous VERIFICATION.md existed w
 
 ### Required Artifacts
 
-| Artifact | Provides | Exists | Size | Status |
-|----------|----------|--------|------|--------|
-| `server/index.ts` | Express app entry, lazy startup (no eagler loadConfig) | Yes | 57 lines | VERIFIED |
-| `server/config.ts` | Validated env config via Proxy lazy pattern | Yes | 59 lines | VERIFIED |
-| `server/types.ts` | MapEntity discriminated union | Yes | 66 lines | VERIFIED |
-| `server/constants.ts` | IRAN_BBOX, CACHE_TTL | Yes | 17 lines | VERIFIED |
-| `server/cache/entityCache.ts` | Generic in-memory cache with TTL and stale flag | Yes | 28 lines | VERIFIED |
-| `server/middleware/errorHandler.ts` | Global Express error middleware | Yes | 11 lines | VERIFIED |
-| `server/adapters/opensky.ts` | OpenSky OAuth2 + flight normalization | Yes | 97 lines | VERIFIED |
-| `server/adapters/aisstream.ts` | AISStream WebSocket + auto-reconnect | Yes | 91 lines | VERIFIED |
-| `server/adapters/acled.ts` | ACLED OAuth2 + conflict classification | Yes | 132 lines | VERIFIED |
-| `server/routes/flights.ts` | GET /api/flights with cache fallback | Yes | 25 lines | VERIFIED |
-| `server/routes/ships.ts` | GET /api/ships from live WebSocket data | Yes | 13 lines | VERIFIED |
-| `server/routes/events.ts` | GET /api/events with cache fallback | Yes | 25 lines | VERIFIED |
-| `src/types/entities.ts` | Frontend re-export of MapEntity types | Yes | 12 lines | VERIFIED |
-| `tsconfig.server.json` | TypeScript config for Node.js server | Yes | 17 lines | VERIFIED |
-| `.env.example` | Template for required env vars | Yes | 18 lines | VERIFIED (with security warning — see anti-patterns) |
+| Artifact                            | Provides                                               | Exists | Size      | Status                                               |
+| ----------------------------------- | ------------------------------------------------------ | ------ | --------- | ---------------------------------------------------- |
+| `server/index.ts`                   | Express app entry, lazy startup (no eagler loadConfig) | Yes    | 57 lines  | VERIFIED                                             |
+| `server/config.ts`                  | Validated env config via Proxy lazy pattern            | Yes    | 59 lines  | VERIFIED                                             |
+| `server/types.ts`                   | MapEntity discriminated union                          | Yes    | 66 lines  | VERIFIED                                             |
+| `server/constants.ts`               | IRAN_BBOX, CACHE_TTL                                   | Yes    | 17 lines  | VERIFIED                                             |
+| `server/cache/entityCache.ts`       | Generic in-memory cache with TTL and stale flag        | Yes    | 28 lines  | VERIFIED                                             |
+| `server/middleware/errorHandler.ts` | Global Express error middleware                        | Yes    | 11 lines  | VERIFIED                                             |
+| `server/adapters/opensky.ts`        | OpenSky OAuth2 + flight normalization                  | Yes    | 97 lines  | VERIFIED                                             |
+| `server/adapters/aisstream.ts`      | AISStream WebSocket + auto-reconnect                   | Yes    | 91 lines  | VERIFIED                                             |
+| `server/adapters/acled.ts`          | ACLED OAuth2 + conflict classification                 | Yes    | 132 lines | VERIFIED                                             |
+| `server/routes/flights.ts`          | GET /api/flights with cache fallback                   | Yes    | 25 lines  | VERIFIED                                             |
+| `server/routes/ships.ts`            | GET /api/ships from live WebSocket data                | Yes    | 13 lines  | VERIFIED                                             |
+| `server/routes/events.ts`           | GET /api/events with cache fallback                    | Yes    | 25 lines  | VERIFIED                                             |
+| `src/types/entities.ts`             | Frontend re-export of MapEntity types                  | Yes    | 12 lines  | VERIFIED                                             |
+| `tsconfig.server.json`              | TypeScript config for Node.js server                   | Yes    | 17 lines  | VERIFIED                                             |
+| `.env.example`                      | Template for required env vars                         | Yes    | 18 lines  | VERIFIED (with security warning — see anti-patterns) |
 
 ---
 
 ### Key Link Verification
 
-| From | To | Via | Status |
-|------|----|-----|--------|
-| `server/index.ts` | `cors` middleware | process.env.CORS_ORIGIN ?? 'http://localhost:5173' in createApp() | VERIFIED |
-| `server/index.ts` | `server/routes/flights.ts` | app.use('/api/flights', flightsRouter) | VERIFIED |
-| `server/index.ts` | `server/routes/ships.ts` | app.use('/api/ships', shipsRouter) | VERIFIED |
-| `server/index.ts` | `server/routes/events.ts` | app.use('/api/events', eventsRouter) | VERIFIED |
-| `server/index.ts` | `server/adapters/aisstream.ts` | connectAISStream() guarded by process.env.AISSTREAM_API_KEY check | VERIFIED |
-| `server/routes/flights.ts` | `server/adapters/opensky.ts` | await fetchFlights(IRAN_BBOX) on line 13 | VERIFIED |
-| `server/routes/ships.ts` | `server/adapters/aisstream.ts` | const data = getShips() on line 7 | VERIFIED |
-| `server/routes/events.ts` | `server/adapters/acled.ts` | await fetchEvents() on line 13 | VERIFIED |
-| `server/adapters/opensky.ts` | `server/config.ts` | config.opensky.clientId and config.opensky.clientSecret (lazy Proxy) | VERIFIED |
-| `server/adapters/aisstream.ts` | `server/config.ts` | config.aisstream.apiKey inside 'open' handler (lazy Proxy) | VERIFIED |
-| `server/adapters/acled.ts` | `server/config.ts` | config.acled.email and config.acled.password (lazy Proxy) | VERIFIED |
-| `server/cache/entityCache.ts` | `server/types.ts` | import type { CacheResponse } from '../types.js' | VERIFIED |
-| `package.json` | concurrently + tsx | dev script: concurrently "vite" "tsx --env-file-if-exists=.env watch server/index.ts" | VERIFIED |
+| From                           | To                             | Via                                                                                   | Status   |
+| ------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------- | -------- |
+| `server/index.ts`              | `cors` middleware              | process.env.CORS_ORIGIN ?? 'http://localhost:5173' in createApp()                     | VERIFIED |
+| `server/index.ts`              | `server/routes/flights.ts`     | app.use('/api/flights', flightsRouter)                                                | VERIFIED |
+| `server/index.ts`              | `server/routes/ships.ts`       | app.use('/api/ships', shipsRouter)                                                    | VERIFIED |
+| `server/index.ts`              | `server/routes/events.ts`      | app.use('/api/events', eventsRouter)                                                  | VERIFIED |
+| `server/index.ts`              | `server/adapters/aisstream.ts` | connectAISStream() guarded by process.env.AISSTREAM_API_KEY check                     | VERIFIED |
+| `server/routes/flights.ts`     | `server/adapters/opensky.ts`   | await fetchFlights(IRAN_BBOX) on line 13                                              | VERIFIED |
+| `server/routes/ships.ts`       | `server/adapters/aisstream.ts` | const data = getShips() on line 7                                                     | VERIFIED |
+| `server/routes/events.ts`      | `server/adapters/acled.ts`     | await fetchEvents() on line 13                                                        | VERIFIED |
+| `server/adapters/opensky.ts`   | `server/config.ts`             | config.opensky.clientId and config.opensky.clientSecret (lazy Proxy)                  | VERIFIED |
+| `server/adapters/aisstream.ts` | `server/config.ts`             | config.aisstream.apiKey inside 'open' handler (lazy Proxy)                            | VERIFIED |
+| `server/adapters/acled.ts`     | `server/config.ts`             | config.acled.email and config.acled.password (lazy Proxy)                             | VERIFIED |
+| `server/cache/entityCache.ts`  | `server/types.ts`              | import type { CacheResponse } from '../types.js'                                      | VERIFIED |
+| `package.json`                 | concurrently + tsx             | dev script: concurrently "vite" "tsx --env-file-if-exists=.env watch server/index.ts" | VERIFIED |
 
 ---
 
 ### Requirements Coverage
 
-| Requirement | Source Plans | Description | Status | Evidence |
-|-------------|-------------|-------------|--------|----------|
-| INFRA-01 | 03-01-PLAN.md, 03-02-PLAN.md, 03-03-PLAN.md | Express API proxy for CORS handling, API key management, and data normalization | SATISFIED | Express server with CORS runs on port 3001; all API keys stored server-side only; all three upstream APIs proxied with normalized MapEntity output; security tests confirm no credential leaks; server boots without credentials; dev scripts tolerate missing .env |
+| Requirement | Source Plans                                | Description                                                                     | Status    | Evidence                                                                                                                                                                                                                                                            |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| INFRA-01    | 03-01-PLAN.md, 03-02-PLAN.md, 03-03-PLAN.md | Express API proxy for CORS handling, API key management, and data normalization | SATISFIED | Express server with CORS runs on port 3001; all API keys stored server-side only; all three upstream APIs proxied with normalized MapEntity output; security tests confirm no credential leaks; server boots without credentials; dev scripts tolerate missing .env |
 
 INFRA-01 is the only requirement mapped to Phase 3 in REQUIREMENTS.md (line 32, marked [x] complete at line 82 of traceability table). No orphaned requirements found.
 
@@ -125,9 +125,9 @@ INFRA-01 is the only requirement mapped to Phase 3 in REQUIREMENTS.md (line 32, 
 
 ### Anti-Patterns Found
 
-| File | Pattern | Severity | Impact |
-|------|---------|----------|--------|
-| `.env.example` | Real credentials committed to the file (OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, AISSTREAM_API_KEY, ACLED_EMAIL, ACLED_PASSWORD all contain actual values, not placeholders) | BLOCKER | These credentials are visible in the working tree (git diff shows them as unstaged local changes). `.env.example` is tracked by git. If committed or pushed, real API keys and a password would be exposed in version history. Must replace with placeholder values (e.g., `your_client_id_here`) and the real credentials should be rotated. |
+| File           | Pattern                                                                                                                                                                       | Severity | Impact                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env.example` | Real credentials committed to the file (OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, AISSTREAM_API_KEY, ACLED_EMAIL, ACLED_PASSWORD all contain actual values, not placeholders) | BLOCKER  | These credentials are visible in the working tree (git diff shows them as unstaged local changes). `.env.example` is tracked by git. If committed or pushed, real API keys and a password would be exposed in version history. Must replace with placeholder values (e.g., `your_client_id_here`) and the real credentials should be rotated. |
 
 Note: The credentials are currently only in the working tree (git status shows `M .env.example` as unstaged). They were not committed. However, the file must be cleaned up before any push.
 
@@ -139,15 +139,15 @@ No other anti-patterns were found across the 12 server source files. No TODO/FIX
 
 **37 server tests across 7 files — all pass:**
 
-| Test File | Tests | Result |
-|-----------|-------|--------|
-| `server/__tests__/types.test.ts` | 8 | All pass |
-| `server/__tests__/cache.test.ts` | 5 | All pass |
-| `server/__tests__/server.test.ts` | 3 | All pass |
-| `server/__tests__/adapters/opensky.test.ts` | 6 | All pass |
-| `server/__tests__/adapters/acled.test.ts` | 6 | All pass |
-| `server/__tests__/adapters/aisstream.test.ts` | 6 | All pass |
-| `server/__tests__/security.test.ts` | 3 | All pass |
+| Test File                                     | Tests | Result   |
+| --------------------------------------------- | ----- | -------- |
+| `server/__tests__/types.test.ts`              | 8     | All pass |
+| `server/__tests__/cache.test.ts`              | 5     | All pass |
+| `server/__tests__/server.test.ts`             | 3     | All pass |
+| `server/__tests__/adapters/opensky.test.ts`   | 6     | All pass |
+| `server/__tests__/adapters/acled.test.ts`     | 6     | All pass |
+| `server/__tests__/adapters/aisstream.test.ts` | 6     | All pass |
+| `server/__tests__/security.test.ts`           | 3     | All pass |
 
 **Full suite (67 tests, 16 files) — all pass.** Frontend tests unaffected by Phase 3 changes.
 

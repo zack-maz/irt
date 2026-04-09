@@ -1,6 +1,8 @@
 import { Router } from 'express';
-import { redis, cacheGet } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { redis, cacheGetSafe } from '../cache/redis.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'cron-health' });
 
 export const cronHealthRouter = Router();
 
@@ -13,6 +15,7 @@ const SOURCE_KEYS: Record<string, string> = {
   markets: 'markets:yahoo:1d',
   weather: 'weather:open-meteo',
   sites: 'sites:v2',
+  water: 'water:facilities',
 };
 
 /** If a source's lastFresh is older than this, log a warning */
@@ -27,7 +30,7 @@ cronHealthRouter.get('/', async (_req, res) => {
     await redis.ping();
     redisOk = true;
   } catch {
-    log({ level: 'error', message: 'Cron health: Redis ping failed' });
+    log.error('Redis ping failed');
   }
 
   // Query per-source freshness
@@ -37,7 +40,7 @@ cronHealthRouter.get('/', async (_req, res) => {
   await Promise.all(
     Object.entries(SOURCE_KEYS).map(async ([name, key]) => {
       try {
-        const entry = await cacheGet(key, 999_999_999);
+        const entry = await cacheGetSafe(key, 999_999_999);
         const lastFresh = entry?.lastFresh ?? null;
         const stale = lastFresh !== null && now - lastFresh > STALE_THRESHOLD_MS;
 
@@ -58,15 +61,9 @@ cronHealthRouter.get('/', async (_req, res) => {
 
   // Log results
   if (warnings.length > 0) {
-    log({
-      level: 'warn',
-      message: `Cron health: ${warnings.length} warning(s) — ${warnings.join(', ')}`,
-    });
+    log.warn({ warningCount: warnings.length, warnings }, 'source health warnings');
   } else {
-    log({
-      level: 'info',
-      message: 'Cron health: all sources healthy',
-    });
+    log.info('all sources healthy');
   }
 
   res.json({

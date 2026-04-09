@@ -51,7 +51,15 @@ describe('assignBasinStress', () => {
   it('compositeHealth uses bwsScoreToLabel for label generation', () => {
     const stress = assignBasinStress(33.3, 44.4);
     // bws_label should be a valid WRI label
-    const validLabels = ['Low', 'Low-Medium', 'Medium-High', 'High', 'Extremely High', 'No Data', 'Arid and Low Water Use'];
+    const validLabels = [
+      'Low',
+      'Low-Medium',
+      'Medium-High',
+      'High',
+      'Extremely High',
+      'No Data',
+      'Arid and Low Water Use',
+    ];
     expect(validLabels).toContain(stress.bws_label);
   });
 });

@@ -35,14 +35,14 @@ key-files:
     - src/components/search/SearchModal.tsx
 
 key-decisions:
-  - "SEARCH_DIM_ALPHA=15 for near-invisible non-matching entities (distinct from DIM_ALPHA=40 active entity dimming)"
-  - "Centralized useEscapeKeyHandler hook replaces per-component Escape listeners for conflict-free priority"
-  - "Glow/highlight layers hidden for non-matched entities during search filter (not just dimmed)"
-  - "Tooltip suppression for non-matching entities in BaseMap via searchStore state check"
+  - 'SEARCH_DIM_ALPHA=15 for near-invisible non-matching entities (distinct from DIM_ALPHA=40 active entity dimming)'
+  - 'Centralized useEscapeKeyHandler hook replaces per-component Escape listeners for conflict-free priority'
+  - 'Glow/highlight layers hidden for non-matched entities during search filter (not just dimmed)'
+  - 'Tooltip suppression for non-matching entities in BaseMap via searchStore state check'
 
 patterns-established:
-  - "Centralized Escape key handler: modal > filter > notification > detail panel priority stack"
-  - "Search filter dimming: SEARCH_DIM_ALPHA check before activeId DIM_ALPHA check in getColor"
+  - 'Centralized Escape key handler: modal > filter > notification > detail panel priority stack'
+  - 'Search filter dimming: SEARCH_DIM_ALPHA check before activeId DIM_ALPHA check in getColor'
 
 requirements-completed: [SRCH-01, SRCH-03]
 
@@ -64,6 +64,7 @@ completed: 2026-03-22
 - **Files modified:** 13
 
 ## Accomplishments
+
 - Non-matching entities render at alpha 15 (near invisible) when search filter is active across all 6 entity layers
 - FilterChip pill component shows active search query in sidebar Filters section with dismiss button
 - Centralized Escape key handler implements priority: search modal > search filter > notification dropdown > detail panel
@@ -78,6 +79,7 @@ Each task was committed atomically:
 2. **Task 2: Add FilterChip component and Escape key priority** - `ee5d966` (feat)
 
 ## Files Created/Modified
+
 - `src/hooks/useEntityLayers.ts` - Added SEARCH_DIM_ALPHA and searchStore reads to all entity layer getColor accessors
 - `src/components/map/BaseMap.tsx` - Added tooltip suppression for non-matching entities during search filter
 - `src/hooks/useSearchResults.ts` - Added useEffect to refresh matchedIds when entity data changes during active filter
@@ -93,6 +95,7 @@ Each task was committed atomically:
 - `src/__tests__/SearchModal.test.tsx` - Updated Escape test for centralized handler
 
 ## Decisions Made
+
 - SEARCH_DIM_ALPHA=15 chosen to be much dimmer than DIM_ALPHA=40 (active entity dimming), making non-matching entities near-invisible per locked decision "highly transparent"
 - Centralized useEscapeKeyHandler reads store state directly via getState() (not selectors) to avoid subscription overhead and ensure priority ordering within a single event handler
 - Glow/highlight layers set to invisible (not just dimmed) for non-matched entities -- cleaner visual since the glow effect at alpha 15 would be invisible anyway
@@ -103,10 +106,11 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Updated tests for centralized Escape handling**
+
 - **Found during:** Task 2 (Escape key priority)
 - **Issue:** 3 existing tests (DetailPanel, NotificationBell, SearchModal) fired Escape via component-level handlers that were removed
 - **Fix:** Updated tests to verify store actions directly since Escape is now centralized in AppShell
-- **Files modified:** src/__tests__/DetailPanel.test.tsx, src/__tests__/NotificationBell.test.tsx, src/__tests__/SearchModal.test.tsx
+- **Files modified:** src/**tests**/DetailPanel.test.tsx, src/**tests**/NotificationBell.test.tsx, src/**tests**/SearchModal.test.tsx
 - **Verification:** All 689 tests pass
 - **Committed in:** ee5d966 (Task 2 commit)
 
@@ -116,12 +120,15 @@ Each task was committed atomically:
 **Impact on plan:** Test updates were necessary consequence of centralizing Escape handling. No scope creep.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Search/filter integration complete: all plan 19 tasks finished
 - Phase 19 ready for merge to main
 - All 689 tests passing
@@ -131,5 +138,6 @@ None - no external service configuration required.
 All files verified present, all commits verified in git log.
 
 ---
-*Phase: 19-search-filter-ui-cleanup*
-*Completed: 2026-03-22*
+
+_Phase: 19-search-filter-ui-cleanup_
+_Completed: 2026-03-22_

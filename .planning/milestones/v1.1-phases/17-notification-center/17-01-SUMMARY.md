@@ -35,14 +35,14 @@ key-files:
     - src/__tests__/newsMatching.test.ts
 
 key-decisions:
-  - "numMentions/numSources optional fields (backward compat with cached/backfilled data)"
-  - "Severity formula: typeWeight * log2(1+mentions) * log2(1+sources) * recencyDecay with ~24h half-life"
-  - "News matching uses 3-signal relevance: temporal (24h window), geographic (100km haversine), keyword overlap"
-  - "parseInt || undefined pattern for GDELT fields to avoid misleading 0 values"
+  - 'numMentions/numSources optional fields (backward compat with cached/backfilled data)'
+  - 'Severity formula: typeWeight * log2(1+mentions) * log2(1+sources) * recencyDecay with ~24h half-life'
+  - 'News matching uses 3-signal relevance: temporal (24h window), geographic (100km haversine), keyword overlap'
+  - 'parseInt || undefined pattern for GDELT fields to avoid misleading 0 values'
 
 patterns-established:
-  - "Pure scoring functions consuming entity types for testable computation"
-  - "Multi-signal relevance scoring with configurable weights and thresholds"
+  - 'Pure scoring functions consuming entity types for testable computation'
+  - 'Multi-signal relevance scoring with configurable weights and thresholds'
 
 requirements-completed: [NOTF-02, NOTF-03]
 
@@ -64,6 +64,7 @@ completed: 2026-03-20
 - **Files modified:** 8
 
 ## Accomplishments
+
 - Extended ConflictEventEntity.data with optional numMentions and numSources fields (backward compatible)
 - Created computeSeverityScore with type-weighted, mention/source-scaled, recency-decayed formula
 - Created matchNewsToEvent with temporal + geographic + keyword relevance scoring (max 3 results)
@@ -82,6 +83,7 @@ Each task was committed atomically (TDD: RED then GREEN):
 _TDD task with RED/GREEN commits._
 
 ## Files Created/Modified
+
 - `src/lib/severity.ts` - Pure severity scoring function with type weights and recency decay
 - `src/lib/newsMatching.ts` - News-to-event matching with multi-signal relevance ranking
 - `src/lib/timeGroup.ts` - Time group bucketing utility (last_hour/last_day/last_week)
@@ -92,6 +94,7 @@ _TDD task with RED/GREEN commits._
 - `src/__tests__/newsMatching.test.ts` - News matching tests (temporal window, max 3, geo boost, keywords)
 
 ## Decisions Made
+
 - numMentions/numSources as optional fields for backward compatibility with existing cached data
 - Severity formula uses log2 scaling for mentions/sources to dampen outlier effects
 - Recency decay half-life of ~24h (1/(1+ageHours/24)) balances freshness vs history
@@ -111,6 +114,7 @@ None.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Pure scoring/matching functions ready for notification store (Plan 03) consumption
 - Type extensions backward compatible - no migration needed for existing cached data
 - All contracts tested and verified
@@ -120,5 +124,6 @@ None - no external service configuration required.
 All 8 created/modified files verified on disk. Both commit hashes (6686eb5, 72fbe02) verified in git log.
 
 ---
-*Phase: 17-notification-center*
-*Completed: 2026-03-20*
+
+_Phase: 17-notification-center_
+_Completed: 2026-03-20_

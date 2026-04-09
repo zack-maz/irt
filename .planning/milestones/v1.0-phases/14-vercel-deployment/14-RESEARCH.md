@@ -13,9 +13,11 @@ The existing codebase is well-structured for this migration. The `createApp()` f
 **Primary recommendation:** Create `api/index.ts` as a thin wrapper that imports `createApp()` and exports default the app. Fix `server/config.ts` to make all API keys optional. Add `@upstash/ratelimit` middleware to protect upstream API credits. Configure `vercel.json` with rewrites and function settings.
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Single catch-all serverless function wrapping `createApp()` in `api/index.ts`
 - vercel.json rewrites `/api/*` to the catch-all function
 - 60s `maxDuration` for API functions (AISStream WebSocket collect needs headroom beyond 10s default)
@@ -33,41 +35,47 @@ The existing codebase is well-structured for this migration. The `createApp()` f
 - Routes with missing API keys return clear error message, never crash
 
 ### Claude's Discretion
+
 - Rate limiting implementation approach (express-rate-limit + Upstash, or @upstash/ratelimit directly)
 - Exact vercel.json rewrite rules and configuration
 - Build command configuration for Vercel
 - Whether to add a health check or status endpoint for monitoring
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Remove ADS-B Exchange and adsb.lol flight sources, keep OpenSky as sole source
 - Custom domain setup
 - Preview deployments per feature branch
-</user_constraints>
+  </user_constraints>
 
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| Vercel Platform | N/A | Hosting (CDN + serverless) | Zero-config Vite detection, native Express support |
-| @upstash/ratelimit | ^2.0.8 | API rate limiting | HTTP-based, designed for serverless, works with existing Upstash Redis |
-| Node.js | 22.x | Runtime | Stable ESM + `"type": "module"` support, LTS on Vercel |
+
+| Library            | Version | Purpose                    | Why Standard                                                           |
+| ------------------ | ------- | -------------------------- | ---------------------------------------------------------------------- |
+| Vercel Platform    | N/A     | Hosting (CDN + serverless) | Zero-config Vite detection, native Express support                     |
+| @upstash/ratelimit | ^2.0.8  | API rate limiting          | HTTP-based, designed for serverless, works with existing Upstash Redis |
+| Node.js            | 22.x    | Runtime                    | Stable ESM + `"type": "module"` support, LTS on Vercel                 |
 
 ### Already Present (no new installs needed)
-| Library | Version | Purpose | Notes |
-|---------|---------|---------|-------|
-| @upstash/redis | ^1.37.0 | Redis client | Already used for caching; reused for ratelimit backing store |
-| express | ^5.2.1 | API framework | Already deployed with `createApp()` factory pattern |
-| vite | ^6.3.5 | Frontend build | Vercel auto-detects and runs `vite build` |
+
+| Library        | Version | Purpose        | Notes                                                        |
+| -------------- | ------- | -------------- | ------------------------------------------------------------ |
+| @upstash/redis | ^1.37.0 | Redis client   | Already used for caching; reused for ratelimit backing store |
+| express        | ^5.2.1  | API framework  | Already deployed with `createApp()` factory pattern          |
+| vite           | ^6.3.5  | Frontend build | Vercel auto-detects and runs `vite build`                    |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| @upstash/ratelimit | express-rate-limit + rate-limit-redis | express-rate-limit needs TCP Redis (ioredis), not HTTP-based Upstash; @upstash/ratelimit is purpose-built for serverless |
-| Single catch-all function | Per-route serverless functions | More cold starts, harder to share middleware; catch-all is simpler and matches Express's routing model |
-| api/index.ts approach | Native Express framework detection (src/index.ts) | Native detection conflicts with Vite framework detection on the same project; api/ directory is the reliable pattern for mixed frontend+backend |
+
+| Instead of                | Could Use                                         | Tradeoff                                                                                                                                        |
+| ------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| @upstash/ratelimit        | express-rate-limit + rate-limit-redis             | express-rate-limit needs TCP Redis (ioredis), not HTTP-based Upstash; @upstash/ratelimit is purpose-built for serverless                        |
+| Single catch-all function | Per-route serverless functions                    | More cold starts, harder to share middleware; catch-all is simpler and matches Express's routing model                                          |
+| api/index.ts approach     | Native Express framework detection (src/index.ts) | Native detection conflicts with Vite framework detection on the same project; api/ directory is the reliable pattern for mixed frontend+backend |
 
 **Installation:**
+
 ```bash
 npm install @upstash/ratelimit
 ```
@@ -75,6 +83,7 @@ npm install @upstash/ratelimit
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 /
 +-- api/
@@ -94,6 +103,7 @@ npm install @upstash/ratelimit
 ```
 
 ### Pattern 1: Serverless Entry Point (api/index.ts)
+
 **What:** Thin wrapper that imports `createApp()` and re-exports the Express app for Vercel
 **When to use:** Always -- this is the Vercel serverless function entry point
 
@@ -110,6 +120,7 @@ Vercel's Express framework integration detects `export default app` and wraps it
 **CRITICAL:** The file MUST use `export default app` (ESM default export). This is required because `package.json` has `"type": "module"`. Vercel's runtime expects either `module.exports = app` (CJS) or `export default app` (ESM).
 
 ### Pattern 2: vercel.json Rewrites
+
 **What:** Route API requests to the catch-all function, let Vite static assets serve from CDN
 **When to use:** Always -- this bridges Vercel's CDN routing to the Express function
 
@@ -132,6 +143,7 @@ Vercel's Express framework integration detects `export default app` and wraps it
 **Rewrite order matters:** Vercel evaluates rewrites top-to-bottom. `/api/*` must come first so API calls hit the serverless function. The SPA fallback `/(.*) -> /index.html` catches all other routes for client-side routing.
 
 ### Pattern 3: Rate Limiting with @upstash/ratelimit
+
 **What:** HTTP-based rate limiting using the existing Upstash Redis instance
 **When to use:** Apply as Express middleware before API routes
 
@@ -163,6 +175,7 @@ export async function rateLimitMiddleware(req, res, next) {
 ```
 
 ### Pattern 4: Graceful Degradation for Missing API Keys
+
 **What:** Routes return informative errors instead of crashing when optional API keys are absent
 **When to use:** For all routes that depend on external APIs
 
@@ -171,6 +184,7 @@ The flights route already checks `process.env.OPENSKY_CLIENT_ID` before calling 
 **The `server/config.ts` issue:** `loadConfig()` calls `required()` for OPENSKY and AISSTREAM, meaning accessing ANY `config` property triggers ALL validations. Fix: make all API keys optional strings (nullable) in `loadConfig()`, using `process.env.X ?? ''` or `process.env.X ?? null`.
 
 ### Anti-Patterns to Avoid
+
 - **Using `vercel dev` for local development:** The user explicitly decided against this. Keep `concurrently` + Vite proxy.
 - **Putting `app.listen()` in api/index.ts:** Vercel handles the server lifecycle. Only export the app.
 - **Using `express.static()` in serverless:** Vercel ignores `express.static()`. Static assets must go in `public/` directory and are served by CDN.
@@ -178,48 +192,54 @@ The flights route already checks `process.env.OPENSKY_CLIENT_ID` before calling 
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Rate limiting counters | Custom Redis INCR/EXPIRE logic | @upstash/ratelimit | Handles sliding windows, race conditions, distributed counting; 1 line to configure |
-| Serverless Express adapter | Custom req/res translation | Vercel's native Express detection | `export default app` is all that's needed; Vercel handles the rest |
-| SPA routing fallback | Custom middleware for 404 -> index.html | vercel.json rewrites | `{ "source": "/(.*)", "destination": "/index.html" }` handles this at CDN level |
-| Environment variable validation | Custom validators | Direct `process.env` checks in routes | Routes already do this; the config.ts centralized validation is the problem |
+| Problem                         | Don't Build                             | Use Instead                           | Why                                                                                 |
+| ------------------------------- | --------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| Rate limiting counters          | Custom Redis INCR/EXPIRE logic          | @upstash/ratelimit                    | Handles sliding windows, race conditions, distributed counting; 1 line to configure |
+| Serverless Express adapter      | Custom req/res translation              | Vercel's native Express detection     | `export default app` is all that's needed; Vercel handles the rest                  |
+| SPA routing fallback            | Custom middleware for 404 -> index.html | vercel.json rewrites                  | `{ "source": "/(.*)", "destination": "/index.html" }` handles this at CDN level     |
+| Environment variable validation | Custom validators                       | Direct `process.env` checks in routes | Routes already do this; the config.ts centralized validation is the problem         |
 
 **Key insight:** Vercel's Express integration is extremely thin. The entire serverless adapter is `export default app`. Don't add complexity.
 
 ## Common Pitfalls
 
 ### Pitfall 1: config.ts Crashing on Cold Start
+
 **What goes wrong:** `server/config.ts` `loadConfig()` calls `required('OPENSKY_CLIENT_ID')` etc. When any adapter property is accessed via the Proxy, ALL required vars must be set. If AISSTREAM_API_KEY is not configured on Vercel, the first request to any adapter-using route crashes the function.
 **Why it happens:** The config module was designed for local dev where all env vars are in `.env`. Serverless requires graceful degradation.
 **How to avoid:** Change `loadConfig()` to make OpenSky/AISStream/ACLED credentials optional (use `process.env.X ?? ''` or `null`). Routes already check env vars before calling adapters.
 **Warning signs:** Function logs show "Missing required env var" errors on cold start.
 
 ### Pitfall 2: Framework Detection Conflict
+
 **What goes wrong:** Vercel might detect the project as "Vite" (frontend) and not know how to handle the Express backend, or vice versa.
 **Why it happens:** Vercel auto-detects frameworks. With both Vite config and Express in the same repo, detection can be ambiguous.
 **How to avoid:** Explicitly set `"framework": "vite"` in vercel.json. The `api/` directory convention is framework-agnostic and works alongside any frontend framework.
 **Warning signs:** Build logs show wrong framework detection or missing static output.
 
 ### Pitfall 3: CORS Wildcard Not Applied
+
 **What goes wrong:** The existing CORS middleware uses `process.env.CORS_ORIGIN ?? 'http://localhost:5173'`. In production, if CORS_ORIGIN is not set, it falls back to localhost, rejecting real requests.
 **Why it happens:** The fallback was designed for local dev.
 **How to avoid:** Set `CORS_ORIGIN=*` in Vercel environment variables, or change the fallback to `*` for production.
 **Warning signs:** Browser console shows CORS errors on the deployed site.
 
 ### Pitfall 4: ESM Import Path Resolution
+
 **What goes wrong:** Vercel's Node.js runtime may not resolve `.ts` imports in the same way as local tsx/esbuild.
 **Why it happens:** The `api/index.ts` file imports from `../server/index.js` (using `.js` extension per ESM convention). Vercel compiles `.ts` files but the import paths must be correct.
 **How to avoid:** Use `.js` extensions in import paths (already the convention in this project). Verify the relative path from `api/index.ts` to `server/index.ts` is `../server/index.js`.
 **Warning signs:** "Cannot find module" errors in function logs.
 
 ### Pitfall 5: maxDuration Misunderstanding
+
 **What goes wrong:** Setting maxDuration to 60s when Vercel's current defaults with fluid compute are actually 300s (5 min) for Hobby plan.
 **Why it happens:** The CONTEXT.md was written assuming the old 10s default. With fluid compute (enabled by default since April 2025), the default is already 300s.
 **How to avoid:** Setting maxDuration to 60 is fine (it's a cap, not a minimum). The AISStream WebSocket collect is 5s by default, well within 60s. The 60s setting protects against runaway requests while allowing headroom.
 **Warning signs:** None -- 60s is a reasonable explicit cap even with higher defaults available.
 
 ### Pitfall 6: WebSocket in Serverless (AISStream)
+
 **What goes wrong:** AISStream adapter opens a WebSocket, collects for 5s, then closes. This is fine for serverless (it's a short-lived connection), but the function stays running during the collect window.
 **Why it happens:** On-demand WebSocket pattern was designed for this serverless model in Phase 13.
 **How to avoid:** Keep AISSTREAM_COLLECT_MS at 5000ms (default). The 60s maxDuration provides ample headroom.
@@ -228,6 +248,7 @@ The flights route already checks `process.env.OPENSKY_CLIENT_ID` before calling 
 ## Code Examples
 
 ### api/index.ts -- Serverless Entry Point
+
 ```typescript
 // Source: Vercel Express guide + project createApp() pattern
 import { createApp } from '../server/index.js';
@@ -237,6 +258,7 @@ export default app;
 ```
 
 ### vercel.json -- Full Configuration
+
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
@@ -254,6 +276,7 @@ export default app;
 ```
 
 ### Node 22.x Configuration
+
 ```json
 // In package.json (engines field)
 {
@@ -262,10 +285,12 @@ export default app;
   }
 }
 ```
+
 Source: https://vercel.com/docs/functions/runtimes/node-js/node-js-versions
 Node version is set via `engines.node` in package.json or project settings. Vercel auto-detects and uses the specified major version. Current default for new projects is 24.x, so explicitly pinning 22.x is correct per user decision.
 
 ### Rate Limiting Middleware
+
 ```typescript
 // Source: https://upstash.com/docs/redis/sdks/ratelimit-ts/overview
 import { Ratelimit } from '@upstash/ratelimit';
@@ -284,9 +309,7 @@ export async function rateLimitMiddleware(
   next: NextFunction,
 ): Promise<void> {
   const identifier = req.ip ?? req.headers['x-forwarded-for'] ?? 'anonymous';
-  const { success, limit, remaining, reset } = await ratelimit.limit(
-    String(identifier),
-  );
+  const { success, limit, remaining, reset } = await ratelimit.limit(String(identifier));
 
   res.setHeader('X-RateLimit-Limit', String(limit));
   res.setHeader('X-RateLimit-Remaining', String(remaining));
@@ -301,6 +324,7 @@ export async function rateLimitMiddleware(
 ```
 
 ### Fixed server/config.ts (Graceful Degradation)
+
 ```typescript
 // All API keys become optional -- routes check process.env before calling adapters
 export function loadConfig(): AppConfig {
@@ -323,6 +347,7 @@ export function loadConfig(): AppConfig {
 ```
 
 ### .env.example Updates
+
 ```bash
 # === REQUIRED for deployment ===
 # Upstash Redis (create free instance at https://console.upstash.com)
@@ -352,15 +377,16 @@ ACLED_PASSWORD=your-password
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| `api/` directory + `@vercel/node` builds | Native Express framework detection (`export default app` from standard locations) | Vercel CLI 47.0.5+ (2025) | Express apps can deploy from root `index.ts` without `api/` directory |
-| Separate serverless functions per route | Single catch-all Express function with fluid compute | Fluid compute default (Apr 2025) | Optimized concurrency, fewer cold starts, background processing |
-| 10s default maxDuration (Hobby) | 300s default maxDuration (Hobby with fluid compute) | Apr 2025 | 60s explicit cap is now well under the default, not fighting it |
-| Node 20.x default | Node 24.x default (22.x still supported) | Late 2025 | Must explicitly pin 22.x per user decision |
-| `module.exports = app` (CJS) | `export default app` (ESM) | Always (ESM convention) | Project uses `"type": "module"` -- ESM export is required |
+| Old Approach                             | Current Approach                                                                  | When Changed                     | Impact                                                                |
+| ---------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| `api/` directory + `@vercel/node` builds | Native Express framework detection (`export default app` from standard locations) | Vercel CLI 47.0.5+ (2025)        | Express apps can deploy from root `index.ts` without `api/` directory |
+| Separate serverless functions per route  | Single catch-all Express function with fluid compute                              | Fluid compute default (Apr 2025) | Optimized concurrency, fewer cold starts, background processing       |
+| 10s default maxDuration (Hobby)          | 300s default maxDuration (Hobby with fluid compute)                               | Apr 2025                         | 60s explicit cap is now well under the default, not fighting it       |
+| Node 20.x default                        | Node 24.x default (22.x still supported)                                          | Late 2025                        | Must explicitly pin 22.x per user decision                            |
+| `module.exports = app` (CJS)             | `export default app` (ESM)                                                        | Always (ESM convention)          | Project uses `"type": "module"` -- ESM export is required             |
 
 **Deprecated/outdated:**
+
 - `builds` + `routes` in vercel.json: replaced by `rewrites` + `functions` in modern Vercel
 - `@vercel/node` explicit runtime in vercel.json: not needed for standard Node.js functions
 - `vercel dev` for mixed projects: user decided against this; keep local concurrently setup
@@ -385,28 +411,32 @@ ACLED_PASSWORD=your-password
 ## Validation Architecture
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | Vitest 4.1.0 with jsdom (frontend) + node (server) |
-| Config file | vite.config.ts (test section) |
-| Quick run command | `npx vitest run server/` |
-| Full suite command | `npx vitest run` |
+
+| Property           | Value                                              |
+| ------------------ | -------------------------------------------------- |
+| Framework          | Vitest 4.1.0 with jsdom (frontend) + node (server) |
+| Config file        | vite.config.ts (test section)                      |
+| Quick run command  | `npx vitest run server/`                           |
+| Full suite command | `npx vitest run`                                   |
 
 ### Phase Requirements -> Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| DEPLOY-01 | api/index.ts exports createApp() as default | unit | `npx vitest run server/__tests__/vercel-entry.test.ts -x` | No -- Wave 0 |
-| DEPLOY-02 | Rate limiting returns 429 on excess requests | unit | `npx vitest run server/__tests__/rateLimit.test.ts -x` | No -- Wave 0 |
-| DEPLOY-03 | Routes return 503 (not crash) when API keys missing | unit | `npx vitest run server/__tests__/server.test.ts -x` | Yes (partial) |
-| DEPLOY-04 | CORS wildcard works in production config | unit | `npx vitest run server/__tests__/server.test.ts -x` | Yes (partial) |
-| DEPLOY-05 | All existing API routes still work | integration | `npx vitest run server/` | Yes (144 tests pass) |
+
+| Req ID    | Behavior                                            | Test Type   | Automated Command                                         | File Exists?         |
+| --------- | --------------------------------------------------- | ----------- | --------------------------------------------------------- | -------------------- |
+| DEPLOY-01 | api/index.ts exports createApp() as default         | unit        | `npx vitest run server/__tests__/vercel-entry.test.ts -x` | No -- Wave 0         |
+| DEPLOY-02 | Rate limiting returns 429 on excess requests        | unit        | `npx vitest run server/__tests__/rateLimit.test.ts -x`    | No -- Wave 0         |
+| DEPLOY-03 | Routes return 503 (not crash) when API keys missing | unit        | `npx vitest run server/__tests__/server.test.ts -x`       | Yes (partial)        |
+| DEPLOY-04 | CORS wildcard works in production config            | unit        | `npx vitest run server/__tests__/server.test.ts -x`       | Yes (partial)        |
+| DEPLOY-05 | All existing API routes still work                  | integration | `npx vitest run server/`                                  | Yes (144 tests pass) |
 
 ### Sampling Rate
+
 - **Per task commit:** `npx vitest run server/`
 - **Per wave merge:** `npx vitest run`
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `server/__tests__/vercel-entry.test.ts` -- covers DEPLOY-01 (api/index.ts exports app correctly)
 - [ ] `server/__tests__/rateLimit.test.ts` -- covers DEPLOY-02 (rate limiting middleware)
 - [ ] Update `server/__tests__/server.test.ts` -- covers DEPLOY-03, DEPLOY-04 (graceful degradation with missing env vars, CORS wildcard)
@@ -414,6 +444,7 @@ ACLED_PASSWORD=your-password
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - [Vercel Express on Vercel Guide](https://vercel.com/docs/frameworks/backend/express) - Express deployment pattern, `export default app`, static assets in `public/`
 - [Vercel vercel.json Configuration](https://vercel.com/docs/project-configuration/vercel-json) - rewrites syntax, functions config, maxDuration, framework setting
 - [Vercel Node.js Versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) - Node 22.x supported, 24.x is new default, set via engines.node in package.json
@@ -423,15 +454,18 @@ ACLED_PASSWORD=your-password
 - [Upstash Ratelimit GitHub](https://github.com/upstash/ratelimit-js) - v2.0.8, connectionless HTTP-based
 
 ### Secondary (MEDIUM confidence)
+
 - [Vercel Vite Documentation](https://vercel.com/docs/frameworks/frontend/vite) - Vite auto-detection, SPA rewrite pattern
 - [Vercel Functions Overview](https://vercel.com/docs/functions) - Fluid compute default since Apr 2025, function lifecycle
 
 ### Tertiary (LOW confidence)
+
 - Community examples of Express + Vite on Vercel (multiple consistent sources confirm api/ directory + rewrites pattern)
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - Official Vercel docs confirm Express + Vite pattern, Upstash docs confirm ratelimit API
 - Architecture: HIGH - `api/index.ts` + `export default app` is documented in official Express on Vercel guide
 - Pitfalls: HIGH - config.ts issue verified by reading source code; framework detection conflict well-documented

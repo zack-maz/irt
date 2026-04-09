@@ -14,17 +14,20 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 ## Implementation Decisions
 
 ### Notification card content & layout
+
 - Event-first card design: lead with conflict event type, location, and severity-derived sort position, then 1-3 matched news headlines below as supporting evidence
 - Severity score is hidden from the card — used internally for sort order within time groups, not displayed as a visible number or color band
 - Cards show: event type icon, event type label (uppercase), location name, relative timestamp, coordinates, then matched news headlines (source: truncated title) with "N sources reporting" summary
 - Clicking a card: closes the dropdown, flies the map to the event location, selects the event, and opens the detail panel
 
 ### Notification grouping & ordering
+
 - Time-grouped sections: Last Hour, Last Day, Last Week
 - Within each time group, sorted by severity score descending (highest severity first)
 - Badge count = total unread items across all groups
 
 ### Proximity alert behavior
+
 - Only unidentified flights (data.unidentified flag) trigger proximity alerts — not identified flights, not ships
 - 50km threshold from key sites (reuses haversine from attackStatus.ts)
 - Proximity alerts appear as a persistent small icon on/near the threatened site on the map (NOT in the notification drawer)
@@ -33,6 +36,7 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 - Computed client-side from flightStore unidentified flights × siteStore sites on each poll cycle
 
 ### Drawer interaction & placement
+
 - Bell icon in top-right corner with unread count badge
 - Click opens a dropdown panel beneath the bell icon
 - Dropdown does not compete with left panel stack or right detail panel
@@ -41,6 +45,7 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 - Clicking outside the dropdown or pressing Escape closes it
 
 ### 24h default event window (NOTF-05)
+
 - Separate mechanism in filterStore — new `defaultEventWindow` concept (not auto-setting the date slider)
 - When dateStart and dateEnd are both null (no custom range), events AND news are filtered to last 24h client-side
 - Slider stays at full range — the 24h filter is invisible to the slider UI
@@ -50,6 +55,7 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 - Scope: applies to conflict events and news clusters; flights, ships, and sites are unaffected
 
 ### Claude's Discretion
+
 - Notification store shape and derived state implementation
 - Severity scoring formula implementation (type weight × log mentions × log sources × recency decay)
 - News-to-event matching algorithm (temporal + geographic/keyword proximity)
@@ -70,9 +76,11 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - `src/lib/attackStatus.ts`: Haversine distance computation + coarse bbox pre-filter — reuse for 50km proximity checks
 - `src/stores/newsStore.ts`: News clusters with articles[], tone, geo metadata — source for news-to-event matching
 - `src/stores/eventStore.ts`: Conflict events with type, lat/lng, timestamp, numMentions, numSources — source for severity scoring
@@ -83,6 +91,7 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 - `src/stores/filterStore.ts`: Date range filter state (dateStart, dateEnd) — extend with defaultEventWindow
 
 ### Established Patterns
+
 - Zustand curried `create<T>()()` for new notificationStore
 - ConnectionStatus type for store health tracking
 - OverlayPanel for collapsible panels in the left stack
@@ -90,6 +99,7 @@ Users receive proactive, severity-ranked intelligence alerts about conflict even
 - useEntityLayers for layer visibility gating — extend with 24h default window logic
 
 ### Integration Points
+
 - `src/components/layout/AppShell.tsx`: Add bell icon + dropdown in top-right area
 - `src/stores/filterStore.ts`: Add `defaultEventWindow` field and logic
 - `src/hooks/useEntityLayers.ts` or `useFilteredEntities.ts`: Apply 24h default when no custom range active
@@ -108,5 +118,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 17-notification-center*
-*Context gathered: 2026-03-20*
+_Phase: 17-notification-center_
+_Context gathered: 2026-03-20_

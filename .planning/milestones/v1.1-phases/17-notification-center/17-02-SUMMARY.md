@@ -59,6 +59,7 @@ completed: 2026-03-20
 - **Files modified:** 5
 
 ## Accomplishments
+
 - filterStore exposes isDefaultWindowActive() getter deriving from dateStart/dateEnd null state
 - Events and news clusters filtered to last 24h when no custom date range is active
 - "Showing last 24h" label appears in filter panel, disappears when custom range set
@@ -73,6 +74,7 @@ Each task was committed atomically:
 2. **Task 2: Add "Showing last 24h" label to FilterPanelSlot** - `427b510` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/filterStore.ts` - Added isDefaultWindowActive getter to interface and implementation
 - `src/hooks/useFilteredEntities.ts` - Added DEFAULT_WINDOW_MS constant, 24h event/cluster filtering, clusters in return type
 - `src/components/layout/FilterPanelSlot.tsx` - Added conditional "Showing last 24h" label in Events > Date Range section
@@ -80,6 +82,7 @@ Each task was committed atomically:
 - `src/__tests__/FilterPanel.test.tsx` - Added 3 tests for label visibility
 
 ## Decisions Made
+
 - isDefaultWindowActive is a pure derived getter (no new stored state) -- derives from dateStart===null && dateEnd===null
 - 24h window applies to both events AND news clusters per locked decision scope
 - useFilteredEntities return type extended to include clusters (backward-compatible)
@@ -89,12 +92,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - 24h default window ready for notification center integration
 - Consumers of useFilteredEntities can now access filtered clusters
 - Full test suite passes (650 tests across 53 files)
@@ -104,5 +110,6 @@ None - no external service configuration required.
 All 5 modified files verified present. Both task commits (e3b853d, 427b510) verified in git log.
 
 ---
-*Phase: 17-notification-center*
-*Completed: 2026-03-20*
+
+_Phase: 17-notification-center_
+_Completed: 2026-03-20_

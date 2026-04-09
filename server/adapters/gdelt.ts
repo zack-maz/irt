@@ -1,29 +1,23 @@
 import AdmZip from 'adm-zip';
 import type { ConflictEventEntity, ConflictEventType } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'gdelt' });
 import { isGeoValid, detectCentroid } from '../lib/geoValidation.js';
-import { haversineKm } from '../../src/lib/geo.js';
-import { computeEventConfidence, applyGoldsteinSanity, GOLDSTEIN_CEILINGS, checkBellingcatCorroboration, getCameoSpecificity } from '../lib/eventScoring.js';
+import {
+  computeEventConfidence,
+  applyGoldsteinSanity,
+  GOLDSTEIN_CEILINGS,
+  checkBellingcatCorroboration,
+  getCameoSpecificity,
+} from '../lib/eventScoring.js';
 import type { BellingcatArticle } from '../lib/eventScoring.js';
 import { getConfig } from '../config.js';
 import { buildAuditRecord } from '../lib/eventAudit.js';
-import type { AuditRecord, PipelineTrace, PhaseAChecks, PhaseCChecks, ConfidenceSubScores } from '../lib/eventAudit.js';
-import { validateEventGeo, ACTOR_COUNTRY_MAP as ACTOR_COUNTRY_MAP_IMPORT } from '../lib/nlpGeoValidator.js';
-import { extractActorsAndPlaces, lookupCityCoords } from '../lib/nlpExtractor.js';
-import { batchFetchTitles } from '../lib/titleFetcher.js';
-
-/** Clean GDELT location strings: strip replacement chars, fix orphaned punctuation */
-function sanitizeLocation(raw: string): string {
-  return raw
-    .replace(/\uFFFD/g, '')       // Unicode replacement character
-    .replace(/\?(?=[a-z])/gi, '') // Literal ? before a letter (encoding artifact)
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+import type { AuditRecord, PhaseAChecks, ConfidenceSubScores } from '../lib/eventAudit.js';
 
 // GDELT v2 lastupdate.txt endpoint (HTTP, NOT HTTPS -- TLS cert issues)
-const GDELT_LASTUPDATE_URL =
-  'http://data.gdeltproject.org/gdeltv2/lastupdate.txt';
+const GDELT_LASTUPDATE_URL = 'http://data.gdeltproject.org/gdeltv2/lastupdate.txt';
 
 // FIPS 10-4 codes for Greater Middle East (16 countries, same coverage as ACLED)
 export const MIDDLE_EAST_FIPS = new Set([
@@ -40,8 +34,6 @@ export const MIDDLE_EAST_FIPS = new Set([
   'KU', // Kuwait
   'JO', // Jordan
   'IS', // Israel (FIPS, not ISO "IL")
-  'WE', // West Bank
-  'GZ', // Gaza Strip
   'LE', // Lebanon
   'AF', // Afghanistan
   'PK', // Pakistan
@@ -90,7 +82,12 @@ export async function getExportUrl(): Promise<string> {
   if (!exportLine) {
     throw new Error('No export URL found in lastupdate.txt');
   }
-  return exportLine.trim().split(' ')[2];
+  const parts = exportLine.trim().split(' ');
+  const url = parts[2];
+  if (!url) {
+    throw new Error('Malformed lastupdate.txt: missing URL column');
+  }
+  return url;
 }
 
 /**
@@ -104,17 +101,25 @@ async function downloadAndUnzip(url: string): Promise<string> {
   const buffer = Buffer.from(await res.arrayBuffer());
   const zip = new AdmZip(buffer);
   const entries = zip.getEntries();
-  return entries[0].getData().toString('utf8');
+  const firstEntry = entries[0];
+  if (!firstEntry) {
+    throw new Error('GDELT ZIP archive contained no entries');
+  }
+  return firstEntry.getData().toString('utf8');
+}
+
+/**
+ * Safely read a CSV column, returning empty string for out-of-bounds access.
+ * GDELT rows have at least 61 columns once filtered earlier in the pipeline,
+ * but this guard makes column reads explicit under noUncheckedIndexedAccess.
+ */
+function getCol(cols: string[], idx: number): string {
+  return cols[idx] ?? '';
 }
 
 // All valid CAMEO base codes in the 180-204 range are mapped below.
 // Codes 187-189, 197-199, 205+ do not exist in the CAMEO spec and correctly fall to ROOT_FALLBACK.
-// CAMEO base codes excluded from the conflict pipeline entirely.
-// 180 "unconventional violence NOS" — GDELT's catch-all (cyber ops, protests, false positives)
-// 182 "physical assault" — very broad, non-kinetic
-// 190 "conventional military force NOS" — vague catch-all
-// 192 — non-conflict
-const EXCLUDED_BASE_CODES = new Set(['180', '182', '190', '192']);
+// Note: CAMEO base code exclusion is handled via config.eventExcludedCameo (not hardcoded here).
 
 const BASE_CODE_MAP: Record<string, ConflictEventType> = {
   '181': 'abduction',
@@ -194,37 +199,33 @@ function describeEvent(eventBaseCode: string): string {
 /**
  * Normalize a GDELT CSV row (as columns array) to ConflictEventEntity.
  */
-export function normalizeGdeltEvent(
-  cols: string[],
-  lat: number,
-  lng: number,
-): ConflictEventEntity {
-  const eventBaseCode = cols[COL.EventBaseCode];
-  const eventRootCode = cols[COL.EventRootCode];
-  const eventCode = cols[COL.EventCode];
-  const sqlDate = cols[COL.SQLDATE];
-  const actionGeoType = parseInt(cols[COL.ActionGeo_Type], 10) || undefined;
+export function normalizeGdeltEvent(cols: string[], lat: number, lng: number): ConflictEventEntity {
+  const eventBaseCode = getCol(cols, COL.EventBaseCode);
+  const eventRootCode = getCol(cols, COL.EventRootCode);
+  const eventCode = getCol(cols, COL.EventCode);
+  const sqlDate = getCol(cols, COL.SQLDATE);
+  const actionGeoType = parseInt(getCol(cols, COL.ActionGeo_Type), 10) || undefined;
 
   return {
-    id: `gdelt-${cols[COL.GLOBALEVENTID]}`,
+    id: `gdelt-${getCol(cols, COL.GLOBALEVENTID)}`,
     type: classifyByBaseCode(eventBaseCode, eventRootCode),
     lat,
     lng,
     timestamp: parseSqlDate(sqlDate),
-    label: `${sanitizeLocation(cols[COL.ActionGeo_FullName])}: ${describeEvent(eventBaseCode)}`,
+    label: `${getCol(cols, COL.ActionGeo_FullName)}: ${describeEvent(eventBaseCode)}`,
     data: {
       eventType: describeEvent(eventBaseCode),
       subEventType: `CAMEO ${eventCode}`,
       fatalities: 0, // GDELT does not track fatalities
-      actor1: cols[COL.Actor1Name] || '',
-      actor2: cols[COL.Actor2Name] || '',
+      actor1: getCol(cols, COL.Actor1Name),
+      actor2: getCol(cols, COL.Actor2Name),
       notes: '',
-      source: cols[COL.SOURCEURL] ?? '',
-      goldsteinScale: parseFloat(cols[COL.GoldsteinScale]) || 0,
-      locationName: sanitizeLocation(cols[COL.ActionGeo_FullName] || ''),
+      source: getCol(cols, COL.SOURCEURL),
+      goldsteinScale: parseFloat(getCol(cols, COL.GoldsteinScale)) || 0,
+      locationName: getCol(cols, COL.ActionGeo_FullName),
       cameoCode: eventCode,
-      numMentions: parseInt(cols[COL.NumMentions], 10) || undefined,
-      numSources: parseInt(cols[COL.NumSources], 10) || undefined,
+      numMentions: parseInt(getCol(cols, COL.NumMentions), 10) || undefined,
+      numSources: parseInt(getCol(cols, COL.NumSources), 10) || undefined,
       actionGeoType,
     },
   };
@@ -235,10 +236,12 @@ export function normalizeGdeltEvent(
  * and normalize survivors to ConflictEventEntity[].
  *
  * Phase A: Raw row filtering (operates on string[] columns)
- * Phase B: Normalize, score, and centroid detection (operates on entities)
- * Phase C: NLP geo cross-validation (async -- fetches article titles)
+ * Phase B: Normalize, score, and threshold-filter (operates on entities)
  */
-export async function parseAndFilter(csv: string, bellingcatArticles?: BellingcatArticle[], options?: { skipTitleFetch?: boolean }): Promise<ConflictEventEntity[]> {
+export function parseAndFilter(
+  csv: string,
+  bellingcatArticles?: BellingcatArticle[],
+): ConflictEventEntity[] {
   const lines = csv.trim().split('\n');
   const rawCount = lines.length;
   const config = getConfig();
@@ -254,38 +257,41 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
     const cols = line.split('\t');
     if (cols.length < 61) continue;
 
-    const eventRootCode = cols[COL.EventRootCode];
-    const countryCode = cols[COL.ActionGeo_CountryCode];
+    const eventRootCode = getCol(cols, COL.EventRootCode);
+    const countryCode = getCol(cols, COL.ActionGeo_CountryCode);
 
     if (!CONFLICT_ROOT_CODES.has(eventRootCode)) continue;
-    const eventBaseCode = cols[COL.EventBaseCode];
+    const eventBaseCode = getCol(cols, COL.EventBaseCode);
     if (excludedCameo.has(eventBaseCode)) continue;
     if (!MIDDLE_EAST_FIPS.has(countryCode)) continue;
 
     // Geo cross-validation: discard events where FullName contradicts FIPS code
-    const fullName = cols[COL.ActionGeo_FullName];
+    const fullName = getCol(cols, COL.ActionGeo_FullName);
     if (!isGeoValid(fullName, countryCode)) {
       geoDiscardCount++;
-      log({ level: 'warn', message: `[gdelt] discarded gdelt-${cols[COL.GLOBALEVENTID]}: FullName='${fullName}' contradicts FIPS=${countryCode}` });
+      log.warn(
+        { eventId: getCol(cols, COL.GLOBALEVENTID), fullName, countryCode },
+        'discarded: FullName contradicts FIPS',
+      );
       continue;
     }
 
     // Require at least N independent sources — single-source events are overwhelmingly
     // false positives (op-eds, niche sites). Real kinetic events get multi-source coverage fast.
-    const numSources = parseInt(cols[COL.NumSources], 10) || 0;
+    const numSources = parseInt(getCol(cols, COL.NumSources), 10) || 0;
     if (numSources < config.eventMinSources) continue;
 
     // Require at least one actor with a country code (filters non-state actors)
-    const actor1Country = cols[COL.Actor1CountryCode]?.trim();
-    const actor2Country = cols[COL.Actor2CountryCode]?.trim();
+    const actor1Country = getCol(cols, COL.Actor1CountryCode).trim();
+    const actor2Country = getCol(cols, COL.Actor2CountryCode).trim();
     if (!actor1Country && !actor2Country) continue;
 
-    const lat = parseFloat(cols[COL.ActionGeo_Lat]);
-    const lng = parseFloat(cols[COL.ActionGeo_Long]);
+    const lat = parseFloat(getCol(cols, COL.ActionGeo_Lat));
+    const lng = parseFloat(getCol(cols, COL.ActionGeo_Long));
     if (isNaN(lat) || isNaN(lng)) continue;
 
-    const key = `${cols[COL.SQLDATE]}|${cols[COL.EventCode]}|${lat}|${lng}`;
-    const mentions = parseInt(cols[COL.NumMentions], 10) || 0;
+    const key = `${getCol(cols, COL.SQLDATE)}|${getCol(cols, COL.EventCode)}|${lat}|${lng}`;
+    const mentions = parseInt(getCol(cols, COL.NumMentions), 10) || 0;
     const existing = best.get(key);
 
     if (!existing || mentions > existing.mentions) {
@@ -295,20 +301,12 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
 
   const geoValidCount = best.size;
 
-  // --- Phase B: Normalize, score (pre-threshold) ---
+  // --- Phase B: Normalize, score, and threshold-filter ---
 
   const { eventConfidenceThreshold, eventCentroidPenalty } = config;
   let reclassifyCount = 0;
   let thresholdDiscardCount = 0;
-  let nlpRejectCount = 0;
-
-  // Build intermediate entities with their raw cols for Phase C
-  const intermediates: Array<{
-    entity: ConflictEventEntity;
-    cols: string[];
-    geoPrecision: 'precise' | 'centroid';
-    confidence: number;
-  }> = [];
+  const results: ConflictEventEntity[] = [];
 
   for (const entry of best.values()) {
     // Step 8: Normalize
@@ -320,7 +318,16 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
     if (entity.type !== origType) {
       reclassifyCount++;
       const ceiling = GOLDSTEIN_CEILINGS[origType]?.ceiling;
-      log({ level: 'info', message: `[gdelt] reclassified ${entity.id}: ${origType} -> ${entity.type} (Goldstein ${entity.data.goldsteinScale}, ceiling ${ceiling})` });
+      log.info(
+        {
+          id: entity.id,
+          from: origType,
+          to: entity.type,
+          goldstein: entity.data.goldsteinScale,
+          ceiling,
+        },
+        'reclassified event',
+      );
     }
 
     // Step 10: Centroid detection
@@ -336,133 +343,15 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
       confidence *= eventCentroidPenalty;
     }
 
-    intermediates.push({ entity, cols: entry.cols, geoPrecision, confidence });
-  }
-
-  // --- Phase C: NLP geo cross-validation ---
-  // Batch fetch titles for all candidate events, then validate
-
-  const urlsToFetch: string[] = [];
-  for (const item of intermediates) {
-    const url = item.cols[COL.SOURCEURL];
-    if (url) urlsToFetch.push(url);
-  }
-
-  const titleMap = options?.skipTitleFetch
-    ? new Map<string, string | null>()
-    : await batchFetchTitles(urlsToFetch);
-  if (!options?.skipTitleFetch) {
-    log({ level: 'info', message: `[gdelt] Phase C: fetched ${titleMap.size} titles for ${urlsToFetch.length} URLs (${[...titleMap.values()].filter(t => t !== null).length} non-null)` });
-  }
-
-  const results: ConflictEventEntity[] = [];
-
-  for (const item of intermediates) {
-    let { entity, confidence, cols } = item;
-    const url = cols[COL.SOURCEURL] || '';
-    const title = titleMap.get(url) ?? null;
-
-    // NLP cross-validation
-    const nlpResult = validateEventGeo({
-      title,
-      actorCountryCodes: {
-        actor1: cols[COL.Actor1CountryCode]?.trim() || '',
-        actor2: cols[COL.Actor2CountryCode]?.trim() || '',
-      },
-      geoCountryCode: cols[COL.ActionGeo_CountryCode],
-      actionGeoType: entity.data.actionGeoType,
-      lat: entity.lat,
-      lng: entity.lng,
-    });
-
-    switch (nlpResult.status) {
-      case 'verified':
-        // Full confidence retained
-        break;
-
-      case 'mismatch':
-        nlpRejectCount++;
-        log({ level: 'warn', message: `[gdelt] NLP rejected ${entity.id}: ${nlpResult.reason}` });
-        continue; // Skip this event entirely
-
-      case 'relocated': {
-        // Update coordinates and remove centroid penalty
-        entity = {
-          ...entity,
-          lat: nlpResult.newLat,
-          lng: nlpResult.newLng,
-          data: {
-            ...entity.data,
-            geoPrecision: 'precise' as const,
-          },
-        };
-        // Restore confidence by undoing centroid penalty if it was applied
-        const actionGeoType = entity.data.actionGeoType;
-        if ((actionGeoType === 3 || actionGeoType === 4) && eventCentroidPenalty > 0) {
-          confidence = confidence / eventCentroidPenalty;
-        }
-        log({ level: 'info', message: `[gdelt] NLP relocated ${entity.id} to ${nlpResult.cityName} (${nlpResult.newLat.toFixed(4)}, ${nlpResult.newLng.toFixed(4)})` });
-        break;
-      }
-
-      case 'penalized':
-        confidence *= nlpResult.confidenceMultiplier;
-        break;
-
-      case 'skipped':
-        // Title fetch failure -> 0.7x penalty
-        if (nlpResult.reason === 'title_fetch_failed') {
-          confidence *= 0.7;
-        }
-        // Other skip reasons: no penalty
-        break;
-    }
-
-    // Coordinate-label sanity check: if GDELT's locationName contains a known city
-    // but coords are >200km away, relocate to the named city. This catches GDELT bugs
-    // like "Baghdad" at Tehran's coordinates, even when title fetch fails.
-    if (nlpResult.status === 'skipped' || nlpResult.status === 'verified') {
-      const locName = entity.data.locationName || '';
-      const firstPart = locName.split(',')[0].trim();
-      if (firstPart) {
-        const cityCoords = lookupCityCoords(firstPart, entity.lat, entity.lng);
-        if (cityCoords) {
-          const dist = haversineKm(entity.lat, entity.lng, cityCoords.lat, cityCoords.lng);
-          if (dist > 200) {
-            log({ level: 'info', message: `[gdelt] label-coord fix: ${entity.id} "${firstPart}" coords ${dist.toFixed(0)}km away, relocating to ${cityCoords.lat.toFixed(4)},${cityCoords.lng.toFixed(4)}` });
-            entity = { ...entity, lat: cityCoords.lat, lng: cityCoords.lng };
-          }
-        }
-      }
-    }
-
-    // Actor1Name-vs-location check: if Actor1Name is a known ME city/country
-    // that doesn't match the geocoded country, the event is likely misplaced.
-    // E.g., Actor1="DUBAI" geocoded to Iran → Dubai is AE, not IR.
-    if (nlpResult.status === 'skipped' || nlpResult.status === 'verified') {
-      const actor1Name = (cols[COL.Actor1Name] || '').toLowerCase().trim();
-      if (actor1Name) {
-        const actorCountryCodes = ACTOR_COUNTRY_MAP_IMPORT[actor1Name];
-        if (actorCountryCodes && !actorCountryCodes.includes(cols[COL.ActionGeo_CountryCode])) {
-          // Actor1 is a known ME entity but geocoded to a different country
-          const cityMatch = lookupCityCoords(actor1Name, entity.lat, entity.lng);
-          if (cityMatch) {
-            log({ level: 'info', message: `[gdelt] actor-name fix: ${entity.id} Actor1="${cols[COL.Actor1Name]}" doesn't match geo ${cols[COL.ActionGeo_CountryCode]}, relocating to ${cityMatch.lat.toFixed(4)},${cityMatch.lng.toFixed(4)}` });
-            entity = { ...entity, lat: cityMatch.lat, lng: cityMatch.lng };
-          } else {
-            confidence *= 0.4;
-          }
-        }
-      }
-    }
-
-    // Update entity with final confidence
     entity = { ...entity, data: { ...entity.data, confidence } };
 
-    // Step 12: Threshold filter (AFTER Phase C adjustments)
+    // Step 12: Threshold filter
     if (confidence < eventConfidenceThreshold) {
       thresholdDiscardCount++;
-      log({ level: 'warn', message: `[gdelt] discarded ${entity.id}: confidence ${confidence.toFixed(3)} below threshold ${eventConfidenceThreshold}` });
+      log.warn(
+        { id: entity.id, confidence: +confidence.toFixed(3), threshold: eventConfidenceThreshold },
+        'discarded: below confidence threshold',
+      );
       continue;
     }
 
@@ -472,7 +361,15 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
       if (corroboration.matched) {
         confidence = Math.min(1.0, confidence + config.bellingcatCorroborationBoost);
         entity = { ...entity, data: { ...entity.data, confidence } };
-        log({ level: 'info', message: `[gdelt] Bellingcat corroboration boost for ${entity.id}: +${config.bellingcatCorroborationBoost} -> ${confidence.toFixed(3)} (article: ${corroboration.article.url})` });
+        log.info(
+          {
+            id: entity.id,
+            boost: config.bellingcatCorroborationBoost,
+            confidence: +confidence.toFixed(3),
+            article: corroboration.article.url,
+          },
+          'Bellingcat corroboration boost',
+        );
       }
     }
 
@@ -480,7 +377,17 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
   }
 
   // Pipeline summary
-  log({ level: 'info', message: `[gdelt] pipeline: ${rawCount} raw -> ${geoValidCount} geo-valid -> ${reclassifyCount} reclassified -> ${nlpRejectCount} NLP rejected -> ${geoValidCount - thresholdDiscardCount - nlpRejectCount} above threshold -> ${results.length} final` });
+  log.info(
+    {
+      rawCount,
+      geoValidCount,
+      geoDiscardCount,
+      reclassifyCount,
+      aboveThreshold: geoValidCount - thresholdDiscardCount,
+      finalCount: results.length,
+    },
+    'pipeline summary',
+  );
 
   // Dispersion is applied downstream in the events route (after all merging)
   // so that the full merged event set gets single-pass slot assignment.
@@ -492,27 +399,27 @@ export async function parseAndFilter(csv: string, bellingcatArticles?: Bellingca
  */
 function extractRawColumns(cols: string[]): Record<string, string> {
   return {
-    GLOBALEVENTID: cols[COL.GLOBALEVENTID] ?? '',
-    SQLDATE: cols[COL.SQLDATE] ?? '',
-    Actor1Name: cols[COL.Actor1Name] ?? '',
-    Actor1CountryCode: cols[COL.Actor1CountryCode] ?? '',
-    Actor2Name: cols[COL.Actor2Name] ?? '',
-    Actor2CountryCode: cols[COL.Actor2CountryCode] ?? '',
-    EventCode: cols[COL.EventCode] ?? '',
-    EventBaseCode: cols[COL.EventBaseCode] ?? '',
-    EventRootCode: cols[COL.EventRootCode] ?? '',
-    GoldsteinScale: cols[COL.GoldsteinScale] ?? '',
-    NumMentions: cols[COL.NumMentions] ?? '',
-    NumSources: cols[COL.NumSources] ?? '',
-    ActionGeo_Type: cols[COL.ActionGeo_Type] ?? '',
-    ActionGeo_FullName: cols[COL.ActionGeo_FullName] ?? '',
-    ActionGeo_CountryCode: cols[COL.ActionGeo_CountryCode] ?? '',
-    ActionGeo_ADM1Code: cols[COL.ActionGeo_ADM1Code] ?? '',
-    ActionGeo_ADM2Code: cols[COL.ActionGeo_ADM2Code] ?? '',
-    ActionGeo_Lat: cols[COL.ActionGeo_Lat] ?? '',
-    ActionGeo_Long: cols[COL.ActionGeo_Long] ?? '',
-    ActionGeo_FeatureID: cols[COL.ActionGeo_FeatureID] ?? '',
-    SOURCEURL: cols[COL.SOURCEURL] ?? '',
+    GLOBALEVENTID: getCol(cols, COL.GLOBALEVENTID),
+    SQLDATE: getCol(cols, COL.SQLDATE),
+    Actor1Name: getCol(cols, COL.Actor1Name),
+    Actor1CountryCode: getCol(cols, COL.Actor1CountryCode),
+    Actor2Name: getCol(cols, COL.Actor2Name),
+    Actor2CountryCode: getCol(cols, COL.Actor2CountryCode),
+    EventCode: getCol(cols, COL.EventCode),
+    EventBaseCode: getCol(cols, COL.EventBaseCode),
+    EventRootCode: getCol(cols, COL.EventRootCode),
+    GoldsteinScale: getCol(cols, COL.GoldsteinScale),
+    NumMentions: getCol(cols, COL.NumMentions),
+    NumSources: getCol(cols, COL.NumSources),
+    ActionGeo_Type: getCol(cols, COL.ActionGeo_Type),
+    ActionGeo_FullName: getCol(cols, COL.ActionGeo_FullName),
+    ActionGeo_CountryCode: getCol(cols, COL.ActionGeo_CountryCode),
+    ActionGeo_ADM1Code: getCol(cols, COL.ActionGeo_ADM1Code),
+    ActionGeo_ADM2Code: getCol(cols, COL.ActionGeo_ADM2Code),
+    ActionGeo_Lat: getCol(cols, COL.ActionGeo_Lat),
+    ActionGeo_Long: getCol(cols, COL.ActionGeo_Long),
+    ActionGeo_FeatureID: getCol(cols, COL.ActionGeo_FeatureID),
+    SOURCEURL: getCol(cols, COL.SOURCEURL),
   };
 }
 
@@ -575,7 +482,10 @@ function computeConfidenceSubScores(
  * to keep the production-hot parseAndFilter lean. This function is slower but
  * provides complete pipeline transparency.
  */
-export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: BellingcatArticle[]): Promise<AuditRecord[]> {
+export function parseAndFilterWithTrace(
+  csv: string,
+  bellingcatArticles?: BellingcatArticle[],
+): AuditRecord[] {
   const lines = csv.trim().split('\n');
   const config = getConfig();
   const excludedCameo = new Set(config.eventExcludedCameo);
@@ -583,20 +493,26 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
 
   // Phase A: Build dedup map for rows that pass all Phase A checks
   // We need two passes: first collect all Phase A survivors for dedup, then process
-  const phaseAPassedRows: Array<{ cols: string[]; lat: number; lng: number; mentions: number; phaseA: PhaseAChecks }> = [];
+  const phaseAPassedRows: Array<{
+    cols: string[];
+    lat: number;
+    lng: number;
+    mentions: number;
+    phaseA: PhaseAChecks;
+  }> = [];
   const phaseARejections: Array<{ cols: string[]; reason: string; phaseA: PhaseAChecks }> = [];
 
   for (const line of lines) {
     const cols = line.split('\t');
     if (cols.length < 61) continue;
 
-    const eventRootCode = cols[COL.EventRootCode];
-    const eventBaseCode = cols[COL.EventBaseCode];
-    const countryCode = cols[COL.ActionGeo_CountryCode];
-    const fullName = cols[COL.ActionGeo_FullName];
-    const numSources = parseInt(cols[COL.NumSources], 10) || 0;
-    const actor1Country = cols[COL.Actor1CountryCode]?.trim();
-    const actor2Country = cols[COL.Actor2CountryCode]?.trim();
+    const eventRootCode = getCol(cols, COL.EventRootCode);
+    const eventBaseCode = getCol(cols, COL.EventBaseCode);
+    const countryCode = getCol(cols, COL.ActionGeo_CountryCode);
+    const fullName = getCol(cols, COL.ActionGeo_FullName);
+    const numSources = parseInt(getCol(cols, COL.NumSources), 10) || 0;
+    const actor1Country = getCol(cols, COL.Actor1CountryCode).trim();
+    const actor2Country = getCol(cols, COL.Actor2CountryCode).trim();
 
     const passedRootCode = CONFLICT_ROOT_CODES.has(eventRootCode);
     const passedCameoExclusion = !excludedCameo.has(eventBaseCode);
@@ -640,48 +556,57 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
       continue;
     }
 
-    const lat = parseFloat(cols[COL.ActionGeo_Lat]);
-    const lng = parseFloat(cols[COL.ActionGeo_Long]);
+    const lat = parseFloat(getCol(cols, COL.ActionGeo_Lat));
+    const lng = parseFloat(getCol(cols, COL.ActionGeo_Long));
     if (isNaN(lat) || isNaN(lng)) {
       phaseARejections.push({ cols, reason: 'invalid_coordinates', phaseA });
       continue;
     }
 
-    const mentions = parseInt(cols[COL.NumMentions], 10) || 0;
+    const mentions = parseInt(getCol(cols, COL.NumMentions), 10) || 0;
     phaseAPassedRows.push({ cols, lat, lng, mentions, phaseA });
   }
 
   // Build Phase A rejection records
   for (const rej of phaseARejections) {
-    const id = `gdelt-${rej.cols[COL.GLOBALEVENTID]}`;
+    const id = `gdelt-${getCol(rej.cols, COL.GLOBALEVENTID)}`;
     const defaultPhaseB = {
       originalType: 'assault' as const,
       reclassified: false,
       geoPrecision: 'precise' as const,
-      confidenceSubScores: { mediaCoverage: 0, sourceDiversity: 0, actorSpecificity: 0, geoPrecisionSignal: 0, goldsteinConsistency: 0, cameoSpecificity: 0 },
+      confidenceSubScores: {
+        mediaCoverage: 0,
+        sourceDiversity: 0,
+        actorSpecificity: 0,
+        geoPrecisionSignal: 0,
+        goldsteinConsistency: 0,
+        cameoSpecificity: 0,
+      },
       finalConfidence: 0,
       passedThreshold: false,
     };
-    records.push(buildAuditRecord({
-      id,
-      status: 'rejected',
-      event: null,
-      pipelineTrace: {
-        phaseA: rej.phaseA,
-        phaseB: defaultPhaseB,
-        rejectionReason: rej.reason,
-        actionGeoType: parseInt(rej.cols[COL.ActionGeo_Type], 10) || undefined,
-      },
-      rawGdeltColumns: extractRawColumns(rej.cols),
-    }));
+    records.push(
+      buildAuditRecord({
+        id,
+        status: 'rejected',
+        event: null,
+        pipelineTrace: {
+          phaseA: rej.phaseA,
+          phaseB: defaultPhaseB,
+          rejectionReason: rej.reason,
+          actionGeoType: parseInt(getCol(rej.cols, COL.ActionGeo_Type), 10) || undefined,
+        },
+        rawGdeltColumns: extractRawColumns(rej.cols),
+      }),
+    );
   }
 
   // Dedup: same date+code+lat+lng, keep highest mentions
-  const best = new Map<string, typeof phaseAPassedRows[0]>();
-  const superseded: Array<typeof phaseAPassedRows[0]> = [];
+  const best = new Map<string, (typeof phaseAPassedRows)[0]>();
+  const superseded: Array<(typeof phaseAPassedRows)[0]> = [];
 
   for (const row of phaseAPassedRows) {
-    const key = `${row.cols[COL.SQLDATE]}|${row.cols[COL.EventCode]}|${row.lat}|${row.lng}`;
+    const key = `${getCol(row.cols, COL.SQLDATE)}|${getCol(row.cols, COL.EventCode)}|${row.lat}|${row.lng}`;
     const existing = best.get(key);
     if (!existing || row.mentions > existing.mentions) {
       if (existing) superseded.push(existing);
@@ -693,45 +618,41 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
 
   // Build dedup rejection records
   for (const sup of superseded) {
-    const id = `gdelt-${sup.cols[COL.GLOBALEVENTID]}`;
+    const id = `gdelt-${getCol(sup.cols, COL.GLOBALEVENTID)}`;
     const defaultPhaseB = {
       originalType: 'assault' as const,
       reclassified: false,
       geoPrecision: 'precise' as const,
-      confidenceSubScores: { mediaCoverage: 0, sourceDiversity: 0, actorSpecificity: 0, geoPrecisionSignal: 0, goldsteinConsistency: 0, cameoSpecificity: 0 },
+      confidenceSubScores: {
+        mediaCoverage: 0,
+        sourceDiversity: 0,
+        actorSpecificity: 0,
+        geoPrecisionSignal: 0,
+        goldsteinConsistency: 0,
+        cameoSpecificity: 0,
+      },
       finalConfidence: 0,
       passedThreshold: false,
     };
-    records.push(buildAuditRecord({
-      id,
-      status: 'rejected',
-      event: null,
-      pipelineTrace: {
-        phaseA: sup.phaseA,
-        phaseB: defaultPhaseB,
-        rejectionReason: 'dedup_superseded',
-        actionGeoType: parseInt(sup.cols[COL.ActionGeo_Type], 10) || undefined,
-      },
-      rawGdeltColumns: extractRawColumns(sup.cols),
-    }));
+    records.push(
+      buildAuditRecord({
+        id,
+        status: 'rejected',
+        event: null,
+        pipelineTrace: {
+          phaseA: sup.phaseA,
+          phaseB: defaultPhaseB,
+          rejectionReason: 'dedup_superseded',
+          actionGeoType: parseInt(getCol(sup.cols, COL.ActionGeo_Type), 10) || undefined,
+        },
+        rawGdeltColumns: extractRawColumns(sup.cols),
+      }),
+    );
   }
 
-  // Phase B: normalize, score for dedup winners
+  // Phase B: normalize, score, threshold-filter for dedup winners
   const { eventConfidenceThreshold, eventCentroidPenalty } = config;
-
-  // Pre-compute Phase B for all dedup winners, collect URLs for Phase C batch fetch
-  const phaseBEntries: Array<{
-    entity: ConflictEventEntity;
-    origType: ConflictEventType;
-    reclassified: boolean;
-    geoPrecision: 'precise' | 'centroid';
-    confidence: number;
-    subScores: ConfidenceSubScores;
-    actionGeoType: number | undefined;
-    entry: typeof phaseAPassedRows[0];
-  }> = [];
-
-  const traceUrls: string[] = [];
+  const acceptedEntities: ConflictEventEntity[] = [];
 
   for (const entry of best.values()) {
     let entity = normalizeGdeltEvent(entry.cols, entry.lat, entry.lng);
@@ -747,67 +668,15 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
     if (actionGeoType === 3 || actionGeoType === 4) {
       confidence *= eventCentroidPenalty;
     }
+    entity = { ...entity, data: { ...entity.data, confidence } };
 
     const subScores = computeConfidenceSubScores(entity, geoPrecision);
+    const passedThreshold = confidence >= eventConfidenceThreshold;
 
-    const url = entry.cols[COL.SOURCEURL];
-    if (url) traceUrls.push(url);
-
-    phaseBEntries.push({ entity, origType, reclassified, geoPrecision, confidence, subScores, actionGeoType, entry });
-  }
-
-  // Phase C: Batch fetch titles and NLP validate
-  const traceTitleMap = await batchFetchTitles(traceUrls);
-
-  const acceptedEntities: ConflictEventEntity[] = [];
-
-  for (const item of phaseBEntries) {
-    let { entity, origType, reclassified, geoPrecision, confidence, subScores, actionGeoType, entry } = item;
-
-    // Phase C: NLP geo cross-validation
-    const url = entry.cols[COL.SOURCEURL] || '';
-    const title = traceTitleMap.get(url) ?? null;
-
-    const nlpResult = validateEventGeo({
-      title,
-      actorCountryCodes: {
-        actor1: entry.cols[COL.Actor1CountryCode]?.trim() || '',
-        actor2: entry.cols[COL.Actor2CountryCode]?.trim() || '',
-      },
-      geoCountryCode: entry.cols[COL.ActionGeo_CountryCode],
-      actionGeoType,
-      lat: entity.lat,
-      lng: entity.lng,
-    });
-
-    // Build Phase C trace
-    let nlpActors: string[] = [];
-    let nlpPlaces: string[] = [];
-    if (title !== null) {
-      const nlpExtraction = extractActorsAndPlaces(title);
-      nlpActors = nlpExtraction.actors;
-      nlpPlaces = nlpExtraction.places;
-    }
-
-    const phaseC: PhaseCChecks = {
-      titleFetched: title !== null,
-      nlpActors,
-      nlpPlaces,
-      validationStatus: nlpResult.status,
-      relocatedTo: nlpResult.status === 'relocated' ? { lat: nlpResult.newLat, lng: nlpResult.newLng, cityName: nlpResult.cityName } : undefined,
-      mismatchReason: nlpResult.status === 'mismatch' ? nlpResult.reason : undefined,
-      penaltyReason: nlpResult.status === 'penalized' ? nlpResult.reason : undefined,
-      penaltyMultiplier: nlpResult.status === 'penalized' ? nlpResult.confidenceMultiplier : undefined,
-      skipReason: nlpResult.status === 'skipped' ? nlpResult.reason : undefined,
-    };
-
-    // Apply Phase C effects
-    switch (nlpResult.status) {
-      case 'verified':
-        break;
-
-      case 'mismatch':
-        records.push(buildAuditRecord({
+    if (!passedThreshold) {
+      // Rejected at threshold
+      records.push(
+        buildAuditRecord({
           id: entity.id,
           status: 'rejected',
           event: null,
@@ -821,62 +690,12 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
               finalConfidence: confidence,
               passedThreshold: false,
             },
-            phaseC,
-            rejectionReason: 'actor_geo_mismatch',
+            rejectionReason: 'below_confidence_threshold',
             actionGeoType,
           },
           rawGdeltColumns: extractRawColumns(entry.cols),
-        }));
-        continue;
-
-      case 'relocated':
-        entity = {
-          ...entity,
-          lat: nlpResult.newLat,
-          lng: nlpResult.newLng,
-          data: { ...entity.data, geoPrecision: 'precise' as const },
-        };
-        if ((actionGeoType === 3 || actionGeoType === 4) && eventCentroidPenalty > 0) {
-          confidence = confidence / eventCentroidPenalty;
-        }
-        geoPrecision = 'precise';
-        break;
-
-      case 'penalized':
-        confidence *= nlpResult.confidenceMultiplier;
-        break;
-
-      case 'skipped':
-        if (nlpResult.reason === 'title_fetch_failed') {
-          confidence *= 0.7;
-        }
-        break;
-    }
-
-    entity = { ...entity, data: { ...entity.data, confidence } };
-    const passedThreshold = confidence >= eventConfidenceThreshold;
-
-    if (!passedThreshold) {
-      records.push(buildAuditRecord({
-        id: entity.id,
-        status: 'rejected',
-        event: null,
-        pipelineTrace: {
-          phaseA: entry.phaseA,
-          phaseB: {
-            originalType: origType,
-            reclassified,
-            geoPrecision,
-            confidenceSubScores: subScores,
-            finalConfidence: confidence,
-            passedThreshold: false,
-          },
-          phaseC,
-          rejectionReason: 'below_confidence_threshold',
-          actionGeoType,
-        },
-        rawGdeltColumns: extractRawColumns(entry.cols),
-      }));
+        }),
+      );
       continue;
     }
 
@@ -896,26 +715,27 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
     acceptedEntities.push(entity);
 
     // Build accepted audit record (raw undispersed coordinates for audit)
-    records.push(buildAuditRecord({
-      id: entity.id,
-      status: 'accepted',
-      event: entity,
-      pipelineTrace: {
-        phaseA: entry.phaseA,
-        phaseB: {
-          originalType: origType,
-          reclassified,
-          geoPrecision,
-          confidenceSubScores: subScores,
-          finalConfidence: confidence,
-          passedThreshold: true,
+    records.push(
+      buildAuditRecord({
+        id: entity.id,
+        status: 'accepted',
+        event: entity,
+        pipelineTrace: {
+          phaseA: entry.phaseA,
+          phaseB: {
+            originalType: origType,
+            reclassified,
+            geoPrecision,
+            confidenceSubScores: subScores,
+            finalConfidence: confidence,
+            passedThreshold: true,
+          },
+          bellingcatMatch,
+          actionGeoType,
         },
-        phaseC,
-        bellingcatMatch,
-        actionGeoType,
-      },
-      rawGdeltColumns: extractRawColumns(entry.cols),
-    }));
+        rawGdeltColumns: extractRawColumns(entry.cols),
+      }),
+    );
   }
 
   // Dispersion is applied downstream (in the events route after merging).
@@ -929,14 +749,16 @@ export async function parseAndFilterWithTrace(csv: string, bellingcatArticles?: 
  * and return normalized ConflictEventEntity[].
  * Optionally accepts Bellingcat articles for confidence corroboration.
  */
-export async function fetchEvents(bellingcatArticles?: BellingcatArticle[]): Promise<ConflictEventEntity[]> {
+export async function fetchEvents(
+  bellingcatArticles?: BellingcatArticle[],
+): Promise<ConflictEventEntity[]> {
   const start = Date.now();
 
   const exportUrl = await getExportUrl();
   const csv = await downloadAndUnzip(exportUrl);
-  const events = await parseAndFilter(csv, bellingcatArticles);
+  const events = parseAndFilter(csv, bellingcatArticles);
 
-  log({ level: 'info', message: `[gdelt] fetched ${events.length} events in ${Date.now() - start}ms` });
+  log.info({ count: events.length, durationMs: Date.now() - start }, 'fetched events');
   return events;
 }
 
@@ -958,9 +780,7 @@ function generateBackfillUrls(fromTs: number, toTs: number, intervalMs?: number)
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');
     const hh = String(d.getUTCHours()).padStart(2, '0');
-    urls.push(
-      `http://data.gdeltproject.org/gdeltv2/${yyyy}${mm}${dd}${hh}0000.export.CSV.zip`,
-    );
+    urls.push(`http://data.gdeltproject.org/gdeltv2/${yyyy}${mm}${dd}${hh}0000.export.CSV.zip`);
     cursor += interval;
   }
 
@@ -978,7 +798,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   const start = Date.now();
 
   const urls = generateBackfillUrls(fromTs, toTs);
-  log({ level: 'info', message: `[gdelt] backfill: ${urls.length} files for ${days} days (4/day sampling)` });
+  log.info({ fileCount: urls.length, days, sampling: '4/day' }, 'backfill started');
 
   const merged = new Map<string, ConflictEventEntity>();
   const BATCH_SIZE = 5;
@@ -988,7 +808,7 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
     const results = await Promise.allSettled(
       batch.map(async (url) => {
         const csv = await downloadAndUnzip(url);
-        return await parseAndFilter(csv, undefined, { skipTitleFetch: true });
+        return parseAndFilter(csv);
       }),
     );
 
@@ -1005,7 +825,10 @@ export async function backfillEvents(days: number): Promise<ConflictEventEntity[
   }
 
   const events = Array.from(merged.values());
-  log({ level: 'info', message: `[gdelt] backfill: loaded ${events.length} events from ${urls.length} files in ${Date.now() - start}ms` });
+  log.info(
+    { count: events.length, fileCount: urls.length, durationMs: Date.now() - start },
+    'backfill complete',
+  );
   return events;
 }
 
@@ -1027,7 +850,7 @@ export async function backfillEventsWithTrace(
 
   const intervalMs = Math.floor((24 * 60 * 60 * 1000) / samplesPerDay);
   const urls = generateBackfillUrls(fromTs, toTs, intervalMs);
-  log({ level: 'info', message: `[gdelt] audit backfill: ${urls.length} files for ${days} days (${samplesPerDay}/day sampling)` });
+  log.info({ fileCount: urls.length, days, samplesPerDay }, 'audit backfill started');
 
   const allRecords: AuditRecord[] = [];
   const seenIds = new Set<string>();
@@ -1038,7 +861,7 @@ export async function backfillEventsWithTrace(
     const results = await Promise.allSettled(
       batch.map(async (url) => {
         const csv = await downloadAndUnzip(url);
-        return await parseAndFilterWithTrace(csv);
+        return parseAndFilterWithTrace(csv);
       }),
     );
 
@@ -1055,6 +878,15 @@ export async function backfillEventsWithTrace(
     }
   }
 
-  log({ level: 'info', message: `[gdelt] audit backfill: ${allRecords.length} records (${allRecords.filter(r => r.status === 'accepted').length} accepted, ${allRecords.filter(r => r.status === 'rejected').length} rejected) from ${urls.length} files in ${Date.now() - start}ms` });
+  log.info(
+    {
+      totalRecords: allRecords.length,
+      accepted: allRecords.filter((r) => r.status === 'accepted').length,
+      rejected: allRecords.filter((r) => r.status === 'rejected').length,
+      fileCount: urls.length,
+      durationMs: Date.now() - start,
+    },
+    'audit backfill complete',
+  );
   return allRecords;
 }

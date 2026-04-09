@@ -4,8 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const storageMock: Record<string, string> = {};
 const localStorageMock = {
   getItem: vi.fn((key: string) => storageMock[key] ?? null),
-  setItem: vi.fn((key: string, value: string) => { storageMock[key] = value; }),
-  removeItem: vi.fn((key: string) => { delete storageMock[key]; }),
+  setItem: vi.fn((key: string, value: string) => {
+    storageMock[key] = value;
+  }),
+  removeItem: vi.fn((key: string) => {
+    delete storageMock[key];
+  }),
 };
 
 vi.stubGlobal('localStorage', localStorageMock);

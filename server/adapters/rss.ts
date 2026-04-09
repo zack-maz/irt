@@ -1,7 +1,9 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { NewsArticle } from '../types.js';
 import { hashUrl } from '../lib/newsClustering.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'rss' });
 
 /** Strip HTML tags and trim whitespace */
 function stripHtml(html: string): string {
@@ -16,7 +18,11 @@ const parser = new XMLParser({
 
 /** RSS feed configurations */
 export const RSS_FEEDS: { url: string; name: string; country: string }[] = [
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', name: 'BBC', country: 'United Kingdom' },
+  {
+    url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml',
+    name: 'BBC',
+    country: 'United Kingdom',
+  },
   { url: 'https://www.aljazeera.com/xml/rss/all.xml', name: 'Al Jazeera', country: 'Qatar' },
   { url: 'https://www.tehrantimes.com/rss', name: 'Tehran Times', country: 'Iran' },
   { url: 'https://www.timesofisrael.com/feed/', name: 'Times of Israel', country: 'Israel' },
@@ -97,7 +103,7 @@ export async function fetchAllRssFeeds(): Promise<NewsArticle[]> {
     if (result.status === 'fulfilled') {
       articles.push(...result.value);
     } else {
-      log({ level: 'warn', message: `[rss] feed fetch failed: ${result.reason}` });
+      log.warn({ err: result.reason }, 'feed fetch failed');
     }
   }
 

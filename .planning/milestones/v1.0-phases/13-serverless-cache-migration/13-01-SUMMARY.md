@@ -18,8 +18,8 @@ affects: [13-02, 13-03, 14-vercel-deployment]
 
 # Tech tracking
 tech-stack:
-  added: ["@upstash/redis"]
-  patterns: ["Redis cache-first with logical TTL + hard TTL", "Source-prefixed Redis keys"]
+  added: ['@upstash/redis']
+  patterns: ['Redis cache-first with logical TTL + hard TTL', 'Source-prefixed Redis keys']
 
 key-files:
   created:
@@ -32,14 +32,14 @@ key-files:
     - package-lock.json
 
 key-decisions:
-  - "Upstash Redis with REST-based client for serverless compatibility"
-  - "Redis hard TTL = 10x logical TTL for stale-but-servable fallback data"
-  - "CacheEntry<T> wraps {data, fetchedAt} in Redis for age computation"
+  - 'Upstash Redis with REST-based client for serverless compatibility'
+  - 'Redis hard TTL = 10x logical TTL for stale-but-servable fallback data'
+  - 'CacheEntry<T> wraps {data, fetchedAt} in Redis for age computation'
 
 patterns-established:
-  - "Redis cache pattern: cacheGet(key, logicalTtlMs) returns CacheResponse or null"
-  - "Redis cache pattern: cacheSet(key, data, redisTtlSec) stores CacheEntry with hard TTL"
-  - "Source-prefixed keys: flights:opensky, flights:adsb, flights:adsblol"
+  - 'Redis cache pattern: cacheGet(key, logicalTtlMs) returns CacheResponse or null'
+  - 'Redis cache pattern: cacheSet(key, data, redisTtlSec) stores CacheEntry with hard TTL'
+  - 'Source-prefixed keys: flights:opensky, flights:adsb, flights:adsblol'
 
 requirements-completed: []
 
@@ -113,12 +113,13 @@ None - no external service configuration required for this plan. Upstash credent
 ## Self-Check: PASSED
 
 - server/cache/redis.ts: FOUND
-- server/__tests__/redis-cache.test.ts: FOUND
-- server/__tests__/cache.test.ts: CONFIRMED DELETED
+- server/**tests**/redis-cache.test.ts: FOUND
+- server/**tests**/cache.test.ts: CONFIRMED DELETED
 - Commit 266d6cb: FOUND
 - Commit ef0526b: FOUND
 - Commit 7d13610: FOUND
 
 ---
-*Phase: 13-serverless-cache-migration*
-*Completed: 2026-03-20*
+
+_Phase: 13-serverless-cache-migration_
+_Completed: 2026-03-20_

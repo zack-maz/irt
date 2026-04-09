@@ -16,27 +16,16 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config to provide thresholds for parseAndFilter (updated for 26.2-03 defaults)
+// Mock config to provide thresholds for parseAndFilter
 const mockConfig = {
-  eventConfidenceThreshold: 0.38,
+  eventConfidenceThreshold: 0.35,
   eventMinSources: 2,
   eventCentroidPenalty: 0.7,
-  eventExcludedCameo: ['180', '182', '190', '192'],
+  eventExcludedCameo: ['180', '192'],
   bellingcatCorroborationBoost: 0.2,
 };
 vi.mock('../config.js', () => ({
   getConfig: () => mockConfig,
-}));
-
-// Mock batchFetchTitles to return empty map (tests focus on Phase A/B logic)
-vi.mock('../lib/titleFetcher.js', () => ({
-  batchFetchTitles: vi.fn().mockResolvedValue(new Map()),
-}));
-
-// Mock nlpGeoValidator to skip Phase C (tests focus on Phase A/B)
-vi.mock('../lib/nlpGeoValidator.js', () => ({
-  validateEventGeo: vi.fn().mockReturnValue({ status: 'skipped', reason: 'no_actor_data' }),
-  ACTOR_COUNTRY_MAP: {},
 }));
 
 // Sample lastupdate.txt content (3 lines: export, mentions, gkg)
@@ -52,21 +41,21 @@ function makeGdeltRow(overrides: Partial<Record<number, string>> = {}): string {
   const cols = new Array(61).fill('');
   // Defaults for a valid Iran conflict event (EventRootCode 19)
   cols[0] = '1234567890'; // GLOBALEVENTID
-  cols[1] = '20260315';   // SQLDATE
+  cols[1] = '20260315'; // SQLDATE
   cols[6] = 'IRANIAN GOVERNMENT'; // Actor1Name
-  cols[7] = 'IRN';          // Actor1CountryCode
-  cols[16] = 'IRAQ';       // Actor2Name
-  cols[17] = 'IRQ';         // Actor2CountryCode
-  cols[26] = '195';        // EventCode (was 190, now excluded)
-  cols[27] = '195';        // EventBaseCode (aerial weapons -- not excluded)
-  cols[28] = '19';         // EventRootCode
-  cols[30] = '-9.5';       // GoldsteinScale
-  cols[31] = '10';          // NumMentions
-  cols[32] = '5';           // NumSources (>= 2 required)
+  cols[7] = 'IRN'; // Actor1CountryCode
+  cols[16] = 'IRAQ'; // Actor2Name
+  cols[17] = 'IRQ'; // Actor2CountryCode
+  cols[26] = '195'; // EventCode (was 190, now excluded)
+  cols[27] = '195'; // EventBaseCode (aerial weapons -- not excluded)
+  cols[28] = '19'; // EventRootCode
+  cols[30] = '-9.5'; // GoldsteinScale
+  cols[31] = '10'; // NumMentions
+  cols[32] = '5'; // NumSources (>= 2 required)
   cols[52] = 'Tehran, Tehran, Iran'; // ActionGeo_FullName
-  cols[53] = 'IR';         // ActionGeo_CountryCode (FIPS)
-  cols[56] = '35.6892';    // ActionGeo_Lat
-  cols[57] = '51.3890';    // ActionGeo_Long
+  cols[53] = 'IR'; // ActionGeo_CountryCode (FIPS)
+  cols[56] = '35.6892'; // ActionGeo_Lat
+  cols[57] = '51.3890'; // ActionGeo_Long
   cols[60] = 'https://reuters.com/article/123'; // SOURCEURL
 
   // Apply overrides
@@ -110,13 +99,13 @@ const malformedShortRow = 'col0\tcol1\tcol2'; // < 61 columns
 // Duplicate rows for dedup testing: same date/code/location, different actors & mention counts
 const dupRowLowMentions = makeGdeltRow({
   0: '4444444444',
-  16: '',         // no Actor2Name
-  31: '5',        // fewer mentions
+  16: '', // no Actor2Name
+  31: '5', // fewer mentions
 });
 const dupRowHighMentions = makeGdeltRow({
   0: '5555555555',
   16: 'Government', // has Actor2Name
-  31: '25',         // more mentions -> should win
+  31: '25', // more mentions -> should win
 });
 
 const sampleCsv = [
@@ -162,9 +151,7 @@ describe('GDELT Adapter', () => {
 
       const url = await getExportUrl();
 
-      expect(url).toBe(
-        'http://data.gdeltproject.org/gdeltv2/20260317120000.export.CSV.zip',
-      );
+      expect(url).toBe('http://data.gdeltproject.org/gdeltv2/20260317120000.export.CSV.zip');
     });
 
     it('throws if lastupdate.txt fetch fails', async () => {
@@ -280,12 +267,12 @@ describe('GDELT Adapter', () => {
       expect(events).toHaveLength(1);
     });
 
-    it('sets geoPrecision="centroid" when lat/lng matches Tehran (GeoNames coords)', async () => {
-      // GeoNames coordinates for Tehran: 35.6944, 51.4215
+    it('sets geoPrecision="centroid" when lat/lng matches Tehran centroid', async () => {
+      // Hardcoded CITY_CENTROIDS coordinates for Tehran: 35.6892, 51.3890
       const row = makeGdeltRow({
         0: '3030303030',
-        56: '35.6944',
-        57: '51.4215',
+        56: '35.6892',
+        57: '51.3890',
       });
       const events = await parseAndFilter(row);
       expect(events).toHaveLength(1);
@@ -332,14 +319,14 @@ describe('GDELT Adapter', () => {
       // Low signal: empty actors, 1 mention, 0 sources, centroid location (Tehran), Goldstein 0
       const row = makeGdeltRow({
         0: '7070707070',
-        6: '',          // no Actor1Name
-        7: 'IRN',       // still need actor country for Phase A
-        16: '',         // no Actor2Name
-        17: '',         // no Actor2CountryCode
-        31: '1',        // minimal mentions
-        32: '0',        // no sources
-        30: '0',        // Goldstein 0 (unknown)
-        56: '35.6892',  // Tehran centroid
+        6: '', // no Actor1Name
+        7: 'IRN', // still need actor country for Phase A
+        16: '', // no Actor2Name
+        17: '', // no Actor2CountryCode
+        31: '1', // minimal mentions
+        32: '0', // no sources
+        30: '0', // Goldstein 0 (unknown)
+        56: '35.6892', // Tehran centroid
         57: '51.3890',
       });
       const events = await parseAndFilter(row);
@@ -674,9 +661,7 @@ describe('GDELT Adapter', () => {
       expect(eventsNoPenalty).toHaveLength(1);
 
       // Centroid event should have lower confidence due to penalty
-      expect(eventsCentroid[0].data.confidence!).toBeLessThan(
-        eventsNoPenalty[0].data.confidence!,
-      );
+      expect(eventsCentroid[0].data.confidence!).toBeLessThan(eventsNoPenalty[0].data.confidence!);
     });
 
     it('applies centroid penalty for ActionGeo_Type 4 (landmark)', async () => {
@@ -697,9 +682,7 @@ describe('GDELT Adapter', () => {
       const eventsNoPenalty = await parseAndFilter(rowNoPenalty);
 
       if (eventsType4.length > 0 && eventsNoPenalty.length > 0) {
-        expect(eventsType4[0].data.confidence!).toBeLessThan(
-          eventsNoPenalty[0].data.confidence!,
-        );
+        expect(eventsType4[0].data.confidence!).toBeLessThan(eventsNoPenalty[0].data.confidence!);
       }
     });
 
@@ -722,10 +705,7 @@ describe('GDELT Adapter', () => {
 
       if (events1.length > 0 && events2.length > 0) {
         // Same confidence (no penalty applied for type 1)
-        expect(events1[0].data.confidence!).toBeCloseTo(
-          events2[0].data.confidence!,
-          10,
-        );
+        expect(events1[0].data.confidence!).toBeCloseTo(events2[0].data.confidence!, 10);
       }
     });
   });
@@ -789,13 +769,15 @@ describe('GDELT Adapter', () => {
 
     it('parseAndFilter with matching Bellingcat article boosts event confidence by 0.2', async () => {
       // Event is at Tehran (35.6892, 51.3890), locationName "Tehran, Tehran, Iran"
-      const articles = [{
-        title: 'Investigation reveals Tehran Iran military site activity',
-        url: 'https://www.bellingcat.com/article/1',
-        publishedAt: Date.UTC(2026, 2, 15, 12), // Same day as SQLDATE (20260315)
-        lat: 35.6892,
-        lng: 51.3890,
-      }];
+      const articles = [
+        {
+          title: 'Investigation reveals Tehran Iran military site activity',
+          url: 'https://www.bellingcat.com/article/1',
+          publishedAt: Date.UTC(2026, 2, 15, 12), // Same day as SQLDATE (20260315)
+          lat: 35.6892,
+          lng: 51.389,
+        },
+      ];
 
       const eventsWithout = await parseAndFilter(validIranMissileRow);
       const eventsWith = await parseAndFilter(validIranMissileRow, articles);
@@ -815,13 +797,15 @@ describe('GDELT Adapter', () => {
 
     it('parseAndFilter with non-matching Bellingcat articles does not boost confidence', async () => {
       // Article is nowhere near the event
-      const articles = [{
-        title: 'Unrelated investigation in London',
-        url: 'https://www.bellingcat.com/article/2',
-        publishedAt: Date.UTC(2026, 2, 15),
-        lat: 51.5074,
-        lng: -0.1278,
-      }];
+      const articles = [
+        {
+          title: 'Unrelated investigation in London',
+          url: 'https://www.bellingcat.com/article/2',
+          publishedAt: Date.UTC(2026, 2, 15),
+          lat: 51.5074,
+          lng: -0.1278,
+        },
+      ];
 
       const eventsWithout = await parseAndFilter(validIranMissileRow);
       const eventsWith = await parseAndFilter(validIranMissileRow, articles);
@@ -830,10 +814,7 @@ describe('GDELT Adapter', () => {
       expect(eventsWith).toHaveLength(1);
 
       // Confidence should be identical (no boost applied)
-      expect(eventsWith[0].data.confidence).toBeCloseTo(
-        eventsWithout[0].data.confidence!,
-        5,
-      );
+      expect(eventsWith[0].data.confidence).toBeCloseTo(eventsWithout[0].data.confidence!, 5);
     });
 
     it('confidence is clamped to 1.0 max after boost', async () => {
@@ -857,13 +838,15 @@ describe('GDELT Adapter', () => {
       });
 
       // Matching article
-      const articles = [{
-        title: 'Tehran Iran conflict investigation',
-        url: 'https://www.bellingcat.com/article/3',
-        publishedAt: Date.UTC(2026, 2, 15, 12),
-        lat: 35.6892,
-        lng: 51.3890,
-      }];
+      const articles = [
+        {
+          title: 'Tehran Iran conflict investigation',
+          url: 'https://www.bellingcat.com/article/3',
+          publishedAt: Date.UTC(2026, 2, 15, 12),
+          lat: 35.6892,
+          lng: 51.389,
+        },
+      ];
 
       const events = await parseAndFilter(highSignalRow, articles);
       expect(events).toHaveLength(1);
@@ -877,10 +860,7 @@ describe('GDELT Adapter', () => {
       expect(eventsWithout).toHaveLength(1);
       expect(eventsWith).toHaveLength(1);
 
-      expect(eventsWith[0].data.confidence).toBeCloseTo(
-        eventsWithout[0].data.confidence!,
-        5,
-      );
+      expect(eventsWith[0].data.confidence).toBeCloseTo(eventsWithout[0].data.confidence!, 5);
     });
   });
 });

@@ -2,43 +2,40 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { Server } from 'node:http';
 
-// Mock config before importing the entry point
-vi.mock('../config.js', () => ({
-  loadConfig: () => ({
+// Mock config before importing the entry point (spread actual to preserve constants)
+vi.mock('../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../config.js')>();
+  const mockCfg = {
     port: 0,
     corsOrigin: '*',
     opensky: { clientId: '', clientSecret: '' },
     aisstream: { apiKey: '' },
     acled: { email: '', password: '' },
     newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  config: {
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: '', clientSecret: '' },
-    aisstream: { apiKey: '' },
-    acled: { email: '', password: '' },
-    newsRelevanceThreshold: 0.7,
-  },
-}));
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock rate limiter -- pass through
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
+    public: _passThrough,
   },
 }));
 
@@ -46,12 +43,7 @@ vi.mock('../middleware/rateLimit.js', () => ({
 vi.mock('../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
-vi.mock('../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-vi.mock('../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
   getLastMessageTime: vi.fn(() => 0),
@@ -64,9 +56,14 @@ vi.mock('../adapters/gdelt.js', () => ({
 vi.mock('../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
 vi.mock('../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
+vi.mock('../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
 vi.mock('../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })) }));
+vi.mock('../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
+}));
 vi.mock('../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
 vi.mock('../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
 

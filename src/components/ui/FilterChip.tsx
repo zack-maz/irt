@@ -36,7 +36,13 @@ export function FilterChip({ label, onClear }: FilterChipProps) {
         className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-accent-blue/30"
         aria-label="Clear search filter"
       >
-        <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2.5}>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-3 w-3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+        >
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
       </button>

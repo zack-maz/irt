@@ -16,53 +16,45 @@ const mockFetchWeather = vi.fn(async (): Promise<WeatherGridPoint[]> => []);
 // Mock rate limiter
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
+    public: _passThrough,
   },
 }));
 
-// Mock config
-vi.mock('../../config.js', () => ({
-  config: {
+// Mock config (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = {
     port: 0,
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
-  },
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-}));
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock all existing adapters to avoid import chain issues
 vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-vi.mock('../../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
   getLastMessageTime: vi.fn(() => 0),
@@ -97,19 +89,27 @@ vi.mock('../../adapters/nominatim.js', () => ({
 vi.mock('../../adapters/open-meteo.js', () => ({
   fetchWeather: (...args: unknown[]) => mockFetchWeather(...args),
 }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis cache module with in-memory store
-const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-});
-const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-  redisStore.set(key, { data, fetchedAt: Date.now() });
-});
+const _mockCacheGet = vi.fn(
+  async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  },
+);
+const _mockCacheSet = vi.fn(
+  async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  },
+);
 vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: vi.fn(async () => null),
@@ -209,10 +209,12 @@ describe('Weather Route (/api/weather)', () => {
     expect(body.data).toHaveLength(2);
   });
 
-  it('returns 500 when upstream fails and no cache exists', async () => {
+  it('returns 502 UPSTREAM_FAIL when upstream fails and no cache exists', async () => {
     mockFetchWeather.mockRejectedValue(new Error('Open-Meteo API down'));
 
     const res = await fetch(`${baseUrl}/api/weather`);
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.code).toBe('UPSTREAM_FAIL');
   });
 });

@@ -26,8 +26,12 @@ export interface BellingcatArticle {
  * Low (0.1): Catch-all / vague codes that GDELT frequently misapplies to non-conflict articles —
  *            "unconventional violence NOS", "physical assault", "conventional military force NOS".
  */
+// TODO(26.2): Review CAMEO exclusion list in GDELT redo
 export const CAMEO_SPECIFICITY: Record<string, number> = {
-  // Note: 180, 182, 190 removed — now hard-excluded in config.eventExcludedCameo before scoring
+  // Low — catch-all codes prone to false positives
+  '180': 0.1, // Unconventional violence, not specified below
+  '182': 0.1, // Physical assault (very broad)
+  '190': 0.1, // Conventional military force, not specified below
 
   // Medium — conflict-related but broader
   '184': 0.5, // Use as human shield
@@ -177,8 +181,8 @@ export function computeEventConfidence(
     0.25 * mediaCoverage +
     0.15 * sourceDiversity +
     0.15 * actorSpecificity +
-    0.10 * geoPrecisionSignal +
-    0.10 * goldsteinConsistency +
+    0.1 * geoPrecisionSignal +
+    0.1 * goldsteinConsistency +
     0.25 * cameoSpecificity
   );
 }
@@ -188,9 +192,7 @@ export function computeEventConfidence(
  * against known CITY_CENTROIDS names (case-insensitive).
  * Returns the first matching city's lat/lng, or undefined if no match.
  */
-export function extractBellingcatGeo(
-  title: string,
-): { lat: number; lng: number } | undefined {
+export function extractBellingcatGeo(title: string): { lat: number; lng: number } | undefined {
   const titleLower = title.toLowerCase();
   for (const city of CITY_CENTROIDS) {
     if (titleLower.includes(city.name.toLowerCase())) {

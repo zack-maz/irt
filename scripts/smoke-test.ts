@@ -95,8 +95,7 @@ async function main() {
   let failures = 0;
   for (const r of results) {
     const icon = r.pass ? 'PASS' : 'FAIL';
-    const cache =
-      r.cacheOk === null ? '' : r.cacheOk ? ' [cache: ok]' : ' [cache: MISSING]';
+    const cache = r.cacheOk === null ? '' : r.cacheOk ? ' [cache: ok]' : ' [cache: MISSING]';
     const err = r.error ? ` (${r.error})` : '';
     console.log(`  ${icon}  ${r.path}  [${r.status}]${cache}${err}`);
     if (!r.pass) failures++;

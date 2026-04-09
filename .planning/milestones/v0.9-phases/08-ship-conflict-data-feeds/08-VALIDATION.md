@@ -15,13 +15,13 @@ created: 2026-03-16
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 3.x with jsdom (frontend) / node (server) |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run --reporter=verbose` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                            |
+| ---------------------- | ------------------------------------------------ |
+| **Framework**          | Vitest 3.x with jsdom (frontend) / node (server) |
+| **Config file**        | `vite.config.ts` (test section)                  |
+| **Quick run command**  | `npx vitest run --reporter=verbose`              |
+| **Full suite command** | `npx vitest run`                                 |
+| **Estimated runtime**  | ~15 seconds                                      |
 
 ---
 
@@ -36,18 +36,18 @@ created: 2026-03-16
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 08-01-01 | 01 | 1 | DATA-02 | unit | `npx vitest run src/__tests__/shipStore.test.ts -x` | ❌ W0 | ⬜ pending |
-| 08-01-02 | 01 | 1 | DATA-02 | unit | `npx vitest run src/__tests__/useShipPolling.test.ts -x` | ❌ W0 | ⬜ pending |
-| 08-01-03 | 01 | 1 | DATA-03 | unit | `npx vitest run src/__tests__/eventStore.test.ts -x` | ❌ W0 | ⬜ pending |
-| 08-01-04 | 01 | 1 | DATA-03 | unit | `npx vitest run src/__tests__/useEventPolling.test.ts -x` | ❌ W0 | ⬜ pending |
-| 08-01-05 | 01 | 1 | DATA-02, DATA-03 | unit | `npx vitest run src/__tests__/entityLayers.test.ts -x` | ✅ (needs update) | ⬜ pending |
-| 08-02-01 | 02 | 2 | DATA-02, DATA-03 | unit | `npx vitest run src/__tests__/StatusPanel.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 08-02-02 | 02 | 2 | DATA-02, DATA-03 | unit | `npx vitest run src/__tests__/AppShell.test.tsx -x` | ✅ (needs update) | ⬜ pending |
-| 08-02-03 | 02 | 2 | DATA-03 | unit | `npx vitest run server/__tests__/adapters/acled.test.ts -x` | ✅ (needs update) | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement      | Test Type | Automated Command                                           | File Exists       | Status     |
+| -------- | ---- | ---- | ---------------- | --------- | ----------------------------------------------------------- | ----------------- | ---------- |
+| 08-01-01 | 01   | 1    | DATA-02          | unit      | `npx vitest run src/__tests__/shipStore.test.ts -x`         | ❌ W0             | ⬜ pending |
+| 08-01-02 | 01   | 1    | DATA-02          | unit      | `npx vitest run src/__tests__/useShipPolling.test.ts -x`    | ❌ W0             | ⬜ pending |
+| 08-01-03 | 01   | 1    | DATA-03          | unit      | `npx vitest run src/__tests__/eventStore.test.ts -x`        | ❌ W0             | ⬜ pending |
+| 08-01-04 | 01   | 1    | DATA-03          | unit      | `npx vitest run src/__tests__/useEventPolling.test.ts -x`   | ❌ W0             | ⬜ pending |
+| 08-01-05 | 01   | 1    | DATA-02, DATA-03 | unit      | `npx vitest run src/__tests__/entityLayers.test.ts -x`      | ✅ (needs update) | ⬜ pending |
+| 08-02-01 | 02   | 2    | DATA-02, DATA-03 | unit      | `npx vitest run src/__tests__/StatusPanel.test.tsx -x`      | ❌ W0             | ⬜ pending |
+| 08-02-02 | 02   | 2    | DATA-02, DATA-03 | unit      | `npx vitest run src/__tests__/AppShell.test.tsx -x`         | ✅ (needs update) | ⬜ pending |
+| 08-02-03 | 02   | 2    | DATA-03          | unit      | `npx vitest run server/__tests__/adapters/acled.test.ts -x` | ✅ (needs update) | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -62,18 +62,18 @@ created: 2026-03-16
 - [ ] Update `src/__tests__/AppShell.test.tsx` — verify three polling hooks wired
 - [ ] Update `server/__tests__/adapters/acled.test.ts` — verify multi-country query
 
-*Existing infrastructure covers test framework — only test files needed.*
+_Existing infrastructure covers test framework — only test files needed._
 
 ---
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Ship diamonds render on map with blue color | DATA-02 | Visual rendering requires browser + WebGL | Run dev server, verify blue diamonds appear for ships |
-| Drone/missile markers render on map | DATA-03 | Visual rendering requires browser + WebGL | Run dev server, verify red starbursts and X marks appear |
-| All three data types render simultaneously | DATA-02, DATA-03 | Multi-source visual integration | Run dev server with all API keys, verify flights + ships + events coexist |
-| Status panel dot colors change with connection state | UI | Visual state transitions | Disconnect API, observe dot color changes |
+| Behavior                                             | Requirement      | Why Manual                                | Test Instructions                                                         |
+| ---------------------------------------------------- | ---------------- | ----------------------------------------- | ------------------------------------------------------------------------- |
+| Ship diamonds render on map with blue color          | DATA-02          | Visual rendering requires browser + WebGL | Run dev server, verify blue diamonds appear for ships                     |
+| Drone/missile markers render on map                  | DATA-03          | Visual rendering requires browser + WebGL | Run dev server, verify red starbursts and X marks appear                  |
+| All three data types render simultaneously           | DATA-02, DATA-03 | Multi-source visual integration           | Run dev server with all API keys, verify flights + ships + events coexist |
+| Status panel dot colors change with connection state | UI               | Visual state transitions                  | Disconnect API, observe dot color changes                                 |
 
 ---
 

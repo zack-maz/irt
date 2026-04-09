@@ -20,27 +20,16 @@ vi.mock('adm-zip', () => {
   };
 });
 
-// Mock config with standard thresholds (updated to match 26.2-03 defaults)
+// Mock config with standard thresholds
 const mockConfig = {
-  eventConfidenceThreshold: 0.38,
+  eventConfidenceThreshold: 0.35,
   eventMinSources: 2,
   eventCentroidPenalty: 0.7,
-  eventExcludedCameo: ['180', '182', '190', '192'],
+  eventExcludedCameo: ['180', '192'],
   bellingcatCorroborationBoost: 0.2,
 };
 vi.mock('../config.js', () => ({
   getConfig: () => mockConfig,
-}));
-
-// Mock batchFetchTitles to return empty map -- fixture tests focus on Phase A/B logic
-vi.mock('../lib/titleFetcher.js', () => ({
-  batchFetchTitles: vi.fn().mockResolvedValue(new Map()),
-}));
-
-// Mock nlpGeoValidator -- return 'skipped' for all events so Phase C doesn't interfere
-vi.mock('../lib/nlpGeoValidator.js', () => ({
-  validateEventGeo: vi.fn().mockReturnValue({ status: 'skipped', reason: 'no_actor_data' }),
-  ACTOR_COUNTRY_MAP: {},
 }));
 
 /**
@@ -50,23 +39,23 @@ vi.mock('../lib/nlpGeoValidator.js', () => ({
 function makeGdeltRow(overrides: Partial<Record<number, string>> = {}): string {
   const cols = new Array(61).fill('');
   // Sensible defaults for a passing event
-  cols[0] = '1000000000';     // GLOBALEVENTID
-  cols[1] = '20260315';        // SQLDATE
-  cols[6] = 'IRAN';            // Actor1Name
-  cols[7] = 'IRN';             // Actor1CountryCode
-  cols[16] = 'IRAQ';           // Actor2Name
-  cols[17] = 'IRQ';            // Actor2CountryCode
-  cols[26] = '195';            // EventCode
-  cols[27] = '195';            // EventBaseCode
-  cols[28] = '19';             // EventRootCode
-  cols[30] = '-8';             // GoldsteinScale
-  cols[31] = '15';             // NumMentions
-  cols[32] = '5';              // NumSources
-  cols[51] = '2';              // ActionGeo_Type (state level -- no centroid penalty)
+  cols[0] = '1000000000'; // GLOBALEVENTID
+  cols[1] = '20260315'; // SQLDATE
+  cols[6] = 'IRAN'; // Actor1Name
+  cols[7] = 'IRN'; // Actor1CountryCode
+  cols[16] = 'IRAQ'; // Actor2Name
+  cols[17] = 'IRQ'; // Actor2CountryCode
+  cols[26] = '195'; // EventCode
+  cols[27] = '195'; // EventBaseCode
+  cols[28] = '19'; // EventRootCode
+  cols[30] = '-8'; // GoldsteinScale
+  cols[31] = '15'; // NumMentions
+  cols[32] = '5'; // NumSources
+  cols[51] = '2'; // ActionGeo_Type (state level -- no centroid penalty)
   cols[52] = 'Baghdad, Baghdad, Iraq'; // ActionGeo_FullName
-  cols[53] = 'IZ';             // ActionGeo_CountryCode (FIPS)
-  cols[56] = '33.3152';        // ActionGeo_Lat
-  cols[57] = '44.3661';        // ActionGeo_Long
+  cols[53] = 'IZ'; // ActionGeo_CountryCode (FIPS)
+  cols[56] = '33.3152'; // ActionGeo_Lat
+  cols[57] = '44.3661'; // ActionGeo_Long
   cols[60] = 'https://reuters.com/article/test'; // SOURCEURL
 
   for (const [idx, val] of Object.entries(overrides)) {
@@ -169,7 +158,7 @@ const FP_CYBER_OP = makeGdeltRow({
 const FP_SINGLE_SOURCE = makeGdeltRow({
   0: 'FP_SINGLE_01',
   1: '20260318',
-  32: '1',  // only 1 source
+  32: '1', // only 1 source
   53: 'IZ',
   52: 'Mosul, Ninawa, Iraq',
   56: '36.3350',
@@ -219,22 +208,22 @@ const FP_LOW_CONFIDENCE = makeGdeltRow({
   1: '20260321',
   6: 'IRAN',
   7: 'IRN',
-  16: '',        // no Actor2Name
-  17: '',        // no Actor2CountryCode
+  16: '', // no Actor2Name
+  17: '', // no Actor2CountryCode
   26: '193',
   27: '193',
   28: '19',
-  30: '0',       // Goldstein 0 (unknown)
-  31: '2',       // low mentions
-  32: '2',       // barely above minSources
-  51: '4',       // ActionGeo_Type landmark (centroid penalty)
+  30: '0', // Goldstein 0 (unknown)
+  31: '2', // low mentions
+  32: '2', // barely above minSources
+  51: '4', // ActionGeo_Type landmark (centroid penalty)
   52: 'Tehran, Tehran, Iran',
   53: 'IR',
   56: '35.6892', // Tehran centroid
   57: '51.3890',
 });
 
-/** Physical assault event -- CAMEO 182 (now excluded) */
+/** Physical assault event -- CAMEO 182 (low specificity, not excluded) */
 const FP_CAMEO_182 = makeGdeltRow({
   0: 'FP_CAMEO_182_01',
   1: '20260322',
@@ -250,7 +239,7 @@ const FP_CAMEO_182 = makeGdeltRow({
   57: '44.3661',
 });
 
-/** Conventional military force NOS -- CAMEO 190 (now excluded) */
+/** Conventional military force NOS -- CAMEO 190 (low specificity, not excluded) */
 const FP_CAMEO_190 = makeGdeltRow({
   0: 'FP_CAMEO_190_01',
   1: '20260323',
@@ -266,7 +255,13 @@ const FP_CAMEO_190 = makeGdeltRow({
   57: '51.3890',
 });
 
-const FALSE_POSITIVE_ROWS = [FP_CYBER_OP, FP_SINGLE_SOURCE, FP_NON_MIDDLE_EAST, FP_GEO_INVALID, FP_LOW_CONFIDENCE, FP_CAMEO_182, FP_CAMEO_190];
+const FALSE_POSITIVE_ROWS = [
+  FP_CYBER_OP,
+  FP_SINGLE_SOURCE,
+  FP_NON_MIDDLE_EAST,
+  FP_GEO_INVALID,
+  FP_LOW_CONFIDENCE,
+];
 
 describe('GDELT Pipeline Fixtures', () => {
   let parseAndFilter: typeof import('../adapters/gdelt.js').parseAndFilter;
@@ -308,7 +303,7 @@ describe('GDELT Pipeline Fixtures', () => {
       const csv = TRUE_POSITIVE_ROWS.join('\n');
       const events = await parseAndFilter(csv);
       expect(events).toHaveLength(3);
-      const ids = events.map(e => e.id).sort();
+      const ids = events.map((e) => e.id).sort();
       expect(ids).toContain('gdelt-TP_AIRSTRIKE_01');
       expect(ids).toContain('gdelt-TP_SHELLING_01');
       expect(ids).toContain('gdelt-TP_BOMBING_01');
@@ -321,14 +316,16 @@ describe('GDELT Pipeline Fixtures', () => {
       expect(events).toHaveLength(0);
     });
 
-    it('physical assault (CAMEO 182) is rejected as excluded CAMEO', async () => {
+    it('physical assault (CAMEO 182) passes pipeline with low specificity', async () => {
+      // CAMEO 182 has specificity 0.1 but is not excluded -- may pass threshold
       const events = await parseAndFilter(FP_CAMEO_182);
-      expect(events).toHaveLength(0);
+      expect(events).toHaveLength(1);
     });
 
-    it('conventional military force NOS (CAMEO 190) is rejected as excluded CAMEO', async () => {
+    it('conventional military force NOS (CAMEO 190) passes pipeline with low specificity', async () => {
+      // CAMEO 190 has specificity 0.1 but is not excluded -- may pass threshold
       const events = await parseAndFilter(FP_CAMEO_190);
-      expect(events).toHaveLength(0);
+      expect(events).toHaveLength(1);
     });
 
     it('single-source rumor is rejected for insufficient sources', async () => {
@@ -366,7 +363,7 @@ describe('GDELT Pipeline Fixtures', () => {
       // Should return exactly the 3 true positives
       expect(events).toHaveLength(3);
 
-      const ids = new Set(events.map(e => e.id));
+      const ids = new Set(events.map((e) => e.id));
       // True positives present
       expect(ids.has('gdelt-TP_AIRSTRIKE_01')).toBe(true);
       expect(ids.has('gdelt-TP_SHELLING_01')).toBe(true);
@@ -378,8 +375,6 @@ describe('GDELT Pipeline Fixtures', () => {
       expect(ids.has('gdelt-FP_NON_ME_01')).toBe(false);
       expect(ids.has('gdelt-FP_GEO_01')).toBe(false);
       expect(ids.has('gdelt-FP_LOW_CONF_01')).toBe(false);
-      expect(ids.has('gdelt-FP_CAMEO_182_01')).toBe(false);
-      expect(ids.has('gdelt-FP_CAMEO_190_01')).toBe(false);
     });
 
     it('all returned events have confidence above threshold', async () => {
@@ -404,18 +399,18 @@ describe('GDELT Pipeline Fixtures', () => {
       const csv = [...TRUE_POSITIVE_ROWS, ...FALSE_POSITIVE_ROWS].join('\n');
       const records = await parseAndFilterWithTrace(csv);
 
-      const accepted = records.filter(r => r.status === 'accepted');
-      const rejected = records.filter(r => r.status === 'rejected');
+      const accepted = records.filter((r) => r.status === 'accepted');
+      const rejected = records.filter((r) => r.status === 'rejected');
 
       expect(accepted.length).toBe(3);
-      expect(rejected.length).toBe(7);
+      expect(rejected.length).toBe(5);
     });
 
     it('rejected records have specific rejection reasons', async () => {
       const csv = FALSE_POSITIVE_ROWS.join('\n');
       const records = await parseAndFilterWithTrace(csv);
 
-      const reasons = records.map(r => r.pipelineTrace.rejectionReason).sort();
+      const reasons = records.map((r) => r.pipelineTrace.rejectionReason).sort();
       expect(reasons).toContain('excluded_cameo');
       expect(reasons).toContain('single_source');
       expect(reasons).toContain('non_middle_east');
@@ -425,7 +420,7 @@ describe('GDELT Pipeline Fixtures', () => {
 
     it('accepted records have full phaseA checks (all true)', async () => {
       const records = await parseAndFilterWithTrace(TP_IRAN_AIRSTRIKE);
-      const accepted = records.filter(r => r.status === 'accepted');
+      const accepted = records.filter((r) => r.status === 'accepted');
       expect(accepted).toHaveLength(1);
 
       const phaseA = accepted[0].pipelineTrace.phaseA;
@@ -439,7 +434,7 @@ describe('GDELT Pipeline Fixtures', () => {
 
     it('accepted records have phaseB confidence sub-scores', async () => {
       const records = await parseAndFilterWithTrace(TP_IRAN_AIRSTRIKE);
-      const accepted = records.filter(r => r.status === 'accepted');
+      const accepted = records.filter((r) => r.status === 'accepted');
       const phaseB = accepted[0].pipelineTrace.phaseB;
 
       expect(phaseB.finalConfidence).toBeGreaterThan(0);
@@ -449,19 +444,9 @@ describe('GDELT Pipeline Fixtures', () => {
       expect(phaseB.confidenceSubScores.cameoSpecificity).toBeGreaterThan(0);
     });
 
-    it('accepted records have phaseC trace fields', async () => {
-      const records = await parseAndFilterWithTrace(TP_IRAN_AIRSTRIKE);
-      const accepted = records.filter(r => r.status === 'accepted');
-      const phaseC = accepted[0].pipelineTrace.phaseC;
-
-      expect(phaseC).toBeDefined();
-      expect(phaseC!.titleFetched).toBe(false); // batchFetchTitles mocked to empty map
-      expect(phaseC!.validationStatus).toBe('skipped');
-    });
-
     it('accepted records have rawGdeltColumns', async () => {
       const records = await parseAndFilterWithTrace(TP_IRAN_AIRSTRIKE);
-      const accepted = records.filter(r => r.status === 'accepted');
+      const accepted = records.filter((r) => r.status === 'accepted');
       const raw = accepted[0].rawGdeltColumns;
 
       expect(raw.GLOBALEVENTID).toBe('TP_AIRSTRIKE_01');

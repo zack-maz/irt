@@ -13,12 +13,41 @@ provides:
   - Zustand UI store with panel visibility toggles
   - OverlayPanel reusable component
   - Vitest test infrastructure with jsdom and testing-library
-affects: [base-map, api-proxy, entity-rendering, layer-controls, detail-panel, smart-filters, analytics-dashboard]
+affects:
+  [
+    base-map,
+    api-proxy,
+    entity-rendering,
+    layer-controls,
+    detail-panel,
+    smart-filters,
+    analytics-dashboard,
+  ]
 
 # Tech tracking
 tech-stack:
-  added: [react@19, react-dom@19, vite@6, typescript@5.9.3, tailwindcss@4, "@tailwindcss/vite@4", zustand@5, vitest@4, "@testing-library/react@16", "@testing-library/jest-dom@6", jsdom]
-  patterns: [css-first-tailwind-v4-theme, zustand-curried-create, overlay-panel-glass-morphism, z-index-scale-css-variables, path-alias-at-prefix]
+  added:
+    [
+      react@19,
+      react-dom@19,
+      vite@6,
+      typescript@5.9.3,
+      tailwindcss@4,
+      '@tailwindcss/vite@4',
+      zustand@5,
+      vitest@4,
+      '@testing-library/react@16',
+      '@testing-library/jest-dom@6',
+      jsdom,
+    ]
+  patterns:
+    [
+      css-first-tailwind-v4-theme,
+      zustand-curried-create,
+      overlay-panel-glass-morphism,
+      z-index-scale-css-variables,
+      path-alias-at-prefix,
+    ]
 
 key-files:
   created:
@@ -41,16 +70,16 @@ key-files:
     - index.html
 
 key-decisions:
-  - "Used Tailwind CSS v4 CSS-first @theme configuration (no tailwind.config.js)"
-  - "Pinned TypeScript to ~5.9.3 to avoid TS 6.0 breaking changes"
-  - "Zustand store uses curried create<UIState>()() pattern for type inference"
-  - "Z-index scale defined as CSS custom properties for consistent overlay layering"
+  - 'Used Tailwind CSS v4 CSS-first @theme configuration (no tailwind.config.js)'
+  - 'Pinned TypeScript to ~5.9.3 to avoid TS 6.0 breaking changes'
+  - 'Zustand store uses curried create<UIState>()() pattern for type inference'
+  - 'Z-index scale defined as CSS custom properties for consistent overlay layering'
 
 patterns-established:
-  - "Tailwind v4 @theme for all design tokens: @import tailwindcss then @theme block with --color-* and --z-* variables"
-  - "OverlayPanel component: rounded-lg border border-border bg-surface-overlay backdrop-blur-sm for all floating UI"
-  - "Layout slots with data-testid attributes for testability"
-  - "@ path alias configured in both vite.config.ts and tsconfig.app.json"
+  - 'Tailwind v4 @theme for all design tokens: @import tailwindcss then @theme block with --color-* and --z-* variables'
+  - 'OverlayPanel component: rounded-lg border border-border bg-surface-overlay backdrop-blur-sm for all floating UI'
+  - 'Layout slots with data-testid attributes for testability'
+  - '@ path alias configured in both vite.config.ts and tsconfig.app.json'
 
 requirements-completed: [INFRA-02]
 
@@ -143,5 +172,6 @@ None - no external service configuration required.
 All 11 key files verified present. All 3 task commits verified in git log.
 
 ---
-*Phase: 01-project-scaffolding-theme*
-*Completed: 2026-03-14*
+
+_Phase: 01-project-scaffolding-theme_
+_Completed: 2026-03-14_

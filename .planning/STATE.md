@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.9
-milestone_name: milestone
-status: unknown
-last_updated: "2026-04-06T01:16:56.280Z"
+milestone: v1.4
+milestone_name: GDELT Redo & Performance
+status: v1.3 milestone complete
+last_updated: '2026-04-09T16:19:15.526Z'
 progress:
-  total_phases: 11
-  completed_phases: 7
-  total_plans: 27
-  completed_plans: 24
+  total_phases: 13
+  completed_phases: 9
+  total_plans: 36
+  completed_plans: 34
+  percent: 94
 ---
 
 # Project State
@@ -21,11 +22,22 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Milestone: v1.3 Data Quality & Layers — IN PROGRESS
-Phase 26.2 COMPLETE (3 of 3 plans done)
-Phase 26.2: Plan 03 COMPLETE (3 of 3 plans done)
-Phase 26.2: Plan 02 COMPLETE (2 of 3 plans done)
-Phase 26.2: Plan 01 COMPLETE (plans 01+02 done, 1 remaining)
+Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
+Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
+Phase 26.4: Plan 04 COMPLETE (6 of 6 plans done — phase execution complete; README 564-line portfolio rewrite, 1354 KB Playwright-captured hero GIF, 6 layer screenshots, rateLimiters.public tier wired globally on /api/\*, public/robots.txt, permanent scripts/capture-hero.ts agentic tooling)
+Phase 26.4: Plan 06 COMPLETE (ADRs + runbook + degradation contract + README link closure — 12 new doc files, 2672 lines, ADR-0005 at 300 lines is the highest portfolio signal)
+Phase 26.4: Plan 05 COMPLETE (Mermaid architecture docs — 10 files, 21 diagrams, ontology deep dive)
+Phase 26.4: Plan 03 COMPLETE (Palantir gap closure — redaction, type-coverage gate, chaos test, sendValidated)
+Phase 26.4: Plan 02 COMPLETE (CI/CD workflows, husky pre-commit, gitleaks)
+Phase 26.4: Plan 01 COMPLETE (final code grooming pass, tooling installed)
+Phase 26.3 COMPLETE (6 of 6 plans done)
+Phase 26.3: Plan 05 COMPLETE (strict TS + OpenAPI, closes the phase)
+Phase 26.3: Plan 06 COMPLETE (5 of 6 plans done; Plan 05 still pending)
+Phase 26.3: Plan 04 COMPLETE (4 of 6 plans done)
+Phase 26.3: Plan 03 COMPLETE (3 of 6 plans done)
+Phase 26.3: Plan 02 COMPLETE (2 of 6 plans done)
+Phase 26.3: Plan 01 COMPLETE (1 of 6 plans done)
+Phase 26.2 SCRAPPED (3 of 3 plans originally executed then fully reverted in Phase 26.3 — NLP approach was wrong; artifacts archived at .planning/phases/archive-26.2-nlp-scrapped/; redo renumbered to Phase 27 under v1.4)
 Phase 26.1 COMPLETE (3 of 3 plans done)
 Phase 26.1: Plan 02 COMPLETE (2 of 3 plans done)
 Phase 26.1: Plan 01 COMPLETE (1 of 3 plans done)
@@ -40,18 +52,27 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 
 ## v1.3 Phases
 
-| Phase | Name | Status |
-|-------|------|--------|
-| 22 | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans) |
-| 22.1 | Fixing Dispersion | COMPLETE (2/2 plans) |
-| 23 | Threat Density Improvements | COMPLETE (2/2 plans) |
-| 23.2 | Improving Threat Density Scatter Plots | IN PROGRESS (1/2 plans) |
-| 24 | Political Boundaries Layer | IN PROGRESS (1/2 plans) |
-| 25 | Ethnic Distribution Layer | IN PROGRESS (1/2 plans) |
-| 26 | Water Stress Layer | IN PROGRESS (6/6 plans, gap closure complete) |
-| 26.1 | Water Layer Refinements | COMPLETE (3/3 plans) |
-| 26.2 | Conflict Geolocation Improvement | COMPLETE (3/3 plans) |
-| 27 | Performance & Load Testing | Planned |
+| Phase | Name                                    | Status                                     |
+| ----- | --------------------------------------- | ------------------------------------------ |
+| 22    | GDELT Event Quality & OSINT Integration | COMPLETE (3/3 plans)                       |
+| 22.1  | Fixing Dispersion                       | COMPLETE (2/2 plans)                       |
+| 23    | Threat Density Improvements             | COMPLETE (2/2 plans)                       |
+| 23.2  | Improving Threat Density Scatter Plots  | IN PROGRESS (1/2 plans)                    |
+| 24    | Political Boundaries Layer              | IN PROGRESS (1/2 plans)                    |
+| 25    | Ethnic Distribution Layer               | IN PROGRESS (1/2 plans)                    |
+| 26    | Water Stress Layer                      | COMPLETE (6/6 plans, gap closure complete) |
+| 26.1  | Water Layer Refinements                 | COMPLETE (3/3 plans)                       |
+| 26.3  | Production Code Cleanup                 | COMPLETE (6/6 plans)                       |
+| 26.4  | Documentation & External Presentation   | COMPLETE (6/6 plans)                       |
+
+_Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Original Phase 27 (Performance & Load Testing) was also moved to v1.4 as Phase 28 on the same date._
+
+## v1.4 Phases (planned)
+
+| Phase | Name                                          | Status  |
+| ----- | --------------------------------------------- | ------- |
+| 27    | Conflict Geolocation Improvement (GDELT Redo) | Planned |
+| 28    | Performance & Load Testing                    | Planned |
 
 ## Key Decisions
 
@@ -121,7 +142,74 @@ Previous: v0.9-v1.2 all shipped (958 tests, p95 153ms)
 - Cross-border events validated by NLP place country match (not actor country); CAMEO 182/190 hard-excluded; threshold raised 0.35->0.38
 - CAMEO_TO_FIPS includes both YMN and YEM mappings for Yemen (GDELT uses both actor codes)
 - ISO_TO_FIPS mapping bridges lookupCityCoords ISO codes to FIPS geo codes for NLP validation
-- parseAndFilter now async (Phase C NLP validation requires title fetching); all callers updated to await
+- parseAndFilter reverted to synchronous (Phase 26.2 removed) -- was async only for title fetching
+- CAMEO exclusion reverted to pre-26.2: ['180','192'] only (182/190 exclusions were 26.2-specific)
+- Confidence threshold reverted to 0.35 (from 26.2's 0.38)
+- Pre-existing tsc errors fixed alongside 26.2 reversion (unused imports, compromise typing)
+- Express 5 req.query is read-only getter -- validateQuery middleware stores parsed data on res.locals.validatedQuery
+- Zod v3 pinned (v4 has breaking changes: ZodTypeAny removed, different module structure)
+- importOriginal pattern for config mocks to preserve constant re-exports after constants.ts consolidation
+- parseEnv test defaults use explicit if-checks (not spread) to avoid env var override order bugs
+- Pino logger with level:'silent' in test mode, pino-pretty in dev, raw JSON in production
+- Module-level child loggers (not request-scoped) for adapter files lacking req context
+- genReqId accepts client-provided X-Request-ID or generates UUID via crypto.randomUUID
+- autoLogging ignores /health endpoint to reduce noise
+- ParsedQs to Zod inferred type cast uses 'as unknown as' double-cast pattern
+- AppError uses explicit property assignment (not parameter properties) due to erasableSyntaxOnly tsconfig
+- Compression middleware gated by !VERCEL — Vercel CDN handles edge gzip/brotli, local dev gets compression for realistic testing
+- Graceful SIGTERM handler only in isMainModule block — Vercel has its own 500ms window and Upstash Redis is REST-based (no connections to drain)
+- Consistent error envelope { error, code, statusCode, requestId } established across all routes and middleware
+- AppError(statusCode, code, message) is the canonical pattern for typed route errors
+- Coverage thresholds pinned at current baseline (lines 66 / functions 69 / branches 53 / statements 65) as a regression ratchet -- ratchet upward as new tests land toward 80% target
+- WAR_START defined locally in src/lib/constants.ts (was re-exported from removed server/constants.js); duplicates server/config.ts to keep frontend tier independent
+- vi.useFakeTimers() pattern for tests that compare two computeSeverityScore() calls (eliminates Date.now() microsecond drift between back-to-back invocations)
+- noUncheckedIndexedAccess enabled on server tsconfig only — client-side would cascade through deck.gl/maplibre layers where runtime types are looser than declared
+- getCol() helper centralizes bounds-checked CSV column reads in GDELT adapter rather than scattering non-null assertions
+- Cast-with-comment pattern for deck.gl v9 GeoJsonLayer/IconLayer types (runtime accepts FeatureCollection/HTMLCanvasElement but v9 type defs are stricter)
+- Rate limit test fixture swap: rateLimiters.flights aliased locally instead of preserving deprecated rateLimitMiddleware export purely for tests
+- OpenAPI 3.0.3 spec hand-written (not zod-to-openapi generated) to avoid code-gen runtime dep and keep editorial descriptions for portfolio review
+- allOf composition in OpenAPI for CacheResponse&lt;T&gt; pattern (OpenAPI 3.0 has no generics)
+- Prettier 3 + eslint-config-prettier 10 (flat) + knip 5 installed; lint:fix, format, format:check, knip, check:env scripts added (26.4-01)
+- eslint argsIgnorePattern '^\_' enforces existing underscore-prefix convention for intentionally-unused identifiers (26.4-01)
+- getIconAtlasForLayer() wrapper in icons.ts eliminates 9 iconAtlas `as any` casts across useEntityLayers and useWaterLayers (26.4-01)
+- Static GeoJSON imports typed via `as unknown as FeatureCollection` instead of `as any` -- deck.gl v9 type defs are stricter than runtime contract (26.4-01)
+- ColorReliefLayer wrapper component isolates the maplibre 5 `color-relief` type cast so @vis.gl/react-maplibre 8 type gap is contained (26.4-01)
+- scripts/check-env-example.ts drift checker forces NODE_ENV=test before dynamic import of server/config so parseEnv() returns safe defaults (26.4-01)
+- knip.json whitelists tailwindcss / pino-pretty / @types/pino-http -- CSS @import / string-literal / type-only usage cannot be statically detected (26.4-01)
+- 81 pre-existing lint errors absorbed into Plan 01 Task 1 commit (26.4-01 cleanup pass intentionally covers pre-existing tech debt)
+- Deleted @deck.gl/aggregation-layers and @deck.gl/react deps (genuinely unused; test mocks aliased via vite.config) (26.4-01)
+- Pino redactPaths exported from server/lib/logger.ts; redact.paths includes authorization/cookie/x-api-key/set-cookie headers plus wildcard tokens (UPSTASH/OPENSKY/AISSTREAM/ADSB) and production-only req.ip/remoteAddress; redaction proof test uses pino write-stream sink (26.4-03)
+- type-coverage baseline measured at 97.05% (7970/8212); CI gate locked at 97 floor as regression ratchet; 99% aspirational target deferred (deck.gl/maplibre v9 type-cast cleanup out of scope) (26.4-03)
+- Chaos test server/**tests**/resilience/redis-death.test.ts boots real Express app via supertest + mocked @upstash/redis throwing on every call; asserts all 8 cached routes + /health return 200 degraded or 502/503 — never 500 (26.4-03)
+- Chaos test exposed Path A gap in events route (shouldBackfill + backfill-ts writeback calling raw redis.get/set); fixed with try/catch helpers + new recordBackfillTimestamp best-effort helper (26.4-03)
+- Chaos test exposed Path B gap in cacheGetSafe/cacheSetSafe — safe wrappers caught sync throws but NOT hung Upstash client calls (client retries internally on undefined URL, blocks forever); added withTimeout Promise.race wrapper with REDIS_OP_TIMEOUT_MS=2000 in server/cache/redis.ts — this is the core production resilience fix, not just test scaffolding (26.4-03)
+- 2000ms Redis op timeout chosen as 25x the healthy Upstash RTT (~50-200ms) — zero impact on happy path, caps worst-case hung call, prevents Vercel lambda timeout cascade (26.4-03)
+- sendValidated<S>(res, schema, payload) middleware added with dev-throw / prod-warn semantics; dev mismatch throws AppError(500, RESPONSE_SCHEMA_MISMATCH) caught by errorHandler; prod mismatch logs warn via pino child logger and falls through with original payload (26.4-03)
+- cacheResponseSchema<T> generic zod wrapper mirrors OpenAPI CacheResponseBase allOf composition; entity schemas (flight, conflict event, water facility) use passthrough() on nested data fields for drift tolerance (26.4-03)
+- sendValidated wired into flights, events, water routes as proof-of-concept (3 of 14 cached routes); remaining 11 deferred to future maintenance pass per plan scope (26.4-03)
+- Sites route needed no code changes under chaos — its failure was purely the hung cacheGetSafe call which the timeout wrapper closes (26.4-03)
+- Stripped 9 debug console.log('[EVENTS] ...') tracer lines from events.ts that were left uncommitted at end of previous session; pre-empted via grep check before commit (26.4-03)
+- Mermaid inline architecture docs over committed SVG/PNG — renders natively on GitHub, diffs cleanly in PRs, no build step, evolves with code (26.4-05)
+- Ontology documentation split into 4 focused files (types/algorithms/state-machines/complexity) to prevent unreadable monolith; single file approach rejected (26.4-05)
+- As-built honesty principle: TODO(26.2) tech debt labeled inline in architecture diagrams (hardcoded CAMEO table in gdelt.ts, centroid dispersion gaps in dispersion.ts, NLP extraction fields in NewsArticle, coarse nearest-country-centroid basin lookup) rather than hidden in issues section (26.4-05)
+- C4Context block with plain flowchart fallback in system-context.md because older Mermaid renderers don't support C4 syntax (26.4-05)
+- 9 sequenceDiagrams in data-flows.md (plan required 8+) — geocode added as 9th with distinct two-tier lookup pattern (synchronous siteStore bbox check → async Nominatim) (26.4-05)
+- Source pointers in architecture docs use relative repo paths so links work both in GitHub rendering and in local editors; no absolute github.com URLs (26.4-05)
+- classDiagram mermaid syntax used only for MapEntity discriminated union (the single most important ontology concept); other type catalogs are prose + code blocks to reduce edit burden (26.4-05)
+- stateDiagram-v2 preferred over flowchart for lifecycle state machines — semantically correct for finite-state behavior and renders the state transitions more clearly on GitHub (26.4-05)
+- ADR-0005 written at 300 lines (5x minimum) as the honest Phase 26.2 NLP-scrap retrospective — names every file deleted, the 2-week time invested, includes a 4-lesson "What I Learned" section with rules for next time (patching downstream of bad signals compounds the problem, spike before commit, killing your darlings is a portfolio signal, cleanup phases are part of the product), and a forward-looking "what to do instead" section naming upstream NumSources + noisy-CAMEO filter as the leading redo candidate — explicitly identified as the highest-portfolio-signal artifact in Phase 26.4 (26.4-06)
+- ADR-0001 Consequences section integrates the Plan 03 REDIS_OP_TIMEOUT_MS 2000ms Promise.race hardening as production resilience work rather than creating a separate ADR-0009 — keeps the decision record coherent ("we chose Upstash and here is how the choice has evolved") (26.4-06)
+- Runbook failure modes grounded in specific code paths with line numbers (server/cache/redis.ts lines 19-42 for REDIS_OP_TIMEOUT_MS, server/middleware/rateLimit.ts lines 100-120 for rateLimiters.public, server/adapters/overpass.ts private.coffee mirror, server/routes/events.ts shouldBackfill/recordBackfillTimestamp helpers) rather than generic SRE advice — reviewable claims not hand-waving (26.4-06)
+- degradation.md summary table includes a "Proof" column mapping each layer contract to a specific test file or code line — belt-and-suspenders documentation that is only believable if it points at proof; mirrors ADR-0001 Consequences structure for cross-document consistency (26.4-06)
+- ADR template uses Positive/Negative/Neutral consequence split (not unstructured "Consequences") to force honest tradeoff consideration; ADR index README documents immutability rule (status line mutable, body frozen) and numbering convention (4-digit zero-padded) so future ADRs have clear conventions (26.4-06)
+- README Plan 06 edits are additive and scoped: new Engineering Documentation subsection after Graceful Degradation with headline-linked paragraphs for architecture/adr/runbook/degradation, upgraded Architecture section prose to clickable per-file links, and ADR-0005 blockquote at the top of the Phase 26.2 retrospective — does NOT touch hero GIF area, Quick Start, or test metrics table from Plan 04 (26.4-06)
+- ADR cross-referencing pattern established: ADRs link to each other (ADR-0003 ↔ ADR-0005), to runbook failure modes, to architecture data-flow diagrams, and to specific code files — the ADR directory is navigable from any entry point rather than a flat list (26.4-06)
+- Agentic hero GIF capture via Playwright (scripts/capture-hero.ts, 527 lines, `npm run capture:hero`) chosen over manual Kap recording — ~45s repeatable regeneration survives UI changes, committed as permanent portfolio tooling rather than a one-off recording (26.4-04)
+- Playwright recordVideo does not work for WebGL content in headless + software-GL mode (produces all-black frames because the compositor receives zeroed frames for WebGL canvases) — `page.screenshot()` frame-sequence stitched by gifski is the reliable fallback because screenshot reads the canvas backbuffer synchronously (26.4-04)
+- Skip ffmpeg in the gifski pipeline — gifski accepts PNG frames directly on stdin and handles lanczos scaling via `--width`, avoiding rgb24→yuv4mpegpipe pixel-format errors and reducing the pipeline to 2 processes (Playwright → gifski) (26.4-04)
+- MapDevExposer dev-only React component added to src/components/map/BaseMap.tsx, gated by `import.meta.env.DEV`, exposes the maplibre Map instance on `window.__map` for programmatic flyTo and layer toggling during capture — Vite tree-shakes entirely out of production builds, zero bundle impact (26.4-04)
+- rateLimiters.public tier (6 req/min per-IP, prefix `ratelimit:public`) wired globally on `/api/*` BEFORE per-endpoint limiters in server/index.ts — protects the Upstash command budget from scraper abuse on the live demo URL while leaving per-endpoint budgets intact for legitimate high-volume users; paired with public/robots.txt disallowing /api/ and /health for polite crawlers (26.4-04)
+- README live demo URL left as `_TBD_` placeholder (commit bd453cf replaced an earlier hardcoded URL) — user will substitute the actual Vercel URL at publication time rather than committing hardcoded production URLs mid-plan (26.4-04)
 
 ## Pending Todos
 
@@ -132,6 +220,12 @@ None.
 - Ethnic distribution GeoJSON data needs manual curation from published maps
 - WRI Aqueduct 4.0 format verified: ZIP contains CSV + GeoPackage; CSV has 231 columns, no lat/lng centroids
 - Redis command budget at ~92% — monitor with Bellingcat RSS adding another polling source
+
+### Quick Tasks Completed
+
+| #   | Description                                               | Date       | Commit  | Directory                                                                                         |
+| --- | --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------- |
+| 1   | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/) |
 
 ## Accumulated Context
 
@@ -145,3 +239,4 @@ None.
 - Phase 26.3 inserted after Phase 26: Production Code Cleanup — portfolio-grade internal quality (URGENT)
 - Phase 26.4 inserted after Phase 26.3: Documentation & External Presentation — portfolio-grade external polish
 - Phase 26.2 now depends on 26.4 — GDELT redo on clean foundation
+- Milestone v1.4 created (2026-04-08): Phase 26.2 renumbered to Phase 27 (Conflict Geolocation Improvement / GDELT Redo) and original Phase 27 renumbered to Phase 28 (Performance & Load Testing). Both moved out of v1.3 so v1.3 can close with its delivered phases (26.3 code cleanup and 26.4 documentation shipped as planned). Scrapped 26.2 artifacts archived to .planning/phases/archive-26.2-nlp-scrapped/. Historical references (ADR-0005, SUMMARY.md files, TODO(26.2) code markers) preserve the old number intentionally.

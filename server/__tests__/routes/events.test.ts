@@ -2,12 +2,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Server } from 'http';
 import type { ConflictEventEntity, CacheResponse } from '../../types.js';
-import { WAR_START } from '../../constants.js';
+import { WAR_START } from '../../config.js';
 
 // Sample event fixtures
-const makeEvent = (
-  overrides: Partial<ConflictEventEntity> = {},
-): ConflictEventEntity => ({
+const makeEvent = (overrides: Partial<ConflictEventEntity> = {}): ConflictEventEntity => ({
   id: 'gdelt-100001',
   type: 'airstrike',
   lat: 33.3,
@@ -56,53 +54,45 @@ const mockBackfillEvents = vi.fn(async (): Promise<ConflictEventEntity[]> => [])
 // Mock rate limiter -- pass through for route tests
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
+    public: _passThrough,
   },
 }));
 
-// Mock config
-vi.mock('../../config.js', () => ({
-  config: {
+// Mock config (spread actual to preserve constants like WAR_START, CACHE_TTL)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = {
     port: 0,
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
+    acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
     eventConfidenceThreshold: 0.35,
-  },
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    newsRelevanceThreshold: 0.7,
-    eventConfidenceThreshold: 0.35,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    newsRelevanceThreshold: 0.7,
-    eventConfidenceThreshold: 0.35,
-  }),
-}));
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock flight adapters (needed by server import chain)
 vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: vi.fn(async () => []),
 }));
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-vi.mock('../../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 
 // Mock aisstream adapter (ships route uses it)
 vi.mock('../../adapters/aisstream.js', () => ({
@@ -118,12 +108,24 @@ vi.mock('../../adapters/gdelt.js', () => ({
 }));
 vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
-vi.mock('../../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
+vi.mock('../../adapters/rss.js', () => ({
+  fetchAllRssFeeds: vi.fn(async () => []),
+  RSS_FEEDS: [],
+}));
+vi.mock('../../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
 vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })) }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
+}));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis cache module with in-memory store
 const mockRedisGet = vi.fn(async (key: string) => rawRedisStore.get(key) ?? null);
@@ -131,15 +133,19 @@ const mockRedisSet = vi.fn(async (key: string, value: unknown, _opts?: unknown) 
   rawRedisStore.set(key, value);
 });
 
-const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-});
-const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-  redisStore.set(key, { data, fetchedAt: Date.now() });
-});
+const _mockCacheGet = vi.fn(
+  async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  },
+);
+const _mockCacheSet = vi.fn(
+  async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  },
+);
 vi.mock('../../cache/redis.js', () => ({
   redis: {
     get: (...args: unknown[]) => mockRedisGet(...(args as [string])),
@@ -284,11 +290,13 @@ describe('Events Route (Redis accumulator)', () => {
     expect(body.data[0].id).toBe('gdelt-A');
   });
 
-  it('returns 500 when fetchEvents throws and no cache exists', async () => {
+  it('returns 502 when fetchEvents throws and no cache exists', async () => {
     mockFetchEvents.mockRejectedValue(new Error('GDELT down'));
 
     const res = await fetch(`${baseUrl}/api/events`);
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.code).toBe('UPSTREAM_FAIL');
   });
 
   it('has no module-level backfill code (no fs access, no GDELT fetch at import time)', async () => {

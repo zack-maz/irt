@@ -1,4 +1,11 @@
-import type { MapEntity, SiteEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  SiteEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+} from '@/types/entities';
+import type { WaterFacility } from '../../server/types';
 import type { PanelView, ThreatCluster } from '@/types/ui';
 import { isConflictEventType, EVENT_TYPE_LABELS } from '@/types/ui';
 import { useUIStore } from '@/stores/uiStore';
@@ -7,6 +14,9 @@ import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
 import { useWaterStore } from '@/stores/waterStore';
+
+/** Broader entity union supported by the detail panel + breadcrumb. */
+export type AnyDetailEntity = MapEntity | SiteEntity | WaterFacility;
 
 /** Maps entity type to display label */
 export function getTypeLabel(type: string): string {
@@ -18,7 +28,7 @@ export function getTypeLabel(type: string): string {
 }
 
 /** Gets the display name for an entity */
-export function getEntityName(entity: { type: string; [key: string]: unknown }): string {
+export function getEntityName(entity: AnyDetailEntity): string {
   switch (entity.type) {
     case 'flight': {
       const d = (entity as FlightEntity).data;
@@ -32,7 +42,7 @@ export function getEntityName(entity: { type: string; [key: string]: unknown }):
       return (entity as SiteEntity).label || 'Unknown Site';
     }
     case 'water': {
-      return (entity as { label: string }).label || 'Unknown Facility';
+      return (entity as WaterFacility).label || 'Unknown Facility';
     }
     default: {
       if (isConflictEventType(entity.type)) {
@@ -45,7 +55,7 @@ export function getEntityName(entity: { type: string; [key: string]: unknown }):
 }
 
 /** Cross-store entity lookup (non-reactive, for imperative use) */
-export function findEntityById(id: string): MapEntity | SiteEntity | null {
+export function findEntityById(id: string): AnyDetailEntity | null {
   const flights = useFlightStore.getState().flights;
   const ships = useShipStore.getState().ships;
   const events = useEventStore.getState().events;
@@ -64,7 +74,7 @@ export function findEntityById(id: string): MapEntity | SiteEntity | null {
 
 /** Derives a breadcrumb label from an entity or cluster */
 export function deriveBreadcrumbLabel(
-  entity: MapEntity | SiteEntity | null,
+  entity: AnyDetailEntity | null,
   cluster: ThreatCluster | null,
 ): string {
   if (cluster) return `Cluster(${cluster.eventCount})`;

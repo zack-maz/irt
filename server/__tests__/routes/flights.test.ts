@@ -26,28 +26,6 @@ const mockOpenSkyFlights: FlightEntity[] = [
   },
 ];
 
-const mockAdsbFlights: FlightEntity[] = [
-  {
-    id: 'flight-def456',
-    type: 'flight',
-    lat: 32.5,
-    lng: 53.0,
-    timestamp: Date.now(),
-    label: 'UAE789',
-    data: {
-      icao24: 'def456',
-      callsign: 'UAE789',
-      originCountry: '',
-      velocity: 174.4,
-      heading: 90,
-      altitude: 11582.4,
-      onGround: false,
-      verticalRate: 0,
-      unidentified: false,
-    },
-  },
-];
-
 const mockAdsbLolFlights: FlightEntity[] = [
   {
     id: 'flight-lol789',
@@ -72,7 +50,6 @@ const mockAdsbLolFlights: FlightEntity[] = [
 
 // Module-level mock functions that persist across tests
 const mockFetchOpenSky = vi.fn(async (): Promise<FlightEntity[]> => mockOpenSkyFlights);
-const mockFetchAdsb = vi.fn(async (): Promise<FlightEntity[]> => mockAdsbFlights);
 const mockFetchAdsbLol = vi.fn(async (): Promise<FlightEntity[]> => mockAdsbLolFlights);
 
 // In-memory store backing the Redis mock
@@ -86,49 +63,42 @@ const redisStore = new Map<string, CacheEntry<unknown>>();
 // Mock rate limiter -- pass through for route tests
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
+    public: _passThrough,
   },
 }));
 
-// Mock config module
-vi.mock('../../config.js', () => ({
-  config: {
+// Mock config module (spread actual to preserve constants like CACHE_TTL, IRAN_BBOX, etc.)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = {
     port: 0,
     corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
-  },
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-}));
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 vi.mock('../../adapters/opensky.js', () => ({
   fetchFlights: (...args: unknown[]) => mockFetchOpenSky(...args),
-}));
-
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: (...args: unknown[]) => mockFetchAdsb(...args),
 }));
 
 vi.mock('../../adapters/adsb-lol.js', () => ({
@@ -142,26 +112,45 @@ vi.mock('../../adapters/aisstream.js', () => ({
 vi.mock('../../adapters/acled.js', () => ({
   fetchEvents: vi.fn(async () => []),
 }));
-vi.mock('../../adapters/gdelt.js', () => ({ fetchEvents: vi.fn(async () => []), backfillEvents: vi.fn(async () => []) }));
+vi.mock('../../adapters/gdelt.js', () => ({
+  fetchEvents: vi.fn(async () => []),
+  backfillEvents: vi.fn(async () => []),
+}));
 vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
-vi.mock('../../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
+vi.mock('../../adapters/rss.js', () => ({
+  fetchAllRssFeeds: vi.fn(async () => []),
+  RSS_FEEDS: [],
+}));
+vi.mock('../../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
 vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })) }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
+}));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // Mock Redis cache module with in-memory store
-const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-});
-const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-  redisStore.set(key, { data, fetchedAt: Date.now() });
-});
+const _mockCacheGet = vi.fn(
+  async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  },
+);
+const _mockCacheSet = vi.fn(
+  async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  },
+);
 vi.mock('../../cache/redis.js', () => ({
   redis: { ping: vi.fn(async () => 'PONG') },
   cacheGet: _mockCacheGet,
@@ -179,15 +168,12 @@ describe('Flight Route Dispatch', () => {
     redisStore.clear();
 
     // Set credential env vars for tests
-    process.env.ADSB_EXCHANGE_API_KEY = 'test-adsb-key';
     process.env.OPENSKY_CLIENT_ID = 'test-opensky-id';
     process.env.OPENSKY_CLIENT_SECRET = 'test-opensky-secret';
 
     // Reset mock call history and restore default implementations
     mockFetchOpenSky.mockClear();
     mockFetchOpenSky.mockImplementation(async () => mockOpenSkyFlights);
-    mockFetchAdsb.mockClear();
-    mockFetchAdsb.mockImplementation(async () => mockAdsbFlights);
     mockFetchAdsbLol.mockClear();
     mockFetchAdsbLol.mockImplementation(async () => mockAdsbLolFlights);
 
@@ -207,7 +193,6 @@ describe('Flight Route Dispatch', () => {
 
   afterEach(() => {
     server?.close();
-    delete process.env.ADSB_EXCHANGE_API_KEY;
     delete process.env.OPENSKY_CLIENT_ID;
     delete process.env.OPENSKY_CLIENT_SECRET;
   });
@@ -219,7 +204,6 @@ describe('Flight Route Dispatch', () => {
     expect(res.ok).toBe(true);
     expect(mockFetchAdsbLol).toHaveBeenCalledTimes(1);
     expect(mockFetchOpenSky).not.toHaveBeenCalled();
-    expect(mockFetchAdsb).not.toHaveBeenCalled();
     expect(body.data[0].data.icao24).toBe('lol789');
   });
 
@@ -229,20 +213,8 @@ describe('Flight Route Dispatch', () => {
 
     expect(res.ok).toBe(true);
     expect(mockFetchOpenSky).toHaveBeenCalledTimes(1);
-    expect(mockFetchAdsb).not.toHaveBeenCalled();
     expect(mockFetchAdsbLol).not.toHaveBeenCalled();
     expect(body.data[0].data.icao24).toBe('abc123');
-  });
-
-  it('GET /api/flights?source=adsb dispatches to ADS-B Exchange adapter', async () => {
-    const res = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    const body = await res.json();
-
-    expect(res.ok).toBe(true);
-    expect(mockFetchAdsb).toHaveBeenCalledTimes(1);
-    expect(mockFetchOpenSky).not.toHaveBeenCalled();
-    expect(mockFetchAdsbLol).not.toHaveBeenCalled();
-    expect(body.data[0].data.icao24).toBe('def456');
   });
 
   it('GET /api/flights?source=adsblol dispatches to adsb-lol adapter', async () => {
@@ -252,19 +224,17 @@ describe('Flight Route Dispatch', () => {
     expect(res.ok).toBe(true);
     expect(mockFetchAdsbLol).toHaveBeenCalledTimes(1);
     expect(mockFetchOpenSky).not.toHaveBeenCalled();
-    expect(mockFetchAdsb).not.toHaveBeenCalled();
     expect(body.data[0].data.icao24).toBe('lol789');
   });
 
-  it('GET /api/flights?source=invalid falls back to adsblol', async () => {
+  it('GET /api/flights?source=invalid returns 400 validation error', async () => {
     const res = await fetch(`${baseUrl}/api/flights?source=invalid`);
     const body = await res.json();
 
-    expect(res.ok).toBe(true);
-    expect(mockFetchAdsbLol).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(400);
+    expect(body.code).toBe('VALIDATION_ERROR');
+    expect(mockFetchAdsbLol).not.toHaveBeenCalled();
     expect(mockFetchOpenSky).not.toHaveBeenCalled();
-    expect(mockFetchAdsb).not.toHaveBeenCalled();
-    expect(body.data[0].data.icao24).toBe('lol789');
   });
 
   it('uses separate caches per source', async () => {
@@ -273,66 +243,12 @@ describe('Flight Route Dispatch', () => {
     expect(res1.ok).toBe(true);
     expect(mockFetchAdsbLol).toHaveBeenCalledTimes(1);
 
-    // Request to ADS-B -- should NOT serve from adsblol cache
-    const res2 = await fetch(`${baseUrl}/api/flights?source=adsb`);
+    // Request to OpenSky -- should NOT serve from adsblol cache
+    const res2 = await fetch(`${baseUrl}/api/flights?source=opensky`);
     const body2 = await res2.json();
     expect(res2.ok).toBe(true);
-    expect(mockFetchAdsb).toHaveBeenCalledTimes(1);
-    expect(body2.data[0].data.icao24).toBe('def456');
-
-    // Request to OpenSky -- should NOT serve from other caches
-    const res3 = await fetch(`${baseUrl}/api/flights?source=opensky`);
-    const body3 = await res3.json();
-    expect(res3.ok).toBe(true);
     expect(mockFetchOpenSky).toHaveBeenCalledTimes(1);
-    expect(body3.data[0].data.icao24).toBe('abc123');
-  });
-
-  it('returns 429 when ADS-B adapter throws RateLimitError and no cache exists', async () => {
-    const { RateLimitError } = await import('../../types.js');
-
-    mockFetchAdsb.mockRejectedValueOnce(new RateLimitError('Rate limit exceeded'));
-
-    const res = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    const body = await res.json();
-
-    expect(res.status).toBe(429);
-    expect(body.rateLimited).toBe(true);
-    expect(body.error).toBe('Rate limited');
-  });
-
-  it('returns rateLimited flag with stale cache data when rate limited', async () => {
-    const { RateLimitError } = await import('../../types.js');
-
-    // First request populates cache
-    const res1 = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    expect(res1.ok).toBe(true);
-
-    // Manually set the fetchedAt in the past to make cache stale
-    const entry = redisStore.get('flights:adsb');
-    if (entry) {
-      entry.fetchedAt = Date.now() - 261_000; // past ADS-B TTL (260s)
-    }
-
-    // Now cache is stale, adapter will be called but throws RateLimitError
-    mockFetchAdsb.mockRejectedValueOnce(new RateLimitError('Rate limit exceeded'));
-
-    const res2 = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    const body2 = await res2.json();
-
-    expect(res2.ok).toBe(true);
-    expect(body2.rateLimited).toBe(true);
-    expect(body2.data[0].data.icao24).toBe('def456');
-  });
-
-  it('returns 503 when ADS-B source requested but API key not set', async () => {
-    delete process.env.ADSB_EXCHANGE_API_KEY;
-
-    const res = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    const body = await res.json();
-
-    expect(res.status).toBe(503);
-    expect(body.error).toContain('API key not configured');
+    expect(body2.data[0].data.icao24).toBe('abc123');
   });
 
   it('returns 503 when OpenSky source requested but credentials not set', async () => {
@@ -344,12 +260,5 @@ describe('Flight Route Dispatch', () => {
 
     expect(res.status).toBe(503);
     expect(body.error).toContain('credentials not configured');
-  });
-
-  it('ADS-B Exchange API key does not appear in response', async () => {
-    const res = await fetch(`${baseUrl}/api/flights?source=adsb`);
-    const text = await res.text();
-
-    expect(text).not.toContain('test-adsb-key');
   });
 });

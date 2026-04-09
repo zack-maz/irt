@@ -1,6 +1,6 @@
 ---
 status: diagnosed
-trigger: "Investigate why the date range filter is no longer working after the Phase 13 serverless cache migration."
+trigger: 'Investigate why the date range filter is no longer working after the Phase 13 serverless cache migration.'
 created: 2026-03-19T00:00:00Z
 updated: 2026-03-19T00:00:00Z
 ---
@@ -34,7 +34,7 @@ started: After Phase 13 serverless cache migration
 
 - timestamp: 2026-03-19
   checked: Pre-Phase-13 events route (git show 86b6294:server/routes/events.ts)
-  found: The old route had NO query parameter handling (_req unused). BUT it had a critical backfillEvents() call on module load that fetched historical events from GDELT's master file list covering all days since WAR_START.
+  found: The old route had NO query parameter handling (\_req unused). BUT it had a critical backfillEvents() call on module load that fetched historical events from GDELT's master file list covering all days since WAR_START.
   implication: Date filtering was always client-side; the server's job was to accumulate a large pool of historical events via backfill.
 
 - timestamp: 2026-03-19

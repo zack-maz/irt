@@ -7,13 +7,13 @@ tags: [react, zustand, hooks, css-animation, layout, detail-panel]
 # Dependency graph
 requires:
   - phase: 09-layer-controls
-    provides: "Layer toggle state, entity tooltip rendering, uiStore with selectEntity/openDetailPanel"
+    provides: 'Layer toggle state, entity tooltip rendering, uiStore with selectEntity/openDetailPanel'
 provides:
-  - "useSelectedEntity hook for cross-store entity lookup with lost contact tracking"
-  - "DetailValue component with flash-on-change animation"
-  - "CSS flash keyframe and updated panel width (360px)"
-  - "AppShell layout with left-side control stack and right-side detail panel slot"
-  - "BaseMap click handler: entity click opens panel, empty click preserves selection"
+  - 'useSelectedEntity hook for cross-store entity lookup with lost contact tracking'
+  - 'DetailValue component with flash-on-change animation'
+  - 'CSS flash keyframe and updated panel width (360px)'
+  - 'AppShell layout with left-side control stack and right-side detail panel slot'
+  - 'BaseMap click handler: entity click opens panel, empty click preserves selection'
 affects: [10-02-detail-panel-content]
 
 # Tech tracking
@@ -35,16 +35,16 @@ key-files:
     - src/__tests__/BaseMap.test.tsx
 
 key-decisions:
-  - "Empty map click does NOT dismiss detail panel -- panel persists until explicitly closed"
-  - "Removed pinned tooltip (clickState) in favor of detail panel for selected entity display"
-  - "Hover tooltip remains for quick entity identification, detail panel for deep inspection"
-  - "useRef for last-known entity tracking to survive store updates without extra renders"
+  - 'Empty map click does NOT dismiss detail panel -- panel persists until explicitly closed'
+  - 'Removed pinned tooltip (clickState) in favor of detail panel for selected entity display'
+  - 'Hover tooltip remains for quick entity identification, detail panel for deep inspection'
+  - 'useRef for last-known entity tracking to survive store updates without extra renders'
 
 patterns-established:
-  - "Cross-store entity lookup: useSelectedEntity searches flights, ships, events in order"
-  - "Lost contact tracking: ref caches last-known entity + timestamp when entity disappears"
-  - "Flash-on-change: useRef(value) initialized to current value prevents initial flash"
-  - "Left-side control stack: TitleSlot > StatusPanel > CountersSlot > LayerTogglesSlot"
+  - 'Cross-store entity lookup: useSelectedEntity searches flights, ships, events in order'
+  - 'Lost contact tracking: ref caches last-known entity + timestamp when entity disappears'
+  - 'Flash-on-change: useRef(value) initialized to current value prevents initial flash'
+  - 'Left-side control stack: TitleSlot > StatusPanel > CountersSlot > LayerTogglesSlot'
 
 requirements-completed: [CTRL-02]
 
@@ -66,6 +66,7 @@ completed: 2026-03-18
 - **Files modified:** 9
 
 ## Accomplishments
+
 - useSelectedEntity hook searches across flight, ship, and event stores with lost contact tracking via useRef
 - DetailValue component flashes yellow highlight on value change but not on initial render, with optional unit suffix
 - CSS flash keyframe animation and --width-detail-panel updated to 360px
@@ -82,6 +83,7 @@ Each task was committed atomically:
 2. **Task 2: AppShell layout repositioning + BaseMap click handler fix** - `e6b0b1a` (feat)
 
 ## Files Created/Modified
+
 - `src/hooks/useSelectedEntity.ts` - Cross-store entity lookup with lost contact tracking
 - `src/components/detail/DetailValue.tsx` - Reusable value cell with flash-on-change animation
 - `src/styles/app.css` - Flash keyframe animation, panel width 360px
@@ -93,6 +95,7 @@ Each task was committed atomically:
 - `src/__tests__/BaseMap.test.tsx` - 3 new tests: empty click preserves, entity opens, re-click closes
 
 ## Decisions Made
+
 - Empty map click does NOT dismiss detail panel -- panel persists until explicitly closed via Close button, Escape, or re-clicking the same entity
 - Removed clickState and pinned tooltip entirely -- the detail panel replaces pinned tooltip for selected entity display
 - Hover tooltip remains for quick entity identification on mouseover
@@ -103,6 +106,7 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - DetailValue test for flash timeout removal needed `act()` wrapper around `vi.advanceTimersByTime(600)` to trigger React state update -- fixed in test code during GREEN phase.
 
 ## User Setup Required
@@ -110,6 +114,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - All building blocks ready for Plan 02 (detail panel content)
 - useSelectedEntity hook provides entity data for the panel
 - DetailValue component ready for use in flight/ship/event detail sections
@@ -121,5 +126,6 @@ None - no external service configuration required.
 All created files verified present. All commit hashes verified in git log.
 
 ---
-*Phase: 10-detail-panel*
-*Completed: 2026-03-18*
+
+_Phase: 10-detail-panel_
+_Completed: 2026-03-18_

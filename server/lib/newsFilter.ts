@@ -23,34 +23,84 @@ export const NON_AMBIGUOUS_KEYWORDS = new Set([
  */
 export const AMBIGUOUS_KEYWORDS = new Set([
   // Geographic (previously non-ambiguous)
-  'iran', 'israel', 'iraq', 'syria', 'yemen', 'lebanon',
-  'gaza', 'tehran', 'baghdad', 'damascus', 'beirut',
-  'tel aviv', 'jerusalem', 'hormuz', 'persian gulf', 'red sea',
+  'iran',
+  'israel',
+  'iraq',
+  'syria',
+  'yemen',
+  'lebanon',
+  'gaza',
+  'tehran',
+  'baghdad',
+  'damascus',
+  'beirut',
+  'tel aviv',
+  'jerusalem',
+  'hormuz',
+  'persian gulf',
+  'red sea',
   // Diplomatic
-  'sanctions', 'negotiations', 'ceasefire', 'escalation', 'tensions',
-  'iaea', 'diplomacy', 'withdrawal', 'deployment',
+  'sanctions',
+  'negotiations',
+  'ceasefire',
+  'escalation',
+  'tensions',
+  'iaea',
+  'diplomacy',
+  'withdrawal',
+  'deployment',
   // Organizations
-  'irgc', 'hezbollah', 'hamas', 'houthi', 'pentagon',
-  'centcom', 'nato', 'idf', 'mossad',
+  'irgc',
+  'hezbollah',
+  'hamas',
+  'houthi',
+  'pentagon',
+  'centcom',
+  'nato',
+  'idf',
+  'mossad',
   // Military (previously non-ambiguous)
-  'strike', 'troops', 'military', 'combat', 'offensive', 'artillery',
-  'warship', 'navy', 'airforce', 'defense', 'weapon', 'nuclear',
-  'rocket', 'interceptor', 'militia', 'ammunition', 'warplane',
+  'strike',
+  'troops',
+  'military',
+  'combat',
+  'offensive',
+  'artillery',
+  'warship',
+  'navy',
+  'airforce',
+  'defense',
+  'weapon',
+  'nuclear',
+  'rocket',
+  'interceptor',
+  'militia',
+  'ammunition',
+  'warplane',
   'airstrikes',
   // Conflict terms
-  'attack', 'bomb', 'killed', 'raid', 'war',
-  'warfare', 'conflict', 'blockade', 'siege', 'occupation',
-  'refugee', 'humanitarian', 'civilian', 'wounded', 'destroyed',
+  'attack',
+  'bomb',
+  'killed',
+  'raid',
+  'war',
+  'warfare',
+  'conflict',
+  'blockade',
+  'siege',
+  'occupation',
+  'refugee',
+  'humanitarian',
+  'civilian',
+  'wounded',
+  'destroyed',
 ]);
 
 /**
  * Backward-compatible union of all keywords.
  * @deprecated Prefer NON_AMBIGUOUS_KEYWORDS + AMBIGUOUS_KEYWORDS
  */
-export const CONFLICT_KEYWORDS = new Set([
-  ...NON_AMBIGUOUS_KEYWORDS,
-  ...AMBIGUOUS_KEYWORDS,
-]);
+export const CONFLICT_KEYWORDS = new Set([...NON_AMBIGUOUS_KEYWORDS, ...AMBIGUOUS_KEYWORDS]);
 
 /** Pre-compiled word-boundary regex cache */
 const keywordRegexCache = new Map<string, RegExp>();
@@ -72,10 +122,7 @@ function getKeywordRegex(keyword: string): RegExp {
  *
  * @returns Array of matched keywords (empty = not conflict-relevant)
  */
-export function matchesKeywords(article: {
-  title: string;
-  summary?: string;
-}): string[] {
+export function matchesKeywords(article: { title: string; summary?: string }): string[] {
   const text = `${article.title} ${article.summary ?? ''}`.toLowerCase();
 
   // Reject if any exclusion pattern matches

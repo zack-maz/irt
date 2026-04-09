@@ -35,12 +35,24 @@ function getWordAtCursor(
   let end = cursorPos;
 
   // Walk backward to find word start (stop at whitespace or parens)
-  while (start > 0 && query[start - 1] !== ' ' && query[start - 1] !== '\t' && query[start - 1] !== '(' && query[start - 1] !== ')') {
+  while (
+    start > 0 &&
+    query[start - 1] !== ' ' &&
+    query[start - 1] !== '\t' &&
+    query[start - 1] !== '(' &&
+    query[start - 1] !== ')'
+  ) {
     start--;
   }
 
   // Walk forward to find word end
-  while (end < query.length && query[end] !== ' ' && query[end] !== '\t' && query[end] !== '(' && query[end] !== ')') {
+  while (
+    end < query.length &&
+    query[end] !== ' ' &&
+    query[end] !== '\t' &&
+    query[end] !== '(' &&
+    query[end] !== ')'
+  ) {
     end++;
   }
 
@@ -60,13 +72,10 @@ const DEBOUNCE_MS = 100;
  *
  * Uses useMemo with entity arrays as deps so value lists update with data, not per keystroke.
  */
-export function useAutocomplete(
-  query: string,
-  cursorPosition: number,
-): AutocompleteSuggestion[] {
+export function useAutocomplete(query: string, cursorPosition: number): AutocompleteSuggestion[] {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [debouncedCursor, setDebouncedCursor] = useState(cursorPosition);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Debounce query + cursor changes
   useEffect(() => {
@@ -116,12 +125,14 @@ export function useAutocomplete(
       return allValues
         .filter((v) => v.value.toLowerCase().includes(partial))
         .slice(0, 8)
-        .map((v): ValueSuggestion => ({
-          type: 'value',
-          prefix,
-          value: v.value,
-          count: v.count,
-        }));
+        .map(
+          (v): ValueSuggestion => ({
+            type: 'value',
+            prefix,
+            value: v.value,
+            count: v.count,
+          }),
+        );
     }
 
     if (colonIdx === cleanWord.length - 1) {
@@ -131,24 +142,27 @@ export function useAutocomplete(
       if (!tagDef) return [];
 
       const allValues = getTagValues(prefix, entityData);
-      return allValues.slice(0, 8).map((v): ValueSuggestion => ({
-        type: 'value',
-        prefix,
-        value: v.value,
-        count: v.count,
-      }));
+      return allValues.slice(0, 8).map(
+        (v): ValueSuggestion => ({
+          type: 'value',
+          prefix,
+          value: v.value,
+          count: v.count,
+        }),
+      );
     }
 
     // Stage 1: partial prefix match -- suggest matching prefixes
     const partial = cleanWord.toLowerCase();
-    return ALL_PREFIXES
-      .filter((p) => p.startsWith(partial) && p !== partial)
+    return ALL_PREFIXES.filter((p) => p.startsWith(partial) && p !== partial)
       .slice(0, 6)
-      .map((p): PrefixSuggestion => ({
-        type: 'prefix',
-        prefix: p,
-        label: TAG_REGISTRY[p].label,
-        description: TAG_REGISTRY[p].description,
-      }));
+      .map(
+        (p): PrefixSuggestion => ({
+          type: 'prefix',
+          prefix: p,
+          label: TAG_REGISTRY[p].label,
+          description: TAG_REGISTRY[p].description,
+        }),
+      );
   }, [debouncedQuery, debouncedCursor, entityData]);
 }

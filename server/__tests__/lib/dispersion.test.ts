@@ -1,27 +1,18 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import {
-  dispersePosition,
-  disperseEvents,
-  RINGS,
-} from '../../lib/dispersion.js';
+import { dispersePosition, disperseEvents, RINGS } from '../../lib/dispersion.js';
 import type { ConflictEventEntity } from '../../types.js';
 
 /**
  * Helper: compute haversine distance in km between two lat/lng points.
  */
-function haversineKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -92,7 +83,7 @@ describe('dispersePosition', () => {
     }
 
     // All positions should be unique
-    const coords = positions.map(p => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`);
+    const coords = positions.map((p) => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`);
     expect(new Set(coords).size).toBe(6);
   });
 
@@ -126,7 +117,7 @@ describe('dispersePosition', () => {
       expect(dist).toBeCloseTo(9, 0);
     }
 
-    const coords = positions.map(p => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`);
+    const coords = positions.map((p) => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`);
     expect(new Set(coords).size).toBe(18);
   });
 
@@ -152,7 +143,7 @@ describe('dispersePosition', () => {
     const slot1 = dispersePosition(centroidLat, centroidLng, 1); // 60 degrees east of north
 
     // Due north: only lat changes
-    const dLat0 = Math.abs(slot0.lat - centroidLat);
+    const _dLat0 = Math.abs(slot0.lat - centroidLat);
     // 60 degrees: both lat and lng change
     // slot at 90 degrees (due east) would show pure lng change
     // Use slot at index 1 (60 deg for Ring 0 with 6 slots) which has some lng component
@@ -250,14 +241,14 @@ describe('disperseEvents', () => {
     expect(result).toHaveLength(4);
 
     // Tehran events should be near Tehran
-    const tehranResults = result.filter(e => e.id.startsWith('gdelt-t'));
+    const tehranResults = result.filter((e) => e.id.startsWith('gdelt-t'));
     for (const e of tehranResults) {
       const dist = haversineKm(35.6892, 51.389, e.lat, e.lng);
       expect(dist).toBeLessThan(15); // Within ring range
     }
 
     // Baghdad events should be near Baghdad
-    const baghdadResults = result.filter(e => e.id.startsWith('gdelt-b'));
+    const baghdadResults = result.filter((e) => e.id.startsWith('gdelt-b'));
     for (const e of baghdadResults) {
       const dist = haversineKm(33.3152, 44.3661, e.lat, e.lng);
       expect(dist).toBeLessThan(15);
@@ -273,8 +264,7 @@ describe('disperseEvents', () => {
     const result2 = disperseEvents([e2, e1]);
 
     // Regardless of input order, same IDs should end up at same positions
-    const findById = (arr: ConflictEventEntity[], id: string) =>
-      arr.find(e => e.id === id)!;
+    const findById = (arr: ConflictEventEntity[], id: string) => arr.find((e) => e.id === id)!;
 
     expect(findById(result1, 'gdelt-early').lat).toBe(findById(result2, 'gdelt-early').lat);
     expect(findById(result1, 'gdelt-late').lat).toBe(findById(result2, 'gdelt-late').lat);
@@ -302,7 +292,7 @@ describe('disperseEvents', () => {
     expect(result).toHaveLength(6);
 
     // All 6 events should have unique lat/lng coordinates (no stacking)
-    const coordSet = new Set(result.map(e => `${e.lat.toFixed(8)},${e.lng.toFixed(8)}`));
+    const coordSet = new Set(result.map((e) => `${e.lat.toFixed(8)},${e.lng.toFixed(8)}`));
     expect(coordSet.size).toBe(6);
 
     // Verify they are not at the centroid (all dispersed)

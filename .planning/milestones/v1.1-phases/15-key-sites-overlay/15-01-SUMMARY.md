@@ -37,14 +37,14 @@ key-files:
     - src/components/layout/AppShell.tsx
 
 key-decisions:
-  - "SiteEntity separate from MapEntity union (static reference data, different lifecycle)"
-  - "Single fetch on mount via useSiteFetch (no polling -- sites are static infrastructure)"
+  - 'SiteEntity separate from MapEntity union (static reference data, different lifecycle)'
+  - 'Single fetch on mount via useSiteFetch (no polling -- sites are static infrastructure)'
   - "SiteConnectionStatus includes 'idle' state for pre-fetch (unlike polling stores that start as 'loading')"
-  - "Overpass QL union query fetches all 6 site types in one request with fallback URL"
+  - 'Overpass QL union query fetches all 6 site types in one request with fallback URL'
 
 patterns-established:
-  - "Single-fetch hook pattern: useEffect with empty deps, no polling, no visibility tracking"
-  - "Idle connection status: pre-fetch state distinct from loading for static data"
+  - 'Single-fetch hook pattern: useEffect with empty deps, no polling, no visibility tracking'
+  - 'Idle connection status: pre-fetch state distinct from loading for static data'
 
 requirements-completed: [SITE-01]
 
@@ -66,6 +66,7 @@ completed: 2026-03-20
 - **Files modified:** 9
 
 ## Accomplishments
+
 - SiteEntity and SiteType types defined in server/types.ts, re-exported from src/types/entities.ts
 - Overpass API adapter fetches all 6 site types (nuclear, naval, oil, airbase, dam, port) in one union query with primary/fallback URLs
 - /api/sites route with 24h logical cache TTL and 3-day hard Redis TTL, stale-but-servable fallback
@@ -80,6 +81,7 @@ Each task was committed atomically:
 2. **Task 2: siteStore + useSiteFetch hook + AppShell wiring** - `caa02da` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - Added SiteType and SiteEntity types (separate from MapEntity union)
 - `src/types/entities.ts` - Re-exported SiteEntity and SiteType
 - `server/constants.ts` - Added SITES_CACHE_TTL (86,400,000ms = 24h)
@@ -91,6 +93,7 @@ Each task was committed atomically:
 - `src/components/layout/AppShell.tsx` - Wired useSiteFetch() alongside existing polling hooks
 
 ## Decisions Made
+
 - SiteEntity kept separate from MapEntity union -- different lifecycle (static vs live telemetry), no polling, no stale clearing
 - Added 'idle' connection status for siteStore (pre-fetch state, distinct from 'loading')
 - Single fetch on mount with no polling or tab visibility tracking -- sites are static infrastructure data
@@ -101,12 +104,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required. Overpass API is free with no authentication.
 
 ## Next Phase Readiness
+
 - Data pipeline complete: types, adapter, route, cache, store, fetch hook all in place
 - Plan 02 can build rendering (IconLayer), toggles, tooltip, and detail panel on top of this foundation
 - Pre-existing test failures (3 in entityLayers.test.ts for conflict icon sizing) documented in deferred-items.md -- unrelated to Phase 15
@@ -119,5 +125,6 @@ None - no external service configuration required. Overpass API is free with no 
 - 556/559 tests pass (3 pre-existing failures in entityLayers.test.ts)
 
 ---
-*Phase: 15-key-sites-overlay*
-*Completed: 2026-03-20*
+
+_Phase: 15-key-sites-overlay_
+_Completed: 2026-03-20_

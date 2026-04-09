@@ -23,7 +23,7 @@ export function TagChipRow({ onInsertTag }: TagChipRowProps) {
   const recentTags = useSearchStore((s) => s.recentTags);
 
   // Deduplicate recent tags against default chip tag values
-  const defaultTagValues = new Set(DEFAULT_CHIPS.map((c) => c.tag));
+  const defaultTagValues = new Set<string>(DEFAULT_CHIPS.map((c) => c.tag));
   const uniqueRecent = recentTags.filter((t) => !defaultTagValues.has(t));
 
   return (

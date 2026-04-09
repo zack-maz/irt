@@ -20,7 +20,12 @@ affects: [05-entity-rendering, flight-layer, counters, detail-panel]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [recursive setTimeout polling, tab visibility API for pause/resume, Zustand getState() for staleness checks]
+  patterns:
+    [
+      recursive setTimeout polling,
+      tab visibility API for pause/resume,
+      Zustand getState() for staleness checks,
+    ]
 
 key-files:
   created:
@@ -33,15 +38,15 @@ key-files:
     - src/components/layout/AppShell.tsx
 
 key-decisions:
-  - "Recursive setTimeout (not setInterval) for polling -- waits for async completion before scheduling next"
-  - "60s stale threshold based on flight drift: 250m/s aircraft moves ~15km in 60s"
-  - "Zustand getState() for staleness check avoids stale closures in setTimeout callback"
-  - "Polling hook is behavior-only -- no return value, writes directly to Zustand store"
+  - 'Recursive setTimeout (not setInterval) for polling -- waits for async completion before scheduling next'
+  - '60s stale threshold based on flight drift: 250m/s aircraft moves ~15km in 60s'
+  - 'Zustand getState() for staleness check avoids stale closures in setTimeout callback'
+  - 'Polling hook is behavior-only -- no return value, writes directly to Zustand store'
 
 patterns-established:
-  - "Recursive setTimeout polling pattern: fetchFlights().then(schedulePoll) for async-safe intervals"
-  - "Tab visibility pause/resume: clear timeout on hidden, immediate fetch + resume on visible"
-  - "Stale data clearing: automatic cache invalidation when lastFresh exceeds threshold"
+  - 'Recursive setTimeout polling pattern: fetchFlights().then(schedulePoll) for async-safe intervals'
+  - 'Tab visibility pause/resume: clear timeout on hidden, immediate fetch + resume on visible'
+  - 'Stale data clearing: automatic cache invalidation when lastFresh exceeds threshold'
 
 requirements-completed: [DATA-01]
 
@@ -63,6 +68,7 @@ completed: 2026-03-15
 - **Files modified:** 6
 
 ## Accomplishments
+
 - Zustand flight store with FlightEntity array, connection status (connected/stale/error/loading), and metadata (lastFetchAt, lastFresh, flightCount)
 - Polling hook with recursive setTimeout at 5s interval, tab visibility awareness (pause on hidden, immediate fetch on visible), and automatic stale data clearing after 60s
 - Vite dev proxy forwarding /api requests to localhost:3001 for seamless frontend-backend development
@@ -78,6 +84,7 @@ Each task was committed atomically:
 2. **Task 2: Add Vite dev proxy and wire polling into AppShell** - `9db03d4` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/flightStore.ts` - Zustand store with flight array, connection status, and state transition actions
 - `src/hooks/useFlightPolling.ts` - Polling hook with 5s setTimeout, visibility API, staleness clearing
 - `src/__tests__/flightStore.test.ts` - 6 tests for store state transitions (initial, connected, stale, error, loading, clear)
@@ -86,6 +93,7 @@ Each task was committed atomically:
 - `src/components/layout/AppShell.tsx` - Added useFlightPolling() hook invocation
 
 ## Decisions Made
+
 - Recursive setTimeout instead of setInterval -- waits for async fetch completion before scheduling next poll, preventing request pile-up
 - 60s stale threshold based on flight physics: aircraft at 250m/s drift ~15km in 60s, making positions meaningfully outdated for intelligence use
 - Used Zustand getState() inside setTimeout callback for staleness check -- avoids stale closure issue with captured React state
@@ -104,6 +112,7 @@ None.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Flight store populated automatically when both dev servers run (npm run dev + server)
 - useFlightStore available for downstream phases: entity rendering layer, counters, detail panel
 - ConnectionStatus type exported for UI indicators (connected/stale/error/loading)
@@ -117,5 +126,6 @@ None - no external service configuration required.
 - TypeScript compiles with zero errors
 
 ---
-*Phase: 04-flight-data-feed*
-*Completed: 2026-03-15*
+
+_Phase: 04-flight-data-feed_
+_Completed: 2026-03-15_

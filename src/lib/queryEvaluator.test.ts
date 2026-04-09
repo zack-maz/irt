@@ -321,7 +321,9 @@ describe('evaluateTag', () => {
     });
 
     it('matches absolute date', () => {
-      expect(evaluateTag(mockFlight, 'since', '2026-03-22', { ...emptyContext, now: NOW })).toBe(true);
+      expect(evaluateTag(mockFlight, 'since', '2026-03-22', { ...emptyContext, now: NOW })).toBe(
+        true,
+      );
     });
   });
 
@@ -339,6 +341,66 @@ describe('evaluateTag', () => {
     it('returns false for empty attribute', () => {
       const noCallsign = { ...mockFlight, data: { ...mockFlight.data, callsign: '' } };
       expect(evaluateTag(noCallsign, 'has', 'callsign', emptyContext)).toBe(false);
+    });
+  });
+
+  describe('stress:', () => {
+    // Build minimal water facility fixtures at three stress levels.
+    // compositeHealth is a 0-1 normalized score; the evaluator maps it to a 1-10 integer.
+    // score = max(1, min(10, round(compositeHealth * 9) + 1))
+    //   compositeHealth 0.0 → round(0)+1 = 1 (extreme stress, black)
+    //   compositeHealth 0.5 → round(4.5)+1 = 6 (mid — JS rounds .5 up)
+    //   compositeHealth 1.0 → round(9)+1 = 10 (healthy, light blue)
+    const makeWater = (compositeHealth: number) =>
+      ({
+        id: `water-${compositeHealth}`,
+        type: 'water',
+        lat: 32,
+        lng: 52,
+        label: 'Test Facility',
+        facilityType: 'dam',
+        stress: { compositeHealth, bws_score: 0 },
+        // Non-water fields are irrelevant for this evaluator path
+      }) as unknown as Parameters<typeof evaluateTag>[0];
+
+    const ctx: EvaluationContext = { sites: [], events: [], now: NOW };
+    const highStress = makeWater(0.0); // score 1
+    const mediumStress = makeWater(0.5); // score 6
+    const lowStress = makeWater(1.0); // score 10 (healthy)
+
+    it('stress:high matches facilities with score 1-3', () => {
+      expect(evaluateTag(highStress, 'stress', 'high', ctx)).toBe(true);
+      expect(evaluateTag(mediumStress, 'stress', 'high', ctx)).toBe(false);
+      expect(evaluateTag(lowStress, 'stress', 'high', ctx)).toBe(false);
+    });
+
+    it('stress:medium matches facilities with score 4-6', () => {
+      expect(evaluateTag(highStress, 'stress', 'medium', ctx)).toBe(false);
+      expect(evaluateTag(mediumStress, 'stress', 'medium', ctx)).toBe(true);
+      expect(evaluateTag(lowStress, 'stress', 'medium', ctx)).toBe(false);
+    });
+
+    it('stress:low matches facilities with score 7-10 (healthy)', () => {
+      expect(evaluateTag(highStress, 'stress', 'low', ctx)).toBe(false);
+      expect(evaluateTag(mediumStress, 'stress', 'low', ctx)).toBe(false);
+      expect(evaluateTag(lowStress, 'stress', 'low', ctx)).toBe(true);
+    });
+
+    it('stress:N numeric still works (backwards compatibility)', () => {
+      expect(evaluateTag(highStress, 'stress', '1', ctx)).toBe(true);
+      expect(evaluateTag(mediumStress, 'stress', '6', ctx)).toBe(true);
+      expect(evaluateTag(lowStress, 'stress', '10', ctx)).toBe(true);
+      expect(evaluateTag(lowStress, 'stress', '1', ctx)).toBe(false);
+    });
+
+    it('stress: on non-water entity returns false', () => {
+      expect(evaluateTag(mockFlight, 'stress', 'high', ctx)).toBe(false);
+      expect(evaluateTag(mockShip, 'stress', 'medium', ctx)).toBe(false);
+      expect(evaluateTag(mockEvent, 'stress', 'low', ctx)).toBe(false);
+    });
+
+    it('stress: with unknown string value returns false', () => {
+      expect(evaluateTag(mediumStress, 'stress', 'foo', ctx)).toBe(false);
     });
   });
 

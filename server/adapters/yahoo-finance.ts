@@ -1,5 +1,7 @@
 import type { MarketQuote } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'yahoo-finance' });
 
 /** Tickers to fetch from Yahoo Finance v8 chart API */
 export const TICKERS = ['BZ=F', 'CL=F', 'XLE', 'USO', 'XOM'] as const;
@@ -26,10 +28,6 @@ const RANGE_CONFIG: Record<MarketRange, { range: string; interval: string }> = {
   '1mo': { range: '1mo', interval: '30m' },
   ytd: { range: 'ytd', interval: '1d' },
 };
-
-export function isValidRange(value: string): value is MarketRange {
-  return value in RANGE_CONFIG;
-}
 
 /** Shape of the Yahoo Finance v8 chart API response */
 interface YahooChartResponse {
@@ -76,7 +74,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     });
 
     if (!resp.ok) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} HTTP ${resp.status}` });
+      log.warn({ symbol, status: resp.status }, 'HTTP error');
       return null;
     }
 
@@ -84,7 +82,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
 
     const result = json.chart?.result?.[0];
     if (!result) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} no chart result` });
+      log.warn({ symbol }, 'no chart result');
       return null;
     }
 
@@ -92,7 +90,7 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     const quote = indicators?.quote?.[0];
 
     if (!meta || !rawTimestamps || !quote) {
-      log({ level: 'warn', message: `[yahoo] ${symbol} missing meta/timestamps/quote` });
+      log.warn({ symbol }, 'missing meta/timestamps/quote');
       return null;
     }
 
@@ -113,12 +111,13 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
     const lows: number[] = [];
 
     for (let i = 0; i < rawTimestamps.length; i++) {
+      const ts = rawTimestamps[i];
       const c = quote.close?.[i];
       const h = quote.high?.[i];
       const l = quote.low?.[i];
-      // Only include entries where all three values are present
-      if (c != null && h != null && l != null) {
-        timestamps.push(rawTimestamps[i] * 1000);
+      // Only include entries where all four values are present
+      if (ts != null && c != null && h != null && l != null) {
+        timestamps.push(ts * 1000);
         closes.push(c);
         highs.push(h);
         lows.push(l);
@@ -131,17 +130,14 @@ async function fetchTicker(symbol: string, range: MarketRange = '1d'): Promise<M
       price,
       previousClose,
       change: price - previousClose,
-      changePercent:
-        previousClose !== 0
-          ? ((price - previousClose) / previousClose) * 100
-          : 0,
+      changePercent: previousClose !== 0 ? ((price - previousClose) / previousClose) * 100 : 0,
       currency: meta.currency ?? 'USD',
       marketOpen,
       lastTradeTime: meta.regularMarketTime * 1000,
       history: { timestamps, closes, highs, lows },
     };
   } catch (err) {
-    log({ level: 'warn', message: `[yahoo] ${symbol} fetch error: ${(err as Error).message}` });
+    log.warn({ err, symbol }, 'fetch error');
     return null;
   }
 }
@@ -154,10 +150,7 @@ export async function fetchMarkets(range: MarketRange = '1d'): Promise<MarketQuo
   const results = await Promise.allSettled(TICKERS.map((t) => fetchTicker(t, range)));
 
   return results
-    .filter(
-      (r): r is PromiseFulfilledResult<MarketQuote | null> =>
-        r.status === 'fulfilled',
-    )
+    .filter((r): r is PromiseFulfilledResult<MarketQuote | null> => r.status === 'fulfilled')
     .map((r) => r.value)
     .filter((q): q is MarketQuote => q !== null);
 }

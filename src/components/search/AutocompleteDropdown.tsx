@@ -38,7 +38,11 @@ export function AutocompleteDropdown({
     >
       {suggestions.map((suggestion, i) => (
         <button
-          key={suggestion.type === 'prefix' ? suggestion.prefix : `${suggestion.prefix}:${suggestion.value}`}
+          key={
+            suggestion.type === 'prefix'
+              ? suggestion.prefix
+              : `${suggestion.prefix}:${suggestion.value}`
+          }
           className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
             i === selectedIndex ? 'bg-surface' : 'hover:bg-surface'
           }`}
@@ -52,7 +56,9 @@ export function AutocompleteDropdown({
             <>
               <span className="font-medium text-text-primary">{suggestion.prefix}:</span>
               <span className="flex-1 truncate text-text-muted">{suggestion.description}</span>
-              <kbd className="shrink-0 rounded bg-surface px-1 text-[10px] text-text-muted">Tab</kbd>
+              <kbd className="shrink-0 rounded bg-surface px-1 text-[10px] text-text-muted">
+                Tab
+              </kbd>
             </>
           ) : (
             <>

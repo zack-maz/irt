@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 import { FillStyleExtension } from '@deck.gl/extensions';
+import type { FeatureCollection } from 'geojson';
 import { useLayerStore } from '@/stores/layerStore';
 import { ETHNIC_GROUPS, type EthnicGroup } from '@/lib/ethnicGroups';
 import { LEGEND_REGISTRY } from '@/components/map/MapLegend';
@@ -32,14 +33,12 @@ const singleGroupFeatures: SingleGroupFeature[] = allFeatures.filter(
   (f): f is SingleGroupFeature => typeof f.properties.group === 'string',
 );
 
-const overlapFeatures: OverlapFeature[] = allFeatures.filter(
-  (f): f is OverlapFeature => Array.isArray(f.properties.groups),
+const overlapFeatures: OverlapFeature[] = allFeatures.filter((f): f is OverlapFeature =>
+  Array.isArray(f.properties.groups),
 );
 
 /** Unique group IDs that appear in overlap zones */
-const overlapGroupIds: string[] = [
-  ...new Set(overlapFeatures.flatMap((f) => f.properties.groups)),
-];
+const overlapGroupIds: string[] = [...new Set(overlapFeatures.flatMap((f) => f.properties.groups))];
 
 // ---------------------------------------------------------------------------
 // Canvas hatch atlas (created once at module load)
@@ -152,18 +151,25 @@ export function useEthnicLayers(): (GeoJsonLayer | TextLayer)[] {
 
     const layers: (GeoJsonLayer | TextLayer)[] = [];
 
-    // A. Single-group hatched fill layer
+    // A. Single-group hatched fill layer.
+    // deck.gl GeoJsonLayer accepts FeatureCollection objects at runtime; v9 type defs
+    // are stricter than the runtime contract, so we narrow via `unknown` to FeatureCollection.
     layers.push(
       new GeoJsonLayer({
         id: 'ethnic-zones',
-        data: { type: 'FeatureCollection', features: singleGroupFeatures } as unknown as Record<string, unknown>,
+        data: {
+          type: 'FeatureCollection',
+          features: singleGroupFeatures,
+        } as unknown as FeatureCollection,
         pickable: true,
         stroked: true,
         filled: true,
-        getFillColor: ((feature: SingleGroupFeature) => {
-          const group = feature.properties?.group as EthnicGroup | undefined;
+        getFillColor: (feature: unknown): [number, number, number, number] => {
+          const group = (feature as SingleGroupFeature).properties?.group as
+            | EthnicGroup
+            | undefined;
           return group && ETHNIC_GROUPS[group] ? ETHNIC_GROUPS[group].rgba : [128, 128, 128, 40];
-        }) as any,
+        },
         getLineColor: [255, 255, 255, 30] as [number, number, number, number],
         getLineWidth: 0.5,
         lineWidthUnits: 'pixels' as const,
@@ -194,7 +200,11 @@ export function useEthnicLayers(): (GeoJsonLayer | TextLayer)[] {
       layers.push(
         new GeoJsonLayer({
           id: `ethnic-overlap-${group}`,
-          data: { type: 'FeatureCollection', features: groupOverlapFeatures } as unknown as Record<string, unknown>,
+          // deck.gl GeoJsonLayer accepts FeatureCollection objects at runtime; cast via unknown.
+          data: {
+            type: 'FeatureCollection',
+            features: groupOverlapFeatures,
+          } as unknown as FeatureCollection,
           pickable: true,
           stroked: false,
           filled: true,

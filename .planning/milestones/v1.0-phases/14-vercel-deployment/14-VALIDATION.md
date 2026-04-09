@@ -15,13 +15,13 @@ created: 2026-03-19
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 with jsdom (frontend) + node (server) |
-| **Config file** | vite.config.ts (test section) |
-| **Quick run command** | `npx vitest run server/` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                              |
+| ---------------------- | -------------------------------------------------- |
+| **Framework**          | Vitest 4.1.0 with jsdom (frontend) + node (server) |
+| **Config file**        | vite.config.ts (test section)                      |
+| **Quick run command**  | `npx vitest run server/`                           |
+| **Full suite command** | `npx vitest run`                                   |
+| **Estimated runtime**  | ~15 seconds                                        |
 
 ---
 
@@ -36,15 +36,15 @@ created: 2026-03-19
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| DEPLOY-01 | 01 | 1 | api/index.ts exports createApp() as default | unit | `npx vitest run server/__tests__/vercel-entry.test.ts -x` | ❌ W0 | ⬜ pending |
-| DEPLOY-02 | 01 | 1 | Rate limiting returns 429 on excess requests | unit | `npx vitest run server/__tests__/rateLimit.test.ts -x` | ❌ W0 | ⬜ pending |
-| DEPLOY-03 | 01 | 1 | Routes return 503 (not crash) when API keys missing | unit | `npx vitest run server/__tests__/server.test.ts -x` | ✅ partial | ⬜ pending |
-| DEPLOY-04 | 01 | 1 | CORS wildcard works in production config | unit | `npx vitest run server/__tests__/server.test.ts -x` | ✅ partial | ⬜ pending |
-| DEPLOY-05 | 02 | 2 | All existing API routes still work | integration | `npx vitest run server/` | ✅ | ⬜ pending |
+| Task ID   | Plan | Wave | Requirement                                         | Test Type   | Automated Command                                         | File Exists | Status     |
+| --------- | ---- | ---- | --------------------------------------------------- | ----------- | --------------------------------------------------------- | ----------- | ---------- |
+| DEPLOY-01 | 01   | 1    | api/index.ts exports createApp() as default         | unit        | `npx vitest run server/__tests__/vercel-entry.test.ts -x` | ❌ W0       | ⬜ pending |
+| DEPLOY-02 | 01   | 1    | Rate limiting returns 429 on excess requests        | unit        | `npx vitest run server/__tests__/rateLimit.test.ts -x`    | ❌ W0       | ⬜ pending |
+| DEPLOY-03 | 01   | 1    | Routes return 503 (not crash) when API keys missing | unit        | `npx vitest run server/__tests__/server.test.ts -x`       | ✅ partial  | ⬜ pending |
+| DEPLOY-04 | 01   | 1    | CORS wildcard works in production config            | unit        | `npx vitest run server/__tests__/server.test.ts -x`       | ✅ partial  | ⬜ pending |
+| DEPLOY-05 | 02   | 2    | All existing API routes still work                  | integration | `npx vitest run server/`                                  | ✅          | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -58,11 +58,11 @@ created: 2026-03-19
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Vercel deployment succeeds | DEPLOY-01 | Requires Vercel platform | Run `vercel --prod`, verify 200 response at deployed URL |
-| CDN serves frontend assets | DEPLOY-05 | Requires deployed environment | Check Network tab for Vercel CDN headers on static assets |
-| Environment variables configured | Config | Requires Vercel dashboard | Verify all env vars set in Vercel project settings |
+| Behavior                         | Requirement | Why Manual                    | Test Instructions                                         |
+| -------------------------------- | ----------- | ----------------------------- | --------------------------------------------------------- |
+| Vercel deployment succeeds       | DEPLOY-01   | Requires Vercel platform      | Run `vercel --prod`, verify 200 response at deployed URL  |
+| CDN serves frontend assets       | DEPLOY-05   | Requires deployed environment | Check Network tab for Vercel CDN headers on static assets |
+| Environment variables configured | Config      | Requires Vercel dashboard     | Verify all env vars set in Vercel project settings        |
 
 ---
 

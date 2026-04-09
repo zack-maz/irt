@@ -1,4 +1,14 @@
-import type { MapEntity, SiteEntity, FlightEntity, ShipEntity, ConflictEventEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  SiteEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+} from '@/types/entities';
+import type { WaterFacility } from '../../server/types';
+
+/** Broader entity union supported across search/query/result helpers. */
+export type SearchableEntity = MapEntity | SiteEntity | WaterFacility;
 
 export interface SearchResult<T> {
   entity: T;
@@ -12,8 +22,9 @@ export interface SearchResult<T> {
  * Ship: label, mmsi, shipName
  * Event: label, type, actor1, actor2, locationName
  * Site: label, siteType, operator
+ * Water: label, facilityType, operator
  */
-export function getSearchableFields(entity: MapEntity | SiteEntity): string[] {
+export function getSearchableFields(entity: SearchableEntity): string[] {
   const fields: string[] = [];
 
   if (entity.type === 'flight') {
@@ -32,7 +43,7 @@ export function getSearchableFields(entity: MapEntity | SiteEntity): string[] {
     if (e.siteType) fields.push(e.siteType.toLowerCase());
     if (e.operator) fields.push(e.operator.toLowerCase());
   } else if (entity.type === 'water') {
-    const e = entity as unknown as { label: string; facilityType: string; operator?: string };
+    const e = entity as WaterFacility;
     if (e.label) fields.push(e.label.toLowerCase());
     if (e.facilityType) fields.push(e.facilityType.toLowerCase());
     if (e.operator) fields.push(e.operator.toLowerCase());
@@ -50,7 +61,7 @@ export function getSearchableFields(entity: MapEntity | SiteEntity): string[] {
 }
 
 /** Field name mapping for display */
-function getFieldNames(entity: MapEntity | SiteEntity): string[] {
+function getFieldNames(entity: SearchableEntity): string[] {
   if (entity.type === 'flight') {
     return ['callsign', 'icao24', 'originCountry'];
   } else if (entity.type === 'ship') {
@@ -68,7 +79,7 @@ function getFieldNames(entity: MapEntity | SiteEntity): string[] {
  * Search entities by substring match (case-insensitive).
  * Returns empty array for empty/whitespace query.
  */
-export function searchEntities<T extends MapEntity | SiteEntity>(
+export function searchEntities<T extends SearchableEntity>(
   query: string,
   entities: T[],
 ): SearchResult<T>[] {
@@ -83,11 +94,12 @@ export function searchEntities<T extends MapEntity | SiteEntity>(
     const fieldNames = getFieldNames(entity);
 
     for (let i = 0; i < fields.length; i++) {
-      if (fields[i].includes(lowerQuery)) {
+      const field = fields[i];
+      if (field !== undefined && field.includes(lowerQuery)) {
         results.push({
           entity,
           matchField: fieldNames[i] ?? 'unknown',
-          matchValue: fields[i],
+          matchValue: field,
         });
         break; // Only one match per entity
       }

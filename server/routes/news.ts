@@ -1,24 +1,33 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'news' });
 import { fetchGdeltArticles } from '../adapters/gdelt-doc.js';
 import { fetchAllRssFeeds } from '../adapters/rss.js';
 import { filterAndScoreArticles } from '../lib/newsFilter.js';
 import { deduplicateAndCluster } from '../lib/newsClustering.js';
-import {
-  NEWS_CACHE_TTL,
-  NEWS_REDIS_TTL_SEC,
-  NEWS_SLIDING_WINDOW_MS,
-} from '../constants.js';
+import { NEWS_CACHE_TTL, NEWS_REDIS_TTL_SEC, NEWS_SLIDING_WINDOW_MS } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
+import { AppError } from '../middleware/errorHandler.js';
 import type { NewsArticle, NewsCluster } from '../types.js';
+
+/** Zod schema for /api/news query params */
+const newsQuerySchema = z.object({
+  refresh: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
+});
 
 /** Redis key for the merged news feed */
 const NEWS_FEED_KEY = 'news:feed';
 
 export const newsRouter = Router();
 
-newsRouter.get('/', async (req, res) => {
-  const forceRefresh = req.query.refresh === 'true';
+newsRouter.get('/', validateQuery(newsQuerySchema), async (_req, res) => {
+  const { refresh: forceRefresh } = res.locals.validatedQuery as z.infer<typeof newsQuerySchema>;
 
   // 1. Check cache first (skip on force refresh)
   const cached = forceRefresh
@@ -33,7 +42,7 @@ newsRouter.get('/', async (req, res) => {
     const [gdeltArticles, rssArticles] = await Promise.all([
       fetchGdeltArticles(),
       fetchAllRssFeeds().catch((err) => {
-        log({ level: 'warn', message: `[news] RSS fetch failed (non-fatal): ${(err as Error).message}` });
+        log.warn({ err }, 'RSS fetch failed (non-fatal)');
         return [] as NewsArticle[];
       }),
     ]);
@@ -70,18 +79,18 @@ newsRouter.get('/', async (req, res) => {
 
     const gdeltCount = gdeltArticles.length;
     const rssCount = rssArticles.length;
-    log({ level: 'info', message: `[news] fetched: ${gdeltCount} GDELT + ${rssCount} RSS, ${clusters.length} clusters after filter/dedup` });
+    log.info({ gdeltCount, rssCount, clusterCount: clusters.length }, 'fetched and clustered news');
 
     // 9. Return response
     res.json({ data: clusters, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[news] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     // Fall back to stale cache if available
     if (cached) {
       res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
     } else {
-      throw err; // Express 5 catches and forwards to errorHandler
+      throw new AppError(502, 'UPSTREAM_FAIL', `news fetch failed: ${(err as Error).message}`);
     }
   }
 });

@@ -54,14 +54,14 @@ started: Since config validation was implemented
 ## Resolution
 
 root_cause: |
-  TWO calls to loadConfig() happen eagerly at startup, both in server/index.ts:
+TWO calls to loadConfig() happen eagerly at startup, both in server/index.ts:
 
-  1. Line 40: `const config = loadConfig();` in the isMainModule block -- validates all env vars before the app even starts.
-  2. Line 11: `const config = loadConfig();` inside createApp() -- validates all env vars when building the Express app.
+1. Line 40: `const config = loadConfig();` in the isMainModule block -- validates all env vars before the app even starts.
+2. Line 11: `const config = loadConfig();` inside createApp() -- validates all env vars when building the Express app.
 
-  loadConfig() (server/config.ts:29-45) constructs the full AppConfig object and calls required() for ALL credentials (OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, AISSTREAM_API_KEY, ACLED_EMAIL, ACLED_PASSWORD). The required() helper throws immediately if any env var is missing.
+loadConfig() (server/config.ts:29-45) constructs the full AppConfig object and calls required() for ALL credentials (OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, AISSTREAM_API_KEY, ACLED_EMAIL, ACLED_PASSWORD). The required() helper throws immediately if any env var is missing.
 
-  The adapters themselves are correctly lazy -- they import the Proxy-based `config` export and only access properties inside async functions. The bug is entirely in server/index.ts calling loadConfig() directly instead of using the lazy Proxy or deferring validation.
+The adapters themselves are correctly lazy -- they import the Proxy-based `config` export and only access properties inside async functions. The bug is entirely in server/index.ts calling loadConfig() directly instead of using the lazy Proxy or deferring validation.
 
 fix: (not applied -- diagnosis only)
 verification: (not applied -- diagnosis only)

@@ -15,15 +15,46 @@ import type { WaterFacility } from '../../server/types';
 
 function makeFlight(id: string, country: string, unidentified = false): FlightEntity {
   return {
-    id, type: 'flight', lat: 32, lng: 51, timestamp: Date.now(), label: id,
-    data: { icao24: id, callsign: id, originCountry: country, velocity: 250, heading: 45, altitude: 10000, onGround: false, verticalRate: 0, unidentified },
+    id,
+    type: 'flight',
+    lat: 32,
+    lng: 51,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      icao24: id,
+      callsign: id,
+      originCountry: country,
+      velocity: 250,
+      heading: 45,
+      altitude: 10000,
+      onGround: false,
+      verticalRate: 0,
+      unidentified,
+    },
   };
 }
 
 function makeEvent(id: string, type: ConflictEventType, fatalities = 0): ConflictEventEntity {
   return {
-    id, type, lat: 32, lng: 51, timestamp: Date.now(), label: id,
-    data: { eventType: '', subEventType: '', fatalities, actor1: '', actor2: '', notes: '', source: '', goldsteinScale: 0, locationName: '', cameoCode: '' },
+    id,
+    type,
+    lat: 32,
+    lng: 51,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      eventType: '',
+      subEventType: '',
+      fatalities,
+      actor1: '',
+      actor2: '',
+      notes: '',
+      source: '',
+      goldsteinScale: 0,
+      locationName: '',
+      cameoCode: '',
+    },
   };
 }
 
@@ -72,10 +103,7 @@ describe('CountersSlot', () => {
 
   it('shows plain counts for events (no ratios)', () => {
     useEventStore.setState({
-      events: [
-        makeEvent('a1', 'airstrike'),
-        makeEvent('a2', 'airstrike'),
-      ],
+      events: [makeEvent('a1', 'airstrike'), makeEvent('a2', 'airstrike')],
       eventCount: 2,
     });
     render(<CountersSlot />);
@@ -87,11 +115,7 @@ describe('CountersSlot', () => {
 
   it('flight counters show simple counts', () => {
     useFlightStore.setState({
-      flights: [
-        makeFlight('f1', 'Iran'),
-        makeFlight('f2', 'Iran'),
-        makeFlight('f3', 'Qatar'),
-      ],
+      flights: [makeFlight('f1', 'Iran'), makeFlight('f2', 'Iran'), makeFlight('f3', 'Qatar')],
       flightCount: 3,
     });
     render(<CountersSlot />);
@@ -118,9 +142,7 @@ describe('CountersSlot', () => {
     render(<CountersSlot />);
 
     const buttons = screen.getAllByTestId('counter-row-button');
-    const airstrikesBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Airstrikes'),
-    );
+    const airstrikesBtn = buttons.find((btn) => btn.textContent?.includes('Airstrikes'));
     expect(airstrikesBtn).toBeDefined();
     fireEvent.click(airstrikesBtn!);
 
@@ -140,12 +162,8 @@ describe('CountersSlot', () => {
     render(<CountersSlot />);
 
     const buttons = screen.getAllByTestId('counter-row-button');
-    const flightsBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Flights'),
-    );
-    const airstrikesBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Airstrikes'),
-    );
+    const flightsBtn = buttons.find((btn) => btn.textContent?.includes('Flights'));
+    const airstrikesBtn = buttons.find((btn) => btn.textContent?.includes('Airstrikes'));
 
     // Expand flights
     fireEvent.click(flightsBtn!);
@@ -162,9 +180,7 @@ describe('CountersSlot', () => {
     render(<CountersSlot />);
 
     const buttons = screen.getAllByTestId('counter-row-button');
-    const airstrikesBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Airstrikes'),
-    );
+    const airstrikesBtn = buttons.find((btn) => btn.textContent?.includes('Airstrikes'));
     expect(airstrikesBtn).toBeDefined();
     expect(airstrikesBtn!.className).toContain('opacity-40');
     expect(airstrikesBtn!.className).toContain('pointer-events-none');
@@ -175,18 +191,13 @@ describe('CountersSlot', () => {
 
   it('expanded dropdown with entities shows entity labels', () => {
     useEventStore.setState({
-      events: [
-        makeEvent('e1', 'airstrike'),
-        makeEvent('e2', 'airstrike'),
-      ],
+      events: [makeEvent('e1', 'airstrike'), makeEvent('e2', 'airstrike')],
       eventCount: 2,
     });
     render(<CountersSlot />);
 
     const buttons = screen.getAllByTestId('counter-row-button');
-    const airstrikesBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Airstrikes'),
-    );
+    const airstrikesBtn = buttons.find((btn) => btn.textContent?.includes('Airstrikes'));
     fireEvent.click(airstrikesBtn!);
 
     // Entity labels use EVENT_TYPE_LABELS, so both show "Airstrike"
@@ -214,9 +225,7 @@ describe('CountersSlot', () => {
     render(<CountersSlot />);
 
     const buttons = screen.getAllByTestId('counter-row-button');
-    const airstrikesBtn = buttons.find(
-      (btn) => btn.textContent?.includes('Airstrikes'),
-    );
+    const airstrikesBtn = buttons.find((btn) => btn.textContent?.includes('Airstrikes'));
     fireEvent.click(airstrikesBtn!);
 
     const entityItem = screen.getByTestId('entity-list-item');

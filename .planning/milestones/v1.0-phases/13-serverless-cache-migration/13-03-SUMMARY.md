@@ -19,7 +19,11 @@ affects: [14-vercel-deployment]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: ["Redis accumulator with merge-by-ID and WAR_START pruning", "Stale cache fallback with pruning on error"]
+  patterns:
+    [
+      'Redis accumulator with merge-by-ID and WAR_START pruning',
+      'Stale cache fallback with pruning on error',
+    ]
 
 key-files:
   created:
@@ -32,13 +36,13 @@ key-files:
     - server/cache/entityCache.ts
 
 key-decisions:
-  - "Events route merges fresh GDELT batch with cached events by ID (upsert), then prunes pre-war entries"
-  - "REDIS_TTL_SEC = 9000 (2.5 hours) for events -- 10x of 15min logical TTL"
-  - "Error fallback prunes stale cache data before serving (filters out pre-WAR_START events)"
+  - 'Events route merges fresh GDELT batch with cached events by ID (upsert), then prunes pre-war entries'
+  - 'REDIS_TTL_SEC = 9000 (2.5 hours) for events -- 10x of 15min logical TTL'
+  - 'Error fallback prunes stale cache data before serving (filters out pre-WAR_START events)'
 
 patterns-established:
-  - "Redis accumulator pattern: seed Map from cache, overwrite with fresh, prune, store back"
-  - "All three data routes (flights, ships, events) now use Redis cacheGet/cacheSet"
+  - 'Redis accumulator pattern: seed Map from cache, overwrite with fresh, prune, store back'
+  - 'All three data routes (flights, ships, events) now use Redis cacheGet/cacheSet'
 
 requirements-completed: []
 
@@ -114,7 +118,7 @@ None -- Upstash credentials (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN) a
 ## Self-Check: PASSED
 
 - server/routes/events.ts: FOUND
-- server/__tests__/routes/events.test.ts: FOUND
+- server/**tests**/routes/events.test.ts: FOUND
 - server/cache/entityCache.ts: CONFIRMED DELETED
 - .env.example: FOUND (contains UPSTASH_REDIS_REST_URL)
 - Commit 8b14f2d: FOUND
@@ -122,5 +126,6 @@ None -- Upstash credentials (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN) a
 - Commit d50fc3e: FOUND
 
 ---
-*Phase: 13-serverless-cache-migration*
-*Completed: 2026-03-20*
+
+_Phase: 13-serverless-cache-migration_
+_Completed: 2026-03-20_

@@ -1,4 +1,4 @@
-import type { MapEntity } from '../../server/types';
+import type { MapEntity, ConflictEventEntity } from '../../server/types';
 import type { FilterState } from '@/stores/filterStore';
 import { isConflictEventType } from '@/types/ui';
 import { haversineKm } from '@/lib/geo';
@@ -12,17 +12,12 @@ export const FEET_PER_METER = 3.28084;
  * Non-applicable filters include (not exclude) the entity.
  * Unknown/null values pass through range filters.
  */
-export function entityPassesFilters(
-  entity: MapEntity,
-  filters: FilterState,
-): boolean {
+export function entityPassesFilters(entity: MapEntity, filters: FilterState): boolean {
   // ── Flight country filter ──────────────────────────────────────────
   if (filters.flightCountries.length > 0) {
     if (entity.type === 'flight') {
       const origin = entity.data.originCountry.toLowerCase();
-      const match = filters.flightCountries.some(
-        (c) => c.toLowerCase() === origin,
-      );
+      const match = filters.flightCountries.some((c) => c.toLowerCase() === origin);
       if (!match) return false;
     }
     // Ships and events: always pass flight country filter
@@ -31,8 +26,9 @@ export function entityPassesFilters(
   // ── Event country filter ───────────────────────────────────────────
   if (filters.eventCountries.length > 0) {
     if (isConflictEventType(entity.type)) {
-      const a1 = entity.data.actor1.toLowerCase();
-      const a2 = entity.data.actor2.toLowerCase();
+      const ev = entity as ConflictEventEntity;
+      const a1 = ev.data.actor1.toLowerCase();
+      const a2 = ev.data.actor2.toLowerCase();
       const match = filters.eventCountries.some((c) => {
         const cl = c.toLowerCase();
         return a1.includes(cl) || a2.includes(cl);
@@ -98,7 +94,8 @@ export function entityPassesFilters(
   // ── Flight ICAO filter ──
   if (filters.flightIcao) {
     if (entity.type === 'flight') {
-      if (!entity.data.icao24.toLowerCase().includes(filters.flightIcao.toLowerCase())) return false;
+      if (!entity.data.icao24.toLowerCase().includes(filters.flightIcao.toLowerCase()))
+        return false;
     }
   }
 
@@ -112,21 +109,24 @@ export function entityPassesFilters(
   // ── Ship name filter ──
   if (filters.shipNameFilter) {
     if (entity.type === 'ship') {
-      if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase())) return false;
+      if (!entity.data.shipName.toLowerCase().includes(filters.shipNameFilter.toLowerCase()))
+        return false;
     }
   }
 
   // ── CAMEO code filter ──
   if (filters.cameoCode) {
     if (isConflictEventType(entity.type)) {
-      if (entity.data.cameoCode !== filters.cameoCode) return false;
+      const ev = entity as ConflictEventEntity;
+      if (ev.data.cameoCode !== filters.cameoCode) return false;
     }
   }
 
   // ── Mentions range filter ──
   if (filters.mentionsMin !== null || filters.mentionsMax !== null) {
     if (isConflictEventType(entity.type)) {
-      const mentions = entity.data.numMentions ?? 0;
+      const ev = entity as ConflictEventEntity;
+      const mentions = ev.data.numMentions ?? 0;
       if (filters.mentionsMin !== null && mentions < filters.mentionsMin) return false;
       if (filters.mentionsMax !== null && mentions > filters.mentionsMax) return false;
     }

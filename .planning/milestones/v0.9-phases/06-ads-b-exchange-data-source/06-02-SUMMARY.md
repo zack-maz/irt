@@ -7,21 +7,21 @@ tags: [zustand, react, polling, flight-data, localStorage]
 # Dependency graph
 requires:
   - phase: 04-flight-data-feed
-    provides: "flightStore, useFlightPolling, CacheResponse type"
+    provides: 'flightStore, useFlightPolling, CacheResponse type'
 provides:
-  - "Source-aware flightStore with activeSource, rateLimited status, localStorage persistence"
-  - "Source-aware useFlightPolling with source-specific URL and polling interval"
+  - 'Source-aware flightStore with activeSource, rateLimited status, localStorage persistence'
+  - 'Source-aware useFlightPolling with source-specific URL and polling interval'
   - "FlightSource type ('opensky' | 'adsb') exported from types/ui.ts"
-  - "OPENSKY_POLL_INTERVAL (5s) and ADSB_POLL_INTERVAL (260s) constants"
+  - 'OPENSKY_POLL_INTERVAL (5s) and ADSB_POLL_INTERVAL (260s) constants'
 affects: [06-ads-b-exchange-data-source, ui-components]
 
 # Tech tracking
 tech-stack:
   added: []
   patterns:
-    - "localStorage persistence with try/catch for SSR safety"
-    - "activeSource in useEffect deps to restart polling on source change"
-    - "rateLimited flag in CacheResponse for distinct rate-limit status"
+    - 'localStorage persistence with try/catch for SSR safety'
+    - 'activeSource in useEffect deps to restart polling on source change'
+    - 'rateLimited flag in CacheResponse for distinct rate-limit status'
 
 key-files:
   created: []
@@ -33,14 +33,14 @@ key-files:
     - src/__tests__/useFlightPolling.test.ts
 
 key-decisions:
-  - "FlightSource type in ui.ts to avoid circular imports with server types"
-  - "260s ADS-B polling interval based on RapidAPI free-tier rate limits"
-  - "setFlightData accepts extended CacheResponse with optional rateLimited flag"
-  - "POLL_INTERVAL renamed to OPENSKY_POLL_INTERVAL for clarity"
+  - 'FlightSource type in ui.ts to avoid circular imports with server types'
+  - '260s ADS-B polling interval based on RapidAPI free-tier rate limits'
+  - 'setFlightData accepts extended CacheResponse with optional rateLimited flag'
+  - 'POLL_INTERVAL renamed to OPENSKY_POLL_INTERVAL for clarity'
 
 patterns-established:
-  - "localStorage persistence with loadPersistedSource/persistSource helpers and try/catch guards"
-  - "Source-specific polling: activeSource in useEffect dependency array triggers cleanup + restart"
+  - 'localStorage persistence with loadPersistedSource/persistSource helpers and try/catch guards'
+  - 'Source-specific polling: activeSource in useEffect dependency array triggers cleanup + restart'
 
 requirements-completed: [DATA-04]
 
@@ -62,6 +62,7 @@ completed: 2026-03-16
 - **Files modified:** 5
 
 ## Accomplishments
+
 - flightStore extended with activeSource field, localStorage persistence, setActiveSource flush behavior, and rate_limited connection status
 - useFlightPolling refactored to include source query param in fetch URL, source-specific polling intervals, and automatic restart on source change
 - Full TDD coverage: 15 store tests + 9 polling tests, all passing (24 total)
@@ -81,6 +82,7 @@ Each task was committed atomically:
 _Note: TDD tasks have RED (test) and GREEN (feat) commits._
 
 ## Files Created/Modified
+
 - `src/stores/flightStore.ts` - Added activeSource, setActiveSource, rate_limited status, localStorage persistence
 - `src/hooks/useFlightPolling.ts` - Source-specific URL/interval, activeSource dependency, rateLimited pass-through
 - `src/types/ui.ts` - Added FlightSource type export
@@ -88,6 +90,7 @@ _Note: TDD tasks have RED (test) and GREEN (feat) commits._
 - `src/__tests__/useFlightPolling.test.ts` - 9 tests including source-specific URL, interval, restart, and rate limit propagation
 
 ## Decisions Made
+
 - FlightSource type placed in `ui.ts` rather than `entities.ts` to avoid circular imports with server types
 - POLL_INTERVAL renamed to OPENSKY_POLL_INTERVAL for explicit clarity when coexisting with ADSB_POLL_INTERVAL
 - 260s ADS-B polling interval chosen per research recommendation for free-tier sustainability
@@ -98,6 +101,7 @@ _Note: TDD tasks have RED (test) and GREEN (feat) commits._
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - jsdom environment does not provide localStorage.clear() natively; resolved with vi.stubGlobal localStorage mock in tests
 - Pre-existing server test failures in `server/__tests__/routes/flights.test.ts` (Plan 01 TDD RED tests awaiting implementation) are unrelated to this plan's changes
 
@@ -106,6 +110,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - flightStore and useFlightPolling ready for SourceSelector UI component (Plan 03)
 - activeSource selector available for UI to read/write current source
 - connectionStatus includes 'rate_limited' for distinct badge rendering in SourceSelector
@@ -116,5 +121,6 @@ None - no external service configuration required.
 All files verified present. All commit hashes verified in git log.
 
 ---
-*Phase: 06-ads-b-exchange-data-source*
-*Completed: 2026-03-16*
+
+_Phase: 06-ads-b-exchange-data-source_
+_Completed: 2026-03-16_

@@ -72,6 +72,7 @@ export function icaoToCountry(hex: string): string {
   while (lo <= hi) {
     const mid = (lo + hi) >>> 1;
     const range = ICAO_RANGES[mid];
+    if (!range) break;
 
     if (addr < range.start) {
       hi = mid - 1;

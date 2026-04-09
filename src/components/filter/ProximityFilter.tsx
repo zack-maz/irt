@@ -32,11 +32,7 @@ export function ProximityFilter({
             Set pin
           </button>
         )}
-        {isSettingPin && (
-          <span className="text-[10px] text-accent-yellow">
-            Click map...
-          </span>
-        )}
+        {isSettingPin && <span className="text-[10px] text-accent-yellow">Click map...</span>}
         {pin && (
           <>
             <span className="font-mono text-[10px] text-text-secondary">
@@ -57,9 +53,7 @@ export function ProximityFilter({
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-text-muted">Radius</span>
-          <span className="font-mono text-[10px] text-text-secondary">
-            {radiusKm} km
-          </span>
+          <span className="font-mono text-[10px] text-text-secondary">{radiusKm} km</span>
         </div>
         <input
           type="range"

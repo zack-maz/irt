@@ -61,7 +61,8 @@ export function NotificationCard({ notification }: NotificationCardProps) {
       {/* Row 3: source count */}
       {notification.sourceCount > 1 && (
         <div className="mt-1 text-[10px] text-accent-blue">
-          {notification.sourceCount} {notification.sourceCount === 1 ? 'source' : 'sources'} reporting
+          {notification.sourceCount} {notification.sourceCount === 1 ? 'source' : 'sources'}{' '}
+          reporting
         </div>
       )}
     </button>

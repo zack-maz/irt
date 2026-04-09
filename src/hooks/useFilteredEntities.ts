@@ -49,25 +49,33 @@ export function useFilteredEntities(): {
   );
 
   const flights = useMemo(
-    () => rawFlights.filter((e) => entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1])),
+    () =>
+      rawFlights.filter((e) =>
+        entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]),
+      ),
     [rawFlights, filters],
   );
 
   const ships = useMemo(
-    () => rawShips.filter((e) => entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1])),
+    () =>
+      rawShips.filter((e) =>
+        entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]),
+      ),
     [rawShips, filters],
   );
 
-  const events = useMemo(
-    () => {
-      const filtered = rawEvents.filter((e) => entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]));
-      return disperseEvents(filtered);
-    },
-    [rawEvents, filters],
-  );
+  const events = useMemo(() => {
+    const filtered = rawEvents.filter((e) =>
+      entityPassesFilters(e, filters as Parameters<typeof entityPassesFilters>[1]),
+    );
+    return disperseEvents(filtered);
+  }, [rawEvents, filters]);
 
   const clusters = useMemo(
-    () => rawClusters.filter((c) => c.lastUpdated >= filters.dateStart && c.lastUpdated <= filters.dateEnd),
+    () =>
+      rawClusters.filter(
+        (c) => c.lastUpdated >= filters.dateStart && c.lastUpdated <= filters.dateEnd,
+      ),
     [rawClusters, filters.dateStart, filters.dateEnd],
   );
 

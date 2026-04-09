@@ -18,9 +18,9 @@ affects: [04-data-layer, uat]
 tech-stack:
   added: []
   patterns:
-    - "Lazy credential validation -- server boots with just PORT, credentials checked at request time"
-    - "Node --env-file-if-exists flag for optional .env loading"
-    - "AISStream WebSocket guarded by env var presence check"
+    - 'Lazy credential validation -- server boots with just PORT, credentials checked at request time'
+    - 'Node --env-file-if-exists flag for optional .env loading'
+    - 'AISStream WebSocket guarded by env var presence check'
 
 key-files:
   created: []
@@ -29,13 +29,13 @@ key-files:
     - package.json
 
 key-decisions:
-  - "Inline process.env reads instead of getServerConfig() helper -- simpler, avoids unnecessary abstraction"
-  - "Node --env-file-if-exists=.env flag (Node 22.14+) instead of dotenv dependency or shell conditionals"
-  - "Guard connectAISStream() with env var check rather than try/catch -- fail-fast is wrong pattern for optional services"
+  - 'Inline process.env reads instead of getServerConfig() helper -- simpler, avoids unnecessary abstraction'
+  - 'Node --env-file-if-exists=.env flag (Node 22.14+) instead of dotenv dependency or shell conditionals'
+  - 'Guard connectAISStream() with env var check rather than try/catch -- fail-fast is wrong pattern for optional services'
 
 patterns-established:
-  - "Lazy credential pattern: server startup reads only PORT/CORS_ORIGIN, API credentials deferred to adapter call time"
-  - "Optional service pattern: check env var presence before connecting optional services like WebSocket"
+  - 'Lazy credential pattern: server startup reads only PORT/CORS_ORIGIN, API credentials deferred to adapter call time'
+  - 'Optional service pattern: check env var presence before connecting optional services like WebSocket'
 
 requirements-completed: [INFRA-01]
 
@@ -57,6 +57,7 @@ completed: 2026-03-15
 - **Files modified:** 2
 
 ## Accomplishments
+
 - Server boots and serves /health without any API credentials configured
 - Dev scripts no longer crash when .env file is missing
 - AISStream WebSocket connection only attempted when AISSTREAM_API_KEY is set
@@ -70,10 +71,12 @@ Each task was committed atomically:
 2. **Task 2: Make dev scripts tolerate missing .env file** - `c0f4193` (fix)
 
 ## Files Created/Modified
+
 - `server/index.ts` - Removed eager loadConfig() calls, read PORT/CORS_ORIGIN from process.env directly, guarded AISStream behind env var check
 - `package.json` - Changed --env-file .env to --env-file-if-exists=.env in dev and dev:server scripts
 
 ## Decisions Made
+
 - Used inline process.env reads (PORT, CORS_ORIGIN) instead of creating a getServerConfig() helper -- the plan considered and rejected the helper as unnecessary abstraction
 - Used Node's --env-file-if-exists=.env flag (available since Node 22.14) instead of adding dotenv as a dependency or using shell conditionals
 - Guarded connectAISStream() with a simple env var presence check rather than wrapping in try/catch -- explicit opt-in is clearer than catching credential errors
@@ -83,12 +86,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Phase 3 (API Proxy) is now fully complete with all gap closure fixes applied
 - Server boots gracefully, all endpoints functional, UAT tests unblocked
 - Ready for Phase 4 (Data Layer) implementation
@@ -98,5 +104,6 @@ None - no external service configuration required.
 All files exist, all commits verified.
 
 ---
-*Phase: 03-api-proxy*
-*Completed: 2026-03-15*
+
+_Phase: 03-api-proxy_
+_Completed: 2026-03-15_

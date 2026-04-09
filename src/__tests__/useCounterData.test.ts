@@ -9,29 +9,100 @@ import { useCounterData } from '@/components/counters/useCounterData';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 import type { ConflictEventType } from '@/types/ui';
 
-function makeFlight(id: string, country: string, unidentified = false, onGround = false, lat = 32, lng = 51): FlightEntity {
+function makeFlight(
+  id: string,
+  country: string,
+  unidentified = false,
+  onGround = false,
+  lat = 32,
+  lng = 51,
+): FlightEntity {
   return {
-    id, type: 'flight', lat, lng, timestamp: Date.now(), label: id,
-    data: { icao24: id, callsign: unidentified ? '' : id, originCountry: country, velocity: 250, heading: 45, altitude: 10000, onGround, verticalRate: 0, unidentified },
+    id,
+    type: 'flight',
+    lat,
+    lng,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      icao24: id,
+      callsign: unidentified ? '' : id,
+      originCountry: country,
+      velocity: 250,
+      heading: 45,
+      altitude: 10000,
+      onGround,
+      verticalRate: 0,
+      unidentified,
+    },
   };
 }
 
 function makeShip(id: string, name: string, speed = 10, lat = 26, lng = 56): ShipEntity {
   return {
-    id, type: 'ship', lat, lng, timestamp: Date.now(), label: name,
-    data: { mmsi: parseInt(id.replace(/\D/g, '') || '0'), shipName: name, speedOverGround: speed, courseOverGround: 180, trueHeading: 180 },
+    id,
+    type: 'ship',
+    lat,
+    lng,
+    timestamp: Date.now(),
+    label: name,
+    data: {
+      mmsi: parseInt(id.replace(/\D/g, '') || '0'),
+      shipName: name,
+      speedOverGround: speed,
+      courseOverGround: 180,
+      trueHeading: 180,
+    },
   };
 }
 
-function makeEvent(id: string, type: ConflictEventType, fatalities = 0, lat = 32, lng = 51, goldsteinScale = -5): ConflictEventEntity {
+function makeEvent(
+  id: string,
+  type: ConflictEventType,
+  fatalities = 0,
+  lat = 32,
+  lng = 51,
+  goldsteinScale = -5,
+): ConflictEventEntity {
   return {
-    id, type, lat, lng, timestamp: Date.now(), label: id,
-    data: { eventType: '', subEventType: '', fatalities, actor1: '', actor2: '', notes: '', source: '', goldsteinScale, locationName: '', cameoCode: '' },
+    id,
+    type,
+    lat,
+    lng,
+    timestamp: Date.now(),
+    label: id,
+    data: {
+      eventType: '',
+      subEventType: '',
+      fatalities,
+      actor1: '',
+      actor2: '',
+      notes: '',
+      source: '',
+      goldsteinScale,
+      locationName: '',
+      cameoCode: '',
+    },
   };
 }
 
-function makeSite(id: string, siteType: SiteEntity['siteType'], label: string, lat = 32, lng = 51): SiteEntity {
-  return { id, type: 'site', siteType, lat, lng, label, operator: '', osmId: parseInt(id.replace(/\D/g, '') || '0') };
+function makeSite(
+  id: string,
+  siteType: SiteEntity['siteType'],
+  label: string,
+  lat = 32,
+  lng = 51,
+): SiteEntity {
+  return {
+    id,
+    type: 'site',
+    siteType,
+    lat,
+    lng,
+    label,
+    operator: '',
+    osmId: parseInt(id.replace(/\D/g, '') || '0'),
+  };
 }
 
 describe('useCounterData', () => {
@@ -66,11 +137,7 @@ describe('useCounterData', () => {
 
   it('counts all Iranian flights', () => {
     useFlightStore.setState({
-      flights: [
-        makeFlight('f1', 'Iran'),
-        makeFlight('f2', 'Iran'),
-        makeFlight('f3', 'Qatar'),
-      ],
+      flights: [makeFlight('f1', 'Iran'), makeFlight('f2', 'Iran'), makeFlight('f3', 'Qatar')],
       flightCount: 3,
     });
     const { result } = renderHook(() => useCounterData());
@@ -111,10 +178,7 @@ describe('useCounterData', () => {
 
   it('flight counters respect smart filters', () => {
     useFlightStore.setState({
-      flights: [
-        makeFlight('f1', 'Iran'),
-        makeFlight('f2', 'Qatar'),
-      ],
+      flights: [makeFlight('f1', 'Iran'), makeFlight('f2', 'Qatar')],
       flightCount: 2,
     });
     // Country filter narrows visible flights
@@ -254,9 +318,9 @@ describe('useCounterData', () => {
     // Create multiple attacks near site-2 (33, 52) and one near site-1 (32, 51)
     useEventStore.setState({
       events: [
-        makeEvent('e1', 'airstrike', 0, 33.001, 52.001),      // near site-2 only
-        makeEvent('e2', 'ground_combat', 0, 33.002, 52.002),   // near site-2 only
-        makeEvent('e3', 'airstrike', 0, 32.001, 51.001),       // near site-1 only
+        makeEvent('e1', 'airstrike', 0, 33.001, 52.001), // near site-2 only
+        makeEvent('e2', 'ground_combat', 0, 33.002, 52.002), // near site-2 only
+        makeEvent('e3', 'airstrike', 0, 32.001, 51.001), // near site-1 only
       ],
       eventCount: 3,
     });

@@ -65,7 +65,13 @@ function makeDefaults(): FilterState {
   };
 }
 
-function makeFlight(overrides: Partial<FlightEntity['data']> & { lat?: number; lng?: number; timestamp?: number } = {}): FlightEntity {
+function makeFlight(
+  overrides: Partial<FlightEntity['data']> & {
+    lat?: number;
+    lng?: number;
+    timestamp?: number;
+  } = {},
+): FlightEntity {
   return {
     id: 'f1',
     type: 'flight',
@@ -88,7 +94,9 @@ function makeFlight(overrides: Partial<FlightEntity['data']> & { lat?: number; l
   };
 }
 
-function makeShip(overrides: Partial<ShipEntity['data']> & { lat?: number; lng?: number; timestamp?: number } = {}): ShipEntity {
+function makeShip(
+  overrides: Partial<ShipEntity['data']> & { lat?: number; lng?: number; timestamp?: number } = {},
+): ShipEntity {
   return {
     id: 's1',
     type: 'ship',
@@ -107,7 +115,14 @@ function makeShip(overrides: Partial<ShipEntity['data']> & { lat?: number; lng?:
   };
 }
 
-function makeEvent(overrides: Partial<ConflictEventEntity['data']> & { lat?: number; lng?: number; timestamp?: number; type?: ConflictEventEntity['type'] } = {}): ConflictEventEntity {
+function makeEvent(
+  overrides: Partial<ConflictEventEntity['data']> & {
+    lat?: number;
+    lng?: number;
+    timestamp?: number;
+    type?: ConflictEventEntity['type'];
+  } = {},
+): ConflictEventEntity {
   const { lat, lng, timestamp, type: eventType, ...dataOverrides } = overrides;
   return {
     id: 'e1',
@@ -191,7 +206,9 @@ describe('entityPassesFilters', () => {
 
     it('event with neither actor matching fails', () => {
       const filters = { ...makeDefaults(), eventCountries: ['Syria'] };
-      expect(entityPassesFilters(makeEvent({ actor1: 'IRAN', actor2: 'IRAQ' }), filters)).toBe(false);
+      expect(entityPassesFilters(makeEvent({ actor1: 'IRAN', actor2: 'IRAQ' }), filters)).toBe(
+        false,
+      );
     });
 
     it('flight always passes event country filter', () => {
@@ -223,12 +240,16 @@ describe('entityPassesFilters', () => {
 
     it('airborne flight with null velocity passes (unknown = include)', () => {
       const filters = { ...makeDefaults(), flightSpeedMin: 200, flightSpeedMax: 400 };
-      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: false }), filters)).toBe(true);
+      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: false }), filters)).toBe(
+        true,
+      );
     });
 
     it('grounded flight with null velocity treated as 0 (fails speed min)', () => {
       const filters = { ...makeDefaults(), flightSpeedMin: 10, flightSpeedMax: null };
-      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: true }), filters)).toBe(false);
+      expect(entityPassesFilters(makeFlight({ velocity: null, onGround: true }), filters)).toBe(
+        false,
+      );
     });
 
     it('grounded flight with velocity 0 fails speed min', () => {
@@ -259,7 +280,7 @@ describe('entityPassesFilters', () => {
     });
   });
 
-describe('altitude filter', () => {
+  describe('altitude filter', () => {
     it('flight within altitude range passes (altitude in meters, filter in feet)', () => {
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
       expect(entityPassesFilters(makeFlight({ altitude: 5000 }), filters)).toBe(true);
@@ -277,12 +298,16 @@ describe('altitude filter', () => {
 
     it('airborne flight with null altitude passes (unknown = include)', () => {
       const filters = { ...makeDefaults(), altitudeMin: 10000, altitudeMax: 40000 };
-      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: false }), filters)).toBe(true);
+      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: false }), filters)).toBe(
+        true,
+      );
     });
 
     it('grounded flight with null altitude treated as 0 (fails altitude min)', () => {
       const filters = { ...makeDefaults(), altitudeMin: 500, altitudeMax: null };
-      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: true }), filters)).toBe(false);
+      expect(entityPassesFilters(makeFlight({ altitude: null, onGround: true }), filters)).toBe(
+        false,
+      );
     });
 
     it('grounded flight with altitude 0 fails altitude min', () => {
@@ -303,23 +328,39 @@ describe('altitude filter', () => {
 
   describe('proximity filter', () => {
     it('entity within radius passes', () => {
-      const filters = { ...makeDefaults(), proximityPin: { lat: 35, lng: 51 }, proximityRadiusKm: 100 };
+      const filters = {
+        ...makeDefaults(),
+        proximityPin: { lat: 35, lng: 51 },
+        proximityRadiusKm: 100,
+      };
       expect(entityPassesFilters(makeFlight({ lat: 35.5, lng: 51.5 }), filters)).toBe(true);
     });
 
     it('entity outside radius fails', () => {
-      const filters = { ...makeDefaults(), proximityPin: { lat: 35, lng: 51 }, proximityRadiusKm: 100 };
+      const filters = {
+        ...makeDefaults(),
+        proximityPin: { lat: 35, lng: 51 },
+        proximityRadiusKm: 100,
+      };
       expect(entityPassesFilters(makeFlight({ lat: 40, lng: 60 }), filters)).toBe(false);
     });
 
     it('applies to ships', () => {
-      const filters = { ...makeDefaults(), proximityPin: { lat: 26, lng: 56 }, proximityRadiusKm: 50 };
+      const filters = {
+        ...makeDefaults(),
+        proximityPin: { lat: 26, lng: 56 },
+        proximityRadiusKm: 50,
+      };
       expect(entityPassesFilters(makeShip({ lat: 26.1, lng: 56.1 }), filters)).toBe(true);
       expect(entityPassesFilters(makeShip({ lat: 30, lng: 60 }), filters)).toBe(false);
     });
 
     it('applies to events', () => {
-      const filters = { ...makeDefaults(), proximityPin: { lat: 33, lng: 44 }, proximityRadiusKm: 50 };
+      const filters = {
+        ...makeDefaults(),
+        proximityPin: { lat: 33, lng: 44 },
+        proximityRadiusKm: 50,
+      };
       expect(entityPassesFilters(makeEvent({ lat: 33.1, lng: 44.1 }), filters)).toBe(true);
       expect(entityPassesFilters(makeEvent({ lat: 40, lng: 50 }), filters)).toBe(false);
     });
@@ -377,7 +418,12 @@ describe('altitude filter', () => {
         altitudeMin: 10000,
         altitudeMax: 40000,
       };
-      expect(entityPassesFilters(makeFlight({ originCountry: 'Iran', velocity: 150, altitude: 5000 }), filters)).toBe(true);
+      expect(
+        entityPassesFilters(
+          makeFlight({ originCountry: 'Iran', velocity: 150, altitude: 5000 }),
+          filters,
+        ),
+      ).toBe(true);
     });
 
     it('entity failing any one applicable filter is excluded', () => {
@@ -387,7 +433,9 @@ describe('altitude filter', () => {
         flightSpeedMin: 200,
         flightSpeedMax: 400,
       };
-      expect(entityPassesFilters(makeFlight({ originCountry: 'Turkey', velocity: 150 }), filters)).toBe(false);
+      expect(
+        entityPassesFilters(makeFlight({ originCountry: 'Turkey', velocity: 150 }), filters),
+      ).toBe(false);
     });
 
     it('flight fails when speed passes but altitude fails', () => {
@@ -398,7 +446,9 @@ describe('altitude filter', () => {
         altitudeMin: 10000,
         altitudeMax: 40000,
       };
-      expect(entityPassesFilters(makeFlight({ velocity: 150, altitude: 2000 }), filters)).toBe(false);
+      expect(entityPassesFilters(makeFlight({ velocity: 150, altitude: 2000 }), filters)).toBe(
+        false,
+      );
     });
 
     it('ships pass through flight-scoped filters', () => {

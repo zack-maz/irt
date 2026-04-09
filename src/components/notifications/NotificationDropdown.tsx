@@ -46,9 +46,7 @@ export function NotificationDropdown() {
 
       {/* Body */}
       {notifications.length === 0 ? (
-        <div className="px-3 py-8 text-center text-xs text-text-muted">
-          No recent notifications
-        </div>
+        <div className="px-3 py-8 text-center text-xs text-text-muted">No recent notifications</div>
       ) : (
         <div>
           {TIME_GROUP_ORDER.map((group) => {

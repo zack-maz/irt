@@ -7,27 +7,27 @@ tags: [zustand, polling, acled, ships, events, deck.gl]
 # Dependency graph
 requires:
   - phase: 04-flight-data-feed
-    provides: "Polling hook pattern (recursive setTimeout, tab visibility, stale threshold)"
+    provides: 'Polling hook pattern (recursive setTimeout, tab visibility, stale threshold)'
   - phase: 05-entity-rendering
-    provides: "useEntityLayers hook with static ship/drone/missile layers"
+    provides: 'useEntityLayers hook with static ship/drone/missile layers'
   - phase: 03-api-proxy
-    provides: "ACLED adapter, /api/events endpoint, CacheResponse type"
+    provides: 'ACLED adapter, /api/events endpoint, CacheResponse type'
 provides:
-  - "shipStore Zustand store with connection status and stale clearing"
-  - "eventStore Zustand store for conflict events (no stale clearing)"
-  - "useShipPolling hook (30s interval, 120s stale threshold)"
-  - "useEventPolling hook (300s interval, no stale clearing)"
-  - "Dynamic entity layers wired to real store data"
-  - "ACLED multi-country query (16 Greater Middle East countries)"
+  - 'shipStore Zustand store with connection status and stale clearing'
+  - 'eventStore Zustand store for conflict events (no stale clearing)'
+  - 'useShipPolling hook (30s interval, 120s stale threshold)'
+  - 'useEventPolling hook (300s interval, no stale clearing)'
+  - 'Dynamic entity layers wired to real store data'
+  - 'ACLED multi-country query (16 Greater Middle East countries)'
 affects: [08-02, entity-rendering, map-layers, data-feeds]
 
 # Tech tracking
 tech-stack:
   added: []
   patterns:
-    - "Ship/event stores follow flightStore pattern (curried create, ConnectionStatus)"
-    - "Polling hooks follow useFlightPolling pattern (recursive setTimeout, tab visibility)"
-    - "Event type filtering via useMemo for drone/missile layer separation"
+    - 'Ship/event stores follow flightStore pattern (curried create, ConnectionStatus)'
+    - 'Polling hooks follow useFlightPolling pattern (recursive setTimeout, tab visibility)'
+    - 'Event type filtering via useMemo for drone/missile layer separation'
 
 key-files:
   created:
@@ -46,15 +46,15 @@ key-files:
     - src/__tests__/entityLayers.test.ts
 
 key-decisions:
-  - "120s stale threshold for ships (slower than flights, positions drift ~1km at 15 knots)"
-  - "No stale clearing for events (historical data never goes stale)"
-  - "Separate useMemo per entity layer (ships, drones, missiles) with individual dependencies"
-  - "ACLED expanded to 16 pipe-separated countries covering Greater Middle East"
+  - '120s stale threshold for ships (slower than flights, positions drift ~1km at 15 knots)'
+  - 'No stale clearing for events (historical data never goes stale)'
+  - 'Separate useMemo per entity layer (ships, drones, missiles) with individual dependencies'
+  - 'ACLED expanded to 16 pipe-separated countries covering Greater Middle East'
 
 patterns-established:
-  - "Ship/event store pattern: simplified flightStore without activeSource or localStorage"
-  - "Polling hook pattern: empty dependency array for non-source-specific hooks"
-  - "Event type filtering: useMemo filter by type for drone/missile separation"
+  - 'Ship/event store pattern: simplified flightStore without activeSource or localStorage'
+  - 'Polling hook pattern: empty dependency array for non-source-specific hooks'
+  - 'Event type filtering: useMemo filter by type for drone/missile separation'
 
 requirements-completed: [DATA-02, DATA-03]
 
@@ -76,6 +76,7 @@ completed: 2026-03-17
 - **Files modified:** 12
 
 ## Accomplishments
+
 - Created shipStore and eventStore Zustand stores with connection status tracking
 - Built useShipPolling (30s interval, 120s stale threshold) and useEventPolling (300s, no stale clearing) hooks
 - Wired real store data into entity layers (ship, drone, missile) replacing empty stub arrays
@@ -92,6 +93,7 @@ Each task was committed atomically:
 2. **Task 2: Wire entity layers to real store data** - `82ab9d0` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/shipStore.ts` - Zustand store for ship data with stale clearing
 - `src/stores/eventStore.ts` - Zustand store for conflict events (no stale clearing)
 - `src/hooks/useShipPolling.ts` - 30s recursive setTimeout polling with tab visibility
@@ -106,6 +108,7 @@ Each task was committed atomically:
 - `src/__tests__/entityLayers.test.ts` - Updated entity layer data flow tests
 
 ## Decisions Made
+
 - 120s stale threshold for ships (slower-moving than aircraft, positions drift ~1km at 15 knots)
 - No stale clearing for conflict events (historical data from ACLED never goes stale)
 - Separate useMemo per entity layer with individual dependency arrays for efficient re-rendering
@@ -116,6 +119,7 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - ACLED test used `decodeURIComponent` which does not decode `+` to space (URLSearchParams encoding). Fixed by adding `.replace(/\+/g, ' ')` before assertions.
 - Ship polling stale threshold test used exactly 120s (4 cycles of 30s) but the check is `> 120_000` (strictly greater). Fixed by adding a 5th poll cycle to push past the threshold.
 
@@ -124,10 +128,12 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Ship and event data plumbing complete, ready for Plan 02 (AppShell wiring)
 - Polling hooks need to be wired into AppShell (like useFlightPolling)
 - Store data flows through entity layers automatically
 
 ---
-*Phase: 08-ship-conflict-data-feeds*
-*Completed: 2026-03-17*
+
+_Phase: 08-ship-conflict-data-feeds_
+_Completed: 2026-03-17_

@@ -74,7 +74,10 @@ describe('useWaterLayers', () => {
 
   it('returns empty arrays when water layer is inactive', async () => {
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = { riverLayers: [], facilityLayers: [] };
+    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = {
+      riverLayers: [],
+      facilityLayers: [],
+    };
     function TestComponent() {
       result = useWaterLayers();
       return null;
@@ -92,7 +95,10 @@ describe('useWaterLayers', () => {
     });
 
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = { riverLayers: [], facilityLayers: [] };
+    let result: { riverLayers: unknown[]; facilityLayers: unknown[] } = {
+      riverLayers: [],
+      facilityLayers: [],
+    };
     function TestComponent() {
       result = useWaterLayers();
       return null;
@@ -111,7 +117,10 @@ describe('useWaterLayers', () => {
     });
 
     const { useWaterLayers } = await import('@/hooks/useWaterLayers');
-    let result: { riverLayers: { id: string }[]; facilityLayers: { id: string }[] } = { riverLayers: [], facilityLayers: [] };
+    let result: { riverLayers: { id: string }[]; facilityLayers: { id: string }[] } = {
+      riverLayers: [],
+      facilityLayers: [],
+    };
     function TestComponent() {
       result = useWaterLayers() as typeof result;
       return null;

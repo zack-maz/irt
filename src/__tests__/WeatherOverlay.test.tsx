@@ -38,7 +38,11 @@ describe('useWeatherLayers', () => {
 
 describe('WeatherTooltip', () => {
   const point: WeatherGridPoint = {
-    lat: 32, lng: 50, temperature: 25, windSpeed: 15, windDirection: 180,
+    lat: 32,
+    lng: 50,
+    temperature: 25,
+    windSpeed: 15,
+    windDirection: 180,
   };
 
   it('renders temperature in both C and F', () => {

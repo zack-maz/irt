@@ -1,6 +1,9 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'water' });
 import { fetchWaterFacilities } from '../adapters/overpass-water.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
 import {
@@ -8,9 +11,20 @@ import {
   WATER_REDIS_TTL_SEC,
   WATER_PRECIP_CACHE_TTL,
   WATER_PRECIP_REDIS_TTL_SEC,
-} from '../constants.js';
+} from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
+import { sendValidated } from '../middleware/validateResponse.js';
+import { waterResponseSchema } from '../schemas/cacheResponse.js';
 import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
+
+/** Zod schema for /api/water and /api/water/precip query params */
+const waterQuerySchema = z.object({
+  refresh: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
+});
 
 /** Redis key for cached water facilities */
 const FACILITIES_KEY = 'water:facilities';
@@ -30,28 +44,40 @@ export const waterRouter = Router();
  * The Vercel function timeout (60s maxDuration) provides the hard cap in production;
  * in local dev, the 90s per-query Overpass timeout handles it.
  */
-waterRouter.get('/', async (req, res) => {
-  log({ level: 'info', message: '[water] GET /api/water hit' });
+waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
+  log.info('GET /api/water hit');
   const isCron = req.headers['user-agent']?.includes('vercel-cron');
-  const forceRefresh = req.query.refresh === 'true' && (isCron || process.env.NODE_ENV !== 'production');
+  const { refresh } = res.locals.validatedQuery as z.infer<typeof waterQuerySchema>;
+  const forceRefresh = refresh && (isCron || process.env.NODE_ENV !== 'production');
   const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
-  log({ level: 'info', message: `[water] cache result: ${cached ? `${cached.data.length} facilities, stale=${cached.stale}` : 'miss'}` });
+  log.info(
+    { cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale },
+    'cache result',
+  );
 
   if (cached && !cached.stale && !forceRefresh) {
-    return res.json(cached);
+    return sendValidated(res, waterResponseSchema, cached);
   }
 
   try {
     const facilities = await fetchWaterFacilities();
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
-    res.json({ data: facilities, stale: false, lastFresh: Date.now() });
+    sendValidated(res, waterResponseSchema, {
+      data: facilities,
+      stale: false,
+      lastFresh: Date.now(),
+    });
   } catch (err) {
-    log({ level: 'error', message: `[water] Overpass error: ${(err as Error).message}` });
+    log.error({ err }, 'Overpass error');
     if (cached) {
-      res.json({ data: cached.data, stale: true, lastFresh: cached.lastFresh });
+      sendValidated(res, waterResponseSchema, {
+        data: cached.data,
+        stale: true,
+        lastFresh: cached.lastFresh,
+      });
     } else {
-      log({ level: 'warn', message: '[water] Overpass failed, returning empty' });
-      res.json({ data: [], stale: true, lastFresh: 0 });
+      log.warn('Overpass failed, returning empty');
+      sendValidated(res, waterResponseSchema, { data: [], stale: true, lastFresh: 0 });
     }
   }
 });
@@ -61,8 +87,8 @@ waterRouter.get('/', async (req, res) => {
  * Returns 30-day precipitation data for cached water facilities.
  * Cache-first with 6h logical TTL.
  */
-waterRouter.get('/precip', async (req, res) => {
-  const forceRefresh = req.query.refresh === 'true';
+waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) => {
+  const { refresh: forceRefresh } = res.locals.validatedQuery as z.infer<typeof waterQuerySchema>;
   const cachedPrecip = await cacheGetSafe<PrecipitationData[]>(PRECIP_KEY, WATER_PRECIP_CACHE_TTL);
 
   if (cachedPrecip && !cachedPrecip.stale && !forceRefresh) {
@@ -81,7 +107,7 @@ waterRouter.get('/precip', async (req, res) => {
     }
 
     // Extract coordinates and fetch precipitation
-    const locations = facilities.map(f => ({ lat: f.lat, lng: f.lng }));
+    const locations = facilities.map((f) => ({ lat: f.lat, lng: f.lng }));
     const precipData = await fetchPrecipitation(locations);
 
     // Only cache non-empty results — empty means all batches failed
@@ -90,7 +116,7 @@ waterRouter.get('/precip', async (req, res) => {
     }
     res.json({ data: precipData, stale: false, lastFresh: Date.now() });
   } catch (err) {
-    log({ level: 'error', message: `[water/precip] Error: ${(err as Error).message}` });
+    log.error({ err }, 'precipitation fetch error');
     if (cachedPrecip) {
       res.json({ data: cachedPrecip.data, stale: true, lastFresh: cachedPrecip.lastFresh });
     } else {

@@ -72,7 +72,7 @@ export function useDraggable(options: DraggableOptions): DraggableReturn {
   const { storageKey, defaultPosition, bounds } = options;
 
   const [position, setPosition] = useState<Position>(() =>
-    loadPosition(storageKey, defaultPosition)
+    loadPosition(storageKey, defaultPosition),
   );
   const [isDragging, setIsDragging] = useState(false);
 
@@ -89,41 +89,50 @@ export function useDraggable(options: DraggableOptions): DraggableReturn {
     };
   }, [bounds]);
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    dragStartRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
-    setIsDragging(true);
-  }, [position]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      dragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        posX: position.x,
+        posY: position.y,
+      };
+      setIsDragging(true);
+    },
+    [position],
+  );
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragStartRef.current) return;
-    const dx = e.clientX - dragStartRef.current.x;
-    const dy = e.clientY - dragStartRef.current.y;
-    const raw = {
-      x: dragStartRef.current.posX + dx,
-      y: dragStartRef.current.posY + dy,
-    };
-    const clamped = clampPosition(raw, getEffectiveBounds());
-    setPosition(clamped);
-  }, [getEffectiveBounds]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStartRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const raw = {
+        x: dragStartRef.current.posX + dx,
+        y: dragStartRef.current.posY + dy,
+      };
+      const clamped = clampPosition(raw, getEffectiveBounds());
+      setPosition(clamped);
+    },
+    [getEffectiveBounds],
+  );
 
-  const onPointerUp = useCallback((e: React.PointerEvent) => {
-    if (!dragStartRef.current) return;
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    dragStartRef.current = null;
-    setIsDragging(false);
-    // Persist after drag ends
-    setPosition((current) => {
-      savePosition(storageKey, current);
-      return current;
-    });
-  }, [storageKey]);
+  const onPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStartRef.current) return;
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      dragStartRef.current = null;
+      setIsDragging(false);
+      // Persist after drag ends
+      setPosition((current) => {
+        savePosition(storageKey, current);
+        return current;
+      });
+    },
+    [storageKey],
+  );
 
   const resetPosition = useCallback(() => {
     setPosition(defaultPosition);
@@ -147,7 +156,10 @@ export function useDraggable(options: DraggableOptions): DraggableReturn {
       onPointerDown,
       onPointerMove,
       onPointerUp,
-      style: { touchAction: 'none' as const, cursor: isDragging ? 'grabbing' as const : 'grab' as const },
+      style: {
+        touchAction: 'none' as const,
+        cursor: isDragging ? ('grabbing' as const) : ('grab' as const),
+      },
     },
     resetPosition,
   };

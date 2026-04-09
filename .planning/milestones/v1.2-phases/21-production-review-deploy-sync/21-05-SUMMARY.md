@@ -7,7 +7,7 @@ tags: [smoke-test, cron-health, vercel-deploy, readme, changelog, production]
 # Dependency graph
 requires:
   - phase: 21
-    provides: "All server hardening (Plans 01-04): helmet, caching, rate limits, logging, Redis degradation, code polish"
+    provides: 'All server hardening (Plans 01-04): helmet, caching, rate limits, logging, Redis degradation, code polish'
 provides:
   - Production deployment live at https://irt-monitoring.vercel.app
   - Smoke test script validating 9 API endpoints
@@ -31,13 +31,13 @@ key-files:
     - CHANGELOG.md
 
 key-decisions:
-  - "Cron schedule set to daily (0 0 * * *) for Vercel Hobby plan (only one daily invocation allowed)"
-  - "Smoke test checks /api/sources for shape {sources: object} rather than {data: array}"
-  - "CDN cache header check relaxed to accept Cache-Control OR CDN-Cache-Control (Vercel edge variation)"
+  - 'Cron schedule set to daily (0 0 * * *) for Vercel Hobby plan (only one daily invocation allowed)'
+  - 'Smoke test checks /api/sources for shape {sources: object} rather than {data: array}'
+  - 'CDN cache header check relaxed to accept Cache-Control OR CDN-Cache-Control (Vercel edge variation)'
 
 patterns-established:
-  - "scripts/smoke-test.ts as production endpoint validation runner"
-  - "server/routes/cron-health.ts as Vercel cron-triggered health monitor"
+  - 'scripts/smoke-test.ts as production endpoint validation runner'
+  - 'server/routes/cron-health.ts as Vercel cron-triggered health monitor'
 
 requirements-completed: []
 
@@ -58,6 +58,7 @@ completed: 2026-03-26
 - **Files modified:** 4 (server/index.ts, vercel.json, README.md, CHANGELOG.md)
 
 ## Accomplishments
+
 - Created `scripts/smoke-test.ts`: CLI smoke test validating 9 production endpoints (/api/flights, /api/ships, /api/events, /api/news, /api/markets, /api/weather, /api/sites, /api/sources, /health) with status code, JSON shape, and cache header checks
 - Created `server/routes/cron-health.ts`: Vercel cron-triggered health endpoint that checks all data source freshness and logs structured warnings for stale sources
 - Wired cron health route in server/index.ts and added cron schedule + rewrite rule in vercel.json
@@ -74,6 +75,7 @@ Each task was committed atomically:
 2. **Task 2: Deploy to production and verify** - No local file changes (deployment is a remote operation)
 
 ## Files Created/Modified
+
 - `scripts/smoke-test.ts` - CLI smoke test for 9 production endpoints with PASS/FAIL output
 - `server/routes/cron-health.ts` - Cron-triggered health check with structured logging
 - `server/index.ts` - Wired cronHealthRouter on `/api/cron/health`
@@ -82,6 +84,7 @@ Each task was committed atomically:
 - `CHANGELOG.md` - Added v1.2 section with Phase 15-21 features
 
 ## Decisions Made
+
 - **Daily cron schedule**: Vercel Hobby plan only supports one daily cron invocation, so schedule set to `0 0 * * *` (midnight UTC) instead of every 6 hours
 - **Smoke test sources shape**: `/api/sources` returns `{sources: object}` not `{data: array}`, so shape check adjusted accordingly
 - **Cache header flexibility**: CDN cache headers checked for either `Cache-Control` or `CDN-Cache-Control` to accommodate Vercel edge behavior
@@ -91,12 +94,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - production deployment is live and fully operational.
 
 ## Final State
+
 - Production URL: https://irt-monitoring.vercel.app
 - Smoke tests: 9/9 passing
 - All 859 tests passing locally
@@ -108,5 +114,6 @@ None - production deployment is live and fully operational.
 All files verified present. All commits verified in history.
 
 ---
-*Phase: 21-production-review-deploy-sync*
-*Completed: 2026-03-26*
+
+_Phase: 21-production-review-deploy-sync_
+_Completed: 2026-03-26_

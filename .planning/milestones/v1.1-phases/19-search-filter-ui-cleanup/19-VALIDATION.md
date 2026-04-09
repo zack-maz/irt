@@ -15,13 +15,13 @@ created: 2026-03-22
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 with jsdom |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                           |
+| ---------------------- | ------------------------------- |
+| **Framework**          | Vitest 4.1.0 with jsdom         |
+| **Config file**        | `vite.config.ts` (test section) |
+| **Quick run command**  | `npx vitest run`                |
+| **Full suite command** | `npx vitest run`                |
+| **Estimated runtime**  | ~15 seconds                     |
 
 ---
 
@@ -36,17 +36,17 @@ created: 2026-03-22
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 19-01-01 | 01 | 1 | SRCH-03a | unit | `npx vitest run src/__tests__/Sidebar.test.tsx` | ❌ W0 | ⬜ pending |
-| 19-01-02 | 01 | 1 | SRCH-03b | unit | `npx vitest run src/__tests__/Topbar.test.tsx` | ❌ W0 | ⬜ pending |
-| 19-02-01 | 02 | 2 | SRCH-01a | unit | `npx vitest run src/__tests__/SearchModal.test.tsx` | ❌ W0 | ⬜ pending |
-| 19-02-02 | 02 | 2 | SRCH-01b | unit | `npx vitest run src/__tests__/useSearchResults.test.ts` | ❌ W0 | ⬜ pending |
-| 19-02-03 | 02 | 2 | SRCH-01c | unit | `npx vitest run src/__tests__/SearchModal.test.tsx` | ❌ W0 | ⬜ pending |
-| 19-03-01 | 03 | 3 | SRCH-02 | unit | `npx vitest run src/__tests__/searchStore.test.ts` | ❌ W0 | ⬜ pending |
-| 19-04-01 | 04 | 4 | SRCH-03 | manual | Visual inspection | N/A | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement | Test Type | Automated Command                                       | File Exists | Status     |
+| -------- | ---- | ---- | ----------- | --------- | ------------------------------------------------------- | ----------- | ---------- |
+| 19-01-01 | 01   | 1    | SRCH-03a    | unit      | `npx vitest run src/__tests__/Sidebar.test.tsx`         | ❌ W0       | ⬜ pending |
+| 19-01-02 | 01   | 1    | SRCH-03b    | unit      | `npx vitest run src/__tests__/Topbar.test.tsx`          | ❌ W0       | ⬜ pending |
+| 19-02-01 | 02   | 2    | SRCH-01a    | unit      | `npx vitest run src/__tests__/SearchModal.test.tsx`     | ❌ W0       | ⬜ pending |
+| 19-02-02 | 02   | 2    | SRCH-01b    | unit      | `npx vitest run src/__tests__/useSearchResults.test.ts` | ❌ W0       | ⬜ pending |
+| 19-02-03 | 02   | 2    | SRCH-01c    | unit      | `npx vitest run src/__tests__/SearchModal.test.tsx`     | ❌ W0       | ⬜ pending |
+| 19-03-01 | 03   | 3    | SRCH-02     | unit      | `npx vitest run src/__tests__/searchStore.test.ts`      | ❌ W0       | ⬜ pending |
+| 19-04-01 | 04   | 4    | SRCH-03     | manual    | Visual inspection                                       | N/A         | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -63,11 +63,11 @@ created: 2026-03-22
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Polish pass (font sizes, spacing, opacity) | SRCH-03 | Visual consistency requires human judgment | Review all panels at different zoom levels, verify consistent spacing/blur |
-| Markets panel drag and position persistence | SRCH-03 | Pointer event interaction hard to unit test reliably | Drag markets panel, reload page, verify position restored |
-| Ship color change | SRCH-03 | Visual rendering in DeckGL | Verify ships appear as soft purple (#a78bfa) on map |
+| Behavior                                    | Requirement | Why Manual                                           | Test Instructions                                                          |
+| ------------------------------------------- | ----------- | ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| Polish pass (font sizes, spacing, opacity)  | SRCH-03     | Visual consistency requires human judgment           | Review all panels at different zoom levels, verify consistent spacing/blur |
+| Markets panel drag and position persistence | SRCH-03     | Pointer event interaction hard to unit test reliably | Drag markets panel, reload page, verify position restored                  |
+| Ship color change                           | SRCH-03     | Visual rendering in DeckGL                           | Verify ships appear as soft purple (#a78bfa) on map                        |
 
 ---
 

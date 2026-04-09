@@ -3,9 +3,9 @@ import { create } from 'zustand';
 export interface WeatherGridPoint {
   lat: number;
   lng: number;
-  temperature: number;     // Celsius
-  windSpeed: number;        // knots
-  windDirection: number;    // degrees (0-360)
+  temperature: number; // Celsius
+  windSpeed: number; // knots
+  windDirection: number; // degrees (0-360)
 }
 
 export type ConnectionStatus = 'connected' | 'stale' | 'error' | 'loading';
@@ -14,7 +14,11 @@ interface WeatherState {
   grid: WeatherGridPoint[];
   connectionStatus: ConnectionStatus;
   lastFetchAt: number | null;
-  setWeatherData: (response: { data: WeatherGridPoint[]; stale: boolean; lastFresh: number }) => void;
+  setWeatherData: (response: {
+    data: WeatherGridPoint[];
+    stale: boolean;
+    lastFresh: number;
+  }) => void;
   setError: () => void;
   setLoading: () => void;
 }

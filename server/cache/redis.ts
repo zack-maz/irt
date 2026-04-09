@@ -17,6 +17,31 @@ interface CacheEntry<T> {
 const memCache = new Map<string, { data: unknown; fetchedAt: number }>();
 
 /**
+ * Hard timeout (ms) for a single Redis operation inside the safe wrappers.
+ *
+ * Upstash REST is synchronous from our perspective (HTTP fetch under the hood),
+ * but the client retries internally on network errors. Under pathological
+ * network partitions or misconfiguration the call can hang indefinitely — e.g.
+ * when `UPSTASH_REDIS_REST_URL` is missing the client still attempts to fetch
+ * and retries per its default retry policy, blocking the request thread.
+ *
+ * 2000 ms is an order of magnitude above a healthy Upstash RTT (~10-80 ms),
+ * so it doesn't affect the happy path, but it caps the worst case and lets
+ * the safe wrapper fall through to the in-memory cache.
+ */
+const REDIS_OP_TIMEOUT_MS = 2000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+/**
  * Read a cached value from Redis.
  *
  * Returns null if the key does not exist.
@@ -44,19 +69,9 @@ export async function cacheGet<T>(
  * The hard TTL should be generously larger than the logical TTL so that
  * stale-but-servable data remains available for upstream error fallback.
  */
-export async function cacheSet<T>(
-  key: string,
-  data: T,
-  redisTtlSec: number,
-): Promise<void> {
+export async function cacheSet<T>(key: string, data: T, redisTtlSec: number): Promise<void> {
   const entry: CacheEntry<T> = { data, fetchedAt: Date.now() };
   await redis.set(key, entry, { ex: redisTtlSec });
-}
-
-/** Delete a cache key. Returns true if the key existed. */
-export async function cacheDel(key: string): Promise<boolean> {
-  const deleted = await redis.del(key);
-  return deleted > 0;
 }
 
 /**
@@ -71,14 +86,18 @@ export async function cacheGetSafe<T>(
   logicalTtlMs: number,
 ): Promise<CacheResponse<T> | null> {
   try {
-    const result = await cacheGet<T>(key, logicalTtlMs);
+    const result = await withTimeout(
+      cacheGet<T>(key, logicalTtlMs),
+      REDIS_OP_TIMEOUT_MS,
+      `cacheGet(${key})`,
+    );
     if (result) {
       // Populate memCache on success
       memCache.set(key, { data: result.data, fetchedAt: result.lastFresh });
     }
     return result;
   } catch {
-    // Redis failed -- try in-memory fallback
+    // Redis failed or timed out -- try in-memory fallback
     const mem = memCache.get(key);
     if (mem) {
       return {
@@ -97,16 +116,12 @@ export async function cacheGetSafe<T>(
  *
  * Always writes to memCache regardless of Redis success.
  */
-export async function cacheSetSafe<T>(
-  key: string,
-  data: T,
-  redisTtlSec: number,
-): Promise<void> {
+export async function cacheSetSafe<T>(key: string, data: T, redisTtlSec: number): Promise<void> {
   // Always update memCache first
   memCache.set(key, { data, fetchedAt: Date.now() });
   try {
-    await cacheSet(key, data, redisTtlSec);
+    await withTimeout(cacheSet(key, data, redisTtlSec), REDIS_OP_TIMEOUT_MS, `cacheSet(${key})`);
   } catch {
-    // Swallow Redis error -- memCache is already updated
+    // Swallow Redis error or timeout -- memCache is already updated
   }
 }

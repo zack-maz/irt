@@ -43,15 +43,15 @@ key-files:
     - package.json
 
 key-decisions:
-  - "GDELT DOC 2.0 ArtList mode with 250 maxrecords and 24h timespan for article discovery"
-  - "Jaccard similarity threshold 0.8 with 5-token minimum for fuzzy title clustering"
-  - "Short titles (< 5 tokens) skip fuzzy matching to avoid false positive clusters"
-  - "7-day sliding window for news retention, 15-min cache TTL matching GDELT update frequency"
+  - 'GDELT DOC 2.0 ArtList mode with 250 maxrecords and 24h timespan for article discovery'
+  - 'Jaccard similarity threshold 0.8 with 5-token minimum for fuzzy title clustering'
+  - 'Short titles (< 5 tokens) skip fuzzy matching to avoid false positive clusters'
+  - '7-day sliding window for news retention, 15-min cache TTL matching GDELT update frequency'
 
 patterns-established:
-  - "News pipeline: fetch -> filter -> merge -> dedup/cluster -> prune -> cache"
-  - "hashUrl: SHA-256 truncated to 16 hex chars for deterministic article IDs"
-  - "server/lib/ directory for shared utility modules (filter, clustering)"
+  - 'News pipeline: fetch -> filter -> merge -> dedup/cluster -> prune -> cache'
+  - 'hashUrl: SHA-256 truncated to 16 hex chars for deterministic article IDs'
+  - 'server/lib/ directory for shared utility modules (filter, clustering)'
 
 requirements-completed: [NEWS-01, NEWS-02, NEWS-03]
 
@@ -73,6 +73,7 @@ completed: 2026-03-20
 - **Files modified:** 14
 
 ## Accomplishments
+
 - NewsArticle/NewsCluster types and news constants added to server type system
 - Keyword whitelist filter with 60+ conflict terms (military, diplomatic, geographic, organizational)
 - URL hash deduplication + Jaccard title clustering within 24h window with configurable thresholds
@@ -90,6 +91,7 @@ Each task was committed atomically:
 3. **Task 3: Cache-first /api/news route + wire to server** - `bc36b77` (feat)
 
 ## Files Created/Modified
+
 - `server/types.ts` - Added NewsArticle and NewsCluster interfaces
 - `server/constants.ts` - Added news cache TTL, sliding window, Jaccard threshold constants
 - `server/lib/newsFilter.ts` - Keyword whitelist conflict filter on title + summary
@@ -106,6 +108,7 @@ Each task was committed atomically:
 - `package.json` - Added fast-xml-parser dependency
 
 ## Decisions Made
+
 - Used GDELT DOC 2.0 ArtList mode (not timeline or tone) for article-level data with social images
 - Jaccard similarity threshold at 0.8 with minimum 5 tokens -- prevents false positive clusters on short headlines
 - 7-day sliding window for news retention (matching the expected news relevance window)
@@ -117,10 +120,11 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed RSS test mockResolvedValue body reuse**
+
 - **Found during:** Task 2 (RSS adapter tests)
 - **Issue:** `mockResolvedValue` with a single Response object caused "Body already read" errors when multiple feeds consumed the same response body
 - **Fix:** Changed to `mockImplementation` returning a new Response per call
-- **Files modified:** server/__tests__/adapters/rss.test.ts
+- **Files modified:** server/**tests**/adapters/rss.test.ts
 - **Verification:** All 9 RSS tests pass
 - **Committed in:** 5c44fe0 (Task 2 commit)
 
@@ -130,12 +134,15 @@ Each task was committed atomically:
 **Impact on plan:** Minimal -- test fixture issue only, no production code affected.
 
 ## Issues Encountered
+
 None beyond the test fixture fix noted above.
 
 ## User Setup Required
+
 None - no external service configuration required. GDELT DOC API is free and requires no authentication.
 
 ## Next Phase Readiness
+
 - /api/news endpoint ready for frontend consumption in Plan 02
 - NewsCluster[] response shape ready for newsStore and polling hook
 - All server tests passing, typecheck clean
@@ -146,5 +153,6 @@ None - no external service configuration required. GDELT DOC API is free and req
 All 12 created files verified present. All 3 task commits verified in git log.
 
 ---
-*Phase: 16-news-feed*
-*Completed: 2026-03-20*
+
+_Phase: 16-news-feed_
+_Completed: 2026-03-20_

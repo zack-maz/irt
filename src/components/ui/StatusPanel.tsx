@@ -3,6 +3,8 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
+import { useWaterStore } from '@/stores/waterStore';
+import { useLayerStore } from '@/stores/layerStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 import { OverlayPanel } from '@/components/ui/OverlayPanel';
@@ -34,9 +36,7 @@ function FeedLine({ status, count, label }: { status: FeedStatus; count: number;
         data-testid={`status-dot-${label}`}
         className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT_CLASS[status]}`}
       />
-      <span className="text-text-secondary tabular-nums">
-        {isLoading ? '\u2014' : count}
-      </span>
+      <span className="text-text-secondary tabular-nums">{isLoading ? '\u2014' : count}</span>
       <span className="text-text-muted">{label}</span>
     </div>
   );
@@ -51,6 +51,13 @@ export function StatusPanel() {
   const eventStatus = useEventStore((s) => s.connectionStatus);
   const siteConnectionStatus = useSiteStore((s) => s.connectionStatus);
   const siteStatus: FeedStatus = siteConnectionStatus === 'idle' ? 'loading' : siteConnectionStatus;
+
+  const waterLayerActive = useLayerStore((s) => s.activeLayers.has('water'));
+  const waterConnectionStatus = useWaterStore((s) => s.connectionStatus);
+  const waterStatus: FeedStatus =
+    waterConnectionStatus === 'idle' ? 'loading' : waterConnectionStatus;
+  const waterFacilities = useWaterStore((s) => s.facilities);
+  const visibleWater = waterFacilities.length;
 
   const flightDegraded = useFlightStore((s) => s.degraded);
   const shipDegraded = useShipStore((s) => s.degraded);
@@ -77,7 +84,10 @@ export function StatusPanel() {
       </button>
       {!isCollapsed && (
         <div className="mt-2 flex flex-col gap-1">
-          <span data-testid="utc-clock" className="text-xs text-text-secondary tabular-nums tracking-wide">
+          <span
+            data-testid="utc-clock"
+            className="text-xs text-text-secondary tabular-nums tracking-wide"
+          >
             {utc}
           </span>
           {anyDegraded && (
@@ -94,6 +104,7 @@ export function StatusPanel() {
           <FeedLine status={shipStatus} count={visibleShips} label="ships" />
           <FeedLine status={eventStatus} count={visibleEvents} label="events" />
           <FeedLine status={siteStatus} count={visibleSites} label="sites" />
+          {waterLayerActive && <FeedLine status={waterStatus} count={visibleWater} label="water" />}
         </div>
       )}
     </OverlayPanel>

@@ -35,8 +35,8 @@ export const SOURCE_RELIABILITY: Record<string, number> = {
   'apnews.com': 1.0,
   'afp.com': 1.0,
   // By source name (RSS feeds)
-  'BBC': 1.0,
-  'Reuters': 1.0,
+  BBC: 1.0,
+  Reuters: 1.0,
   'Associated Press': 1.0,
 
   // Tier 2 — regional quality (0.9-0.95)
@@ -59,10 +59,30 @@ export const SOURCE_RELIABILITY: Record<string, number> = {
 
 /** Conflict-action verbs for negativity detection */
 export const CONFLICT_VERBS = new Set([
-  'strike', 'kill', 'bomb', 'destroy', 'attack', 'shell', 'invade',
-  'launch', 'fire', 'shoot', 'target', 'hit', 'blast', 'detonate',
-  'intercept', 'deploy', 'seize', 'capture', 'raid', 'assassinate',
-  'wound', 'shatter', 'demolish', 'obliterate',
+  'strike',
+  'kill',
+  'bomb',
+  'destroy',
+  'attack',
+  'shell',
+  'invade',
+  'launch',
+  'fire',
+  'shoot',
+  'target',
+  'hit',
+  'blast',
+  'detonate',
+  'intercept',
+  'deploy',
+  'seize',
+  'capture',
+  'raid',
+  'assassinate',
+  'wound',
+  'shatter',
+  'demolish',
+  'obliterate',
 ]);
 
 /**
@@ -71,30 +91,80 @@ export const CONFLICT_VERBS = new Set([
  */
 export const EXCLUSION_PATTERNS: string[] = [
   // Existing (kept from newsFilter.ts)
-  'new year', 'firework', 'fireworks', 'celebration', 'celebrate',
-  'festival', 'holiday', 'parade', 'super bowl', 'world cup',
-  'box office', 'movie premiere', 'concert', 'cricket',
-  'basketball', 'football match', 'stock market', 'ipo',
-  'earnings report', 'fashion week',
+  'new year',
+  'firework',
+  'fireworks',
+  'celebration',
+  'celebrate',
+  'festival',
+  'holiday',
+  'parade',
+  'super bowl',
+  'world cup',
+  'box office',
+  'movie premiere',
+  'concert',
+  'cricket',
+  'basketball',
+  'football match',
+  'stock market',
+  'ipo',
+  'earnings report',
+  'fashion week',
   // Historical/documentary
-  'world war ii', 'world war i', 'cold war era', 'documentary',
-  'museum', 'exhibition', 'anniversary of', 'memoir', 'autobiography',
+  'world war ii',
+  'world war i',
+  'cold war era',
+  'documentary',
+  'museum',
+  'exhibition',
+  'anniversary of',
+  'memoir',
+  'autobiography',
   // Entertainment
-  'video game', 'tv series', 'netflix', 'movie review', 'book review',
-  'album release', 'music video', 'award show', 'grammy', 'oscar',
-  'emmy', 'golden globe',
+  'video game',
+  'tv series',
+  'netflix',
+  'movie review',
+  'book review',
+  'album release',
+  'music video',
+  'award show',
+  'grammy',
+  'oscar',
+  'emmy',
+  'golden globe',
   // Sports expanded
-  'olympics', 'soccer', 'tennis', 'rugby', 'baseball', 'hockey',
-  'wrestling', 'boxing match', 'marathon', 'tournament',
+  'olympics',
+  'soccer',
+  'tennis',
+  'rugby',
+  'baseball',
+  'hockey',
+  'wrestling',
+  'boxing match',
+  'marathon',
+  'tournament',
   // Education/academic
-  'university study', 'research paper', 'academic', 'thesis',
-  'classroom', 'curriculum',
+  'university study',
+  'research paper',
+  'academic',
+  'thesis',
+  'classroom',
+  'curriculum',
   // Technology
-  'product launch', 'tech review', 'startup funding', 'app update',
+  'product launch',
+  'tech review',
+  'startup funding',
+  'app update',
   'software release',
   // Weather/natural
-  'weather forecast', 'earthquake', 'tornado', 'hurricane',
-  'flood warning', 'wildfire',
+  'weather forecast',
+  'earthquake',
+  'tornado',
+  'hurricane',
+  'flood warning',
+  'wildfire',
 ];
 
 /**
@@ -137,7 +207,7 @@ export function computeRelevanceScore(input: ScoringInput): number {
   // Factor 1: NLP Triple Completeness (0-0.45)
   let tripleScore = 0;
   if (input.triple.actor) tripleScore += 0.12;
-  if (input.triple.action) tripleScore += 0.20;
+  if (input.triple.action) tripleScore += 0.2;
   if (input.triple.target) tripleScore += 0.13;
 
   // Factor 2: Negativity/Conflict Signal (0-0.35)
@@ -165,7 +235,7 @@ export function computeRelevanceScore(input: ScoringInput): number {
 
   // Factor 3: Source Reliability (0-0.20)
   const reliability = getSourceReliability(input.source, input.domain);
-  const sourceScore = reliability * 0.20;
+  const sourceScore = reliability * 0.2;
 
   return Math.min(1, tripleScore + negativityScore + sourceScore);
 }

@@ -296,14 +296,15 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   setShowMediumSeverity: (v) => set({ showMediumSeverity: v }),
   setShowLowSeverity: (v) => set({ showLowSeverity: v }),
   setEnabledSiteTypes: (types) => set({ enabledSiteTypes: types }),
-  toggleSiteType: (type) => set((s) => {
-    const enabled = s.enabledSiteTypes.includes(type);
-    return {
-      enabledSiteTypes: enabled
-        ? s.enabledSiteTypes.filter((t) => t !== type)
-        : [...s.enabledSiteTypes, type],
-    };
-  }),
+  toggleSiteType: (type) =>
+    set((s) => {
+      const enabled = s.enabledSiteTypes.includes(type);
+      return {
+        enabledSiteTypes: enabled
+          ? s.enabledSiteTypes.filter((t) => t !== type)
+          : [...s.enabledSiteTypes, type],
+      };
+    }),
 
   // Visibility toggles
   toggleShowFlights: () => set((s) => ({ showFlights: !s.showFlights })),

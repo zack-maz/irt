@@ -2,7 +2,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('Open-Meteo Precipitation Adapter', () => {
-  let fetchPrecipitation: (locations: { lat: number; lng: number }[]) => Promise<
+  let fetchPrecipitation: (
+    locations: { lat: number; lng: number }[],
+  ) => Promise<
     { lat: number; lng: number; last30DaysMm: number; anomalyRatio: number; updatedAt: number }[]
   >;
   const originalFetch = globalThis.fetch;
@@ -28,9 +30,7 @@ describe('Open-Meteo Precipitation Adapter', () => {
     };
 
     const mockFetch = vi.mocked(globalThis.fetch);
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify([mockResponse]), { status: 200 }),
-    );
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify([mockResponse]), { status: 200 }));
 
     const result = await fetchPrecipitation([{ lat: 33, lng: 44 }]);
     expect(result).toHaveLength(1);
@@ -79,9 +79,7 @@ describe('Open-Meteo Precipitation Adapter', () => {
 
   it('returns empty array on non-OK response', async () => {
     const mockFetch = vi.mocked(globalThis.fetch);
-    mockFetch.mockResolvedValueOnce(
-      new Response('Server Error', { status: 500 }),
-    );
+    mockFetch.mockResolvedValueOnce(new Response('Server Error', { status: 500 }));
 
     const result = await fetchPrecipitation([{ lat: 33, lng: 44 }]);
     expect(result).toEqual([]);
@@ -101,9 +99,7 @@ describe('Open-Meteo Precipitation Adapter', () => {
     };
 
     const mockFetch = vi.mocked(globalThis.fetch);
-    mockFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify([mockResponse]), { status: 200 }),
-    );
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify([mockResponse]), { status: 200 }));
 
     const result = await fetchPrecipitation([{ lat: 33, lng: 44 }]);
     expect(result).toHaveLength(1);

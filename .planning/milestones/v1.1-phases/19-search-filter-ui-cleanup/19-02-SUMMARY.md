@@ -21,7 +21,11 @@ affects: [19-03-PLAN, 19-04-PLAN]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [cross-store search with useRef to avoid poll-cycle recomputation, TDD RED-GREEN for store+component]
+  patterns:
+    [
+      cross-store search with useRef to avoid poll-cycle recomputation,
+      TDD RED-GREEN for store+component,
+    ]
 
 key-files:
   created:
@@ -38,16 +42,16 @@ key-files:
     - src/components/layout/Topbar.tsx
 
 key-decisions:
-  - "useSearchResults uses useRef for entity arrays to avoid recomputing on every poll cycle (only recomputes on query change)"
-  - "SearchModal rendered inside Topbar component (uses z-modal to overlay everything)"
-  - "closeSearchModal preserves query so user can re-open and see previous search"
-  - "applyAsFilter closes modal and keeps query for filter mode"
-  - "filterStore.clearAll extended to also call searchStore.clearSearch (Reset All clears search)"
-  - "Results capped at 10 per entity type (40 total max) to prevent UI overflow"
+  - 'useSearchResults uses useRef for entity arrays to avoid recomputing on every poll cycle (only recomputes on query change)'
+  - 'SearchModal rendered inside Topbar component (uses z-modal to overlay everything)'
+  - 'closeSearchModal preserves query so user can re-open and see previous search'
+  - 'applyAsFilter closes modal and keeps query for filter mode'
+  - 'filterStore.clearAll extended to also call searchStore.clearSearch (Reset All clears search)'
+  - 'Results capped at 10 per entity type (40 total max) to prevent UI overflow'
 
 patterns-established:
-  - "Cross-store search pattern: useRef for latest entity data + useMemo keyed on query only"
-  - "Spotlight modal pattern: fixed backdrop + centered container + global keydown listener"
+  - 'Cross-store search pattern: useRef for latest entity data + useMemo keyed on query only'
+  - 'Spotlight modal pattern: fixed backdrop + centered container + global keydown listener'
 
 requirements-completed: [SRCH-01, SRCH-02]
 
@@ -69,6 +73,7 @@ completed: 2026-03-22
 - **Files modified:** 10
 
 ## Accomplishments
+
 - Implemented searchStore managing query state, modal open/close, filter mode, and matchedIds
 - Built pure searchUtils functions for cross-entity substring matching (flights, ships, events, sites)
 - Created useSearchResults hook with useRef pattern to avoid recomputing on every poll cycle
@@ -85,6 +90,7 @@ Each task was committed atomically:
 2. **Task 2: Create SearchModal UI and wire Cmd+K shortcut + Topbar hint** - `1159741` (feat)
 
 ## Files Created/Modified
+
 - `src/stores/searchStore.ts` - Search query, modal state, filter mode, matched entity IDs
 - `src/lib/searchUtils.ts` - Pure search/matching functions for all entity types
 - `src/hooks/useSearchResults.ts` - Cross-store entity search hook with useRef optimization
@@ -97,6 +103,7 @@ Each task was committed atomically:
 - `src/components/layout/Topbar.tsx` - Wired search hint onClick and renders SearchModal
 
 ## Decisions Made
+
 - useSearchResults uses useRef for entity arrays to avoid recomputing on every poll cycle (only recomputes on query change) -- follows research Pitfall 2 guidance
 - SearchModal rendered inside Topbar component rather than AppShell -- uses z-modal (40) to overlay everything regardless of parent position
 - closeSearchModal preserves query so user can re-open and see previous search
@@ -108,12 +115,15 @@ Each task was committed atomically:
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Search infrastructure complete, ready for Plan 03 (smart filter presets)
 - searchStore.isFilterMode and matchedIds available for useEntityLayers to consume in future plan
 - SearchModal component can be extended with arrow key navigation as a stretch goal
@@ -123,5 +133,6 @@ None - no external service configuration required.
 All created files verified present. All commit hashes verified in git log.
 
 ---
-*Phase: 19-search-filter-ui-cleanup*
-*Completed: 2026-03-22*
+
+_Phase: 19-search-filter-ui-cleanup_
+_Completed: 2026-03-22_

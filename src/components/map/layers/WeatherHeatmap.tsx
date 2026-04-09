@@ -26,16 +26,24 @@ function tempToRgb(temp: number): [number, number, number] {
   let r: number, g: number, b: number;
   if (t < 0.25) {
     const s = t / 0.25;
-    r = 0; g = Math.round(100 * s); b = Math.round(255 * (1 - s * 0.4));
+    r = 0;
+    g = Math.round(100 * s);
+    b = Math.round(255 * (1 - s * 0.4));
   } else if (t < 0.5) {
     const s = (t - 0.25) / 0.25;
-    r = 0; g = Math.round(100 + 155 * s); b = Math.round(153 * (1 - s));
+    r = 0;
+    g = Math.round(100 + 155 * s);
+    b = Math.round(153 * (1 - s));
   } else if (t < 0.75) {
     const s = (t - 0.5) / 0.25;
-    r = Math.round(255 * s); g = 255; b = 0;
+    r = Math.round(255 * s);
+    g = 255;
+    b = 0;
   } else {
     const s = (t - 0.75) / 0.25;
-    r = 255; g = Math.round(255 * (1 - s)); b = 0;
+    r = 255;
+    g = Math.round(255 * (1 - s));
+    b = 0;
   }
   return [r, g, b];
 }
@@ -64,10 +72,7 @@ function bilinearSample(
   const v01 = grid[y1 * gw + x0];
   const v11 = grid[y1 * gw + x1];
 
-  return v00 * (1 - dx) * (1 - dy) +
-    v10 * dx * (1 - dy) +
-    v01 * (1 - dx) * dy +
-    v11 * dx * dy;
+  return v00 * (1 - dx) * (1 - dy) + v10 * dx * (1 - dy) + v01 * (1 - dx) * dy + v11 * dx * dy;
 }
 
 /** Render weather grid to a canvas data URL covering the full map */
@@ -98,12 +103,12 @@ function renderHeatmap(points: WeatherGridPoint[]): string {
 
   for (let py = 0; py < h; py++) {
     // Image row 0 = top = IMG_LAT_MAX, row h-1 = bottom = IMG_LAT_MIN
-    const lat = IMG_LAT_MAX - (py / PX_PER_DEG);
+    const lat = IMG_LAT_MAX - py / PX_PER_DEG;
     // Map lat to data grid row (fractional)
     const fy = lat - DATA_LAT_MIN;
 
     for (let px = 0; px < w; px++) {
-      const lng = IMG_LNG_MIN + (px / PX_PER_DEG);
+      const lng = IMG_LNG_MIN + px / PX_PER_DEG;
       // Map lng to data grid col (fractional)
       const fx = lng - DATA_LNG_MIN;
 
@@ -147,12 +152,7 @@ export function WeatherHeatmap() {
 
   return (
     <>
-      <Source
-        id="weather-heatmap"
-        type="image"
-        url={dataUrl}
-        coordinates={IMAGE_COORDS}
-      />
+      <Source id="weather-heatmap" type="image" url={dataUrl} coordinates={IMAGE_COORDS} />
       <Layer
         id="weather-heatmap-layer"
         type="raster"

@@ -67,81 +67,81 @@ All stores -------> searchStore -------> (client-side) --> SearchBarSlot
 
 ### New Files (by phase)
 
-| Phase | File | Purpose |
-|-------|------|---------|
-| 15 | `server/adapters/overpass.ts` | Overpass QL fetch + whitelist filter + normalize to SiteEntity[] |
-| 15 | `server/routes/sites.ts` | Cache-first route for site data (24h TTL) |
-| 15 | `src/stores/siteStore.ts` | Zustand store: sites[], connectionStatus |
-| 15 | `src/hooks/useSitePolling.ts` | 24h recursive setTimeout, conditional tab-resume |
-| 15 | `src/components/detail/SiteDetail.tsx` | Detail panel content for type='site' |
-| 16 | `server/adapters/news.ts` | GDELT DOC + BBC RSS + AJ RSS fetch, merge, dedup, noise filter |
-| 16 | `server/routes/news.ts` | Cache-first route for news (15min TTL) |
-| 16 | `src/stores/newsStore.ts` | Zustand store: items[], connectionStatus |
-| 16 | `src/hooks/useNewsPolling.ts` | 15min recursive setTimeout |
-| 17 | `server/routes/notifications.ts` | Score events from Redis cache, return top 10 |
-| 17 | `src/stores/notificationStore.ts` | Server-scored events + client-side proximity alerts + unread count |
-| 17 | `src/components/layout/NotificationDrawer.tsx` | 360px right slide-out drawer |
-| 17 | `src/components/notifications/NotificationCard.tsx` | Individual notification card with news links |
-| 18 | `server/adapters/yahoo-finance.ts` | Fetch 5 symbols from v8/finance/chart, normalize to MarketQuote[] |
-| 18 | `server/routes/markets.ts` | Cache-first route for market quotes (60s TTL) |
-| 18 | `src/stores/marketStore.ts` | Zustand store: quotes[], connectionStatus |
-| 18 | `src/hooks/useMarketPolling.ts` | 60s recursive setTimeout (hourly when markets closed) |
-| 18 | `src/components/layout/MarketsPanelSlot.tsx` | Bottom-left collapsible OverlayPanel, 5 ticker rows |
-| 18 | `src/components/markets/SparklineChart.tsx` | 20-line SVG polyline component |
-| 19 | `src/stores/searchStore.ts` | Zustand store: query, results, isOpen |
-| 19 | `src/components/layout/SearchBarSlot.tsx` | Top-center floating input + results dropdown |
+| Phase | File                                                | Purpose                                                            |
+| ----- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| 15    | `server/adapters/overpass.ts`                       | Overpass QL fetch + whitelist filter + normalize to SiteEntity[]   |
+| 15    | `server/routes/sites.ts`                            | Cache-first route for site data (24h TTL)                          |
+| 15    | `src/stores/siteStore.ts`                           | Zustand store: sites[], connectionStatus                           |
+| 15    | `src/hooks/useSitePolling.ts`                       | 24h recursive setTimeout, conditional tab-resume                   |
+| 15    | `src/components/detail/SiteDetail.tsx`              | Detail panel content for type='site'                               |
+| 16    | `server/adapters/news.ts`                           | GDELT DOC + BBC RSS + AJ RSS fetch, merge, dedup, noise filter     |
+| 16    | `server/routes/news.ts`                             | Cache-first route for news (15min TTL)                             |
+| 16    | `src/stores/newsStore.ts`                           | Zustand store: items[], connectionStatus                           |
+| 16    | `src/hooks/useNewsPolling.ts`                       | 15min recursive setTimeout                                         |
+| 17    | `server/routes/notifications.ts`                    | Score events from Redis cache, return top 10                       |
+| 17    | `src/stores/notificationStore.ts`                   | Server-scored events + client-side proximity alerts + unread count |
+| 17    | `src/components/layout/NotificationDrawer.tsx`      | 360px right slide-out drawer                                       |
+| 17    | `src/components/notifications/NotificationCard.tsx` | Individual notification card with news links                       |
+| 18    | `server/adapters/yahoo-finance.ts`                  | Fetch 5 symbols from v8/finance/chart, normalize to MarketQuote[]  |
+| 18    | `server/routes/markets.ts`                          | Cache-first route for market quotes (60s TTL)                      |
+| 18    | `src/stores/marketStore.ts`                         | Zustand store: quotes[], connectionStatus                          |
+| 18    | `src/hooks/useMarketPolling.ts`                     | 60s recursive setTimeout (hourly when markets closed)              |
+| 18    | `src/components/layout/MarketsPanelSlot.tsx`        | Bottom-left collapsible OverlayPanel, 5 ticker rows                |
+| 18    | `src/components/markets/SparklineChart.tsx`         | 20-line SVG polyline component                                     |
+| 19    | `src/stores/searchStore.ts`                         | Zustand store: query, results, isOpen                              |
+| 19    | `src/components/layout/SearchBarSlot.tsx`           | Top-center floating input + results dropdown                       |
 
 ### Modified Files (by phase)
 
-| Phase | File | Changes |
-|-------|------|---------|
-| 15 | `server/types.ts` | Add `SiteType`, `SiteEntity`, `'site'` to `EntityType`, `SiteEntity` to `MapEntity` union |
-| 15 | `src/types/entities.ts` | Re-export `SiteEntity`, `SiteType` |
-| 15 | `src/types/ui.ts` | Add 7 site toggle fields to `LayerToggles`, defaults to `LAYER_TOGGLE_DEFAULTS` |
-| 15 | `server/index.ts` | Register `/api/sites` route |
-| 15 | `src/stores/uiStore.ts` | Add 7 site toggle booleans + actions, persist to localStorage |
-| 15 | `src/hooks/useSelectedEntity.ts` | Add siteStore search in entity lookup chain |
-| 15 | `src/hooks/useEntityLayers.ts` | Add site IconLayer (6 icons, 3500m sizing), reduce event icon sizing |
-| 15 | `src/components/layout/LayerTogglesSlot.tsx` | Add Key Sites master toggle + 6 indented sub-toggles |
-| 15 | `src/components/layout/AppShell.tsx` | Wire `useSitePolling()` |
-| 15 | `src/components/layout/DetailPanelSlot.tsx` | Add `SiteDetail` type-switch case, extend helper functions |
-| 16 | `server/index.ts` | Register `/api/news` route |
-| 16 | `src/components/layout/AppShell.tsx` | Wire `useNewsPolling()` |
-| 17 | `server/index.ts` | Register `/api/notifications` route |
-| 17 | `src/stores/filterStore.ts` | Add `DEFAULT_EVENT_WINDOW_MS` module constant |
-| 17 | `src/stores/uiStore.ts` | Add `isNotificationDrawerOpen`, open/close actions |
-| 17 | `src/hooks/useFilteredEntities.ts` | Apply 24h soft lower bound when `dateStart === null` |
-| 17 | `src/components/layout/AppShell.tsx` | Mount NotificationDrawer, add bell icon, set offset CSS var |
-| 17 | `src/components/layout/DetailPanelSlot.tsx` | Respect `--notification-drawer-offset` for panel coexistence |
-| 17 | `src/styles/app.css` | Add `--width-notification-drawer`, `--z-notification-bell` |
-| 18 | `server/index.ts` | Register `/api/markets` route |
-| 18 | `src/stores/uiStore.ts` | Add `isMarketsCollapsed`, `toggleMarkets` |
-| 18 | `src/components/layout/AppShell.tsx` | Wire `useMarketPolling()`, mount MarketsPanelSlot |
-| 19 | `src/components/layout/AppShell.tsx` | Mount SearchBarSlot |
-| 19 | `src/stores/filterStore.ts` | Remove `minute` from `STEP_MS` record |
-| 19 | `src/components/filter/DateRangeFilter.tsx` | Remove Min granularity button |
-| 19 | `src/components/layout/FilterPanelSlot.tsx` | Add Reset All button, grouped sections |
-| 19 | `src/components/layout/LayerTogglesSlot.tsx` | Add scrollable/max-height for overflow |
-| 19 | `src/components/ui/StatusPanel.tsx` | Add FeedLine entries for sites, news, markets |
+| Phase | File                                         | Changes                                                                                   |
+| ----- | -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 15    | `server/types.ts`                            | Add `SiteType`, `SiteEntity`, `'site'` to `EntityType`, `SiteEntity` to `MapEntity` union |
+| 15    | `src/types/entities.ts`                      | Re-export `SiteEntity`, `SiteType`                                                        |
+| 15    | `src/types/ui.ts`                            | Add 7 site toggle fields to `LayerToggles`, defaults to `LAYER_TOGGLE_DEFAULTS`           |
+| 15    | `server/index.ts`                            | Register `/api/sites` route                                                               |
+| 15    | `src/stores/uiStore.ts`                      | Add 7 site toggle booleans + actions, persist to localStorage                             |
+| 15    | `src/hooks/useSelectedEntity.ts`             | Add siteStore search in entity lookup chain                                               |
+| 15    | `src/hooks/useEntityLayers.ts`               | Add site IconLayer (6 icons, 3500m sizing), reduce event icon sizing                      |
+| 15    | `src/components/layout/LayerTogglesSlot.tsx` | Add Key Sites master toggle + 6 indented sub-toggles                                      |
+| 15    | `src/components/layout/AppShell.tsx`         | Wire `useSitePolling()`                                                                   |
+| 15    | `src/components/layout/DetailPanelSlot.tsx`  | Add `SiteDetail` type-switch case, extend helper functions                                |
+| 16    | `server/index.ts`                            | Register `/api/news` route                                                                |
+| 16    | `src/components/layout/AppShell.tsx`         | Wire `useNewsPolling()`                                                                   |
+| 17    | `server/index.ts`                            | Register `/api/notifications` route                                                       |
+| 17    | `src/stores/filterStore.ts`                  | Add `DEFAULT_EVENT_WINDOW_MS` module constant                                             |
+| 17    | `src/stores/uiStore.ts`                      | Add `isNotificationDrawerOpen`, open/close actions                                        |
+| 17    | `src/hooks/useFilteredEntities.ts`           | Apply 24h soft lower bound when `dateStart === null`                                      |
+| 17    | `src/components/layout/AppShell.tsx`         | Mount NotificationDrawer, add bell icon, set offset CSS var                               |
+| 17    | `src/components/layout/DetailPanelSlot.tsx`  | Respect `--notification-drawer-offset` for panel coexistence                              |
+| 17    | `src/styles/app.css`                         | Add `--width-notification-drawer`, `--z-notification-bell`                                |
+| 18    | `server/index.ts`                            | Register `/api/markets` route                                                             |
+| 18    | `src/stores/uiStore.ts`                      | Add `isMarketsCollapsed`, `toggleMarkets`                                                 |
+| 18    | `src/components/layout/AppShell.tsx`         | Wire `useMarketPolling()`, mount MarketsPanelSlot                                         |
+| 19    | `src/components/layout/AppShell.tsx`         | Mount SearchBarSlot                                                                       |
+| 19    | `src/stores/filterStore.ts`                  | Remove `minute` from `STEP_MS` record                                                     |
+| 19    | `src/components/filter/DateRangeFilter.tsx`  | Remove Min granularity button                                                             |
+| 19    | `src/components/layout/FilterPanelSlot.tsx`  | Add Reset All button, grouped sections                                                    |
+| 19    | `src/components/layout/LayerTogglesSlot.tsx` | Add scrollable/max-height for overflow                                                    |
+| 19    | `src/components/ui/StatusPanel.tsx`          | Add FeedLine entries for sites, news, markets                                             |
 
 ---
 
 ## Component Boundaries
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| `server/adapters/overpass.ts` | Fetch + parse OSM data via Overpass QL, whitelist filter, normalize to SiteEntity[] | `server/routes/sites.ts` |
-| `server/adapters/news.ts` | Fetch GDELT DOC JSON + parse BBC/AJ RSS XML (via fast-xml-parser), merge, dedup, noise filter | `server/routes/news.ts` |
-| `server/adapters/yahoo-finance.ts` | Fetch 5 symbols from Yahoo Finance v8 chart endpoint, normalize to MarketQuote[] | `server/routes/markets.ts` |
-| `server/routes/notifications.ts` | Read events + news from Redis, score events by severity, match headlines, return top 10 | Redis (`events:gdelt`, `news:feed` keys directly) |
-| `siteStore` | Site entity array + connection status | useSitePolling, useEntityLayers, useSelectedEntity, notificationStore (proximity), searchStore |
-| `newsStore` | News item array + connection status | useNewsPolling, notificationStore (headline matching) |
-| `notificationStore` | Server-scored events + client-side proximity alerts + unread count | Reads from newsStore, siteStore, flightStore, shipStore |
-| `marketStore` | Market quotes array + connection status | useMarketPolling, MarketsPanelSlot |
-| `searchStore` | Query string + results + focus state | Reads from all entity stores (flightStore, shipStore, eventStore, siteStore) |
-| `NotificationDrawer` | 360px right-side drawer, notification cards with news headline links | notificationStore, uiStore |
-| `MarketsPanelSlot` | Bottom-left collapsible panel, 5 ticker rows with sparklines | marketStore |
-| `SearchBarSlot` | Top-center floating input, fuzzy search dropdown, fly-to-entity on select | searchStore, uiStore, mapStore |
+| Component                          | Responsibility                                                                                | Communicates With                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `server/adapters/overpass.ts`      | Fetch + parse OSM data via Overpass QL, whitelist filter, normalize to SiteEntity[]           | `server/routes/sites.ts`                                                                       |
+| `server/adapters/news.ts`          | Fetch GDELT DOC JSON + parse BBC/AJ RSS XML (via fast-xml-parser), merge, dedup, noise filter | `server/routes/news.ts`                                                                        |
+| `server/adapters/yahoo-finance.ts` | Fetch 5 symbols from Yahoo Finance v8 chart endpoint, normalize to MarketQuote[]              | `server/routes/markets.ts`                                                                     |
+| `server/routes/notifications.ts`   | Read events + news from Redis, score events by severity, match headlines, return top 10       | Redis (`events:gdelt`, `news:feed` keys directly)                                              |
+| `siteStore`                        | Site entity array + connection status                                                         | useSitePolling, useEntityLayers, useSelectedEntity, notificationStore (proximity), searchStore |
+| `newsStore`                        | News item array + connection status                                                           | useNewsPolling, notificationStore (headline matching)                                          |
+| `notificationStore`                | Server-scored events + client-side proximity alerts + unread count                            | Reads from newsStore, siteStore, flightStore, shipStore                                        |
+| `marketStore`                      | Market quotes array + connection status                                                       | useMarketPolling, MarketsPanelSlot                                                             |
+| `searchStore`                      | Query string + results + focus state                                                          | Reads from all entity stores (flightStore, shipStore, eventStore, siteStore)                   |
+| `NotificationDrawer`               | 360px right-side drawer, notification cards with news headline links                          | notificationStore, uiStore                                                                     |
+| `MarketsPanelSlot`                 | Bottom-left collapsible panel, 5 ticker rows with sparklines                                  | marketStore                                                                                    |
+| `SearchBarSlot`                    | Top-center floating input, fuzzy search dropdown, fly-to-entity on select                     | searchStore, uiStore, mapStore                                                                 |
 
 ---
 
@@ -165,11 +165,12 @@ export interface SiteEntity extends MapEntityBase {
   };
 }
 
-export type EntityType = 'flight' | 'ship' | 'site' | ConflictEventType;  // 'site' added
-export type MapEntity = FlightEntity | ShipEntity | SiteEntity | ConflictEventEntity;  // SiteEntity added
+export type EntityType = 'flight' | 'ship' | 'site' | ConflictEventType; // 'site' added
+export type MapEntity = FlightEntity | ShipEntity | SiteEntity | ConflictEventEntity; // SiteEntity added
 ```
 
 **Downstream impact of MapEntity change:**
+
 - `useSelectedEntity.ts` -- must search siteStore (code change)
 - `useEntityLayers.ts` -- must handle site icon mapping (code change)
 - `entityPassesFilters` -- no change needed (sites bypass filter pipeline)
@@ -195,6 +196,7 @@ The useMemo dependency array adds `sites`. This is the only change to this hook.
 ### 3. useFilteredEntities -- Sites Are Excluded (Phase 15)
 
 Sites are static infrastructure. They have no speed, altitude, country, or meaningful timestamp. They must NOT flow through `entityPassesFilters` because:
+
 - All filter predicates would pass-through (wasteful computation)
 - Sites should remain visible regardless of filter state (they are reference points)
 
@@ -216,7 +218,7 @@ import { DEFAULT_EVENT_WINDOW_MS } from '@/stores/filterStore';
 const events = useMemo(() => {
   // When dateStart is null (no user-set range), apply 24h default window
   // When dateStart is set (custom range mode), use user's value
-  const effectiveStart = filters.dateStart ?? (Date.now() - DEFAULT_EVENT_WINDOW_MS);
+  const effectiveStart = filters.dateStart ?? Date.now() - DEFAULT_EVENT_WINDOW_MS;
   return rawEvents.filter((e) => {
     if (e.timestamp < effectiveStart) return false;
     if (filters.dateEnd !== null && e.timestamp > filters.dateEnd) return false;
@@ -226,6 +228,7 @@ const events = useMemo(() => {
 ```
 
 Key properties:
+
 - `filterStore.dateStart` stays `null` at init -- no custom-range suppression
 - Flights and ships are completely unaffected
 - `clearAll()` resets user filters only; the constant is immune
@@ -261,6 +264,7 @@ className={`... right-[var(--notification-drawer-offset)] ...`}
 **Escape key LIFO:** Track open order. First Escape closes the most recently opened panel (notification drawer or detail panel).
 
 **Filter panel shift:** FilterPanelSlot already shifts when detail panel is open (via `right-[calc(var(--width-detail-panel)+1rem)]`). It must now account for both panels:
+
 ```
 right = (detailOpen ? 360px : 0) + (drawerOpen ? 360px : 0) + 1rem
 ```
@@ -309,12 +313,12 @@ StatusPanel currently shows 3 FeedLines (flights, ships, events). After v1.1 it 
 
 ## Cache TTLs (New Routes)
 
-| Route | Redis Key | Logical TTL | Redis Hard TTL | Rationale |
-|-------|-----------|-------------|----------------|-----------|
-| `/api/sites` | `sites:osm` | 24h (86,400,000ms) | 10d (864,000s) | OSM data changes rarely |
-| `/api/news` | `news:feed` | 15min (900,000ms) | 2.5h (9,000s) | Matches event poll interval |
-| `/api/markets` | `markets:quotes` | 60s (60,000ms) | 10min (600s) | Real-time price sensitivity |
-| `/api/notifications` | None | N/A | N/A | Computed per request from event + news caches |
+| Route                | Redis Key        | Logical TTL        | Redis Hard TTL | Rationale                                     |
+| -------------------- | ---------------- | ------------------ | -------------- | --------------------------------------------- |
+| `/api/sites`         | `sites:osm`      | 24h (86,400,000ms) | 10d (864,000s) | OSM data changes rarely                       |
+| `/api/news`          | `news:feed`      | 15min (900,000ms)  | 2.5h (9,000s)  | Matches event poll interval                   |
+| `/api/markets`       | `markets:quotes` | 60s (60,000ms)     | 10min (600s)   | Real-time price sensitivity                   |
+| `/api/notifications` | None             | N/A                | N/A            | Computed per request from event + news caches |
 
 ---
 
@@ -332,8 +336,9 @@ try {
   await cacheSet(KEY, fresh, REDIS_TTL_SEC);
   res.json({ data: fresh, stale: false, lastFresh: Date.now() });
 } catch (err) {
-  if (cached) res.json(cached);  // stale fallback
-  else throw err;                // Express 5 error handler
+  if (cached)
+    res.json(cached); // stale fallback
+  else throw err; // Express 5 error handler
 }
 ```
 
@@ -354,31 +359,37 @@ MarketsPanel reuses the collapsible `OverlayPanel` pattern from CountersSlot and
 ## Anti-Patterns to Avoid
 
 ### Anti-Pattern 1: Sites in Filter Pipeline
+
 **What:** Running sites through `entityPassesFilters` in `useFilteredEntities`.
 **Why bad:** Sites are static reference points with no filterable attributes. They should remain visible regardless of speed/altitude/country/date filters.
 **Instead:** Toggle-only visibility in `useEntityLayers`.
 
 ### Anti-Pattern 2: News as MapEntity
+
 **What:** Adding `NewsItem` to the `MapEntity` discriminated union.
 **Why bad:** News has no coordinates. It pollutes every entity-iterating function.
 **Instead:** Separate type in separate store, consumed only by notificationStore.
 
 ### Anti-Pattern 3: Server-Side Proximity Alerts
+
 **What:** Computing proximity on the server.
 **Why bad:** Server caches positions with varying staleness. Client has the freshest data from all polling hooks. Proximity depends on the exact moment of comparison.
 **Instead:** Client-side haversine in notificationStore against current store data.
 
 ### Anti-Pattern 4: Charting Library for Sparklines
+
 **What:** Adding recharts/Victory for 5 tiny sparkline charts.
 **Why bad:** 50-200KB for something that needs a single SVG `<polyline>`.
 **Instead:** 20-line `SparklineChart` component using raw SVG.
 
 ### Anti-Pattern 5: Re-Scoring Server Events Client-Side
+
 **What:** Receiving raw events and re-applying severity scoring on the client.
 **Why bad:** Duplicates logic, creates divergence risk, wastes CPU.
 **Instead:** Server returns pre-scored, pre-sorted top 10. Client displays as-is.
 
 ### Anti-Pattern 6: Full-Text Search Library
+
 **What:** Using MiniSearch, Lunr, or ElasticSearch for entity search.
 **Why bad:** Overkill for ~5K entities with 2-3 searchable fields. These engines require document indexing infrastructure.
 **Instead:** fuse.js with weighted keys. Rebuild index from store arrays on change.
@@ -425,14 +436,14 @@ Phase 20: Production Review           <-- depends on all above
 
 ## Scalability Considerations
 
-| Concern | Current (~100s of entities) | At 10K entities | At 100K entities |
-|---------|---------------------------|-----------------|------------------|
-| Entity search (fuse.js) | O(n) fuzzy match, instant | ~50ms (fine) | Consider web worker |
-| Proximity alerts | O(flights * sites), trivial | O(10K * 100) = ~50ms | Spatial index needed |
-| Notification scoring | Top 10 from ~200 events | Server caps at 10, fast | No change needed |
-| Deck.gl layers | 9 layers after sites added | Deck.gl handles this well | Millions of points OK |
-| Zustand re-renders | Per-selector pattern, minimal | No degradation | No degradation |
-| Redis cache reads | ~7 keys per request cycle | Same keys, larger payloads | Redis handles natively |
+| Concern                 | Current (~100s of entities)   | At 10K entities            | At 100K entities       |
+| ----------------------- | ----------------------------- | -------------------------- | ---------------------- |
+| Entity search (fuse.js) | O(n) fuzzy match, instant     | ~50ms (fine)               | Consider web worker    |
+| Proximity alerts        | O(flights \* sites), trivial  | O(10K \* 100) = ~50ms      | Spatial index needed   |
+| Notification scoring    | Top 10 from ~200 events       | Server caps at 10, fast    | No change needed       |
+| Deck.gl layers          | 9 layers after sites added    | Deck.gl handles this well  | Millions of points OK  |
+| Zustand re-renders      | Per-selector pattern, minimal | No degradation             | No degradation         |
+| Redis cache reads       | ~7 keys per request cycle     | Same keys, larger payloads | Redis handles natively |
 
 None of these thresholds are expected to be reached. The monitoring area is a fixed geographic region, and entity counts are bounded by data source limits.
 
@@ -440,19 +451,19 @@ None of these thresholds are expected to be reached. The monitoring area is a fi
 
 ## Store Count Summary
 
-| Store | Phase | Purpose | Cross-Store Reads |
-|-------|-------|---------|-------------------|
-| mapStore | v0.9 | Map loaded state, cursor, pending fly-to | None |
-| uiStore | v0.9 | Panel state, toggles, selection/hover | None |
-| flightStore | v0.9 | Flight entities, connection status | None |
-| shipStore | v0.9 | Ship entities, connection status | None |
-| eventStore | v0.9 | Event entities, connection status | None |
-| filterStore | v0.9 | All filter state, date range, proximity | Reads uiStore (for toggle save/restore) |
-| siteStore | **15** | Site entities, connection status | None |
-| newsStore | **16** | News items, connection status | None |
-| notificationStore | **17** | Scored events, proximity alerts, unread count | Reads siteStore, flightStore, shipStore, newsStore |
-| marketStore | **18** | Market quotes, connection status | None |
-| searchStore | **19** | Search query, results, focus state | Reads flightStore, shipStore, eventStore, siteStore |
+| Store             | Phase  | Purpose                                       | Cross-Store Reads                                   |
+| ----------------- | ------ | --------------------------------------------- | --------------------------------------------------- |
+| mapStore          | v0.9   | Map loaded state, cursor, pending fly-to      | None                                                |
+| uiStore           | v0.9   | Panel state, toggles, selection/hover         | None                                                |
+| flightStore       | v0.9   | Flight entities, connection status            | None                                                |
+| shipStore         | v0.9   | Ship entities, connection status              | None                                                |
+| eventStore        | v0.9   | Event entities, connection status             | None                                                |
+| filterStore       | v0.9   | All filter state, date range, proximity       | Reads uiStore (for toggle save/restore)             |
+| siteStore         | **15** | Site entities, connection status              | None                                                |
+| newsStore         | **16** | News items, connection status                 | None                                                |
+| notificationStore | **17** | Scored events, proximity alerts, unread count | Reads siteStore, flightStore, shipStore, newsStore  |
+| marketStore       | **18** | Market quotes, connection status              | None                                                |
+| searchStore       | **19** | Search query, results, focus state            | Reads flightStore, shipStore, eventStore, siteStore |
 
 **Total after v1.1:** 11 stores (6 existing + 5 new)
 

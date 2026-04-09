@@ -35,9 +35,7 @@ export function ThreatClusterDetail({ cluster }: ThreatClusterDetailProps) {
 
   // Look up individual events by cluster eventIds
   const eventMap = new Map(events.map((e) => [e.id, e]));
-  const matchedEvents = cluster.eventIds
-    .map((id) => eventMap.get(id))
-    .filter((e) => e != null);
+  const matchedEvents = cluster.eventIds.map((id) => eventMap.get(id)).filter((e) => e != null);
 
   // Sort events by threat weight (highest severity first)
   const sortedEvents = useMemo(
@@ -51,8 +49,7 @@ export function ThreatClusterDetail({ cluster }: ThreatClusterDetailProps) {
     for (const event of matchedEvents) {
       counts.set(event.type, (counts.get(event.type) ?? 0) + 1);
     }
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1]);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
   }, [matchedEvents]);
 
   const maxTypeCount = typeBreakdown.length > 0 ? typeBreakdown[0][1] : 1;
@@ -120,9 +117,7 @@ export function ThreatClusterDetail({ cluster }: ThreatClusterDetailProps) {
       {/* Event type breakdown bars */}
       {visibleTypes.length > 0 && (
         <div className="px-3 py-1" data-testid="type-breakdown">
-          <h4 className="text-[10px] uppercase tracking-wider text-text-muted mb-1">
-            Event Types
-          </h4>
+          <h4 className="text-[10px] uppercase tracking-wider text-text-muted mb-1">Event Types</h4>
           <div className="flex flex-col gap-1">
             {visibleTypes.map(([type, count]) => (
               <div key={type} className="flex items-center gap-2 text-[11px]">
@@ -156,9 +151,7 @@ export function ThreatClusterDetail({ cluster }: ThreatClusterDetailProps) {
 
       {/* Scrollable event list */}
       <div className="mt-2 border-t border-border pt-2">
-        <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 px-3">
-          Events
-        </h3>
+        <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 px-3">Events</h3>
         <div className="max-h-[300px] overflow-y-auto" key={cluster.id}>
           {sortedEvents.map((event) => {
             const typeLabel = EVENT_TYPE_LABELS[event.type] ?? event.type;
@@ -180,9 +173,7 @@ export function ThreatClusterDetail({ cluster }: ThreatClusterDetailProps) {
                   {event.data.locationName || `${event.lat.toFixed(3)}, ${event.lng.toFixed(3)}`}
                 </div>
                 {fatalities > 0 && (
-                  <div className="text-[10px] text-red-400 mt-0.5">
-                    {fatalities} fatalities
-                  </div>
+                  <div className="text-[10px] text-red-400 mt-0.5">{fatalities} fatalities</div>
                 )}
               </button>
             );

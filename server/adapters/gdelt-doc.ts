@@ -70,16 +70,18 @@ export async function fetchGdeltArticles(): Promise<NewsArticle[]> {
     return [];
   }
 
-  return articles.map((a): NewsArticle => ({
-    id: hashUrl(a.url),
-    title: a.title,
-    url: a.url,
-    source: 'GDELT',
-    sourceCountry: a.sourcecountry || undefined,
-    publishedAt: parseGdeltDate(a.seendate),
-    imageUrl: a.socialimage || undefined,
-    summary: undefined,
-    tone: undefined,
-    keywords: [],
-  }));
+  return articles.map(
+    (a): NewsArticle => ({
+      id: hashUrl(a.url),
+      title: a.title,
+      url: a.url,
+      source: 'GDELT',
+      sourceCountry: a.sourcecountry || undefined,
+      publishedAt: parseGdeltDate(a.seendate),
+      imageUrl: a.socialimage || undefined,
+      summary: undefined,
+      tone: undefined,
+      keywords: [],
+    }),
+  );
 }

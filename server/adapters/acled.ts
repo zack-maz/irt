@@ -1,6 +1,8 @@
 import { config } from '../config.js';
 import type { ConflictEventEntity, ConflictEventType } from '../types.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'acled' });
 
 const ACLED_TOKEN_URL = 'https://acleddata.com/oauth/token';
 const ACLED_API_URL = 'https://acleddata.com/api';
@@ -137,6 +139,6 @@ export async function fetchEvents(): Promise<ConflictEventEntity[]> {
 
   const events = json.data.map(normalizeEvent);
 
-  log({ level: 'info', message: `[acled] fetched ${events.length} events in ${Date.now() - start}ms` });
+  log.info({ count: events.length, durationMs: Date.now() - start }, 'fetched events');
   return events;
 }

@@ -33,9 +33,7 @@ function SectionHeader({
         <span className={`text-[10px] ${active ? 'text-accent-blue' : 'text-text-muted'}`}>
           {active ? '\u25B6' : '---'}
         </span>
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
-          {label}
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">{label}</span>
       </div>
       {active && (
         <button
@@ -159,10 +157,14 @@ export function FilterPanelContent() {
 
   return (
     <div className="flex flex-col gap-3">
-
       {/* Proximity (global -- applies to all entity types) */}
       <div>
-        <SectionHeader label="Proximity" active={isProximityActive} filterKey="proximity" onClear={clearFilter} />
+        <SectionHeader
+          label="Proximity"
+          active={isProximityActive}
+          filterKey="proximity"
+          onClear={clearFilter}
+        />
         <div className="mt-1">
           <ProximityFilter
             pin={proximityPin}
@@ -178,16 +180,35 @@ export function FilterPanelContent() {
 
       {/* Flights section */}
       <div>
-        <EntitySectionHeader label="Flights" isOpen={isFlightFiltersOpen} onToggle={toggleFlightFilters} />
+        <EntitySectionHeader
+          label="Flights"
+          isOpen={isFlightFiltersOpen}
+          onToggle={toggleFlightFilters}
+        />
         {isFlightFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
             {/* Visibility button + toggles */}
             <div className="flex flex-wrap gap-1">
-              <FilterButton label="Flights" active={showFlights} color={ENTITY_DOT_COLORS.flights} onToggle={() => useFilterStore.getState().toggleShowFlights()} />
+              <FilterButton
+                label="Flights"
+                active={showFlights}
+                color={ENTITY_DOT_COLORS.flights}
+                onToggle={() => useFilterStore.getState().toggleShowFlights()}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
-              <SliderToggle label="Unidentified" checked={showUnidentified} onChange={() => useFilterStore.getState().toggleShowUnidentified()} color={ENTITY_DOT_COLORS.unidentified} />
-              <SliderToggle label="Grounded" checked={showGroundTraffic} onChange={() => useFilterStore.getState().toggleShowGroundTraffic()} color={ENTITY_DOT_COLORS.ground} />
+              <SliderToggle
+                label="Unidentified"
+                checked={showUnidentified}
+                onChange={() => useFilterStore.getState().toggleShowUnidentified()}
+                color={ENTITY_DOT_COLORS.unidentified}
+              />
+              <SliderToggle
+                label="Grounded"
+                checked={showGroundTraffic}
+                onChange={() => useFilterStore.getState().toggleShowGroundTraffic()}
+                color={ENTITY_DOT_COLORS.ground}
+              />
             </div>
             {/* Callsign search */}
             <TextSearchInput
@@ -205,7 +226,12 @@ export function FilterPanelContent() {
             />
             {/* Altitude slider */}
             <div>
-              <SectionHeader label="Altitude" active={isAltitudeActive} filterKey="altitude" onClear={clearFilter} />
+              <SectionHeader
+                label="Altitude"
+                active={isAltitudeActive}
+                filterKey="altitude"
+                onClear={clearFilter}
+              />
               <div className="mt-1">
                 <RangeSlider
                   label="Altitude"
@@ -222,7 +248,12 @@ export function FilterPanelContent() {
             </div>
             {/* Speed slider */}
             <div>
-              <SectionHeader label="Speed" active={isFlightSpeedActive} filterKey="flightSpeed" onClear={clearFilter} />
+              <SectionHeader
+                label="Speed"
+                active={isFlightSpeedActive}
+                filterKey="flightSpeed"
+                onClear={clearFilter}
+              />
               <div className="mt-1">
                 <RangeSlider
                   label="Speed"
@@ -245,12 +276,21 @@ export function FilterPanelContent() {
 
       {/* Ships section */}
       <div>
-        <EntitySectionHeader label="Ships" isOpen={isShipFiltersOpen} onToggle={toggleShipFilters} />
+        <EntitySectionHeader
+          label="Ships"
+          isOpen={isShipFiltersOpen}
+          onToggle={toggleShipFilters}
+        />
         {isShipFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
             {/* Visibility button */}
             <div className="flex flex-wrap gap-1">
-              <FilterButton label="Ships" active={showShips} color={ENTITY_DOT_COLORS.ships} onToggle={() => useFilterStore.getState().toggleShowShips()} />
+              <FilterButton
+                label="Ships"
+                active={showShips}
+                color={ENTITY_DOT_COLORS.ships}
+                onToggle={() => useFilterStore.getState().toggleShowShips()}
+              />
             </div>
             {/* MMSI search */}
             <TextSearchInput
@@ -272,14 +312,33 @@ export function FilterPanelContent() {
 
       {/* Conflicts section */}
       <div>
-        <EntitySectionHeader label="Conflicts" isOpen={isEventFiltersOpen} onToggle={toggleEventFilters} />
+        <EntitySectionHeader
+          label="Conflicts"
+          isOpen={isEventFiltersOpen}
+          onToggle={toggleEventFilters}
+        />
         {isEventFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
             {/* Conflict subtype buttons */}
             <div className="flex flex-wrap gap-1">
-              <FilterButton label="Airstrikes" active={showAirstrikes} color={ENTITY_DOT_COLORS.airstrikes} onToggle={() => useFilterStore.getState().toggleShowAirstrikes()} />
-              <FilterButton label="Ground Combat" active={showGroundCombat} color={ENTITY_DOT_COLORS.groundCombat} onToggle={() => useFilterStore.getState().toggleShowGroundCombat()} />
-              <FilterButton label="Targeted" active={showTargeted} color={ENTITY_DOT_COLORS.targeted} onToggle={() => useFilterStore.getState().toggleShowTargeted()} />
+              <FilterButton
+                label="Airstrikes"
+                active={showAirstrikes}
+                color={ENTITY_DOT_COLORS.airstrikes}
+                onToggle={() => useFilterStore.getState().toggleShowAirstrikes()}
+              />
+              <FilterButton
+                label="Ground Combat"
+                active={showGroundCombat}
+                color={ENTITY_DOT_COLORS.groundCombat}
+                onToggle={() => useFilterStore.getState().toggleShowGroundCombat()}
+              />
+              <FilterButton
+                label="Targeted"
+                active={showTargeted}
+                color={ENTITY_DOT_COLORS.targeted}
+                onToggle={() => useFilterStore.getState().toggleShowTargeted()}
+              />
             </div>
             {/* Severity toggles */}
             <SeverityToggles />
@@ -294,7 +353,12 @@ export function FilterPanelContent() {
 
             {/* Country filter */}
             <div>
-              <SectionHeader label="Country" active={isEventCountryActive} filterKey="eventCountry" onClear={clearFilter} />
+              <SectionHeader
+                label="Country"
+                active={isEventCountryActive}
+                filterKey="eventCountry"
+                onClear={clearFilter}
+              />
               <div className="mt-1">
                 <CountryFilter
                   selectedCountries={eventCountries}
@@ -307,7 +371,12 @@ export function FilterPanelContent() {
 
             {/* Mentions slider */}
             <div>
-              <SectionHeader label="Mentions" active={isMentionsActive} filterKey="mentions" onClear={clearFilter} />
+              <SectionHeader
+                label="Mentions"
+                active={isMentionsActive}
+                filterKey="mentions"
+                onClear={clearFilter}
+              />
               <div className="mt-1">
                 <RangeSlider
                   label="Mentions"
@@ -324,7 +393,12 @@ export function FilterPanelContent() {
 
             {/* Date range slider */}
             <div>
-              <SectionHeader label="Date Range" active={isDateActive} filterKey="date" onClear={clearFilter} />
+              <SectionHeader
+                label="Date Range"
+                active={isDateActive}
+                filterKey="date"
+                onClear={clearFilter}
+              />
               <div className="mt-1">
                 <DateRangeFilter
                   dateStart={dateStart}
@@ -341,7 +415,11 @@ export function FilterPanelContent() {
 
       {/* Sites section */}
       <div>
-        <EntitySectionHeader label="Sites" isOpen={isSiteFiltersOpen} onToggle={toggleSiteFilters} />
+        <EntitySectionHeader
+          label="Sites"
+          isOpen={isSiteFiltersOpen}
+          onToggle={toggleSiteFilters}
+        />
         {isSiteFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
             {/* Site subtype buttons */}
@@ -359,13 +437,22 @@ export function FilterPanelContent() {
             </div>
             {/* Healthy / Attacked toggles */}
             <div className="flex flex-col gap-1.5">
-              <SliderToggle label="Healthy Sites" checked={showHealthySites} onChange={() => useFilterStore.getState().toggleShowHealthySites()} color={ENTITY_DOT_COLORS.siteHealthy} />
-              <SliderToggle label="Attacked Sites" checked={showAttackedSites} onChange={() => useFilterStore.getState().toggleShowAttackedSites()} color={ENTITY_DOT_COLORS.siteAttacked} />
+              <SliderToggle
+                label="Healthy Sites"
+                checked={showHealthySites}
+                onChange={() => useFilterStore.getState().toggleShowHealthySites()}
+                color={ENTITY_DOT_COLORS.siteHealthy}
+              />
+              <SliderToggle
+                label="Attacked Sites"
+                checked={showAttackedSites}
+                onChange={() => useFilterStore.getState().toggleShowAttackedSites()}
+                color={ENTITY_DOT_COLORS.siteAttacked}
+              />
             </div>
           </div>
         )}
       </div>
-
     </div>
   );
 }
@@ -392,9 +479,7 @@ export function FilterPanelSlot() {
           >
             <span>
               Filters
-              {activeCount > 0 && (
-                <span className="ml-1 text-accent-blue">({activeCount})</span>
-              )}
+              {activeCount > 0 && <span className="ml-1 text-accent-blue">({activeCount})</span>}
             </span>
             <span className="text-text-muted">{isCollapsed ? '+' : '-'}</span>
           </button>

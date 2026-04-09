@@ -12,14 +12,18 @@ function loadRecentTags(): string[] {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) return parsed.slice(0, MAX_RECENT_TAGS);
     }
-  } catch { /* localStorage unavailable or corrupted */ }
+  } catch {
+    /* localStorage unavailable or corrupted */
+  }
   return [];
 }
 
 function persistRecentTags(tags: string[]): void {
   try {
     localStorage.setItem(RECENT_TAGS_KEY, JSON.stringify(tags));
-  } catch { /* silently fail */ }
+  } catch {
+    /* silently fail */
+  }
 }
 
 /** Extract tag expressions (e.g., "type:flight", "country:iran") from an AST */
@@ -77,7 +81,8 @@ export const useSearchStore = create<SearchState>()((set, get) => ({
     set({ isFilterMode: true, isSearchModalOpen: false, recentTags: merged });
   },
 
-  clearSearch: () => set({ query: '', parsedQuery: null, isFilterMode: false, matchedIds: new Set<string>() }),
+  clearSearch: () =>
+    set({ query: '', parsedQuery: null, isFilterMode: false, matchedIds: new Set<string>() }),
 
   setMatchedIds: (ids) => set({ matchedIds: ids }),
 }));

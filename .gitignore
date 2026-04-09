@@ -43,6 +43,10 @@ load-test-results/
 # Test artifacts
 test-results/
 .playwright-mcp/
+coverage/
+
+# Capture script scratch space (scripts/capture-hero.ts intermediate frames)
+tmp/
 
 # MCP config
 .mcp.json

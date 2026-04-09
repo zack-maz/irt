@@ -336,9 +336,7 @@ describe('fly-to deduplication', () => {
     });
 
     expect(flyToCalls).toHaveLength(1);
-    expect(flyToCalls[0]).toEqual(
-      expect.objectContaining({ lat: 35.6892, lng: 51.389 }),
-    );
+    expect(flyToCalls[0]).toEqual(expect.objectContaining({ lat: 35.6892, lng: 51.389 }));
 
     unmount();
   });
@@ -378,9 +376,7 @@ describe('fly-to deduplication', () => {
     });
 
     expect(flyToCalls).toHaveLength(2);
-    expect(flyToCalls[1]).toEqual(
-      expect.objectContaining({ lat: 33.3152, lng: 44.3661 }),
-    );
+    expect(flyToCalls[1]).toEqual(expect.objectContaining({ lat: 33.3152, lng: 44.3661 }));
 
     unmount();
   });
@@ -405,9 +401,7 @@ describe('fly-to deduplication', () => {
     });
 
     expect(flyToCalls).toHaveLength(2);
-    expect(flyToCalls[1]).toEqual(
-      expect.objectContaining({ lat: 35.6892, lng: 51.389 }),
-    );
+    expect(flyToCalls[1]).toEqual(expect.objectContaining({ lat: 35.6892, lng: 51.389 }));
 
     unmount();
   });

@@ -19,7 +19,8 @@ affects: [07-02 frontend integration, polling intervals, source selector UI]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [shared normalizer extraction, 3-source dispatch with helper functions, credential-free adapter]
+  patterns:
+    [shared normalizer extraction, 3-source dispatch with helper functions, credential-free adapter]
 
 key-files:
   created:
@@ -40,15 +41,15 @@ key-files:
     - server/__tests__/server.test.ts
 
 key-decisions:
-  - "Extracted shared V2 normalizer into adsb-v2-normalize.ts to avoid code duplication between adsb-exchange and adsb-lol adapters"
-  - "adsblol as default flight source (no API key required, best out-of-box experience)"
-  - "30s cache TTL for adsb.lol (respectful of community API)"
-  - "parseSource/getCache/getFetcher helper pattern for clean 3-source dispatch"
+  - 'Extracted shared V2 normalizer into adsb-v2-normalize.ts to avoid code duplication between adsb-exchange and adsb-lol adapters'
+  - 'adsblol as default flight source (no API key required, best out-of-box experience)'
+  - '30s cache TTL for adsb.lol (respectful of community API)'
+  - 'parseSource/getCache/getFetcher helper pattern for clean 3-source dispatch'
 
 patterns-established:
-  - "Shared normalizer pattern: common response format extracted to shared module, imported by multiple adapters"
-  - "Credential-free adapter: adsb-lol calls fetch(url) with no options object (no headers)"
-  - "Source config endpoint: GET /api/sources returns { source: { configured: boolean } } per source"
+  - 'Shared normalizer pattern: common response format extracted to shared module, imported by multiple adapters'
+  - 'Credential-free adapter: adsb-lol calls fetch(url) with no options object (no headers)'
+  - 'Source config endpoint: GET /api/sources returns { source: { configured: boolean } } per source'
 
 requirements-completed: [DATA-04]
 
@@ -70,6 +71,7 @@ completed: 2026-03-16
 - **Files modified:** 14
 
 ## Accomplishments
+
 - Extracted shared V2 normalizer (normalizeAircraft, AdsbAircraft, AdsbResponse) into dedicated module -- both adsb-exchange and adsb-lol import from it
 - Created adsb.lol adapter that fetches from api.adsb.lol with no auth headers and no trailing slash
 - Extended flight route to dispatch across 3 sources (opensky, adsb, adsblol) with adsblol as the new default
@@ -89,6 +91,7 @@ Each task was committed atomically (TDD: test then feat):
    - `07cc801` (feat: extend flight dispatch to 3 sources, add /api/sources endpoint)
 
 ## Files Created/Modified
+
 - `server/adapters/adsb-v2-normalize.ts` - Shared V2 normalizer with AdsbAircraft/AdsbResponse types and normalizeAircraft function
 - `server/adapters/adsb-lol.ts` - adsb.lol adapter: fetches from api.adsb.lol without auth, uses shared normalizer
 - `server/adapters/adsb-exchange.ts` - Refactored to import shared normalizer (no local copy)
@@ -105,6 +108,7 @@ Each task was committed atomically (TDD: test then feat):
 - `server/__tests__/server.test.ts` - Updated for new default source
 
 ## Decisions Made
+
 - Extracted shared V2 normalizer into `adsb-v2-normalize.ts` to avoid code duplication between adapters
 - Changed default flight source from 'opensky' to 'adsblol' (no API key required, best out-of-box experience)
 - Set 30s cache TTL for adsb.lol (respectful of community API with dynamic rate limits)
@@ -116,6 +120,7 @@ Each task was committed atomically (TDD: test then feat):
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Updated pre-existing server.test.ts for new default source**
+
 - **Found during:** Task 2 (flight route dispatch refactor)
 - **Issue:** `server/__tests__/server.test.ts` had a cache-first test calling `/api/flights` without `?source=` param, expecting OpenSky dispatch. With adsblol as the new default, this test broke.
 - **Fix:** Added mocks for adsb-exchange and adsb-lol adapters, changed test URL to `?source=opensky` explicitly, added credential env vars.
@@ -129,12 +134,15 @@ Each task was committed atomically (TDD: test then feat):
 **Impact on plan:** Necessary fix due to default source change. No scope creep.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - adsb.lol requires no API key or external configuration.
 
 ## Next Phase Readiness
+
 - Server-side adsb.lol integration complete with full test coverage
 - Ready for Plan 02: Frontend integration (source selector, polling intervals, disabled-state UI for unconfigured sources)
 - `/api/sources` endpoint ready for frontend to query configuration status
@@ -144,5 +152,6 @@ None - adsb.lol requires no API key or external configuration.
 All 6 created files verified on disk. All 4 commit hashes verified in git log.
 
 ---
-*Phase: 07-adsb-lol-data-source*
-*Completed: 2026-03-16*
+
+_Phase: 07-adsb-lol-data-source_
+_Completed: 2026-03-16_

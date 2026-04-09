@@ -1,5 +1,11 @@
 import { useRef, useLayoutEffect, useState } from 'react';
-import type { MapEntity, FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
+import type {
+  MapEntity,
+  FlightEntity,
+  ShipEntity,
+  ConflictEventEntity,
+  SiteEntity,
+} from '@/types/entities';
 import { isConflictEventType, EVENT_TYPE_LABELS, SITE_TYPE_LABELS } from '@/types/ui';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
@@ -21,15 +27,40 @@ function FlightContent({ entity }: { entity: FlightEntity }) {
 
   return (
     <>
-      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>Flight</span>
-      <br /><strong>{d.callsign || d.icao24}</strong>
-      {d.callsign && <><br />ICAO: {d.icao24}</>}
-      <br />Origin: {d.originCountry || '--'}
-      <br />Altitude: {alt}
-      <br />Speed: {speed}
-      <br />Heading: {heading}
-      <br />Status: {d.onGround ? 'Ground' : 'Airborne'}
-      {d.unidentified && <><br /><span style={{ color: '#ef4444' }}>Unidentified</span></>}
+      <span
+        style={{
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          fontSize: '9px',
+          letterSpacing: '0.05em',
+        }}
+      >
+        Flight
+      </span>
+      <br />
+      <strong>{d.callsign || d.icao24}</strong>
+      {d.callsign && (
+        <>
+          <br />
+          ICAO: {d.icao24}
+        </>
+      )}
+      <br />
+      Origin: {d.originCountry || '--'}
+      <br />
+      Altitude: {alt}
+      <br />
+      Speed: {speed}
+      <br />
+      Heading: {heading}
+      <br />
+      Status: {d.onGround ? 'Ground' : 'Airborne'}
+      {d.unidentified && (
+        <>
+          <br />
+          <span style={{ color: '#ef4444' }}>Unidentified</span>
+        </>
+      )}
     </>
   );
 }
@@ -38,12 +69,30 @@ function ShipContent({ entity }: { entity: ShipEntity }) {
   const d = entity.data;
   return (
     <>
-      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>Ship</span>
-      <br /><strong>{d.shipName || `MMSI ${d.mmsi}`}</strong>
-      {d.shipName && <><br />MMSI: {d.mmsi}</>}
-      <br />Speed: {d.speedOverGround.toFixed(1)} kn
-      <br />Course: {Math.round(d.courseOverGround)}°
-      <br />Heading: {Math.round(d.trueHeading)}°
+      <span
+        style={{
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          fontSize: '9px',
+          letterSpacing: '0.05em',
+        }}
+      >
+        Ship
+      </span>
+      <br />
+      <strong>{d.shipName || `MMSI ${d.mmsi}`}</strong>
+      {d.shipName && (
+        <>
+          <br />
+          MMSI: {d.mmsi}
+        </>
+      )}
+      <br />
+      Speed: {d.speedOverGround.toFixed(1)} kn
+      <br />
+      Course: {Math.round(d.courseOverGround)}°
+      <br />
+      Heading: {Math.round(d.trueHeading)}°
     </>
   );
 }
@@ -54,15 +103,44 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
 
   return (
     <>
-      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>
+      <span
+        style={{
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          fontSize: '9px',
+          letterSpacing: '0.05em',
+        }}
+      >
         {EVENT_TYPE_LABELS[entity.type] ?? entity.type}
       </span>
-      <br /><strong>{d.eventType || 'Unknown'}</strong>
-      {d.locationName && <><br />Location: {d.locationName}</>}
-      {d.actor1 && <><br />Actor 1: {d.actor1}</>}
-      {d.actor2 && <><br />Actor 2: {d.actor2}</>}
-      <br />Date: {date}
-      {d.cameoCode && <><br />CAMEO: {d.cameoCode}</>}
+      <br />
+      <strong>{d.eventType || 'Unknown'}</strong>
+      {d.locationName && (
+        <>
+          <br />
+          Location: {d.locationName}
+        </>
+      )}
+      {d.actor1 && (
+        <>
+          <br />
+          Actor 1: {d.actor1}
+        </>
+      )}
+      {d.actor2 && (
+        <>
+          <br />
+          Actor 2: {d.actor2}
+        </>
+      )}
+      <br />
+      Date: {date}
+      {d.cameoCode && (
+        <>
+          <br />
+          CAMEO: {d.cameoCode}
+        </>
+      )}
     </>
   );
 }
@@ -75,13 +153,35 @@ function SiteContent({ entity }: { entity: SiteEntity }) {
 
   return (
     <>
-      <span style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.05em' }}>{typeLabel}</span>
-      <br /><strong>{entity.label}</strong>
-      {entity.operator && <><br />Operator: {entity.operator}</>}
-      <br />Status: <span style={{ color: attack.isAttacked ? '#f97316' : '#22c55e' }}>
+      <span
+        style={{
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          fontSize: '9px',
+          letterSpacing: '0.05em',
+        }}
+      >
+        {typeLabel}
+      </span>
+      <br />
+      <strong>{entity.label}</strong>
+      {entity.operator && (
+        <>
+          <br />
+          Operator: {entity.operator}
+        </>
+      )}
+      <br />
+      Status:{' '}
+      <span style={{ color: attack.isAttacked ? '#f97316' : '#22c55e' }}>
         {attack.isAttacked ? `Attacked (${attack.attackCount} events)` : 'Healthy'}
       </span>
-      {attack.latestAttackDate && <><br />Last attack: {new Date(attack.latestAttackDate).toISOString().slice(0, 10)}</>}
+      {attack.latestAttackDate && (
+        <>
+          <br />
+          Last attack: {new Date(attack.latestAttackDate).toISOString().slice(0, 10)}
+        </>
+      )}
     </>
   );
 }

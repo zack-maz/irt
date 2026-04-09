@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { hashUrl, deduplicateAndCluster } from '../../lib/newsClustering.js';
-import type { NewsArticle, NewsCluster } from '../../types.js';
+import type { NewsArticle } from '../../types.js';
 
 const makeArticle = (overrides: Partial<NewsArticle> = {}): NewsArticle => ({
   id: 'test-id',
@@ -38,8 +38,18 @@ describe('newsClustering', () => {
     it('removes duplicate URLs keeping first seen', () => {
       const now = Date.now();
       const articles = [
-        makeArticle({ id: 'id-1', url: 'https://example.com/same', title: 'First version', publishedAt: now }),
-        makeArticle({ id: 'id-1', url: 'https://example.com/same', title: 'Second version', publishedAt: now + 1000 }),
+        makeArticle({
+          id: 'id-1',
+          url: 'https://example.com/same',
+          title: 'First version',
+          publishedAt: now,
+        }),
+        makeArticle({
+          id: 'id-1',
+          url: 'https://example.com/same',
+          title: 'Second version',
+          publishedAt: now + 1000,
+        }),
       ];
 
       const clusters = deduplicateAndCluster(articles);

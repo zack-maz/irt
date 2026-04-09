@@ -1,11 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import {
-  buildAuditRecord,
-  type PipelineTrace,
-  type PhaseCChecks,
-  type AuditRecord,
-} from '../../lib/eventAudit.js';
+import { buildAuditRecord, type PipelineTrace, type AuditRecord } from '../../lib/eventAudit.js';
 import type { ConflictEventEntity } from '../../types.js';
 
 /** Build a minimal ConflictEventEntity for testing. */
@@ -110,9 +105,7 @@ describe('buildAuditRecord', () => {
     expect(record.id).toBe('gdelt-456');
     expect(record.status).toBe('rejected');
     expect(record.event).toBeNull();
-    expect(record.pipelineTrace.rejectionReason).toBe(
-      'Below confidence threshold (0.15 < 0.35)',
-    );
+    expect(record.pipelineTrace.rejectionReason).toBe('Below confidence threshold (0.15 < 0.35)');
   });
 
   it('PipelineTrace sub-scores are present and valid numbers', () => {
@@ -141,7 +134,7 @@ describe('buildAuditRecord', () => {
         originalLat: 35.6892,
         originalLng: 51.389,
         dispersedLat: 35.71,
-        dispersedLng: 51.40,
+        dispersedLng: 51.4,
       },
     });
 
@@ -158,83 +151,5 @@ describe('buildAuditRecord', () => {
   it('supports optional bellingcatMatch', () => {
     const trace = makeTrace({ bellingcatMatch: true });
     expect(trace.bellingcatMatch).toBe(true);
-  });
-
-  it('supports optional phaseC with verified status', () => {
-    const phaseC: PhaseCChecks = {
-      titleFetched: true,
-      nlpActors: ['Iran', 'IRGC'],
-      nlpPlaces: ['Baghdad'],
-      validationStatus: 'verified',
-    };
-    const trace = makeTrace({ phaseC });
-    expect(trace.phaseC).toBeDefined();
-    expect(trace.phaseC!.titleFetched).toBe(true);
-    expect(trace.phaseC!.validationStatus).toBe('verified');
-    expect(trace.phaseC!.nlpActors).toEqual(['Iran', 'IRGC']);
-    expect(trace.phaseC!.nlpPlaces).toEqual(['Baghdad']);
-  });
-
-  it('supports phaseC with mismatch status and reason', () => {
-    const phaseC: PhaseCChecks = {
-      titleFetched: true,
-      nlpActors: ['Israel'],
-      nlpPlaces: [],
-      validationStatus: 'mismatch',
-      mismatchReason: 'Actor countries IS do not include geocoded IZ',
-    };
-    const trace = makeTrace({ phaseC });
-    expect(trace.phaseC!.validationStatus).toBe('mismatch');
-    expect(trace.phaseC!.mismatchReason).toContain('IS');
-  });
-
-  it('supports phaseC with relocated status', () => {
-    const phaseC: PhaseCChecks = {
-      titleFetched: true,
-      nlpActors: [],
-      nlpPlaces: ['Damascus'],
-      validationStatus: 'relocated',
-      relocatedTo: { lat: 33.513, lng: 36.292, cityName: 'Damascus' },
-    };
-    const trace = makeTrace({ phaseC });
-    expect(trace.phaseC!.validationStatus).toBe('relocated');
-    expect(trace.phaseC!.relocatedTo!.cityName).toBe('Damascus');
-    expect(trace.phaseC!.relocatedTo!.lat).toBe(33.513);
-  });
-
-  it('supports phaseC with skipped status', () => {
-    const phaseC: PhaseCChecks = {
-      titleFetched: false,
-      nlpActors: [],
-      nlpPlaces: [],
-      validationStatus: 'skipped',
-      skipReason: 'title_fetch_failed',
-    };
-    const trace = makeTrace({ phaseC });
-    expect(trace.phaseC!.validationStatus).toBe('skipped');
-    expect(trace.phaseC!.skipReason).toBe('title_fetch_failed');
-    expect(trace.phaseC!.titleFetched).toBe(false);
-  });
-
-  it('phaseC fields appear in full audit record', () => {
-    const phaseC: PhaseCChecks = {
-      titleFetched: true,
-      nlpActors: ['Turkey'],
-      nlpPlaces: ['Aleppo'],
-      validationStatus: 'verified',
-    };
-    const event = makeEvent('gdelt-789');
-    const trace = makeTrace({ phaseC });
-    const record = buildAuditRecord({
-      id: 'gdelt-789',
-      status: 'accepted',
-      event,
-      pipelineTrace: trace,
-      rawGdeltColumns: { GLOBALEVENTID: '789' },
-    });
-
-    expect(record.pipelineTrace.phaseC).toBeDefined();
-    expect(record.pipelineTrace.phaseC!.nlpActors).toEqual(['Turkey']);
-    expect(record.pipelineTrace.phaseC!.nlpPlaces).toEqual(['Aleppo']);
   });
 });

@@ -9,7 +9,8 @@ dependency_graph:
   affects: [BaseMap]
 tech_stack:
   added: []
-  patterns: [haversine-proximity, coarse-bbox-prefilter, map-project-html-overlay, raf-throttled-rerender]
+  patterns:
+    [haversine-proximity, coarse-bbox-prefilter, map-project-html-overlay, raf-throttled-rerender]
 key_files:
   created:
     - src/hooks/useProximityAlerts.ts
@@ -34,10 +35,10 @@ Haversine-based proximity detection between unidentified flights and key infrast
 
 ## Tasks Completed
 
-| Task | Name | Commit | Files |
-| ---- | ---- | ------ | ----- |
-| 1 | Create useProximityAlerts hook (TDD) | 96a6e02 | src/hooks/useProximityAlerts.ts, src/__tests__/proximityAlerts.test.ts |
-| 2 | Build ProximityAlertOverlay and wire into BaseMap | ce53e5f | src/components/map/ProximityAlertOverlay.tsx, src/components/map/BaseMap.tsx |
+| Task | Name                                              | Commit  | Files                                                                        |
+| ---- | ------------------------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| 1    | Create useProximityAlerts hook (TDD)              | 96a6e02 | src/hooks/useProximityAlerts.ts, src/**tests**/proximityAlerts.test.ts       |
+| 2    | Build ProximityAlertOverlay and wire into BaseMap | ce53e5f | src/components/map/ProximityAlertOverlay.tsx, src/components/map/BaseMap.tsx |
 
 ## Implementation Details
 

@@ -1,6 +1,6 @@
 ---
 status: diagnosed
-trigger: "Events line shows 0 events and no /api/events polling in Network tab"
+trigger: 'Events line shows 0 events and no /api/events polling in Network tab'
 created: 2026-03-17T10:30:00Z
 updated: 2026-03-17T10:50:00Z
 ---
@@ -88,17 +88,17 @@ started: First observation during UAT test 5
 ## Resolution
 
 root_cause: |
-  The /api/events endpoint returns HTTP 500 because ACLED OAuth2 authentication fails.
-  The ACLED adapter (server/adapters/acled.ts) requests a token using the email/password from .env,
-  but the ACLED API rejects the credentials (likely invalid, expired, or unactivated account).
+The /api/events endpoint returns HTTP 500 because ACLED OAuth2 authentication fails.
+The ACLED adapter (server/adapters/acled.ts) requests a token using the email/password from .env,
+but the ACLED API rejects the credentials (likely invalid, expired, or unactivated account).
 
-  This server error is then SILENTLY SWALLOWED by the client because useEventPolling.ts
-  does not check res.ok before processing the response. The error JSON { error: "Internal server error" }
-  is passed to setEventData(), which throws TypeError on undefined .data, caught by the catch block
-  that calls setError(). The store shows 0 events with error status.
+This server error is then SILENTLY SWALLOWED by the client because useEventPolling.ts
+does not check res.ok before processing the response. The error JSON { error: "Internal server error" }
+is passed to setEventData(), which throws TypeError on undefined .data, caught by the catch block
+that calls setError(). The store shows 0 events with error status.
 
-  The 300-second poll interval means no retry for 5 minutes, so the user sees zero network activity
-  after the single initial failed request (which they likely missed if DevTools was opened after page load).
+The 300-second poll interval means no retry for 5 minutes, so the user sees zero network activity
+after the single initial failed request (which they likely missed if DevTools was opened after page load).
 fix:
 verification:
 files_changed: []

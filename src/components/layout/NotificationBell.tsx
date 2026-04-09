@@ -31,11 +31,7 @@ export function NotificationBell() {
   }, [isDropdownOpen, handleMouseDown]);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative"
-      data-testid="notification-bell"
-    >
+    <div ref={containerRef} className="relative" data-testid="notification-bell">
       <button
         onClick={toggleDropdown}
         className="relative rounded-lg border border-border bg-surface-overlay p-2 shadow-lg backdrop-blur-sm hover:bg-white/5 transition-colors"

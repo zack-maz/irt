@@ -17,9 +17,7 @@ export function UtcClock() {
       data-testid="utc-clock"
       className="rounded-md bg-surface-overlay/80 px-2 py-1 backdrop-blur-sm"
     >
-      <span className="text-xs text-text-secondary tabular-nums tracking-wide">
-        {utc}
-      </span>
+      <span className="text-xs text-text-secondary tabular-nums tracking-wide">{utc}</span>
     </div>
   );
 }

@@ -14,6 +14,7 @@ A runnable React/Vite/TypeScript application shell with dark theme layout, ready
 ## Implementation Decisions
 
 ### Layout structure
+
 - Full-screen map layout with floating overlays — map fills entire viewport
 - All controls, panels, and counters float on top of the map with semi-transparent dark backgrounds
 - Detail panel slides in from the left edge (~320px wide) when an entity is clicked
@@ -22,6 +23,7 @@ A runnable React/Vite/TypeScript application shell with dark theme layout, ready
 - Title/branding in top-left area (above or near the counters card)
 
 ### Shell placeholder regions
+
 - Top-left: title/branding + collapsible counters card slot
 - Top-right: layer toggle buttons + expandable filter controls slot
 - Left edge: slide-in detail panel slot (hidden by default)
@@ -29,6 +31,7 @@ A runnable React/Vite/TypeScript application shell with dark theme layout, ready
 - All overlay slots should be defined as layout regions with z-index layering
 
 ### Claude's Discretion
+
 - Exact dark background shade and overlay opacity levels
 - Typography choices (font family, sizes, weights)
 - Spacing and padding within overlay panels
@@ -49,16 +52,20 @@ A runnable React/Vite/TypeScript application shell with dark theme layout, ready
 </specifics>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - None — greenfield project, no existing code
 
 ### Established Patterns
+
 - Stack decided in STATE.md: React 19 + Vite 6 + TypeScript 5 + Tailwind CSS 4 + Zustand 5
 - Dark theme with black/white primary + blue/red/green/yellow accents only
 
 ### Integration Points
+
 - Shell layout must accommodate Deck.gl + MapLibre map component (Phase 2)
 - Overlay regions must support Zustand-driven show/hide state
 
@@ -73,5 +80,5 @@ None — discussion stayed within phase scope
 
 ---
 
-*Phase: 01-project-scaffolding-theme*
-*Context gathered: 2026-03-13*
+_Phase: 01-project-scaffolding-theme_
+_Context gathered: 2026-03-13_

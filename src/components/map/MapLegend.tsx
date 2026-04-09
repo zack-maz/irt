@@ -115,9 +115,7 @@ function LegendItem({ config }: { config: LegendConfig }) {
     );
   }
 
-  const gradient = config.colorStops
-    .map((stop) => stop.color)
-    .join(', ');
+  const gradient = config.colorStops.map((stop) => stop.color).join(', ');
 
   return (
     <div className="pointer-events-auto rounded bg-surface-overlay/80 px-2 py-1.5 backdrop-blur-sm">
@@ -144,10 +142,7 @@ function LegendItem({ config }: { config: LegendConfig }) {
 let _cachedLegends: LegendConfig[] = [];
 const selectActiveLegends = (s: { activeLayers: Set<VisualizationLayerId> }): LegendConfig[] => {
   const next = LEGEND_REGISTRY.filter((l) => s.activeLayers.has(l.layerId));
-  if (
-    next.length === _cachedLegends.length &&
-    next.every((v, i) => v === _cachedLegends[i])
-  ) {
+  if (next.length === _cachedLegends.length && next.every((v, i) => v === _cachedLegends[i])) {
     return _cachedLegends;
   }
   _cachedLegends = next;
@@ -161,7 +156,9 @@ export function MapLegend() {
   if (activeLegends.length === 0) return null;
 
   // Offset past sidebar: icon strip (48px) + gap (8px), plus sidebar width (280px) when open
-  const leftOffset = isSidebarOpen ? 'calc(var(--width-icon-strip) + var(--width-sidebar) + 8px)' : 'calc(var(--width-icon-strip) + 8px)';
+  const leftOffset = isSidebarOpen
+    ? 'calc(var(--width-icon-strip) + var(--width-sidebar) + 8px)'
+    : 'calc(var(--width-icon-strip) + 8px)';
 
   return (
     <div
@@ -169,10 +166,7 @@ export function MapLegend() {
       style={{ left: leftOffset }}
     >
       {activeLegends.map((legend) => (
-        <div
-          key={legend.layerId}
-          className="transition-opacity duration-300"
-        >
+        <div key={legend.layerId} className="transition-opacity duration-300">
           <LegendItem config={legend} />
         </div>
       ))}

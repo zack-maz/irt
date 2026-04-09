@@ -1,15 +1,24 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
-import { log } from '../lib/logger.js';
-import { fetchMarkets, isValidRange } from '../adapters/yahoo-finance.js';
-import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../constants.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'markets' });
+import { fetchMarkets } from '../adapters/yahoo-finance.js';
+import { MARKETS_CACHE_TTL, MARKETS_REDIS_TTL_SEC } from '../config.js';
+import { validateQuery } from '../middleware/validate.js';
+import { AppError } from '../middleware/errorHandler.js';
 import type { MarketQuote } from '../types.js';
+
+/** Zod schema for /api/markets query params */
+const marketsQuerySchema = z.object({
+  range: z.enum(['1d', '5d', '1mo', 'ytd']).default('1d'),
+});
 
 export const marketsRouter = Router();
 
-marketsRouter.get('/', async (req, res) => {
-  const rangeParam = typeof req.query.range === 'string' ? req.query.range : '1d';
-  const range = isValidRange(rangeParam) ? rangeParam : '1d';
+marketsRouter.get('/', validateQuery(marketsQuerySchema), async (_req, res) => {
+  const { range } = res.locals.validatedQuery as z.infer<typeof marketsQuerySchema>;
 
   const cacheKey = `markets:yahoo:${range}`;
 
@@ -27,13 +36,16 @@ marketsRouter.get('/', async (req, res) => {
       // 3. Cache the fresh data
       await cacheSetSafe(cacheKey, quotes, MARKETS_REDIS_TTL_SEC);
 
-      log({ level: 'info', message: `[markets] fetched ${quotes.length}/${5} tickers (${range}): ${quotes.map((q) => q.symbol).join(', ')}` });
+      log.info(
+        { count: quotes.length, total: 5, range, tickers: quotes.map((q) => q.symbol) },
+        'fetched tickers',
+      );
 
       // 4. Return fresh response
       res.json({ data: quotes, stale: false, lastFresh: Date.now() });
     } else if (cached) {
       // All tickers failed but we have stale cache
-      log({ level: 'warn', message: '[markets] all tickers failed, serving stale cache' });
+      log.warn('all tickers failed, serving stale cache');
       res.json({
         data: cached.data,
         stale: true,
@@ -41,11 +53,13 @@ marketsRouter.get('/', async (req, res) => {
       });
     } else {
       // No data at all
-      log({ level: 'error', message: '[markets] all tickers failed with no cache available' });
-      res.status(502).json({ error: 'No market data available' });
+      log.error('all tickers failed with no cache available');
+      res
+        .status(502)
+        .json({ error: 'No market data available', code: 'UPSTREAM_ERROR', statusCode: 502 });
     }
   } catch (err) {
-    log({ level: 'error', message: `[markets] upstream error: ${(err as Error).message}` });
+    log.error({ err }, 'upstream error');
 
     // Fall back to stale cache if available
     if (cached) {
@@ -55,7 +69,11 @@ marketsRouter.get('/', async (req, res) => {
         lastFresh: cached.lastFresh,
       });
     } else {
-      throw err; // Express catches and forwards to errorHandler
+      throw new AppError(
+        502,
+        'UPSTREAM_FAIL',
+        `yahoo-finance fetch failed: ${(err as Error).message}`,
+      );
     }
   }
 });

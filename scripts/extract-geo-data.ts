@@ -104,28 +104,26 @@ async function main() {
   const countriesRaw = await fetchJSON(NE_110M_COUNTRIES_URL);
   console.log(`Total features: ${countriesRaw.features.length}`);
 
-  const filteredCountries = countriesRaw.features
-    .filter(overlapsFilterRegion)
-    .map((f) => {
-      let isoA3 = f.properties.ISO_A3 as string;
-      const adm0A3 = f.properties.ADM0_A3 as string;
-      const name = f.properties.NAME as string;
+  const filteredCountries = countriesRaw.features.filter(overlapsFilterRegion).map((f) => {
+    let isoA3 = f.properties.ISO_A3 as string;
+    const adm0A3 = f.properties.ADM0_A3 as string;
+    const name = f.properties.NAME as string;
 
-      // Fallback for -99 codes
-      if (isoA3 === '-99' && adm0A3) {
-        console.log(`  ISO_A3 fallback: ${name} -> ${adm0A3} (was -99)`);
-        isoA3 = adm0A3;
-      }
+    // Fallback for -99 codes
+    if (isoA3 === '-99' && adm0A3) {
+      console.log(`  ISO_A3 fallback: ${name} -> ${adm0A3} (was -99)`);
+      isoA3 = adm0A3;
+    }
 
-      return {
-        type: 'Feature' as const,
-        properties: { ISO_A3: isoA3, NAME: name },
-        geometry: {
-          type: f.geometry.type,
-          coordinates: roundCoords(f.geometry.coordinates, 2),
-        },
-      };
-    });
+    return {
+      type: 'Feature' as const,
+      properties: { ISO_A3: isoA3, NAME: name },
+      geometry: {
+        type: f.geometry.type,
+        coordinates: roundCoords(f.geometry.coordinates, 2),
+      },
+    };
+  });
 
   const countriesOut: GeoJSONCollection = {
     type: 'FeatureCollection',
@@ -138,15 +136,15 @@ async function main() {
   const countriesSize = Buffer.byteLength(JSON.stringify(countriesOut));
   console.log(`Filtered features: ${filteredCountries.length}`);
   console.log(`Output size: ${(countriesSize / 1024).toFixed(1)} KB`);
-  console.log(
-    'ISO A3 codes:',
-    filteredCountries.map((f) => f.properties.ISO_A3).join(', ')
-  );
+  console.log('ISO A3 codes:', filteredCountries.map((f) => f.properties.ISO_A3).join(', '));
 
   // Verify no -99 codes remain
   const bad = filteredCountries.filter((f) => f.properties.ISO_A3 === '-99');
   if (bad.length > 0) {
-    console.error('ERROR: Still have -99 codes:', bad.map((f) => f.properties.NAME));
+    console.error(
+      'ERROR: Still have -99 codes:',
+      bad.map((f) => f.properties.NAME),
+    );
     process.exit(1);
   }
 
@@ -187,10 +185,7 @@ async function main() {
   const disputedSize = Buffer.byteLength(JSON.stringify(disputedOut));
   console.log(`Filtered features: ${filteredDisputed.length}`);
   console.log(`Output size: ${(disputedSize / 1024).toFixed(1)} KB`);
-  console.log(
-    'Names:',
-    filteredDisputed.map((f) => f.properties.NAME).join(', ')
-  );
+  console.log('Names:', filteredDisputed.map((f) => f.properties.NAME).join(', '));
 
   if (filteredDisputed.length !== 3) {
     console.warn(`WARNING: Expected 3 disputed features, got ${filteredDisputed.length}`);

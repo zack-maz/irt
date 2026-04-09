@@ -28,21 +28,26 @@ const MAX_VISIBLE_ATTACKS = 5;
 
 function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 /** Event types that mark a facility as "destroyed" (score 0) */
 const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
 
-function computeWaterAttackStatus(facility: WaterFacility, events: ConflictEventEntity[], dateEnd: number) {
+function computeWaterAttackStatus(
+  facility: WaterFacility,
+  events: ConflictEventEntity[],
+  dateEnd: number,
+) {
   const attacks = events.filter((e) => {
     if (e.timestamp > dateEnd) return false;
-    if (Math.abs(e.lat - facility.lat) > COARSE_DEG || Math.abs(e.lng - facility.lng) > COARSE_DEG) return false;
+    if (Math.abs(e.lat - facility.lat) > COARSE_DEG || Math.abs(e.lng - facility.lng) > COARSE_DEG)
+      return false;
     return haversineDistanceKm(facility.lat, facility.lng, e.lat, e.lng) <= ATTACK_RADIUS_KM;
   });
   const isDestroyed = attacks.some((e) => DESTRUCTIVE_EVENT_TYPES.has(e.type));
@@ -71,7 +76,9 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
 
   const score = attack.isDestroyed ? 0 : healthToScore(facility.stress.compositeHealth);
   const scorePct = Math.round((score / 10) * 100);
-  const [r, g, b] = attack.isDestroyed ? [0, 0, 0] as const : stressToRGBA(facility.stress.compositeHealth, 255);
+  const [r, g, b] = attack.isDestroyed
+    ? ([0, 0, 0] as const)
+    : stressToRGBA(facility.stress.compositeHealth, 255);
   const stressColor = `rgb(${r}, ${g}, ${b})`;
 
   const [showAll, setShowAll] = useState(false);
@@ -111,9 +118,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
         Water Stress
       </h3>
       <div className="flex items-center justify-between px-3 py-1">
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
-          BWS Level
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">BWS Level</span>
         <div className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-full"
@@ -127,9 +132,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
 
       {/* Composite Health */}
       <div className="flex items-center justify-between px-3 py-1">
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
-          Health
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">Health</span>
         <div className="flex items-center gap-2">
           <div className="relative h-2 w-16 rounded-full bg-white/10 overflow-hidden">
             <div
@@ -140,7 +143,9 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
               }}
             />
           </div>
-          <span className="tabular-nums text-text-primary text-xs">{score}/10 {scoreToLabel(score)}</span>
+          <span className="tabular-nums text-text-primary text-xs">
+            {score}/10 {scoreToLabel(score)}
+          </span>
         </div>
       </div>
 
@@ -169,9 +174,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
           />
           {precipAge !== null && (
             <div className="px-3 py-1">
-              <span className="text-[10px] text-text-muted">
-                Updated {precipAge}s ago
-              </span>
+              <span className="text-[10px] text-text-muted">Updated {precipAge}s ago</span>
             </div>
           )}
         </>
@@ -185,7 +188,8 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
           </h3>
           <div className="px-3 py-1">
             <span className="text-xs text-red-400 font-semibold">
-              {attack.attackCount} conflict event{attack.attackCount !== 1 ? 's' : ''} within {ATTACK_RADIUS_KM}km
+              {attack.attackCount} conflict event{attack.attackCount !== 1 ? 's' : ''} within{' '}
+              {ATTACK_RADIUS_KM}km
             </span>
           </div>
           <div className="flex flex-col gap-1">
@@ -208,7 +212,9 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
                   <span className="text-text-secondary">{date}</span>
                   <span className="text-text-primary">{evtLabel}</span>
                   {evt.data.actor1 && (
-                    <span className="text-text-muted truncate max-w-[100px]">{evt.data.actor1}</span>
+                    <span className="text-text-muted truncate max-w-[100px]">
+                      {evt.data.actor1}
+                    </span>
                   )}
                 </button>
               );
@@ -226,15 +232,11 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
       )}
 
       {/* Location */}
-      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
-        Location
-      </h3>
+      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">Location</h3>
       <DetailValue label="Latitude" value={facility.lat.toFixed(6)} />
       <DetailValue label="Longitude" value={facility.lng.toFixed(6)} />
       <div className="flex items-center justify-between px-3 py-1">
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
-          Map
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">Map</span>
         <a
           href={osmUrl}
           target="_blank"
@@ -246,9 +248,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
       </div>
 
       {/* Source */}
-      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
-        Source
-      </h3>
+      <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">Source</h3>
       <DetailValue label="Data Source" value="OpenStreetMap" />
       <DetailValue label="Stress Data" value="WRI Aqueduct 4.0" />
     </div>

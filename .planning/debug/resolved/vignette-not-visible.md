@@ -1,6 +1,6 @@
 ---
 status: resolved
-trigger: "Investigate why the vignette edge effect is not visible on the map"
+trigger: 'Investigate why the vignette edge effect is not visible on the map'
 created: 2026-03-14T00:00:00Z
 updated: 2026-03-14T23:30:00Z
 ---

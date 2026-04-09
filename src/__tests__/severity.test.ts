@@ -3,7 +3,9 @@ import { computeSeverityScore } from '../lib/severity';
 import type { ConflictEventEntity } from '../../server/types';
 
 /** Helper to create a ConflictEventEntity with sensible defaults */
-function makeEvent(overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {}): ConflictEventEntity {
+function makeEvent(
+  overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {},
+): ConflictEventEntity {
   const now = Date.now();
   const { data: dataOverrides, ...rest } = overrides;
   return {
@@ -93,9 +95,19 @@ describe('computeSeverityScore', () => {
   });
 
   it('ranks wmd and airstrike equally (both weight 10)', () => {
-    const wmd = makeEvent({ type: 'wmd' });
-    const airstrike = makeEvent({ type: 'airstrike' });
+    // Pin Date.now() with fake timers so recency decay is identical for both
+    // computeSeverityScore() calls. Without this, ~microsecond drift between
+    // the two Date.now() reads inside computeSeverityScore breaks exact equality.
+    const fixedNow = Date.UTC(2026, 5, 1);
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+    try {
+      const wmd = makeEvent({ type: 'wmd', timestamp: fixedNow });
+      const airstrike = makeEvent({ type: 'airstrike', timestamp: fixedNow });
 
-    expect(computeSeverityScore(wmd)).toBe(computeSeverityScore(airstrike));
+      expect(computeSeverityScore(wmd)).toBe(computeSeverityScore(airstrike));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

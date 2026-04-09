@@ -1,11 +1,14 @@
 import type { MapEntity, SiteEntity } from '@/types/entities';
+import type { WaterFacility } from '../../../server/types';
 import type { SearchResult } from '@/lib/searchUtils';
 import { SearchResultItem } from '@/components/search/SearchResultItem';
 
+type SearchableEntity = MapEntity | SiteEntity | WaterFacility;
+
 interface SearchResultGroupProps {
   type: string;
-  results: SearchResult<MapEntity | SiteEntity>[];
-  onSelect: (entity: MapEntity | SiteEntity) => void;
+  results: SearchResult<SearchableEntity>[];
+  onSelect: (entity: SearchableEntity) => void;
 }
 
 export function SearchResultGroup({ type, results, onSelect }: SearchResultGroupProps) {

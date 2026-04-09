@@ -7,9 +7,6 @@ sourcesRouter.get('/', (_req, res) => {
     opensky: {
       configured: !!(process.env.OPENSKY_CLIENT_ID && process.env.OPENSKY_CLIENT_SECRET),
     },
-    adsb: {
-      configured: !!process.env.ADSB_EXCHANGE_API_KEY,
-    },
     adsblol: {
       configured: true,
     },

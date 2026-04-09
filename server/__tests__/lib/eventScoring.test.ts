@@ -4,7 +4,6 @@ import {
   computeEventConfidence,
   applyGoldsteinSanity,
   GOLDSTEIN_CEILINGS,
-  CAMEO_SPECIFICITY,
   getCameoSpecificity,
   checkBellingcatCorroboration,
   extractBellingcatGeo,
@@ -12,15 +11,17 @@ import {
 import type { BellingcatArticle } from '../../lib/eventScoring.js';
 
 /** Helper to create a test ConflictEventEntity with configurable fields */
-function makeTestEvent(overrides: {
-  type?: ConflictEventType;
-  actor1?: string;
-  actor2?: string;
-  goldsteinScale?: number;
-  numMentions?: number;
-  numSources?: number;
-  cameoCode?: string;
-} = {}): ConflictEventEntity {
+function makeTestEvent(
+  overrides: {
+    type?: ConflictEventType;
+    actor1?: string;
+    actor2?: string;
+    goldsteinScale?: number;
+    numMentions?: number;
+    numSources?: number;
+    cameoCode?: string;
+  } = {},
+): ConflictEventEntity {
   const cameoCode = overrides.cameoCode ?? '195';
   return {
     id: 'gdelt-test-1',
@@ -50,9 +51,17 @@ describe('eventScoring', () => {
   describe('GOLDSTEIN_CEILINGS', () => {
     it('has entries for all 11 ConflictEventTypes', () => {
       const expectedTypes: ConflictEventType[] = [
-        'airstrike', 'ground_combat', 'shelling', 'bombing',
-        'assassination', 'abduction', 'assault', 'blockade',
-        'ceasefire_violation', 'mass_violence', 'wmd',
+        'airstrike',
+        'ground_combat',
+        'shelling',
+        'bombing',
+        'assassination',
+        'abduction',
+        'assault',
+        'blockade',
+        'ceasefire_violation',
+        'mass_violence',
+        'wmd',
       ];
       for (const type of expectedTypes) {
         expect(GOLDSTEIN_CEILINGS).toHaveProperty(type);
@@ -259,15 +268,33 @@ describe('eventScoring', () => {
 
     it('actor specificity: both actors > one actor > no actors', () => {
       const both = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3 }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: 'B',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+        }),
         'precise',
       );
       const one = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: '', goldsteinScale: -5, numMentions: 5, numSources: 3 }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: '',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+        }),
         'precise',
       );
       const none = computeEventConfidence(
-        makeTestEvent({ actor1: '', actor2: '', goldsteinScale: -5, numMentions: 5, numSources: 3 }),
+        makeTestEvent({
+          actor1: '',
+          actor2: '',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+        }),
         'precise',
       );
       expect(both).toBeGreaterThan(one);
@@ -278,11 +305,25 @@ describe('eventScoring', () => {
       // Note: 180/182/190 removed from CAMEO_SPECIFICITY (hard-excluded in pipeline).
       // Using 184 (medium, 0.5) and 195 (high, 1.0) instead.
       const specific = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '195' }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: 'B',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+          cameoCode: '195',
+        }),
         'precise',
       );
       const medium = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '184' }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: 'B',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+          cameoCode: '184',
+        }),
         'precise',
       );
       expect(specific).toBeGreaterThan(medium);
@@ -295,7 +336,10 @@ describe('eventScoring', () => {
       // Only high (1.0) and medium (0.5) tiers exist now. Unknown codes default to 0.5.
       const base = { actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3 };
       const high = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '195' }), 'precise');
-      const medium = computeEventConfidence(makeTestEvent({ ...base, cameoCode: '193' }), 'precise');
+      const medium = computeEventConfidence(
+        makeTestEvent({ ...base, cameoCode: '193' }),
+        'precise',
+      );
       expect(high).toBeGreaterThan(medium);
     });
 
@@ -333,11 +377,25 @@ describe('eventScoring', () => {
 
     it('handles 4-digit CAMEO codes by using first 3 as base', () => {
       const score3 = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '195' }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: 'B',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+          cameoCode: '195',
+        }),
         'precise',
       );
       const score4 = computeEventConfidence(
-        makeTestEvent({ actor1: 'A', actor2: 'B', goldsteinScale: -5, numMentions: 5, numSources: 3, cameoCode: '1951' }),
+        makeTestEvent({
+          actor1: 'A',
+          actor2: 'B',
+          goldsteinScale: -5,
+          numMentions: 5,
+          numSources: 3,
+          cameoCode: '1951',
+        }),
         'precise',
       );
       expect(score3).toBeCloseTo(score4, 5);
@@ -345,12 +403,11 @@ describe('eventScoring', () => {
   });
 
   describe('getCameoSpecificity', () => {
-    it('returns 0.5 (default) for excluded codes (180, 182, 190) -- no longer in specificity map', () => {
-      // These codes are hard-excluded in config.eventExcludedCameo before scoring runs,
-      // so their specificity entries were removed. They fall to the default 0.5.
-      expect(getCameoSpecificity('180')).toBe(0.5);
-      expect(getCameoSpecificity('182')).toBe(0.5);
-      expect(getCameoSpecificity('190')).toBe(0.5);
+    it('returns 0.1 (low) for catch-all codes (180, 182, 190)', () => {
+      // These codes are broad catch-alls prone to false positives
+      expect(getCameoSpecificity('180')).toBe(0.1);
+      expect(getCameoSpecificity('182')).toBe(0.1);
+      expect(getCameoSpecificity('190')).toBe(0.1);
     });
 
     it('returns 1.0 for specific codes (195, 194, 204)', () => {
@@ -371,7 +428,7 @@ describe('eventScoring', () => {
 
     it('uses first 3 chars of 4-digit codes', () => {
       expect(getCameoSpecificity('1951')).toBe(1.0); // 195 -> high
-      expect(getCameoSpecificity('1801')).toBe(0.5); // 180 -> default (removed from map)
+      expect(getCameoSpecificity('1801')).toBe(0.1); // 180 -> low (catch-all)
     });
   });
 
@@ -423,7 +480,7 @@ describe('eventScoring', () => {
 
     it('returns matched: false when article is > 200km away (geographic gate)', () => {
       // Tehran is ~450km from Baghdad
-      const articles = [makeArticle({ lat: 35.6892, lng: 51.3890 })];
+      const articles = [makeArticle({ lat: 35.6892, lng: 51.389 })];
       const result = checkBellingcatCorroboration(baseEvent, articles);
       expect(result.matched).toBe(false);
     });
@@ -461,9 +518,9 @@ describe('eventScoring', () => {
     it('returns Baghdad centroid coords for title containing "Baghdad"', () => {
       const geo = extractBellingcatGeo('Airstrike hits Baghdad military base');
       expect(geo).toBeDefined();
-      // GeoNames coordinates for Baghdad
-      expect(geo!.lat).toBeCloseTo(33.3406, 3);
-      expect(geo!.lng).toBeCloseTo(44.4009, 3);
+      // Hardcoded CITY_CENTROIDS coordinates for Baghdad
+      expect(geo!.lat).toBeCloseTo(33.3152, 3);
+      expect(geo!.lng).toBeCloseTo(44.3661, 3);
     });
 
     it('returns undefined for title with no city name', () => {
@@ -474,9 +531,9 @@ describe('eventScoring', () => {
     it('matches city names case-insensitively', () => {
       const geo = extractBellingcatGeo('TEHRAN under fire as conflict escalates');
       expect(geo).toBeDefined();
-      // GeoNames coordinates for Tehran
-      expect(geo!.lat).toBeCloseTo(35.6944, 3);
-      expect(geo!.lng).toBeCloseTo(51.4215, 3);
+      // Hardcoded CITY_CENTROIDS coordinates for Tehran
+      expect(geo!.lat).toBeCloseTo(35.6892, 3);
+      expect(geo!.lng).toBeCloseTo(51.389, 3);
     });
   });
 });

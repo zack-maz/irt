@@ -21,7 +21,12 @@ affects: []
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [Record-based interval map replacing ternary, optimistic defaults before API response, aria-disabled for unconfigured sources]
+  patterns:
+    [
+      Record-based interval map replacing ternary,
+      optimistic defaults before API response,
+      aria-disabled for unconfigured sources,
+    ]
 
 key-files:
   created: []
@@ -35,13 +40,13 @@ key-files:
     - src/__tests__/SourceSelector.test.tsx
 
 key-decisions:
-  - "Record-based INTERVAL_MAP for polling intervals instead of ternary chain -- exhaustive by type, easy to extend"
-  - "Optimistic defaults (all sources enabled) until /api/sources responds -- dropdown works immediately"
-  - "aria-disabled attribute on unconfigured source options for accessibility"
+  - 'Record-based INTERVAL_MAP for polling intervals instead of ternary chain -- exhaustive by type, easy to extend'
+  - 'Optimistic defaults (all sources enabled) until /api/sources responds -- dropdown works immediately'
+  - 'aria-disabled attribute on unconfigured source options for accessibility'
 
 patterns-established:
-  - "Source config fetch: useEffect on mount fetching /api/sources, null state for optimistic defaults"
-  - "Disabled option pattern: aria-disabled + cursor-not-allowed + onClick guard + hint text"
+  - 'Source config fetch: useEffect on mount fetching /api/sources, null state for optimistic defaults'
+  - 'Disabled option pattern: aria-disabled + cursor-not-allowed + onClick guard + hint text'
 
 requirements-completed: [DATA-04]
 
@@ -63,6 +68,7 @@ completed: 2026-03-16
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Extended FlightSource type with 'adsblol' and changed default from 'opensky' to 'adsblol' for zero-config experience
 - Added 30s polling interval for adsblol with Record-based INTERVAL_MAP replacing ternary chain
 - Updated SourceSelector to show 3 options with disabled state (aria-disabled, cursor-not-allowed, "(API key required)" hint) for unconfigured sources
@@ -81,6 +87,7 @@ Each task was committed atomically (TDD: test then feat):
    - `967ede7` (feat: update SourceSelector with 3 options, disabled state, and /api/sources fetch)
 
 ## Files Created/Modified
+
 - `src/types/ui.ts` - FlightSource type extended to 'opensky' | 'adsb' | 'adsblol'
 - `src/stores/flightStore.ts` - Default source changed to 'adsblol', loadPersistedSource recognizes all 3 values
 - `src/hooks/useFlightPolling.ts` - ADSBLOL_POLL_INTERVAL (30s), Record-based INTERVAL_MAP replacing ternary
@@ -90,6 +97,7 @@ Each task was committed atomically (TDD: test then feat):
 - `src/__tests__/SourceSelector.test.tsx` - Added 3-option, disabled state, optimistic defaults tests
 
 ## Decisions Made
+
 - Used Record-based INTERVAL_MAP for polling intervals instead of growing ternary chain -- exhaustive by FlightSource type, easy to extend
 - Optimistic defaults (all sources enabled) until /api/sources responds -- dropdown works immediately on mount without waiting for network
 - aria-disabled attribute on unconfigured source options for accessibility best practices
@@ -99,12 +107,15 @@ Each task was committed atomically (TDD: test then feat):
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None - adsb.lol requires no API key or external configuration.
 
 ## Next Phase Readiness
+
 - Phase 7 (adsb.lol Data Source) fully complete: server-side adapter + frontend integration
 - 3 flight data sources available: OpenSky (5s poll), ADS-B Exchange (260s poll), adsb.lol (30s poll, default)
 - Ready for next phase in roadmap
@@ -114,5 +125,6 @@ None - adsb.lol requires no API key or external configuration.
 All 7 modified files verified on disk. All 4 commit hashes verified in git log.
 
 ---
-*Phase: 07-adsb-lol-data-source*
-*Completed: 2026-03-16*
+
+_Phase: 07-adsb-lol-data-source_
+_Completed: 2026-03-16_

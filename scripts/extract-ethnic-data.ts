@@ -130,7 +130,7 @@ function roundCoords(coords: unknown, decimals: number): unknown {
 function perpendicularDistance(
   point: [number, number],
   lineStart: [number, number],
-  lineEnd: [number, number]
+  lineEnd: [number, number],
 ): number {
   const dx = lineEnd[0] - lineStart[0];
   const dy = lineEnd[1] - lineStart[1];
@@ -179,11 +179,7 @@ function simplifyRing(points: number[][], epsilon: number): number[][] {
 function simplifyCoords(coords: unknown, epsilon: number): unknown {
   if (!Array.isArray(coords)) return coords;
   // Check if this is a ring (array of coordinate pairs)
-  if (
-    coords.length > 0 &&
-    Array.isArray(coords[0]) &&
-    typeof coords[0][0] === 'number'
-  ) {
+  if (coords.length > 0 && Array.isArray(coords[0]) && typeof coords[0][0] === 'number') {
     return simplifyRing(coords as number[][], epsilon);
   }
   return coords.map((c) => simplifyCoords(c, epsilon));
@@ -298,7 +294,10 @@ function processGeoEPR(data: GeoJSONCollection): Map<EthnicGroupId, unknown[][]>
   // Dump all unique group names
   const allNames = new Set<string>();
   for (const f of meFeatures) {
-    const name = (f.properties.group || f.properties.GROUP || f.properties.name || f.properties.NAME) as string;
+    const name = (f.properties.group ||
+      f.properties.GROUP ||
+      f.properties.name ||
+      f.properties.NAME) as string;
     if (name) allNames.add(name);
   }
   console.log(`\nAll unique group names in Middle East bbox:`);
@@ -311,7 +310,10 @@ function processGeoEPR(data: GeoJSONCollection): Map<EthnicGroupId, unknown[][]>
   const groupRings = new Map<EthnicGroupId, unknown[][]>();
 
   for (const f of meFeatures) {
-    const rawName = (f.properties.group || f.properties.GROUP || f.properties.name || f.properties.NAME) as string;
+    const rawName = (f.properties.group ||
+      f.properties.GROUP ||
+      f.properties.name ||
+      f.properties.NAME) as string;
     if (!rawName) continue;
 
     const groupId = mapGroupName(rawName);
@@ -607,9 +609,7 @@ function buildFallbackData(): Map<EthnicGroupId, unknown[][]> {
  * For each grid cell, count which groups have coordinates in that cell.
  * Where 2+ groups share a cell, create overlap features.
  */
-function detectOverlaps(
-  groupRings: Map<EthnicGroupId, unknown[][]>
-): OverlapFeature[] {
+function detectOverlaps(groupRings: Map<EthnicGroupId, unknown[][]>): OverlapFeature[] {
   const GRID_SIZE = 0.5;
   // Map: "gridLng,gridLat" -> Set<EthnicGroupId>
   const gridGroups = new Map<string, Set<EthnicGroupId>>();
@@ -661,10 +661,7 @@ function detectOverlaps(
       properties: { groups, label },
       geometry: {
         type: polygons.length === 1 ? 'Polygon' : 'MultiPolygon',
-        coordinates:
-          polygons.length === 1
-            ? [polygons[0]]
-            : polygons.map((p) => [p]),
+        coordinates: polygons.length === 1 ? [polygons[0]] : polygons.map((p) => [p]),
       },
     });
   }
@@ -696,8 +693,16 @@ async function main() {
   // Log per-group status
   console.log(`\n=== Group Status (source: ${source}) ===`);
   const allGroupIds: EthnicGroupId[] = [
-    'kurdish', 'arab', 'persian', 'baloch', 'turkmen',
-    'druze', 'alawite', 'yazidi', 'assyrian', 'pashtun',
+    'kurdish',
+    'arab',
+    'persian',
+    'baloch',
+    'turkmen',
+    'druze',
+    'alawite',
+    'yazidi',
+    'assyrian',
+    'pashtun',
   ];
 
   const foundGroups: EthnicGroupId[] = [];
@@ -734,8 +739,8 @@ async function main() {
         type: simplifiedRings.length === 1 ? 'Polygon' : 'MultiPolygon',
         coordinates:
           simplifiedRings.length === 1
-            ? roundCoords(simplifiedRings[0], 2) as unknown
-            : roundCoords(simplifiedRings, 2) as unknown,
+            ? (roundCoords(simplifiedRings[0], 2) as unknown)
+            : (roundCoords(simplifiedRings, 2) as unknown),
       },
     });
   }
@@ -745,7 +750,9 @@ async function main() {
   const overlapFeatures = detectOverlaps(groupRings);
   if (overlapFeatures.length > 0) {
     for (const f of overlapFeatures) {
-      console.log(`  Overlap: ${f.properties.label} (${(f.geometry.coordinates as unknown[]).length} cell(s))`);
+      console.log(
+        `  Overlap: ${f.properties.label} (${(f.geometry.coordinates as unknown[]).length} cell(s))`,
+      );
     }
   } else {
     console.log('  No overlaps detected');

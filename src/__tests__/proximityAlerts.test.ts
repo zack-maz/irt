@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { computeProximityAlerts } from '../hooks/useProximityAlerts';
 import type { FlightEntity, SiteEntity } from '@/types/entities';
 
-function makeFlight(overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {}): FlightEntity {
+function makeFlight(
+  overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {},
+): FlightEntity {
   const { data: dataOverrides, ...rest } = overrides;
   return {
     id: 'flight-1',
@@ -55,8 +57,18 @@ describe('computeProximityAlerts', () => {
 
   it('returns empty array when all flights are identified (unidentified=false)', () => {
     const flights = [
-      makeFlight({ id: 'f1', lat: 32.0, lng: 51.0, data: { unidentified: false } } as Partial<FlightEntity>),
-      makeFlight({ id: 'f2', lat: 32.01, lng: 51.01, data: { unidentified: false } } as Partial<FlightEntity>),
+      makeFlight({
+        id: 'f1',
+        lat: 32.0,
+        lng: 51.0,
+        data: { unidentified: false },
+      } as Partial<FlightEntity>),
+      makeFlight({
+        id: 'f2',
+        lat: 32.01,
+        lng: 51.01,
+        data: { unidentified: false },
+      } as Partial<FlightEntity>),
     ];
     const sites = [makeSite()];
     const result = computeProximityAlerts(flights, sites);
@@ -178,15 +190,16 @@ describe('computeProximityAlerts', () => {
   });
 
   it('returns alerts sorted by distanceKm ascending', () => {
+    // PROXIMITY_THRESHOLD_KM is 5km, so both sites must be within 5km of the flight
     const sites = [
       makeSite({ id: 'site-near', lat: 32.0, lng: 51.0, label: 'Near Site' }),
-      makeSite({ id: 'site-far', lat: 32.2, lng: 51.0, label: 'Far Site' }),
+      makeSite({ id: 'site-far', lat: 32.03, lng: 51.0, label: 'Far Site' }),
     ];
-    // Flight at 32.05 is ~5.5km from site-near, ~16.7km from site-far
+    // Flight at 32.01 is ~1.1km from site-near, ~2.2km from site-far -- both within 5km
     const flights = [
       makeFlight({
         id: 'uid-1',
-        lat: 32.05,
+        lat: 32.01,
         lng: 51.0,
         label: 'ALERT',
         data: { unidentified: true, heading: 0 },

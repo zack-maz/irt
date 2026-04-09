@@ -2,16 +2,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NewsArticle } from '../../types.js';
 
-// Mock config module so we can control newsRelevanceThreshold
-vi.mock('../../config.js', () => ({
-  getConfig: () => ({
-    newsRelevanceThreshold: 0.7,
-  }),
-  loadConfig: () => ({
-    newsRelevanceThreshold: 0.7,
-  }),
-  config: { newsRelevanceThreshold: 0.7 },
-}));
+// Mock config module (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = { ...actual.config, newsRelevanceThreshold: 0.7 };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 const makeArticle = (overrides: Partial<NewsArticle> = {}): NewsArticle => ({
   id: 'test-id-001',
@@ -63,7 +59,15 @@ describe('newsFilter', () => {
 
   describe('keyword reclassification', () => {
     it('NON_AMBIGUOUS_KEYWORDS contains exactly the 7 strict terms', () => {
-      const expected = ['airstrike', 'missile', 'bombing', 'shelling', 'casualties', 'invasion', 'drone'];
+      const expected = [
+        'airstrike',
+        'missile',
+        'bombing',
+        'shelling',
+        'casualties',
+        'invasion',
+        'drone',
+      ];
       expect(NON_AMBIGUOUS_KEYWORDS.size).toBe(7);
       for (const kw of expected) {
         expect(NON_AMBIGUOUS_KEYWORDS.has(kw)).toBe(true);
@@ -71,7 +75,15 @@ describe('newsFilter', () => {
     });
 
     it('each non-ambiguous keyword passes matchesKeywords on its own', () => {
-      for (const kw of ['airstrike', 'missile', 'bombing', 'shelling', 'casualties', 'invasion', 'drone']) {
+      for (const kw of [
+        'airstrike',
+        'missile',
+        'bombing',
+        'shelling',
+        'casualties',
+        'invasion',
+        'drone',
+      ]) {
         const result = matchesKeywords({ title: `Report about ${kw} in the region` });
         expect(result.length).toBeGreaterThanOrEqual(1);
       }
@@ -92,7 +104,17 @@ describe('newsFilter', () => {
     });
 
     it('organization names (IRGC, Hezbollah, Hamas, etc.) are ambiguous', () => {
-      for (const org of ['irgc', 'hezbollah', 'hamas', 'houthi', 'pentagon', 'centcom', 'nato', 'idf', 'mossad']) {
+      for (const org of [
+        'irgc',
+        'hezbollah',
+        'hamas',
+        'houthi',
+        'pentagon',
+        'centcom',
+        'nato',
+        'idf',
+        'mossad',
+      ]) {
         const result = matchesKeywords({ title: `Report on ${org} activities` });
         expect(result).toEqual([]);
       }
@@ -131,7 +153,9 @@ describe('newsFilter', () => {
     });
 
     it('uses word boundary matching -- "war" does not match "forward" or "warned"', () => {
-      const result = matchesKeywords({ title: 'Stocks moved forward as traders warned of volatility' });
+      const result = matchesKeywords({
+        title: 'Stocks moved forward as traders warned of volatility',
+      });
       expect(result).toEqual([]);
     });
 
@@ -157,7 +181,9 @@ describe('newsFilter', () => {
 
     it('expanded exclusion patterns reject entertainment/historical/sports articles', () => {
       // Historical
-      expect(matchesKeywords({ title: 'Documentary about Iran World War II alliance' })).toEqual([]);
+      expect(matchesKeywords({ title: 'Documentary about Iran World War II alliance' })).toEqual(
+        [],
+      );
       // Entertainment
       expect(matchesKeywords({ title: 'New Netflix series about Iran spy thriller' })).toEqual([]);
       // Olympics
@@ -168,34 +194,43 @@ describe('newsFilter', () => {
   describe('filterAndScoreArticles', () => {
     it('enriches articles with actor/action/target/relevanceScore fields', () => {
       const articles = [
-        makeArticle({ id: 'a1', title: 'Iran launches missile strike on Israeli bases', source: 'BBC' }),
+        makeArticle({
+          id: 'a1',
+          title: 'Iran launches missile strike on Israeli bases',
+          source: 'BBC',
+        }),
       ];
       const filtered = filterAndScoreArticles(articles);
       expect(filtered).toHaveLength(1);
       expect(filtered[0]).toHaveProperty('relevanceScore');
       expect(typeof filtered[0].relevanceScore).toBe('number');
       // Should have at least some enriched fields
-      const hasEnriched = filtered[0].actor !== undefined || filtered[0].action !== undefined || filtered[0].target !== undefined;
+      const hasEnriched =
+        filtered[0].actor !== undefined ||
+        filtered[0].action !== undefined ||
+        filtered[0].target !== undefined;
       expect(hasEnriched).toBe(true);
     });
 
     it('filters out articles below 0.7 threshold', () => {
       const articles = [
-        makeArticle({ id: 'a1', title: 'Iran launches missile strike on Israeli bases', source: 'BBC' }),
+        makeArticle({
+          id: 'a1',
+          title: 'Iran launches missile strike on Israeli bases',
+          source: 'BBC',
+        }),
         makeArticle({ id: 'a2', title: 'Local cooking show recipes' }),
         makeArticle({ id: 'a3', title: 'Celebrity gossip roundup' }),
       ];
       const filtered = filterAndScoreArticles(articles);
       // Non-conflict articles should be filtered out
-      const ids = filtered.map(a => a.id);
+      const ids = filtered.map((a) => a.id);
       expect(ids).not.toContain('a2');
       expect(ids).not.toContain('a3');
     });
 
     it('articles with only geographic terms (no non-ambiguous keywords) are excluded', () => {
-      const articles = [
-        makeArticle({ id: 'a1', title: 'Iran sanctions expanded by EU' }),
-      ];
+      const articles = [makeArticle({ id: 'a1', title: 'Iran sanctions expanded by EU' })];
       const filtered = filterAndScoreArticles(articles);
       // "iran" and "sanctions" are both ambiguous -- no non-ambiguous keyword present
       expect(filtered).toHaveLength(0);
@@ -208,7 +243,11 @@ describe('newsFilter', () => {
 
     it('"Tehran condemns airstrike in Yemen" -- passes keyword filter (has "airstrike") but enriched fields reflect indirect nature', () => {
       const articles = [
-        makeArticle({ id: 'a1', title: 'Tehran condemns airstrike in Yemen', source: 'Al Jazeera' }),
+        makeArticle({
+          id: 'a1',
+          title: 'Tehran condemns airstrike in Yemen',
+          source: 'Al Jazeera',
+        }),
       ];
       const filtered = filterAndScoreArticles(articles);
       // Should pass because "airstrike" is non-ambiguous
@@ -238,7 +277,11 @@ describe('newsFilter', () => {
 
     it('"Iran launches missile strike on Israeli bases" passes with high score (>= 0.7)', () => {
       const articles = [
-        makeArticle({ id: 'a1', title: 'Iran launches missile strike on Israeli bases', source: 'BBC' }),
+        makeArticle({
+          id: 'a1',
+          title: 'Iran launches missile strike on Israeli bases',
+          source: 'BBC',
+        }),
       ];
       const filtered = filterAndScoreArticles(articles);
       expect(filtered).toHaveLength(1);
@@ -250,13 +293,17 @@ describe('newsFilter', () => {
     it('still exists and delegates to filterAndScoreArticles', () => {
       expect(typeof filterConflictArticles).toBe('function');
       const articles = [
-        makeArticle({ id: 'a1', title: 'Iran launches missile strike on Israeli military bases', source: 'BBC' }),
+        makeArticle({
+          id: 'a1',
+          title: 'Iran launches missile strike on Israeli military bases',
+          source: 'BBC',
+        }),
         makeArticle({ id: 'a2', title: 'Local cooking show recipes' }),
       ];
       const filtered = filterConflictArticles(articles);
       // Should filter same as filterAndScoreArticles
       expect(filtered.length).toBeGreaterThanOrEqual(1);
-      const ids = filtered.map(a => a.id);
+      const ids = filtered.map((a) => a.id);
       expect(ids).toContain('a1');
       expect(ids).not.toContain('a2');
     });

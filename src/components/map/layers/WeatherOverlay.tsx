@@ -20,9 +20,7 @@ export function useWeatherLayers() {
     if (!isActive || grid.length === 0) return [];
 
     // Filter to every 3rd degree for sparser wind barb rendering
-    const sparseGrid = grid.filter(
-      (d) => d.lat % 3 === 0 && d.lng % 3 === 0,
-    );
+    const sparseGrid = grid.filter((d) => d.lat % 3 === 0 && d.lng % 3 === 0);
 
     const windBarbLayer = new IconLayer({
       id: 'weather-wind-barbs',
@@ -74,12 +72,19 @@ interface WeatherTooltipProps {
  * Positioned at cursor coordinates, styled to match EntityTooltip.
  */
 /** Find the nearest water facility within ~50km of a point */
-function findNearestFacility(lat: number, lng: number, facilities: WaterFacility[]): WaterFacility | null {
+function findNearestFacility(
+  lat: number,
+  lng: number,
+  facilities: WaterFacility[],
+): WaterFacility | null {
   let best: WaterFacility | null = null;
   let bestDist = Infinity;
   for (const f of facilities) {
     const d = Math.abs(f.lat - lat) + Math.abs(f.lng - lng);
-    if (d < bestDist) { bestDist = d; best = f; }
+    if (d < bestDist) {
+      bestDist = d;
+      best = f;
+    }
   }
   // ~0.5 degrees ≈ 50km — don't show precip for distant facilities
   return bestDist < 0.5 ? best : null;
@@ -87,11 +92,12 @@ function findNearestFacility(lat: number, lng: number, facilities: WaterFacility
 
 export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
   const tempC = point.temperature.toFixed(1);
-  const tempF = (point.temperature * 9 / 5 + 32).toFixed(1);
+  const tempF = ((point.temperature * 9) / 5 + 32).toFixed(1);
   const compass = directionToCompass(point.windDirection);
   const facilities = useWaterStore((s) => s.facilities);
 
-  const nearbyFacility = facilities.length > 0 ? findNearestFacility(point.lat, point.lng, facilities) : null;
+  const nearbyFacility =
+    facilities.length > 0 ? findNearestFacility(point.lat, point.lng, facilities) : null;
   const precip = nearbyFacility?.precipitation;
 
   return (
@@ -100,11 +106,13 @@ export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
       style={{ left: x + 12, top: y - 12 }}
     >
       <div className="rounded bg-surface-overlay px-2 py-1.5 text-xs text-text-primary backdrop-blur-sm shadow-lg">
-        <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">
-          Weather
+        <div className="mb-0.5 text-[9px] uppercase tracking-wider text-text-muted">Weather</div>
+        <div>
+          {tempC}C / {tempF}F
         </div>
-        <div>{tempC}C / {tempF}F</div>
-        <div>Wind: {compass} {Math.round(point.windSpeed)} kn</div>
+        <div>
+          Wind: {compass} {Math.round(point.windSpeed)} kn
+        </div>
         {precip && (
           <>
             <div className="mt-1 border-t border-border/30 pt-1 text-[9px] uppercase tracking-wider text-text-muted">

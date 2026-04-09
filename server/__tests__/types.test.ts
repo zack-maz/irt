@@ -206,7 +206,21 @@ describe('MapEntity types', () => {
   });
 
   it('EntityType includes all conflict event types plus flight and ship', () => {
-    const types: EntityType[] = ['flight', 'ship', 'airstrike', 'ground_combat', 'shelling', 'bombing', 'assassination', 'abduction', 'assault', 'blockade', 'ceasefire_violation', 'mass_violence', 'wmd'];
+    const types: EntityType[] = [
+      'flight',
+      'ship',
+      'airstrike',
+      'ground_combat',
+      'shelling',
+      'bombing',
+      'assassination',
+      'abduction',
+      'assault',
+      'blockade',
+      'ceasefire_violation',
+      'mass_violence',
+      'wmd',
+    ];
     expect(types).toHaveLength(13);
   });
 });

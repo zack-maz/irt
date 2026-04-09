@@ -17,55 +17,62 @@ const mockFetchPrecipitation = vi.fn(async () => []);
 // Mock rate limiter
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
-    geocode: _passThrough, water: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
+    geocode: _passThrough,
+    water: _passThrough,
+    public: _passThrough,
   },
 }));
 
-// Mock config
-vi.mock('../../config.js', () => ({
-  config: {
-    port: 0, corsOrigin: '*',
+// Mock config (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = {
+    port: 0,
+    corsOrigin: '*',
     opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
     aisstream: { apiKey: 'test-ais-key' },
     acled: { email: 'test@example.com', password: 'test-pass' },
     newsRelevanceThreshold: 0.7,
-  },
-  loadConfig: () => ({
-    port: 0, corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0, corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-}));
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 // Mock all existing adapters
 vi.mock('../../adapters/opensky.js', () => ({ fetchFlights: vi.fn(async () => []) }));
-vi.mock('../../adapters/adsb-exchange.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 vi.mock('../../adapters/aisstream.js', () => ({
-  getShips: vi.fn(() => []), getLastMessageTime: vi.fn(() => 0), connectAISStream: vi.fn(),
+  getShips: vi.fn(() => []),
+  getLastMessageTime: vi.fn(() => 0),
+  connectAISStream: vi.fn(),
 }));
 vi.mock('../../adapters/acled.js', () => ({ fetchEvents: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt.js', () => ({
-  fetchEvents: vi.fn(async () => []), backfillEvents: vi.fn(async () => []),
+  fetchEvents: vi.fn(async () => []),
+  backfillEvents: vi.fn(async () => []),
 }));
 vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
-vi.mock('../../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
+vi.mock('../../adapters/rss.js', () => ({
+  fetchAllRssFeeds: vi.fn(async () => []),
+  RSS_FEEDS: [],
+}));
 vi.mock('../../adapters/yahoo-finance.js', () => ({
-  fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true),
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
 }));
 vi.mock('../../adapters/nominatim.js', () => ({
   reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
@@ -81,21 +88,29 @@ vi.mock('../../adapters/open-meteo-precip.js', () => ({
 }));
 
 // Mock Redis cache module with in-memory store
-const _mockCacheGet = vi.fn(async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
-  const entry = redisStore.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
-  return { data: entry.data, stale, lastFresh: entry.fetchedAt };
-});
-const _mockCacheSet = vi.fn(async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
-  redisStore.set(key, { data, fetchedAt: Date.now() });
-});
+const _mockCacheGet = vi.fn(
+  async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
+    const entry = redisStore.get(key) as CacheEntry<T> | undefined;
+    if (!entry) return null;
+    const stale = Date.now() - entry.fetchedAt > logicalTtlMs;
+    return { data: entry.data, stale, lastFresh: entry.fetchedAt };
+  },
+);
+const _mockCacheSet = vi.fn(
+  async <T>(key: string, data: T, _redisTtlSec: number): Promise<void> => {
+    redisStore.set(key, { data, fetchedAt: Date.now() });
+  },
+);
 vi.mock('../../cache/redis.js', () => ({
   redis: {
-    get: vi.fn(async () => null), set: vi.fn(async () => {}), ping: vi.fn(async () => 'PONG'),
+    get: vi.fn(async () => null),
+    set: vi.fn(async () => {}),
+    ping: vi.fn(async () => 'PONG'),
   },
-  cacheGet: _mockCacheGet, cacheSet: _mockCacheSet,
-  cacheGetSafe: _mockCacheGet, cacheSetSafe: _mockCacheSet,
+  cacheGet: _mockCacheGet,
+  cacheSet: _mockCacheSet,
+  cacheGetSafe: _mockCacheGet,
+  cacheSetSafe: _mockCacheSet,
 }));
 
 // Sample water facility fixture
@@ -108,8 +123,13 @@ const sampleFacility: WaterFacility = {
   label: 'Mosul Dam',
   osmId: 12345,
   stress: {
-    bws_raw: 3.5, bws_score: 3.5, bws_label: 'High',
-    drr_score: 2.0, gtd_score: 1.5, sev_score: 2.5, iav_score: 3.0,
+    bws_raw: 3.5,
+    bws_score: 3.5,
+    bws_label: 'High',
+    drr_score: 2.0,
+    gtd_score: 1.5,
+    sev_score: 2.5,
+    iav_score: 3.0,
     compositeHealth: 0.3,
   },
 };

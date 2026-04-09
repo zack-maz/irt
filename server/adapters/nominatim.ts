@@ -12,10 +12,7 @@ export interface GeocodedLocation {
  * Coordinates are quantized to 2 decimal places (~1km precision) before the
  * request, reducing unique cache keys upstream.
  */
-export async function reverseGeocode(
-  lat: number,
-  lon: number,
-): Promise<GeocodedLocation> {
+export async function reverseGeocode(lat: number, lon: number): Promise<GeocodedLocation> {
   const qLat = Math.round(lat * 100) / 100;
   const qLon = Math.round(lon * 100) / 100;
 
@@ -34,8 +31,7 @@ export async function reverseGeocode(
 
     const data = await res.json();
 
-    const city =
-      data.address?.city ?? data.address?.town ?? data.address?.village;
+    const city = data.address?.city ?? data.address?.town ?? data.address?.village;
     const country = data.address?.country;
     const display = data.display_name;
 

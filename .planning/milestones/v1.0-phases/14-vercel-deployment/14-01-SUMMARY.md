@@ -17,8 +17,8 @@ affects: [14-vercel-deployment]
 
 # Tech tracking
 tech-stack:
-  added: ["@upstash/ratelimit"]
-  patterns: ["sliding-window rate limiting per IP", "graceful degradation for optional API keys"]
+  added: ['@upstash/ratelimit']
+  patterns: ['sliding-window rate limiting per IP', 'graceful degradation for optional API keys']
 
 key-files:
   created:
@@ -36,12 +36,12 @@ key-files:
 
 key-decisions:
   - "All API keys optional with ?? '' fallback for serverless cold start"
-  - "CORS defaults to wildcard * (production-first; local dev overrides via .env)"
-  - "Rate limiting 60 req/60s sliding window per IP on /api/* only (not /health)"
+  - 'CORS defaults to wildcard * (production-first; local dev overrides via .env)'
+  - 'Rate limiting 60 req/60s sliding window per IP on /api/* only (not /health)'
 
 patterns-established:
-  - "Rate limiter pass-through mock pattern for route tests"
-  - "Graceful degradation: server boots cleanly without external API keys"
+  - 'Rate limiter pass-through mock pattern for route tests'
+  - 'Graceful degradation: server boots cleanly without external API keys'
 
 requirements-completed: [DEPLOY-02, DEPLOY-03, DEPLOY-04]
 
@@ -63,8 +63,9 @@ completed: 2026-03-20
 - **Files modified:** 10
 
 ## Accomplishments
+
 - Server boots without crashing when OpenSky/AISStream/ACLED API keys are absent
-- Rate limiting middleware returns 429 with X-RateLimit-* headers on excess requests
+- Rate limiting middleware returns 429 with X-RateLimit-\* headers on excess requests
 - CORS defaults to wildcard `*` (overridable via CORS_ORIGIN env var)
 - .env.example restructured into REQUIRED/OPTIONAL/SERVER CONFIG sections
 - All 150 server tests pass with no regressions
@@ -79,9 +80,10 @@ Each task was committed atomically:
 _Note: Task 1 was TDD with RED+GREEN phases combined in single commit._
 
 ## Files Created/Modified
+
 - `server/config.ts` - Removed required() function; all API keys optional with ?? '' fallback
 - `server/middleware/rateLimit.ts` - Rate limiting middleware using @upstash/ratelimit sliding window
-- `server/index.ts` - Wired rateLimitMiddleware on /api/* routes, CORS default changed to *
+- `server/index.ts` - Wired rateLimitMiddleware on /api/_ routes, CORS default changed to _
 - `server/__tests__/rateLimit.test.ts` - 5 tests: under limit, 429, headers, IP fallback chain
 - `server/__tests__/server.test.ts` - Updated config mock, added CORS wildcard + graceful boot tests
 - `server/__tests__/routes/flights.test.ts` - Added rateLimitMiddleware pass-through mock
@@ -91,6 +93,7 @@ _Note: Task 1 was TDD with RED+GREEN phases combined in single commit._
 - `.env.example` - Restructured into REQUIRED/OPTIONAL/SERVER CONFIG sections
 
 ## Decisions Made
+
 - All API keys optional with `?? ''` fallback -- server boots cleanly for serverless cold starts
 - CORS defaults to wildcard `*` (production-first; local dev sets `CORS_ORIGIN` via .env)
 - Rate limiting at 60 requests per 60 seconds sliding window per IP
@@ -102,10 +105,11 @@ _Note: Task 1 was TDD with RED+GREEN phases combined in single commit._
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Added rateLimitMiddleware mock to 4 route test files**
+
 - **Found during:** Task 2 (wiring rate limiter into createApp)
 - **Issue:** Route tests (flights, ships, events, sources) failed because createApp now imports rateLimitMiddleware, which wasn't mocked in those test files
 - **Fix:** Added pass-through mock `(_req, _res, next) => next()` to all 4 route test files
-- **Files modified:** server/__tests__/routes/flights.test.ts, ships.test.ts, events.test.ts, sources.test.ts
+- **Files modified:** server/**tests**/routes/flights.test.ts, ships.test.ts, events.test.ts, sources.test.ts
 - **Verification:** All 150 server tests pass
 - **Committed in:** e0c27b8 (Task 2 commit)
 
@@ -115,12 +119,15 @@ _Note: Task 1 was TDD with RED+GREEN phases combined in single commit._
 **Impact on plan:** Auto-fix necessary for test compatibility. No scope creep.
 
 ## Issues Encountered
+
 None beyond the deviation documented above.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Server hardened for serverless deployment -- ready for Vercel configuration (Plan 02)
 - @upstash/ratelimit installed and wired
 - All API keys gracefully degrade when absent
@@ -130,5 +137,6 @@ None - no external service configuration required.
 All 7 files verified present. Both task commits (f8c9143, e0c27b8) verified in git log.
 
 ---
-*Phase: 14-vercel-deployment*
-*Completed: 2026-03-20*
+
+_Phase: 14-vercel-deployment_
+_Completed: 2026-03-20_

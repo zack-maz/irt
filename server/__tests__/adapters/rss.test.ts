@@ -34,7 +34,11 @@ const RSS_SINGLE_ITEM = `<?xml version="1.0" encoding="UTF-8"?>
 </rss>`;
 
 describe('RSS Adapter', () => {
-  let fetchRssFeed: (url: string, sourceName: string, sourceCountry: string) => Promise<NewsArticle[]>;
+  let fetchRssFeed: (
+    url: string,
+    sourceName: string,
+    sourceCountry: string,
+  ) => Promise<NewsArticle[]>;
   let fetchAllRssFeeds: () => Promise<NewsArticle[]>;
   let RSS_FEEDS: Array<{ url: string; name: string; country: string }>;
   const originalFetch = globalThis.fetch;
@@ -75,11 +79,13 @@ describe('RSS Adapter', () => {
 
   describe('fetchRssFeed', () => {
     it('parses RSS 2.0 XML and returns NewsArticle[] with correct source name', async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(RSS_FIXTURE, { status: 200 }),
-      );
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(new Response(RSS_FIXTURE, { status: 200 }));
 
-      const articles = await fetchRssFeed('https://feeds.bbci.co.uk/rss.xml', 'BBC', 'United Kingdom');
+      const articles = await fetchRssFeed(
+        'https://feeds.bbci.co.uk/rss.xml',
+        'BBC',
+        'United Kingdom',
+      );
       expect(articles).toHaveLength(2);
       expect(articles[0].source).toBe('BBC');
       expect(articles[0].sourceCountry).toBe('United Kingdom');
@@ -88,23 +94,17 @@ describe('RSS Adapter', () => {
     });
 
     it('strips HTML tags from description for summary field', async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(RSS_FIXTURE, { status: 200 }),
-      );
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(new Response(RSS_FIXTURE, { status: 200 }));
 
       const articles = await fetchRssFeed('https://example.com/rss', 'Test', 'United Kingdom');
-      expect(articles[0].summary).toBe(
-        'The latest developments in the Iran conflict region.',
-      );
+      expect(articles[0].summary).toBe('The latest developments in the Iran conflict region.');
       // No HTML tags
       expect(articles[0].summary).not.toContain('<');
       expect(articles[0].summary).not.toContain('>');
     });
 
     it('handles missing optional fields (description, media:thumbnail) gracefully', async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(RSS_FIXTURE, { status: 200 }),
-      );
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(new Response(RSS_FIXTURE, { status: 200 }));
 
       const articles = await fetchRssFeed('https://example.com/rss', 'Test', 'United Kingdom');
       // Second item has no description or thumbnail
@@ -113,9 +113,7 @@ describe('RSS Adapter', () => {
     });
 
     it('extracts media:thumbnail @_url when present', async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(RSS_FIXTURE, { status: 200 }),
-      );
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(new Response(RSS_FIXTURE, { status: 200 }));
 
       const articles = await fetchRssFeed('https://example.com/rss', 'Test', 'United Kingdom');
       expect(articles[0].imageUrl).toBe('https://ichef.bbci.co.uk/thumb.jpg');
@@ -132,9 +130,7 @@ describe('RSS Adapter', () => {
     });
 
     it('sets id to hashUrl(link), tone to undefined, keywords to []', async () => {
-      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
-        new Response(RSS_FIXTURE, { status: 200 }),
-      );
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(new Response(RSS_FIXTURE, { status: 200 }));
 
       const articles = await fetchRssFeed('https://example.com/rss', 'Test', 'United Kingdom');
       expect(articles[0].id).toMatch(/^[0-9a-f]{16}$/);

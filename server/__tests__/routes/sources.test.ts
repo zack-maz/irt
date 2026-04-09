@@ -5,27 +5,24 @@ import type { Server } from 'http';
 // Mock rate limiter -- pass through for route tests
 const _passThrough = (_req: unknown, _res: unknown, next: () => void) => next();
 vi.mock('../../middleware/rateLimit.js', () => ({
-  rateLimitMiddleware: _passThrough,
   rateLimiters: {
-    flights: _passThrough, ships: _passThrough, events: _passThrough, news: _passThrough,
-    markets: _passThrough, weather: _passThrough, sites: _passThrough, sources: _passThrough,
+    flights: _passThrough,
+    ships: _passThrough,
+    events: _passThrough,
+    news: _passThrough,
+    markets: _passThrough,
+    weather: _passThrough,
+    sites: _passThrough,
+    sources: _passThrough,
     geocode: _passThrough,
     water: _passThrough,
+    public: _passThrough,
   },
 }));
 
 // Mock all adapter modules to prevent real network calls
-vi.mock('../../adapters/opensky.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-
-vi.mock('../../adapters/adsb-exchange.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
-
-vi.mock('../../adapters/adsb-lol.js', () => ({
-  fetchFlights: vi.fn(async () => []),
-}));
+vi.mock('../../adapters/opensky.js', () => ({ fetchFlights: vi.fn(async () => []) }));
+vi.mock('../../adapters/adsb-lol.js', () => ({ fetchFlights: vi.fn(async () => []) }));
 
 vi.mock('../../adapters/aisstream.js', () => ({
   getShips: vi.fn(() => []),
@@ -36,42 +33,48 @@ vi.mock('../../adapters/aisstream.js', () => ({
 vi.mock('../../adapters/acled.js', () => ({
   fetchEvents: vi.fn(async () => []),
 }));
-vi.mock('../../adapters/gdelt.js', () => ({ fetchEvents: vi.fn(async () => []), backfillEvents: vi.fn(async () => []) }));
+vi.mock('../../adapters/gdelt.js', () => ({
+  fetchEvents: vi.fn(async () => []),
+  backfillEvents: vi.fn(async () => []),
+}));
 vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
-vi.mock('../../adapters/rss.js', () => ({ fetchAllRssFeeds: vi.fn(async () => []), RSS_FEEDS: [] }));
-vi.mock('../../adapters/yahoo-finance.js', () => ({ fetchMarkets: vi.fn(async () => []), isValidRange: vi.fn(() => true) }));
-vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../../adapters/nominatim.js', () => ({ reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })) }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
-
-vi.mock('../../config.js', () => ({
-  config: {
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  },
-  loadConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
-  getConfig: () => ({
-    port: 0,
-    corsOrigin: '*',
-    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
-    aisstream: { apiKey: 'test-ais-key' },
-    acled: { email: 'test@example.com', password: 'test-pass' },
-    newsRelevanceThreshold: 0.7,
-  }),
+vi.mock('../../adapters/rss.js', () => ({
+  fetchAllRssFeeds: vi.fn(async () => []),
+  RSS_FEEDS: [],
 }));
+vi.mock('../../adapters/yahoo-finance.js', () => ({
+  fetchMarkets: vi.fn(async () => []),
+  isValidRange: vi.fn(() => true),
+}));
+vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
+vi.mock('../../adapters/nominatim.js', () => ({
+  reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
+}));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
+
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  const mockCfg = {
+    port: 0,
+    corsOrigin: '*',
+    opensky: { clientId: 'test-id', clientSecret: 'test-secret' },
+    aisstream: { apiKey: 'test-ais-key' },
+    acled: { email: 'test@example.com', password: 'test-pass' },
+    newsRelevanceThreshold: 0.7,
+    eventConfidenceThreshold: 0.35,
+    eventMinSources: 2,
+    eventCentroidPenalty: 0.7,
+    eventExcludedCameo: ['180', '192'],
+    bellingcatCorroborationBoost: 0.2,
+  };
+  return { ...actual, config: mockCfg, loadConfig: () => mockCfg, getConfig: () => mockCfg };
+});
 
 describe('Sources Route', () => {
   let server: Server;
@@ -101,22 +104,18 @@ describe('Sources Route', () => {
   it('returns 200 with correct shape', async () => {
     process.env.OPENSKY_CLIENT_ID = 'test-id';
     process.env.OPENSKY_CLIENT_SECRET = 'test-secret';
-    process.env.ADSB_EXCHANGE_API_KEY = 'test-key';
 
     const res = await fetch(`${baseUrl}/api/sources`);
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body).toHaveProperty('opensky');
-    expect(body).toHaveProperty('adsb');
     expect(body).toHaveProperty('adsblol');
     expect(body.opensky).toHaveProperty('configured');
-    expect(body.adsb).toHaveProperty('configured');
     expect(body.adsblol).toHaveProperty('configured');
 
     delete process.env.OPENSKY_CLIENT_ID;
     delete process.env.OPENSKY_CLIENT_SECRET;
-    delete process.env.ADSB_EXCHANGE_API_KEY;
   });
 
   it('adsblol.configured is always true', async () => {
@@ -161,25 +160,5 @@ describe('Sources Route', () => {
     expect(body.opensky.configured).toBe(false);
 
     delete process.env.OPENSKY_CLIENT_ID;
-  });
-
-  it('adsb.configured is true when ADSB_EXCHANGE_API_KEY is set', async () => {
-    process.env.ADSB_EXCHANGE_API_KEY = 'test-key';
-
-    const res = await fetch(`${baseUrl}/api/sources`);
-    const body = await res.json();
-
-    expect(body.adsb.configured).toBe(true);
-
-    delete process.env.ADSB_EXCHANGE_API_KEY;
-  });
-
-  it('adsb.configured is false when ADSB_EXCHANGE_API_KEY is missing', async () => {
-    delete process.env.ADSB_EXCHANGE_API_KEY;
-
-    const res = await fetch(`${baseUrl}/api/sources`);
-    const body = await res.json();
-
-    expect(body.adsb.configured).toBe(false);
   });
 });

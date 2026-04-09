@@ -18,9 +18,7 @@ describe('weatherStore', () => {
   });
 
   it('setWeatherData sets grid and connectionStatus to connected', () => {
-    const grid = [
-      { lat: 30, lng: 50, temperature: 25, windSpeed: 10, windDirection: 180 },
-    ];
+    const grid = [{ lat: 30, lng: 50, temperature: 25, windSpeed: 10, windDirection: 180 }];
     useWeatherStore.getState().setWeatherData({ data: grid, stale: false, lastFresh: Date.now() });
     const state = useWeatherStore.getState();
     expect(state.grid).toEqual(grid);
@@ -29,9 +27,7 @@ describe('weatherStore', () => {
   });
 
   it('setWeatherData with stale=true sets connectionStatus to stale', () => {
-    const grid = [
-      { lat: 30, lng: 50, temperature: 25, windSpeed: 10, windDirection: 180 },
-    ];
+    const grid = [{ lat: 30, lng: 50, temperature: 25, windSpeed: 10, windDirection: 180 }];
     useWeatherStore.getState().setWeatherData({ data: grid, stale: true, lastFresh: Date.now() });
     expect(useWeatherStore.getState().connectionStatus).toBe('stale');
   });

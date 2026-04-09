@@ -9,7 +9,14 @@ interface SidebarSectionProps {
   id: string;
 }
 
-export function SidebarSection({ title, icon, isOpen, onToggle, children, id }: SidebarSectionProps) {
+export function SidebarSection({
+  title,
+  icon,
+  isOpen,
+  onToggle,
+  children,
+  id,
+}: SidebarSectionProps) {
   return (
     <div id={id} data-testid={`sidebar-section-${id}`}>
       <button

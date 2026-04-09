@@ -15,13 +15,13 @@ created: 2026-03-21
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.0 |
-| **Config file** | `vite.config.ts` (test section) |
-| **Quick run command** | `npx vitest run server/__tests__/routes/markets.test.ts` |
-| **Full suite command** | `npx vitest run` |
-| **Estimated runtime** | ~15 seconds |
+| Property               | Value                                                    |
+| ---------------------- | -------------------------------------------------------- |
+| **Framework**          | Vitest 4.1.0                                             |
+| **Config file**        | `vite.config.ts` (test section)                          |
+| **Quick run command**  | `npx vitest run server/__tests__/routes/markets.test.ts` |
+| **Full suite command** | `npx vitest run`                                         |
+| **Estimated runtime**  | ~15 seconds                                              |
 
 ---
 
@@ -36,16 +36,16 @@ created: 2026-03-21
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 18-01-01 | 01 | 1 | MRKT-01 | unit | `npx vitest run server/__tests__/adapters/yahoo-finance.test.ts -x` | ❌ W0 | ⬜ pending |
-| 18-01-02 | 01 | 1 | MRKT-01 | integration | `npx vitest run server/__tests__/routes/markets.test.ts -x` | ❌ W0 | ⬜ pending |
-| 18-01-03 | 01 | 1 | MRKT-01 | unit | `npx vitest run src/__tests__/stores/marketStore.test.ts -x` | ❌ W0 | ⬜ pending |
-| 18-02-01 | 02 | 2 | MRKT-02 | unit | `npx vitest run src/__tests__/components/markets/Sparkline.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 18-02-02 | 02 | 2 | MRKT-02 | unit | `npx vitest run src/__tests__/components/markets/Sparkline.test.tsx -x` | ❌ W0 | ⬜ pending |
-| 18-03-01 | 03 | 2 | MRKT-03 | unit | `npx vitest run src/__tests__/components/markets/MarketRow.test.tsx -x` | ❌ W0 | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement | Test Type   | Automated Command                                                       | File Exists | Status     |
+| -------- | ---- | ---- | ----------- | ----------- | ----------------------------------------------------------------------- | ----------- | ---------- |
+| 18-01-01 | 01   | 1    | MRKT-01     | unit        | `npx vitest run server/__tests__/adapters/yahoo-finance.test.ts -x`     | ❌ W0       | ⬜ pending |
+| 18-01-02 | 01   | 1    | MRKT-01     | integration | `npx vitest run server/__tests__/routes/markets.test.ts -x`             | ❌ W0       | ⬜ pending |
+| 18-01-03 | 01   | 1    | MRKT-01     | unit        | `npx vitest run src/__tests__/stores/marketStore.test.ts -x`            | ❌ W0       | ⬜ pending |
+| 18-02-01 | 02   | 2    | MRKT-02     | unit        | `npx vitest run src/__tests__/components/markets/Sparkline.test.tsx -x` | ❌ W0       | ⬜ pending |
+| 18-02-02 | 02   | 2    | MRKT-02     | unit        | `npx vitest run src/__tests__/components/markets/Sparkline.test.tsx -x` | ❌ W0       | ⬜ pending |
+| 18-03-01 | 03   | 2    | MRKT-03     | unit        | `npx vitest run src/__tests__/components/markets/MarketRow.test.tsx -x` | ❌ W0       | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -61,13 +61,13 @@ created: 2026-03-21
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Panel position below NotificationBell | MRKT-01 | Visual layout | Inspect top-right, verify panel renders below bell icon |
-| Sparkline inline appearance (~60x16px) | MRKT-02 | Visual styling | Verify sparkline size and crispness in browser |
-| Delta fade animation timing | MRKT-03 | CSS animation | Verify 3s green fade matches CounterRow pattern |
-| Market closed label display | MRKT-01 | Time-dependent | Check during market close hours for "MARKET CLOSED" label |
-| Accordion expand/collapse | MRKT-02 | Interaction | Click row, verify chart expands; click another, verify previous collapses |
+| Behavior                               | Requirement | Why Manual     | Test Instructions                                                         |
+| -------------------------------------- | ----------- | -------------- | ------------------------------------------------------------------------- |
+| Panel position below NotificationBell  | MRKT-01     | Visual layout  | Inspect top-right, verify panel renders below bell icon                   |
+| Sparkline inline appearance (~60x16px) | MRKT-02     | Visual styling | Verify sparkline size and crispness in browser                            |
+| Delta fade animation timing            | MRKT-03     | CSS animation  | Verify 3s green fade matches CounterRow pattern                           |
+| Market closed label display            | MRKT-01     | Time-dependent | Check during market close hours for "MARKET CLOSED" label                 |
+| Accordion expand/collapse              | MRKT-02     | Interaction    | Click row, verify chart expands; click another, verify previous collapses |
 
 ---
 

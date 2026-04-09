@@ -20,10 +20,12 @@ The primary risks are: Overpass API timeouts on the large Middle East bounding b
 The existing stack (React 19, TypeScript ~5.9.3, Vite 6, Zustand 5, Deck.gl 9, MapLibre GL 5, Tailwind CSS 4, Express 5, Upstash Redis) is unchanged. Two new production dependencies are needed:
 
 **New dependencies:**
+
 - **fast-xml-parser ^5.5.6**: Parse BBC and Al Jazeera RSS XML -- zero dependencies, 104KB, pure JS, serverless-safe, TypeScript types included
 - **fuse.js ^7.1.0**: Client-side fuzzy search across all entity stores -- zero dependencies, 12KB, weighted multi-key search for ranking callsigns higher than location strings
 
 **No dependency needed for:**
+
 - Overpass API (direct fetch, same pattern as GDELT adapter)
 - Yahoo Finance v8 chart endpoint (direct fetch with User-Agent header)
 - GDELT DOC 2.0 API (returns JSON natively)
@@ -36,6 +38,7 @@ The existing stack (React 19, TypeScript ~5.9.3, Vite 6, Zustand 5, Deck.gl 9, M
 ### Expected Features
 
 **Must have (table stakes):**
+
 - Key infrastructure sites overlay (nuclear, military, oil, ports, dams, airbases) with per-type toggles and click-to-inspect
 - Multi-source news feed (GDELT DOC + BBC RSS + Al Jazeera RSS) with conflict keyword filtering and URL deduplication
 - Notification center with bell icon, unread badge, severity-scored event ranking, and 24h rolling window
@@ -43,12 +46,14 @@ The existing stack (React 19, TypeScript ~5.9.3, Vite 6, Zustand 5, Deck.gl 9, M
 - Global search bar with Cmd+K shortcut, fuzzy matching across all entity types, grouped results, and fly-to-entity
 
 **Should have (differentiators):**
+
 - Proximity alerts (flight/ship within 50km of key site) with cooldown deduplication
 - News-event correlation per notification card (temporal + geographic/keyword matching)
 - Oil-conflict visual correlation (co-locate markets and events; user draws conclusions)
 - Logarithmic severity scoring that compresses the long tail of media coverage
 
 **Defer to v1.2+:**
+
 - AI-generated situation briefs (Claude API)
 - Historical replay / event timeline
 - Trajectory arcs / flight path rendering
@@ -61,6 +66,7 @@ The existing stack (React 19, TypeScript ~5.9.3, Vite 6, Zustand 5, Deck.gl 9, M
 All five features replicate the established pipeline: upstream API -> server adapter -> Express route -> Redis cache -> Zustand store -> polling hook -> UI component/Deck.gl layer. The project grows from 6 stores to 11, from 4 API routes to 8, and from 3 polling hooks to 6. The only structural type change is adding `SiteEntity` to the `MapEntity` discriminated union -- news items and market quotes are separate types that never flow through the entity pipeline. The notification center is the only cross-store consumer, reading from siteStore, newsStore, flightStore, and shipStore for proximity and headline matching.
 
 **Major components:**
+
 1. **Overpass adapter + siteStore** -- static infrastructure sites (24h cache), new IconLayer with 6 site-type icons
 2. **News adapter + newsStore** -- merged GDELT DOC + RSS articles (15min cache), no standalone UI, consumed by notifications
 3. **Notification route + notificationStore** -- server-side severity scoring, client-side proximity alerts, drawer panel with news-matched cards
@@ -79,6 +85,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 ## Implications for Roadmap
 
 ### Phase 15: Key Sites Overlay
+
 **Rationale:** Must come first -- it is the only phase that extends the MapEntity type system, which is a structural change that ripples through useSelectedEntity, useEntityLayers, DetailPanelSlot, and all switch statements. Phase 17 depends on siteStore for proximity alerts.
 **Delivers:** 6 site types on the map with per-type toggles, click-to-inspect detail panel, 24h cached Overpass data
 **Addresses:** Key infrastructure overlay (table stakes), toggle panel structure
@@ -86,6 +93,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 **Stack:** No new dependencies (direct fetch to Overpass API)
 
 ### Phase 16: News Feed
+
 **Rationale:** Independent of Phase 15 (no code dependencies), but must precede Phase 17 (notification center needs newsStore for headline matching). Quick to build -- 1 adapter, 1 route, 1 store, 1 hook, zero UI.
 **Delivers:** Server-side news pipeline merging GDELT DOC + BBC RSS + Al Jazeera RSS, deduplication, conflict keyword filtering
 **Addresses:** Multi-source news feed (table stakes)
@@ -93,6 +101,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 **Stack:** fast-xml-parser (new dependency)
 
 ### Phase 17: Notification Center
+
 **Rationale:** The highest-value feature in v1.1 -- transforms the dashboard from passive display to active intelligence. Depends on both Phase 15 (site positions for proximity alerts) and Phase 16 (news items for headline matching). Also introduces the 24h event default, a cross-cutting change best landed in one focused phase.
 **Delivers:** Bell icon with unread badge, severity-scored notification drawer, proximity alerts (50km threshold), news-event correlation per card, 24h rolling event window default
 **Addresses:** Notification center (table stakes), proximity alerts (differentiator), news-event correlation (differentiator)
@@ -100,6 +109,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 **Stack:** No new dependencies (haversine is inline, scoring is Math.log)
 
 ### Phase 18: Oil Markets Tracker
+
 **Rationale:** Fully independent of Phases 15-17 -- no interaction with entity stores, layers, or other panels. Placed after notifications so panel layout patterns are proven. Follows the established store/polling/panel pattern exactly.
 **Delivers:** 5 oil/energy ticker rows with price, % change, 5-day sparklines, market-closed state, collapsible bottom-left panel
 **Addresses:** Oil markets tracker (table stakes), oil-conflict visual correlation (differentiator)
@@ -107,6 +117,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 **Stack:** No new dependencies (direct fetch, inline SVG sparkline)
 
 ### Phase 19: Search, Filter & UI Cleanup
+
 **Rationale:** Cross-store search needs all entity stores to exist (Phases 15-18). UI cleanup (toggle overflow redesign, filter panel grouping, z-index audit) should assess the final state of all panels. This is the polish phase.
 **Delivers:** Global search bar with Cmd+K, fuzzy matching across all types, fly-to-entity; filter panel redesign with grouped sections and Reset All; scrollable/collapsible layer toggles; minute granularity removal; StatusPanel extended to 6 feed lines
 **Addresses:** Global search (table stakes), filter improvements (table stakes)
@@ -114,6 +125,7 @@ All five features replicate the established pipeline: upstream API -> server ada
 **Stack:** fuse.js (new dependency)
 
 ### Phase 20: Production Review
+
 **Rationale:** Verification-only, must be last. Full E2E test matrix covering all panel combinations, Vercel deployment validation, git tag v1.1.
 **Delivers:** Production-ready v1.1 deployment
 **Addresses:** All integration pitfalls surface in production testing
@@ -130,10 +142,12 @@ All five features replicate the established pipeline: upstream API -> server ada
 ### Research Flags
 
 Phases likely needing deeper research during planning:
+
 - **Phase 17:** Notification center is the most complex phase (severity scoring formula tuning, panel coexistence CSS, proximity alert deduplication logic, 24h event window integration). Needs phase-level research for the panel manager pattern and proximity clustering algorithm.
 - **Phase 18:** Yahoo Finance endpoint behavior needs validation at implementation time -- test from Vercel's IP range to confirm the v8 chart endpoint is accessible from serverless functions without crumb auth.
 
 Phases with standard patterns (skip research-phase):
+
 - **Phase 15:** Overpass API is well-documented (10+ year stability), and the adapter/store/layer pattern is identical to existing event handling. Split-query mitigation is straightforward.
 - **Phase 16:** RSS parsing with fast-xml-parser is a solved problem. GDELT DOC API is from the same project already used for events. No novel patterns.
 - **Phase 19:** fuse.js has comprehensive documentation. Search bar, filter grouping, and scrollable panels are standard UI patterns.
@@ -141,12 +155,12 @@ Phases with standard patterns (skip research-phase):
 
 ## Confidence Assessment
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | Only 2 new deps, both zero-dependency, well-established. Existing stack unchanged. Only Yahoo Finance (MEDIUM) as an unofficial API introduces uncertainty. |
-| Features | HIGH | Feature set derived from approved design spec + competitor analysis (World Monitor). Clear table stakes / differentiator / anti-feature classification. |
-| Architecture | HIGH | Direct codebase analysis confirms all new features replicate existing adapter->route->store->hook->layer pattern. 5 new stores, 4 new routes, no structural changes beyond SiteEntity in MapEntity union. |
-| Pitfalls | HIGH | 18 pitfalls identified across 6 phases with concrete prevention strategies. Critical pitfalls (Overpass timeout, Yahoo instability, panel conflicts, event window regression) have multiple mitigations each. |
+| Area         | Confidence | Notes                                                                                                                                                                                                         |
+| ------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack        | HIGH       | Only 2 new deps, both zero-dependency, well-established. Existing stack unchanged. Only Yahoo Finance (MEDIUM) as an unofficial API introduces uncertainty.                                                   |
+| Features     | HIGH       | Feature set derived from approved design spec + competitor analysis (World Monitor). Clear table stakes / differentiator / anti-feature classification.                                                       |
+| Architecture | HIGH       | Direct codebase analysis confirms all new features replicate existing adapter->route->store->hook->layer pattern. 5 new stores, 4 new routes, no structural changes beyond SiteEntity in MapEntity union.     |
+| Pitfalls     | HIGH       | 18 pitfalls identified across 6 phases with concrete prevention strategies. Critical pitfalls (Overpass timeout, Yahoo instability, panel conflicts, event window regression) have multiple mitigations each. |
 
 **Overall confidence:** HIGH
 
@@ -161,6 +175,7 @@ Phases with standard patterns (skip research-phase):
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Direct codebase analysis of all existing stores, routes, adapters, hooks, and components
 - [Overpass API - OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Overpass_API)
 - [GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/)
@@ -170,6 +185,7 @@ Phases with standard patterns (skip research-phase):
 - Approved design spec: `docs/superpowers/specs/2026-03-19-intelligence-layer-design.md`
 
 ### Secondary (MEDIUM confidence)
+
 - [Yahoo Finance API Guide - AlgoTrading101](https://algotrading101.com/learn/yahoo-finance-api-guide/) -- v8 chart endpoint stability
 - [yahoo-finance2 Crumb Issue #764](https://github.com/gadicc/yahoo-finance2/issues/764) -- crumb auth problems
 - [Overpass API timeout for large queries](https://github.com/drolbr/Overpass-API/issues/389) -- bbox size constraints
@@ -177,9 +193,11 @@ Phases with standard patterns (skip research-phase):
 - [Carbon Design System: Notification Pattern](https://carbondesignsystem.com/patterns/notification-pattern/) -- severity tiering
 
 ### Tertiary (LOW confidence)
+
 - Yahoo Finance v8 chart endpoint long-term stability -- unofficial API with no SLA; needs runtime validation
 - Proximity alert cluster grouping thresholds (10km radius, 30min cooldown) -- reasonable defaults, needs production tuning
 
 ---
-*Research completed: 2026-03-19*
-*Ready for roadmap: yes*
+
+_Research completed: 2026-03-19_
+_Ready for roadmap: yes_

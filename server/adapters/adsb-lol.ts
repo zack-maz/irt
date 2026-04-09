@@ -1,9 +1,11 @@
 import { RateLimitError } from '../types.js';
 import type { FlightEntity } from '../types.js';
-import { IRAN_CENTER, ADSB_RADIUS_NM } from '../constants.js';
+import { IRAN_CENTER, ADSB_RADIUS_NM } from '../config.js';
 import { normalizeAircraft } from './adsb-v2-normalize.js';
 import type { AdsbResponse } from './adsb-v2-normalize.js';
-import { log } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
+
+const log = logger.child({ module: 'adsb-lol' });
 
 const BASE_URL = 'https://api.adsb.lol';
 const FETCH_TIMEOUT = 10_000;
@@ -26,10 +28,8 @@ export async function fetchFlights(): Promise<FlightEntity[]> {
   const data = (await res.json()) as AdsbResponse;
   const aircraft = data.ac ?? [];
 
-  const flights = aircraft
-    .map(normalizeAircraft)
-    .filter((f): f is FlightEntity => f !== null);
+  const flights = aircraft.map(normalizeAircraft).filter((f): f is FlightEntity => f !== null);
 
-  log({ level: 'info', message: `[adsb.lol] fetched ${flights.length} flights in ${Date.now() - start}ms` });
+  log.info({ count: flights.length, durationMs: Date.now() - start }, 'fetched flights');
   return flights;
 }

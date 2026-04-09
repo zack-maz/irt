@@ -22,7 +22,13 @@ affects: [base-map-plan-03, entity-rendering, layer-controls, detail-panel]
 # Tech tracking
 tech-stack:
   added: []
-  patterns: [imperative-style-customization-in-onLoad, terrain-dem-source-with-hillshade, overlaid-deckgl-mode, useMap-hook-for-compass-reset]
+  patterns:
+    [
+      imperative-style-customization-in-onLoad,
+      terrain-dem-source-with-hillshade,
+      overlaid-deckgl-mode,
+      useMap-hook-for-compass-reset,
+    ]
 
 key-files:
   created:
@@ -39,17 +45,17 @@ key-files:
     - src/__tests__/MapLoadingScreen.test.tsx
 
 key-decisions:
-  - "Imperative style customization in onLoad callback with getLayer() guards for safe property modification"
-  - "Separate waterway line-color vs fill-color handling for correct CARTO Dark Matter layer types"
-  - "Zustand selector pattern (s => s.field) in BaseMap to minimize re-renders"
-  - "CoordinateReadout positioned as sibling after Map element for z-index stacking"
-  - "CompassControl uses useMap hook with DOM querySelector for compass button double-click binding"
+  - 'Imperative style customization in onLoad callback with getLayer() guards for safe property modification'
+  - 'Separate waterway line-color vs fill-color handling for correct CARTO Dark Matter layer types'
+  - 'Zustand selector pattern (s => s.field) in BaseMap to minimize re-renders'
+  - 'CoordinateReadout positioned as sibling after Map element for z-index stacking'
+  - 'CompassControl uses useMap hook with DOM querySelector for compass button double-click binding'
 
 patterns-established:
-  - "Map style customization: hide/modify layers imperatively in onLoad, never pre-fetch/modify style.json"
-  - "Overlay component pattern: behavior-only components (render null) mounted inside Map children"
-  - "Map constant extraction: all view state, bounds, layer IDs in constants.ts to prevent re-render allocations"
-  - "Mock Map onLoad capture: test mock captures onLoad callback via __capturedOnLoad for simulating map load events"
+  - 'Map style customization: hide/modify layers imperatively in onLoad, never pre-fetch/modify style.json'
+  - 'Overlay component pattern: behavior-only components (render null) mounted inside Map children'
+  - 'Map constant extraction: all view state, bounds, layer IDs in constants.ts to prevent re-render allocations'
+  - 'Mock Map onLoad capture: test mock captures onLoad callback via __capturedOnLoad for simulating map load events'
 
 requirements-completed: [MAP-01]
 
@@ -131,5 +137,6 @@ None - no external service configuration required.
 All 10 key files verified present. Both task commits (2abf9ff, 59603cd) verified in git log. SUMMARY.md created.
 
 ---
-*Phase: 02-base-map*
-*Completed: 2026-03-14*
+
+_Phase: 02-base-map_
+_Completed: 2026-03-14_

@@ -1,15 +1,17 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock config module before importing adapter
-vi.mock('../../config.js', () => ({
-  config: {
-    acled: {
-      email: 'test@example.com',
-      password: 'test-password-secret',
+// Mock config module before importing adapter (spread actual to preserve constants)
+vi.mock('../../config.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../config.js')>();
+  return {
+    ...actual,
+    config: {
+      ...actual.config,
+      acled: { email: 'test@example.com', password: 'test-password-secret' },
     },
-  },
-}));
+  };
+});
 
 // Sample ACLED event record
 const sampleShellingEvent = {
@@ -184,7 +186,11 @@ describe('ACLED Adapter', () => {
     });
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ status: 200, success: true, data: [sampleShellingEvent, sampleAirstrikeEvent] }),
+      json: async () => ({
+        status: 200,
+        success: true,
+        data: [sampleShellingEvent, sampleAirstrikeEvent],
+      }),
     });
 
     const events = await fetchEvents();

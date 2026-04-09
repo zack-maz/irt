@@ -41,6 +41,5 @@ export const useShipStore = create<ShipState>()((set, get) => ({
 
   setLoading: () => set({ connectionStatus: 'loading' }),
 
-  clearStaleData: () =>
-    set({ ships: [], shipCount: 0, connectionStatus: 'error' }),
+  clearStaleData: () => set({ ships: [], shipCount: 0, connectionStatus: 'error' }),
 }));

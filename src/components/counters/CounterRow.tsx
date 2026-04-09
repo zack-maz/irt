@@ -60,11 +60,7 @@ export function CounterRow({
   }, [value]);
 
   const deltaText =
-    delta !== null
-      ? delta > 0
-        ? `+${fmt.format(delta)}`
-        : fmt.format(delta)
-      : null;
+    delta !== null ? (delta > 0 ? `+${fmt.format(delta)}` : fmt.format(delta)) : null;
 
   const hasEntities = entities !== undefined;
   const isDisabled = hasEntities && value === 0;
@@ -92,10 +88,7 @@ export function CounterRow({
       <div className="flex items-center gap-1.5 flex-1 justify-end">
         <span className="tabular-nums text-text-primary">{fmt.format(value)}</span>
         {deltaText && (
-          <span
-            key={deltaKey}
-            className="text-accent-green text-[10px] tabular-nums animate-delta"
-          >
+          <span key={deltaKey} className="text-accent-green text-[10px] tabular-nums animate-delta">
             {deltaText}
           </span>
         )}
@@ -165,10 +158,7 @@ export function CounterRow({
                     ))}
                   </div>
                   {showOverflowIndicator && (
-                    <div
-                      ref={rangeRef}
-                      className="text-[10px] text-text-muted text-center py-0.5"
-                    >
+                    <div ref={rangeRef} className="text-[10px] text-text-muted text-center py-0.5">
                       {`Showing 1-${MAX_VISIBLE} of ${entities!.length}`}
                     </div>
                   )}

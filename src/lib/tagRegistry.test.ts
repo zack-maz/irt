@@ -5,15 +5,15 @@ import {
   isValidPrefix,
   getTagColor,
   getTagValues,
-  type TagDefinition,
   type EntityDataSources,
-  type TagValue,
 } from './tagRegistry';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '../../server/types';
 
 // --- Helpers ---
 
-function makeFlight(overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {}): FlightEntity {
+function makeFlight(
+  overrides: Partial<FlightEntity> & { data?: Partial<FlightEntity['data']> } = {},
+): FlightEntity {
   const { data: d, ...rest } = overrides;
   return {
     id: 'flight-1',
@@ -38,7 +38,9 @@ function makeFlight(overrides: Partial<FlightEntity> & { data?: Partial<FlightEn
   };
 }
 
-function makeShip(overrides: Partial<ShipEntity> & { data?: Partial<ShipEntity['data']> } = {}): ShipEntity {
+function makeShip(
+  overrides: Partial<ShipEntity> & { data?: Partial<ShipEntity['data']> } = {},
+): ShipEntity {
   const { data: d, ...rest } = overrides;
   return {
     id: 'ship-1',
@@ -59,7 +61,9 @@ function makeShip(overrides: Partial<ShipEntity> & { data?: Partial<ShipEntity['
   };
 }
 
-function makeEvent(overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {}): ConflictEventEntity {
+function makeEvent(
+  overrides: Partial<ConflictEventEntity> & { data?: Partial<ConflictEventEntity['data']> } = {},
+): ConflictEventEntity {
   const { data: d, ...rest } = overrides;
   return {
     id: 'event-1',
@@ -115,11 +119,29 @@ function makeDataSources(overrides: Partial<EntityDataSources> = {}): EntityData
 
 describe('TAG_REGISTRY', () => {
   const EXPECTED_PREFIXES = [
-    'type', 'country', 'actor', 'location', 'severity', 'near', 'since', 'before', 'has',
-    'callsign', 'icao', 'altitude', 'speed', 'ground', 'unidentified',
-    'mmsi', 'heading', 'shipname',
-    'cameo', 'mentions', 'date',
-    'site', 'status',
+    'type',
+    'country',
+    'actor',
+    'location',
+    'severity',
+    'near',
+    'since',
+    'before',
+    'has',
+    'callsign',
+    'icao',
+    'altitude',
+    'speed',
+    'ground',
+    'unidentified',
+    'mmsi',
+    'heading',
+    'shipname',
+    'cameo',
+    'mentions',
+    'date',
+    'site',
+    'status',
   ];
 
   it('has entries for all expected prefixes', () => {
@@ -210,15 +232,15 @@ describe('getTagValues', () => {
       const values = getTagValues('type', data);
       expect(values.length).toBeGreaterThan(0);
 
-      const flightVal = values.find(v => v.value === 'flight');
+      const flightVal = values.find((v) => v.value === 'flight');
       expect(flightVal).toBeDefined();
       expect(flightVal!.count).toBe(2);
 
-      const shipVal = values.find(v => v.value === 'ship');
+      const shipVal = values.find((v) => v.value === 'ship');
       expect(shipVal).toBeDefined();
       expect(shipVal!.count).toBe(1);
 
-      const siteVal = values.find(v => v.value === 'site');
+      const siteVal = values.find((v) => v.value === 'site');
       expect(siteVal).toBeDefined();
       expect(siteVal!.count).toBe(1);
     });
@@ -234,10 +256,10 @@ describe('getTagValues', () => {
         ],
       });
       const values = getTagValues('country', data);
-      const iranVal = values.find(v => v.value.toLowerCase() === 'iran');
+      const iranVal = values.find((v) => v.value.toLowerCase() === 'iran');
       expect(iranVal).toBeDefined();
       expect(iranVal!.count).toBe(2);
-      const iraqVal = values.find(v => v.value.toLowerCase() === 'iraq');
+      const iraqVal = values.find((v) => v.value.toLowerCase() === 'iraq');
       expect(iraqVal).toBeDefined();
       expect(iraqVal!.count).toBe(1);
     });
@@ -252,25 +274,23 @@ describe('getTagValues', () => {
         ],
       });
       const values = getTagValues('actor', data);
-      const iranVal = values.find(v => v.value === 'IRAN');
+      const iranVal = values.find((v) => v.value === 'IRAN');
       expect(iranVal).toBeDefined();
       expect(iranVal!.count).toBe(2); // appears as actor1 twice
-      const iraqVal = values.find(v => v.value === 'IRAQ');
+      const iraqVal = values.find((v) => v.value === 'IRAQ');
       expect(iraqVal).toBeDefined();
       expect(iraqVal!.count).toBe(1);
-      const israelVal = values.find(v => v.value === 'ISRAEL');
+      const israelVal = values.find((v) => v.value === 'ISRAEL');
       expect(israelVal).toBeDefined();
       expect(israelVal!.count).toBe(1);
     });
 
     it('deduplicates actors appearing as both actor1 and actor2', () => {
       const data = makeDataSources({
-        events: [
-          makeEvent({ data: { actor1: 'IRAN', actor2: 'IRAN' } }),
-        ],
+        events: [makeEvent({ data: { actor1: 'IRAN', actor2: 'IRAN' } })],
       });
       const values = getTagValues('actor', data);
-      const iranEntries = values.filter(v => v.value === 'IRAN');
+      const iranEntries = values.filter((v) => v.value === 'IRAN');
       expect(iranEntries.length).toBe(1);
       expect(iranEntries[0].count).toBe(2); // counted from both actor1 and actor2
     });
@@ -286,16 +306,16 @@ describe('getTagValues', () => {
         ],
       });
       const values = getTagValues('site', data);
-      const nuclearVal = values.find(v => v.value === 'nuclear');
+      const nuclearVal = values.find((v) => v.value === 'nuclear');
       expect(nuclearVal).toBeDefined();
       expect(nuclearVal!.count).toBe(2);
-      const oilVal = values.find(v => v.value === 'oil');
+      const oilVal = values.find((v) => v.value === 'oil');
       expect(oilVal).toBeDefined();
       expect(oilVal!.count).toBe(1);
     });
   });
 
-describe('severity: prefix', () => {
+  describe('severity: prefix', () => {
     it('returns static high/medium/low values', () => {
       const values = getTagValues('severity', makeDataSources());
       expect(values).toEqual([
@@ -316,7 +336,7 @@ describe('severity: prefix', () => {
     });
   });
 
-describe('unidentified: prefix', () => {
+  describe('unidentified: prefix', () => {
     it('returns static true/false values', () => {
       const values = getTagValues('unidentified', makeDataSources());
       expect(values).toEqual([
@@ -344,18 +364,16 @@ describe('unidentified: prefix', () => {
           makeEvent({ id: 'e2', data: { locationName: 'Tehran, Iran' } }),
           makeEvent({ id: 'e3', data: { locationName: 'Baghdad, Iraq' } }),
         ],
-        sites: [
-          makeSite({ label: 'Natanz Nuclear Facility' }),
-        ],
+        sites: [makeSite({ label: 'Natanz Nuclear Facility' })],
       });
       const values = getTagValues('location', data);
-      const baghdadVal = values.find(v => v.value === 'Baghdad, Iraq');
+      const baghdadVal = values.find((v) => v.value === 'Baghdad, Iraq');
       expect(baghdadVal).toBeDefined();
       expect(baghdadVal!.count).toBe(2);
-      const tehranVal = values.find(v => v.value === 'Tehran, Iran');
+      const tehranVal = values.find((v) => v.value === 'Tehran, Iran');
       expect(tehranVal).toBeDefined();
       expect(tehranVal!.count).toBe(1);
-      const natanzVal = values.find(v => v.value === 'Natanz Nuclear Facility');
+      const natanzVal = values.find((v) => v.value === 'Natanz Nuclear Facility');
       expect(natanzVal).toBeDefined();
       expect(natanzVal!.count).toBe(1);
     });
@@ -370,7 +388,7 @@ describe('unidentified: prefix', () => {
       expect(getTagValues('speed', makeDataSources())).toEqual([]);
     });
 
-it('returns empty array for mentions', () => {
+    it('returns empty array for mentions', () => {
       expect(getTagValues('mentions', makeDataSources())).toEqual([]);
     });
 

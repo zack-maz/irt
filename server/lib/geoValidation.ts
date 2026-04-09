@@ -1,23 +1,5 @@
 // Geo cross-validation and centroid detection for GDELT events
 
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-// Load ME cities data for expanded centroid detection
-interface MeCityEntry {
-  name: string;
-  asciiName: string;
-  lat: number;
-  lng: number;
-  countryCode: string;
-  population: number;
-}
-
-const __dirname_geo = dirname(fileURLToPath(import.meta.url));
-const citiesPath = resolve(__dirname_geo, '../../src/data/me-cities.json');
-const ME_CITIES: MeCityEntry[] = JSON.parse(readFileSync(citiesPath, 'utf-8'));
-
 /**
  * Non-Middle-East country names that commonly appear in GDELT ActionGeo_FullName.
  * Used to discard events misplaced outside the monitoring region.
@@ -59,6 +41,7 @@ export const NON_ME_FULLNAME_COUNTRIES = new Set([
  * FIPS 10-4 code to expected country name suffixes in ActionGeo_FullName.
  * Covers all 16 MIDDLE_EAST_FIPS codes.
  */
+// TODO(26.2): Externalize FIPS lookup tables
 export const FIPS_TO_EXPECTED_COUNTRY: Record<string, string[]> = {
   IR: ['Iran'],
   IZ: ['Iraq'],
@@ -73,8 +56,6 @@ export const FIPS_TO_EXPECTED_COUNTRY: Record<string, string[]> = {
   KU: ['Kuwait'],
   JO: ['Jordan'],
   IS: ['Israel', 'West Bank', 'Gaza Strip', 'Palestinian Territory'],
-  WE: ['West Bank', 'Palestinian Territory', 'Israel'],
-  GZ: ['Gaza Strip', 'Gaza', 'Palestinian Territory', 'Israel'],
   LE: ['Lebanon'],
   AF: ['Afghanistan'],
   PK: ['Pakistan'],
@@ -84,12 +65,53 @@ export const FIPS_TO_EXPECTED_COUNTRY: Record<string, string[]> = {
  * Major city centroids in the Middle East region for centroid detection.
  * Events at these exact coordinates are likely geocoded to city center
  * rather than the actual event location.
- *
- * Dynamically built from GeoNames data (me-cities.json) -- expanded from
- * original 42 hardcoded entries to ~300 cities with pop >= 200k.
  */
-export const CITY_CENTROIDS: Array<{ name: string; lat: number; lng: number }> =
-  ME_CITIES.map(c => ({ name: c.name, lat: c.lat, lng: c.lng }));
+// TODO(26.2): Replace hardcoded 42-entry table with GeoNames-sourced data
+export const CITY_CENTROIDS: Array<{ name: string; lat: number; lng: number }> = [
+  { name: 'Tehran', lat: 35.6892, lng: 51.389 },
+  { name: 'Baghdad', lat: 33.3152, lng: 44.3661 },
+  { name: 'Damascus', lat: 33.5138, lng: 36.2765 },
+  { name: 'Tel Aviv', lat: 32.0853, lng: 34.7818 },
+  { name: 'Jerusalem', lat: 31.7683, lng: 35.2137 },
+  { name: 'Riyadh', lat: 24.7136, lng: 46.6753 },
+  { name: 'Beirut', lat: 33.8938, lng: 35.5018 },
+  { name: 'Amman', lat: 31.9454, lng: 35.9284 },
+  { name: 'Kabul', lat: 34.5553, lng: 69.2075 },
+  { name: 'Islamabad', lat: 33.6844, lng: 73.0479 },
+  { name: 'Ankara', lat: 39.9334, lng: 32.8597 },
+  { name: "Sana'a", lat: 15.3694, lng: 44.191 },
+  { name: 'Doha', lat: 25.2854, lng: 51.531 },
+  { name: 'Kuwait City', lat: 29.3759, lng: 47.9774 },
+  { name: 'Muscat', lat: 23.588, lng: 58.3829 },
+  { name: 'Manama', lat: 26.2285, lng: 50.586 },
+  { name: 'Abu Dhabi', lat: 24.4539, lng: 54.3773 },
+  { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
+  { name: 'Aden', lat: 12.7855, lng: 45.0187 },
+  { name: 'Basra', lat: 30.5085, lng: 47.7804 },
+  { name: 'Mosul', lat: 36.335, lng: 43.1189 },
+  { name: 'Aleppo', lat: 36.2021, lng: 37.1343 },
+  { name: 'Homs', lat: 34.7324, lng: 36.7137 },
+  { name: 'Isfahan', lat: 32.6546, lng: 51.668 },
+  { name: 'Tabriz', lat: 38.0962, lng: 46.2738 },
+  { name: 'Jeddah', lat: 21.4858, lng: 39.1925 },
+  { name: 'Medina', lat: 24.4672, lng: 39.6024 },
+  { name: 'Haifa', lat: 32.794, lng: 34.9896 },
+  { name: 'Gaza City', lat: 31.5017, lng: 34.4668 },
+  { name: 'Karachi', lat: 24.8607, lng: 67.0011 },
+  // Additional conflict hotspot cities
+  { name: 'Tikrit', lat: 34.6115, lng: 43.677 },
+  { name: 'Fallujah', lat: 33.3484, lng: 43.7753 },
+  { name: 'Ramadi', lat: 33.4271, lng: 43.3068 },
+  { name: 'Kirkuk', lat: 35.4681, lng: 44.3953 },
+  { name: 'Idlib', lat: 35.9306, lng: 36.6339 },
+  { name: 'Deir ez-Zor', lat: 35.3359, lng: 40.1408 },
+  { name: 'Palmyra', lat: 34.5571, lng: 38.2688 },
+  { name: 'Hodeidah', lat: 14.798, lng: 42.954 },
+  { name: 'Kandahar', lat: 31.628, lng: 65.7372 },
+  { name: 'Mazar-i-Sharif', lat: 36.7069, lng: 67.11 },
+  { name: 'Lahore', lat: 31.5497, lng: 74.3436 },
+  { name: 'Peshawar', lat: 34.0151, lng: 71.5249 },
+];
 
 /**
  * Extract the last comma-delimited segment from ActionGeo_FullName.
@@ -161,7 +183,10 @@ export const CENTROID_TOLERANCE = 0.01;
  */
 export function detectCentroid(lat: number, lng: number): 'precise' | 'centroid' {
   for (const city of CITY_CENTROIDS) {
-    if (Math.abs(lat - city.lat) <= CENTROID_TOLERANCE && Math.abs(lng - city.lng) <= CENTROID_TOLERANCE) {
+    if (
+      Math.abs(lat - city.lat) <= CENTROID_TOLERANCE &&
+      Math.abs(lng - city.lng) <= CENTROID_TOLERANCE
+    ) {
       return 'centroid';
     }
   }

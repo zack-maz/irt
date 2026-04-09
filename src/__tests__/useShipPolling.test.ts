@@ -110,7 +110,27 @@ describe('useShipPolling', () => {
 
   it('clears stale data when lastFresh exceeds 120s threshold', async () => {
     // Respond with non-stale data so lastFresh gets set
-    const freshResponse = { data: [{ id: 'ship-1', type: 'ship', lat: 26, lng: 56, timestamp: Date.now(), label: 'TEST', data: { mmsi: 1, shipName: 'TEST', speedOverGround: 0, courseOverGround: 0, trueHeading: 0 } }], stale: false, lastFresh: Date.now() };
+    const freshResponse = {
+      data: [
+        {
+          id: 'ship-1',
+          type: 'ship',
+          lat: 26,
+          lng: 56,
+          timestamp: Date.now(),
+          label: 'TEST',
+          data: {
+            mmsi: 1,
+            shipName: 'TEST',
+            speedOverGround: 0,
+            courseOverGround: 0,
+            trueHeading: 0,
+          },
+        },
+      ],
+      stale: false,
+      lastFresh: Date.now(),
+    };
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(freshResponse),

@@ -26,14 +26,14 @@ key-files:
     - server/__tests__/routes/events.test.ts
 
 key-decisions:
-  - "Backfill only on cache miss (not stale) to keep normal request path fast"
-  - "1-hour cooldown via Redis timestamp to prevent hammering GDELT master list"
-  - "Backfill merged first, then fresh events overwrite duplicates (fresh wins)"
-  - "Backfill failure is non-fatal -- route continues with fetchEvents data"
+  - 'Backfill only on cache miss (not stale) to keep normal request path fast'
+  - '1-hour cooldown via Redis timestamp to prevent hammering GDELT master list'
+  - 'Backfill merged first, then fresh events overwrite duplicates (fresh wins)'
+  - 'Backfill failure is non-fatal -- route continues with fetchEvents data'
 
 patterns-established:
-  - "Lazy backfill: seed historical data on first request when Redis is empty, not at startup"
-  - "Redis cooldown: direct redis.get/set for lightweight timestamp tracking alongside cacheGet/cacheSet"
+  - 'Lazy backfill: seed historical data on first request when Redis is empty, not at startup'
+  - 'Redis cooldown: direct redis.get/set for lightweight timestamp tracking alongside cacheGet/cacheSet'
 
 requirements-completed: []
 
@@ -55,6 +55,7 @@ completed: 2026-03-20
 - **Files modified:** 2
 
 ## Accomplishments
+
 - Events route now triggers backfillEvents() on first request when Redis cache is empty
 - Backfill dynamically computes days since WAR_START to cover full war timeline
 - 1-hour cooldown tracked in Redis prevents re-triggering on rapid cache misses
@@ -69,10 +70,12 @@ Each task was committed atomically (TDD flow):
 2. **Task 1 GREEN: Implement lazy backfill** - `d91e25a` (feat)
 
 ## Files Created/Modified
+
 - `server/routes/events.ts` - Added backfillEvents import, shouldBackfill() helper, lazy backfill logic in cache miss branch
 - `server/__tests__/routes/events.test.ts` - Added backfillEvents mock, redis.get/set mocks, 6 new backfill test cases
 
 ## Decisions Made
+
 - Backfill only on cache miss (not stale): stale cache already has accumulated data, backfill is only needed to seed an empty accumulator
 - 1-hour cooldown: prevents hammering GDELT master file list if Redis gets evicted repeatedly
 - Merge order: backfill results merged first, then fresh events overwrite -- ensures latest 15-minute data always wins over historical
@@ -91,6 +94,7 @@ None.
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - GDELT backfill closes the UAT gap where date range filter showed no historical data
 - Events accumulator now seeds with full war timeline on first cold-start request
 - Ready for UAT re-test of date range filter with historical data
@@ -98,12 +102,14 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 All files and commits verified:
+
 - server/routes/events.ts: FOUND
-- server/__tests__/routes/events.test.ts: FOUND
+- server/**tests**/routes/events.test.ts: FOUND
 - 13-04-SUMMARY.md: FOUND
 - 758e36d (RED): FOUND
 - d91e25a (GREEN): FOUND
 
 ---
-*Phase: 13-serverless-cache-migration*
-*Completed: 2026-03-20*
+
+_Phase: 13-serverless-cache-migration_
+_Completed: 2026-03-20_

@@ -13,13 +13,14 @@ This document covers ONLY new dependencies and integration patterns needed for v
 
 ### RSS/XML Parsing (Phase 16: News Feed)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| fast-xml-parser | ^5.5.6 | Parse BBC and Al Jazeera RSS XML to JS objects | Zero dependencies, 104KB, pure JS (no native C/C++ modules), TypeScript types included, actively maintained (v5.5.6 released 2026-03-16). Ideal for serverless — no binary compilation issues on Vercel. |
+| Technology      | Version | Purpose                                        | Why                                                                                                                                                                                                      |
+| --------------- | ------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| fast-xml-parser | ^5.5.6  | Parse BBC and Al Jazeera RSS XML to JS objects | Zero dependencies, 104KB, pure JS (no native C/C++ modules), TypeScript types included, actively maintained (v5.5.6 released 2026-03-16). Ideal for serverless — no binary compilation issues on Vercel. |
 
 **Confidence:** HIGH (verified via GitHub, npm, widespread serverless adoption)
 
 **Usage pattern:**
+
 ```typescript
 import { XMLParser } from 'fast-xml-parser';
 const parser = new XMLParser({ ignoreAttributes: false });
@@ -37,13 +38,14 @@ const items = feed.rss?.channel?.item ?? [];
 
 ### Fuzzy Search (Phase 19: Global Search Bar)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| fuse.js | ^7.1.0 | Client-side fuzzy search across all entity stores | Zero dependencies, ~12KB minified, TypeScript types, 3,252+ npm dependents, well-documented API for weighted multi-key search. |
+| Technology | Version | Purpose                                           | Why                                                                                                                            |
+| ---------- | ------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| fuse.js    | ^7.1.0  | Client-side fuzzy search across all entity stores | Zero dependencies, ~12KB minified, TypeScript types, 3,252+ npm dependents, well-documented API for weighted multi-key search. |
 
 **Confidence:** HIGH (zero-dependency, stable API, dominant market share for client-side fuzzy search)
 
 **Usage pattern:**
+
 ```typescript
 import Fuse from 'fuse.js';
 const fuse = new Fuse(entities, {
@@ -83,6 +85,7 @@ The following v1.1 features need NO new npm packages — they are fully covered 
 **Confidence:** HIGH (official OSM wiki documentation, free, no auth, stable for 10+ years)
 
 **Query structure for the 6 site types:**
+
 ```
 [out:json][timeout:30][bbox:15,30,42,70];
 (
@@ -117,6 +120,7 @@ The `out center;` directive returns centroid coordinates for ways (polygons), gi
 **Confidence:** MEDIUM (unofficial API — Yahoo provides no guarantees, but the chart endpoint has been stable for years and does not require crumb auth unlike the quote endpoints that were locked down in April 2024)
 
 **Risk mitigation:**
+
 - Return empty array (not error) on Yahoo Finance failure — graceful degradation per design spec
 - Cache in Redis with 60s TTL to minimize requests
 - If Yahoo blocks this endpoint in the future, `yahoo-finance2` npm package (v3.13.2) could be added as fallback — it handles crumb/cookie negotiation but adds complexity and has known intermittent crumb expiry issues
@@ -139,6 +143,7 @@ The `out center;` directive returns centroid coordinates for ways (polygons), gi
 **Confidence:** HIGH (same GDELT project already used for events in v0.9, well-documented API)
 
 **Query for the news adapter:**
+
 ```
 query=Iran OR "Middle East" OR Iraq OR Israel theme:MILITARY_STRIKE OR theme:TERROR
 mode=artlist
@@ -178,10 +183,11 @@ timespan=24h
 ```typescript
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 ```
@@ -195,12 +201,21 @@ Used client-side in `notificationStore` for proximity alerts (flight/ship within
 **No library needed.** Sparklines are a single SVG `<polyline>` element. For 5 data points rendered at 60x20px, a React component is ~20 lines of code.
 
 ```tsx
-function Sparkline({ data, width = 60, height = 20 }: { data: number[]; width?: number; height?: number }) {
-  const min = Math.min(...data), max = Math.max(...data);
+function Sparkline({
+  data,
+  width = 60,
+  height = 20,
+}: {
+  data: number[];
+  width?: number;
+  height?: number;
+}) {
+  const min = Math.min(...data),
+    max = Math.max(...data);
   const range = max - min || 1;
-  const points = data.map((v, i) =>
-    `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * height}`
-  ).join(' ');
+  const points = data
+    .map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * height}`)
+    .join(' ');
   return (
     <svg width={width} height={height}>
       <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -225,35 +240,35 @@ function Sparkline({ data, width = 60, height = 20 }: { data: number[]; width?: 
 
 ## Existing Stack Leveraged (No Changes)
 
-| Existing Technology | v1.1 Usage |
-|---------------------|-----------|
-| Express 5 routes | 4 new routes: `/api/sites`, `/api/news`, `/api/notifications`, `/api/markets` |
-| Upstash Redis | 4 new cache keys: `sites:osm` (24h), `news:feed` (15min), `markets:quotes` (60s), notifications computed from events cache |
-| Zustand 5 (curried create) | 4 new stores: `siteStore`, `newsStore`, `notificationStore`, `marketStore` |
-| Deck.gl IconLayer | 1 new layer for key sites (same pattern as conflict events) |
+| Existing Technology          | v1.1 Usage                                                                                                                                     |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Express 5 routes             | 4 new routes: `/api/sites`, `/api/news`, `/api/notifications`, `/api/markets`                                                                  |
+| Upstash Redis                | 4 new cache keys: `sites:osm` (24h), `news:feed` (15min), `markets:quotes` (60s), notifications computed from events cache                     |
+| Zustand 5 (curried create)   | 4 new stores: `siteStore`, `newsStore`, `notificationStore`, `marketStore`                                                                     |
+| Deck.gl IconLayer            | 1 new layer for key sites (same pattern as conflict events)                                                                                    |
 | Recursive setTimeout polling | 4 new hooks: `useSitePolling` (24h), `useNewsPolling` (15min), `useMarketPolling` (60s), `useNotificationPolling` (implicit via event polling) |
-| Tailwind CSS v4 | All new UI panels (notification drawer, markets panel, search bar) |
-| Vitest + jsdom | Tests for all new adapters, routes, stores, components |
-| tsup serverless bundle | New routes auto-included via Express app factory |
-| adm-zip | Not used by v1.1 (GDELT DOC returns JSON, not ZIP) |
+| Tailwind CSS v4              | All new UI panels (notification drawer, markets panel, search bar)                                                                             |
+| Vitest + jsdom               | Tests for all new adapters, routes, stores, components                                                                                         |
+| tsup serverless bundle       | New routes auto-included via Express app factory                                                                                               |
+| adm-zip                      | Not used by v1.1 (GDELT DOC returns JSON, not ZIP)                                                                                             |
 
 ---
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| XML parsing | fast-xml-parser | rss-parser | Heavier deps (xml2js), last updated 2022, slower |
-| XML parsing | fast-xml-parser | DOMParser | Not available in Node.js without jsdom (30MB) |
-| Fuzzy search | fuse.js | uFuzzy | No weighted multi-key search, optimized for file paths |
-| Fuzzy search | fuse.js | MiniSearch | Full-text search engine, overkill for ~5K entities |
-| Fuzzy search | fuse.js | native filter | No fuzzy matching, no typo tolerance, no scoring |
-| Yahoo Finance | Direct fetch | yahoo-finance2 | Crumb auth issues, 15+ transitive deps, intermittent failures |
-| Yahoo Finance | Direct fetch | Alpha Vantage | Requires API key, rate-limited free tier (5 req/min) |
-| Sparklines | Inline SVG | react-sparklines | 8KB dep for 20 lines of code |
-| Sparklines | Inline SVG | recharts | Massive bundle for non-interactive mini charts |
-| Haversine | Inline function | haversine-distance npm | 10 lines of math vs. adding a dependency |
-| Overpass | Direct fetch | osm-api npm | Unnecessary abstraction over a single POST request |
+| Category      | Recommended     | Alternative            | Why Not                                                       |
+| ------------- | --------------- | ---------------------- | ------------------------------------------------------------- |
+| XML parsing   | fast-xml-parser | rss-parser             | Heavier deps (xml2js), last updated 2022, slower              |
+| XML parsing   | fast-xml-parser | DOMParser              | Not available in Node.js without jsdom (30MB)                 |
+| Fuzzy search  | fuse.js         | uFuzzy                 | No weighted multi-key search, optimized for file paths        |
+| Fuzzy search  | fuse.js         | MiniSearch             | Full-text search engine, overkill for ~5K entities            |
+| Fuzzy search  | fuse.js         | native filter          | No fuzzy matching, no typo tolerance, no scoring              |
+| Yahoo Finance | Direct fetch    | yahoo-finance2         | Crumb auth issues, 15+ transitive deps, intermittent failures |
+| Yahoo Finance | Direct fetch    | Alpha Vantage          | Requires API key, rate-limited free tier (5 req/min)          |
+| Sparklines    | Inline SVG      | react-sparklines       | 8KB dep for 20 lines of code                                  |
+| Sparklines    | Inline SVG      | recharts               | Massive bundle for non-interactive mini charts                |
+| Haversine     | Inline function | haversine-distance npm | 10 lines of math vs. adding a dependency                      |
+| Overpass      | Direct fetch    | osm-api npm            | Unnecessary abstraction over a single POST request            |
 
 ---
 
@@ -267,6 +282,7 @@ npm install fast-xml-parser fuse.js
 ```
 
 **Total new dependency footprint:**
+
 - fast-xml-parser: ~104KB, 0 transitive dependencies
 - fuse.js: ~12KB, 0 transitive dependencies
 - **Combined: ~116KB, 0 transitive dependencies**
@@ -277,10 +293,10 @@ This is deliberately minimal. The project already has 14 production dependencies
 
 ## Version Pinning
 
-| Package | Pin | Rationale |
-|---------|-----|-----------|
-| fast-xml-parser | ^5.5.6 | Major version 5 API is stable; minor/patch updates are safe |
-| fuse.js | ^7.1.0 | Major version 7 API is stable; last published ~1 year ago, unlikely to see breaking changes |
+| Package         | Pin    | Rationale                                                                                   |
+| --------------- | ------ | ------------------------------------------------------------------------------------------- |
+| fast-xml-parser | ^5.5.6 | Major version 5 API is stable; minor/patch updates are safe                                 |
+| fuse.js         | ^7.1.0 | Major version 7 API is stable; last published ~1 year ago, unlikely to see breaking changes |
 
 Both packages use standard semver. Caret (`^`) pinning is appropriate — no known upcoming breaking changes in either.
 
@@ -289,6 +305,7 @@ Both packages use standard semver. Caret (`^`) pinning is appropriate — no kno
 ## TypeScript Integration Notes
 
 Both new packages include TypeScript type definitions:
+
 - `fast-xml-parser`: Ships its own types (3.4% of codebase is `.ts`)
 - `fuse.js`: Ships its own types, generic `Fuse<T>` for typed results
 
@@ -299,6 +316,7 @@ No `@types/*` packages needed.
 ## Serverless (Vercel) Compatibility
 
 Both new packages are serverless-safe:
+
 - **fast-xml-parser:** Pure JS, no native binaries, no filesystem access
 - **fuse.js:** Pure JS, client-side only (not in serverless bundle)
 
@@ -308,15 +326,15 @@ The tsup bundle for Vercel (`server/vercel-entry.ts`) will include fast-xml-pars
 
 ## Risk Assessment
 
-| Technology | Risk | Mitigation |
-|-----------|------|------------|
-| Yahoo Finance v8 chart API | MEDIUM — unofficial, could be blocked | Graceful degradation (empty array), can add yahoo-finance2 as fallback later |
-| Overpass API | LOW — free, stable, 10+ year track record | Redis 24h cache means 1 request/day; fallback to cached data on failure |
-| GDELT DOC API | LOW — same project as existing GDELT v2 events | 15min cache; existing GDELT event data provides fallback context |
-| BBC RSS | LOW — BBC has maintained feeds for 15+ years | Cache; if feed dies, GDELT DOC + Al Jazeera still provide news |
-| Al Jazeera RSS | LOW — standard RSS, stable endpoint | Cache; one of three sources, not single point of failure |
-| fast-xml-parser | LOW — 3,844 npm dependents, actively maintained | Well-established, v5 API is stable |
-| fuse.js | LOW — 3,252 npm dependents, zero deps | Dominant client-side fuzzy search library |
+| Technology                 | Risk                                            | Mitigation                                                                   |
+| -------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| Yahoo Finance v8 chart API | MEDIUM — unofficial, could be blocked           | Graceful degradation (empty array), can add yahoo-finance2 as fallback later |
+| Overpass API               | LOW — free, stable, 10+ year track record       | Redis 24h cache means 1 request/day; fallback to cached data on failure      |
+| GDELT DOC API              | LOW — same project as existing GDELT v2 events  | 15min cache; existing GDELT event data provides fallback context             |
+| BBC RSS                    | LOW — BBC has maintained feeds for 15+ years    | Cache; if feed dies, GDELT DOC + Al Jazeera still provide news               |
+| Al Jazeera RSS             | LOW — standard RSS, stable endpoint             | Cache; one of three sources, not single point of failure                     |
+| fast-xml-parser            | LOW — 3,844 npm dependents, actively maintained | Well-established, v5 API is stable                                           |
+| fuse.js                    | LOW — 3,252 npm dependents, zero deps           | Dominant client-side fuzzy search library                                    |
 
 ---
 

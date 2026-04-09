@@ -41,7 +41,7 @@ export function SyntaxOverlay({ query, className = '' }: SyntaxOverlayProps) {
           className: colorClass,
           key: token.start,
         });
-      } else if (token.type === 'AND' || token.type === 'OR') {
+      } else if (token.type === 'OR') {
         result.push({
           text: token.value,
           className: 'text-text-muted italic',

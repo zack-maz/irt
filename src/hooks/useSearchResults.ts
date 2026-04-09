@@ -8,6 +8,7 @@ import { useWaterStore } from '@/stores/waterStore';
 import { useLayerStore } from '@/stores/layerStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { evaluateQuery, type EvaluationContext } from '@/lib/queryEvaluator';
+import type { SearchableEntity } from '@/lib/searchUtils';
 import { haversineKm } from '@/lib/geo';
 import type { FlightEntity, ShipEntity, ConflictEventEntity, SiteEntity } from '@/types/entities';
 import type { WaterFacility } from '../../server/types';
@@ -92,7 +93,7 @@ export function useSearchResults(): GroupedSearchResults {
     }
     if (isWaterLayerActive) {
       for (const w of waterFacilities) {
-        if (evaluateQuery(parsedQuery, w as any, ctx)) ids.add(w.id);
+        if (evaluateQuery(parsedQuery, w, ctx)) ids.add(w.id);
       }
     }
 
@@ -101,7 +102,16 @@ export function useSearchResults(): GroupedSearchResults {
     if (ids.size !== current.size || [...ids].some((id) => !current.has(id))) {
       useSearchStore.getState().setMatchedIds(ids);
     }
-  }, [isFilterMode, parsedQuery, flights, ships, events, sites, waterFacilities, isWaterLayerActive]);
+  }, [
+    isFilterMode,
+    parsedQuery,
+    flights,
+    ships,
+    events,
+    sites,
+    waterFacilities,
+    isWaterLayerActive,
+  ]);
 
   return useMemo(() => {
     if (!query.trim() || !parsedQuery) {
@@ -120,9 +130,9 @@ export function useSearchResults(): GroupedSearchResults {
     const inProximity = (lat: number, lng: number) =>
       !pin || haversineKm(pin.lat, pin.lng, lat, lng) <= radius;
 
-    const matchEntity = <T extends { type: string; label: string; lat: number; lng: number }>(entity: T): SearchResult<T> | null => {
+    const matchEntity = <T extends SearchableEntity>(entity: T): SearchResult<T> | null => {
       if (!inProximity(entity.lat, entity.lng)) return null;
-      if (evaluateQuery(parsedQuery, entity as any, ctx)) {
+      if (evaluateQuery(parsedQuery, entity, ctx)) {
         return {
           entity,
           matchField: 'match',
@@ -164,8 +174,8 @@ export function useSearchResults(): GroupedSearchResults {
     if (isWaterLayerActive) {
       for (const w of waterRef.current) {
         if (wa.length >= MAX_PER_TYPE) break;
-        const r = matchEntity(w as any);
-        if (r) wa.push(r as unknown as SearchResult<WaterFacility>);
+        const r = matchEntity(w);
+        if (r) wa.push(r);
       }
     }
 

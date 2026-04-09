@@ -27,12 +27,7 @@ export function Sparkline({ closes, previousClose, width = 60, height = 16 }: Sp
   const d = points.map((p, i) => (i === 0 ? `M${p}` : `L${p}`)).join(' ');
 
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className="shrink-0"
-    >
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="shrink-0">
       <path
         d={d}
         fill="none"

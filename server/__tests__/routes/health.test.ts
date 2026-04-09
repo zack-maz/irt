@@ -9,6 +9,9 @@ const mockCacheGet = vi.fn();
 vi.mock('../../cache/redis.js', () => ({
   redis: { ping: (...args: unknown[]) => mockPing(...(args as [])) },
   cacheGet: (...args: unknown[]) => mockCacheGet(...args),
+  // Task 4 (26.4): health.ts now calls cacheGetSafe; route behavior is
+  // identical on the happy path, so route both through the same mock.
+  cacheGetSafe: (...args: unknown[]) => mockCacheGet(...args),
 }));
 
 // Helper: create a minimal request/response pair for Express handler testing
@@ -17,8 +20,14 @@ function createReqRes() {
   let statusCode = 200;
   let body: unknown;
   const res = {
-    status(code: number) { statusCode = code; return res; },
-    json(data: unknown) { body = data; return res; },
+    status(code: number) {
+      statusCode = code;
+      return res;
+    },
+    json(data: unknown) {
+      body = data;
+      return res;
+    },
   } as unknown as import('express').Response;
   return { req, res, getStatus: () => statusCode, getBody: () => body as Record<string, unknown> };
 }
@@ -100,7 +109,6 @@ interface RouteLayer {
 }
 
 function extractHandler(router: ReturnType<typeof Router>) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stack = (router as any).stack as RouteLayer[];
   for (const layer of stack) {
     if (layer.route?.methods.get) {
