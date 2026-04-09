@@ -516,6 +516,12 @@ smoothly.
 > for a future GDELT redo on a clean foundation. If you're evaluating
 > this project as a work sample, that ADR is the single most
 > portfolio-relevant artifact in the repo.
+>
+> **Renumbering note:** The redo of this work has been scheduled as
+> **Phase 27 under milestone v1.4** (2026-04-08). The "Phase 26.2" name
+> below refers to the scrapped attempt as it existed at the time, not
+> the new plan. Historical artifacts from the scrapped attempt are
+> preserved at `.planning/phases/archive-26.2-nlp-scrapped/`.
 
 Phase 26.2 was supposed to be "Conflict Geolocation Improvement." The idea
 was to use NLP entity extraction (via `compromise`, a browser-compatible NLP
