@@ -80,16 +80,18 @@ Roadmap Evolution for the full history.
 **Goal:** Rearchitect the GDELT conflict event pipeline with LLM-based extraction (Cerebras/Groq), precise geolocation via Nominatim, a simplified 5-type event ontology (airstrike, on_ground, explosion, targeted, other), multi-source deduplication/merge, casualty extraction, and situation summaries. Graceful degradation to raw GDELT when LLM is unavailable.
 **Depends on:** v1.3 closeout (Phases 26.3 + 26.4 complete)
 **Requirements:** D-01 through D-20 (from 27-CONTEXT.md)
-**Plans:** 6 plans
+**Plans:** 8 plans (6 complete + 2 gap closure)
 
 Plans:
 
-- [ ] 27-01-PLAN.md — Server-side type foundation: 5-type ConflictEventType, CAMEO remapping, config
-- [ ] 27-02-PLAN.md — LLM adapter, event grouping, LLM extractor, Nominatim forward geocoding
-- [ ] 27-03-PLAN.md — Events route integration: LLM processing path + cooldown + dual-cache + degradation
-- [ ] 27-04-PLAN.md — Client-side type cascade: toggles, severity, filters, counters, layers
-- [ ] 27-05-PLAN.md — UI features: master + 5 sub-toggles, EventDetail enrichment, precision rings
-- [ ] 27-06-PLAN.md — Architecture docs, CLAUDE.md update, human verification
+- [x] 27-01-PLAN.md — Server-side type foundation: 5-type ConflictEventType, CAMEO remapping, config
+- [x] 27-02-PLAN.md — LLM adapter, event grouping, LLM extractor, Nominatim forward geocoding
+- [x] 27-03-PLAN.md — Events route integration: LLM processing path + cooldown + dual-cache + degradation
+- [x] 27-04-PLAN.md — Client-side type cascade: toggles, severity, filters, counters, layers
+- [x] 27-05-PLAN.md — UI features: master + 5 sub-toggles, EventDetail enrichment, precision rings
+- [x] 27-06-PLAN.md — Architecture docs, CLAUDE.md update, human verification
+- [ ] 27-07-PLAN.md — Gap closure: normalize old event types before Zod validation (blocker fix)
+- [ ] 27-08-PLAN.md — Gap closure: remove duplicate event toggles from Layers panel (major fix)
 
 **Historical note:** This phase was originally numbered 26.2 and attempted an NLP-based approach (title fetching + me-cities lexicon + NLP extraction wired into the GDELT adapter). That approach was scrapped in Phase 26.3 after roughly two weeks of work because it was patching downstream of a bad signal rather than fixing the input. See `docs/adr/0005-phase-26-2-nlp-approach-scrapped.md` for the honest retrospective and `.planning/phases/archive-26.2-nlp-scrapped/` for the preserved historical artifacts.
 
