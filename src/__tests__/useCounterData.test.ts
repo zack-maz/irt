@@ -131,8 +131,10 @@ describe('useCounterData', () => {
     const { result } = renderHook(() => useCounterData());
     expect(result.current.iranianFlights).toBe(0);
     expect(result.current.airstrikes).toBe(0);
-    expect(result.current.groundCombat).toBe(0);
+    expect(result.current.onGround).toBe(0);
+    expect(result.current.explosions).toBe(0);
     expect(result.current.targeted).toBe(0);
+    expect(result.current.other).toBe(0);
   });
 
   it('counts all Iranian flights', () => {
@@ -172,8 +174,10 @@ describe('useCounterData', () => {
     });
     const { result } = renderHook(() => useCounterData());
     expect(result.current.airstrikes).toBe(2);
-    expect(result.current.groundCombat).toBe(3); // on_ground + explosion + other
+    expect(result.current.onGround).toBe(1);
+    expect(result.current.explosions).toBe(1);
     expect(result.current.targeted).toBe(1);
+    expect(result.current.other).toBe(1);
   });
 
   it('flight counters respect smart filters', () => {
@@ -195,8 +199,10 @@ describe('useCounterData', () => {
     expect(result.current.entities.flights).toEqual([]);
     expect(result.current.entities.ships).toEqual([]);
     expect(result.current.entities.airstrikeEvents).toEqual([]);
-    expect(result.current.entities.groundCombatEvents).toEqual([]);
+    expect(result.current.entities.onGroundEvents).toEqual([]);
+    expect(result.current.entities.explosionEvents).toEqual([]);
     expect(result.current.entities.targetedEvents).toEqual([]);
+    expect(result.current.entities.otherEvents).toEqual([]);
     expect(result.current.entities.sites).toBeDefined();
   });
 
@@ -238,7 +244,7 @@ describe('useCounterData', () => {
     expect(result.current.entities.airstrikeEvents).toHaveLength(2);
   });
 
-  it('entities.groundCombatEvents contains events filtered by GROUND_COMBAT_TYPES', () => {
+  it('entities split on_ground, explosion, other into separate arrays', () => {
     useEventStore.setState({
       events: [
         makeEvent('gc1', 'on_ground'),
@@ -249,7 +255,9 @@ describe('useCounterData', () => {
       eventCount: 4,
     });
     const { result } = renderHook(() => useCounterData());
-    expect(result.current.entities.groundCombatEvents).toHaveLength(3);
+    expect(result.current.entities.onGroundEvents).toHaveLength(1);
+    expect(result.current.entities.explosionEvents).toHaveLength(1);
+    expect(result.current.entities.otherEvents).toHaveLength(1);
   });
 
   it('entities.targetedEvents contains events filtered by TARGETED_TYPES', () => {
