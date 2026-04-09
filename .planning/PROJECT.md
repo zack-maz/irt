@@ -8,18 +8,14 @@ A personal real-time intelligence dashboard for monitoring the Iran conflict and
 
 Surface actionable, data-backed intelligence on the Iran conflict in real-time on an interactive 2.5D map — numbers over narratives.
 
-## Current Milestone: v1.1 Intelligence Layer
+## Current Milestone: v1.4 GDELT Redo & Performance
 
-**Goal:** Add key infrastructure sites overlay, news feed, notification center with severity scoring, oil markets tracker, search/filter/UI cleanup, and production deploy sync.
+**Goal:** Rearchitect the conflict event pipeline with NLP-based geolocation and a simplified event ontology, then validate production handles 250 concurrent users.
 
 **Target features:**
 
-- Key infrastructure sites overlay (nuclear, naval, oil, airbase, dam, port) via Overpass API
-- Multi-source news feed (GDELT DOC + BBC + Al Jazeera) with noise filtering
-- Notification center with severity scoring, news matching, and proximity alerts
-- Oil markets tracker (Brent, WTI, XLE, USO, XOM) with sparklines
-- Search bar, filter panel improvements, and UI cleanup
-- Production review and deploy sync
+- Phase 27 — NLP-based conflict event pipeline: precise geolocation via NLP (approach TBD — requires deep discussion), simplified event type categories, updated filters/search to reflect new ontology. Replaces the scrapped Phase 26.2 approach with lessons learned (see ADR-0005).
+- Phase 28 — Performance & load testing: staggered API calls, lazy-load visualization layers, code-splitting, k6 at 250 VUs, CDN cache tuning, request coalescing
 
 ## Requirements
 
@@ -61,11 +57,13 @@ Surface actionable, data-backed intelligence on the Iran conflict in real-time o
 
 ## Context
 
-Shipped v0.9 MVP with 12,262 LOC TypeScript/CSS in 6 days.
-Tech stack: Vite 6, React 19, TypeScript 5.9, Zustand 5, Deck.gl, MapLibre, Tailwind CSS 4, Express 5.
-Data sources: OpenSky Network, ADS-B Exchange (RapidAPI), adsb.lol, AISStream, GDELT v2.
+Shipped through v1.3 with 41,709 LOC TypeScript across 288 files. 1283 tests passing across 101 files.
+Tech stack: Vite 6, React 19, TypeScript 5.9, Zustand 5, Deck.gl 9, MapLibre 5, Tailwind CSS 4, Express 5, pino, Zod, Upstash Redis.
+Data sources: OpenSky Network, adsb.lol (default), AISStream, GDELT v2, GDELT DOC 2.0, RSS (5 feeds), Yahoo Finance, Open-Meteo, Overpass API, WRI Aqueduct 4.0.
 Coverage area: Greater Middle East (15-42°N, 30-70°E) with 500 NM radius ADS-B queries from Iran center.
-Brainstorm document: docs/brainstorms/2026-03-13-iran-conflict-monitor-brainstorm.md
+Visualization layers: Geographic (terrain + contours), Weather (wind barbs + temp heatmap), Political (3-faction), Ethnic (GeoEPR 2021), Water stress (WRI + Open-Meteo), Threat density (RadialGradientExtension).
+CI/CD: GitHub Actions (lint + test + codecov + CodeQL), husky + lint-staged + gitleaks pre-commit, Vercel serverless deployment.
+Portfolio: 564-line README with hero GIF, 10-file Mermaid architecture deep dive, 8 ADRs, SRE runbook, degradation contract.
 
 ## Constraints
 
