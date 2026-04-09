@@ -240,7 +240,7 @@ describe('uiStore', () => {
         cells: [],
         eventCount: 3,
         totalWeight: 7,
-        dominantType: 'ground_combat',
+        dominantType: 'on_ground',
         totalFatalities: 2,
         latestTime: Date.now(),
         boundingBox: { minLat: 34, maxLat: 36, minLng: 50, maxLng: 52 },

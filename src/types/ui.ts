@@ -7,17 +7,10 @@ import type { ConflictEventType } from '../../server/types.js';
 
 export const CONFLICT_TOGGLE_GROUPS = {
   showAirstrikes: ['airstrike'] as const,
-  showGroundCombat: [
-    'ground_combat',
-    'shelling',
-    'bombing',
-    'assault',
-    'blockade',
-    'ceasefire_violation',
-    'mass_violence',
-    'wmd',
-  ] as const,
-  showTargeted: ['assassination', 'abduction'] as const,
+  showOnGround: ['on_ground'] as const,
+  showExplosions: ['explosion'] as const,
+  showTargeted: ['targeted'] as const,
+  showOther: ['other'] as const,
 } as const;
 
 // Derived from toggle groups — single source of truth
@@ -30,16 +23,10 @@ export function isConflictEventType(type: string): type is ConflictEventType {
 /** Human-readable labels for each ConflictEventType. Shared across tooltip, detail panel, etc. */
 export const EVENT_TYPE_LABELS: Record<string, string> = {
   airstrike: 'Airstrike',
-  ground_combat: 'Ground Combat',
-  shelling: 'Shelling',
-  bombing: 'Bombing',
-  assassination: 'Assassination',
-  abduction: 'Abduction',
-  assault: 'Assault',
-  blockade: 'Blockade',
-  ceasefire_violation: 'Ceasefire Violation',
-  mass_violence: 'Mass Violence',
-  wmd: 'WMD',
+  on_ground: 'Ground Combat',
+  explosion: 'Explosion',
+  targeted: 'Targeted',
+  other: 'Other',
 };
 
 /** Represents a connected-component cluster of threat grid cells */

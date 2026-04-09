@@ -77,9 +77,12 @@ export interface FilterState {
   // Visibility toggles (independent — each one gates its category independently)
   showFlights: boolean;
   showShips: boolean;
+  showEvents: boolean; // Master toggle for all conflict events
   showAirstrikes: boolean;
-  showGroundCombat: boolean;
+  showOnGround: boolean; // Was showGroundCombat
+  showExplosions: boolean;
   showTargeted: boolean;
+  showOther: boolean;
   showUnidentified: boolean;
   showGroundTraffic: boolean;
   showHealthySites: boolean;
@@ -120,9 +123,12 @@ export interface FilterState {
   // Visibility toggle actions
   toggleShowFlights: () => void;
   toggleShowShips: () => void;
+  toggleShowEvents: () => void; // Master toggle
   toggleShowAirstrikes: () => void;
-  toggleShowGroundCombat: () => void;
+  toggleShowOnGround: () => void; // Was toggleShowGroundCombat
+  toggleShowExplosions: () => void;
   toggleShowTargeted: () => void;
+  toggleShowOther: () => void;
   toggleShowUnidentified: () => void;
   toggleShowGroundTraffic: () => void;
   toggleShowHealthySites: () => void;
@@ -165,9 +171,12 @@ const DEFAULTS = {
   // Visibility toggles (all default ON)
   showFlights: true,
   showShips: true,
+  showEvents: true,
   showAirstrikes: true,
-  showGroundCombat: true,
+  showOnGround: true,
+  showExplosions: true,
   showTargeted: true,
+  showOther: true,
   showUnidentified: true,
   showGroundTraffic: true,
   showHealthySites: true,
@@ -309,9 +318,12 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   // Visibility toggles
   toggleShowFlights: () => set((s) => ({ showFlights: !s.showFlights })),
   toggleShowShips: () => set((s) => ({ showShips: !s.showShips })),
+  toggleShowEvents: () => set((s) => ({ showEvents: !s.showEvents })),
   toggleShowAirstrikes: () => set((s) => ({ showAirstrikes: !s.showAirstrikes })),
-  toggleShowGroundCombat: () => set((s) => ({ showGroundCombat: !s.showGroundCombat })),
+  toggleShowOnGround: () => set((s) => ({ showOnGround: !s.showOnGround })),
+  toggleShowExplosions: () => set((s) => ({ showExplosions: !s.showExplosions })),
   toggleShowTargeted: () => set((s) => ({ showTargeted: !s.showTargeted })),
+  toggleShowOther: () => set((s) => ({ showOther: !s.showOther })),
   toggleShowUnidentified: () => set((s) => ({ showUnidentified: !s.showUnidentified })),
   toggleShowGroundTraffic: () => set((s) => ({ showGroundTraffic: !s.showGroundTraffic })),
   toggleShowHealthySites: () => set((s) => ({ showHealthySites: !s.showHealthySites })),
