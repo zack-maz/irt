@@ -40,8 +40,10 @@ export interface CounterValues {
   totalFlights: number;
   iranianFlights: number;
   airstrikes: number;
-  groundCombat: number;
+  onGround: number;
+  explosions: number;
   targeted: number;
+  other: number;
   sites: SiteCounts;
   water: WaterCounts;
 }
@@ -59,19 +61,19 @@ export interface CounterEntities {
   flights: CounterEntity[];
   ships: CounterEntity[];
   airstrikeEvents: CounterEntity[];
-  groundCombatEvents: CounterEntity[];
+  onGroundEvents: CounterEntity[];
+  explosionEvents: CounterEntity[];
   targetedEvents: CounterEntity[];
+  otherEvents: CounterEntity[];
   sites: Record<SiteType, CounterEntity[]>;
   water: Record<WaterFacilityType, CounterEntity[]>;
 }
 
 const AIRSTRIKE_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showAirstrikes;
-const GROUND_COMBAT_TYPES: readonly string[] = [
-  ...CONFLICT_TOGGLE_GROUPS.showOnGround,
-  ...CONFLICT_TOGGLE_GROUPS.showExplosions,
-  ...CONFLICT_TOGGLE_GROUPS.showOther,
-];
+const ON_GROUND_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showOnGround;
+const EXPLOSION_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showExplosions;
 const TARGETED_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showTargeted;
+const OTHER_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showOther;
 
 // Proximity sort reference points
 const TEHRAN = { lat: 35.69, lng: 51.39 };
@@ -218,11 +220,10 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
 
     // Apply conflict visibility toggles (master gate + sub-toggles)
     const airstrikes = showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
-    const showGroundCombatToggle = showOnGroundToggle || showExplosionsToggle || showOtherToggle;
-    const groundCombatCount = showEvents && showGroundCombatToggle
-      ? countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES)
-      : 0;
+    const onGroundCount = showEvents && showOnGroundToggle ? countByGroup(severityFilteredEvents, ON_GROUND_TYPES) : 0;
+    const explosionsCount = showEvents && showExplosionsToggle ? countByGroup(severityFilteredEvents, EXPLOSION_TYPES) : 0;
     const targeted = showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
+    const otherCount = showEvents && showOtherToggle ? countByGroup(severityFilteredEvents, OTHER_TYPES) : 0;
 
     // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, port: 0, total: 0 };
@@ -326,9 +327,17 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         )
       : [];
 
-    const groundCombatEventEntities = showEvents && showGroundCombatToggle
+    const onGroundEventEntities = showEvents && showOnGroundToggle
       ? sortByProximity(
-          filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity),
+          filterByGroup(severityFilteredEvents, ON_GROUND_TYPES).map(toEventEntity),
+          TEHRAN,
+          TEL_AVIV,
+        )
+      : [];
+
+    const explosionEventEntities = showEvents && showExplosionsToggle
+      ? sortByProximity(
+          filterByGroup(severityFilteredEvents, EXPLOSION_TYPES).map(toEventEntity),
           TEHRAN,
           TEL_AVIV,
         )
@@ -342,12 +351,22 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         )
       : [];
 
+    const otherEventEntities = showEvents && showOtherToggle
+      ? sortByProximity(
+          filterByGroup(severityFilteredEvents, OTHER_TYPES).map(toEventEntity),
+          TEHRAN,
+          TEL_AVIV,
+        )
+      : [];
+
     const entities: CounterEntities = {
       flights: flightEntities,
       ships: shipEntities,
       airstrikeEvents: airstrikeEventEntities,
-      groundCombatEvents: groundCombatEventEntities,
+      onGroundEvents: onGroundEventEntities,
+      explosionEvents: explosionEventEntities,
       targetedEvents: targetedEventEntities,
+      otherEvents: otherEventEntities,
       sites: siteEntities,
       water: waterEntities,
     };
@@ -356,8 +375,10 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       totalFlights: visibleFlights.length,
       iranianFlights,
       airstrikes,
-      groundCombat: groundCombatCount,
+      onGround: onGroundCount,
+      explosions: explosionsCount,
       targeted,
+      other: otherCount,
       sites: siteCounts,
       water: waterCounts,
       entities,
