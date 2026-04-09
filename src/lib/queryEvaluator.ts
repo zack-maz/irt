@@ -352,6 +352,13 @@ export function evaluateTag(
       if (entity.type !== 'water') return false;
       const wf = entity as unknown as { stress: { compositeHealth: number } };
       const score = Math.max(1, Math.min(10, Math.round(wf.stress.compositeHealth * 9) + 1));
+      const v = value.toLowerCase();
+      // String branch: high = high stress = low score (1-3);
+      // medium = mid score (4-6); low = low stress (healthy) = high score (7-10).
+      if (v === 'high') return score >= 1 && score <= 3;
+      if (v === 'medium') return score >= 4 && score <= 6;
+      if (v === 'low') return score >= 7 && score <= 10;
+      // Numeric comparison (existing behavior preserved)
       const n = parseInt(value, 10);
       if (!isNaN(n)) return score === n;
       return false;
