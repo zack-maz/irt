@@ -494,7 +494,7 @@ entity layers are blank because their fetch calls fail.
   `iran-conflict-monitor-git-feature-branch.vercel.app`) and the
   env var is set to the production URL.
 - Default CORS*ORIGIN is `*` (graceful config loader), so a
-  missing env var is safe — a \_wrong* env var is worse than a
+  missing env var is safe — a \_wrong\* env var is worse than a
   missing one.
 
 **Remediation:**
