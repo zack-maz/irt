@@ -77,14 +77,19 @@ Roadmap Evolution for the full history.
 
 ### Phase 27: Conflict Geolocation Improvement (GDELT Redo) — was Phase 26.2
 
-**Goal:** Redo the GDELT event extraction pipeline on the clean v1.3 foundation — fix source deduplication, location accuracy, event type labeling, and remove hardcoding. The NLP-based attempt was scrapped in Phase 26.3; the redo should investigate upstream NumSources + noisy-CAMEO filtering, GDELT's actionGeo_FeatureID vs eventGeo_FeatureID discrimination, and ACLED as a ground-truth cross-validation source.
+**Goal:** Rearchitect the GDELT conflict event pipeline with LLM-based extraction (Cerebras/Groq), precise geolocation via Nominatim, a simplified 5-type event ontology (airstrike, on_ground, explosion, targeted, other), multi-source deduplication/merge, casualty extraction, and situation summaries. Graceful degradation to raw GDELT when LLM is unavailable.
 **Depends on:** v1.3 closeout (Phases 26.3 + 26.4 complete)
-**Requirements:** TBD (re-discuss approach — previous NLP decisions in `.planning/phases/archive-26.2-nlp-scrapped/` are NOT binding)
-**Plans:** 0 plans
+**Requirements:** D-01 through D-20 (from 27-CONTEXT.md)
+**Plans:** 6 plans
 
 Plans:
 
-- [ ] TBD (run `/gsd:discuss-phase 27` to capture fresh context, then `/gsd:plan-phase 27`)
+- [ ] 27-01-PLAN.md — Server-side type foundation: 5-type ConflictEventType, CAMEO remapping, config
+- [ ] 27-02-PLAN.md — LLM adapter, event grouping, LLM extractor, Nominatim forward geocoding
+- [ ] 27-03-PLAN.md — Events route integration: LLM processing path + cooldown + dual-cache + degradation
+- [ ] 27-04-PLAN.md — Client-side type cascade: toggles, severity, filters, counters, layers
+- [ ] 27-05-PLAN.md — UI features: master + 5 sub-toggles, EventDetail enrichment, precision rings
+- [ ] 27-06-PLAN.md — Architecture docs, CLAUDE.md update, human verification
 
 **Historical note:** This phase was originally numbered 26.2 and attempted an NLP-based approach (title fetching + me-cities lexicon + NLP extraction wired into the GDELT adapter). That approach was scrapped in Phase 26.3 after roughly two weeks of work because it was patching downstream of a bad signal rather than fixing the input. See `docs/adr/0005-phase-26-2-nlp-approach-scrapped.md` for the honest retrospective and `.planning/phases/archive-26.2-nlp-scrapped/` for the preserved historical artifacts.
 
