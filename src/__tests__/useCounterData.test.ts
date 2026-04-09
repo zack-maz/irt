@@ -163,16 +163,16 @@ describe('useCounterData', () => {
       events: [
         makeEvent('a1', 'airstrike'),
         makeEvent('a2', 'airstrike'),
-        makeEvent('gc1', 'ground_combat'),
-        makeEvent('sh1', 'shelling'),
-        makeEvent('t1', 'assassination'),
-        makeEvent('bl1', 'blockade'),
+        makeEvent('gc1', 'on_ground'),
+        makeEvent('ex1', 'explosion'),
+        makeEvent('t1', 'targeted'),
+        makeEvent('o1', 'other'),
       ],
       eventCount: 6,
     });
     const { result } = renderHook(() => useCounterData());
     expect(result.current.airstrikes).toBe(2);
-    expect(result.current.groundCombat).toBe(3); // ground_combat + shelling + blockade
+    expect(result.current.groundCombat).toBe(3); // on_ground + explosion + other
     expect(result.current.targeted).toBe(1);
   });
 
@@ -229,7 +229,7 @@ describe('useCounterData', () => {
     useEventStore.setState({
       events: [
         makeEvent('a1', 'airstrike'),
-        makeEvent('gc1', 'ground_combat'),
+        makeEvent('gc1', 'on_ground'),
         makeEvent('a2', 'airstrike'),
       ],
       eventCount: 3,
@@ -241,9 +241,9 @@ describe('useCounterData', () => {
   it('entities.groundCombatEvents contains events filtered by GROUND_COMBAT_TYPES', () => {
     useEventStore.setState({
       events: [
-        makeEvent('gc1', 'ground_combat'),
-        makeEvent('sh1', 'shelling'),
-        makeEvent('bm1', 'bombing'),
+        makeEvent('gc1', 'on_ground'),
+        makeEvent('ex1', 'explosion'),
+        makeEvent('o1', 'other'),
         makeEvent('a1', 'airstrike'),
       ],
       eventCount: 4,
@@ -255,8 +255,8 @@ describe('useCounterData', () => {
   it('entities.targetedEvents contains events filtered by TARGETED_TYPES', () => {
     useEventStore.setState({
       events: [
-        makeEvent('t1', 'assassination'),
-        makeEvent('t2', 'abduction'),
+        makeEvent('t1', 'targeted'),
+        makeEvent('t2', 'targeted'),
         makeEvent('a1', 'airstrike'),
       ],
       eventCount: 3,
@@ -319,7 +319,7 @@ describe('useCounterData', () => {
     useEventStore.setState({
       events: [
         makeEvent('e1', 'airstrike', 0, 33.001, 52.001), // near site-2 only
-        makeEvent('e2', 'ground_combat', 0, 33.002, 52.002), // near site-2 only
+        makeEvent('e2', 'on_ground', 0, 33.002, 52.002), // near site-2 only
         makeEvent('e3', 'airstrike', 0, 32.001, 51.001), // near site-1 only
       ],
       eventCount: 3,

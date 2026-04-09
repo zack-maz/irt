@@ -37,7 +37,7 @@ function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: num
 }
 
 /** Event types that mark a facility as "destroyed" (score 0) */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
+const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion']);
 
 function computeWaterAttackStatus(
   facility: WaterFacility,

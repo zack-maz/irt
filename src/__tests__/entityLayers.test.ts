@@ -155,7 +155,7 @@ const mockAirstrikeEvent: ConflictEventEntity = {
 };
 const mockGroundCombatEvent: ConflictEventEntity = {
   id: 'event-IRN002',
-  type: 'ground_combat',
+  type: 'on_ground',
   lat: 35.6892,
   lng: 51.389,
   timestamp: Date.now(),
@@ -175,13 +175,13 @@ const mockGroundCombatEvent: ConflictEventEntity = {
 };
 const mockTargetedEvent: ConflictEventEntity = {
   id: 'event-IRN003',
-  type: 'assassination',
+  type: 'targeted',
   lat: 33.0,
   lng: 52.0,
   timestamp: Date.now(),
-  label: 'Assassination',
+  label: 'Targeted killing',
   data: {
-    eventType: 'Assassination',
+    eventType: 'Targeted killing',
     subEventType: 'CAMEO 186',
     fatalities: 1,
     actor1: 'Unknown',
@@ -195,13 +195,13 @@ const mockTargetedEvent: ConflictEventEntity = {
 };
 const mockOtherEvent: ConflictEventEntity = {
   id: 'event-IRN004',
-  type: 'blockade',
+  type: 'other',
   lat: 34.0,
   lng: 53.0,
   timestamp: Date.now(),
-  label: 'Blockade',
+  label: 'Other conflict',
   data: {
-    eventType: 'Blockade / movement restriction',
+    eventType: 'Other conflict event',
     subEventType: 'CAMEO 191',
     fatalities: 0,
     actor1: 'Unknown',

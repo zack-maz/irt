@@ -327,23 +327,25 @@ export function useThreatHeatmapLayers(
   const { events } = useFilteredEntities();
   const isActive = useLayerStore((s) => s.activeLayers.has('threat'));
 
-  // Visibility toggles (conflict category gating — not handled by useFilteredEntities)
+  // Visibility toggles (master gate + conflict category gating — not handled by useFilteredEntities)
+  const showEvents = useFilterStore((s) => s.showEvents);
   const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
-  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showOnGroundToggle = useFilterStore((s) => s.showOnGround);
+  const showExplosionsToggle = useFilterStore((s) => s.showExplosions);
   const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+  const showOtherToggle = useFilterStore((s) => s.showOther);
 
   return useMemo(() => {
-    if (!isActive || events.length === 0) return [];
+    if (!isActive || events.length === 0 || !showEvents) return [];
 
-    const filtered = events.filter((e) => {
-      if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type))
-        return showAirstrikes;
-      if ((CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type))
-        return showGroundCombatToggle;
-      if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type))
-        return showTargetedToggle;
-      return false;
-    });
+    const toggleMap: Record<string, boolean> = {
+      airstrike: showAirstrikes,
+      on_ground: showOnGroundToggle,
+      explosion: showExplosionsToggle,
+      targeted: showTargetedToggle,
+      other: showOtherToggle,
+    };
+    const filtered = events.filter((e) => toggleMap[e.type] ?? false);
     if (filtered.length === 0) return [];
 
     const grid = aggregateToGrid(filtered);
@@ -404,9 +406,12 @@ export function useThreatHeatmapLayers(
   }, [
     isActive,
     events,
+    showEvents,
     showAirstrikes,
-    showGroundCombatToggle,
+    showOnGroundToggle,
+    showExplosionsToggle,
     showTargetedToggle,
+    showOtherToggle,
     hoveredClusterId,
     isBelowCrossover,
   ]);
