@@ -257,6 +257,17 @@ Deferred to future releases. Tracked but not in current roadmap.
 | Full-text article scraping            | Copyright concerns; title + URL linking is sufficient                                             |
 | User-configurable alert thresholds    | Over-engineering for single user; hardcoded thresholds in v1.1, configurable in v1.2+             |
 
+## Phase-Local Requirements (not elevated to top-level)
+
+Phases 22.1, 23, 23.1, and 23.2 used phase-local requirement IDs tracked in their SUMMARY.md `requirements-completed` frontmatter but never elevated to this file's traceability table. They are listed here for archival completeness:
+
+- **FIX-01..06** (Phase 22.1 — Fixing Dispersion & Camera Fly-To): city-centroid dispersion rings, camera fly-to, deterministic slot assignment. 6 IDs, all shipped. See `22.1-01-SUMMARY.md`, `22.1-02-SUMMARY.md`.
+- **P23-01..09** (Phase 23 — Threat Density Improvements): BFS clustering, ScatterplotLayer, ThreatClusterDetail, zoom crossover. 9 IDs, all shipped. See `23-01-SUMMARY.md`, `23-02-SUMMARY.md`.
+- **NAV-01..09** (Phase 23.1 — Detail Panel Navigation Stack): PanelView, pushView/goBack, BreadcrumbRow, slide animations. 9 IDs (01,02,03,04,07,09 claimed in SUMMARY; 05,06,08 implemented but not surfaced). See `23.1-01-SUMMARY.md`.
+- **TD-01..10** (Phase 23.2 — Improving Threat Density Scatter Plots): RadialGradientExtension, 4-stop thermal palette, dual-dimension encoding, additive blending. 10 IDs, all shipped. See `23.2-01-SUMMARY.md`, `23.2-02-SUMMARY.md`.
+
+Total: 34 phase-local requirements, all shipped and verified (VERIFICATION.md exists for all except Phase 23.1).
+
 ## Traceability
 
 Which phases cover which requirements. Updated during roadmap creation.
