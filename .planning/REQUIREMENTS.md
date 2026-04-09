@@ -125,20 +125,28 @@ Requirements for the Data Quality & Layers milestone.
 - [x] **WR-06**: WaterFacilityType includes treatment_plant; all WATER_TYPE_LABELS maps updated across tooltip, detail panel, and counters
 - [x] **WR-07**: Desalination audit cross-references known major Gulf plants against Overpass results and reports coverage gaps (report-only, no manual data addition)
 
-### Conflict Geolocation Improvement
+### Conflict Geolocation Improvement (scrapped — historical reference only)
 
-- [x] **NLP-01**: extractActorsAndPlaces() returns actors and places from a single NLP pass on article titles using compromise
-- [x] **NLP-02**: Custom ME city lexicon (from GeoNames) makes compromise .places() recognize Middle East-specific city names (Isfahan, Mosul, Homs, Deir ez-Zor, etc.)
-- [x] **GEO-01**: CITY_CENTROIDS expanded from 42 hardcoded entries to 100+ entries sourced from GeoNames dump (pop >= 50k in ME bbox)
-- [x] **GEO-02**: Events where NLP-extracted actors clearly contradict the geocoded country are rejected with actor_geo_mismatch pipeline trace
-- [x] **GEO-03**: Centroid events are relocated to NLP-extracted city coordinates when article title mentions a specific place name
-- [x] **GEO-04**: Cross-border events (e.g., "Israel strikes targets in Syria") are NOT falsely rejected by actor-country validation
-- [x] **TITLE-01**: Article titles extracted from GDELT SOURCEURL via HTTP GET of HTML head (og:title or title tag, regex-based, no DOM parser)
-- [x] **TITLE-02**: Title extractions cached in Redis (URL hash key, 7-day logical TTL) with batch concurrency limit (10 parallel fetches)
-- [x] **PIPE-01**: parseAndFilter includes Phase C NLP cross-validation that rejects actor-geo mismatches and relocates centroid events
-- [x] **PIPE-02**: CAMEO codes 182 (physical assault) and 190 (conventional military force NOS) are hard-rejected (added to excluded codes list)
-- [x] **PIPE-03**: Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)
-- [x] **SCRIPT-01**: GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities
+> **These 12 requirements describe the scrapped Phase 26.2 NLP approach.** All
+> implementation was reverted in Phase 26.3. They are preserved here as a
+> historical reference of what was tried, not as a forward-looking specification.
+> Phase 27 (under v1.4) will re-discuss the GDELT redo approach from scratch
+> and will likely replace every requirement below. See
+> `docs/adr/0005-phase-26-2-nlp-approach-scrapped.md` and
+> `.planning/phases/archive-26.2-nlp-scrapped/` for the full retrospective.
+
+- [ ] **NLP-01**: ~~extractActorsAndPlaces() returns actors and places from a single NLP pass on article titles using compromise~~ _(scrapped — NLP approach rejected)_
+- [ ] **NLP-02**: ~~Custom ME city lexicon (from GeoNames) makes compromise .places() recognize Middle East-specific city names (Isfahan, Mosul, Homs, Deir ez-Zor, etc.)~~ _(scrapped — me-cities.json deleted)_
+- [ ] **GEO-01**: ~~CITY_CENTROIDS expanded from 42 hardcoded entries to 100+ entries sourced from GeoNames dump (pop >= 50k in ME bbox)~~ _(scrapped — reverted to 42 pre-26.2 entries flagged as `TODO(26.2)`)_
+- [ ] **GEO-02**: ~~Events where NLP-extracted actors clearly contradict the geocoded country are rejected with actor_geo_mismatch pipeline trace~~ _(scrapped — depends on NLP-01)_
+- [ ] **GEO-03**: ~~Centroid events are relocated to NLP-extracted city coordinates when article title mentions a specific place name~~ _(scrapped — depends on NLP-01)_
+- [ ] **GEO-04**: ~~Cross-border events (e.g., "Israel strikes targets in Syria") are NOT falsely rejected by actor-country validation~~ _(scrapped — NLP validation removed)_
+- [ ] **TITLE-01**: ~~Article titles extracted from GDELT SOURCEURL via HTTP GET of HTML head (og:title or title tag, regex-based, no DOM parser)~~ _(scrapped — titleFetcher.ts deleted)_
+- [ ] **TITLE-02**: ~~Title extractions cached in Redis (URL hash key, 7-day logical TTL) with batch concurrency limit (10 parallel fetches)~~ _(scrapped)_
+- [ ] **PIPE-01**: ~~parseAndFilter includes Phase C NLP cross-validation that rejects actor-geo mismatches and relocates centroid events~~ _(scrapped — parseAndFilter reverted to synchronous pre-26.2 state)_
+- [ ] **PIPE-02**: ~~CAMEO codes 182 (physical assault) and 190 (conventional military force NOS) are hard-rejected (added to excluded codes list)~~ _(scrapped — CAMEO exclusions reverted to ['180','192'])_
+- [ ] **PIPE-03**: ~~Pipeline audit trace includes Phase C NLP validation fields (titleFetched, nlpActors, nlpPlaces, validationStatus)~~ _(scrapped)_
+- [ ] **SCRIPT-01**: ~~GeoNames extraction script (npx tsx scripts/extract-geonames.ts) produces valid me-cities.json with 100-250 ME cities~~ _(scrapped — extract-geonames.ts deleted)_
 
 ### Production Cleanup
 
@@ -330,18 +338,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WR-05       | Phase 26.1 | Planned  |
 | WR-06       | Phase 26.1 | Planned  |
 | WR-07       | Phase 26.1 | Planned  |
-| NLP-01      | Phase 26.2 | Planned  |
-| NLP-02      | Phase 26.2 | Planned  |
-| GEO-01      | Phase 26.2 | Planned  |
-| GEO-02      | Phase 26.2 | Planned  |
-| GEO-03      | Phase 26.2 | Planned  |
-| GEO-04      | Phase 26.2 | Planned  |
-| TITLE-01    | Phase 26.2 | Planned  |
-| TITLE-02    | Phase 26.2 | Planned  |
-| PIPE-01     | Phase 26.2 | Planned  |
-| PIPE-02     | Phase 26.2 | Planned  |
-| PIPE-03     | Phase 26.2 | Planned  |
-| SCRIPT-01   | Phase 26.2 | Planned  |
+| NLP-01      | Phase 27   | Planned  |
+| NLP-02      | Phase 27   | Planned  |
+| GEO-01      | Phase 27   | Planned  |
+| GEO-02      | Phase 27   | Planned  |
+| GEO-03      | Phase 27   | Planned  |
+| GEO-04      | Phase 27   | Planned  |
+| TITLE-01    | Phase 27   | Planned  |
+| TITLE-02    | Phase 27   | Planned  |
+| PIPE-01     | Phase 27   | Planned  |
+| PIPE-02     | Phase 27   | Planned  |
+| PIPE-03     | Phase 27   | Planned  |
+| SCRIPT-01   | Phase 27   | Planned  |
 | CLN-01      | Phase 26.3 | Complete |
 | CLN-02      | Phase 26.3 | Complete |
 | CLN-03      | Phase 26.3 | Complete |
@@ -400,10 +408,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 - v1.1 requirements: 29 total, 29 complete
 - v1.2 requirements: 5 total, 5 complete
-- v1.3 requirements: 106 total, 46 complete (66 prior + 40 PRES-\* Phase 26.4)
-- Total: 140 mapped, 80 complete
+- v1.3 requirements: 94 total, 34 complete (54 prior + 40 PRES-\* Phase 26.4; the 12 NLP/GEO/TITLE/PIPE/SCRIPT entries moved to v1.4 with the GDELT redo renumber)
+- v1.4 requirements: 12 total, 0 complete (historical IDs retargeted to Phase 27; will likely be redefined when Phase 27 is discussed)
+- Total: 140 mapped, 68 complete
 
 ---
 
 _Requirements defined: 2026-03-19_
-_Last updated: 2026-04-08 -- Phase 26.4 traceability backfill: PRES-10..15, PRES-23, PRES-40..48, PRES-50..55 flipped to Complete_
+_Last updated: 2026-04-08 -- Phase 26.2 GDELT-redo requirements (NLP-01..02, GEO-01..04, TITLE-01..02, PIPE-01..03, SCRIPT-01) retargeted to Phase 27 under new milestone v1.4; these requirement IDs are historical — Phase 27 will re-discuss the approach and may redefine them_
