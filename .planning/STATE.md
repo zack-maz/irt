@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.9
-milestone_name: milestone
-status: unknown
-last_updated: '2026-04-08T23:40:07.702Z'
+milestone: v1.4
+milestone_name: GDELT Redo & Performance
+status: 'Phase 26.4 shipped — PR #4 (v1.3 closeout: 26.3 + 26.4)'
+last_updated: '2026-04-09T03:07:17.987Z'
 progress:
   total_phases: 13
-  completed_phases: 9
-  total_plans: 39
-  completed_plans: 36
+  completed_phases: 8
+  total_plans: 36
+  completed_plans: 33
+  percent: 92
 ---
 
 # Project State
