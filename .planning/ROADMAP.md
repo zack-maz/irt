@@ -80,7 +80,7 @@ Roadmap Evolution for the full history.
 **Goal:** Rearchitect the GDELT conflict event pipeline with LLM-based extraction (Cerebras/Groq), precise geolocation via Nominatim, a simplified 5-type event ontology (airstrike, on_ground, explosion, targeted, other), multi-source deduplication/merge, casualty extraction, and situation summaries. Graceful degradation to raw GDELT when LLM is unavailable.
 **Depends on:** v1.3 closeout (Phases 26.3 + 26.4 complete)
 **Requirements:** D-01 through D-20 (from 27-CONTEXT.md)
-**Plans:** 8 plans (6 complete + 2 gap closure)
+**Plans:** 9 plans (6 complete + 3 gap closure)
 
 Plans:
 
@@ -92,6 +92,7 @@ Plans:
 - [x] 27-06-PLAN.md — Architecture docs, CLAUDE.md update, human verification
 - [ ] 27-07-PLAN.md — Gap closure: normalize old event types before Zod validation (blocker fix)
 - [ ] 27-08-PLAN.md — Gap closure: remove duplicate event toggles from Layers panel (major fix)
+- [ ] 27-09-PLAN.md — Gap closure: distinct event colors + precision from actionGeoType (UAT Tests 6/10/11)
 
 **Historical note:** This phase was originally numbered 26.2 and attempted an NLP-based approach (title fetching + me-cities lexicon + NLP extraction wired into the GDELT adapter). That approach was scrapped in Phase 26.3 after roughly two weeks of work because it was patching downstream of a bad signal rather than fixing the input. See `docs/adr/0005-phase-26-2-nlp-approach-scrapped.md` for the honest retrospective and `.planning/phases/archive-26.2-nlp-scrapped/` for the preserved historical artifacts.
 
