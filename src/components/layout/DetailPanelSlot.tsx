@@ -25,12 +25,12 @@ function getDotColor(type: string): string {
     if ((CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(type))
       return ENTITY_DOT_COLORS.airstrikes;
     if ((CONFLICT_TOGGLE_GROUPS.showOnGround as readonly string[]).includes(type))
-      return ENTITY_DOT_COLORS.groundCombat;
+      return ENTITY_DOT_COLORS.on_ground;
     if ((CONFLICT_TOGGLE_GROUPS.showExplosions as readonly string[]).includes(type))
-      return ENTITY_DOT_COLORS.groundCombat;
+      return ENTITY_DOT_COLORS.explosion;
     if ((CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(type))
       return ENTITY_DOT_COLORS.targeted;
-    return ENTITY_DOT_COLORS.groundCombat; // 'other'
+    return ENTITY_DOT_COLORS.other; // 'other'
   }
   return '#9ca3af';
 }

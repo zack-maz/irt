@@ -123,7 +123,18 @@ async function recordLLMTimestamp(): Promise<void> {
  * Merges LLM-extracted fields into the existing entity data structure.
  */
 function enrichedToEntities(
-  geocoded: Array<{ groupKey: string; resolvedLat: number; resolvedLng: number; location: { name: string; precision: 'exact' | 'neighborhood' | 'city' | 'region' }; type: string; actors: string[]; severity: string; summary: string; casualties: { killed: number | null; injured: number | null; unknown: boolean }; sourceCount: number }>,
+  geocoded: Array<{
+    groupKey: string;
+    resolvedLat: number;
+    resolvedLng: number;
+    location: { name: string; precision: 'exact' | 'neighborhood' | 'city' | 'region' };
+    type: string;
+    actors: string[];
+    severity: string;
+    summary: string;
+    casualties: { killed: number | null; injured: number | null; unknown: boolean };
+    sourceCount: number;
+  }>,
   groups: Array<{ key: string; entities: ConflictEventEntity[] }>,
 ): ConflictEventEntity[] {
   const groupMap = new Map<string, ConflictEventEntity[]>();
@@ -170,7 +181,13 @@ function enrichedToEntities(
  */
 function sendNormalizedEvents(
   res: import('express').Response,
-  payload: { data: ConflictEventEntity[]; stale: boolean; lastFresh: number; rateLimited?: boolean; degraded?: boolean },
+  payload: {
+    data: ConflictEventEntity[];
+    stale: boolean;
+    lastFresh: number;
+    rateLimited?: boolean;
+    degraded?: boolean;
+  },
 ): void {
   sendValidated(res, eventsResponseSchema, {
     ...payload,
@@ -270,83 +287,75 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     // in useFilteredEntities so it dynamically adjusts when filters change.
     await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
 
-    // --- LLM processing layer (on top of raw GDELT) ---
-    // Wrapped in try/catch: on ANY failure, fall through to serving raw GDELT.
-    // The map NEVER goes blank.
-    if (isLLMConfigured()) {
-      try {
-        if (await shouldRunLLM()) {
+    // --- LLM processing layer (fire-and-forget) ---
+    // Always serve raw GDELT immediately. If LLM is configured and cooldown
+    // expired, kick off enrichment in the background. The NEXT request will
+    // pick up the enriched cache from the top-of-route LLM cache check.
+    if (isLLMConfigured() && (await shouldRunLLM())) {
+      // Record timestamp BEFORE spawning to prevent concurrent triggers
+      await recordLLMTimestamp();
+
+      // Fire-and-forget: don't await — runs after response is sent
+      const llmCachedRef = llmCached;
+      void (async () => {
+        try {
           const groups = groupGdeltRows(merged);
 
           // Diff: only process groups whose key doesn't match a cached LLM event
           const cachedLlmKeys = new Set<string>();
-          if (llmCached?.data) {
-            for (const e of llmCached.data) {
+          if (llmCachedRef?.data) {
+            for (const e of llmCachedRef.data) {
               if (e.id) cachedLlmKeys.add(e.id);
             }
           }
-          const newGroups = cachedLlmKeys.size > 0
-            ? groups.filter((g) => !cachedLlmKeys.has(g.key))
-            : groups;
+          const newGroups =
+            cachedLlmKeys.size > 0 ? groups.filter((g) => !cachedLlmKeys.has(g.key)) : groups;
 
-          if (newGroups.length > 0) {
-            const enriched = await processEventGroups(newGroups);
-
-            if (enriched && enriched.length > 0) {
-              const geocoded = await geocodeEnrichedEvents(enriched, newGroups);
-              const llmEntities = enrichedToEntities(geocoded, newGroups);
-
-              // Merge newly processed LLM events with existing cached LLM events
-              const llmMergeMap = new Map<string, ConflictEventEntity>();
-              if (llmCached?.data) {
-                for (const e of llmCached.data) {
-                  llmMergeMap.set(e.id, e);
-                }
-              }
-              for (const e of llmEntities) {
-                llmMergeMap.set(e.id, e);
-              }
-              const llmMerged = Array.from(llmMergeMap.values());
-
-              await cacheSetSafe(LLM_EVENTS_KEY, llmMerged, LLM_REDIS_TTL_SEC);
-              await recordLLMTimestamp();
-              log.info({ count: llmEntities.length, total: llmMerged.length }, 'LLM: processed and cached enriched events');
-
-              return sendNormalizedEvents(res, {
-                data: llmMerged,
-                stale: false,
-                lastFresh: Date.now(),
-              });
-            }
-          } else {
-            // No new groups to process — re-serve cached LLM data if available
-            if (llmCached?.data) {
-              await recordLLMTimestamp();
-              return sendNormalizedEvents(res, {
-                data: llmCached.data,
-                stale: false,
-                lastFresh: Date.now(),
-              });
-            }
+          if (newGroups.length === 0) {
+            log.info('LLM: no new groups to process');
+            return;
           }
 
-          // LLM returned null (all batches failed) — fall through to raw GDELT
-          log.warn('LLM processing returned null — falling back to raw GDELT');
-        } else if (llmCached?.data) {
-          // Cooldown not expired — serve stale LLM cache
-          return sendNormalizedEvents(res, {
-            data: llmCached.data,
-            stale: true,
-            lastFresh: llmCached.lastFresh,
-          });
+          const enriched = await processEventGroups(newGroups);
+          if (!enriched || enriched.length === 0) {
+            log.warn('LLM processing returned null — raw GDELT serving continues');
+            return;
+          }
+
+          const geocoded = await geocodeEnrichedEvents(enriched, newGroups);
+          const llmEntities = enrichedToEntities(geocoded, newGroups);
+
+          // Merge newly processed LLM events with existing cached LLM events
+          const llmMergeMap = new Map<string, ConflictEventEntity>();
+          if (llmCachedRef?.data) {
+            for (const e of llmCachedRef.data) {
+              llmMergeMap.set(e.id, e);
+            }
+          }
+          for (const e of llmEntities) {
+            llmMergeMap.set(e.id, e);
+          }
+          const llmMerged = Array.from(llmMergeMap.values());
+
+          await cacheSetSafe(LLM_EVENTS_KEY, llmMerged, LLM_REDIS_TTL_SEC);
+          log.info(
+            { count: llmEntities.length, total: llmMerged.length },
+            'LLM: processed and cached enriched events (background)',
+          );
+        } catch (llmErr) {
+          log.warn({ err: llmErr }, 'LLM background processing failed');
         }
-      } catch (llmErr) {
-        // Any LLM pipeline failure — log and fall through to raw GDELT
-        log.warn({ err: llmErr }, 'LLM processing failed — falling back to raw GDELT');
-      }
+      })();
     }
 
-    // Serve raw GDELT events (default path / fallback)
+    // Serve immediately: stale LLM cache if available, otherwise raw GDELT
+    if (llmCached?.data) {
+      return sendNormalizedEvents(res, {
+        data: llmCached.data,
+        stale: true,
+        lastFresh: llmCached.lastFresh,
+      });
+    }
     sendNormalizedEvents(res, {
       data: merged,
       stale: false,

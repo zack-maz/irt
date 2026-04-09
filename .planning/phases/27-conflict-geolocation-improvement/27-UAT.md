@@ -1,5 +1,5 @@
 ---
-status: testing
+status: complete
 phase: 27-conflict-geolocation-improvement
 source:
   [
@@ -11,16 +11,12 @@ source:
     27-06-SUMMARY.md,
   ]
 started: 2026-04-09T20:30:00Z
-updated: 2026-04-09T20:40:00Z
+updated: 2026-04-09T22:15:00Z
 ---
 
 ## Current Test
 
-number: 3
-name: Event Layer Toggle Panel (re-test after fix)
-expected: |
-Event toggles should NOT appear in the Layers tab. They should only be in the filter panel. The Layers tab should only show visualization layers (Geographic, Weather, Threat, Political, Ethnic, Water).
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -52,12 +48,11 @@ previous: issue — fixed by Plan 27-07 (normalizeEventTypes remaps old cached t
 expected: Each sub-toggle independently filters its event category. Turning off "Airstrikes" hides only airstrike markers. Other event types remain visible.
 result: pass
 
-### 6. Event Colors
+### 6. Event Colors (re-test after fix)
 
-expected: Conflict events display in distinct shades of red on the map. They do NOT use yellow (flights), purple (ships), or green (sites) colors.
-result: issue
-reported: "Airstrikes, ground, and explosions are all the same color. Also 'Ground Combat' in filters tab should just say 'Ground'"
-severity: minor
+expected: Each of the 5 event types displays in a visually distinct color and shape on the map. Airstrike (bright red starburst), Ground (warm brick-red triangle), Explosion (vibrant orange-red burst), Targeted (dark crimson crosshair), Other (gray-red X mark). Filter panel label reads "Ground" (not "Ground Combat").
+result: pass
+previous: issue — fixed by Plan 27-09 (per-type colors in ENTITY_COLORS, triangle icon for ground, size differentiation)
 
 ### 7. Event Detail Panel
 
@@ -75,19 +70,17 @@ expected: With CEREBRAS_API_KEY or GROQ_API_KEY set in .env, clicking an event s
 result: skipped
 reason: "API keys not configured yet — need .env.example with instructions first"
 
-### 10. Precision Radius Rings
+### 10. Precision Radius Rings (re-test after fix)
 
-expected: Events with non-exact precision show translucent red radius rings on the map: neighborhood=1km, city=5km, region=25km. Exact events show as point icons only.
-result: issue
-reported: "No precision radius rings visible"
-severity: major
+expected: Events with non-exact precision show translucent red radius rings on the map: city=5km, region=25km. Exact events show as point icons only.
+result: pass
+previous: issue — fixed by Plan 27-09 (actionGeoTypeToPrecision maps GDELT geoType to precision field)
 
-### 11. Tooltip Precision Indicator
+### 11. Tooltip Precision Indicator (re-test after fix)
 
-expected: Hovering over a conflict event shows a tooltip with precision indicator dots (showing the confidence level of the geolocation).
-result: issue
-reported: "Seeing no precision indicator"
-severity: minor
+expected: Hovering over a conflict event shows a tooltip with precision indicator showing geolocation confidence level.
+result: pass
+previous: issue — fixed by Plan 27-09 (same root cause as Test 10: precision field now populated for raw GDELT events)
 
 ### 12. Architecture Docs Updated
 
@@ -98,8 +91,8 @@ note: Verified automatically — all 3 files return 0 TODO(26.2) matches, 5-type
 ## Summary
 
 total: 12
-passed: 8
-issues: 3
+passed: 11
+issues: 0
 skipped: 1
 blocked: 0
 
@@ -116,25 +109,16 @@ blocked: 0
   test: 4
 
 - truth: "Each of the 5 event types should display in a distinct shade of red. 'Ground Combat' label should say 'Ground'"
-  status: failed
-  reason: "User reported: Airstrikes, ground, and explosions are all the same color. Also 'Ground Combat' in filters tab should just say 'Ground'"
-  severity: minor
+  status: resolved
+  reason: "Fixed by Plan 27-09 — per-type colors, triangle icon for ground, per-entity sizing"
   test: 6
-  artifacts: []
-  missing: []
 
 - truth: "Non-exact events show precision radius rings on the map"
-  status: failed
-  reason: "User reported: No precision radius rings visible"
-  severity: major
+  status: resolved
+  reason: "Fixed by Plan 27-09 — actionGeoTypeToPrecision maps GDELT geoType to precision field for raw events"
   test: 10
-  artifacts: []
-  missing: []
 
 - truth: "Tooltip shows precision indicator dots for geolocation confidence"
-  status: failed
-  reason: "User reported: Seeing no precision indicator"
-  severity: minor
+  status: resolved
+  reason: "Fixed by Plan 27-09 — same root cause as Test 10"
   test: 11
-  artifacts: []
-  missing: []

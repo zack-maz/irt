@@ -196,6 +196,24 @@ function describeEvent(eventBaseCode: string): string {
   return BASE_CODE_DESCRIPTIONS[eventBaseCode] ?? 'Unknown conflict';
 }
 
+/** Map GDELT ActionGeo_Type to precision level for radius rings + tooltip dots */
+function actionGeoTypeToPrecision(
+  geoType: number | undefined,
+): 'exact' | 'neighborhood' | 'city' | 'region' | undefined {
+  switch (geoType) {
+    case 4:
+      return 'exact'; // landmark — most precise GDELT geocoding
+    case 3:
+      return 'city'; // city-level — ~5km uncertainty
+    case 2:
+      return 'region'; // ADM1/state — ~25km uncertainty
+    case 1:
+      return 'region'; // country-level — ~25km uncertainty
+    default:
+      return undefined; // unknown/missing — no ring shown
+  }
+}
+
 /**
  * Normalize a GDELT CSV row (as columns array) to ConflictEventEntity.
  */
@@ -205,6 +223,7 @@ export function normalizeGdeltEvent(cols: string[], lat: number, lng: number): C
   const eventCode = getCol(cols, COL.EventCode);
   const sqlDate = getCol(cols, COL.SQLDATE);
   const actionGeoType = parseInt(getCol(cols, COL.ActionGeo_Type), 10) || undefined;
+  const precision = actionGeoTypeToPrecision(actionGeoType);
 
   return {
     id: `gdelt-${getCol(cols, COL.GLOBALEVENTID)}`,
@@ -227,6 +246,7 @@ export function normalizeGdeltEvent(cols: string[], lat: number, lng: number): C
       numMentions: parseInt(getCol(cols, COL.NumMentions), 10) || undefined,
       numSources: parseInt(getCol(cols, COL.NumSources), 10) || undefined,
       actionGeoType,
+      precision,
     },
   };
 }

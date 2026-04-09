@@ -522,7 +522,7 @@ describe('ThreatTooltip', () => {
         y={50}
       />,
     );
-    expect(screen.getByText('Mostly Ground Combat')).toBeTruthy();
+    expect(screen.getByText('Mostly Ground')).toBeTruthy();
     expect(screen.getByText(/\d+h ago/)).toBeTruthy();
     // Should show fatalities when > 0
     expect(screen.getByText('5 fatalities')).toBeTruthy();

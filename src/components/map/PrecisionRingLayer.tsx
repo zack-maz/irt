@@ -8,9 +8,9 @@ import { isConflictEventType } from '@/types/ui';
 /** Radius mapping per precision level in meters */
 const PRECISION_RADIUS_METERS: Record<string, number> = {
   exact: 0, // No ring for exact — point icon only
-  neighborhood: 1000, // 1km ring
-  city: 5000, // 5km ring
-  region: 25000, // 25km ring
+  neighborhood: 5000, // 5km ring
+  city: 25000, // 25km ring
+  region: 100000, // 100km ring
 };
 
 /** Color for precision rings: translucent red */

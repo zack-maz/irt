@@ -46,16 +46,24 @@ describe('Entity Layer Constants', () => {
     it('airstrike is red', () => {
       expect(ENTITY_COLORS.airstrike).toEqual([255, 59, 48]);
     });
-    it('groundCombat is red', () => {
-      expect(ENTITY_COLORS.groundCombat).toEqual([239, 68, 68]);
+    it('on_ground is dark burnt red', () => {
+      expect(ENTITY_COLORS.on_ground).toEqual([180, 50, 20]);
     });
-    it('targeted is dark red', () => {
+    it('explosion is vibrant orange-red', () => {
+      expect(ENTITY_COLORS.explosion).toEqual([255, 95, 25]);
+    });
+    it('targeted is dark crimson', () => {
       expect(ENTITY_COLORS.targeted).toEqual([139, 30, 30]);
+    });
+    it('other is gray with red tint', () => {
+      expect(ENTITY_COLORS.other).toEqual([190, 170, 168]);
     });
   });
   describe('ICON_SIZE', () => {
     const movingExpected = { meters: 1000, minPixels: 16, maxPixels: 100 };
-    const eventExpected = { meters: 1500, minPixels: 16, maxPixels: 120 };
+    const largeEventExpected = { meters: 2500, minPixels: 22, maxPixels: 160 };
+    const smallEventExpected = { meters: 1500, minPixels: 16, maxPixels: 120 };
+    const targetedExpected = { meters: 2200, minPixels: 20, maxPixels: 140 };
     it('flight', () => {
       expect(ICON_SIZE.flight).toEqual(movingExpected);
     });
@@ -63,13 +71,19 @@ describe('Entity Layer Constants', () => {
       expect(ICON_SIZE.ship).toEqual(movingExpected);
     });
     it('airstrike', () => {
-      expect(ICON_SIZE.airstrike).toEqual(eventExpected);
+      expect(ICON_SIZE.airstrike).toEqual(largeEventExpected);
     });
-    it('groundCombat', () => {
-      expect(ICON_SIZE.groundCombat).toEqual(eventExpected);
+    it('on_ground', () => {
+      expect(ICON_SIZE.on_ground).toEqual(smallEventExpected);
+    });
+    it('explosion', () => {
+      expect(ICON_SIZE.explosion).toEqual(largeEventExpected);
+    });
+    it('other', () => {
+      expect(ICON_SIZE.other).toEqual(smallEventExpected);
     });
     it('targeted', () => {
-      expect(ICON_SIZE.targeted).toEqual(eventExpected);
+      expect(ICON_SIZE.targeted).toEqual(targetedExpected);
     });
   });
   describe('PULSE_CONFIG', () => {
@@ -100,8 +114,9 @@ describe('Icon Mapping', () => {
     'waterReservoir',
     'waterDesalination',
     'waterTreatment',
+    'triangle',
   ] as const;
-  it('has all 17 icon keys', () => {
+  it('has all 18 icon keys', () => {
     expect(Object.keys(ICON_MAPPING).sort()).toEqual([...expectedKeys].sort());
   });
   for (const key of expectedKeys) {

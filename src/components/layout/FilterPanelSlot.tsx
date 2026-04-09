@@ -193,7 +193,7 @@ export function FilterPanelContent() {
             {/* Visibility button + toggles */}
             <div className="flex flex-wrap gap-1">
               <FilterButton
-                label="Flights"
+                label="All Flights"
                 active={showFlights}
                 color={ENTITY_DOT_COLORS.flights}
                 onToggle={() => useFilterStore.getState().toggleShowFlights()}
@@ -338,15 +338,15 @@ export function FilterPanelContent() {
                 onToggle={() => useFilterStore.getState().toggleShowAirstrikes()}
               />
               <FilterButton
-                label="Ground Combat"
+                label="Ground"
                 active={showOnGround}
-                color={ENTITY_DOT_COLORS.groundCombat}
+                color={ENTITY_DOT_COLORS.on_ground}
                 onToggle={() => useFilterStore.getState().toggleShowOnGround()}
               />
               <FilterButton
                 label="Explosions"
                 active={showExplosions}
-                color={ENTITY_DOT_COLORS.groundCombat}
+                color={ENTITY_DOT_COLORS.explosion}
                 onToggle={() => useFilterStore.getState().toggleShowExplosions()}
               />
               <FilterButton
@@ -358,7 +358,7 @@ export function FilterPanelContent() {
               <FilterButton
                 label="Other"
                 active={showOther}
-                color="#9ca3af"
+                color={ENTITY_DOT_COLORS.other}
                 onToggle={() => useFilterStore.getState().toggleShowOther()}
               />
             </div>

@@ -9,7 +9,7 @@ interface IconEntry {
   mask: boolean;
 }
 
-/** Icon mapping for the 17 entity shapes */
+/** Icon mapping for the 18 entity shapes */
 export const ICON_MAPPING: Record<string, IconEntry> = {
   chevron: { x: 0, y: 0, width: 32, height: 32, mask: true },
   diamond: { x: 32, y: 0, width: 32, height: 32, mask: true },
@@ -28,6 +28,7 @@ export const ICON_MAPPING: Record<string, IconEntry> = {
   waterReservoir: { x: 448, y: 0, width: 32, height: 32, mask: true },
   waterTreatment: { x: 480, y: 0, width: 32, height: 32, mask: true },
   waterDesalination: { x: 512, y: 0, width: 32, height: 32, mask: true },
+  triangle: { x: 544, y: 0, width: 32, height: 32, mask: true },
 };
 
 /** Cached atlas canvas */
@@ -47,16 +48,16 @@ export function getIconAtlasForLayer(): any {
 }
 
 /**
- * Lazily generates a 544x32 canvas icon atlas with 17 white shapes.
+ * Lazily generates a 576x32 canvas icon atlas with 18 white shapes.
  * All shapes drawn white -- Deck.gl mask mode tints via getColor.
  */
 export function getIconAtlas(): HTMLCanvasElement {
-  // Guard against stale cache in dev HMR (old atlas was 416px)
-  if (atlas && atlas.width === 544) return atlas;
+  // Guard against stale cache in dev HMR (old atlas was 544px)
+  if (atlas && atlas.width === 576) return atlas;
   atlas = null;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 544;
+  canvas.width = 576;
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -348,6 +349,15 @@ export function getIconAtlas(): HTMLCanvasElement {
     cx16 - 9 * Math.cos(0.05 * Math.PI),
     20 - 9 * Math.sin(0.05 * Math.PI),
   );
+  ctx.closePath();
+  ctx.fill();
+
+  // Icon 17 (offset 544): Triangle -- solid downward-pointing triangle (ground combat)
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.moveTo(560, 4); // top center
+  ctx.lineTo(574, 28); // bottom right
+  ctx.lineTo(546, 28); // bottom left
   ctx.closePath();
   ctx.fill();
 

@@ -23,7 +23,7 @@ export function isConflictEventType(type: string): type is ConflictEventType {
 /** Human-readable labels for each ConflictEventType. Shared across tooltip, detail panel, etc. */
 export const EVENT_TYPE_LABELS: Record<string, string> = {
   airstrike: 'Airstrike',
-  on_ground: 'Ground Combat',
+  on_ground: 'Ground',
   explosion: 'Explosion',
   targeted: 'Targeted',
   other: 'Other',
