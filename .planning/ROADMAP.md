@@ -6,7 +6,7 @@
 - **v1.0 Deployment** -- Phases 13-14 (shipped 2026-03-20)
 - **v1.1 Intelligence Layer** -- Phases 15-19.2 (shipped 2026-03-22)
 - **v1.2 Visualization & Hardening** -- Phases 20-21.3 (shipped 2026-03-29)
-- **v1.3 Data Quality & Layers** -- Phases 22-26.4 (closing — all primary phases shipped)
+- ✅ **v1.3 Data Quality & Layers** -- Phases 22-26.4 (shipped 2026-04-09) — [archive](milestones/v1.3-ROADMAP.md)
 - **v1.4 GDELT Redo & Performance** -- Phases 27-28 (planned)
 
 ## Phase Summary
@@ -48,146 +48,25 @@
 
 **v0.9-v1.2 Totals:** 30 phases (27 shipped, 3 deferred) | 72/72 plans executed
 
-### Phase 22: GDELT Event Quality & OSINT Integration
+<details>
+<summary>✅ v1.3 Data Quality & Layers (Phases 22-26.4) — SHIPPED 2026-04-09</summary>
 
-**Goal**: Eliminate false positives/negatives in the conflict event pipeline, add Bellingcat OSINT signal, fix location stacking, and produce a verified event audit trail
-**Depends on**: Phase 21.2 (existing quality pipeline)
-**Requirements:** [EQ-01, EQ-02, EQ-03, EQ-04, EQ-05, EQ-06, EQ-07, EQ-08, EQ-09]
-**Plans:** 3/3 plans complete
+- [x] Phase 22: GDELT Event Quality & OSINT Integration (3/3 plans)
+- [x] Phase 22.1: Fixing Dispersion & Camera Fly-To (2/2 plans)
+- [x] Phase 23: Threat Density Improvements (2/2 plans)
+- [x] Phase 23.1: Detail Panel Navigation Stack (2/2 plans)
+- [x] Phase 23.2: Improving Threat Density Scatter Plots (2/2 plans)
+- [x] Phase 24: Political Boundaries Layer (2/2 plans)
+- [x] Phase 25: Ethnic Distribution Layer (2/2 plans)
+- [x] Phase 26: Water Stress Layer (6/6 plans)
+- [x] Phase 26.1: Water Layer Refinements (3/3 plans)
+- [x] Phase 26.3: Production Code Cleanup (6/6 plans)
+- [x] Phase 26.4: Documentation & External Presentation (6/6 plans)
 
-Plans:
+**11 phases, 36 plans, 82/82 requirements satisfied, 12 scrapped → v1.4**
+**Full archive:** [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
-- [ ] 22-01-PLAN.md -- ActionGeo_Type parsing, concentric ring dispersion, config-driven thresholds, pipeline trace types
-- [ ] 22-02-PLAN.md -- Bellingcat RSS feed integration and event confidence corroboration boost
-- [ ] 22-03-PLAN.md -- CLI event audit dump script and fixture-based test suite
-
-### Phase 22.1: Fixing Dispersion & Camera Fly-To (INSERTED)
-
-**Goal:** Fix dispersion pipeline so events visually spread instead of stacking, and fix camera fly-to to fire once per unique near: pin instead of continuously re-centering
-**Depends on:** Phase 22
-**Requirements:** [FIX-01, FIX-02, FIX-03, FIX-04, FIX-05, FIX-06]
-**Plans:** 2/2 plans complete
-
-Plans:
-
-- [x] 22.1-01-PLAN.md -- Relocate disperseEvents to events route (post-merge), shared tolerance constant
-- [x] 22.1-02-PLAN.md -- Ref-based fly-to deduplication guard in useQuerySync
-
-### Phase 23: Threat Density Improvements
-
-**Goal**: Transform the threat heatmap with military thermal palette, P90 normalization, 0.25-degree grid, connected-component cluster merging, and clickable cluster detail panel
-**Depends on**: Phase 22 (better event data feeds into heatmap)
-**Requirements:** [P23-01, P23-02, P23-03, P23-04, P23-05, P23-06, P23-07, P23-08, P23-09]
-**Plans:** 2/2 plans complete
-
-Plans:
-
-- [ ] 23-01-PLAN.md -- Military thermal palette, decay removal, 0.25-deg grid, P90 normalization, legend update
-- [ ] 23-02-PLAN.md -- BFS cluster merging, ThreatClusterDetail component, detail panel + BaseMap wiring
-
-### Phase 23.2: Improving Threat Density Scatter Plots (INSERTED)
-
-**Goal:** Upgrade threat cluster circles with radial gradient shaders, additive blending, dual-dimension encoding (radius=spread, color=weight), zoom-dependent z-ordering, hover dimming, and enriched detail panel with type breakdown bars, geographic context, and weight-sorted event lists
-**Depends on:** Phase 23
-**Requirements:** [TD-01, TD-02, TD-03, TD-04, TD-05, TD-06, TD-07, TD-08, TD-09, TD-10]
-**Plans:** 2/2 plans complete
-
-Plans:
-
-- [ ] 23.2-01-PLAN.md -- Radial gradient shader, simplified palette, pixel sizing, additive blending, hover dimming, zoom z-order
-- [ ] 23.2-02-PLAN.md -- Nominatim geocode route, type breakdown bars, geographic context, weight-sorted events
-
-### Phase 23.1: Detail Panel Navigation Stack (INSERTED)
-
-**Goal:** Add browser-like back-navigation to the detail panel with a breadcrumb row, directional slide transitions, and universal history across all entity/cluster entry points
-**Depends on:** Phase 23
-**Requirements:** [NAV-01, NAV-02, NAV-03, NAV-04, NAV-05, NAV-06, NAV-07, NAV-08, NAV-09]
-**Plans:** 1/2 plans complete
-
-Plans:
-
-- [x] 23.1-01-PLAN.md -- PanelView type, UIState extension, store actions, label helper, CSS animations, and tests
-- [ ] 23.1-02-PLAN.md -- BreadcrumbRow component, DetailPanelSlot integration, call site wiring, visual checkpoint
-
-### Phase 24: Political Boundaries Layer
-
-**Goal**: Users can toggle a political overlay showing country borders color-coded by alliance/faction alignment
-**Depends on**: Phase 20 (layer architecture)
-**Requirements:** [POL-01, POL-02, POL-03, POL-04, POL-05, POL-06]
-**Plans:** 1/2 plans complete
-
-Plans:
-
-- [ ] 24-01-PLAN.md -- Data extraction, faction types, PoliticalOverlay component, legend registration, new tests
-- [ ] 24-02-PLAN.md -- BaseMap wiring, toggle activation, existing test updates, visual checkpoint
-
-### Phase 25: Ethnic Distribution Layer
-
-**Goal**: Users can toggle an overlay showing 10 major ethnic/sectarian zones as labeled hatched regions with per-group colors, hover tooltips, and a discrete legend
-**Depends on**: Phase 24 (political layer patterns)
-**Requirements:** [ETH-01, ETH-02, ETH-03, ETH-04, ETH-05, ETH-06, ETH-07, ETH-08]
-**Plans:** 1/2 plans complete
-
-Plans:
-
-- [ ] 25-01-PLAN.md -- GeoEPR data extraction, ethnic group config, @deck.gl/extensions install, test mock setup
-- [ ] 25-02-PLAN.md -- EthnicOverlay component with hatched fills, labels, BaseMap wiring, tooltip priority, legend, visual checkpoint
-
-### Phase 26: Water Stress Layer
-
-**Goal**: Users can toggle a water stress overlay showing point-based resource scarcity at water infrastructure facilities (dams, reservoirs, treatment plants, canals, desalination) with stress-colored markers, major river line features, precipitation integration, and full entity treatment (detail panel, counters, search, proximity alerts)
-**Depends on**: Phase 20 (layer architecture)
-**Requirements:** [WAT-01, WAT-02, WAT-03, WAT-04, WAT-05, WAT-06, WAT-07, WAT-08, WAT-09, WAT-10, WAT-11]
-**Plans:** 6/6 plans complete
-
-Plans:
-
-- [ ] 26-01-PLAN.md -- WaterFacility types, stress utilities, data extraction scripts (rivers + Aqueduct basins)
-- [ ] 26-02-PLAN.md -- Desalination migration from Sites to Water layer
-- [ ] 26-03-PLAN.md -- Overpass water adapter, basin lookup, Open-Meteo precip adapter, /api/water routes
-- [ ] 26-04-PLAN.md -- waterStore, fetch/polling hooks, useWaterLayers (rivers + facilities), WaterOverlay tooltip
-- [ ] 26-05-PLAN.md -- Detail panel, BaseMap wiring, counters, search, proximity, legend, toggle UI, visual checkpoint
-- [ ] 26-06-PLAN.md -- Gap closure: API timeout fix, color floor adjustment, river compositeHealth + line width
-
-### Phase 26.3: Production Code Cleanup (INSERTED)
-
-**Goal:** Portfolio-grade internal code quality: security audit, type safety (eliminate `any`), dead code removal, error handling consistency, dependency audit, config externalization, test quality pass, fetch/polling/rate limit review. Remove NLP pipeline wiring from 26.2 (keep infrastructure). Strip hardcoded tables where possible.
-**Depends on:** Phase 26
-**Requirements:** TBD
-**Plans:** 6/6 plans complete
-
-Plans:
-
-- [x] TBD (run /gsd:plan-phase 26.3 to break down) (completed 2026-04-07)
-
-### Phase 26.4: Documentation & External Presentation (INSERTED)
-
-**Goal:** Portfolio-grade external presentation: professional README with architecture diagram, API documentation, setup guide, screenshots, architecture decision records (ADRs), CI/CD pipeline, pre-commit hooks, performance baselines, graceful degradation documentation.
-**Depends on:** Phase 26.3
-**Requirements:** [PRES-01, PRES-02, PRES-03, PRES-04, PRES-05, PRES-06, PRES-07]
-**Plans:** 6/6 plans complete
-
-Plans:
-
-- [x] 26.4-01-PLAN.md -- Final code grooming pass: Prettier + knip install, format repo, clear 81 pre-existing lint errors, knip cleanup, .env.example drift checker (completed 2026-04-07)
-- [x] 26.4-02-PLAN.md -- CI/CD: GitHub Actions + CodeQL + husky + lint-staged + gitleaks pre-commit (completed 2026-04-07)
-- [x] 26.4-03-PLAN.md -- Palantir gaps: pino log redaction, type-coverage CI gate, Redis chaos test, Zod output-boundary validation (completed 2026-04-07)
-- [ ] 26.4-04-PLAN.md -- Portfolio README with Hormuz GIF, layer screenshots, engineering badges, retrospective, live demo hardening
-- [ ] 26.4-05-PLAN.md -- Exhaustive Mermaid architecture docs under docs/architecture/ (4 altitudes + ontology)
-- [ ] 26.4-06-PLAN.md -- ADRs, runbook, graceful degradation doc + README wiring
-
-### Phase 26.1: Water Layer Refinements (INSERTED)
-
-**Goal:** Refine the water stress overlay: add tiered Overpass queries (~1000 facility target with priority country coverage), expand score to 0-10 with destroyed state, create type-specific canvas icons, set up Vercel cron for daily cache refresh, and audit desalination coverage
-**Depends on:** Phase 26
-**Requirements:** [WR-01, WR-02, WR-03, WR-04, WR-05, WR-06, WR-07]
-**Plans:** 3/3 plans complete
-
-Plans:
-
-- [ ] 26.1-01-PLAN.md -- Tiered Overpass queries, treatment_plant type, Vercel cron, route timeout removal
-- [ ] 26.1-02-PLAN.md -- Score 0-10 with destroyed state, 4 new water facility canvas icons
-- [ ] 26.1-03-PLAN.md -- useWaterLayers icon wiring + destroyed rendering, label updates, desalination audit
+</details>
 
 ## Milestone v1.4: GDELT Redo & Performance
 
