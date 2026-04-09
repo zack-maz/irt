@@ -15,6 +15,7 @@ const SOURCE_KEYS: Record<string, string> = {
   markets: 'markets:yahoo:1d',
   weather: 'weather:open-meteo',
   sites: 'sites:v2',
+  water: 'water:facilities',
 };
 
 /** If a source's lastFresh is older than this, log a warning */
