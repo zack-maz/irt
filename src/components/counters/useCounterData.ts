@@ -66,7 +66,11 @@ export interface CounterEntities {
 }
 
 const AIRSTRIKE_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showAirstrikes;
-const GROUND_COMBAT_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showGroundCombat;
+const GROUND_COMBAT_TYPES: readonly string[] = [
+  ...CONFLICT_TOGGLE_GROUPS.showOnGround,
+  ...CONFLICT_TOGGLE_GROUPS.showExplosions,
+  ...CONFLICT_TOGGLE_GROUPS.showOther,
+];
 const TARGETED_TYPES: readonly string[] = CONFLICT_TOGGLE_GROUPS.showTargeted;
 
 // Proximity sort reference points
@@ -160,9 +164,12 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   // Visibility toggles
   const showFlights = useFilterStore((s) => s.showFlights);
   const showShips = useFilterStore((s) => s.showShips);
+  const showEvents = useFilterStore((s) => s.showEvents);
   const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
-  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showOnGroundToggle = useFilterStore((s) => s.showOnGround);
+  const showExplosionsToggle = useFilterStore((s) => s.showExplosions);
   const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+  const showOtherToggle = useFilterStore((s) => s.showOther);
   const showUnidentified = useFilterStore((s) => s.showUnidentified);
   const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
   const showHealthySites = useFilterStore((s) => s.showHealthySites);
@@ -209,12 +216,13 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       return showLowSeverity;
     });
 
-    // Apply conflict visibility toggles
-    const airstrikes = showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
-    const groundCombatCount = showGroundCombatToggle
+    // Apply conflict visibility toggles (master gate + sub-toggles)
+    const airstrikes = showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
+    const showGroundCombatToggle = showOnGroundToggle || showExplosionsToggle || showOtherToggle;
+    const groundCombatCount = showEvents && showGroundCombatToggle
       ? countByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES)
       : 0;
-    const targeted = showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
+    const targeted = showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
 
     // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, port: 0, total: 0 };
@@ -270,7 +278,7 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
 
     if (isWaterLayerActive) {
       // Pre-compute destroyed set (destructive events within 5km)
-      const DESTRUCTIVE = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
+      const DESTRUCTIVE = new Set(['airstrike', 'explosion']);
       const destructive = allEvents.filter(
         (e) => DESTRUCTIVE.has(e.type) && e.timestamp <= dateEnd,
       );
@@ -310,7 +318,7 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     const shipEntities = sortByProximity(visibleShips.map(toShipEntity), STRAIT_HORMUZ);
 
     // Event entities (apply conflict visibility toggles)
-    const airstrikeEventEntities = showAirstrikes
+    const airstrikeEventEntities = showEvents && showAirstrikes
       ? sortByProximity(
           filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity),
           TEHRAN,
@@ -318,7 +326,7 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         )
       : [];
 
-    const groundCombatEventEntities = showGroundCombatToggle
+    const groundCombatEventEntities = showEvents && showGroundCombatToggle
       ? sortByProximity(
           filterByGroup(severityFilteredEvents, GROUND_COMBAT_TYPES).map(toEventEntity),
           TEHRAN,
@@ -326,7 +334,7 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         )
       : [];
 
-    const targetedEventEntities = showTargetedToggle
+    const targetedEventEntities = showEvents && showTargetedToggle
       ? sortByProximity(
           filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity),
           TEHRAN,
@@ -369,9 +377,12 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     enabledSiteTypes,
     showFlights,
     showShips,
+    showEvents,
     showAirstrikes,
-    showGroundCombatToggle,
+    showOnGroundToggle,
+    showExplosionsToggle,
     showTargetedToggle,
+    showOtherToggle,
     showUnidentified,
     showGroundTraffic,
     showHealthySites,

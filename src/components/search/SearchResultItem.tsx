@@ -18,9 +18,8 @@ function getEntityColor(entity: SearchableEntity): string {
   if (entity.type === 'site') return ENTITY_DOT_COLORS.siteHealthy;
   if (entity.type === 'water') return '#4ade80';
   if (entity.type === 'airstrike') return ENTITY_DOT_COLORS.airstrikes;
-  if (entity.type === 'assassination' || entity.type === 'abduction')
-    return ENTITY_DOT_COLORS.targeted;
-  return ENTITY_DOT_COLORS.groundCombat;
+  if (entity.type === 'targeted') return ENTITY_DOT_COLORS.targeted;
+  return ENTITY_DOT_COLORS.groundCombat; // on_ground, explosion, other
 }
 
 function getEntityTypeBadge(entity: SearchableEntity): string {

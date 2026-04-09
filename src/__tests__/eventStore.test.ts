@@ -25,7 +25,7 @@ const mockAirstrikeEvent: ConflictEventEntity = {
 
 const mockGroundCombatEvent: ConflictEventEntity = {
   id: 'event-IRN002',
-  type: 'ground_combat',
+  type: 'on_ground',
   lat: 35.6892,
   lng: 51.389,
   timestamp: Date.now(),

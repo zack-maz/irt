@@ -19,7 +19,7 @@ const WATER_ICON_MAP: Record<WaterFacilityType, string> = {
 };
 
 /** Event types that indicate facility destruction */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'bombing', 'shelling', 'wmd']);
+const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion']);
 
 interface RiverFeature {
   type: 'Feature';

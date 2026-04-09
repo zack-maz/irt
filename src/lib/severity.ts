@@ -12,16 +12,10 @@ export const MEDIUM_THRESHOLD = 15;
  */
 export const TYPE_WEIGHTS: Record<ConflictEventType, number> = {
   airstrike: 10,
-  wmd: 10,
-  mass_violence: 9,
-  assassination: 8,
-  bombing: 7,
-  shelling: 7,
-  ground_combat: 6,
-  abduction: 5,
-  ceasefire_violation: 4,
-  assault: 3,
-  blockade: 2,
+  explosion: 8,
+  targeted: 8,
+  on_ground: 6,
+  other: 3,
 };
 
 /**
