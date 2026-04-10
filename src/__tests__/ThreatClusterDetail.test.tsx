@@ -73,7 +73,7 @@ const mockEvents: ConflictEventEntity[] = [
   }),
   makeEvent({
     id: 'evt-2',
-    type: 'shelling',
+    type: 'explosion',
     lat: 33.2,
     lng: 44.2,
     data: {
@@ -93,7 +93,7 @@ const mockEvents: ConflictEventEntity[] = [
   }),
   makeEvent({
     id: 'evt-3',
-    type: 'ground_combat',
+    type: 'on_ground',
     lat: 33.3,
     lng: 44.3,
     data: {

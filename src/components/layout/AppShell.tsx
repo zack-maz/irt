@@ -14,7 +14,19 @@ import { useWaterFetch } from '@/hooks/useWaterFetch';
 import { useWaterPrecipPolling } from '@/hooks/useWaterPrecipPolling';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEscapeKeyHandler } from '@/hooks/useEscapeKeyHandler';
+import { Component, type ReactNode } from 'react';
 import { useQuerySync } from '@/hooks/useQuerySync';
+import { DevApiStatus } from '@/components/ui/DevApiStatus';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
 
 export function AppShell() {
   useFlightPolling();
@@ -52,6 +64,13 @@ export function AppShell() {
 
       {/* Floating markets panel */}
       <MarketsSlot />
+
+      {/* Dev-only API status overlay — wrapped in error boundary */}
+      {import.meta.env.DEV && (
+        <ErrorBoundary>
+          <DevApiStatus />
+        </ErrorBoundary>
+      )}
     </div>
   );
 }

@@ -226,7 +226,7 @@ describe('getTagValues', () => {
       const data = makeDataSources({
         flights: [makeFlight(), makeFlight({ id: 'flight-2' })],
         ships: [makeShip()],
-        events: [makeEvent(), makeEvent({ id: 'event-2', type: 'ground_combat' })],
+        events: [makeEvent(), makeEvent({ id: 'event-2', type: 'on_ground' })],
         sites: [makeSite()],
       });
       const values = getTagValues('type', data);

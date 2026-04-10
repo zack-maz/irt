@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: v1.3 milestone complete
-last_updated: '2026-04-09T16:19:15.526Z'
+status: 'Phase 27 shipped — PR #5'
+last_updated: '2026-04-09T23:59:14.113Z'
 progress:
-  total_phases: 13
-  completed_phases: 9
-  total_plans: 36
-  completed_plans: 34
-  percent: 94
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 9
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State
@@ -223,9 +223,10 @@ None.
 
 ### Quick Tasks Completed
 
-| #   | Description                                               | Date       | Commit  | Directory                                                                                         |
-| --- | --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------- |
-| 1   | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/) |
+| #          | Description                                               | Date       | Commit  | Directory                                                                                                           |
+| ---------- | --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| 1          | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/)                   |
+| 260409-jf3 | update events counters to reflect our new ontology        | 2026-04-09 | 4c6c1cb | [260409-jf3-update-events-counters-to-reflect-our-ne](./quick/260409-jf3-update-events-counters-to-reflect-our-ne/) |
 
 ## Accumulated Context
 

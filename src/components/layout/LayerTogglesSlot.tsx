@@ -74,6 +74,7 @@ export function LayerTogglesContent() {
       {LAYER_CONFIGS.map(({ id, label, color, comingSoon }) => (
         <LayerToggleRow key={id} id={id} label={label} color={color} comingSoon={comingSoon} />
       ))}
+
       <button
         onClick={() => {
           localStorage.clear();

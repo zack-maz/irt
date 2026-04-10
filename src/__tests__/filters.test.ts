@@ -62,6 +62,36 @@ function makeDefaults(): FilterState {
     setShowHighSeverity: () => {},
     setShowMediumSeverity: () => {},
     setShowLowSeverity: () => {},
+    // Site type toggles
+    enabledSiteTypes: ['nuclear', 'naval', 'oil', 'airbase', 'port'] as import('@/types/entities').SiteType[],
+    setEnabledSiteTypes: () => {},
+    toggleSiteType: () => {},
+    // Visibility toggles
+    showFlights: true,
+    showShips: true,
+    showEvents: true,
+    showAirstrikes: true,
+    showOnGround: true,
+    showExplosions: true,
+    showTargeted: true,
+    showOther: true,
+    showUnidentified: true,
+    showGroundTraffic: true,
+    showHealthySites: true,
+    showAttackedSites: true,
+    // Visibility toggle actions
+    toggleShowFlights: () => {},
+    toggleShowShips: () => {},
+    toggleShowEvents: () => {},
+    toggleShowAirstrikes: () => {},
+    toggleShowOnGround: () => {},
+    toggleShowExplosions: () => {},
+    toggleShowTargeted: () => {},
+    toggleShowOther: () => {},
+    toggleShowUnidentified: () => {},
+    toggleShowGroundTraffic: () => {},
+    toggleShowHealthySites: () => {},
+    toggleShowAttackedSites: () => {},
   };
 }
 

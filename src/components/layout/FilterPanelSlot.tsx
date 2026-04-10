@@ -82,9 +82,12 @@ export function FilterPanelContent() {
   // Visibility toggles
   const showFlights = useFilterStore((s) => s.showFlights);
   const showShips = useFilterStore((s) => s.showShips);
+  const showEvents = useFilterStore((s) => s.showEvents);
   const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
-  const showGroundCombat = useFilterStore((s) => s.showGroundCombat);
+  const showOnGround = useFilterStore((s) => s.showOnGround);
+  const showExplosions = useFilterStore((s) => s.showExplosions);
   const showTargeted = useFilterStore((s) => s.showTargeted);
+  const showOther = useFilterStore((s) => s.showOther);
   const showUnidentified = useFilterStore((s) => s.showUnidentified);
   const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
   const showHealthySites = useFilterStore((s) => s.showHealthySites);
@@ -190,7 +193,7 @@ export function FilterPanelContent() {
             {/* Visibility button + toggles */}
             <div className="flex flex-wrap gap-1">
               <FilterButton
-                label="Flights"
+                label="All Flights"
                 active={showFlights}
                 color={ENTITY_DOT_COLORS.flights}
                 onToggle={() => useFilterStore.getState().toggleShowFlights()}
@@ -319,6 +322,13 @@ export function FilterPanelContent() {
         />
         {isEventFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
+            {/* Master events toggle */}
+            <FilterButton
+              label="All Events"
+              active={showEvents}
+              color="#ef4444"
+              onToggle={() => useFilterStore.getState().toggleShowEvents()}
+            />
             {/* Conflict subtype buttons */}
             <div className="flex flex-wrap gap-1">
               <FilterButton
@@ -328,16 +338,28 @@ export function FilterPanelContent() {
                 onToggle={() => useFilterStore.getState().toggleShowAirstrikes()}
               />
               <FilterButton
-                label="Ground Combat"
-                active={showGroundCombat}
-                color={ENTITY_DOT_COLORS.groundCombat}
-                onToggle={() => useFilterStore.getState().toggleShowGroundCombat()}
+                label="Ground"
+                active={showOnGround}
+                color={ENTITY_DOT_COLORS.on_ground}
+                onToggle={() => useFilterStore.getState().toggleShowOnGround()}
+              />
+              <FilterButton
+                label="Explosions"
+                active={showExplosions}
+                color={ENTITY_DOT_COLORS.explosion}
+                onToggle={() => useFilterStore.getState().toggleShowExplosions()}
               />
               <FilterButton
                 label="Targeted"
                 active={showTargeted}
                 color={ENTITY_DOT_COLORS.targeted}
                 onToggle={() => useFilterStore.getState().toggleShowTargeted()}
+              />
+              <FilterButton
+                label="Other"
+                active={showOther}
+                color={ENTITY_DOT_COLORS.other}
+                onToggle={() => useFilterStore.getState().toggleShowOther()}
               />
             </div>
             {/* Severity toggles */}

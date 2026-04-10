@@ -5,7 +5,11 @@ import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'events' });
 import { fetchEvents, backfillEvents } from '../adapters/gdelt.js';
+import { isLLMConfigured } from '../adapters/llm-provider.js';
 import { extractBellingcatGeo } from '../lib/eventScoring.js';
+import { normalizeEventTypes } from '../lib/normalizeEventTypes.js';
+import { groupGdeltRows } from '../lib/eventGrouping.js';
+import { processEventGroups, geocodeEnrichedEvents } from '../lib/llmEventExtractor.js';
 import { WAR_START, CACHE_TTL } from '../config.js';
 import { validateQuery } from '../middleware/validate.js';
 import { sendValidated } from '../middleware/validateResponse.js';
@@ -35,6 +39,21 @@ const BACKFILL_KEY = 'events:backfill-ts';
 
 /** 1 hour cooldown to prevent hammering GDELT master list */
 const BACKFILL_COOLDOWN_MS = 3_600_000;
+
+/** Redis key for LLM-enriched events (separate from raw GDELT) */
+const LLM_EVENTS_KEY = 'events:llm';
+
+/** Redis key storing last LLM processing Unix ms timestamp */
+const LLM_PROCESS_KEY = 'events:llm-process-ts';
+
+/** 15 minute cooldown between LLM processing runs */
+const LLM_COOLDOWN_MS = 900_000;
+
+/** Logical TTL for LLM cache — 15 minutes */
+const LLM_LOGICAL_TTL_MS = 900_000;
+
+/** Hard Redis TTL for LLM cache — 2.5 hours (same as raw GDELT) */
+const LLM_REDIS_TTL_SEC = 9000;
 
 /**
  * Check whether a backfill should run.
@@ -69,6 +88,113 @@ async function recordBackfillTimestamp(): Promise<void> {
   }
 }
 
+/**
+ * Check whether the LLM processing pipeline should run.
+ * Returns true if never run or cooldown (15 minutes) has expired.
+ *
+ * Same resilience pattern as shouldBackfill: Redis failure allows the run
+ * (the LLM pipeline has its own error handling).
+ */
+async function shouldRunLLM(): Promise<boolean> {
+  try {
+    const lastTs = await redis.get<number>(LLM_PROCESS_KEY);
+    if (lastTs === null || lastTs === undefined) return true;
+    return Date.now() - lastTs > LLM_COOLDOWN_MS;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Persist the LLM processing timestamp without throwing on Redis failure.
+ * Best-effort: if Redis is dead, the next request may re-trigger LLM
+ * (rate-limited by the LLM providers themselves, not catastrophic).
+ */
+async function recordLLMTimestamp(): Promise<void> {
+  try {
+    await redis.set(LLM_PROCESS_KEY, Date.now(), { ex: LLM_REDIS_TTL_SEC });
+  } catch {
+    /* best-effort */
+  }
+}
+
+/**
+ * Convert LLM-geocoded enriched events back to ConflictEventEntity format.
+ * Merges LLM-extracted fields into the existing entity data structure.
+ */
+function enrichedToEntities(
+  geocoded: Array<{
+    groupKey: string;
+    resolvedLat: number;
+    resolvedLng: number;
+    location: { name: string; precision: 'exact' | 'neighborhood' | 'city' | 'region' };
+    type: string;
+    actors: string[];
+    severity: string;
+    summary: string;
+    casualties: { killed: number | null; injured: number | null; unknown: boolean };
+    sourceCount: number;
+  }>,
+  groups: Array<{ key: string; entities: ConflictEventEntity[] }>,
+): ConflictEventEntity[] {
+  const groupMap = new Map<string, ConflictEventEntity[]>();
+  for (const g of groups) {
+    groupMap.set(g.key, g.entities);
+  }
+
+  const results: ConflictEventEntity[] = [];
+  for (const enriched of geocoded) {
+    const entities = groupMap.get(enriched.groupKey);
+    if (!entities || entities.length === 0) continue;
+
+    // Use the first entity as a template, override with LLM data
+    const template = entities[0];
+    results.push({
+      ...template,
+      lat: enriched.resolvedLat,
+      lng: enriched.resolvedLng,
+      type: enriched.type as ConflictEventEntity['type'],
+      label: `${enriched.location.name}: ${enriched.summary.slice(0, 60)}`,
+      data: {
+        ...template.data,
+        locationName: enriched.location.name,
+        summary: enriched.summary,
+        precision: enriched.location.precision,
+        llmProcessed: true,
+        actors: enriched.actors,
+        sourceCount: enriched.sourceCount,
+        casualties: {
+          killed: enriched.casualties.killed ?? undefined,
+          injured: enriched.casualties.injured ?? undefined,
+          unknown: enriched.casualties.unknown,
+        },
+      },
+    });
+  }
+  return results;
+}
+
+/**
+ * Wrap sendValidated to normalize event types before Zod validation.
+ * Remaps old 11-type taxonomy (ground_combat, shelling, etc.) cached in Redis
+ * to the new 5-type system so conflictEventEntitySchema doesn't reject them.
+ */
+function sendNormalizedEvents(
+  res: import('express').Response,
+  payload: {
+    data: ConflictEventEntity[];
+    stale: boolean;
+    lastFresh: number;
+    rateLimited?: boolean;
+    degraded?: boolean;
+  },
+): void {
+  sendValidated(res, eventsResponseSchema, {
+    ...payload,
+    data: normalizeEventTypes(payload.data),
+  });
+}
+
 export const eventsRouter = Router();
 
 eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
@@ -76,13 +202,19 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     typeof eventsQuerySchema
   >;
 
-  // Check cache first (skip on forced backfill)
+  // --- LLM cache check (highest priority: serve enriched events if fresh) ---
+  const llmCached = await cacheGetSafe<ConflictEventEntity[]>(LLM_EVENTS_KEY, LLM_LOGICAL_TTL_MS);
+  if (llmCached && !llmCached.stale) {
+    return sendNormalizedEvents(res, llmCached);
+  }
+
+  // Check raw GDELT cache (skip on forced backfill)
   const cached = forceBackfill
     ? null
     : await cacheGetSafe<ConflictEventEntity[]>(EVENTS_KEY, LOGICAL_TTL_MS);
 
-  if (cached && !cached.stale) {
-    return sendValidated(res, eventsResponseSchema, cached);
+  if (cached && !cached.stale && !isLLMConfigured()) {
+    return sendNormalizedEvents(res, cached);
   }
 
   try {
@@ -154,7 +286,77 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     // Store raw (undispersed) coordinates — dispersion is applied client-side
     // in useFilteredEntities so it dynamically adjusts when filters change.
     await cacheSetSafe(EVENTS_KEY, merged, REDIS_TTL_SEC);
-    sendValidated(res, eventsResponseSchema, {
+
+    // --- LLM processing layer (fire-and-forget) ---
+    // Always serve raw GDELT immediately. If LLM is configured and cooldown
+    // expired, kick off enrichment in the background. The NEXT request will
+    // pick up the enriched cache from the top-of-route LLM cache check.
+    if (isLLMConfigured() && (await shouldRunLLM())) {
+      // Record timestamp BEFORE spawning to prevent concurrent triggers
+      await recordLLMTimestamp();
+
+      // Fire-and-forget: don't await — runs after response is sent
+      const llmCachedRef = llmCached;
+      void (async () => {
+        try {
+          const groups = groupGdeltRows(merged);
+
+          // Diff: only process groups whose key doesn't match a cached LLM event
+          const cachedLlmKeys = new Set<string>();
+          if (llmCachedRef?.data) {
+            for (const e of llmCachedRef.data) {
+              if (e.id) cachedLlmKeys.add(e.id);
+            }
+          }
+          const newGroups =
+            cachedLlmKeys.size > 0 ? groups.filter((g) => !cachedLlmKeys.has(g.key)) : groups;
+
+          if (newGroups.length === 0) {
+            log.info('LLM: no new groups to process');
+            return;
+          }
+
+          const enriched = await processEventGroups(newGroups);
+          if (!enriched || enriched.length === 0) {
+            log.warn('LLM processing returned null — raw GDELT serving continues');
+            return;
+          }
+
+          const geocoded = await geocodeEnrichedEvents(enriched, newGroups);
+          const llmEntities = enrichedToEntities(geocoded, newGroups);
+
+          // Merge newly processed LLM events with existing cached LLM events
+          const llmMergeMap = new Map<string, ConflictEventEntity>();
+          if (llmCachedRef?.data) {
+            for (const e of llmCachedRef.data) {
+              llmMergeMap.set(e.id, e);
+            }
+          }
+          for (const e of llmEntities) {
+            llmMergeMap.set(e.id, e);
+          }
+          const llmMerged = Array.from(llmMergeMap.values());
+
+          await cacheSetSafe(LLM_EVENTS_KEY, llmMerged, LLM_REDIS_TTL_SEC);
+          log.info(
+            { count: llmEntities.length, total: llmMerged.length },
+            'LLM: processed and cached enriched events (background)',
+          );
+        } catch (llmErr) {
+          log.warn({ err: llmErr }, 'LLM background processing failed');
+        }
+      })();
+    }
+
+    // Serve immediately: stale LLM cache if available, otherwise raw GDELT
+    if (llmCached?.data) {
+      return sendNormalizedEvents(res, {
+        data: llmCached.data,
+        stale: true,
+        lastFresh: llmCached.lastFresh,
+      });
+    }
+    sendNormalizedEvents(res, {
       data: merged,
       stale: false,
       lastFresh: Date.now(),
@@ -165,7 +367,7 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     if (cached) {
       // Prune stale entries even on error
       const pruned = cached.data.filter((e) => e.timestamp >= WAR_START);
-      sendValidated(res, eventsResponseSchema, {
+      sendNormalizedEvents(res, {
         data: pruned,
         stale: true,
         lastFresh: cached.lastFresh,

@@ -69,9 +69,9 @@ const airborne = [makeFlight('f1', false), makeFlight('f2', false), makeFlight('
 const ground = [makeFlight('g1', true), makeFlight('g2', true)];
 const allFlights = [...airborne, ...ground];
 const airstrikes = [makeEvent('a1', 'airstrike'), makeEvent('a2', 'airstrike')];
-const groundCombat = [makeEvent('gc1', 'ground_combat')];
-const targeted = [makeEvent('t1', 'assassination')];
-const otherGroundCombat = [makeEvent('o1', 'blockade')];
+const groundCombat = [makeEvent('gc1', 'on_ground')];
+const targeted = [makeEvent('t1', 'targeted')];
+const otherGroundCombat = [makeEvent('o1', 'other')];
 const allEvents = [...airstrikes, ...groundCombat, ...targeted, ...otherGroundCombat];
 
 describe('StatusPanel', () => {

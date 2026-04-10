@@ -23,12 +23,31 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Layers')).toBeTruthy();
   });
 
-  it('renders 6 active toggle rows and no coming-soon rows', () => {
+  it('renders 6 visualization layer toggles', () => {
+    render(<LayerTogglesSlot />);
+    // Visualization layer toggles (Geographic, Climate, Water, Threat Density, Political, Ethnic)
+    expect(screen.getByLabelText('Toggle Geographic layer')).toBeTruthy();
+    expect(screen.getByLabelText('Toggle Climate layer')).toBeTruthy();
+    expect(screen.getByLabelText('Toggle Water layer')).toBeTruthy();
+    expect(screen.getByLabelText('Toggle Threat Density layer')).toBeTruthy();
+    expect(screen.getByLabelText('Toggle Political layer')).toBeTruthy();
+    expect(screen.getByLabelText('Toggle Ethnic layer')).toBeTruthy();
+  });
+
+  it('renders only 6 switch roles (visualization layers only, no event toggles)', () => {
     render(<LayerTogglesSlot />);
     const switches = screen.getAllByRole('switch');
     expect(switches).toHaveLength(6);
-    // No layers are coming-soon in current config (Satellite was removed)
-    expect(screen.queryAllByText('soon')).toHaveLength(0);
+  });
+
+  it('does not render any event toggles', () => {
+    render(<LayerTogglesSlot />);
+    expect(screen.queryByLabelText('Toggle Events')).toBeNull();
+    expect(screen.queryByLabelText('Toggle Airstrikes')).toBeNull();
+    expect(screen.queryByLabelText('Toggle Ground Combat')).toBeNull();
+    expect(screen.queryByLabelText('Toggle Explosions')).toBeNull();
+    expect(screen.queryByLabelText('Toggle Targeted')).toBeNull();
+    expect(screen.queryByLabelText('Toggle Other')).toBeNull();
   });
 
   it('renders toggle rows with correct labels', () => {
@@ -41,7 +60,7 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Ethnic')).toBeTruthy();
   });
 
-  it('clicking a toggle calls toggleLayer', () => {
+  it('clicking a visualization layer toggle calls toggleLayer', () => {
     render(<LayerTogglesSlot />);
     const geoToggle = screen.getByLabelText('Toggle Geographic layer');
     fireEvent.click(geoToggle);
@@ -53,16 +72,13 @@ describe('LayerTogglesSlot', () => {
     expect(screen.getByText('Clear cache & reload')).toBeTruthy();
   });
 
-  it('inactive toggle has opacity-40 class', () => {
+  it('inactive visualization toggle has opacity-40 class', () => {
     render(<LayerTogglesSlot />);
-    const switches = screen.getAllByRole('switch');
-    // All are inactive initially (no active layers)
-    for (const btn of switches) {
-      expect(btn.className).toContain('opacity-40');
-    }
+    const geoToggle = screen.getByLabelText('Toggle Geographic layer');
+    expect(geoToggle.className).toContain('opacity-40');
   });
 
-  it('active toggle has opacity-100 class', () => {
+  it('active visualization toggle has opacity-100 class', () => {
     useLayerStore.setState({ activeLayers: new Set(['geographic']) });
     render(<LayerTogglesSlot />);
     const geoToggle = screen.getByLabelText('Toggle Geographic layer');
@@ -75,5 +91,10 @@ describe('LayerTogglesSlot', () => {
     expect(politicalToggle).toBeTruthy();
     fireEvent.click(politicalToggle);
     expect(useLayerStore.getState().activeLayers.has('political')).toBe(true);
+  });
+
+  it('no coming-soon rows', () => {
+    render(<LayerTogglesSlot />);
+    expect(screen.queryAllByText('soon')).toHaveLength(0);
   });
 });

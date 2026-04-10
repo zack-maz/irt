@@ -148,11 +148,20 @@ function CountersContent() {
           selectedEntityId={selectedEntityId}
         />
         <CounterRow
-          label="Ground Combat"
-          value={counters.groundCombat}
-          entities={counters.entities.groundCombatEvents}
-          isExpanded={expandedKey === 'groundCombat'}
-          onToggle={() => handleToggle('groundCombat')}
+          label="Ground"
+          value={counters.onGround}
+          entities={counters.entities.onGroundEvents}
+          isExpanded={expandedKey === 'onGround'}
+          onToggle={() => handleToggle('onGround')}
+          onEntityClick={handleEntityClick}
+          selectedEntityId={selectedEntityId}
+        />
+        <CounterRow
+          label="Explosions"
+          value={counters.explosions}
+          entities={counters.entities.explosionEvents}
+          isExpanded={expandedKey === 'explosions'}
+          onToggle={() => handleToggle('explosions')}
           onEntityClick={handleEntityClick}
           selectedEntityId={selectedEntityId}
         />
@@ -162,6 +171,15 @@ function CountersContent() {
           entities={counters.entities.targetedEvents}
           isExpanded={expandedKey === 'targeted'}
           onToggle={() => handleToggle('targeted')}
+          onEntityClick={handleEntityClick}
+          selectedEntityId={selectedEntityId}
+        />
+        <CounterRow
+          label="Other"
+          value={counters.other}
+          entities={counters.entities.otherEvents}
+          isExpanded={expandedKey === 'other'}
+          onToggle={() => handleToggle('other')}
           onEntityClick={handleEntityClick}
           selectedEntityId={selectedEntityId}
         />

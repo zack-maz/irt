@@ -131,8 +131,10 @@ describe('useCounterData', () => {
     const { result } = renderHook(() => useCounterData());
     expect(result.current.iranianFlights).toBe(0);
     expect(result.current.airstrikes).toBe(0);
-    expect(result.current.groundCombat).toBe(0);
+    expect(result.current.onGround).toBe(0);
+    expect(result.current.explosions).toBe(0);
     expect(result.current.targeted).toBe(0);
+    expect(result.current.other).toBe(0);
   });
 
   it('counts all Iranian flights', () => {
@@ -163,17 +165,19 @@ describe('useCounterData', () => {
       events: [
         makeEvent('a1', 'airstrike'),
         makeEvent('a2', 'airstrike'),
-        makeEvent('gc1', 'ground_combat'),
-        makeEvent('sh1', 'shelling'),
-        makeEvent('t1', 'assassination'),
-        makeEvent('bl1', 'blockade'),
+        makeEvent('gc1', 'on_ground'),
+        makeEvent('ex1', 'explosion'),
+        makeEvent('t1', 'targeted'),
+        makeEvent('o1', 'other'),
       ],
       eventCount: 6,
     });
     const { result } = renderHook(() => useCounterData());
     expect(result.current.airstrikes).toBe(2);
-    expect(result.current.groundCombat).toBe(3); // ground_combat + shelling + blockade
+    expect(result.current.onGround).toBe(1);
+    expect(result.current.explosions).toBe(1);
     expect(result.current.targeted).toBe(1);
+    expect(result.current.other).toBe(1);
   });
 
   it('flight counters respect smart filters', () => {
@@ -195,8 +199,10 @@ describe('useCounterData', () => {
     expect(result.current.entities.flights).toEqual([]);
     expect(result.current.entities.ships).toEqual([]);
     expect(result.current.entities.airstrikeEvents).toEqual([]);
-    expect(result.current.entities.groundCombatEvents).toEqual([]);
+    expect(result.current.entities.onGroundEvents).toEqual([]);
+    expect(result.current.entities.explosionEvents).toEqual([]);
     expect(result.current.entities.targetedEvents).toEqual([]);
+    expect(result.current.entities.otherEvents).toEqual([]);
     expect(result.current.entities.sites).toBeDefined();
   });
 
@@ -229,7 +235,7 @@ describe('useCounterData', () => {
     useEventStore.setState({
       events: [
         makeEvent('a1', 'airstrike'),
-        makeEvent('gc1', 'ground_combat'),
+        makeEvent('gc1', 'on_ground'),
         makeEvent('a2', 'airstrike'),
       ],
       eventCount: 3,
@@ -238,25 +244,27 @@ describe('useCounterData', () => {
     expect(result.current.entities.airstrikeEvents).toHaveLength(2);
   });
 
-  it('entities.groundCombatEvents contains events filtered by GROUND_COMBAT_TYPES', () => {
+  it('entities split on_ground, explosion, other into separate arrays', () => {
     useEventStore.setState({
       events: [
-        makeEvent('gc1', 'ground_combat'),
-        makeEvent('sh1', 'shelling'),
-        makeEvent('bm1', 'bombing'),
+        makeEvent('gc1', 'on_ground'),
+        makeEvent('ex1', 'explosion'),
+        makeEvent('o1', 'other'),
         makeEvent('a1', 'airstrike'),
       ],
       eventCount: 4,
     });
     const { result } = renderHook(() => useCounterData());
-    expect(result.current.entities.groundCombatEvents).toHaveLength(3);
+    expect(result.current.entities.onGroundEvents).toHaveLength(1);
+    expect(result.current.entities.explosionEvents).toHaveLength(1);
+    expect(result.current.entities.otherEvents).toHaveLength(1);
   });
 
   it('entities.targetedEvents contains events filtered by TARGETED_TYPES', () => {
     useEventStore.setState({
       events: [
-        makeEvent('t1', 'assassination'),
-        makeEvent('t2', 'abduction'),
+        makeEvent('t1', 'targeted'),
+        makeEvent('t2', 'targeted'),
         makeEvent('a1', 'airstrike'),
       ],
       eventCount: 3,
@@ -319,7 +327,7 @@ describe('useCounterData', () => {
     useEventStore.setState({
       events: [
         makeEvent('e1', 'airstrike', 0, 33.001, 52.001), // near site-2 only
-        makeEvent('e2', 'ground_combat', 0, 33.002, 52.002), // near site-2 only
+        makeEvent('e2', 'on_ground', 0, 33.002, 52.002), // near site-2 only
         makeEvent('e3', 'airstrike', 0, 32.001, 51.001), // near site-1 only
       ],
       eventCount: 3,

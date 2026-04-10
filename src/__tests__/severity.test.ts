@@ -10,7 +10,7 @@ function makeEvent(
   const { data: dataOverrides, ...rest } = overrides;
   return {
     id: 'gdelt-test-1',
-    type: 'ground_combat',
+    type: 'on_ground',
     lat: 35.6892,
     lng: 51.389,
     timestamp: now, // current time -> max recency
@@ -35,14 +35,14 @@ function makeEvent(
 }
 
 describe('computeSeverityScore', () => {
-  it('returns higher score for airstrike than blockade (type weight)', () => {
+  it('returns higher score for airstrike than other (type weight)', () => {
     const airstrike = makeEvent({ type: 'airstrike' });
-    const blockade = makeEvent({ type: 'blockade' });
+    const other = makeEvent({ type: 'other' });
 
     const airstrikeScore = computeSeverityScore(airstrike);
-    const blockadeScore = computeSeverityScore(blockade);
+    const otherScore = computeSeverityScore(other);
 
-    expect(airstrikeScore).toBeGreaterThan(blockadeScore);
+    expect(airstrikeScore).toBeGreaterThan(otherScore);
   });
 
   it('returns higher score for events with more mentions', () => {
@@ -94,7 +94,7 @@ describe('computeSeverityScore', () => {
     expect(typeof score).toBe('number');
   });
 
-  it('ranks wmd and airstrike equally (both weight 10)', () => {
+  it('ranks explosion and targeted equally (both weight 8)', () => {
     // Pin Date.now() with fake timers so recency decay is identical for both
     // computeSeverityScore() calls. Without this, ~microsecond drift between
     // the two Date.now() reads inside computeSeverityScore breaks exact equality.
@@ -102,10 +102,10 @@ describe('computeSeverityScore', () => {
     vi.useFakeTimers();
     vi.setSystemTime(fixedNow);
     try {
-      const wmd = makeEvent({ type: 'wmd', timestamp: fixedNow });
-      const airstrike = makeEvent({ type: 'airstrike', timestamp: fixedNow });
+      const explosion = makeEvent({ type: 'explosion', timestamp: fixedNow });
+      const targeted = makeEvent({ type: 'targeted', timestamp: fixedNow });
 
-      expect(computeSeverityScore(wmd)).toBe(computeSeverityScore(airstrike));
+      expect(computeSeverityScore(explosion)).toBe(computeSeverityScore(targeted));
     } finally {
       vi.useRealTimers();
     }

@@ -96,8 +96,10 @@ describe('CountersSlot', () => {
     render(<CountersSlot />);
     expect(screen.getAllByText('Flights').length).toBeGreaterThan(0);
     expect(screen.getByText('Airstrikes')).toBeInTheDocument();
-    expect(screen.getByText('Ground Combat')).toBeInTheDocument();
+    expect(screen.getByText('Ground')).toBeInTheDocument();
+    expect(screen.getByText('Explosions')).toBeInTheDocument();
     expect(screen.getByText('Targeted')).toBeInTheDocument();
+    expect(screen.getByText('Other')).toBeInTheDocument();
     expect(screen.getAllByText('Ships').length).toBeGreaterThan(0);
   });
 

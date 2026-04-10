@@ -59,15 +59,14 @@ function getIconForEntity(entity: MapEntity | SiteEntity): string {
       return SITE_ICON_MAP[(entity as SiteEntity).siteType] ?? 'diamond';
     case 'airstrike':
       return 'starburst';
-    case 'ground_combat':
-    case 'shelling':
-    case 'bombing':
+    case 'on_ground':
+      return 'triangle';
+    case 'explosion':
       return 'explosion';
-    case 'assassination':
-    case 'abduction':
+    case 'targeted':
       return 'crosshair';
     default:
-      return 'xmark'; // assault, blockade, ceasefire_violation, mass_violence, wmd
+      return 'xmark'; // 'other'
   }
 }
 
@@ -88,15 +87,14 @@ function getColorForEntity(
         : [...ENTITY_COLORS.siteHealthy];
     case 'airstrike':
       return [...ENTITY_COLORS.airstrike];
-    case 'ground_combat':
-    case 'shelling':
-    case 'bombing':
-      return [...ENTITY_COLORS.groundCombat];
-    case 'assassination':
-    case 'abduction':
+    case 'on_ground':
+      return [...ENTITY_COLORS.on_ground];
+    case 'explosion':
+      return [...ENTITY_COLORS.explosion];
+    case 'targeted':
       return [...ENTITY_COLORS.targeted];
     default:
-      return [...ENTITY_COLORS.groundCombat];
+      return [...ENTITY_COLORS.other]; // 'other'
   }
 }
 
@@ -165,9 +163,12 @@ export function useEntityLayers() {
   // Visibility toggles (independent)
   const showFlights = useFilterStore((s) => s.showFlights);
   const showShips = useFilterStore((s) => s.showShips);
+  const showEvents = useFilterStore((s) => s.showEvents);
   const showAirstrikes = useFilterStore((s) => s.showAirstrikes);
-  const showGroundCombatToggle = useFilterStore((s) => s.showGroundCombat);
+  const showOnGroundToggle = useFilterStore((s) => s.showOnGround);
+  const showExplosionsToggle = useFilterStore((s) => s.showExplosions);
   const showTargetedToggle = useFilterStore((s) => s.showTargeted);
+  const showOtherToggle = useFilterStore((s) => s.showOther);
   const showUnidentified = useFilterStore((s) => s.showUnidentified);
   const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
   const showHealthySites = useFilterStore((s) => s.showHealthySites);
@@ -199,9 +200,28 @@ export function useEntityLayers() {
     });
   }, [allFlights, showFlights, showUnidentified, showGroundTraffic]);
 
+  // Event toggle map: master gate + per-type sub-toggles
+  const eventToggleMap: Record<string, boolean> = useMemo(
+    () => ({
+      airstrike: showEvents && showAirstrikes,
+      on_ground: showEvents && showOnGroundToggle,
+      explosion: showEvents && showExplosionsToggle,
+      targeted: showEvents && showTargetedToggle,
+      other: showEvents && showOtherToggle,
+    }),
+    [
+      showEvents,
+      showAirstrikes,
+      showOnGroundToggle,
+      showExplosionsToggle,
+      showTargetedToggle,
+      showOtherToggle,
+    ],
+  );
+
   const airstrikeEvents = useMemo(
     () =>
-      showAirstrikes
+      eventToggleMap.airstrike
         ? events
             .filter((e) =>
               (CONFLICT_TOGGLE_GROUPS.showAirstrikes as readonly string[]).includes(e.type),
@@ -210,24 +230,34 @@ export function useEntityLayers() {
               passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
             )
         : [],
-    [events, showAirstrikes, showHighSeverity, showMediumSeverity, showLowSeverity],
+    [events, eventToggleMap.airstrike, showHighSeverity, showMediumSeverity, showLowSeverity],
   );
-  const groundCombatEvents = useMemo(
-    () =>
-      showGroundCombatToggle
-        ? events
-            .filter((e) =>
-              (CONFLICT_TOGGLE_GROUPS.showGroundCombat as readonly string[]).includes(e.type),
-            )
-            .filter((e) =>
-              passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
-            )
-        : [],
-    [events, showGroundCombatToggle, showHighSeverity, showMediumSeverity, showLowSeverity],
-  );
+  const groundCombatEvents = useMemo(() => {
+    // Combine on_ground, explosion, and other into the "ground combat" visual layer
+    const enabledTypes = new Set<string>();
+    if (eventToggleMap.on_ground)
+      for (const t of CONFLICT_TOGGLE_GROUPS.showOnGround) enabledTypes.add(t);
+    if (eventToggleMap.explosion)
+      for (const t of CONFLICT_TOGGLE_GROUPS.showExplosions) enabledTypes.add(t);
+    if (eventToggleMap.other) for (const t of CONFLICT_TOGGLE_GROUPS.showOther) enabledTypes.add(t);
+    if (enabledTypes.size === 0) return [];
+    return events
+      .filter((e) => enabledTypes.has(e.type))
+      .filter((e) =>
+        passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
+      );
+  }, [
+    events,
+    eventToggleMap.on_ground,
+    eventToggleMap.explosion,
+    eventToggleMap.other,
+    showHighSeverity,
+    showMediumSeverity,
+    showLowSeverity,
+  ]);
   const targetedEvents = useMemo(
     () =>
-      showTargetedToggle
+      eventToggleMap.targeted
         ? events
             .filter((e) =>
               (CONFLICT_TOGGLE_GROUPS.showTargeted as readonly string[]).includes(e.type),
@@ -236,7 +266,7 @@ export function useEntityLayers() {
               passesSeverityFilter(e, showHighSeverity, showMediumSeverity, showLowSeverity),
             )
         : [],
-    [events, showTargetedToggle, showHighSeverity, showMediumSeverity, showLowSeverity],
+    [events, eventToggleMap.targeted, showHighSeverity, showMediumSeverity, showLowSeverity],
   );
 
   // Sites filtered by enabled types, proximity pin, and healthy/attacked toggles
@@ -387,13 +417,16 @@ export function useEntityLayers() {
         iconMapping: ICON_MAPPING,
         getIcon: (d: ConflictEventEntity) => getIconForEntity(d),
         getPosition: (d: ConflictEventEntity) => [d.lng, d.lat],
-        getSize: ICON_SIZE.groundCombat.meters,
+        getSize: (d: ConflictEventEntity) => {
+          const sz = ICON_SIZE[d.type as keyof typeof ICON_SIZE];
+          return sz ? sz.meters : ICON_SIZE.on_ground.meters;
+        },
         sizeUnits: 'meters' as const,
-        sizeMinPixels: ICON_SIZE.groundCombat.minPixels,
-        sizeMaxPixels: ICON_SIZE.groundCombat.maxPixels,
+        sizeMinPixels: ICON_SIZE.explosion.minPixels,
+        sizeMaxPixels: ICON_SIZE.explosion.maxPixels,
         getAngle: () => 0,
         getColor: (d: ConflictEventEntity) => {
-          const [r, g, b] = ENTITY_COLORS.groundCombat;
+          const [r, g, b] = getColorForEntity(d);
           if (isFilterActive && !matchedIds.has(d.id)) return [r, g, b, SEARCH_DIM_ALPHA];
           if (clusterEventIds && !clusterEventIds.has(d.id)) return [r, g, b, DIM_ALPHA];
           if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];

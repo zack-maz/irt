@@ -93,7 +93,7 @@ describe('aggregateToGrid', () => {
     const events = [
       makeEvent({ type: 'airstrike', lat: 33.1, lng: 44.5, timestamp: now - 1000 }),
       makeEvent({ type: 'airstrike', lat: 33.2, lng: 44.5, timestamp: now }),
-      makeEvent({ type: 'shelling', lat: 33.15, lng: 44.55, timestamp: now - 5000 }),
+      makeEvent({ type: 'on_ground', lat: 33.15, lng: 44.55, timestamp: now - 5000 }),
     ];
     const result = aggregateToGrid(events);
     expect(result).toHaveLength(1);
@@ -107,7 +107,7 @@ describe('aggregateToGrid', () => {
     // lat 33.6 -> cell floor(33.6/0.25)=134 (center 33.625)
     const events = [
       makeEvent({ type: 'airstrike', lat: 33.1, lng: 44.3 }),
-      makeEvent({ type: 'bombing', lat: 33.6, lng: 44.3 }),
+      makeEvent({ type: 'explosion', lat: 33.6, lng: 44.3 }),
     ];
     const result = aggregateToGrid(events);
     expect(result).toHaveLength(2);
@@ -116,19 +116,19 @@ describe('aggregateToGrid', () => {
   it('computes dominant type as the most frequent event type in the cell', () => {
     // All in same 0.25-degree cell (lat ~33.1 range)
     const events = [
-      makeEvent({ type: 'shelling', lat: 33.1, lng: 44.1 }),
-      makeEvent({ type: 'shelling', lat: 33.15, lng: 44.15 }),
-      makeEvent({ type: 'shelling', lat: 33.2, lng: 44.2 }),
+      makeEvent({ type: 'on_ground', lat: 33.1, lng: 44.1 }),
+      makeEvent({ type: 'on_ground', lat: 33.15, lng: 44.15 }),
+      makeEvent({ type: 'on_ground', lat: 33.2, lng: 44.2 }),
       makeEvent({ type: 'airstrike', lat: 33.12, lng: 44.12 }),
     ];
     const result = aggregateToGrid(events);
-    expect(result[0].dominantType).toBe('shelling');
+    expect(result[0].dominantType).toBe('on_ground');
   });
 
   it('populates eventIds with correct event IDs for each cell', () => {
     const e1 = makeEvent({ id: 'evt-001', type: 'airstrike', lat: 33.1, lng: 44.1 });
-    const e2 = makeEvent({ id: 'evt-002', type: 'shelling', lat: 33.15, lng: 44.15 });
-    const e3 = makeEvent({ id: 'evt-003', type: 'bombing', lat: 35.5, lng: 50.5 }); // different cell
+    const e2 = makeEvent({ id: 'evt-002', type: 'on_ground', lat: 33.15, lng: 44.15 });
+    const e3 = makeEvent({ id: 'evt-003', type: 'explosion', lat: 35.5, lng: 50.5 }); // different cell
     const result = aggregateToGrid([e1, e2, e3]);
     expect(result).toHaveLength(2);
 
@@ -148,7 +148,7 @@ describe('aggregateToGrid', () => {
   it('separates events in widely different cells', () => {
     const events = [
       makeEvent({ type: 'airstrike', lat: 33.2, lng: 44.3 }),
-      makeEvent({ type: 'bombing', lat: 35.5, lng: 50.5 }),
+      makeEvent({ type: 'explosion', lat: 35.5, lng: 50.5 }),
     ];
     const result = aggregateToGrid(events);
     expect(result).toHaveLength(2);
@@ -509,7 +509,7 @@ describe('ThreatTooltip', () => {
           lat: 33,
           lng: 44,
           eventCount: 3,
-          dominantType: 'ground_combat',
+          dominantType: 'on_ground',
           latestTime: twoHoursAgo,
           totalFatalities: 5,
           totalMentions: 10,
@@ -522,7 +522,7 @@ describe('ThreatTooltip', () => {
         y={50}
       />,
     );
-    expect(screen.getByText('Mostly Ground Combat')).toBeTruthy();
+    expect(screen.getByText('Mostly Ground')).toBeTruthy();
     expect(screen.getByText(/\d+h ago/)).toBeTruthy();
     // Should show fatalities when > 0
     expect(screen.getByText('5 fatalities')).toBeTruthy();
@@ -536,7 +536,7 @@ describe('ThreatTooltip', () => {
           lat: 33,
           lng: 44,
           eventCount: 2,
-          dominantType: 'shelling',
+          dominantType: 'on_ground',
           latestTime: recent,
           totalFatalities: 0,
           totalMentions: 5,
@@ -582,7 +582,7 @@ describe('ThreatTooltip', () => {
           lat: 33,
           lng: 44,
           eventCount: 1,
-          dominantType: 'bombing',
+          dominantType: 'explosion',
           latestTime: Date.now(),
           totalFatalities: 0,
           totalMentions: 1,
@@ -605,7 +605,7 @@ describe('ThreatTooltip', () => {
           lat: 33,
           lng: 44,
           eventCount: 1,
-          dominantType: 'assault',
+          dominantType: 'other',
           latestTime: Date.now(),
           totalFatalities: 0,
           totalMentions: 1,

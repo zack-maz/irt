@@ -5,9 +5,11 @@ export const ENTITY_COLORS = {
   flight: [234, 179, 8] as const, // #eab308 yellow
   flightUnidentified: [255, 255, 100] as const, // #ffff64 shiny bright yellow
   ship: [167, 139, 250] as const, // #a78bfa violet-400
-  airstrike: [255, 59, 48] as const, // #ff3b30 red
-  groundCombat: [239, 68, 68] as const, // #ef4444 red
-  targeted: [139, 30, 30] as const, // #8b1e1e dark red
+  airstrike: [255, 59, 48] as const, // #ff3b30 bright red
+  on_ground: [180, 50, 20] as const, // #b43214 dark burnt red
+  explosion: [255, 95, 25] as const, // #ff5f19 vibrant orange-red
+  targeted: [139, 30, 30] as const, // #8b1e1e dark crimson
+  other: [190, 170, 168] as const, // #beaaa8 gray with red tint
   siteHealthy: [34, 197, 94] as const, // #22c55e green
   siteAttacked: [249, 115, 22] as const, // #f97316 orange
 } as const;
@@ -17,8 +19,10 @@ export const ENTITY_DOT_COLORS = {
   flights: '#eab308',
   ships: '#a78bfa',
   airstrikes: '#ff3b30',
-  groundCombat: '#ef4444',
+  on_ground: '#b43214',
+  explosion: '#ff5f19',
   targeted: '#8b1e1e',
+  other: '#beaaa8',
   ground: '#eab308',
   unidentified: '#ffff64',
   siteHealthy: '#22c55e',
@@ -38,9 +42,11 @@ export const SITE_SUBTYPE_COLORS: Record<string, string> = {
 export const ICON_SIZE = {
   flight: { meters: 1000, minPixels: 16, maxPixels: 100 },
   ship: { meters: 1000, minPixels: 16, maxPixels: 100 },
-  airstrike: { meters: 1500, minPixels: 16, maxPixels: 120 },
-  groundCombat: { meters: 1500, minPixels: 16, maxPixels: 120 },
-  targeted: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  airstrike: { meters: 2500, minPixels: 22, maxPixels: 160 },
+  on_ground: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  explosion: { meters: 2500, minPixels: 22, maxPixels: 160 },
+  targeted: { meters: 2200, minPixels: 20, maxPixels: 140 },
+  other: { meters: 1500, minPixels: 16, maxPixels: 120 },
   site: { meters: 1500, minPixels: 16, maxPixels: 50 },
 } as const;
 
