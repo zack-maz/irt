@@ -96,6 +96,17 @@ Plans:
 
 **Historical note:** This phase was originally numbered 26.2 and attempted an NLP-based approach (title fetching + me-cities lexicon + NLP extraction wired into the GDELT adapter). That approach was scrapped in Phase 26.3 after roughly two weeks of work because it was patching downstream of a bad signal rather than fixing the input. See `docs/adr/0005-phase-26-2-nlp-approach-scrapped.md` for the honest retrospective and `.planning/phases/archive-26.2-nlp-scrapped/` for the preserved historical artifacts.
 
+### Phase 27.1: Dev Observability and LLM Pipeline Status (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 27
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 27.1 to break down)
+
 ### Phase 28: Performance & Load Testing — was Phase 27
 
 **Goal:** Optimize initial load time and validate production handles 250 concurrent users.
