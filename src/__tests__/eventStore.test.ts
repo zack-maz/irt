@@ -51,6 +51,9 @@ describe('eventStore', () => {
       connectionStatus: 'loading',
       lastFetchAt: null,
       eventCount: 0,
+      lastError: null,
+      nextPollAt: null,
+      recentFetches: [],
     });
   });
 

@@ -34,6 +34,9 @@ describe('flightStore', () => {
       lastFresh: null,
       flightCount: 0,
       activeSource: 'opensky',
+      lastError: null,
+      nextPollAt: null,
+      recentFetches: [],
     });
   });
 
