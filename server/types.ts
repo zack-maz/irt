@@ -65,6 +65,7 @@ export interface ConflictEventEntity extends MapEntityBase {
     precision?: 'exact' | 'neighborhood' | 'city' | 'region';
     actors?: string[]; // All actors (richer than actor1/actor2)
     sourceCount?: number; // Number of independent sources
+    sourceTier?: 1 | 2 | 3; // Best source tier (1=gold, 2=silver, 3=bronze) — set server-side
     llmProcessed?: boolean; // true when LLM enriched this event
   };
 }
@@ -104,6 +105,7 @@ export interface NewsArticle {
   title: string;
   url: string;
   source: string; // "GDELT", "BBC", "Al Jazeera", "Tehran Times", "Times of Israel", "Middle East Eye"
+  domain?: string; // Source domain (e.g., "reuters.com", "bbc.co.uk") — propagated from GDELT DOC API
   sourceCountry?: string; // Country of origin of the news source (e.g., "United Kingdom", "Qatar")
   publishedAt: number; // Unix ms
   summary?: string;

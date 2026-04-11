@@ -76,6 +76,7 @@ export async function fetchGdeltArticles(): Promise<NewsArticle[]> {
       title: a.title,
       url: a.url,
       source: 'GDELT',
+      domain: a.domain || undefined,
       sourceCountry: a.sourcecountry || undefined,
       publishedAt: parseGdeltDate(a.seendate),
       imageUrl: a.socialimage || undefined,
