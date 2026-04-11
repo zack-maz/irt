@@ -2,6 +2,7 @@ import type { NewsArticle } from '../types.js';
 import { extractTriple } from './nlpExtractor.js';
 import { computeRelevanceScore, EXCLUSION_PATTERNS } from './relevanceScorer.js';
 import { getConfig } from '../config.js';
+import { getSourceTier, extractDomain } from './sourceTiers.js';
 
 /**
  * Strict non-ambiguous keywords -- pass on their own.
@@ -173,6 +174,12 @@ export function filterAndScoreArticles(articles: NewsArticle[]): NewsArticle[] {
   const result: NewsArticle[] = [];
 
   for (const article of articles) {
+    // Tier pre-filter: exclude unknown-source articles from news feed
+    // Per D-01: "Everything else filtered out entirely from news feed.
+    // Still counts toward event numSources for corroboration."
+    const tier = getSourceTier(article.source, article.domain ?? extractDomain(article.url));
+    if (tier === null) continue;
+
     const matched = matchesKeywords(article);
     if (matched.length === 0) continue;
 

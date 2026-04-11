@@ -289,6 +289,74 @@ describe('newsFilter', () => {
     });
   });
 
+  describe('source tier filtering', () => {
+    it('article with source "BBC" + conflict keyword passes filter', () => {
+      const articles = [
+        makeArticle({
+          id: 'tier2-bbc',
+          title: 'Iran launches missile strike on Israeli bases',
+          source: 'BBC',
+        }),
+      ];
+      const filtered = filterAndScoreArticles(articles);
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe('tier2-bbc');
+    });
+
+    it('article with source "Tehran Times" (Tier 3) + conflict keyword passes filter', () => {
+      const articles = [
+        makeArticle({
+          id: 'tier3-tt',
+          title: 'Iran launches missile strike on Israeli military bases',
+          source: 'Tehran Times',
+        }),
+      ];
+      const filtered = filterAndScoreArticles(articles);
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe('tier3-tt');
+    });
+
+    it('article with unknown source + conflict keyword is FILTERED OUT', () => {
+      const articles = [
+        makeArticle({
+          id: 'unknown-src',
+          title: 'Iran launches missile strike on Israeli bases',
+          source: 'GDELT',
+          domain: 'unknownblog.com',
+          url: 'https://unknownblog.com/article/123',
+        }),
+      ];
+      const filtered = filterAndScoreArticles(articles);
+      expect(filtered).toHaveLength(0);
+    });
+
+    it('GDELT article with reuters.com domain passes filter (Tier 1)', () => {
+      const articles = [
+        makeArticle({
+          id: 'gdelt-reuters',
+          title: 'Major airstrike hits target in Iraq',
+          source: 'GDELT',
+          domain: 'reuters.com',
+        }),
+      ];
+      const filtered = filterAndScoreArticles(articles);
+      expect(filtered).toHaveLength(1);
+    });
+
+    it('GDELT article with no domain but extractable Tier 1 URL passes', () => {
+      const articles = [
+        makeArticle({
+          id: 'gdelt-ap-url',
+          title: 'Major airstrike hits target in Iraq',
+          source: 'GDELT',
+          url: 'https://apnews.com/article/iran-missile-strike',
+        }),
+      ];
+      const filtered = filterAndScoreArticles(articles);
+      expect(filtered).toHaveLength(1);
+    });
+  });
+
   describe('filterConflictArticles backward compat', () => {
     it('still exists and delegates to filterAndScoreArticles', () => {
       expect(typeof filterConflictArticles).toBe('function');

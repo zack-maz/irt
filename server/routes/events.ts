@@ -18,6 +18,7 @@ import { sendValidated } from '../middleware/validateResponse.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { eventsResponseSchema } from '../schemas/cacheResponse.js';
 import type { ConflictEventEntity, NewsCluster } from '../types.js';
+import { getHighestTier, extractDomain, getSourceTier } from '../lib/sourceTiers.js';
 
 /** Zod schema for /api/events query params */
 const eventsQuerySchema = z.object({
@@ -143,17 +144,23 @@ function enrichedToEntities(
     casualties: { killed: number | null; injured: number | null; unknown: boolean };
     sourceCount: number;
   }>,
-  groups: Array<{ key: string; entities: ConflictEventEntity[] }>,
+  groups: Array<{ key: string; entities: ConflictEventEntity[]; sourceUrls: string[] }>,
 ): ConflictEventEntity[] {
   const groupMap = new Map<string, ConflictEventEntity[]>();
+  const groupSourceUrls = new Map<string, string[]>();
   for (const g of groups) {
     groupMap.set(g.key, g.entities);
+    groupSourceUrls.set(g.key, g.sourceUrls);
   }
 
   const results: ConflictEventEntity[] = [];
   for (const enriched of geocoded) {
     const entities = groupMap.get(enriched.groupKey);
     if (!entities || entities.length === 0) continue;
+
+    // Compute best source tier from the group's source URLs
+    const sourceUrls = groupSourceUrls.get(enriched.groupKey) ?? [];
+    const sourceTier = getHighestTier(sourceUrls) ?? undefined;
 
     // Use the first entity as a template, override with LLM data
     const template = entities[0];
@@ -171,6 +178,7 @@ function enrichedToEntities(
         llmProcessed: true,
         actors: enriched.actors,
         sourceCount: enriched.sourceCount,
+        sourceTier,
         casualties: {
           killed: enriched.casualties.killed ?? undefined,
           injured: enriched.casualties.injured ?? undefined,
@@ -319,6 +327,17 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     }
 
     const merged = Array.from(eventMap.values());
+
+    // Inject sourceTier on raw events that don't already have it
+    for (const event of merged) {
+      if (event.data.sourceTier === undefined && event.data.source) {
+        const domain = extractDomain(event.data.source);
+        const tier = domain ? getSourceTier('', domain) : null;
+        if (tier !== null) {
+          event.data.sourceTier = tier;
+        }
+      }
+    }
 
     // Store raw (undispersed) coordinates — dispersion is applied client-side
     // in useFilteredEntities so it dynamically adjusts when filters change.

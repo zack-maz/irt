@@ -19,6 +19,17 @@ export const TYPE_WEIGHTS: Record<ConflictEventType, number> = {
 };
 
 /**
+ * Source tier severity multiplier.
+ * Tier 1 (gold) boosts score, Tier 3 (bronze) demotes score.
+ * Default (Tier 2 / unknown) is neutral.
+ */
+export const SOURCE_TIER_MULTIPLIER: Record<number, number> = {
+  1: 1.5,
+  2: 1.0,
+  3: 0.7,
+};
+
+/**
  * Compute a severity score for a conflict event.
  *
  * Formula: typeWeight * log2(1 + mentions) * log2(1 + sources) * recencyDecay
@@ -38,7 +49,11 @@ export function computeSeverityScore(event: ConflictEventEntity): number {
   const ageHours = ageMs / (1000 * 60 * 60);
   const recencyDecay = 1 / (1 + ageHours / 24);
 
-  return typeWeight * Math.log2(1 + mentions) * Math.log2(1 + sources) * recencyDecay;
+  const tierMultiplier = SOURCE_TIER_MULTIPLIER[event.data.sourceTier ?? 2] ?? 1.0;
+
+  return (
+    typeWeight * Math.log2(1 + mentions) * Math.log2(1 + sources) * recencyDecay * tierMultiplier
+  );
 }
 
 /**
@@ -49,7 +64,8 @@ export function classifySeverity(event: ConflictEventEntity): SeverityLevel {
   const typeWeight = TYPE_WEIGHTS[event.type] ?? 3;
   const mentions = event.data.numMentions ?? 1;
   const sources = event.data.numSources ?? 1;
-  const score = typeWeight * Math.log2(1 + mentions) * Math.log2(1 + sources);
+  const tierMultiplier = SOURCE_TIER_MULTIPLIER[event.data.sourceTier ?? 2] ?? 1.0;
+  const score = typeWeight * Math.log2(1 + mentions) * Math.log2(1 + sources) * tierMultiplier;
   if (score > HIGH_THRESHOLD) return 'high';
   if (score > MEDIUM_THRESHOLD) return 'medium';
   return 'low';

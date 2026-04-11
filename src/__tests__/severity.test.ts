@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { computeSeverityScore } from '../lib/severity';
+import { computeSeverityScore, classifySeverity, SOURCE_TIER_MULTIPLIER } from '../lib/severity';
 import type { ConflictEventEntity } from '../../server/types';
 
 /** Helper to create a ConflictEventEntity with sensible defaults */
@@ -106,6 +106,85 @@ describe('computeSeverityScore', () => {
       const targeted = makeEvent({ type: 'targeted', timestamp: fixedNow });
 
       expect(computeSeverityScore(explosion)).toBe(computeSeverityScore(targeted));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('sourceTier=1 produces higher score than sourceTier=2', () => {
+    const fixedNow = Date.UTC(2026, 5, 1);
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+    try {
+      const tier1 = makeEvent({ timestamp: fixedNow, data: { sourceTier: 1 } });
+      const tier2 = makeEvent({ timestamp: fixedNow, data: { sourceTier: 2 } });
+
+      expect(computeSeverityScore(tier1)).toBeGreaterThan(computeSeverityScore(tier2));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('sourceTier=3 produces lower score than sourceTier=2', () => {
+    const fixedNow = Date.UTC(2026, 5, 1);
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+    try {
+      const tier3 = makeEvent({ timestamp: fixedNow, data: { sourceTier: 3 } });
+      const tier2 = makeEvent({ timestamp: fixedNow, data: { sourceTier: 2 } });
+
+      expect(computeSeverityScore(tier3)).toBeLessThan(computeSeverityScore(tier2));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('undefined sourceTier defaults to tier 2 (neutral multiplier)', () => {
+    const fixedNow = Date.UTC(2026, 5, 1);
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+    try {
+      const noTier = makeEvent({ timestamp: fixedNow, data: { sourceTier: undefined } });
+      const tier2 = makeEvent({ timestamp: fixedNow, data: { sourceTier: 2 } });
+
+      expect(computeSeverityScore(noTier)).toBe(computeSeverityScore(tier2));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('SOURCE_TIER_MULTIPLIER has correct values', () => {
+    expect(SOURCE_TIER_MULTIPLIER[1]).toBe(1.5);
+    expect(SOURCE_TIER_MULTIPLIER[2]).toBe(1.0);
+    expect(SOURCE_TIER_MULTIPLIER[3]).toBe(0.7);
+  });
+});
+
+describe('classifySeverity', () => {
+  it('applies tier multiplier to classification', () => {
+    const fixedNow = Date.UTC(2026, 5, 1);
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+    try {
+      // Create events near the threshold boundary
+      // Tier 1 (1.5x) should boost an event above a threshold that tier 3 (0.7x) wouldn't
+      const tier1 = makeEvent({
+        type: 'airstrike',
+        timestamp: fixedNow,
+        data: { numMentions: 20, numSources: 8, sourceTier: 1 },
+      });
+      const tier3 = makeEvent({
+        type: 'airstrike',
+        timestamp: fixedNow,
+        data: { numMentions: 20, numSources: 8, sourceTier: 3 },
+      });
+
+      // Both should classify -- tier1 should be at least as severe as tier3
+      const tier1Level = classifySeverity(tier1);
+      const tier3Level = classifySeverity(tier3);
+
+      const levelOrder = { high: 3, medium: 2, low: 1 };
+      expect(levelOrder[tier1Level]).toBeGreaterThanOrEqual(levelOrder[tier3Level]);
     } finally {
       vi.useRealTimers();
     }
