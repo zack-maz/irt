@@ -5,7 +5,7 @@ import { useFilterStore } from '@/stores/filterStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 
 import { TYPE_WEIGHTS } from '@/lib/severity';
-import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
+import { EVENT_TYPE_LABELS } from '@/types/ui';
 import type { ThreatCluster } from '@/types/ui';
 import { LEGEND_REGISTRY } from '@/components/map/MapLegend';
 import { RadialGradientExtension } from './RadialGradientExtension';
@@ -358,22 +358,13 @@ export function useThreatHeatmapLayers(
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Meter-based radius from bounding box diagonal + event density boost.
-      // Stays geographically anchored to events on zoom. Dense clusters grow bigger.
+      // Static pixel radius — does NOT scale with zoom.
+      // Sized by event count: single-event clusters are small, dense clusters are large.
       getRadius: (d: ThreatCluster) => {
-        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
-        const dLat = (maxLat - minLat) * 111_000; // ~111km per degree latitude
-        const dLng = (maxLng - minLng) * 111_000 * Math.cos((d.centroidLat * Math.PI) / 180);
-        const diagonal = Math.sqrt(dLat * dLat + dLng * dLng);
-        // Base: full bounding box diagonal (generous coverage of cluster extent)
-        const baseRadius = Math.max(diagonal, 30_000); // floor 30km for single-cell clusters
-        // Density boost: sqrt of event count scales up packed clusters proportionally
-        const densityFactor = 1 + Math.sqrt(d.eventCount) * 0.3;
-        return baseRadius * densityFactor;
+        // Base 40px floor + sqrt scaling for event density
+        return 40 + Math.sqrt(d.eventCount) * 15;
       },
-      radiusUnits: 'meters' as const,
-      radiusMinPixels: 20,
-      radiusMaxPixels: 200,
+      radiusUnits: 'pixels' as const,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {
