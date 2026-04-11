@@ -126,13 +126,33 @@ export function useWaterLayers(): WaterLayerGroup {
   const dateEnd = useFilterStore((s) => s.dateEnd) ?? Date.now();
   const showWater = useFilterStore((s) => s.showWater);
   const enabledWaterTypes = useFilterStore((s) => s.enabledWaterTypes);
+  const waterNameFilter = useFilterStore((s) => s.waterNameFilter);
+  const showHighStress = useFilterStore((s) => s.showHighStress);
+  const showMediumStress = useFilterStore((s) => s.showMediumStress);
+  const showLowStress = useFilterStore((s) => s.showLowStress);
+  const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
+  const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
 
   return useMemo(() => {
     if (!isActive || !showWater)
       return { riverLayers: [], facilityLayers: [], destroyedIds: new Set<string>() };
 
     // Filter facilities by enabled water types
-    const filteredFacilities = facilities.filter((f) => enabledWaterTypes.includes(f.facilityType));
+    let filteredFacilities = facilities.filter((f) => enabledWaterTypes.includes(f.facilityType));
+
+    // Name filter
+    if (waterNameFilter) {
+      const q = waterNameFilter.toLowerCase();
+      filteredFacilities = filteredFacilities.filter((f) => f.label.toLowerCase().includes(q));
+    }
+
+    // Stress level filter based on compositeHealth
+    filteredFacilities = filteredFacilities.filter((f) => {
+      const h = f.stress.compositeHealth;
+      if (h <= 0.33) return showHighStress;
+      if (h <= 0.66) return showMediumStress;
+      return showLowStress;
+    });
 
     // Pre-compute destroyed set (O(facilities * destructiveEvents))
     const destructiveEvents = events.filter(
@@ -156,6 +176,15 @@ export function useWaterLayers(): WaterLayerGroup {
           break;
         }
       }
+    }
+
+    // Attacked/healthy filter (must be after destroyedIds computed)
+    if (!showAttackedWater || !showHealthyWater) {
+      filteredFacilities = filteredFacilities.filter((f) => {
+        const isAttacked = destroyedIds.has(f.id);
+        if (isAttacked) return showAttackedWater;
+        return showHealthyWater;
+      });
     }
 
     // River lines with per-vertex gradient coloring
@@ -203,8 +232,8 @@ export function useWaterLayers(): WaterLayerGroup {
       getIcon: (d: WaterFacility) => WATER_ICON_MAP[d.facilityType] ?? 'diamond',
       getSize: 2000,
       sizeUnits: 'meters' as const,
-      sizeMinPixels: 12,
-      sizeMaxPixels: 80,
+      sizeMinPixels: 18,
+      sizeMaxPixels: 120,
       getColor: (d: WaterFacility) => {
         if (destroyedIds.has(d.id)) return [0, 0, 0, 255] as [number, number, number, number];
         return stressToRGBA(d.stress.compositeHealth);
@@ -221,5 +250,18 @@ export function useWaterLayers(): WaterLayerGroup {
       facilityLayers: [facilityLayer],
       destroyedIds,
     };
-  }, [isActive, facilities, events, dateEnd, showWater, enabledWaterTypes]);
+  }, [
+    isActive,
+    facilities,
+    events,
+    dateEnd,
+    showWater,
+    enabledWaterTypes,
+    waterNameFilter,
+    showHighStress,
+    showMediumStress,
+    showLowStress,
+    showHealthyWater,
+    showAttackedWater,
+  ]);
 }

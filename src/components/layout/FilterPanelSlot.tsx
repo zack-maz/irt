@@ -101,6 +101,13 @@ export function FilterPanelContent() {
   const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
   const showWater = useFilterStore((s) => s.showWater);
   const enabledWaterTypes = useFilterStore((s) => s.enabledWaterTypes);
+  const waterNameFilter = useFilterStore((s) => s.waterNameFilter);
+  const setWaterNameFilter = useFilterStore((s) => s.setWaterNameFilter);
+  const showHighStress = useFilterStore((s) => s.showHighStress);
+  const showMediumStress = useFilterStore((s) => s.showMediumStress);
+  const showLowStress = useFilterStore((s) => s.showLowStress);
+  const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
+  const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
 
   // Filter store — country filters
   const eventCountries = useFilterStore((s) => s.eventCountries);
@@ -297,7 +304,7 @@ export function FilterPanelContent() {
             {/* Visibility button */}
             <div className="flex flex-wrap gap-1">
               <FilterButton
-                label="Ships"
+                label="All Ships"
                 active={showShips}
                 color={ENTITY_DOT_COLORS.ships}
                 onToggle={() => useFilterStore.getState().toggleShowShips()}
@@ -512,6 +519,49 @@ export function FilterPanelContent() {
                   compact
                 />
               ))}
+            </div>
+            {/* Name search */}
+            <TextSearchInput
+              label="Name"
+              value={waterNameFilter}
+              onChange={setWaterNameFilter}
+              placeholder="e.g. Tabriz dam"
+            />
+            {/* Stress level toggles */}
+            <div className="flex flex-col gap-1.5">
+              <SliderToggle
+                label="High Stress"
+                checked={showHighStress}
+                onChange={() => useFilterStore.getState().toggleShowHighStress()}
+                color="#1a0a2e"
+              />
+              <SliderToggle
+                label="Medium Stress"
+                checked={showMediumStress}
+                onChange={() => useFilterStore.getState().toggleShowMediumStress()}
+                color="#4a7ab5"
+              />
+              <SliderToggle
+                label="Low Stress"
+                checked={showLowStress}
+                onChange={() => useFilterStore.getState().toggleShowLowStress()}
+                color="#93c5fd"
+              />
+            </div>
+            {/* Attacked / Healthy toggles */}
+            <div className="flex flex-col gap-1.5">
+              <SliderToggle
+                label="Attacked"
+                checked={showAttackedWater}
+                onChange={() => useFilterStore.getState().toggleShowAttackedWater()}
+                color={ENTITY_DOT_COLORS.siteAttacked}
+              />
+              <SliderToggle
+                label="Healthy"
+                checked={showHealthyWater}
+                onChange={() => useFilterStore.getState().toggleShowHealthyWater()}
+                color={ENTITY_DOT_COLORS.siteHealthy}
+              />
             </div>
           </div>
         )}

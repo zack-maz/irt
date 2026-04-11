@@ -48,7 +48,8 @@ export type FilterKey =
   | 'icao'
   | 'mmsi'
   | 'shipNameFilter'
-  | 'cameo';
+  | 'cameo'
+  | 'waterName';
 
 export type Granularity = 'minute' | 'hour' | 'day';
 
@@ -90,6 +91,12 @@ export interface FilterState {
   // Water facility type toggles
   enabledWaterTypes: WaterFacilityType[];
   showWater: boolean;
+  waterNameFilter: string;
+  showHighStress: boolean;
+  showMediumStress: boolean;
+  showLowStress: boolean;
+  showHealthyWater: boolean;
+  showAttackedWater: boolean;
 
   // Visibility toggles (independent — each one gates its category independently)
   showFlights: boolean;
@@ -139,6 +146,12 @@ export interface FilterState {
   setEnabledWaterTypes: (types: WaterFacilityType[]) => void;
   toggleWaterType: (type: WaterFacilityType) => void;
   toggleShowWater: () => void;
+  setWaterNameFilter: (v: string) => void;
+  toggleShowHighStress: () => void;
+  toggleShowMediumStress: () => void;
+  toggleShowLowStress: () => void;
+  toggleShowHealthyWater: () => void;
+  toggleShowAttackedWater: () => void;
 
   // Visibility toggle actions
   toggleShowFlights: () => void;
@@ -191,6 +204,12 @@ const DEFAULTS = {
   // Water facility type toggles
   enabledWaterTypes: DEFAULT_WATER_TYPES as WaterFacilityType[],
   showWater: true,
+  waterNameFilter: '',
+  showHighStress: true,
+  showMediumStress: true,
+  showLowStress: true,
+  showHealthyWater: true,
+  showAttackedWater: true,
 
   // Visibility toggles (all default ON)
   showFlights: true,
@@ -291,6 +310,9 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       case 'cameo':
         set({ cameoCode: '' });
         break;
+      case 'waterName':
+        set({ waterNameFilter: '' });
+        break;
     }
   },
 
@@ -314,6 +336,9 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
     if (s.shipMmsi !== '') count++;
     if (s.shipNameFilter !== '') count++;
     if (s.cameoCode !== '') count++;
+    if (s.waterNameFilter !== '') count++;
+    if (!s.showHighStress || !s.showMediumStress || !s.showLowStress) count++;
+    if (!s.showHealthyWater || !s.showAttackedWater) count++;
     return count;
   },
 
@@ -349,6 +374,12 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       };
     }),
   toggleShowWater: () => set((s) => ({ showWater: !s.showWater })),
+  setWaterNameFilter: (v) => set({ waterNameFilter: v }),
+  toggleShowHighStress: () => set((s) => ({ showHighStress: !s.showHighStress })),
+  toggleShowMediumStress: () => set((s) => ({ showMediumStress: !s.showMediumStress })),
+  toggleShowLowStress: () => set((s) => ({ showLowStress: !s.showLowStress })),
+  toggleShowHealthyWater: () => set((s) => ({ showHealthyWater: !s.showHealthyWater })),
+  toggleShowAttackedWater: () => set((s) => ({ showAttackedWater: !s.showAttackedWater })),
 
   // Visibility toggles
   toggleShowFlights: () => set((s) => ({ showFlights: !s.showFlights })),
