@@ -134,21 +134,24 @@ export function DateRangeFilter({
 
   return (
     <div className="flex flex-col gap-1">
-      {/* Granularity toggle */}
-      <div className="flex gap-1">
-        {GRANULARITY_LABELS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => onGranularity(key)}
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
-              granularity === key
-                ? 'bg-accent-blue/20 text-accent-blue'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Header row: label + granularity toggle */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-text-muted">Date Range</span>
+        <div className="flex gap-0.5">
+          {GRANULARITY_LABELS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => onGranularity(key)}
+              className={`rounded-full px-1.5 py-0 text-[9px] font-medium transition-colors ${
+                granularity === key
+                  ? 'bg-accent-blue/20 text-accent-blue'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Custom dual-handle slider */}
@@ -175,7 +178,7 @@ export function DateRangeFilter({
           aria-valuemax={sliderMax}
           aria-valuenow={lo}
           tabIndex={0}
-          className="absolute top-[3px] rounded-full bg-accent-blue border-2 border-surface cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+          className="absolute top-[3px] rounded-full bg-accent-blue cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
           style={{
             width: THUMB_SIZE,
             height: THUMB_SIZE,
@@ -192,7 +195,7 @@ export function DateRangeFilter({
           aria-valuemax={sliderMax}
           aria-valuenow={hi}
           tabIndex={0}
-          className="absolute top-[3px] rounded-full bg-accent-blue border-2 border-surface cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+          className="absolute top-[3px] rounded-full bg-accent-blue cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
           style={{
             width: THUMB_SIZE,
             height: THUMB_SIZE,
