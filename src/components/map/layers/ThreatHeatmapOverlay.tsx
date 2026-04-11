@@ -358,13 +358,13 @@ export function useThreatHeatmapLayers(
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Static pixel radius — does NOT scale with zoom.
-      // Sized by event count: single-event clusters are small, dense clusters are large.
+      // Screen-fixed pixel size — does NOT scale with zoom.
+      // radiusUnits 'common' keeps size constant in screen space across zoom levels.
       getRadius: (d: ThreatCluster) => {
-        // Base 40px floor + sqrt scaling for event density
         return 40 + Math.sqrt(d.eventCount) * 15;
       },
-      radiusUnits: 'pixels' as const,
+      radiusUnits: 'common' as const,
+      radiusScale: 1,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {

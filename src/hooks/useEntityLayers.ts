@@ -371,6 +371,7 @@ export function useEntityLayers() {
         },
         billboard: false,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
     [filteredShips, activeId, isFilterActive, matchedIds, clusterEventIds],
@@ -401,6 +402,7 @@ export function useEntityLayers() {
         },
         billboard: true,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
     [airstrikeEvents, activeId, isFilterActive, matchedIds, clusterEventIds],
@@ -434,6 +436,7 @@ export function useEntityLayers() {
         },
         billboard: true,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
     [groundCombatEvents, activeId, isFilterActive, matchedIds],
@@ -464,6 +467,7 @@ export function useEntityLayers() {
         },
         billboard: true,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
     [targetedEvents, activeId, isFilterActive, matchedIds, clusterEventIds],
@@ -505,6 +509,7 @@ export function useEntityLayers() {
         },
         billboard: false,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: {
           getColor: [pulseOpacity, activeId, isFilterActive, matchedIds.size, clusterEventIds],
           getSize: [pulseOpacity],
@@ -539,6 +544,7 @@ export function useEntityLayers() {
         },
         billboard: false,
         pickable: true,
+        parameters: { depthTest: false },
         updateTriggers: {
           getColor: [activeId, siteAttackMap, isFilterActive, matchedIds.size, clusterEventIds],
         },
@@ -580,6 +586,7 @@ export function useEntityLayers() {
         getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 60],
         billboard: false,
         pickable: false,
+        parameters: { depthTest: false },
       }),
     [activeEntity, siteAttackMap, glowVisible],
   );
@@ -605,6 +612,7 @@ export function useEntityLayers() {
         getColor: (d: AnyEntity) => [...getColorForEntity(d, siteAttackMap), 255],
         billboard: false,
         pickable: false,
+        parameters: { depthTest: false },
       }),
     [activeEntity, siteAttackMap, highlightVisible],
   );
