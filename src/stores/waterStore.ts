@@ -32,6 +32,8 @@ interface WaterState {
   precipNextPollAt: number | null;
   precipRecentFetches: FetchRecord[];
   precipMatchedCount: number;
+  /** Raw precipitation array for direct coordinate lookup (e.g. weather tooltip) */
+  rawPrecipData: PrecipitationData[];
   setWaterData: (response: CacheResponse<WaterFacility[]>) => void;
   updatePrecipitation: (data: PrecipitationData[]) => void;
   setError: (message?: string) => void;
@@ -58,6 +60,7 @@ export const useWaterStore = create<WaterState>()((set) => ({
   precipNextPollAt: null,
   precipRecentFetches: [],
   precipMatchedCount: 0,
+  rawPrecipData: [],
 
   setWaterData: (response) =>
     set({
@@ -90,7 +93,7 @@ export const useWaterStore = create<WaterState>()((set) => ({
           },
         };
       });
-      return { facilities: updated };
+      return { facilities: updated, rawPrecipData: data };
     }),
 
   setError: (message?: string) =>
