@@ -383,11 +383,8 @@ describe('useThreatHeatmapLayers', () => {
     expect(picker.id).toBe('threat-cluster-picker');
     expect(picker.props.pickable).toBe(true);
     expect(typeof picker.props.getFillColor).toBe('function');
-    // Meter-based sizing from bbox diagonal so clusters always cover their events
+    // Meter-based sizing from bbox diagonal — no pixel clamps, size varies by event count
     expect(picker.props.radiusUnits).toBe('meters');
-    expect(picker.props.radiusMinPixels).toBe(60);
-    // No radiusMaxPixels — meter-based radius is bounded by bbox, not pixel cap
-    expect(picker.props.radiusMaxPixels).toBeUndefined();
   });
 
   it('cluster layer has RadialGradientExtension in extensions array', () => {
