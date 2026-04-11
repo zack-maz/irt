@@ -25,12 +25,22 @@ interface WaterState {
   lastError: string | null;
   nextPollAt: number | null;
   recentFetches: FetchRecord[];
+  /** Precipitation-specific observability */
+  precipStatus: WaterConnectionStatus;
+  precipLastFetchAt: number | null;
+  precipLastError: string | null;
+  precipNextPollAt: number | null;
+  precipRecentFetches: FetchRecord[];
+  precipMatchedCount: number;
   setWaterData: (response: CacheResponse<WaterFacility[]>) => void;
   updatePrecipitation: (data: PrecipitationData[]) => void;
   setError: (message?: string) => void;
   setLoading: () => void;
   recordFetch: (ok: boolean, durationMs: number) => void;
   setNextPollAt: (ts: number | null) => void;
+  recordPrecipFetch: (ok: boolean, durationMs: number, matchedCount?: number) => void;
+  setPrecipNextPollAt: (ts: number | null) => void;
+  setPrecipError: (message?: string) => void;
 }
 
 /** Max lat/lng distance in degrees to match a precipitation entry to a facility */
@@ -42,6 +52,12 @@ export const useWaterStore = create<WaterState>()((set) => ({
   lastError: null,
   nextPollAt: null,
   recentFetches: [],
+  precipStatus: 'idle',
+  precipLastFetchAt: null,
+  precipLastError: null,
+  precipNextPollAt: null,
+  precipRecentFetches: [],
+  precipMatchedCount: 0,
 
   setWaterData: (response) =>
     set({
@@ -88,4 +104,21 @@ export const useWaterStore = create<WaterState>()((set) => ({
     })),
 
   setNextPollAt: (ts) => set({ nextPollAt: ts }),
+
+  recordPrecipFetch: (ok, durationMs, matchedCount) =>
+    set((state) => ({
+      precipStatus: ok ? 'connected' : 'error',
+      precipLastFetchAt: Date.now(),
+      precipLastError: ok ? null : state.precipLastError,
+      precipRecentFetches: [
+        ...state.precipRecentFetches.slice(-9),
+        { ok, durationMs, timestamp: Date.now() },
+      ],
+      ...(matchedCount !== undefined ? { precipMatchedCount: matchedCount } : {}),
+    })),
+
+  setPrecipNextPollAt: (ts) => set({ precipNextPollAt: ts }),
+
+  setPrecipError: (message) =>
+    set({ precipStatus: 'error', precipLastError: message ?? 'Unknown error' }),
 }));

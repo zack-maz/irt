@@ -335,6 +335,18 @@ export function DevApiStatus() {
     })),
   );
 
+  const precip = useWaterStore(
+    useShallow((s) => ({
+      status: s.precipStatus,
+      count: s.precipMatchedCount,
+      lastFetch: s.precipLastFetchAt,
+      lastError: s.precipLastError,
+      nextPollAt: s.precipNextPollAt,
+      recentFetches: s.precipRecentFetches,
+      facilityCount: s.facilities.length,
+    })),
+  );
+
   const rows: ApiRow[] = [
     {
       name: 'Flights',
@@ -389,6 +401,12 @@ export function DevApiStatus() {
       ...water,
       isOneShot: true,
       quality: `${water.count} facilities`,
+    },
+    {
+      name: 'Precip',
+      ...precip,
+      isOneShot: false,
+      quality: `${precip.count}/${precip.facilityCount} matched`,
     },
   ];
 

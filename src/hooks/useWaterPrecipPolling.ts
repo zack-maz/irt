@@ -17,8 +17,8 @@ interface PrecipResponse {
 export function useWaterPrecipPolling(): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const updatePrecipitation = useWaterStore((s) => s.updatePrecipitation);
-  const recordFetch = useWaterStore((s) => s.recordFetch);
-  const setNextPollAt = useWaterStore((s) => s.setNextPollAt);
+  const recordPrecipFetch = useWaterStore((s) => s.recordPrecipFetch);
+  const setPrecipNextPollAt = useWaterStore((s) => s.setPrecipNextPollAt);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,23 +32,23 @@ export function useWaterPrecipPolling(): void {
         if (cancelled) return;
         if (!res.ok) {
           // Silently swallow error — stale precipitation data is acceptable
-          recordFetch(false, Date.now() - start);
+          recordPrecipFetch(false, Date.now() - start);
           return;
         }
         const data: PrecipResponse = await res.json();
         updatePrecipitation(data.data);
-        recordFetch(true, Date.now() - start);
+        recordPrecipFetch(true, Date.now() - start, data.data.length);
       } catch {
         // Silently swallow — stale precipitation data is acceptable; do not clear facilities.
         // Record failure for observability but do NOT call setError (preserving silent swallow design).
-        recordFetch(false, Date.now() - start);
+        recordPrecipFetch(false, Date.now() - start);
       }
     };
 
     const schedulePoll = (): void => {
       if (cancelled) return;
       const nextTs = Date.now() + WATER_PRECIP_POLL_INTERVAL;
-      setNextPollAt(nextTs);
+      setPrecipNextPollAt(nextTs);
       timeoutRef.current = setTimeout(async () => {
         await fetchPrecip();
         schedulePoll();
@@ -61,7 +61,7 @@ export function useWaterPrecipPolling(): void {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = null;
         }
-        setNextPollAt(null);
+        setPrecipNextPollAt(null);
       } else {
         fetchPrecip().then(schedulePoll);
       }
@@ -78,8 +78,8 @@ export function useWaterPrecipPolling(): void {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      setNextPollAt(null);
+      setPrecipNextPollAt(null);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [updatePrecipitation, recordFetch, setNextPollAt]);
+  }, [updatePrecipitation, recordPrecipFetch, setPrecipNextPollAt]);
 }
