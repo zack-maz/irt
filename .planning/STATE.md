@@ -242,6 +242,7 @@ None.
 | 260411-m00 | Fix threat density cluster sizes to scale with event count while remaining zoom-independent                     | 2026-04-11 | c68d12a | [260411-m00-fix-threat-density-cluster-sizes-to-scal](./quick/260411-m00-fix-threat-density-cluster-sizes-to-scal/) |
 | 260411-m4j | Threat density clusters use meter-based radius from bbox diagonal so they never shrink below their event spread | 2026-04-11 | 475f900 | [260411-m4j-threat-density-clusters-use-meter-based-](./quick/260411-m4j-threat-density-clusters-use-meter-based-/) |
 | 260411-ma5 | Remove radiusMaxPixels cap so threat density clusters never shrink below event spread                           | 2026-04-11 | 86b648f | [260411-ma5-remove-radiusmaxpixels-cap-so-threat-den](./quick/260411-ma5-remove-radiusmaxpixels-cap-so-threat-den/) |
+| 260411-mh0 | Add Open-Meteo precipitation to API observability dashboard                                                     | 2026-04-11 | 7d73360 | [260411-mh0-add-open-meteo-precipitation-to-api-obse](./quick/260411-mh0-add-open-meteo-precipitation-to-api-obse/) |
 
 ## Accumulated Context
 
