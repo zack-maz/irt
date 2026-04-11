@@ -358,20 +358,13 @@ export function useThreatHeatmapLayers(
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Meter-based radius with tight pixel clamp to limit zoom scaling.
-      // radiusMinPixels/radiusMaxPixels bracket keeps blurs visually stable across zoom.
+      // Fixed screen-space pixels — size does NOT change with zoom.
+      // billboard: true eliminates perspective distortion on pitched/terrain views.
       getRadius: (d: ThreatCluster) => {
-        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
-        const dLat = (maxLat - minLat) * 111_000;
-        const dLng = (maxLng - minLng) * 111_000 * Math.cos((d.centroidLat * Math.PI) / 180);
-        const diagonal = Math.sqrt(dLat * dLat + dLng * dLng);
-        const baseRadius = Math.max(diagonal, 30_000);
-        const densityFactor = 1 + Math.sqrt(d.eventCount) * 0.3;
-        return baseRadius * densityFactor;
+        return 40 + Math.sqrt(d.eventCount) * 12;
       },
-      radiusUnits: 'meters' as const,
-      radiusMinPixels: 30,
-      radiusMaxPixels: 120,
+      radiusUnits: 'pixels' as const,
+      billboard: true,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {
