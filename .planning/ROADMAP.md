@@ -114,11 +114,11 @@ Plans:
 **Goal:** Improve event data quality (high-tier news sources, richer LLM enrichment, precision ring UX, zoom icon fix, date slider styling) and water facility coverage (more dams/treatment plants, full filter parity, icon sizing).
 **Requirements:** EQ-01 through EQ-14
 **Depends on:** Phase 27.1
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 
-- [ ] 27.2-01-PLAN.md — Source tier registry, news filter tier gating, entity sourceTier field, severity multiplier
+- [x] 27.2-01-PLAN.md — Source tier registry, news filter tier gating, entity sourceTier field, severity multiplier
 - [ ] 27.2-02-PLAN.md — LLM batch size reduction (8->4), prompt enrichment with news article context
 - [ ] 27.2-03-PLAN.md — Precision ring 5%/40% opacity, zoom icon fix, date slider styling
 - [x] 27.2-04-PLAN.md — Water Overpass name filter removal, reverse geocode labels, filter parity, icon sizing, ships label

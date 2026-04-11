@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: 'Phase 27 shipped — PR #5'
-last_updated: '2026-04-11T22:16:46.467Z'
+last_updated: '2026-04-11T22:18:15.390Z'
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 16
-  completed_plans: 12
-  percent: 75
+  completed_plans: 13
+  percent: 81
 ---
 
 # Project State
@@ -24,6 +24,7 @@ See: .planning/PROJECT.md
 
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
+Phase 27.2: Plan 01 COMPLETE (source tier registry, tier-gated news filtering, sourceTier entity injection, severity tier multiplier 1.5x/1.0x/0.7x)
 Phase 27.2: Plan 04 COMPLETE (water facility coverage expansion — Overpass name filter removal, reverse geocode unnamed facilities, water filter parity, icon sizing, ships button label)
 Phase 27.1: Plan 01 COMPLETE (1 of 3 plans done — server-side LLM progress module, /api/events/llm-status endpoint, callback-instrumented pipeline, concurrent guard, Redis summary persistence)
 Phase 26.4: Plan 04 COMPLETE (6 of 6 plans done — phase execution complete; README 564-line portfolio rewrite, 1354 KB Playwright-captured hero GIF, 6 layer screenshots, rateLimiters.public tier wired globally on /api/\*, public/robots.txt, permanent scripts/capture-hero.ts agentic tooling)
@@ -78,6 +79,9 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 
 ## Key Decisions
 
+- Source tier registry as standalone module (sourceTiers.ts) rather than extending relevanceScorer.ts — cleaner separation of classification vs scoring
+- Tier pre-filter runs before keyword/NLP scoring in filterAndScoreArticles — early exit saves NLP compute on unknown sources
+- Unknown sourceTier defaults to tier 2 (neutral 1.0x multiplier) in severity scoring — conservative default avoids penalizing events where source URL is missing
 - FACILITY_TYPE_LABELS exported from overpass-water.ts for shared detection of unnamed facilities in water route reverse geocoding
 - labelUnnamedFacilities runs after fetch, before cache — Redis stores labeled facilities so reverse geocoding only runs on 24h cold cache
 - Stress level thresholds: <=0.33 High, <=0.66 Medium, >0.66 Low (simple thirds of compositeHealth)
