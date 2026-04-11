@@ -372,7 +372,7 @@ export function useThreatHeatmapLayers(
       },
       radiusUnits: 'meters' as const,
       radiusMinPixels: 20,
-      radiusMaxPixels: 200,
+      // No radiusMaxPixels — meter-based radius is already bounded by bbox diagonal.
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).
       getFillColor: (d: ThreatCluster) => {
