@@ -368,7 +368,7 @@ export function useThreatHeatmapLayers(
           (maxLng - minLng) * 111_000 * Math.cos(((minLat + maxLat) / 2) * (Math.PI / 180));
         const bboxDiag = Math.sqrt(dLat * dLat + dLng * dLng) / 2;
         const densityBoost = Math.sqrt(d.eventCount) * 5_000;
-        return Math.max(30_000, bboxDiag + densityBoost);
+        return Math.max(45_000, (bboxDiag + densityBoost) * 1.5);
       },
       radiusUnits: 'meters' as const,
       radiusMinPixels: 20,
