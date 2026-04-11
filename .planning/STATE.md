@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: 'Phase 27 shipped — PR #5'
-last_updated: '2026-04-11T22:18:15.390Z'
+last_updated: '2026-04-11T22:53:00.000Z'
 progress:
   total_phases: 4
   completed_phases: 1
@@ -235,10 +235,11 @@ None.
 
 ### Quick Tasks Completed
 
-| #          | Description                                               | Date       | Commit  | Directory                                                                                                           |
-| ---------- | --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| 1          | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/)                   |
-| 260409-jf3 | update events counters to reflect our new ontology        | 2026-04-09 | 4c6c1cb | [260409-jf3-update-events-counters-to-reflect-our-ne](./quick/260409-jf3-update-events-counters-to-reflect-our-ne/) |
+| #          | Description                                                                                 | Date       | Commit  | Directory                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| 1          | add CLN-01..CLN-13 requirement entries to REQUIREMENTS.md                                   | 2026-04-07 | e487029 | [1-add-cln-01-cln-13-requirement-entries-to](./quick/1-add-cln-01-cln-13-requirement-entries-to/)                   |
+| 260409-jf3 | update events counters to reflect our new ontology                                          | 2026-04-09 | 4c6c1cb | [260409-jf3-update-events-counters-to-reflect-our-ne](./quick/260409-jf3-update-events-counters-to-reflect-our-ne/) |
+| 260411-m00 | Fix threat density cluster sizes to scale with event count while remaining zoom-independent | 2026-04-11 | c68d12a | [260411-m00-fix-threat-density-cluster-sizes-to-scal](./quick/260411-m00-fix-threat-density-cluster-sizes-to-scal/) |
 
 ## Accumulated Context
 
