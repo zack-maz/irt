@@ -385,7 +385,7 @@ describe('useThreatHeatmapLayers', () => {
     expect(typeof picker.props.getFillColor).toBe('function');
     // Meter-based sizing from bbox diagonal so clusters always cover their events
     expect(picker.props.radiusUnits).toBe('meters');
-    expect(picker.props.radiusMinPixels).toBe(20);
+    expect(picker.props.radiusMinPixels).toBe(60);
     // No radiusMaxPixels — meter-based radius is bounded by bbox, not pixel cap
     expect(picker.props.radiusMaxPixels).toBeUndefined();
   });
