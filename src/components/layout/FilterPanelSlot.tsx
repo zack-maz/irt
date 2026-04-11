@@ -104,9 +104,9 @@ export function FilterPanelContent() {
   const enabledWaterTypes = useFilterStore((s) => s.enabledWaterTypes);
   const waterNameFilter = useFilterStore((s) => s.waterNameFilter);
   const setWaterNameFilter = useFilterStore((s) => s.setWaterNameFilter);
-  const showHighStress = useFilterStore((s) => s.showHighStress);
-  const showMediumStress = useFilterStore((s) => s.showMediumStress);
-  const showLowStress = useFilterStore((s) => s.showLowStress);
+  const stressMin = useFilterStore((s) => s.stressMin);
+  const stressMax = useFilterStore((s) => s.stressMax);
+  const setStressRange = useFilterStore((s) => s.setStressRange);
   const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
   const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
 
@@ -171,7 +171,6 @@ export function FilterPanelContent() {
   const isFlightSpeedActive = flightSpeedMin !== null || flightSpeedMax !== null;
   const isAltitudeActive = altitudeMin !== null || altitudeMax !== null;
   const isProximityActive = proximityPin !== null;
-  const isDateActive = true; // Date range is always active
   const isMentionsActive = mentionsMin !== null || mentionsMax !== null;
 
   return (
@@ -426,23 +425,13 @@ export function FilterPanelContent() {
             </div>
 
             {/* Date range slider */}
-            <div>
-              <SectionHeader
-                label="Date Range"
-                active={isDateActive}
-                filterKey="date"
-                onClear={clearFilter}
-              />
-              <div className="mt-1">
-                <DateRangeFilter
-                  dateStart={dateStart}
-                  dateEnd={dateEnd}
-                  granularity={granularity}
-                  onDateRange={setDateRange}
-                  onGranularity={setGranularity}
-                />
-              </div>
-            </div>
+            <DateRangeFilter
+              dateStart={dateStart}
+              dateEnd={dateEnd}
+              granularity={granularity}
+              onDateRange={setDateRange}
+              onGranularity={setGranularity}
+            />
           </div>
         )}
       </div>
@@ -531,52 +520,18 @@ export function FilterPanelContent() {
               onChange={setWaterNameFilter}
               placeholder="e.g. Tabriz dam"
             />
-            {/* Stress level (severity-style buttons) */}
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] uppercase tracking-wider text-text-muted">Stress</span>
-              <div className="flex gap-1">
-                {(
-                  [
-                    {
-                      label: 'High',
-                      active: showHighStress,
-                      toggle: () => useFilterStore.getState().toggleShowHighStress(),
-                      color: '#1a0a2e',
-                    },
-                    {
-                      label: 'Medium',
-                      active: showMediumStress,
-                      toggle: () => useFilterStore.getState().toggleShowMediumStress(),
-                      color: '#4a7ab5',
-                    },
-                    {
-                      label: 'Low',
-                      active: showLowStress,
-                      toggle: () => useFilterStore.getState().toggleShowLowStress(),
-                      color: '#93c5fd',
-                    },
-                  ] as const
-                ).map(({ label, active, toggle, color }) => (
-                  <button
-                    key={label}
-                    role="switch"
-                    aria-checked={active}
-                    onClick={toggle}
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-all ${
-                      active
-                        ? 'bg-white/10 text-text-secondary'
-                        : 'bg-transparent text-text-muted opacity-40'
-                    }`}
-                  >
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full mr-1"
-                      style={{ backgroundColor: color }}
-                    />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Stress level slider */}
+            <RangeSlider
+              label="Stress"
+              min={0}
+              max={100}
+              step={5}
+              unit="%"
+              valueMin={stressMin}
+              valueMax={stressMax}
+              onChangeMin={(v) => setStressRange(v, stressMax)}
+              onChangeMax={(v) => setStressRange(stressMin, v)}
+            />
             {/* Attacked / Healthy toggles */}
             <div className="flex flex-col gap-1.5">
               <SliderToggle

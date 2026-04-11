@@ -95,6 +95,8 @@ export interface FilterState {
   showHighStress: boolean;
   showMediumStress: boolean;
   showLowStress: boolean;
+  stressMin: number | null;
+  stressMax: number | null;
   showHealthyWater: boolean;
   showAttackedWater: boolean;
 
@@ -151,6 +153,7 @@ export interface FilterState {
   toggleShowHighStress: () => void;
   toggleShowMediumStress: () => void;
   toggleShowLowStress: () => void;
+  setStressRange: (min: number | null, max: number | null) => void;
   toggleShowHealthyWater: () => void;
   toggleShowAttackedWater: () => void;
 
@@ -210,6 +213,8 @@ const DEFAULTS = {
   showHighStress: true,
   showMediumStress: true,
   showLowStress: true,
+  stressMin: null as number | null,
+  stressMax: null as number | null,
   showHealthyWater: true,
   showAttackedWater: true,
 
@@ -381,6 +386,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   toggleShowHighStress: () => set((s) => ({ showHighStress: !s.showHighStress })),
   toggleShowMediumStress: () => set((s) => ({ showMediumStress: !s.showMediumStress })),
   toggleShowLowStress: () => set((s) => ({ showLowStress: !s.showLowStress })),
+  setStressRange: (min, max) => set({ stressMin: min, stressMax: max }),
   toggleShowHealthyWater: () => set((s) => ({ showHealthyWater: !s.showHealthyWater })),
   toggleShowAttackedWater: () => set((s) => ({ showAttackedWater: !s.showAttackedWater })),
 
