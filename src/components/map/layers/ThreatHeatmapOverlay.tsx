@@ -358,11 +358,20 @@ export function useThreatHeatmapLayers(
       id: 'threat-cluster-picker',
       data: clusters,
       getPosition: (d: ThreatCluster) => [d.centroidLng, d.centroidLat],
-      // Pixel-based radius scales with event count but stays constant across zoom levels.
-      // sqrt(eventCount) gives diminishing returns so huge clusters don't dominate the map.
-      getRadius: (d: ThreatCluster) => 25 + Math.sqrt(d.eventCount) * 20,
-      radiusUnits: 'pixels' as const,
-      radiusMinPixels: 25,
+      // Meter-based radius from bbox diagonal so clusters always cover their events.
+      // 30km floor for single-cell clusters; density boost via sqrt(eventCount).
+      // radiusMinPixels scales with event count for visibility when zoomed out.
+      getRadius: (d: ThreatCluster) => {
+        const { minLat, maxLat, minLng, maxLng } = d.boundingBox;
+        const dLat = (maxLat - minLat) * 111_000; // meters
+        const dLng =
+          (maxLng - minLng) * 111_000 * Math.cos(((minLat + maxLat) / 2) * (Math.PI / 180));
+        const bboxDiag = Math.sqrt(dLat * dLat + dLng * dLng) / 2;
+        const densityBoost = Math.sqrt(d.eventCount) * 5_000;
+        return Math.max(30_000, bboxDiag + densityBoost);
+      },
+      radiusUnits: 'meters' as const,
+      radiusMinPixels: 20,
       radiusMaxPixels: 200,
       // Thermal color mapped from cluster weight via P90 normalization.
       // Alpha modulated by hover state: 255 (hovered), 102 (non-hovered when one is hovered), 180 (default).

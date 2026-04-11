@@ -383,9 +383,9 @@ describe('useThreatHeatmapLayers', () => {
     expect(picker.id).toBe('threat-cluster-picker');
     expect(picker.props.pickable).toBe(true);
     expect(typeof picker.props.getFillColor).toBe('function');
-    // Pixel-based sizing: zoom-independent, scales with event count
-    expect(picker.props.radiusUnits).toBe('pixels');
-    expect(picker.props.radiusMinPixels).toBe(25);
+    // Meter-based sizing from bbox diagonal so clusters always cover their events
+    expect(picker.props.radiusUnits).toBe('meters');
+    expect(picker.props.radiusMinPixels).toBe(20);
     expect(picker.props.radiusMaxPixels).toBe(200);
   });
 
