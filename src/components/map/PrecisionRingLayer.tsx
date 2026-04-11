@@ -50,11 +50,11 @@ export function usePrecisionRingLayer(): ScatterplotLayer<ConflictEventEntity>[]
         getRadius: (d) => PRECISION_RADIUS_METERS[d.data.precision ?? ''] ?? 0,
         getFillColor: (d: ConflictEventEntity) => {
           const isSelected = d.id === selectedEntityId;
-          return [239, 68, 68, isSelected ? 102 : 13]; // 40% vs 5% opacity
+          return [239, 68, 68, isSelected ? 102 : 3]; // 40% vs 1% opacity
         },
         getLineColor: (d: ConflictEventEntity) => {
           const isSelected = d.id === selectedEntityId;
-          return [239, 68, 68, isSelected ? 180 : 30]; // Bold vs subtle stroke
+          return [239, 68, 68, isSelected ? 180 : 8]; // Bold vs subtle stroke
         },
         radiusUnits: 'meters',
         stroked: true,

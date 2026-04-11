@@ -109,6 +109,7 @@ export interface FilterState {
   showOther: boolean;
   showUnidentified: boolean;
   showGroundTraffic: boolean;
+  showSites: boolean; // Master toggle for all sites
   showHealthySites: boolean;
   showAttackedSites: boolean;
 
@@ -164,6 +165,7 @@ export interface FilterState {
   toggleShowOther: () => void;
   toggleShowUnidentified: () => void;
   toggleShowGroundTraffic: () => void;
+  toggleShowSites: () => void;
   toggleShowHealthySites: () => void;
   toggleShowAttackedSites: () => void;
 }
@@ -222,6 +224,7 @@ const DEFAULTS = {
   showOther: true,
   showUnidentified: true,
   showGroundTraffic: true,
+  showSites: true,
   showHealthySites: true,
   showAttackedSites: true,
 };
@@ -392,6 +395,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   toggleShowOther: () => set((s) => ({ showOther: !s.showOther })),
   toggleShowUnidentified: () => set((s) => ({ showUnidentified: !s.showUnidentified })),
   toggleShowGroundTraffic: () => set((s) => ({ showGroundTraffic: !s.showGroundTraffic })),
+  toggleShowSites: () => set((s) => ({ showSites: !s.showSites })),
   toggleShowHealthySites: () => set((s) => ({ showHealthySites: !s.showHealthySites })),
   toggleShowAttackedSites: () => set((s) => ({ showAttackedSites: !s.showAttackedSites })),
 }));

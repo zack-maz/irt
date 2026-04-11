@@ -96,6 +96,7 @@ export function FilterPanelContent() {
   const showOther = useFilterStore((s) => s.showOther);
   const showUnidentified = useFilterStore((s) => s.showUnidentified);
   const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
+  const showSites = useFilterStore((s) => s.showSites);
   const showHealthySites = useFilterStore((s) => s.showHealthySites);
   const showAttackedSites = useFilterStore((s) => s.showAttackedSites);
   const enabledSiteTypes = useFilterStore((s) => s.enabledSiteTypes);
@@ -205,15 +206,13 @@ export function FilterPanelContent() {
         />
         {isFlightFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
-            {/* Visibility button + toggles */}
-            <div className="flex flex-wrap gap-1">
-              <FilterButton
-                label="All Flights"
-                active={showFlights}
-                color={ENTITY_DOT_COLORS.flights}
-                onToggle={() => useFilterStore.getState().toggleShowFlights()}
-              />
-            </div>
+            {/* Master flights toggle */}
+            <FilterButton
+              label="All Flights"
+              active={showFlights}
+              color={ENTITY_DOT_COLORS.flights}
+              onToggle={() => useFilterStore.getState().toggleShowFlights()}
+            />
             <div className="flex flex-col gap-1.5">
               <SliderToggle
                 label="Unidentified"
@@ -301,15 +300,13 @@ export function FilterPanelContent() {
         />
         {isShipFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
-            {/* Visibility button */}
-            <div className="flex flex-wrap gap-1">
-              <FilterButton
-                label="All Ships"
-                active={showShips}
-                color={ENTITY_DOT_COLORS.ships}
-                onToggle={() => useFilterStore.getState().toggleShowShips()}
-              />
-            </div>
+            {/* Master ships toggle */}
+            <FilterButton
+              label="All Ships"
+              active={showShips}
+              color={ENTITY_DOT_COLORS.ships}
+              onToggle={() => useFilterStore.getState().toggleShowShips()}
+            />
             {/* MMSI search */}
             <TextSearchInput
               label="MMSI"
@@ -459,6 +456,13 @@ export function FilterPanelContent() {
         />
         {isSiteFiltersOpen && (
           <div className="mt-1.5 flex flex-col gap-2 pl-3">
+            {/* Master sites toggle */}
+            <FilterButton
+              label="All Sites"
+              active={showSites}
+              color={ENTITY_DOT_COLORS.siteHealthy}
+              onToggle={() => useFilterStore.getState().toggleShowSites()}
+            />
             {/* Site subtype buttons */}
             <div className="flex flex-wrap gap-1">
               {ALL_SITE_TYPES.map((type) => (
@@ -527,26 +531,51 @@ export function FilterPanelContent() {
               onChange={setWaterNameFilter}
               placeholder="e.g. Tabriz dam"
             />
-            {/* Stress level toggles */}
-            <div className="flex flex-col gap-1.5">
-              <SliderToggle
-                label="High Stress"
-                checked={showHighStress}
-                onChange={() => useFilterStore.getState().toggleShowHighStress()}
-                color="#1a0a2e"
-              />
-              <SliderToggle
-                label="Medium Stress"
-                checked={showMediumStress}
-                onChange={() => useFilterStore.getState().toggleShowMediumStress()}
-                color="#4a7ab5"
-              />
-              <SliderToggle
-                label="Low Stress"
-                checked={showLowStress}
-                onChange={() => useFilterStore.getState().toggleShowLowStress()}
-                color="#93c5fd"
-              />
+            {/* Stress level (severity-style buttons) */}
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] uppercase tracking-wider text-text-muted">Stress</span>
+              <div className="flex gap-1">
+                {(
+                  [
+                    {
+                      label: 'High',
+                      active: showHighStress,
+                      toggle: () => useFilterStore.getState().toggleShowHighStress(),
+                      color: '#1a0a2e',
+                    },
+                    {
+                      label: 'Medium',
+                      active: showMediumStress,
+                      toggle: () => useFilterStore.getState().toggleShowMediumStress(),
+                      color: '#4a7ab5',
+                    },
+                    {
+                      label: 'Low',
+                      active: showLowStress,
+                      toggle: () => useFilterStore.getState().toggleShowLowStress(),
+                      color: '#93c5fd',
+                    },
+                  ] as const
+                ).map(({ label, active, toggle, color }) => (
+                  <button
+                    key={label}
+                    role="switch"
+                    aria-checked={active}
+                    onClick={toggle}
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-all ${
+                      active
+                        ? 'bg-white/10 text-text-secondary'
+                        : 'bg-transparent text-text-muted opacity-40'
+                    }`}
+                  >
+                    <span
+                      className="inline-block h-1.5 w-1.5 rounded-full mr-1"
+                      style={{ backgroundColor: color }}
+                    />
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Attacked / Healthy toggles */}
             <div className="flex flex-col gap-1.5">

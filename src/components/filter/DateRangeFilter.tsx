@@ -134,24 +134,28 @@ export function DateRangeFilter({
 
   return (
     <div className="flex flex-col gap-1">
-      {/* Header row: label + granularity toggle */}
+      {/* Header row: matches RangeSlider layout (label left, value right) */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-text-muted">Date Range</span>
-        <div className="flex gap-0.5">
-          {GRANULARITY_LABELS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => onGranularity(key)}
-              className={`rounded-full px-1.5 py-0 text-[9px] font-medium transition-colors ${
-                granularity === key
-                  ? 'bg-accent-blue/20 text-accent-blue'
-                  : 'text-text-muted hover:text-text-secondary'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <span className="font-mono text-[10px] text-text-secondary">
+          {startLabel} - {endLabel}
+        </span>
+      </div>
+      {/* Granularity toggle */}
+      <div className="flex gap-0.5">
+        {GRANULARITY_LABELS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => onGranularity(key)}
+            className={`rounded-full px-1.5 py-0 text-[9px] font-medium transition-colors ${
+              granularity === key
+                ? 'bg-accent-blue/20 text-accent-blue'
+                : 'text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Custom dual-handle slider */}
@@ -203,12 +207,6 @@ export function DateRangeFilter({
             zIndex: 3,
           }}
         />
-      </div>
-
-      {/* Date labels */}
-      <div className="flex items-center justify-between font-mono text-[10px] text-text-secondary">
-        <span>{startLabel}</span>
-        <span>{endLabel}</span>
       </div>
     </div>
   );
