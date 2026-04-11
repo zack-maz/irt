@@ -109,6 +109,34 @@ Plans:
 - [x] 27.1-02-PLAN.md -- Store instrumentation (8 stores + 9 hooks with observability fields)
 - [ ] 27.1-03-PLAN.md -- useLLMStatusPolling hook + DevApiStatus rewrite with full metrics
 
+### Phase 27.2: Event Quality and Water Data Improvements (INSERTED)
+
+**Goal:** Improve event data quality (high-tier news sources, richer LLM enrichment, precision ring UX, zoom icon fix, date slider styling) and water facility coverage (more dams/treatment plants, full filter parity, icon sizing).
+**Requirements**: TBD
+**Depends on:** Phase 27.1
+**Plans:** 0 plans
+
+Scope:
+
+**Events:**
+
+1. Better filtering of news sources — only use high-tier sources
+2. Better LLM enrichment — more token budget since we only use high-grade sources
+3. Precision circle only shows when clicking event, reduce opacity
+4. Zooming in disappears event entity icons — fix
+5. Date range filter should match width/style of other double-ended sliders
+
+**Water:**
+
+1. Only 1 dam — need more (Overpass query tuning)
+2. No treatment plants — need more (Overpass query tuning)
+3. Filters tab should have every variable as filterable/searchable (parity with other entities)
+4. Make water facility icons bigger
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 27.2 to break down)
+
 ### Phase 28: Performance & Load Testing — was Phase 27
 
 **Goal:** Optimize initial load time and validate production handles 250 concurrent users.
