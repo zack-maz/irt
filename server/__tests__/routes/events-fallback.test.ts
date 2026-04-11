@@ -14,7 +14,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Server } from 'http';
 import type { ConflictEventEntity, CacheResponse } from '../../types.js';
-import { WAR_START } from '../../config.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -132,8 +131,18 @@ vi.mock('../../adapters/yahoo-finance.js', () => ({
   isValidRange: vi.fn(() => true),
 }));
 vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
-vi.mock('../../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
-vi.mock('../../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
+vi.mock('../../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+  FACILITY_TYPE_LABELS: {
+    dam: 'Dam',
+    reservoir: 'Reservoir',
+    desalination: 'Desalination Plant',
+    treatment_plant: 'Treatment Plant',
+  },
+}));
+vi.mock('../../adapters/open-meteo-precip.js', () => ({
+  fetchPrecipitation: vi.fn(async () => []),
+}));
 
 // LLM provider mock — controls whether LLM is configured and what callLLM returns
 vi.mock('../../adapters/llm-provider.js', () => ({
@@ -310,12 +319,8 @@ describe('Events Route: Graceful LLM Degradation', () => {
     //  if groupKey doesn't match, geocodeEnrichedEvents returns empty,
     //  enrichedToEntities produces nothing, and raw GDELT is served.
     //  That's still a valid degradation path.)
-    const hasEnriched = body.data.some(
-      (e: ConflictEventEntity) => e.data.llmProcessed === true,
-    );
-    const hasRaw = body.data.some(
-      (e: ConflictEventEntity) => !e.data.llmProcessed,
-    );
+    const hasEnriched = body.data.some((e: ConflictEventEntity) => e.data.llmProcessed === true);
+    const hasRaw = body.data.some((e: ConflictEventEntity) => !e.data.llmProcessed);
 
     // At minimum, we get data back (either enriched or raw — never blank)
     expect(hasEnriched || hasRaw).toBe(true);

@@ -138,16 +138,16 @@ function isExcludedLocation(lat: number, lng: number): boolean {
  * Treatment plants only kept in priority countries; non-priority dams/reservoirs require notability.
  */
 const FACILITY_QUERIES: { label: string; nwr: string }[] = [
-  { label: 'dams', nwr: 'nwr["waterway"="dam"]["name"]' },
+  { label: 'dams', nwr: 'nwr["waterway"="dam"]' },
   {
     label: 'reservoirs',
-    nwr: '(way["natural"="water"]["water"="reservoir"]["name"];relation["natural"="water"]["water"="reservoir"]["name"];)',
+    nwr: '(way["natural"="water"]["water"="reservoir"];relation["natural"="water"]["water"="reservoir"];)',
   },
   {
     label: 'desalination',
     nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)',
   },
-  { label: 'treatment_plants', nwr: 'nwr["man_made"="water_works"]["name"]' },
+  { label: 'treatment_plants', nwr: 'nwr["man_made"="water_works"]' },
 ];
 
 function buildQuery(nwr: string): string {
@@ -191,7 +191,7 @@ export function classifyWaterType(tags: Record<string, string>): WaterFacilityTy
   return null;
 }
 
-const FACILITY_TYPE_LABELS: Record<WaterFacilityType, string> = {
+export const FACILITY_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination Plant',
@@ -319,6 +319,13 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
   // Deduplicate by OSM ID
   const unique = new Map<string, WaterFacility>();
   for (const f of all) unique.set(f.id, f);
+
+  if (unique.size > 800) {
+    log.warn(
+      { total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length },
+      'water facility count exceeds 800 soft cap — serving all facilities',
+    );
+  }
 
   log.info(
     { total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length },

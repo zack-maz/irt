@@ -132,6 +132,12 @@ vi.mock('../../adapters/nominatim.js', () => ({
 }));
 vi.mock('../../adapters/overpass-water.js', () => ({
   fetchWaterFacilities: vi.fn(async () => []),
+  FACILITY_TYPE_LABELS: {
+    dam: 'Dam',
+    reservoir: 'Reservoir',
+    desalination: 'Desalination Plant',
+    treatment_plant: 'Treatment Plant',
+  },
 }));
 vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: vi.fn(async () => []),

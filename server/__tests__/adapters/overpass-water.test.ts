@@ -5,6 +5,7 @@ import {
   normalizeWaterElement,
   isPriorityCountry,
   isNotable,
+  FACILITY_TYPE_LABELS,
 } from '../../adapters/overpass-water.js';
 import type { WaterStressIndicators } from '../../types.js';
 
@@ -309,6 +310,58 @@ describe('normalizeWaterElement', () => {
         },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+  });
+
+  describe('unnamed facility labeling', () => {
+    it('produces generic type label when OSM name tag is absent', () => {
+      const el = {
+        type: 'node' as const,
+        id: 400,
+        lat: 33.2,
+        lon: 43.7, // Iraq (priority)
+        tags: { waterway: 'dam' },
+      };
+      const result = normalizeWaterElement(el, stressLookup);
+      expect(result).not.toBeNull();
+      expect(result!.label).toBe('Dam');
+    });
+
+    it('produces named label when OSM name tag exists', () => {
+      const el = {
+        type: 'node' as const,
+        id: 401,
+        lat: 33.2,
+        lon: 43.7,
+        tags: { waterway: 'dam', name: 'Haditha Dam' },
+      };
+      const result = normalizeWaterElement(el, stressLookup);
+      expect(result).not.toBeNull();
+      expect(result!.label).toBe('Haditha Dam');
+    });
+
+    it('uses name:en when present over non-Latin name', () => {
+      const el = {
+        type: 'node' as const,
+        id: 402,
+        lat: 32.4,
+        lon: 53.7, // Iran (priority)
+        tags: { man_made: 'water_works', 'name:en': 'Isfahan Water Works' },
+      };
+      const result = normalizeWaterElement(el, stressLookup);
+      expect(result).not.toBeNull();
+      expect(result!.label).toBe('Isfahan Water Works');
+    });
+  });
+});
+
+describe('FACILITY_TYPE_LABELS', () => {
+  it('exports all four facility type labels', () => {
+    expect(FACILITY_TYPE_LABELS).toEqual({
+      dam: 'Dam',
+      reservoir: 'Reservoir',
+      desalination: 'Desalination Plant',
+      treatment_plant: 'Treatment Plant',
     });
   });
 });

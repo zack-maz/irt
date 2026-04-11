@@ -82,6 +82,12 @@ vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () =>
 // Mock water adapters
 vi.mock('../../adapters/overpass-water.js', () => ({
   fetchWaterFacilities: (...args: unknown[]) => mockFetchWaterFacilities(...args),
+  FACILITY_TYPE_LABELS: {
+    dam: 'Dam',
+    reservoir: 'Reservoir',
+    desalination: 'Desalination Plant',
+    treatment_plant: 'Treatment Plant',
+  },
 }));
 vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: (...args: unknown[]) => mockFetchPrecipitation(...args),

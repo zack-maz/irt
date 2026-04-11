@@ -102,7 +102,15 @@ vi.mock('../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []
 vi.mock('../adapters/nominatim.js', () => ({
   reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
 }));
-vi.mock('../adapters/overpass-water.js', () => ({ fetchWaterFacilities: vi.fn(async () => []) }));
+vi.mock('../adapters/overpass-water.js', () => ({
+  fetchWaterFacilities: vi.fn(async () => []),
+  FACILITY_TYPE_LABELS: {
+    dam: 'Dam',
+    reservoir: 'Reservoir',
+    desalination: 'Desalination Plant',
+    treatment_plant: 'Treatment Plant',
+  },
+}));
 vi.mock('../adapters/open-meteo-precip.js', () => ({ fetchPrecipitation: vi.fn(async () => []) }));
 
 vi.mock('../adapters/acled.js', () => ({

@@ -4,7 +4,8 @@ import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'water' });
-import { fetchWaterFacilities } from '../adapters/overpass-water.js';
+import { fetchWaterFacilities, FACILITY_TYPE_LABELS } from '../adapters/overpass-water.js';
+import { reverseGeocode } from '../adapters/nominatim.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
 import {
   WATER_CACHE_TTL,
@@ -17,6 +18,69 @@ import { sendValidated } from '../middleware/validateResponse.js';
 import { waterResponseSchema } from '../schemas/cacheResponse.js';
 import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
+
+/** Redis cache key prefix for reverse geocode results (shared with geocode route) */
+const GEOCODE_CACHE_PREFIX = 'geocode:';
+/** 30-day logical TTL for geocode cache */
+const GEOCODE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/** 90-day hard Redis TTL for geocode cache */
+const GEOCODE_REDIS_TTL_SEC = 90 * 24 * 60 * 60;
+
+/** Known generic type labels produced by extractLabel when no OSM name exists */
+const GENERIC_LABELS = new Set(Object.values(FACILITY_TYPE_LABELS));
+
+/** Max unnamed facilities to reverse geocode per cold cache run */
+const MAX_GEOCODE_COUNT = 500;
+
+/**
+ * Reverse-geocode unnamed facilities to produce "Type near City" labels.
+ * Uses Redis cache (30-day TTL) so only the first cold-cache run is slow.
+ * Respects Nominatim 1 req/s rate limit for uncached calls.
+ */
+async function labelUnnamedFacilities(facilities: WaterFacility[]): Promise<WaterFacility[]> {
+  const unnamed = facilities.filter((f) => GENERIC_LABELS.has(f.label));
+  if (unnamed.length === 0) return facilities;
+
+  const toGeocode = unnamed.slice(0, MAX_GEOCODE_COUNT);
+  log.info(
+    { unnamed: unnamed.length, geocoding: toGeocode.length },
+    'reverse geocoding unnamed water facilities',
+  );
+
+  for (const f of toGeocode) {
+    const qLat = Math.round(f.lat * 100) / 100;
+    const qLon = Math.round(f.lng * 100) / 100;
+    const cacheKey = `${GEOCODE_CACHE_PREFIX}${qLat},${qLon}`;
+
+    // Check Redis cache first (avoids Nominatim call + rate limit delay)
+    const cached = await cacheGetSafe<{ city?: string; country?: string; display?: string }>(
+      cacheKey,
+      GEOCODE_TTL_MS,
+    );
+
+    if (cached) {
+      const location = cached.data;
+      const place = location.city ?? location.country ?? 'Unknown';
+      f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+      continue;
+    }
+
+    // Cache miss — call Nominatim with rate limit delay
+    try {
+      const geo = await reverseGeocode(f.lat, f.lng);
+      await cacheSetSafe(cacheKey, geo, GEOCODE_REDIS_TTL_SEC);
+      const place = geo.city ?? geo.country ?? 'Unknown';
+      f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+    } catch (err) {
+      log.warn({ err, facilityId: f.id }, 'reverse geocode failed for unnamed facility');
+    }
+
+    // 1 req/s rate limit for Nominatim (only for uncached calls)
+    await new Promise((resolve) => setTimeout(resolve, 1050));
+  }
+
+  return facilities;
+}
 
 /** Zod schema for /api/water and /api/water/precip query params */
 const waterQuerySchema = z.object({
@@ -60,7 +124,8 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   }
 
   try {
-    const facilities = await fetchWaterFacilities();
+    const raw = await fetchWaterFacilities();
+    const facilities = await labelUnnamedFacilities(raw);
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     sendValidated(res, waterResponseSchema, {
       data: facilities,
@@ -102,7 +167,8 @@ waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) =>
     if (cachedFacilities) {
       facilities = cachedFacilities.data;
     } else {
-      facilities = await fetchWaterFacilities();
+      const raw = await fetchWaterFacilities();
+      facilities = await labelUnnamedFacilities(raw);
       await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     }
 
