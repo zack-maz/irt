@@ -399,7 +399,7 @@ export function useEntityLayers() {
           if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
           return [r, g, b, 255];
         },
-        billboard: false,
+        billboard: true,
         pickable: true,
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
@@ -432,7 +432,7 @@ export function useEntityLayers() {
           if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
           return [r, g, b, 255];
         },
-        billboard: false,
+        billboard: true,
         pickable: true,
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),
@@ -462,7 +462,7 @@ export function useEntityLayers() {
           if (activeId && d.id !== activeId) return [r, g, b, DIM_ALPHA];
           return [r, g, b, 255];
         },
-        billboard: false,
+        billboard: true,
         pickable: true,
         updateTriggers: { getColor: [activeId, isFilterActive, matchedIds.size, clusterEventIds] },
       }),

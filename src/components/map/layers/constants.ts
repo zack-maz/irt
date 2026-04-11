@@ -50,11 +50,11 @@ export const WATER_TYPE_COLORS: Record<string, string> = {
 export const ICON_SIZE = {
   flight: { meters: 1000, minPixels: 16, maxPixels: 100 },
   ship: { meters: 1000, minPixels: 16, maxPixels: 100 },
-  airstrike: { meters: 2500, minPixels: 22, maxPixels: 160 },
-  on_ground: { meters: 1500, minPixels: 16, maxPixels: 120 },
-  explosion: { meters: 2500, minPixels: 22, maxPixels: 160 },
-  targeted: { meters: 2200, minPixels: 20, maxPixels: 140 },
-  other: { meters: 1500, minPixels: 16, maxPixels: 120 },
+  airstrike: { meters: 2500, minPixels: 22, maxPixels: 200 },
+  on_ground: { meters: 1500, minPixels: 16, maxPixels: 160 },
+  explosion: { meters: 2500, minPixels: 22, maxPixels: 200 },
+  targeted: { meters: 2200, minPixels: 20, maxPixels: 180 },
+  other: { meters: 1500, minPixels: 16, maxPixels: 160 },
   site: { meters: 1500, minPixels: 16, maxPixels: 50 },
 } as const;
 

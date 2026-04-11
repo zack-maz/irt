@@ -61,9 +61,9 @@ describe('Entity Layer Constants', () => {
   });
   describe('ICON_SIZE', () => {
     const movingExpected = { meters: 1000, minPixels: 16, maxPixels: 100 };
-    const largeEventExpected = { meters: 2500, minPixels: 22, maxPixels: 160 };
-    const smallEventExpected = { meters: 1500, minPixels: 16, maxPixels: 120 };
-    const targetedExpected = { meters: 2200, minPixels: 20, maxPixels: 140 };
+    const largeEventExpected = { meters: 2500, minPixels: 22, maxPixels: 200 };
+    const smallEventExpected = { meters: 1500, minPixels: 16, maxPixels: 160 };
+    const targetedExpected = { meters: 2200, minPixels: 20, maxPixels: 180 };
     it('flight', () => {
       expect(ICON_SIZE.flight).toEqual(movingExpected);
     });
