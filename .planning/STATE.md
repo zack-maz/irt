@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: 'Phase 27 shipped — PR #5'
-last_updated: '2026-04-10T04:52:57.728Z'
+last_updated: '2026-04-11T22:16:46.467Z'
 progress:
-  total_phases: 3
-  completed_phases: 0
-  total_plans: 12
-  completed_plans: 10
-  percent: 83
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 16
+  completed_plans: 12
+  percent: 75
 ---
 
 # Project State
@@ -24,6 +24,7 @@ See: .planning/PROJECT.md
 
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
+Phase 27.2: Plan 04 COMPLETE (water facility coverage expansion — Overpass name filter removal, reverse geocode unnamed facilities, water filter parity, icon sizing, ships button label)
 Phase 27.1: Plan 01 COMPLETE (1 of 3 plans done — server-side LLM progress module, /api/events/llm-status endpoint, callback-instrumented pipeline, concurrent guard, Redis summary persistence)
 Phase 26.4: Plan 04 COMPLETE (6 of 6 plans done — phase execution complete; README 564-line portfolio rewrite, 1354 KB Playwright-captured hero GIF, 6 layer screenshots, rateLimiters.public tier wired globally on /api/\*, public/robots.txt, permanent scripts/capture-hero.ts agentic tooling)
 Phase 26.4: Plan 06 COMPLETE (ADRs + runbook + degradation contract + README link closure — 12 new doc files, 2672 lines, ADR-0005 at 300 lines is the highest portfolio signal)
@@ -77,6 +78,9 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 
 ## Key Decisions
 
+- FACILITY_TYPE_LABELS exported from overpass-water.ts for shared detection of unnamed facilities in water route reverse geocoding
+- labelUnnamedFacilities runs after fetch, before cache — Redis stores labeled facilities so reverse geocoding only runs on 24h cold cache
+- Stress level thresholds: <=0.33 High, <=0.66 Medium, >0.66 Low (simple thirds of compositeHealth)
 - Callback injection pattern for LLM pipeline progress instrumentation — keeps processEventGroups/geocodeEnrichedEvents pure and testable without module-level state mocks
 - Module-level singleton for LLM progress (not Map) — simpler API, single pipeline per Vercel instance, warm-start persistence
 - /api/events/llm-status gated by NODE_ENV !== 'production' — returns 404 in prod per threat model T-27.1-01
