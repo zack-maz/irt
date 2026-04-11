@@ -9,7 +9,7 @@ export const ENTITY_COLORS = {
   on_ground: [180, 50, 20] as const, // #b43214 dark burnt red
   explosion: [255, 95, 25] as const, // #ff5f19 vibrant orange-red
   targeted: [139, 30, 30] as const, // #8b1e1e dark crimson
-  other: [190, 170, 168] as const, // #beaaa8 gray with red tint
+  other: [220, 100, 90] as const, // #dc5a5a light red
   siteHealthy: [34, 197, 94] as const, // #22c55e green
   siteAttacked: [249, 115, 22] as const, // #f97316 orange
 } as const;
@@ -22,7 +22,7 @@ export const ENTITY_DOT_COLORS = {
   on_ground: '#b43214',
   explosion: '#ff5f19',
   targeted: '#8b1e1e',
-  other: '#beaaa8',
+  other: '#dc5a5a',
   ground: '#eab308',
   unidentified: '#ffff64',
   siteHealthy: '#22c55e',
