@@ -22,6 +22,7 @@ export interface FetchRecord {
 interface WaterState {
   facilities: WaterFacility[];
   connectionStatus: WaterConnectionStatus;
+  lastFetchAt: number | null;
   lastError: string | null;
   nextPollAt: number | null;
   recentFetches: FetchRecord[];
@@ -51,6 +52,7 @@ const COORD_MATCH_THRESHOLD = 0.01;
 export const useWaterStore = create<WaterState>()((set) => ({
   facilities: [],
   connectionStatus: 'idle',
+  lastFetchAt: null,
   lastError: null,
   nextPollAt: null,
   recentFetches: [],
@@ -103,6 +105,7 @@ export const useWaterStore = create<WaterState>()((set) => ({
 
   recordFetch: (ok, durationMs) =>
     set((state) => ({
+      lastFetchAt: Date.now(),
       recentFetches: [...state.recentFetches.slice(-9), { ok, durationMs, timestamp: Date.now() }],
     })),
 

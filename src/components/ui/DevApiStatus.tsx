@@ -325,14 +325,21 @@ export function DevApiStatus() {
   );
 
   const water = useWaterStore(
-    useShallow((s) => ({
-      status: s.connectionStatus,
-      count: s.facilities.length,
-      lastFetch: null as number | null,
-      lastError: s.lastError,
-      nextPollAt: s.nextPollAt,
-      recentFetches: s.recentFetches,
-    })),
+    useShallow((s) => {
+      const byType: Record<string, number> = {};
+      for (const f of s.facilities) {
+        byType[f.facilityType] = (byType[f.facilityType] ?? 0) + 1;
+      }
+      return {
+        status: s.connectionStatus,
+        count: s.facilities.length,
+        lastFetch: s.lastFetchAt,
+        lastError: s.lastError,
+        nextPollAt: s.nextPollAt,
+        recentFetches: s.recentFetches,
+        byType,
+      };
+    }),
   );
 
   const precip = useWaterStore(
@@ -400,7 +407,7 @@ export function DevApiStatus() {
       name: 'Water',
       ...water,
       isOneShot: true,
-      quality: `${water.count} facilities`,
+      quality: `${water.count} total | ${water.byType['dam'] ?? 0} dam, ${water.byType['reservoir'] ?? 0} res, ${water.byType['desalination'] ?? 0} desal, ${water.byType['treatment_plant'] ?? 0} treat`,
     },
     {
       name: 'Precip',
