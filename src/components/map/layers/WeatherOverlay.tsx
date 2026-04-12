@@ -71,7 +71,7 @@ interface WeatherTooltipProps {
  * Weather tooltip showing temperature (C/F) and wind (direction + speed).
  * Positioned at cursor coordinates, styled to match EntityTooltip.
  */
-/** Find the nearest precipitation entry within ~50km of a point */
+/** Find the nearest precipitation entry within ~200km of a point */
 function findNearestPrecip(
   lat: number,
   lng: number,
@@ -86,8 +86,8 @@ function findNearestPrecip(
       best = p;
     }
   }
-  // ~0.5 degrees ≈ 50km — don't show precip for distant points
-  return bestDist < 0.5 ? best : null;
+  // ~2 degrees ≈ 200km — precip is a regional 30-day metric, coarse matching is fine
+  return bestDist < 2.0 ? best : null;
 }
 
 export function WeatherTooltip({ point, x, y }: WeatherTooltipProps) {
