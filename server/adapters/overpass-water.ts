@@ -78,13 +78,16 @@ export function isPriorityCountry(lat: number, lng: number): boolean {
 }
 
 /**
- * Returns true if OSM tags indicate a notable facility (has wikidata or wikipedia reference).
- * Used to filter non-priority country dams/reservoirs to only significant facilities.
+ * Returns true if OSM tags indicate a notable facility.
+ * Checks wikidata/wikipedia refs and English names (name:en or Latin name).
  */
 export function isNotable(tags: Record<string, string>): boolean {
   if (tags.wikidata) return true;
   if (tags.wikipedia) return true;
   if (Object.keys(tags).some((k) => k.startsWith('wikipedia:'))) return true;
+  // English name is a notability signal — unnamed facilities are generic
+  if (tags['name:en']?.trim()) return true;
+  if (tags['name'] && /^[\p{Script=Latin}\d\s\p{P}\p{S}]+$/u.test(tags['name'])) return true;
   return false;
 }
 
@@ -229,8 +232,12 @@ export function normalizeWaterElement(
 
   // Tiered country filtering: priority countries keep all, non-priority apply notability checks
   if (!isPriorityCountry(lat, lon)) {
-    if (facilityType === 'treatment_plant') return null; // Always excluded in non-priority
-    if ((facilityType === 'dam' || facilityType === 'reservoir') && !isNotable(el.tags))
+    if (
+      (facilityType === 'dam' ||
+        facilityType === 'reservoir' ||
+        facilityType === 'treatment_plant') &&
+      !isNotable(el.tags)
+    )
       return null;
     // desalination always passes through
   }
