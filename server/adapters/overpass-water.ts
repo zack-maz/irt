@@ -78,16 +78,24 @@ export function isPriorityCountry(lat: number, lng: number): boolean {
 }
 
 /**
- * Returns true if OSM tags indicate a notable facility.
- * Checks wikidata/wikipedia refs and English names (name:en or Latin name).
+ * Strict notability: wikidata/wikipedia refs only. Used for reservoirs
+ * (high volume — need strict filter to keep count manageable).
  */
 export function isNotable(tags: Record<string, string>): boolean {
   if (tags.wikidata) return true;
   if (tags.wikipedia) return true;
   if (Object.keys(tags).some((k) => k.startsWith('wikipedia:'))) return true;
-  // English name is a notability signal — unnamed facilities are generic
+  return false;
+}
+
+/**
+ * Relaxed notability: any name tag at all (any script). Used for dams
+ * and treatment plants where volume is lower and named = significant.
+ */
+export function hasName(tags: Record<string, string>): boolean {
+  if (isNotable(tags)) return true;
+  if (tags['name']?.trim()) return true;
   if (tags['name:en']?.trim()) return true;
-  if (tags['name'] && /^[\p{Script=Latin}\d\s\p{P}\p{S}]+$/u.test(tags['name'])) return true;
   return false;
 }
 
@@ -232,12 +240,10 @@ export function normalizeWaterElement(
 
   // Tiered country filtering: priority countries keep all, non-priority apply notability checks
   if (!isPriorityCountry(lat, lon)) {
-    if (
-      (facilityType === 'dam' ||
-        facilityType === 'reservoir' ||
-        facilityType === 'treatment_plant') &&
-      !isNotable(el.tags)
-    )
+    // Reservoirs: strict (wikidata/wikipedia only) — high volume needs tight filter
+    if (facilityType === 'reservoir' && !isNotable(el.tags)) return null;
+    // Dams & treatment plants: relaxed (any name) — lower volume, named = significant
+    if ((facilityType === 'dam' || facilityType === 'treatment_plant') && !hasName(el.tags))
       return null;
     // desalination always passes through
   }
