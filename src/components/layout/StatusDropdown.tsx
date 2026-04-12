@@ -3,8 +3,6 @@ import { useFlightStore } from '@/stores/flightStore';
 import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
-import { useNewsStore } from '@/stores/newsStore';
-import { useMarketStore } from '@/stores/marketStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useFilteredEntities } from '@/hooks/useFilteredEntities';
 
@@ -42,14 +40,9 @@ export function StatusDropdown() {
   const eventStatus = useEventStore((s) => s.connectionStatus);
   const siteConnectionStatus = useSiteStore((s) => s.connectionStatus);
   const siteStatus: FeedStatus = siteConnectionStatus === 'idle' ? 'loading' : siteConnectionStatus;
-  const newsStatus = useNewsStore((s) => s.connectionStatus);
-  const marketStatus = useMarketStore((s) => s.connectionStatus);
-
   // Entity counts (unconditional — no toggle gating)
   const { flights, ships: filteredShips, events } = useFilteredEntities();
   const sites = useSiteStore((s) => s.sites);
-  const newsClusterCount = useNewsStore((s) => s.clusterCount);
-  const marketQuoteCount = useMarketStore((s) => s.quotes).length;
   const isSidebarOpen = useUIStore((s) => s.isSidebarOpen);
 
   const visibleFlights = flights.length;
@@ -71,7 +64,7 @@ export function StatusDropdown() {
   }, [isOpen, handleMouseDown]);
 
   // Aggregate status for the overall indicator
-  const statuses = [flightStatus, shipStatus, eventStatus, siteStatus, newsStatus, marketStatus];
+  const statuses = [flightStatus, shipStatus, eventStatus, siteStatus];
   const hasError = statuses.some((s) => s === 'error' || s === 'rate_limited');
   const hasStale = statuses.some((s) => s === 'stale');
   const allConnected = statuses.every((s) => s === 'connected');
@@ -118,8 +111,6 @@ export function StatusDropdown() {
             <FeedLine status={shipStatus} count={visibleShips} label="ships" />
             <FeedLine status={eventStatus} count={visibleEvents} label="events" />
             <FeedLine status={siteStatus} count={visibleSites} label="sites" />
-            <FeedLine status={newsStatus} count={newsClusterCount} label="news" />
-            <FeedLine status={marketStatus} count={marketQuoteCount} label="markets" />
           </div>
         </div>
       )}
