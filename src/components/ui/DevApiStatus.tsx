@@ -324,23 +324,25 @@ export function DevApiStatus() {
     })),
   );
 
-  const water = useWaterStore(
-    useShallow((s) => {
-      const byType: Record<string, number> = {};
-      for (const f of s.facilities) {
-        byType[f.facilityType] = (byType[f.facilityType] ?? 0) + 1;
-      }
-      return {
-        status: s.connectionStatus,
-        count: s.facilities.length,
-        lastFetch: s.lastFetchAt,
-        lastError: s.lastError,
-        nextPollAt: s.nextPollAt,
-        recentFetches: s.recentFetches,
-        byType,
-      };
-    }),
+  const waterRaw = useWaterStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.facilities.length,
+      lastFetch: s.lastFetchAt,
+      lastError: s.lastError,
+      nextPollAt: s.nextPollAt,
+      recentFetches: s.recentFetches,
+      facilities: s.facilities,
+    })),
   );
+
+  const waterByType = useMemo(() => {
+    const byType: Record<string, number> = {};
+    for (const f of waterRaw.facilities) {
+      byType[f.facilityType] = (byType[f.facilityType] ?? 0) + 1;
+    }
+    return byType;
+  }, [waterRaw.facilities]);
 
   const precip = useWaterStore(
     useShallow((s) => ({
@@ -405,9 +407,9 @@ export function DevApiStatus() {
     },
     {
       name: 'Water',
-      ...water,
+      ...waterRaw,
       isOneShot: true,
-      quality: `${water.count} total | ${water.byType['dam'] ?? 0} dam, ${water.byType['reservoir'] ?? 0} res, ${water.byType['desalination'] ?? 0} desal, ${water.byType['treatment_plant'] ?? 0} treat`,
+      quality: `${waterRaw.count} total | ${waterByType['dam'] ?? 0} dam, ${waterByType['reservoir'] ?? 0} res, ${waterByType['desalination'] ?? 0} desal, ${waterByType['treatment_plant'] ?? 0} treat`,
     },
     {
       name: 'Precip',
