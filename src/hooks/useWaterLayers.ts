@@ -239,7 +239,7 @@ export function useWaterLayers(): WaterLayerGroup {
         return stressToRGBA(d.stress.compositeHealth);
       },
       getAngle: () => 0,
-      billboard: false,
+      billboard: true,
       pickable: true,
       iconAtlas: getIconAtlasForLayer(),
       iconMapping: ICON_MAPPING,
