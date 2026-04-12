@@ -196,6 +196,7 @@ export function BaseMap() {
         setEthnicHover({ groups, x: info.x, y: info.y });
         setHover(null);
         setThreatHover(null);
+        setHoveredClusterId(null);
         setWeatherHover(null);
         setWaterHover(null);
         hoverEntity(null);
@@ -208,6 +209,7 @@ export function BaseMap() {
         setWaterHover({ facility, x: info.x, y: info.y });
         setHover(null);
         setThreatHover(null);
+        setHoveredClusterId(null);
         setEthnicHover(null);
         setWeatherHover(null);
         hoverEntity(null);
@@ -220,6 +222,7 @@ export function BaseMap() {
         setWeatherHover({ point, x: info.x, y: info.y });
         setHover(null);
         setThreatHover(null);
+        setHoveredClusterId(null);
         setEthnicHover(null);
         setWaterHover(null);
         hoverEntity(null);
