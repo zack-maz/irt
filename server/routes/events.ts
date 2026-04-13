@@ -19,6 +19,7 @@ import { AppError } from '../middleware/errorHandler.js';
 import { eventsResponseSchema } from '../schemas/cacheResponse.js';
 import type { ConflictEventEntity, NewsCluster } from '../types.js';
 import { getHighestTier, extractDomain, getSourceTier } from '../lib/sourceTiers.js';
+import { saveDevLLMCache, loadDevLLMCache } from '../cache/devFileCache.js';
 
 /** Zod schema for /api/events query params */
 const eventsQuerySchema = z.object({
@@ -253,6 +254,16 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     return sendNormalizedEvents(res, llmCached);
   }
 
+  // Dev fallback: if Redis LLM cache is empty, try local file cache to avoid re-processing
+  if (!llmCached?.data) {
+    const devData = loadDevLLMCache<ConflictEventEntity[]>();
+    if (devData) {
+      // Seed Redis from file so subsequent requests are fast
+      await cacheSetSafe(LLM_EVENTS_KEY, devData, LLM_REDIS_TTL_SEC);
+      return sendNormalizedEvents(res, { data: devData, stale: false, lastFresh: Date.now() });
+    }
+  }
+
   // Check raw GDELT cache (skip on forced backfill)
   const cached = forceBackfill
     ? null
@@ -446,6 +457,7 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
           const llmMerged = Array.from(llmMergeMap.values());
 
           await cacheSetSafe(LLM_EVENTS_KEY, llmMerged, LLM_REDIS_TTL_SEC);
+          saveDevLLMCache(llmMerged);
           log.info(
             { count: llmEntities.length, total: llmMerged.length },
             'LLM: processed and cached enriched events (background)',
