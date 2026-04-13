@@ -120,6 +120,74 @@ function formatDuration(ms: number | null | undefined): string {
 
 /* ---------- LLM Pipeline Section ---------- */
 
+const PIPELINE_STAGES = ['grouping', 'llm-processing', 'geocoding', 'done'] as const;
+const STAGE_LABELS: Record<string, string> = {
+  grouping: 'Group',
+  'llm-processing': 'LLM',
+  geocoding: 'Geocode',
+  done: 'Done',
+  error: 'Error',
+};
+const STAGE_COLORS: Record<string, string> = {
+  grouping: '#60a5fa',
+  'llm-processing': '#a78bfa',
+  geocoding: '#22c55e',
+  done: '#22c55e',
+  error: '#ef4444',
+};
+
+function ProgressBar({ completed, total }: { completed: number; total: number }) {
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="h-1 flex-1 rounded-full bg-white/10">
+        <div
+          className="h-1 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%`, backgroundColor: '#a78bfa' }}
+        />
+      </div>
+      <span className="text-[8px] text-white/40 tabular-nums">{pct}%</span>
+    </div>
+  );
+}
+
+function StageIndicator({ current }: { current: string }) {
+  const activeIdx = PIPELINE_STAGES.indexOf(current as (typeof PIPELINE_STAGES)[number]);
+  const isError = current === 'error';
+  return (
+    <div className="flex items-center gap-0.5">
+      {PIPELINE_STAGES.map((s, i) => {
+        const isDone = !isError && activeIdx >= 0 && i < activeIdx;
+        const isActive = !isError && s === current;
+        const color = isError
+          ? '#ef4444'
+          : isDone
+            ? '#22c55e'
+            : isActive
+              ? (STAGE_COLORS[s] ?? '#60a5fa')
+              : 'rgba(255,255,255,0.15)';
+        return (
+          <div key={s} className="flex items-center gap-0.5">
+            <div
+              className="flex h-3 items-center justify-center rounded px-1 text-[7px] font-bold uppercase"
+              style={{
+                backgroundColor: isActive ? color : 'transparent',
+                color: isDone ? color : isActive ? '#000' : color,
+                border: `1px solid ${color}`,
+              }}
+            >
+              {STAGE_LABELS[s]}
+            </div>
+            {i < PIPELINE_STAGES.length - 1 && (
+              <span style={{ color: isDone ? '#22c55e' : 'rgba(255,255,255,0.15)' }}>→</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LLMPipelineSection({ llmStatus }: { llmStatus: LLMStatus }) {
   const { stage } = llmStatus;
 
@@ -130,80 +198,80 @@ function LLMPipelineSection({ llmStatus }: { llmStatus: LLMStatus }) {
   if (stage === 'idle' && llmStatus.lastRun) {
     const lr = llmStatus.lastRun;
     return (
-      <div className="space-y-0.5">
+      <div className="space-y-1">
+        <StageIndicator current="done" />
         <div className="text-white/50">
-          Last run: {formatAge(lr.lastRun)} ago, {lr.enrichedCount} enriched, {lr.geocodeCount}{' '}
-          geocoded
+          Last: {formatAge(lr.lastRun)} ago · {lr.enrichedCount} enriched · {lr.geocodeCount}{' '}
+          geocoded · {formatDuration(lr.durationMs)}
         </div>
-        <div className="text-white/30">
-          Duration: {formatDuration(lr.durationMs)}
-          {lr.error ? <span className="ml-1 text-red-400">Error: {lr.error}</span> : null}
-        </div>
+        {lr.error ? <div className="text-red-400">Error: {lr.error}</div> : null}
       </div>
     );
   }
 
-  const stageColors: Record<string, string> = {
-    grouping: '#60a5fa',
-    'llm-processing': '#a78bfa',
-    geocoding: '#22c55e',
-    done: '#22c55e',
-    error: '#ef4444',
-  };
-
-  const stageLabels: Record<string, string> = {
-    grouping: 'Grouping',
-    'llm-processing': 'LLM Processing',
-    geocoding: 'Geocoding',
-    done: 'Done',
-    error: 'Error',
-  };
-
   if (stage === 'done') {
     return (
-      <div className="space-y-0.5">
-        <span style={{ color: stageColors[stage] }}>{stageLabels[stage]}</span>
-        <span className="ml-1 text-white/40">
+      <div className="space-y-1">
+        <StageIndicator current="done" />
+        <div className="text-white/50">
           {llmStatus.enrichedCount ?? 0} enriched in {formatDuration(llmStatus.durationMs)}
-        </span>
+        </div>
       </div>
     );
   }
 
   if (stage === 'error') {
     return (
-      <div className="space-y-0.5">
-        <span style={{ color: stageColors[stage] }}>{stageLabels[stage]}</span>
+      <div className="space-y-1">
+        <StageIndicator current="error" />
+        <div className="text-white/50">Elapsed: {formatElapsed(llmStatus.startedAt)}</div>
         {llmStatus.errorMessage ? (
-          <span className="ml-1 text-red-400">{llmStatus.errorMessage}</span>
+          <div className="text-red-400">{llmStatus.errorMessage}</div>
         ) : null}
       </div>
     );
   }
 
   // Active stages: grouping, llm-processing, geocoding
+  const completed =
+    stage === 'llm-processing'
+      ? (llmStatus.completedBatches ?? 0)
+      : stage === 'geocoding'
+        ? (llmStatus.completedGeocodes ?? 0)
+        : 0;
+  const total =
+    stage === 'llm-processing'
+      ? (llmStatus.totalBatches ?? 0)
+      : stage === 'geocoding'
+        ? (llmStatus.totalGeocodes ?? 0)
+        : 0;
+
   return (
-    <div className="space-y-0.5">
-      <div>
-        <span style={{ color: stageColors[stage] ?? '#60a5fa' }}>
-          {stageLabels[stage] ?? stage}
-        </span>
-        <span className="ml-1 text-white/40">Elapsed: {formatElapsed(llmStatus.startedAt)}</span>
+    <div className="space-y-1">
+      <StageIndicator current={stage} />
+      <div className="text-white/50">
+        Elapsed: {formatElapsed(llmStatus.startedAt)}
+        {stage === 'grouping' && (
+          <span>
+            {' '}
+            · {llmStatus.totalGroups ?? 0} groups, {llmStatus.newGroups ?? 0} new
+          </span>
+        )}
+        {stage === 'llm-processing' && (
+          <span>
+            {' '}
+            · Batch {completed}/{total}
+          </span>
+        )}
+        {stage === 'geocoding' && (
+          <span>
+            {' '}
+            · {completed}/{total} · {llmStatus.enrichedCount ?? 0} enriched
+          </span>
+        )}
       </div>
-      {stage === 'llm-processing' && (
-        <div className="text-white/50">
-          Batches: {llmStatus.completedBatches ?? 0}/{llmStatus.totalBatches ?? 0}
-        </div>
-      )}
-      {stage === 'geocoding' && (
-        <div className="text-white/50">
-          Geocoding: {llmStatus.completedGeocodes ?? 0}/{llmStatus.totalGeocodes ?? 0}
-        </div>
-      )}
-      {stage === 'grouping' && (
-        <div className="text-white/50">
-          Groups: {llmStatus.totalGroups ?? 0} total, {llmStatus.newGroups ?? 0} new
-        </div>
+      {(stage === 'llm-processing' || stage === 'geocoding') && total > 0 && (
+        <ProgressBar completed={completed} total={total} />
       )}
     </div>
   );
