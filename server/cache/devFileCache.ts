@@ -17,8 +17,8 @@ const log = logger.child({ module: 'dev-file-cache' });
 const DEV_CACHE_DIR = join(process.cwd(), '.dev-cache');
 const LLM_EVENTS_FILE = join(DEV_CACHE_DIR, 'llm-events.json');
 
-/** Max age for dev cache file (6 hours) — stale data is worse than re-processing */
-const MAX_AGE_MS = 6 * 60 * 60 * 1000;
+/** Max age for dev cache file (48 hours) — generous for dev convenience across overnight restarts */
+const MAX_AGE_MS = 48 * 60 * 60 * 1000;
 
 const isDev = process.env.NODE_ENV !== 'production';
 
