@@ -399,13 +399,20 @@ export function FilterPanelContent() {
                 onClear={clearFilter}
               />
               <div className="mt-1 flex flex-wrap gap-1">
-                {(['exact', 'neighborhood', 'city', 'region'] as const).map((p) => (
+                {(
+                  [
+                    { key: 'exact', label: 'Exact', color: '#22c55e' },
+                    { key: 'neighborhood', label: 'Nbhd', color: '#eab308' },
+                    { key: 'city', label: 'City', color: '#f97316' },
+                    { key: 'region', label: 'Region', color: '#ef4444' },
+                  ] as const
+                ).map(({ key, label, color }) => (
                   <FilterButton
-                    key={p}
-                    label={p === 'neighborhood' ? 'Nbhd' : p.charAt(0).toUpperCase() + p.slice(1)}
-                    active={enabledPrecisions.includes(p)}
-                    color="#67e8f9"
-                    onToggle={() => useFilterStore.getState().togglePrecision(p)}
+                    key={key}
+                    label={label}
+                    active={enabledPrecisions.includes(key)}
+                    color={color}
+                    onToggle={() => useFilterStore.getState().togglePrecision(key)}
                     compact
                   />
                 ))}
