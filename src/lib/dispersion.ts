@@ -3,31 +3,13 @@
 
 import type { ConflictEventEntity } from '@/types/entities';
 
-/** Ring definitions per precision tier: [slotCount, radiusKm] */
-const RINGS_DEFAULT: ReadonlyArray<readonly [number, number]> = [
+/** Ring definitions: [slotCount, radiusKm] */
+const RINGS: ReadonlyArray<readonly [number, number]> = [
   [6, 3],
   [12, 6],
   [18, 9],
 ];
-
-const RINGS_REGION: ReadonlyArray<readonly [number, number]> = [
-  [6, 30],
-  [12, 60],
-  [18, 90],
-];
-
-const RINGS_CITY: ReadonlyArray<readonly [number, number]> = [
-  [6, 8],
-  [12, 16],
-  [18, 24],
-];
-
-function getRings(precision?: string): ReadonlyArray<readonly [number, number]> {
-  if (precision === 'region') return RINGS_REGION;
-  if (precision === 'city') return RINGS_CITY;
-  return RINGS_DEFAULT;
-}
-
+const TOTAL_SLOTS = RINGS.reduce((sum, [count]) => sum + count, 0); // 36
 const KM_PER_DEG_LAT = 111.32;
 
 /**
@@ -38,19 +20,16 @@ function dispersePosition(
   centroidLat: number,
   centroidLng: number,
   globalSlotIndex: number,
-  precision?: string,
 ): { lat: number; lng: number } {
-  const rings = getRings(precision);
-  const totalSlots = rings.reduce((sum, [count]) => sum + count, 0);
   let ringIndex: number;
   let localSlot: number;
 
-  if (globalSlotIndex < totalSlots) {
+  if (globalSlotIndex < TOTAL_SLOTS) {
     let cumulative = 0;
     ringIndex = 0;
     localSlot = 0;
-    for (let i = 0; i < rings.length; i++) {
-      const [count] = rings[i];
+    for (let i = 0; i < RINGS.length; i++) {
+      const [count] = RINGS[i];
       if (globalSlotIndex < cumulative + count) {
         ringIndex = i;
         localSlot = globalSlotIndex - cumulative;
@@ -60,10 +39,10 @@ function dispersePosition(
     }
   } else {
     ringIndex = 2;
-    localSlot = (globalSlotIndex - totalSlots) % rings[2][0];
+    localSlot = (globalSlotIndex - TOTAL_SLOTS) % RINGS[2][0];
   }
 
-  const [slotCount, radiusKm] = rings[ringIndex];
+  const [slotCount, radiusKm] = RINGS[ringIndex];
   const baseAngle = (2 * Math.PI * localSlot) / slotCount;
   const halfStep = ringIndex % 2 === 1 ? Math.PI / slotCount : 0;
   const angle = baseAngle + halfStep;
@@ -111,11 +90,8 @@ export function disperseEvents(events: ConflictEventEntity[]): ConflictEventEnti
     const centroidLat = group[0].lat;
     const centroidLng = group[0].lng;
 
-    // Use the dominant precision tier for this group's dispersion radius
-    const groupPrecision = group[0].data.precision;
-
     for (let i = 0; i < group.length; i++) {
-      const pos = dispersePosition(centroidLat, centroidLng, i, groupPrecision);
+      const pos = dispersePosition(centroidLat, centroidLng, i);
       result.push({
         ...group[i],
         lat: pos.lat,
