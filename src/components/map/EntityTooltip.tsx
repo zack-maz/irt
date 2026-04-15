@@ -121,6 +121,11 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
       >
         {EVENT_TYPE_LABELS[entity.type] ?? entity.type}
       </span>
+      {import.meta.env.DEV && (
+        <span style={{ color: '#6b7280', fontSize: '8px', marginLeft: '4px' }}>
+          {entity.id.slice(0, 12)}
+        </span>
+      )}
       <br />
       <strong>{d.eventType || 'Unknown'}</strong>
       {d.locationName && (
@@ -147,10 +152,10 @@ function EventContent({ entity }: { entity: ConflictEventEntity }) {
             {d.precision === 'exact'
               ? 'Precise'
               : d.precision === 'neighborhood'
-                ? '~1km'
+                ? '~5km'
                 : d.precision === 'city'
-                  ? '~5km'
-                  : '~25km'}
+                  ? '~25km'
+                  : '~100km'}
           </span>
         </>
       )}

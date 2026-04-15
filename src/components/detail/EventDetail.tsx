@@ -51,6 +51,7 @@ export function EventDetail({ entity }: EventDetailProps) {
       )}
 
       <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-0">Event</h3>
+      {import.meta.env.DEV && <DetailValue label="ID" value={entity.id} />}
       <DetailValue label="Type" value={typeLabel} />
 
       {/* LLM badge */}
@@ -88,9 +89,7 @@ export function EventDetail({ entity }: EventDetailProps) {
           )}
           {d.casualties!.unknown === true &&
             d.casualties!.killed == null &&
-            d.casualties!.injured == null && (
-              <DetailValue label="Casualties" value="Unknown" />
-            )}
+            d.casualties!.injured == null && <DetailValue label="Casualties" value="Unknown" />}
         </>
       )}
 
