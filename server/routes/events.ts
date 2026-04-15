@@ -260,6 +260,20 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
     if (devData) {
       // Seed Redis from file so subsequent requests are fast
       await cacheSetSafe(LLM_EVENTS_KEY, devData, LLM_REDIS_TTL_SEC);
+      // Write synthetic summary so LLM Pipeline section shows "loaded from file cache"
+      const summary: LLMRunSummary = {
+        lastRun: Date.now(),
+        groupCount: 0,
+        batchCount: 0,
+        geocodeCount: 0,
+        enrichedCount: devData.length,
+        durationMs: 0,
+        error: null,
+      };
+      await cacheSetSafe(LLM_SUMMARY_KEY, summary, LLM_SUMMARY_TTL_SEC);
+      // Set cooldown so the pipeline doesn't re-trigger on the next request
+      await recordLLMTimestamp();
+      log.info({ count: devData.length }, 'served LLM events from dev file cache');
       return sendNormalizedEvents(res, { data: devData, stale: false, lastFresh: Date.now() });
     }
   }
