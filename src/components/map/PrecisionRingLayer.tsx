@@ -54,13 +54,8 @@ export function usePrecisionRingLayer(): ScatterplotLayer<ConflictEventEntity>[]
         },
         getLineColor: (d: ConflictEventEntity) => {
           const isSelected = d.id === selectedEntityId;
-          // Larger rings get stronger stroke to stay visible at scale
-          const isRegion = d.data.precision === 'region';
-          const ambient = isRegion ? 80 : 50;
-          const selected = isRegion ? 180 : 140;
-          return [239, 68, 68, isSelected ? selected : ambient];
+          return [239, 68, 68, isSelected ? 140 : 50]; // Ring stroke: 55% selected, 20% ambient
         },
-        getLineWidth: (d: ConflictEventEntity) => (d.data.precision === 'region' ? 3 : 1),
         radiusUnits: 'meters',
         radiusMinPixels: 8,
         stroked: true,
