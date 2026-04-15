@@ -50,13 +50,14 @@ export function usePrecisionRingLayer(): ScatterplotLayer<ConflictEventEntity>[]
         getRadius: (d) => PRECISION_RADIUS_METERS[d.data.precision ?? ''] ?? 0,
         getFillColor: (d: ConflictEventEntity) => {
           const isSelected = d.id === selectedEntityId;
-          return [239, 68, 68, isSelected ? 30 : 8]; // Subtle fill: 12% selected, 3% ambient
+          return [239, 68, 68, isSelected ? 30 : 3]; // Subtle fill: 12% selected, 1% ambient
         },
         getLineColor: (d: ConflictEventEntity) => {
           const isSelected = d.id === selectedEntityId;
           return [239, 68, 68, isSelected ? 140 : 50]; // Ring stroke: 55% selected, 20% ambient
         },
         radiusUnits: 'meters',
+        radiusMinPixels: 8,
         stroked: true,
         filled: true,
         lineWidthMinPixels: 2,
