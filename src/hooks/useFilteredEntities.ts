@@ -45,6 +45,8 @@ export function useFilteredEntities(): {
       mentionsMin: s.mentionsMin,
       mentionsMax: s.mentionsMax,
       headingAngle: s.headingAngle,
+      enabledPrecisions: s.enabledPrecisions,
+      entityIdFilter: s.entityIdFilter,
     })),
   );
 
