@@ -49,7 +49,11 @@ export type FilterKey =
   | 'mmsi'
   | 'shipNameFilter'
   | 'cameo'
-  | 'waterName';
+  | 'waterName'
+  | 'precision'
+  | 'entityId';
+
+export type PrecisionTier = 'exact' | 'neighborhood' | 'city' | 'region';
 
 export type Granularity = 'minute' | 'hour' | 'day';
 
@@ -99,6 +103,10 @@ export interface FilterState {
   stressMax: number | null;
   showHealthyWater: boolean;
   showAttackedWater: boolean;
+
+  // Precision & ID filters
+  enabledPrecisions: PrecisionTier[];
+  entityIdFilter: string;
 
   // Visibility toggles (independent — each one gates its category independently)
   showFlights: boolean;
@@ -156,6 +164,8 @@ export interface FilterState {
   setStressRange: (min: number | null, max: number | null) => void;
   toggleShowHealthyWater: () => void;
   toggleShowAttackedWater: () => void;
+  togglePrecision: (tier: PrecisionTier) => void;
+  setEntityIdFilter: (v: string) => void;
 
   // Visibility toggle actions
   toggleShowFlights: () => void;
@@ -217,6 +227,10 @@ const DEFAULTS = {
   stressMax: null as number | null,
   showHealthyWater: true,
   showAttackedWater: true,
+
+  // Precision & ID
+  enabledPrecisions: ['exact', 'neighborhood', 'city', 'region'] as PrecisionTier[],
+  entityIdFilter: '',
 
   // Visibility toggles (all default ON)
   showFlights: true,
@@ -321,6 +335,12 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       case 'waterName':
         set({ waterNameFilter: '' });
         break;
+      case 'precision':
+        set({ enabledPrecisions: ['exact', 'neighborhood', 'city', 'region'] });
+        break;
+      case 'entityId':
+        set({ entityIdFilter: '' });
+        break;
     }
   },
 
@@ -347,6 +367,8 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
     if (s.waterNameFilter !== '') count++;
     if (!s.showHighStress || !s.showMediumStress || !s.showLowStress) count++;
     if (!s.showHealthyWater || !s.showAttackedWater) count++;
+    if (s.enabledPrecisions.length < 4) count++;
+    if (s.entityIdFilter !== '') count++;
     return count;
   },
 
@@ -389,6 +411,16 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   setStressRange: (min, max) => set({ stressMin: min, stressMax: max }),
   toggleShowHealthyWater: () => set((s) => ({ showHealthyWater: !s.showHealthyWater })),
   toggleShowAttackedWater: () => set((s) => ({ showAttackedWater: !s.showAttackedWater })),
+  togglePrecision: (tier) =>
+    set((s) => {
+      const enabled = s.enabledPrecisions.includes(tier);
+      return {
+        enabledPrecisions: enabled
+          ? s.enabledPrecisions.filter((t) => t !== tier)
+          : [...s.enabledPrecisions, tier],
+      };
+    }),
+  setEntityIdFilter: (v) => set({ entityIdFilter: v }),
 
   // Visibility toggles
   toggleShowFlights: () => set((s) => ({ showFlights: !s.showFlights })),

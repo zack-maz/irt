@@ -378,6 +378,22 @@ export function evaluateTag(
       return false;
     }
 
+    case 'precision': {
+      if (
+        entity.type === 'flight' ||
+        entity.type === 'ship' ||
+        entity.type === 'site' ||
+        entity.type === 'water'
+      )
+        return false;
+      const p = (entity as ConflictEventEntity).data.precision ?? 'exact';
+      return ciEq(p, value);
+    }
+
+    case 'id': {
+      return ciIncludes(entity.id, value);
+    }
+
     case 'since': {
       const ts = getEntityTimestamp(entity);
       if (ts === null) return false;

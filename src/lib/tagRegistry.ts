@@ -348,6 +348,23 @@ export const TAG_REGISTRY: Record<string, TagDefinition> = {
     examples: ['status:healthy', 'status:attacked'],
     getValues: () => staticValues(['healthy', 'attacked']),
   },
+  precision: {
+    prefix: 'precision',
+    label: 'Precision',
+    description: 'Filter events by geolocation precision tier',
+    color: 'text-cyan-400',
+    entityTypes: ['event'],
+    examples: ['precision:exact', 'precision:city', 'precision:region'],
+    getValues: () => staticValues(['exact', 'neighborhood', 'city', 'region']),
+  },
+  id: {
+    prefix: 'id',
+    label: 'Entity ID',
+    description: 'Filter by entity ID (substring match)',
+    color: 'text-pink-400',
+    entityTypes: ['flight', 'ship', 'event', 'site', 'water'],
+    examples: ['id:abc123'],
+  },
 };
 
 // --- Exported Helpers ---

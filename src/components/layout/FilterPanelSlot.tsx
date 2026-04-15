@@ -135,6 +135,11 @@ export function FilterPanelContent() {
   const shipNameFilter = useFilterStore((s) => s.shipNameFilter);
   const setShipNameFilter = useFilterStore((s) => s.setShipNameFilter);
 
+  // Filter store — precision & ID filters
+  const enabledPrecisions = useFilterStore((s) => s.enabledPrecisions);
+  const entityIdFilter = useFilterStore((s) => s.entityIdFilter);
+  const setEntityIdFilter = useFilterStore((s) => s.setEntityIdFilter);
+
   // Filter store — conflict filters
   const cameoCode = useFilterStore((s) => s.cameoCode);
   const setCameoCode = useFilterStore((s) => s.setCameoCode);
@@ -172,6 +177,7 @@ export function FilterPanelContent() {
   const isAltitudeActive = altitudeMin !== null || altitudeMax !== null;
   const isProximityActive = proximityPin !== null;
   const isMentionsActive = mentionsMin !== null || mentionsMax !== null;
+  const isPrecisionActive = enabledPrecisions.length < 4;
 
   return (
     <div className="flex flex-col gap-3">
@@ -382,6 +388,36 @@ export function FilterPanelContent() {
               value={cameoCode}
               onChange={setCameoCode}
               placeholder="e.g. 14, 190..."
+            />
+
+            {/* Precision filter */}
+            <div>
+              <SectionHeader
+                label="Precision"
+                active={isPrecisionActive}
+                filterKey="precision"
+                onClear={clearFilter}
+              />
+              <div className="mt-1 flex flex-wrap gap-1">
+                {(['exact', 'neighborhood', 'city', 'region'] as const).map((p) => (
+                  <FilterButton
+                    key={p}
+                    label={p === 'neighborhood' ? 'Nbhd' : p.charAt(0).toUpperCase() + p.slice(1)}
+                    active={enabledPrecisions.includes(p)}
+                    color="#67e8f9"
+                    onToggle={() => useFilterStore.getState().togglePrecision(p)}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Entity ID filter */}
+            <TextSearchInput
+              label="Entity ID"
+              value={entityIdFilter}
+              onChange={setEntityIdFilter}
+              placeholder="Substring match..."
             />
 
             {/* Country filter */}

@@ -143,5 +143,21 @@ export function entityPassesFilters(entity: MapEntity, filters: FilterState): bo
     }
   }
 
+  // ── Precision filter (conflict events only) ──
+  if (filters.enabledPrecisions.length < 4) {
+    if ('precision' in entity.data) {
+      const precision = (entity.data as { precision?: string }).precision ?? 'exact';
+      if (
+        !filters.enabledPrecisions.includes(precision as (typeof filters.enabledPrecisions)[number])
+      )
+        return false;
+    }
+  }
+
+  // ── Entity ID filter (all types) ──
+  if (filters.entityIdFilter) {
+    if (!entity.id.toLowerCase().includes(filters.entityIdFilter.toLowerCase())) return false;
+  }
+
   return true;
 }
