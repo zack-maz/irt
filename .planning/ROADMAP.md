@@ -125,10 +125,15 @@ Plans:
 
 ### Phase 27.3: Water Facility Filtering Improvements
 
-**Goal:** Improve the filtering and selection of water facilities pulled from Overpass — refine query criteria, reduce noise, ensure we're pulling the right facility types and data fields.
+**Goal:** Fix dam filtering (union tags + relaxed notability), reduce reservoir noise to 50-200 (strict notability for all countries), remove treatment_plant type entirely, enrich facilities with capacity/population/river data, and add dev filter diagnostics. Make the water layer Palantir-grade using only free/public APIs.
 **Depends on:** Phase 27.2
-**Requirements:** TBD
-**Plans:** 0 plans
+**Requirements:** D-01 through D-08 (from 27.3-CONTEXT.md)
+**Plans:** 2 plans
+
+Plans:
+
+- [ ] 27.3-01-PLAN.md — Server-side: types, query fixes, filtering, enrichment pipeline, filter stats, tests
+- [ ] 27.3-02-PLAN.md — Client-side: treatment_plant removal cascade, enrichment display, dev diagnostics
 
 ### Phase 27.4: LLM Enrichment Improvements
 
