@@ -244,6 +244,7 @@ None.
 | 260411-ma5 | Remove radiusMaxPixels cap so threat density clusters never shrink below event spread                           | 2026-04-11 | 86b648f | [260411-ma5-remove-radiusmaxpixels-cap-so-threat-den](./quick/260411-ma5-remove-radiusmaxpixels-cap-so-threat-den/) |
 | 260411-mh0 | Add Open-Meteo precipitation to API observability dashboard                                                     | 2026-04-11 | 7d73360 | [260411-mh0-add-open-meteo-precipitation-to-api-obse](./quick/260411-mh0-add-open-meteo-precipitation-to-api-obse/) |
 | 260411-mn4 | Show precipitation in weather tooltip always, using raw precip data instead of facility lookup                  | 2026-04-11 | 490561f | [260411-mn4-show-precipitation-in-weather-tooltip-al](./quick/260411-mn4-show-precipitation-in-weather-tooltip-al/) |
+| 260415-uzj | In our status line, keep the version number but remove the version title                                        | 2026-04-16 | 2c75caf | [260415-uzj-in-our-status-line-keep-the-version-numb](./quick/260415-uzj-in-our-status-line-keep-the-version-numb/) |
 
 ## Accumulated Context
 
