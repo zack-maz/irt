@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: 'Phase 27 shipped — PR #5'
+status: 'P27.2 shipped - PR#5'
 last_updated: '2026-04-11T22:53:00.000Z'
 progress:
-  total_phases: 4
+  total_phases: 6
   completed_phases: 1
   total_plans: 16
   completed_plans: 13

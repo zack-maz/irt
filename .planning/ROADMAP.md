@@ -7,7 +7,7 @@
 - **v1.1 Intelligence Layer** -- Phases 15-19.2 (shipped 2026-03-22)
 - **v1.2 Visualization & Hardening** -- Phases 20-21.3 (shipped 2026-03-29)
 - ✅ **v1.3 Data Quality & Layers** -- Phases 22-26.4 (shipped 2026-04-09) — [archive](milestones/v1.3-ROADMAP.md)
-- **v1.4 GDELT Redo & Performance** -- Phases 27-28 (planned)
+- **v1.4 GDELT Redo & Performance** -- Phases 27-28 (planned, 27.2-27.4 inserted)
 
 ## Phase Summary
 
@@ -123,10 +123,24 @@ Plans:
 - [ ] 27.2-03-PLAN.md — Precision ring 5%/40% opacity, zoom icon fix, date slider styling
 - [x] 27.2-04-PLAN.md — Water Overpass name filter removal, reverse geocode labels, filter parity, icon sizing, ships label
 
+### Phase 27.3: Water Facility Filtering Improvements
+
+**Goal:** Improve the filtering and selection of water facilities pulled from Overpass — refine query criteria, reduce noise, ensure we're pulling the right facility types and data fields.
+**Depends on:** Phase 27.2
+**Requirements:** TBD
+**Plans:** 0 plans
+
+### Phase 27.4: LLM Enrichment Improvements
+
+**Goal:** Further improve the LLM event enrichment pipeline — batch size tuning, prompt enrichment with news article context, better extraction quality, and richer output fields.
+**Depends on:** Phase 27.3
+**Requirements:** TBD
+**Plans:** 0 plans
+
 ### Phase 28: Performance & Load Testing — was Phase 27
 
 **Goal:** Optimize initial load time and validate production handles 250 concurrent users.
-**Depends on:** Phase 27 (GDELT redo — to ensure load tests hit a stable event pipeline)
+**Depends on:** Phase 27.4 (GDELT redo + water/LLM improvements complete before load testing)
 **Requirements:** TBD
 **Plans:** 0 plans
 
