@@ -306,22 +306,20 @@ async function fetchFacilityType(entry: { label: string; nwr: string }): Promise
  * Each facility is enriched with WRI basin stress indicators via assignBasinStress.
  */
 export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
-  // Run all facility type queries in parallel for faster cold starts
-  const results = await Promise.allSettled(
-    FACILITY_QUERIES.map((entry) => fetchFacilityType(entry)),
-  );
-
+  // Run queries sequentially to avoid Overpass rate limiting.
+  // Parallel requests cause the large reservoir query to get throttled/dropped.
   const all: WaterFacility[] = [];
   let succeeded = 0;
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
-    if (!result) continue;
-    if (result.status === 'fulfilled' && result.value.length > 0) {
-      succeeded++;
-      all.push(...result.value);
-    } else if (result.status === 'rejected') {
-      log.warn({ facilityType: FACILITY_QUERIES[i]?.label, err: result.reason }, 'query rejected');
+  for (const entry of FACILITY_QUERIES) {
+    try {
+      const facilities = await fetchFacilityType(entry);
+      if (facilities.length > 0) {
+        succeeded++;
+        all.push(...facilities);
+      }
+    } catch (err) {
+      log.warn({ facilityType: entry.label, err }, 'query failed, continuing');
     }
   }
 
