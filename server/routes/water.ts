@@ -5,6 +5,7 @@ import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'water' });
 import { fetchWaterFacilities, FACILITY_TYPE_LABELS } from '../adapters/overpass-water.js';
+import { saveDevWaterCache, loadDevWaterCache } from '../cache/devFileCache.js';
 import { reverseGeocode } from '../adapters/nominatim.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
 import {
@@ -123,14 +124,31 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
     return sendValidated(res, waterResponseSchema, cached);
   }
 
+  // REV-4: Dev file cache fallback before Overpass call
+  if (!forceRefresh) {
+    const devCached = loadDevWaterCache<{ facilities: WaterFacility[]; stats: unknown }>();
+    if (devCached) {
+      const labeled = await labelUnnamedFacilities(devCached.facilities);
+      await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
+      return sendValidated(res, waterResponseSchema, {
+        data: labeled,
+        stale: false,
+        lastFresh: Date.now(),
+      });
+    }
+  }
+
   try {
-    const raw = await fetchWaterFacilities();
+    const { facilities: raw, stats: filterStats } = await fetchWaterFacilities();
     const facilities = await labelUnnamedFacilities(raw);
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
+    saveDevWaterCache({ facilities, stats: filterStats });
+    // REV-4 wiring: include filterStats in non-cached response so DevApiStatus can render diagnostics
     sendValidated(res, waterResponseSchema, {
       data: facilities,
       stale: false,
       lastFresh: Date.now(),
+      filterStats,
     });
   } catch (err) {
     log.error({ err }, 'Overpass error');
@@ -167,8 +185,8 @@ waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) =>
     if (cachedFacilities) {
       facilities = cachedFacilities.data;
     } else {
-      const raw = await fetchWaterFacilities();
-      facilities = await labelUnnamedFacilities(raw);
+      const { facilities: rawFacilities } = await fetchWaterFacilities();
+      facilities = await labelUnnamedFacilities(rawFacilities);
       await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     }
 

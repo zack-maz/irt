@@ -33,7 +33,7 @@ cronWarmRouter.get('/', async (_req, res) => {
       return sites.length;
     })(),
     (async () => {
-      const facilities = await fetchWaterFacilities();
+      const { facilities } = await fetchWaterFacilities();
       await cacheSetSafe(WATER_KEY, facilities, WATER_REDIS_TTL_SEC);
       return facilities.length;
     })(),

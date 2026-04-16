@@ -6,6 +6,11 @@ import {
   isPriorityCountry,
   isNotable,
   FACILITY_TYPE_LABELS,
+  extractCapacityTags,
+  findNearestCity,
+  linkRiver,
+  computeNotabilityScore,
+  RIVER_BBOXES,
 } from '../../adapters/overpass-water.js';
 import type { WaterStressIndicators } from '../../types.js';
 
@@ -16,10 +21,6 @@ describe('classifyWaterType', () => {
 
   it('returns "reservoir" for natural=water + water=reservoir', () => {
     expect(classifyWaterType({ natural: 'water', water: 'reservoir' })).toBe('reservoir');
-  });
-
-  it('returns "treatment_plant" for man_made=water_works', () => {
-    expect(classifyWaterType({ man_made: 'water_works' })).toBe('treatment_plant');
   });
 
   it('returns "desalination" for man_made=desalination_plant', () => {
@@ -36,6 +37,21 @@ describe('classifyWaterType', () => {
 
   it('returns null for canal tags (not a facility type)', () => {
     expect(classifyWaterType({ waterway: 'canal' })).toBeNull();
+  });
+});
+
+describe('classifyWaterType (Phase 27.3)', () => {
+  it('returns "dam" for waterway=dam', () => {
+    expect(classifyWaterType({ waterway: 'dam' })).toBe('dam');
+  });
+  it('returns "dam" for man_made=dam (D-01 union)', () => {
+    expect(classifyWaterType({ man_made: 'dam' })).toBe('dam');
+  });
+  it('returns "reservoir" for landuse=reservoir', () => {
+    expect(classifyWaterType({ landuse: 'reservoir' })).toBe('reservoir');
+  });
+  it('returns null for man_made=water_works (treatment_plant removed)', () => {
+    expect(classifyWaterType({ man_made: 'water_works' })).toBeNull();
   });
 });
 
@@ -126,7 +142,7 @@ describe('normalizeWaterElement', () => {
       id: 12345,
       lat: 33.3,
       lon: 44.4,
-      tags: { waterway: 'dam', name: 'Mosul Dam' },
+      tags: { waterway: 'dam', name: 'Mosul Dam', wikidata: 'Q123' },
     };
     const result = normalizeWaterElement(el, stressLookup);
     expect(result).not.toBeNull();
@@ -145,7 +161,7 @@ describe('normalizeWaterElement', () => {
       type: 'way' as const,
       id: 67890,
       center: { lat: 35.0, lon: 45.0 },
-      tags: { natural: 'water', water: 'reservoir', 'name:en': 'Lake Tharthar' },
+      tags: { natural: 'water', water: 'reservoir', 'name:en': 'Lake Tharthar', wikidata: 'Q99' },
     };
     const result = normalizeWaterElement(el, stressLookup);
     expect(result).not.toBeNull();
@@ -189,6 +205,7 @@ describe('normalizeWaterElement', () => {
         waterway: 'dam',
         name: 'Darbandikhan Dam',
         operator: 'Iraqi Ministry of Water Resources',
+        wikidata: 'Q456',
       },
     };
     const result = normalizeWaterElement(el, stressLookup);
@@ -211,27 +228,14 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('keeps treatment_plant in priority country (Iran)', () => {
-      const el = {
-        type: 'node' as const,
-        id: 201,
-        lat: 32.4,
-        lon: 53.7,
-        tags: { man_made: 'water_works', name: 'Tehran Water Works' },
-      };
-      const result = normalizeWaterElement(el, stressLookup);
-      expect(result).not.toBeNull();
-      expect(result!.facilityType).toBe('treatment_plant');
-    });
-
     // Non-priority country: Saudi Arabia (23.9, 45.1)
-    it('filters dam without wikidata/wikipedia in non-priority country', () => {
+    it('filters dam without name in non-priority country', () => {
       const el = {
         type: 'node' as const,
         id: 300,
         lat: 23.9,
         lon: 45.1,
-        tags: { waterway: 'dam', name: 'Saudi Dam' },
+        tags: { waterway: 'dam' },
       };
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
@@ -274,24 +278,13 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('filters treatment_plant in non-priority country (always excluded)', () => {
-      const el = {
-        type: 'node' as const,
-        id: 304,
-        lat: 23.9,
-        lon: 45.1,
-        tags: { man_made: 'water_works', name: 'Saudi Water Works', wikidata: 'Q99999' },
-      };
-      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
-    });
-
-    it('keeps desalination in non-priority country (always included)', () => {
+    it('keeps desalination in non-priority country when score >= 25 (wikidata gives +40)', () => {
       const el = {
         type: 'node' as const,
         id: 305,
         lat: 23.9,
         lon: 45.1,
-        tags: { man_made: 'desalination_plant', name: 'Saudi Desalination' },
+        tags: { man_made: 'desalination_plant', name: 'Saudi Desalination', wikidata: 'Q99' },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
@@ -314,13 +307,13 @@ describe('normalizeWaterElement', () => {
   });
 
   describe('unnamed facility labeling', () => {
-    it('produces generic type label when OSM name tag is absent', () => {
+    it('produces generic type label when OSM name tag is absent (wikidata provides notability)', () => {
       const el = {
         type: 'node' as const,
         id: 400,
         lat: 33.2,
         lon: 43.7, // Iraq (priority)
-        tags: { waterway: 'dam' },
+        tags: { waterway: 'dam', wikidata: 'Q999' }, // wikidata (+40) + priority (+15) = 55 >= 25
       };
       const result = normalizeWaterElement(el, stressLookup);
       expect(result).not.toBeNull();
@@ -346,22 +339,150 @@ describe('normalizeWaterElement', () => {
         id: 402,
         lat: 32.4,
         lon: 53.7, // Iran (priority)
-        tags: { man_made: 'water_works', 'name:en': 'Isfahan Water Works' },
+        tags: { man_made: 'desalination_plant', 'name:en': 'Isfahan Desalination Plant' },
       };
       const result = normalizeWaterElement(el, stressLookup);
       expect(result).not.toBeNull();
-      expect(result!.label).toBe('Isfahan Water Works');
+      expect(result!.label).toBe('Isfahan Desalination Plant');
     });
   });
 });
 
 describe('FACILITY_TYPE_LABELS', () => {
-  it('exports all four facility type labels', () => {
+  it('exports all three facility type labels', () => {
     expect(FACILITY_TYPE_LABELS).toEqual({
       dam: 'Dam',
       reservoir: 'Reservoir',
       desalination: 'Desalination Plant',
-      treatment_plant: 'Treatment Plant',
     });
+  });
+});
+
+// ---------- Phase 27.3 new tests ----------
+
+const stressLookup = () => ({
+  bws_raw: 3.5,
+  bws_score: 3.5,
+  bws_label: 'High',
+  drr_score: 2.0,
+  gtd_score: 1.5,
+  sev_score: 2.5,
+  iav_score: 3.0,
+  compositeHealth: 0.5,
+});
+
+describe('computeNotabilityScore (REV-1)', () => {
+  it('scores high for wikidata + named + priority', () => {
+    const score = computeNotabilityScore(
+      { wikidata: 'Q123', name: 'Mosul Dam', 'name:en': 'Mosul Dam', operator: 'Iraq Gov' },
+      'dam',
+      true,
+    );
+    expect(score).toBeGreaterThanOrEqual(85);
+  });
+  it('scores low for unnamed non-priority', () => {
+    expect(computeNotabilityScore({}, 'dam', false)).toBeLessThan(25);
+  });
+  it('desalination always gets +5 bonus', () => {
+    expect(computeNotabilityScore({ name: 'Plant' }, 'desalination', false)).toBeGreaterThanOrEqual(
+      20,
+    );
+  });
+});
+
+describe('extractCapacityTags', () => {
+  it('extracts numeric height', () => {
+    expect(extractCapacityTags({ height: '85' })).toEqual({ height: 85 });
+  });
+  it('strips unit suffixes', () => {
+    expect(extractCapacityTags({ height: '85 m', volume: '1000000 m3' })).toEqual({
+      height: 85,
+      volume: 1000000,
+    });
+  });
+  it('returns null when no capacity tags', () => {
+    expect(extractCapacityTags({ name: 'Dam' })).toBeNull();
+  });
+  it('ignores fully non-numeric values', () => {
+    expect(extractCapacityTags({ height: 'unknown' })).toBeNull();
+  });
+});
+
+describe('findNearestCity', () => {
+  it('finds Baghdad for coords near Baghdad', () => {
+    // Use Baghdad city center coords (not Iraq country centroid)
+    expect(findNearestCity(33.32, 44.37)?.name).toBe('Baghdad');
+  });
+  it('finds Tabqa for coords near Tabqa Dam (REV-1 expanded)', () => {
+    expect(findNearestCity(35.84, 38.55)?.name).toBe('Tabqa');
+  });
+  it('returns null for remote coordinates', () => {
+    expect(findNearestCity(0, 0)).toBeNull();
+  });
+});
+
+describe('linkRiver with bbox optimization (REV-3)', () => {
+  it('returns null for facility outside any river bbox', () => {
+    expect(linkRiver(25.0, 55.0)).toBeNull();
+  });
+  it('RIVER_BBOXES has at least one entry', () => {
+    expect(RIVER_BBOXES.length).toBeGreaterThan(0);
+  });
+  it('each river bbox has valid bounds', () => {
+    for (const bbox of RIVER_BBOXES) {
+      expect(bbox.minLat).toBeLessThanOrEqual(bbox.maxLat);
+      expect(bbox.minLng).toBeLessThanOrEqual(bbox.maxLng);
+      expect(bbox.vertices.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('reservoir filtering (REV-2 wikidata fallback)', () => {
+  it('keeps named reservoir in priority country without wikidata', () => {
+    const el = {
+      type: 'node' as const,
+      id: 700,
+      lat: 33.2,
+      lon: 43.7,
+      tags: { natural: 'water', water: 'reservoir', name: 'Tharthar Lake' },
+    };
+    expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+  });
+  it('rejects unnamed reservoir even in priority country', () => {
+    const el = {
+      type: 'node' as const,
+      id: 701,
+      lat: 33.2,
+      lon: 43.7,
+      tags: { natural: 'water', water: 'reservoir' },
+    };
+    expect(normalizeWaterElement(el, stressLookup)).toBeNull();
+  });
+});
+
+describe('holistic filtering (REV-1)', () => {
+  it('rejects facility with score below MIN_NOTABILITY_SCORE', () => {
+    const el = {
+      type: 'node' as const,
+      id: 800,
+      lat: 24.0, // Saudi Arabia, non-priority
+      lon: 47.0,
+      tags: { waterway: 'dam' }, // No name, no wikidata, no operator
+    };
+    expect(normalizeWaterElement(el, stressLookup)).toBeNull();
+  });
+});
+
+describe('normalized facility includes notabilityScore', () => {
+  it('attaches notabilityScore to passing facilities', () => {
+    const el = {
+      type: 'node' as const,
+      id: 900,
+      lat: 33.2,
+      lon: 43.7,
+      tags: { waterway: 'dam', name: 'Test Dam', operator: 'Iraq', wikidata: 'Q1' },
+    };
+    const result = normalizeWaterElement(el, stressLookup);
+    expect(result?.notabilityScore).toBeGreaterThanOrEqual(70);
   });
 });

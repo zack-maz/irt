@@ -1,8 +1,13 @@
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import type { WaterFacility, WaterFacilityType, WaterStressIndicators } from '../types.js';
 import { assignBasinStress } from '../lib/basinLookup.js';
 import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'overpass-water' });
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const OVERPASS_FALLBACK = 'https://overpass.private.coffee/api/interpreter';
@@ -90,7 +95,7 @@ export function isNotable(tags: Record<string, string>): boolean {
 
 /**
  * Relaxed notability: any name tag at all (any script). Used for dams
- * and treatment plants where volume is lower and named = significant.
+ * where volume is lower and named = significant.
  */
 export function hasName(tags: Record<string, string>): boolean {
   if (isNotable(tags)) return true;
@@ -143,22 +148,130 @@ function isExcludedLocation(lat: number, lng: number): boolean {
   return false;
 }
 
+// ---------- City Data for Enrichment (REV-1 expanded coverage) ----------
+
+interface CityEntry {
+  name: string;
+  lat: number;
+  lng: number;
+  population: number;
+}
+
+const CITY_DATA: CityEntry[] = [
+  { name: 'Tehran', lat: 35.6892, lng: 51.389, population: 9_000_000 },
+  { name: 'Baghdad', lat: 33.3152, lng: 44.3661, population: 7_500_000 },
+  { name: 'Damascus', lat: 33.5138, lng: 36.2765, population: 2_500_000 },
+  { name: 'Tel Aviv', lat: 32.0853, lng: 34.7818, population: 4_000_000 },
+  { name: 'Jerusalem', lat: 31.7683, lng: 35.2137, population: 950_000 },
+  { name: 'Riyadh', lat: 24.7136, lng: 46.6753, population: 7_600_000 },
+  { name: 'Beirut', lat: 33.8938, lng: 35.5018, population: 2_400_000 },
+  { name: 'Amman', lat: 31.9454, lng: 35.9284, population: 4_000_000 },
+  { name: 'Kabul', lat: 34.5553, lng: 69.2075, population: 4_400_000 },
+  { name: 'Islamabad', lat: 33.6844, lng: 73.0479, population: 1_100_000 },
+  { name: 'Ankara', lat: 39.9334, lng: 32.8597, population: 5_700_000 },
+  { name: "Sana'a", lat: 15.3694, lng: 44.191, population: 3_900_000 },
+  { name: 'Doha', lat: 25.2854, lng: 51.531, population: 2_400_000 },
+  { name: 'Kuwait City', lat: 29.3759, lng: 47.9774, population: 3_100_000 },
+  { name: 'Muscat', lat: 23.588, lng: 58.3829, population: 1_500_000 },
+  { name: 'Manama', lat: 26.2285, lng: 50.586, population: 600_000 },
+  { name: 'Abu Dhabi', lat: 24.4539, lng: 54.3773, population: 1_500_000 },
+  { name: 'Dubai', lat: 25.2048, lng: 55.2708, population: 3_400_000 },
+  { name: 'Aden', lat: 12.7855, lng: 45.0187, population: 1_000_000 },
+  { name: 'Basra', lat: 30.5085, lng: 47.7804, population: 2_800_000 },
+  { name: 'Mosul', lat: 36.335, lng: 43.1189, population: 1_800_000 },
+  { name: 'Aleppo', lat: 36.2021, lng: 37.1343, population: 2_100_000 },
+  { name: 'Homs', lat: 34.7324, lng: 36.7137, population: 800_000 },
+  { name: 'Isfahan', lat: 32.6546, lng: 51.668, population: 2_200_000 },
+  { name: 'Tabriz', lat: 38.0962, lng: 46.2738, population: 1_800_000 },
+  { name: 'Jeddah', lat: 21.4858, lng: 39.1925, population: 4_700_000 },
+  { name: 'Medina', lat: 24.4672, lng: 39.6024, population: 1_500_000 },
+  { name: 'Haifa', lat: 32.794, lng: 34.9896, population: 300_000 },
+  { name: 'Gaza City', lat: 31.5017, lng: 34.4668, population: 600_000 },
+  { name: 'Karachi', lat: 24.8607, lng: 67.0011, population: 16_000_000 },
+  { name: 'Tikrit', lat: 34.6115, lng: 43.677, population: 160_000 },
+  { name: 'Fallujah', lat: 33.3484, lng: 43.7753, population: 350_000 },
+  { name: 'Ramadi', lat: 33.4271, lng: 43.3068, population: 300_000 },
+  { name: 'Kirkuk', lat: 35.4681, lng: 44.3953, population: 1_000_000 },
+  { name: 'Idlib', lat: 35.9306, lng: 36.6339, population: 165_000 },
+  { name: 'Deir ez-Zor', lat: 35.3359, lng: 40.1408, population: 250_000 },
+  { name: 'Hodeidah', lat: 14.798, lng: 42.954, population: 600_000 },
+  { name: 'Kandahar', lat: 31.628, lng: 65.7372, population: 600_000 },
+  { name: 'Mazar-i-Sharif', lat: 36.7069, lng: 67.11, population: 500_000 },
+  { name: 'Lahore', lat: 31.5497, lng: 74.3436, population: 13_000_000 },
+  { name: 'Peshawar', lat: 34.0151, lng: 71.5249, population: 2_000_000 },
+  { name: 'Cairo', lat: 30.0444, lng: 31.2357, population: 21_000_000 },
+  // Dam-complex cities added per REV-1 to improve enrichment coverage:
+  { name: 'Tabqa', lat: 35.8367, lng: 38.5478, population: 100_000 },
+  { name: 'Dukan', lat: 35.95, lng: 44.95, population: 50_000 },
+  { name: 'Tarbela', lat: 34.085, lng: 72.6985, population: 30_000 },
+  { name: 'Mangla', lat: 33.1456, lng: 73.6444, population: 40_000 },
+  { name: 'Kajaki', lat: 32.3175, lng: 65.1228, population: 15_000 },
+  { name: 'Aswan', lat: 24.0889, lng: 32.8998, population: 290_000 },
+  { name: 'Diyarbakir', lat: 37.9144, lng: 40.2306, population: 1_100_000 },
+  { name: 'Khartoum', lat: 15.5007, lng: 32.5599, population: 5_000_000 },
+  { name: 'Shiraz', lat: 29.5918, lng: 52.5836, population: 1_900_000 },
+];
+
+// ---------- Pre-computed River Bounding Boxes (REV-3) ----------
+
+interface RiverFeature {
+  type: 'Feature';
+  properties: { name: string; scalerank?: number; compositeHealth?: number };
+  geometry: { type: 'MultiLineString' | 'LineString'; coordinates: number[][] | number[][][] };
+}
+
+interface RiverBbox {
+  name: string;
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+  vertices: [number, number][];
+}
+
+const riversPath = resolve(__dirname, '../../src/data/rivers.json');
+const riversData: { features: RiverFeature[] } = JSON.parse(readFileSync(riversPath, 'utf-8'));
+
+export const RIVER_BBOXES: RiverBbox[] = riversData.features.map((f) => {
+  const coords: number[][] =
+    f.geometry.type === 'LineString'
+      ? (f.geometry.coordinates as number[][])
+      : (f.geometry.coordinates as number[][][]).flat();
+  const vertices: [number, number][] = coords
+    .filter((c) => c[0] !== undefined && c[1] !== undefined)
+    .map((c) => [c[0]!, c[1]!] as [number, number]);
+  let minLat = Infinity,
+    maxLat = -Infinity,
+    minLng = Infinity,
+    maxLng = -Infinity;
+  for (const [lng, lat] of vertices) {
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+  }
+  return { name: f.properties.name, minLat, maxLat, minLng, maxLng, vertices };
+});
+
+// ---------- Facility Queries (D-01 union, D-03 drop treatment) ----------
+
 /**
  * Split into separate queries per facility type to keep each request light.
- * Dams, reservoirs, desalination, and treatment plants (man_made=water_works).
- * Treatment plants only kept in priority countries; non-priority dams/reservoirs require notability.
+ * Dams: union of waterway=dam + man_made=dam (D-01).
+ * Reservoirs: natural=water+reservoir + landuse=reservoir.
+ * Desalination: man_made=desalination_plant + water_works=desalination.
+ * treatment_plant removed (D-03).
  */
 const FACILITY_QUERIES: { label: string; nwr: string }[] = [
-  { label: 'dams', nwr: 'nwr["waterway"="dam"]' },
+  { label: 'dams', nwr: '(nwr["waterway"="dam"];nwr["man_made"="dam"];)' },
   {
     label: 'reservoirs',
-    nwr: '(way["natural"="water"]["water"="reservoir"];relation["natural"="water"]["water"="reservoir"];)',
+    nwr: '(way["natural"="water"]["water"="reservoir"];relation["natural"="water"]["water"="reservoir"];way["landuse"="reservoir"];relation["landuse"="reservoir"];)',
   },
   {
     label: 'desalination',
     nwr: '(nwr["man_made"="desalination_plant"];nwr["water_works"="desalination"];)',
   },
-  { label: 'treatment_plants', nwr: 'nwr["man_made"="water_works"]' },
 ];
 
 function buildQuery(nwr: string): string {
@@ -195,10 +308,11 @@ function toTitleCase(str: string): string {
  */
 export function classifyWaterType(tags: Record<string, string>): WaterFacilityType | null {
   if (tags['waterway'] === 'dam') return 'dam';
+  if (tags['man_made'] === 'dam') return 'dam';
   if (tags['natural'] === 'water' && tags['water'] === 'reservoir') return 'reservoir';
+  if (tags['landuse'] === 'reservoir') return 'reservoir';
   if (tags['man_made'] === 'desalination_plant') return 'desalination';
   if (tags['water_works'] === 'desalination') return 'desalination';
-  if (tags['man_made'] === 'water_works') return 'treatment_plant';
   return null;
 }
 
@@ -206,7 +320,6 @@ export const FACILITY_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination Plant',
-  treatment_plant: 'Treatment Plant',
 };
 
 /** Extract an English label from OSM tags */
@@ -219,13 +332,130 @@ function extractLabel(tags: Record<string, string>, facilityType: WaterFacilityT
   return FACILITY_TYPE_LABELS[facilityType];
 }
 
+// ---------- Enrichment Functions ----------
+
+/**
+ * Extract capacity-related OSM tags into structured numbers.
+ * Strips unit suffixes (e.g. "85 m" → 85).
+ */
+export function extractCapacityTags(
+  tags: Record<string, string>,
+): { height?: number; volume?: number; area?: number } | null {
+  // parseFloat naturally stops at first non-numeric char, handling "85 m", "1000000 m3", etc.
+  const stripUnits = (v: string) => parseFloat(v);
+  const heightRaw = tags['height'];
+  const height = heightRaw ? stripUnits(heightRaw) : undefined;
+  const volRaw = tags['volume'] ?? tags['capacity'];
+  const volume = volRaw ? stripUnits(volRaw) : undefined;
+  const areaRaw = tags['area'];
+  const area = areaRaw ? stripUnits(areaRaw) : undefined;
+  const result: { height?: number; volume?: number; area?: number } = {};
+  if (height !== undefined && !isNaN(height)) result.height = height;
+  if (volume !== undefined && !isNaN(volume)) result.volume = volume;
+  if (area !== undefined && !isNaN(area)) result.area = area;
+  return Object.keys(result).length > 0 ? result : null;
+}
+
+/**
+ * Find the nearest city within 150km of the given coordinates.
+ * Returns null if no city is within range.
+ */
+export function findNearestCity(
+  lat: number,
+  lng: number,
+): { name: string; distanceKm: number; population: number } | null {
+  let nearest: { name: string; distanceKm: number; population: number } | null = null;
+  for (const city of CITY_DATA) {
+    const d = haversine(lat, lng, city.lat, city.lng);
+    if (!nearest || d < nearest.distanceKm) {
+      nearest = { name: city.name, distanceKm: Math.round(d), population: city.population };
+    }
+  }
+  return nearest && nearest.distanceKm <= 150 ? nearest : null;
+}
+
+/**
+ * Find the nearest river within 20km of the given coordinates.
+ * Uses pre-computed bounding boxes (REV-3) to skip ~80% of vertex iterations.
+ * Returns null if no river is within range.
+ */
+export function linkRiver(lat: number, lng: number): { name: string; distanceKm: number } | null {
+  const BBOX_MARGIN_DEG = 0.2;
+  let nearest: { name: string; distanceKm: number } | null = null;
+  for (const river of RIVER_BBOXES) {
+    if (
+      lat < river.minLat - BBOX_MARGIN_DEG ||
+      lat > river.maxLat + BBOX_MARGIN_DEG ||
+      lng < river.minLng - BBOX_MARGIN_DEG ||
+      lng > river.maxLng + BBOX_MARGIN_DEG
+    )
+      continue;
+    for (const [vlng, vlat] of river.vertices) {
+      const d = haversine(lat, lng, vlat, vlng);
+      if (!nearest || d < nearest.distanceKm) {
+        nearest = { name: river.name, distanceKm: Math.round(d) };
+      }
+    }
+  }
+  return nearest && nearest.distanceKm <= 20 ? nearest : null;
+}
+
+// ---------- Holistic Notability Score (REV-1) ----------
+
+/**
+ * Compute a holistic notability score (0-100) for a water facility.
+ * Facilities below MIN_NOTABILITY_SCORE are bypassed regardless of country.
+ */
+export function computeNotabilityScore(
+  tags: Record<string, string>,
+  facilityType: WaterFacilityType,
+  inPriorityCountry: boolean,
+): number {
+  let score = 0;
+  // isNotable covers wikidata, wikipedia, and any wikipedia:lang key
+  if (isNotable(tags)) score += 40;
+  if (tags['name:en']?.trim()) score += 20;
+  else if (tags.name?.trim()) score += 15;
+  if (inPriorityCountry) score += 15;
+  if (tags.operator) score += 10;
+  if (tags.height || tags.volume || tags.capacity) score += 10;
+  if (facilityType === 'desalination') score += 5;
+  return score;
+}
+
+// ---------- Filter Stats ----------
+
+export interface WaterFilterStats {
+  rawCounts: Record<string, number>;
+  filteredCounts: Record<string, number>;
+  rejections: {
+    excluded_location: number;
+    not_notable: number;
+    no_name: number;
+    duplicate: number;
+    low_score: number;
+  };
+  enrichment: {
+    withCapacity: number;
+    withCity: number;
+    withRiver: number;
+  };
+  scoreHistogram: { bucket: string; count: number }[];
+}
+
+// ---------- Normalization ----------
+
+const MIN_NOTABILITY_SCORE = 25;
+
 /**
  * Normalize an Overpass element into a WaterFacility.
- * Requires a stress lookup function to assign basin stress indicators.
+ * Applies holistic filtering (REV-1), reservoir wikidata fallback (REV-2),
+ * and enrichment pipeline (D-06/D-07/D-08).
  */
 export function normalizeWaterElement(
   el: OverpassElement,
   stressLookup: (lat: number, lng: number) => WaterStressIndicators,
+  rejections?: WaterFilterStats['rejections'],
 ): WaterFacility | null {
   if (!el.tags) return null;
   const facilityType = classifyWaterType(el.tags);
@@ -235,18 +465,38 @@ export function normalizeWaterElement(
   const lon = el.lon ?? el.center?.lon;
   if (lat === undefined || lon === undefined) return null;
 
-  // Geographic exclusion: western Turkey, Uzbekistan, Tajikistan, etc.
-  if (isExcludedLocation(lat, lon)) return null;
-
-  // Tiered country filtering: priority countries keep all, non-priority apply notability checks
-  if (!isPriorityCountry(lat, lon)) {
-    // Reservoirs: strict (wikidata/wikipedia only) — high volume needs tight filter
-    if (facilityType === 'reservoir' && !isNotable(el.tags)) return null;
-    // Dams & treatment plants: relaxed (any name) — lower volume, named = significant
-    if ((facilityType === 'dam' || facilityType === 'treatment_plant') && !hasName(el.tags))
-      return null;
-    // desalination always passes through
+  if (isExcludedLocation(lat, lon)) {
+    if (rejections) rejections.excluded_location++;
+    return null;
   }
+
+  const inPriority = isPriorityCountry(lat, lon);
+  const score = computeNotabilityScore(el.tags, facilityType, inPriority);
+
+  // REV-2: Reservoir wikidata fallback — wikidata OR (named AND priority country)
+  if (facilityType === 'reservoir') {
+    const passes = isNotable(el.tags) || (inPriority && hasName(el.tags));
+    if (!passes) {
+      if (rejections) rejections.not_notable++;
+      return null;
+    }
+  }
+
+  // Dams (non-priority): require name
+  if (facilityType === 'dam' && !inPriority && !hasName(el.tags)) {
+    if (rejections) rejections.no_name++;
+    return null;
+  }
+
+  // REV-1: Holistic notability cutoff bypasses miniscule facilities
+  if (score < MIN_NOTABILITY_SCORE) {
+    if (rejections) rejections.low_score++;
+    return null;
+  }
+
+  const capacity = extractCapacityTags(el.tags);
+  const nearestCity = findNearestCity(lat, lon);
+  const linkedRiver = linkRiver(lat, lon);
 
   return {
     id: `water-${el.id}`,
@@ -259,13 +509,22 @@ export function normalizeWaterElement(
       el.tags.operator && isLatin(el.tags.operator) ? toTitleCase(el.tags.operator) : undefined,
     osmId: el.id,
     stress: stressLookup(lat, lon),
+    notabilityScore: score,
+    ...(capacity && { capacity }),
+    ...(nearestCity && { nearestCity }),
+    ...(linkedRiver && { linkedRiver }),
   };
 }
+
+// ---------- Fetch Helpers ----------
 
 /**
  * Fetch one facility type from Overpass, trying primary then fallback.
  */
-async function fetchFacilityType(entry: { label: string; nwr: string }): Promise<WaterFacility[]> {
+async function fetchFacilityType(
+  entry: { label: string; nwr: string },
+  stats: WaterFilterStats,
+): Promise<WaterFacility[]> {
   const query = buildQuery(entry.nwr);
   for (const url of [OVERPASS_URL, OVERPASS_FALLBACK]) {
     try {
@@ -283,14 +542,20 @@ async function fetchFacilityType(entry: { label: string; nwr: string }): Promise
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
+      stats.rawCounts[entry.label] = (stats.rawCounts[entry.label] ?? 0) + json.elements.length;
 
       const facilities: WaterFacility[] = [];
       for (const el of json.elements) {
-        const facility = normalizeWaterElement(el, assignBasinStress);
+        const facility = normalizeWaterElement(el, assignBasinStress, stats.rejections);
         if (facility) facilities.push(facility);
       }
+      stats.filteredCounts[entry.label] =
+        (stats.filteredCounts[entry.label] ?? 0) + facilities.length;
 
-      log.info({ facilityType: entry.label, count: facilities.length }, 'fetched facilities');
+      log.info(
+        { facilityType: entry.label, raw: json.elements.length, kept: facilities.length },
+        'fetched facilities',
+      );
       return facilities;
     } catch (err) {
       log.warn({ err, facilityType: entry.label, url }, 'Overpass request failed');
@@ -302,18 +567,28 @@ async function fetchFacilityType(entry: { label: string; nwr: string }): Promise
 
 /**
  * Fetch water infrastructure facilities from Overpass API.
+ * Returns facilities with enrichment fields and filter stats.
  * Uses bbox queries (one per facility type, sequential) instead of country-area unions.
- * Each facility is enriched with WRI basin stress indicators via assignBasinStress.
  */
-export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
-  // Run queries sequentially to avoid Overpass rate limiting.
-  // Parallel requests cause the large reservoir query to get throttled/dropped.
+export async function fetchWaterFacilities(): Promise<{
+  facilities: WaterFacility[];
+  stats: WaterFilterStats;
+}> {
+  const stats: WaterFilterStats = {
+    rawCounts: {},
+    filteredCounts: {},
+    rejections: { excluded_location: 0, not_notable: 0, no_name: 0, duplicate: 0, low_score: 0 },
+    enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
+    scoreHistogram: [],
+  };
+
   const all: WaterFacility[] = [];
   let succeeded = 0;
 
+  // Run queries sequentially to avoid Overpass rate limiting.
   for (const entry of FACILITY_QUERIES) {
     try {
-      const facilities = await fetchFacilityType(entry);
+      const facilities = await fetchFacilityType(entry, stats);
       if (facilities.length > 0) {
         succeeded++;
         all.push(...facilities);
@@ -331,16 +606,43 @@ export async function fetchWaterFacilities(): Promise<WaterFacility[]> {
   const unique = new Map<string, WaterFacility>();
   for (const f of all) unique.set(f.id, f);
 
-  if (unique.size > 800) {
-    log.warn(
-      { total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length },
-      'water facility count exceeds 800 soft cap — serving all facilities',
+  // D-05: Spatial dedup (50m, same facilityType)
+  const deduped: WaterFacility[] = [];
+  for (const f of Array.from(unique.values())) {
+    const isDupe = deduped.some(
+      (existing) =>
+        existing.facilityType === f.facilityType &&
+        haversine(existing.lat, existing.lng, f.lat, f.lng) < 0.05,
     );
+    if (!isDupe) deduped.push(f);
+    else stats.rejections.duplicate++;
   }
 
+  // Tally enrichment coverage
+  for (const f of deduped) {
+    if (f.capacity) stats.enrichment.withCapacity++;
+    if (f.nearestCity) stats.enrichment.withCity++;
+    if (f.linkedRiver) stats.enrichment.withRiver++;
+  }
+
+  // Score histogram
+  const buckets: [number, number][] = [
+    [25, 40],
+    [40, 55],
+    [55, 70],
+    [70, 85],
+    [85, 101],
+  ];
+  stats.scoreHistogram = buckets.map(([lo, hi]) => ({
+    bucket: `${lo}-${hi - 1}`,
+    count: deduped.filter((f) => (f.notabilityScore ?? 0) >= lo && (f.notabilityScore ?? 0) < hi)
+      .length,
+  }));
+
   log.info(
-    { total: unique.size, succeeded, totalQueries: FACILITY_QUERIES.length },
+    { total: deduped.length, succeeded, totalQueries: FACILITY_QUERIES.length, stats },
     'water facilities fetch complete',
   );
-  return Array.from(unique.values());
+
+  return { facilities: deduped, stats };
 }

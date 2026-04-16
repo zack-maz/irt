@@ -11,7 +11,12 @@ interface CacheEntry<T> {
 const redisStore = new Map<string, CacheEntry<unknown>>();
 
 // Module-level mock functions
-const mockFetchWaterFacilities = vi.fn(async (): Promise<WaterFacility[]> => []);
+const mockFetchWaterFacilities = vi.fn(
+  async (): Promise<{ facilities: WaterFacility[]; stats: unknown }> => ({
+    facilities: [],
+    stats: {},
+  }),
+);
 const mockFetchPrecipitation = vi.fn(async () => []);
 
 // Mock rate limiter
@@ -78,6 +83,12 @@ vi.mock('../../adapters/nominatim.js', () => ({
   reverseGeocode: vi.fn(async () => ({ display: 'Unknown location' })),
 }));
 vi.mock('../../adapters/open-meteo.js', () => ({ fetchWeather: vi.fn(async () => []) }));
+vi.mock('../../cache/devFileCache.js', () => ({
+  saveDevWaterCache: vi.fn(),
+  loadDevWaterCache: vi.fn(() => null),
+  saveDevLLMCache: vi.fn(),
+  loadDevLLMCache: vi.fn(() => null),
+}));
 
 // Mock water adapters
 vi.mock('../../adapters/overpass-water.js', () => ({
@@ -86,7 +97,6 @@ vi.mock('../../adapters/overpass-water.js', () => ({
     dam: 'Dam',
     reservoir: 'Reservoir',
     desalination: 'Desalination Plant',
-    treatment_plant: 'Treatment Plant',
   },
 }));
 vi.mock('../../adapters/open-meteo-precip.js', () => ({
@@ -148,7 +158,7 @@ describe('Water Routes (/api/water)', () => {
     redisStore.clear();
     mockFetchWaterFacilities.mockClear();
     mockFetchPrecipitation.mockClear();
-    mockFetchWaterFacilities.mockResolvedValue([]);
+    mockFetchWaterFacilities.mockResolvedValue({ facilities: [], stats: {} });
     mockFetchPrecipitation.mockResolvedValue([]);
 
     vi.resetModules();
@@ -172,7 +182,7 @@ describe('Water Routes (/api/water)', () => {
 
   describe('GET /api/water', () => {
     it('returns 200 with { data, stale: false, lastFresh } on cache miss + successful fetch', async () => {
-      mockFetchWaterFacilities.mockResolvedValue([sampleFacility]);
+      mockFetchWaterFacilities.mockResolvedValue({ facilities: [sampleFacility], stats: {} });
 
       const res = await fetch(`${baseUrl}/api/water`);
       const body = await res.json();

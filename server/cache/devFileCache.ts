@@ -69,3 +69,49 @@ export function loadDevLLMCache<T>(): T | null {
     return null;
   }
 }
+
+// ---------- Water Facilities Dev Cache ----------
+
+const WATER_FACILITIES_FILE = join(DEV_CACHE_DIR, 'water-facilities.json');
+const WATER_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+/**
+ * Save water facilities to local file. No-op in production.
+ */
+export function saveDevWaterCache<T>(data: T): void {
+  if (!isDev) return;
+  try {
+    if (!existsSync(DEV_CACHE_DIR)) mkdirSync(DEV_CACHE_DIR, { recursive: true });
+    const entry: DevCacheEntry<T> = { data, savedAt: Date.now() };
+    writeFileSync(WATER_FACILITIES_FILE, JSON.stringify(entry));
+    log.info('saved water facilities to dev file cache');
+  } catch (err) {
+    log.warn({ err }, 'failed to write water facilities dev cache');
+  }
+}
+
+/**
+ * Load water facilities from local file. Returns null if not in dev mode,
+ * file doesn't exist, or data is too old (7 days).
+ */
+export function loadDevWaterCache<T>(): T | null {
+  if (!isDev) return null;
+  try {
+    if (!existsSync(WATER_FACILITIES_FILE)) return null;
+    const raw = readFileSync(WATER_FACILITIES_FILE, 'utf-8');
+    const entry = JSON.parse(raw) as DevCacheEntry<T>;
+    const age = Date.now() - entry.savedAt;
+    if (age > WATER_MAX_AGE_MS) {
+      log.info({ ageMs: age }, 'water facility dev cache too old, ignoring');
+      return null;
+    }
+    log.info(
+      { ageMs: age, ageHr: Math.round(age / 3_600_000) },
+      'loaded water facilities from dev file cache',
+    );
+    return entry.data;
+  } catch (err) {
+    log.warn({ err }, 'failed to read water facility dev cache');
+    return null;
+  }
+}
