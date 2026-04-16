@@ -261,11 +261,14 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
       // Seed Redis from file so subsequent requests are fast
       await cacheSetSafe(LLM_EVENTS_KEY, devData, LLM_REDIS_TTL_SEC);
       // Write synthetic summary so LLM Pipeline section shows "loaded from file cache"
+      const geocoded = devData.filter(
+        (e) => e.data.precision && e.data.precision !== 'region',
+      ).length;
       const summary: LLMRunSummary = {
         lastRun: Date.now(),
-        groupCount: 0,
+        groupCount: devData.length,
         batchCount: 0,
-        geocodeCount: 0,
+        geocodeCount: geocoded,
         enrichedCount: devData.length,
         durationMs: 0,
         error: null,
