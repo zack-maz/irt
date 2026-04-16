@@ -158,7 +158,7 @@ export interface WeatherGridPoint {
 
 // ---------- Water Stress Types ----------
 
-export type WaterFacilityType = 'dam' | 'reservoir' | 'desalination' | 'treatment_plant';
+export type WaterFacilityType = 'dam' | 'reservoir' | 'desalination';
 
 export interface WaterStressIndicators {
   bws_raw: number; // baseline water stress raw value
@@ -186,6 +186,23 @@ export interface WaterFacility {
     anomalyRatio: number;
     updatedAt: number;
   };
+  // Enrichment fields (Phase 27.3)
+  capacity?: {
+    height?: number;
+    volume?: number;
+    area?: number;
+  };
+  nearestCity?: {
+    name: string;
+    distanceKm: number;
+    population: number;
+  };
+  linkedRiver?: {
+    name: string;
+    distanceKm: number;
+  };
+  /** Notability score (0-100). Higher = more strategically relevant. */
+  notabilityScore?: number;
 }
 
 export class RateLimitError extends Error {

@@ -352,6 +352,49 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/WaterFacility'
+                      filterStats:
+                        type: object
+                        description: Diagnostic counts from the Overpass filtering pipeline.
+                        properties:
+                          rawCounts:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                          filteredCounts:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                          rejections:
+                            type: object
+                            properties:
+                              excluded_location:
+                                type: integer
+                              not_notable:
+                                type: integer
+                              no_name:
+                                type: integer
+                              duplicate:
+                                type: integer
+                              low_score:
+                                type: integer
+                          enrichment:
+                            type: object
+                            properties:
+                              withCapacity:
+                                type: integer
+                              withCity:
+                                type: integer
+                              withRiver:
+                                type: integer
+                          scoreHistogram:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                bucket:
+                                  type: string
+                                count:
+                                  type: integer
         '400':
           $ref: '#/components/responses/ValidationError'
         '429':
@@ -855,7 +898,7 @@ components:
           enum: [water]
         facilityType:
           type: string
-          enum: [dam, reservoir, desalination, treatment_plant]
+          enum: [dam, reservoir, desalination]
         lat:
           type: number
           format: double
@@ -880,6 +923,37 @@ components:
             updatedAt:
               type: integer
               format: int64
+        capacity:
+          type: object
+          properties:
+            height:
+              type: number
+              description: Dam height in meters.
+            volume:
+              type: number
+              description: Reservoir volume in cubic meters.
+            area:
+              type: number
+              description: Reservoir surface area in square meters.
+        nearestCity:
+          type: object
+          properties:
+            name:
+              type: string
+            distanceKm:
+              type: number
+            population:
+              type: integer
+        linkedRiver:
+          type: object
+          properties:
+            name:
+              type: string
+            distanceKm:
+              type: number
+        notabilityScore:
+          type: number
+          description: Holistic notability score 0-100. Higher = more strategically relevant.
 
     WaterStressIndicators:
       type: object

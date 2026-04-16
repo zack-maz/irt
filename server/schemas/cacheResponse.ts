@@ -93,7 +93,7 @@ export const waterFacilityEntitySchema = z
   .object({
     id: z.string(),
     type: z.literal('water'),
-    facilityType: z.enum(['dam', 'reservoir', 'desalination', 'treatment_plant']),
+    facilityType: z.enum(['dam', 'reservoir', 'desalination']),
     lat: z.number(),
     lng: z.number(),
     label: z.string(),
@@ -103,11 +103,54 @@ export const waterFacilityEntitySchema = z
         compositeHealth: z.number(),
       })
       .passthrough(),
+    capacity: z
+      .object({
+        height: z.number().optional(),
+        volume: z.number().optional(),
+        area: z.number().optional(),
+      })
+      .optional(),
+    nearestCity: z
+      .object({
+        name: z.string(),
+        distanceKm: z.number(),
+        population: z.number(),
+      })
+      .optional(),
+    linkedRiver: z
+      .object({
+        name: z.string(),
+        distanceKm: z.number(),
+      })
+      .optional(),
+    notabilityScore: z.number().optional(),
   })
   .passthrough();
+
+const waterFilterStatsSchema = z
+  .object({
+    rawCounts: z.record(z.string(), z.number()),
+    filteredCounts: z.record(z.string(), z.number()),
+    rejections: z.object({
+      excluded_location: z.number(),
+      not_notable: z.number(),
+      no_name: z.number(),
+      duplicate: z.number(),
+      low_score: z.number(),
+    }),
+    enrichment: z.object({
+      withCapacity: z.number(),
+      withCity: z.number(),
+      withRiver: z.number(),
+    }),
+    scoreHistogram: z.array(z.object({ bucket: z.string(), count: z.number() })),
+  })
+  .optional();
 
 // ---------- Wrapped CacheResponse schemas per route ----------
 
 export const flightsResponseSchema = cacheResponseSchema(z.array(flightEntitySchema));
 export const eventsResponseSchema = cacheResponseSchema(z.array(conflictEventEntitySchema));
-export const waterResponseSchema = cacheResponseSchema(z.array(waterFacilityEntitySchema));
+export const waterResponseSchema = cacheResponseSchema(z.array(waterFacilityEntitySchema)).extend({
+  filterStats: waterFilterStatsSchema,
+});
