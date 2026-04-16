@@ -269,6 +269,7 @@ eventsRouter.get('/', validateQuery(eventsQuerySchema), async (_req, res) => {
         enrichedCount: devData.length,
         durationMs: 0,
         error: null,
+        source: 'dev-file-cache',
       };
       await cacheSetSafe(LLM_SUMMARY_KEY, summary, LLM_SUMMARY_TTL_SEC);
       // Set cooldown so the pipeline doesn't re-trigger on the next request

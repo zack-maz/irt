@@ -203,6 +203,11 @@ function LLMPipelineSection({ llmStatus }: { llmStatus: LLMStatus }) {
         <div className="text-white/50">
           Last: {formatAge(lr.lastRun)} ago · {lr.enrichedCount} enriched · {lr.geocodeCount}{' '}
           geocoded · {formatDuration(lr.durationMs)}
+          {lr.source === 'dev-file-cache' && (
+            <span className="ml-1 rounded bg-yellow-500/15 px-1 text-[8px] text-yellow-400">
+              FILE CACHE
+            </span>
+          )}
         </div>
         {lr.error ? <div className="text-red-400">Error: {lr.error}</div> : null}
       </div>

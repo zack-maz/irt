@@ -45,6 +45,7 @@ export interface LLMRunSummary {
   enrichedCount: number;
   durationMs: number;
   error: string | null;
+  source?: 'pipeline' | 'dev-file-cache';
 }
 
 /** Initial state for the progress singleton. */
@@ -101,5 +102,6 @@ export function buildSummary(): LLMRunSummary {
     enrichedCount: llmProgress.enrichedCount,
     durationMs: llmProgress.durationMs ?? 0,
     error: llmProgress.errorMessage,
+    source: 'pipeline',
   };
 }

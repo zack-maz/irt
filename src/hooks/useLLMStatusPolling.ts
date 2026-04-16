@@ -11,6 +11,7 @@ export interface LLMRunSummary {
   enrichedCount: number;
   durationMs: number;
   error: string | null;
+  source?: 'pipeline' | 'dev-file-cache';
 }
 
 export interface LLMStatus {
