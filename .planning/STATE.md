@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: Ready to execute
-last_updated: '2026-04-17T15:16:56.088Z'
+status: Phase 27.3 COMPLETE
+last_updated: '2026-04-17T08:30:00.000Z'
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 19
-  completed_plans: 15
-  percent: 79
+  completed_plans: 16
+  percent: 84
 ---
 
 # Project State
@@ -22,10 +22,11 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 27.3 (water-facility-filtering-improvements) — COMPLETE (2/2 plans done)
-Plan: 2 of 2 COMPLETE
+Phase: 27.3 (water-facility-filtering-improvements) — COMPLETE (3/3 plans)
+Plan: 3 of 3 COMPLETE
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
+Phase 27.3: Plan 03 COMPLETE (gap closure — G-01 water route test fixture fix + WR-01 shared WATER_ATTACK_EVENT_TYPES constant across useWaterLayers/WaterFacilityDetail/useCounterData)
 Phase 27.3: Plan 02 COMPLETE (treatment_plant cascade removal, WaterFacility enrichment in detail panel, DevApiStatus Water Filters diagnostics, waterStore.filterStats wiring, REV-5 fix for attacked facility detection)
 Phase 27.3: Plan 01 COMPLETE (holistic filtering, enrichment pipeline, river bbox optimization, dev file cache)
 Phase 27.2: Plan 01 COMPLETE (source tier registry, tier-gated news filtering, sourceTier entity injection, severity tier multiplier 1.5x/1.0x/0.7x)
@@ -233,6 +234,8 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 - waterTreatment atlas slot at x=480 left intact (canvas draw code retained, harmless dead pixels) when removing treatment_plant from ICON_MAPPING — removing the shape would require renumbering downstream x-offsets (waterDesalination 512, triangle 544) for zero functional gain (27.3-02)
 - Master `showSites` toggle wired into useEntityLayers visibleSites memo — previously the filter store had the field but the layer didn't consult it, so toggling the master sites control had no effect on the map (27.3-02, consistency fix bundled with Task 1)
 - Proximity pin filter added to useWaterLayers — water facilities were the only entity type not honoring the pin (parity with flights/ships/events/sites via entityPassesFilters pattern) (27.3-02)
+- WATER_ATTACK_EVENT_TYPES extracted to `src/lib/waterAttackEvents.ts` as single source of truth shared by useWaterLayers (map), WaterFacilityDetail (panel isDestroyed), useCounterData (counter score); the REV-5 expansion now reaches all three consumers so a facility near a `targeted` or `on_ground` event shows attacked/destroyed across map + detail + counter dropdown (27.3-03, WR-01)
+- Water route test emptyStats fixture added: a well-formed WaterFilterStats stub (5 required sub-fields, all zero) replaces the `stats: {}` literal that violated waterFilterStatsSchema under NODE_ENV=test — chosen over `stats: undefined` so future tests have a reference payload; mock return type narrowed from `stats: unknown` to `stats: typeof emptyStats` (27.3-03, G-01/WR-02, IN-03)
 
 ## Pending Todos
 
