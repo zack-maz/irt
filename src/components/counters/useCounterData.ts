@@ -193,6 +193,16 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   const waterFacilities = useWaterStore((s) => s.facilities);
   const isWaterLayerActive = useLayerStore((s) => s.activeLayers.has('water'));
 
+  // Water facility filter selectors (must mirror useWaterLayers so counters and map agree).
+  const showWater = useFilterStore((s) => s.showWater);
+  const enabledWaterTypes = useFilterStore((s) => s.enabledWaterTypes);
+  const waterNameFilter = useFilterStore((s) => s.waterNameFilter);
+  const showHighStress = useFilterStore((s) => s.showHighStress);
+  const showMediumStress = useFilterStore((s) => s.showMediumStress);
+  const showLowStress = useFilterStore((s) => s.showLowStress);
+  const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
+  const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
+
   return useMemo(() => {
     // Apply independent flight visibility toggles (matching useEntityLayers)
     const visibleFlights = filteredFlights.filter((f: FlightEntity) => {
@@ -281,15 +291,39 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       desalination: [],
     };
 
-    if (isWaterLayerActive) {
-      // Pre-compute destroyed set (REV-5 attack events within 5km).
-      // Shared WATER_ATTACK_EVENT_TYPES keeps this in lock-step with the map
-      // layer and the detail panel -- all three views agree on "attacked".
+    if (isWaterLayerActive && showWater) {
+      // Apply the same filters useWaterLayers applies, in the same order, so
+      // counters match what the map is rendering. Drift between these two
+      // paths is a recurring bug (WR-01 family) — keep them in lock-step.
+      let visibleWater = waterFacilities.filter((f) => enabledWaterTypes.includes(f.facilityType));
+
+      if (waterNameFilter) {
+        const q = waterNameFilter.toLowerCase();
+        visibleWater = visibleWater.filter((f) => f.label.toLowerCase().includes(q));
+      }
+
+      if (proximityPin) {
+        visibleWater = visibleWater.filter(
+          (f) => haversineKm(proximityPin.lat, proximityPin.lng, f.lat, f.lng) <= proximityRadiusKm,
+        );
+      }
+
+      // Stress level filter based on compositeHealth (thresholds must match useWaterLayers).
+      visibleWater = visibleWater.filter((f) => {
+        const h = f.stress.compositeHealth;
+        if (h <= 0.33) return showHighStress;
+        if (h <= 0.66) return showMediumStress;
+        return showLowStress;
+      });
+
+      // Pre-compute destroyed set (REV-5 attack events within 5km) from the
+      // already-narrowed visibleWater list. Shared WATER_ATTACK_EVENT_TYPES
+      // keeps this in lock-step with map + detail panel.
       const destructive = allEvents.filter(
         (e) => WATER_ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
       );
       const destroyedWater = new Set<string>();
-      for (const wf of waterFacilities) {
+      for (const wf of visibleWater) {
         for (const e of destructive) {
           if (Math.abs(e.lat - wf.lat) > 0.05 || Math.abs(e.lng - wf.lng) > 0.05) continue;
           if (haversineKm(wf.lat, wf.lng, e.lat, e.lng) <= 5) {
@@ -299,7 +333,15 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         }
       }
 
-      for (const wf of waterFacilities) {
+      // Healthy/attacked visibility filter (must run after destroyedWater is computed).
+      if (!showAttackedWater || !showHealthyWater) {
+        visibleWater = visibleWater.filter((f) => {
+          const isAttacked = destroyedWater.has(f.id);
+          return isAttacked ? showAttackedWater : showHealthyWater;
+        });
+      }
+
+      for (const wf of visibleWater) {
         waterCounts[wf.facilityType]++;
         waterCounts.total++;
         waterEntities[wf.facilityType].push(toWaterEntity(wf, destroyedWater.has(wf.id)));
@@ -420,5 +462,13 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     showAttackedSites,
     waterFacilities,
     isWaterLayerActive,
+    showWater,
+    enabledWaterTypes,
+    waterNameFilter,
+    showHighStress,
+    showMediumStress,
+    showLowStress,
+    showHealthyWater,
+    showAttackedWater,
   ]);
 }
