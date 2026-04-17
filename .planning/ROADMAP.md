@@ -128,12 +128,12 @@ Plans:
 **Goal:** Fix dam filtering (union tags + relaxed notability), reduce reservoir noise to 50-200 via HOLISTIC filter (wikidata OR wikipedia OR (named AND priority country)), remove treatment_plant type entirely, enrich facilities with capacity/population/river data via bbox-pre-filtered pipeline, preload facility data via dev file cache, fix the invisible-attacked-water-sites bug, and add dev filter diagnostics. Make the water layer Palantir-grade using only free/public APIs.
 **Depends on:** Phase 27.2
 **Requirements:** D-01 through D-08 (from 27.3-CONTEXT.md)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 
-- [ ] 27.3-01-PLAN.md — Server-side: types, union dam query, holistic reservoir filter, bbox-pre-filtered enrichment (capacity/city/river), dev file cache, filter stats, tests
-- [ ] 27.3-02-PLAN.md — Client-side: treatment_plant removal cascade, Capacity + Watershed detail sections, Water Filters diagnostics in DevApiStatus, attacked-water-sites bug fix in useWaterLayers
+- [x] 27.3-01-PLAN.md — Server-side: types, union dam query, holistic reservoir filter, bbox-pre-filtered enrichment (capacity/city/river), dev file cache, filter stats, tests
+- [x] 27.3-02-PLAN.md — Client-side: treatment_plant removal cascade, Capacity + Watershed detail sections, Water Filters diagnostics in DevApiStatus, attacked-water-sites bug fix in useWaterLayers
 
 ### Phase 27.4: LLM Enrichment Improvements
 

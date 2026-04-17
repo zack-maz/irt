@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: Ready to execute
-last_updated: '2026-04-16T05:02:51.806Z'
+status: Phase 27.3 complete
+last_updated: '2026-04-17T07:29:00.000Z'
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 18
-  completed_plans: 13
-  percent: 72
+  completed_plans: 16
+  percent: 88
 ---
 
 # Project State
@@ -22,8 +22,12 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
+Phase: 27.3 (water-facility-filtering-improvements) — COMPLETE (2/2 plans done)
+Plan: 2 of 2 COMPLETE
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
+Phase 27.3: Plan 02 COMPLETE (treatment_plant cascade removal, WaterFacility enrichment in detail panel, DevApiStatus Water Filters diagnostics, waterStore.filterStats wiring, REV-5 fix for attacked facility detection)
+Phase 27.3: Plan 01 COMPLETE (holistic filtering, enrichment pipeline, river bbox optimization, dev file cache)
 Phase 27.2: Plan 01 COMPLETE (source tier registry, tier-gated news filtering, sourceTier entity injection, severity tier multiplier 1.5x/1.0x/0.7x)
 Phase 27.2: Plan 04 COMPLETE (water facility coverage expansion — Overpass name filter removal, reverse geocode unnamed facilities, water filter parity, icon sizing, ships button label)
 Phase 27.1: Plan 01 COMPLETE (1 of 3 plans done — server-side LLM progress module, /api/events/llm-status endpoint, callback-instrumented pipeline, concurrent guard, Redis summary persistence)
@@ -222,6 +226,13 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 - MapDevExposer dev-only React component added to src/components/map/BaseMap.tsx, gated by `import.meta.env.DEV`, exposes the maplibre Map instance on `window.__map` for programmatic flyTo and layer toggling during capture — Vite tree-shakes entirely out of production builds, zero bundle impact (26.4-04)
 - rateLimiters.public tier (6 req/min per-IP, prefix `ratelimit:public`) wired globally on `/api/*` BEFORE per-endpoint limiters in server/index.ts — protects the Upstash command budget from scraper abuse on the live demo URL while leaving per-endpoint budgets intact for legitimate high-volume users; paired with public/robots.txt disallowing /api/ and /health for polite crawlers (26.4-04)
 - README live demo URL left as `_TBD_` placeholder (commit bd453cf replaced an earlier hardcoded URL) — user will substitute the actual Vercel URL at publication time rather than committing hardcoded production URLs mid-plan (26.4-04)
+- REV-5 root cause: `DESTRUCTIVE_EVENT_TYPES` was `['airstrike', 'explosion']` but targeted precision strikes and ground combat near infrastructure were silently ignored for water facility attack detection; expanded to `ATTACK_EVENT_TYPES` combining destructive+combat sets (27.3-02)
+- Dev-mode `console.debug('[useWaterLayers] attack detection:', ...)` added unthrottled per-render — acceptable because Vite strips it from production builds via `import.meta.env.DEV` (27.3-02)
+- `filterStats` guarded with `!== undefined` in useWaterFetch — cached responses (Redis/dev-file-cache) don't carry the field, so the null fallback keeps the DevApiStatus Water Filters panel from rendering stale zeros (27.3-02)
+- WaterFacilityDetail enrichment sections use the existing `<h3>` + DetailValue pattern (NOT a DetailSection component) — matches established convention in that file; DetailSection is not a component in this codebase (27.3-02)
+- waterTreatment atlas slot at x=480 left intact (canvas draw code retained, harmless dead pixels) when removing treatment_plant from ICON_MAPPING — removing the shape would require renumbering downstream x-offsets (waterDesalination 512, triangle 544) for zero functional gain (27.3-02)
+- Master `showSites` toggle wired into useEntityLayers visibleSites memo — previously the filter store had the field but the layer didn't consult it, so toggling the master sites control had no effect on the map (27.3-02, consistency fix bundled with Task 1)
+- Proximity pin filter added to useWaterLayers — water facilities were the only entity type not honoring the pin (parity with flights/ships/events/sites via entityPassesFilters pattern) (27.3-02)
 
 ## Pending Todos
 
