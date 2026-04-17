@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: Ready to plan
-last_updated: '2026-04-17T15:35:56.411Z'
+last_updated: '2026-04-17T16:59:00.000Z'
 progress:
   total_phases: 6
   completed_phases: 2
@@ -259,6 +259,7 @@ None.
 | 260411-mh0 | Add Open-Meteo precipitation to API observability dashboard                                                     | 2026-04-11 | 7d73360 | [260411-mh0-add-open-meteo-precipitation-to-api-obse](./quick/260411-mh0-add-open-meteo-precipitation-to-api-obse/) |
 | 260411-mn4 | Show precipitation in weather tooltip always, using raw precip data instead of facility lookup                  | 2026-04-11 | 490561f | [260411-mn4-show-precipitation-in-weather-tooltip-al](./quick/260411-mn4-show-precipitation-in-weather-tooltip-al/) |
 | 260415-uzj | In our status line, keep the version number but remove the version title                                        | 2026-04-16 | 2c75caf | [260415-uzj-in-our-status-line-keep-the-version-numb](./quick/260415-uzj-in-our-status-line-keep-the-version-numb/) |
+| 260417-dtt | Reorder water filter toggles (healthy above attacked) and make the attacked toggle dot black                    | 2026-04-17 | f9f169b | [260417-dtt-for-the-water-filters-let-s-move-the-att](./quick/260417-dtt-for-the-water-filters-let-s-move-the-att/) |
 
 ## Accumulated Context
 
