@@ -5,7 +5,10 @@
  * dev server restart. Writes JSON to .dev-cache/ after LLM completion;
  * reads it back as a fallback when Redis LLM cache is empty.
  *
- * Only active when NODE_ENV !== 'production'. Production always uses Redis.
+ * Only active when NODE_ENV === 'development' (explicit allowlist).
+ * Test environments (NODE_ENV=test, vitest, etc.) and production
+ * both skip disk I/O — tests must mock this module explicitly if they
+ * exercise code paths that call save/load.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -20,7 +23,10 @@ const LLM_EVENTS_FILE = join(DEV_CACHE_DIR, 'llm-events.json');
 /** Max age for dev cache file (48 hours) — generous for dev convenience across overnight restarts */
 const MAX_AGE_MS = 48 * 60 * 60 * 1000;
 
-const isDev = process.env.NODE_ENV !== 'production';
+// Only write/read disk when explicitly in development. Previously used
+// `!== 'production'` which falsely enabled test runs (NODE_ENV=test or undefined
+// under vitest) to pollute the on-disk cache with fixture data.
+const isDev = process.env.NODE_ENV === 'development';
 
 interface DevCacheEntry<T> {
   data: T;
