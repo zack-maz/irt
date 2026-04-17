@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { WaterFacility } from '../../../server/types';
 import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -35,9 +36,6 @@ function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Event types that mark a facility as "destroyed" (score 0) */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion']);
-
 function computeWaterAttackStatus(
   facility: WaterFacility,
   events: ConflictEventEntity[],
@@ -49,7 +47,9 @@ function computeWaterAttackStatus(
       return false;
     return haversineDistanceKm(facility.lat, facility.lng, e.lat, e.lng) <= ATTACK_RADIUS_KM;
   });
-  const isDestroyed = attacks.some((e) => DESTRUCTIVE_EVENT_TYPES.has(e.type));
+  // REV-5: use shared WATER_ATTACK_EVENT_TYPES so 'targeted' and 'on_ground'
+  // also mark the facility as destroyed (matches useWaterLayers map coloring).
+  const isDestroyed = attacks.some((e) => WATER_ATTACK_EVENT_TYPES.has(e.type));
   return {
     isAttacked: attacks.length > 0,
     isDestroyed,

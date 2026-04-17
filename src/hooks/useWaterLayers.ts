@@ -6,6 +6,7 @@ import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { stressToRGBA } from '@/lib/waterStress';
 import { haversineKm } from '@/lib/geo';
+import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { getIconAtlasForLayer, ICON_MAPPING } from '@/components/map/layers/icons';
 import riversGeoJson from '@/data/rivers.json';
 import type { WaterFacility, WaterFacilityType } from '../../server/types';
@@ -17,16 +18,6 @@ const WATER_ICON_MAP: Record<WaterFacilityType, string> = {
   reservoir: 'waterReservoir',
   desalination: 'waterDesalination',
 };
-
-/**
- * Event types that indicate facility damage or imminent threat (REV-5).
- * Expanded from ['airstrike', 'explosion'] to also include 'targeted' (precision strikes
- * on infrastructure) and 'on_ground' (ground combat near facilities).
- */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion', 'targeted']);
-const COMBAT_EVENT_TYPES = new Set(['on_ground']);
-/** Combined attack-relevant event types for the destroyed/attacked check. */
-const ATTACK_EVENT_TYPES = new Set([...DESTRUCTIVE_EVENT_TYPES, ...COMBAT_EVENT_TYPES]);
 
 interface RiverFeature {
   type: 'Feature';
@@ -171,9 +162,9 @@ export function useWaterLayers(): WaterLayerGroup {
     });
 
     // Pre-compute destroyed set (O(facilities * destructiveEvents))
-    // REV-5: use combined ATTACK_EVENT_TYPES so 'targeted' and 'on_ground' also count.
+    // REV-5: use shared WATER_ATTACK_EVENT_TYPES so 'targeted' and 'on_ground' also count.
     const destructiveEvents = events.filter(
-      (e) => ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
+      (e) => WATER_ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
     );
 
     if (import.meta.env.DEV) {

@@ -9,6 +9,7 @@ import { computeAttackStatus } from '@/lib/attackStatus';
 import { haversineKm } from '@/lib/geo';
 import { classifySeverity } from '@/lib/severity';
 import { healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type {
   FlightEntity,
@@ -281,10 +282,11 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     };
 
     if (isWaterLayerActive) {
-      // Pre-compute destroyed set (destructive events within 5km)
-      const DESTRUCTIVE = new Set(['airstrike', 'explosion']);
+      // Pre-compute destroyed set (REV-5 attack events within 5km).
+      // Shared WATER_ATTACK_EVENT_TYPES keeps this in lock-step with the map
+      // layer and the detail panel -- all three views agree on "attacked".
       const destructive = allEvents.filter(
-        (e) => DESTRUCTIVE.has(e.type) && e.timestamp <= dateEnd,
+        (e) => WATER_ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
       );
       const destroyedWater = new Set<string>();
       for (const wf of waterFacilities) {
