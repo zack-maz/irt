@@ -255,7 +255,7 @@ export function useWaterLayers(): WaterLayerGroup {
       sizeMinPixels: 18,
       sizeMaxPixels: 120,
       getColor: (d: WaterFacility) => {
-        if (destroyedIds.has(d.id)) return [0, 0, 0, 255] as [number, number, number, number];
+        if (destroyedIds.has(d.id)) return [45, 10, 78, 255] as [number, number, number, number];
         return stressToRGBA(d.stress.compositeHealth);
       },
       getAngle: () => 0,

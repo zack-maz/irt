@@ -61,7 +61,7 @@ LEGEND_REGISTRY.push({
   layerId: 'water',
   title: 'Water Health',
   colorStops: [
-    { color: '#000000', label: 'Extreme Stress' },
+    { color: '#2d0a4e', label: 'Extreme Stress' },
     { color: '#1e3a5f', label: '' },
     { color: '#3b82b4', label: '' },
     { color: '#7dd3fc', label: 'Healthy' },
