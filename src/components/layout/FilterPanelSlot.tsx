@@ -575,19 +575,19 @@ export function FilterPanelContent() {
               onChangeMin={(v) => setStressRange(v, stressMax)}
               onChangeMax={(v) => setStressRange(stressMin, v)}
             />
-            {/* Attacked / Healthy toggles */}
+            {/* Healthy / Attacked toggles */}
             <div className="flex flex-col gap-1.5">
-              <SliderToggle
-                label="Attacked"
-                checked={showAttackedWater}
-                onChange={() => useFilterStore.getState().toggleShowAttackedWater()}
-                color={ENTITY_DOT_COLORS.siteAttacked}
-              />
               <SliderToggle
                 label="Healthy"
                 checked={showHealthyWater}
                 onChange={() => useFilterStore.getState().toggleShowHealthyWater()}
                 color={ENTITY_DOT_COLORS.siteHealthy}
+              />
+              <SliderToggle
+                label="Attacked"
+                checked={showAttackedWater}
+                onChange={() => useFilterStore.getState().toggleShowAttackedWater()}
+                color={ENTITY_DOT_COLORS.waterAttacked}
               />
             </div>
           </div>

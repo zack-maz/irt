@@ -27,6 +27,7 @@ export const ENTITY_DOT_COLORS = {
   unidentified: '#ffff64',
   siteHealthy: '#22c55e',
   siteAttacked: '#f97316',
+  waterAttacked: '#000000',
 } as const;
 
 /** CSS hex color strings for site subtype filter buttons */
