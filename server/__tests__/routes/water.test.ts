@@ -10,11 +10,32 @@ interface CacheEntry<T> {
 }
 const redisStore = new Map<string, CacheEntry<unknown>>();
 
+/**
+ * Zod-valid empty WaterFilterStats stub. Phase 27.3 Plan 01 added
+ * waterFilterStatsSchema to server/schemas/cacheResponse.ts requiring all 5
+ * sub-fields; the Zod wrapper is `.optional()` but once present the inner
+ * object must be well-formed. Serves both as a passing fixture and a
+ * reference for what a fresh-fetch filterStats payload looks like.
+ */
+const emptyStats = {
+  rawCounts: {} as Record<string, number>,
+  filteredCounts: {} as Record<string, number>,
+  rejections: {
+    excluded_location: 0,
+    not_notable: 0,
+    no_name: 0,
+    duplicate: 0,
+    low_score: 0,
+  },
+  enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
+  scoreHistogram: [] as { bucket: string; count: number }[],
+};
+
 // Module-level mock functions
 const mockFetchWaterFacilities = vi.fn(
-  async (): Promise<{ facilities: WaterFacility[]; stats: unknown }> => ({
+  async (): Promise<{ facilities: WaterFacility[]; stats: typeof emptyStats }> => ({
     facilities: [],
-    stats: {},
+    stats: emptyStats,
   }),
 );
 const mockFetchPrecipitation = vi.fn(async () => []);
@@ -158,7 +179,7 @@ describe('Water Routes (/api/water)', () => {
     redisStore.clear();
     mockFetchWaterFacilities.mockClear();
     mockFetchPrecipitation.mockClear();
-    mockFetchWaterFacilities.mockResolvedValue({ facilities: [], stats: {} });
+    mockFetchWaterFacilities.mockResolvedValue({ facilities: [], stats: emptyStats });
     mockFetchPrecipitation.mockResolvedValue([]);
 
     vi.resetModules();
@@ -182,7 +203,10 @@ describe('Water Routes (/api/water)', () => {
 
   describe('GET /api/water', () => {
     it('returns 200 with { data, stale: false, lastFresh } on cache miss + successful fetch', async () => {
-      mockFetchWaterFacilities.mockResolvedValue({ facilities: [sampleFacility], stats: {} });
+      mockFetchWaterFacilities.mockResolvedValue({
+        facilities: [sampleFacility],
+        stats: emptyStats,
+      });
 
       const res = await fetch(`${baseUrl}/api/water`);
       const body = await res.json();
