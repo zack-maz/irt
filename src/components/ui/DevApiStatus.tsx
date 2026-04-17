@@ -482,7 +482,7 @@ export function DevApiStatus() {
       name: 'Water',
       ...waterRaw,
       isOneShot: true,
-      quality: `${waterRaw.count} total | ${waterByType['dam'] ?? 0} dam, ${waterByType['reservoir'] ?? 0} res, ${waterByType['desalination'] ?? 0} desal, ${waterByType['treatment_plant'] ?? 0} treat`,
+      quality: `${waterRaw.count} total | ${waterByType['dam'] ?? 0} dam, ${waterByType['reservoir'] ?? 0} res, ${waterByType['desalination'] ?? 0} desal`,
     },
     {
       name: 'Precip',

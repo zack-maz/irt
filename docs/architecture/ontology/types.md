@@ -174,7 +174,8 @@ Water facilities are their own type, independent of both `MapEntity`
 and `SiteEntity`:
 
 ```ts
-type WaterFacilityType = 'dam' | 'reservoir' | 'desalination' | 'treatment_plant';
+// treatment_plant was removed in Phase 27.3 (near-zero OSM coverage in the Middle East).
+type WaterFacilityType = 'dam' | 'reservoir' | 'desalination';
 
 interface WaterFacility {
   id: string; // "water-{osmId}"
@@ -254,7 +255,7 @@ interface NewsCluster {
 
 **Note:** `actor` / `action` / `target` fields are populated from
 GDELT metadata when available. Phase 27's LLM pipeline enriches
-*events* (not news articles) with structured actor and summary data
+_events_ (not news articles) with structured actor and summary data
 via the `ConflictEventData.actors` and `summary` fields instead.
 
 ## `NotificationItem` (frontend-derived)

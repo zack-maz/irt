@@ -43,7 +43,6 @@ export const WATER_TYPE_COLORS: Record<string, string> = {
   dam: '#3b82f6',
   reservoir: '#06b6d4',
   desalination: '#8b5cf6',
-  treatment_plant: '#14b8a6',
 } as const;
 
 /** Zoom-responsive sizes for entity icons (meter-based with pixel bounds) */

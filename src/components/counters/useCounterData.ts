@@ -32,7 +32,6 @@ export interface WaterCounts {
   dam: number;
   reservoir: number;
   desalination: number;
-  treatment_plant: number;
   total: number;
 }
 
@@ -142,7 +141,6 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination',
-  treatment_plant: 'Treatment Plant',
 };
 
 function toWaterEntity(w: WaterFacility, isAttacked: boolean): CounterEntity {
@@ -219,11 +217,18 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     });
 
     // Apply conflict visibility toggles (master gate + sub-toggles)
-    const airstrikes = showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
-    const onGroundCount = showEvents && showOnGroundToggle ? countByGroup(severityFilteredEvents, ON_GROUND_TYPES) : 0;
-    const explosionsCount = showEvents && showExplosionsToggle ? countByGroup(severityFilteredEvents, EXPLOSION_TYPES) : 0;
-    const targeted = showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
-    const otherCount = showEvents && showOtherToggle ? countByGroup(severityFilteredEvents, OTHER_TYPES) : 0;
+    const airstrikes =
+      showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
+    const onGroundCount =
+      showEvents && showOnGroundToggle ? countByGroup(severityFilteredEvents, ON_GROUND_TYPES) : 0;
+    const explosionsCount =
+      showEvents && showExplosionsToggle
+        ? countByGroup(severityFilteredEvents, EXPLOSION_TYPES)
+        : 0;
+    const targeted =
+      showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
+    const otherCount =
+      showEvents && showOtherToggle ? countByGroup(severityFilteredEvents, OTHER_TYPES) : 0;
 
     // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, port: 0, total: 0 };
@@ -267,14 +272,12 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       dam: 0,
       reservoir: 0,
       desalination: 0,
-      treatment_plant: 0,
       total: 0,
     };
     const waterEntities: Record<WaterFacilityType, CounterEntity[]> = {
       dam: [],
       reservoir: [],
       desalination: [],
-      treatment_plant: [],
     };
 
     if (isWaterLayerActive) {
@@ -319,45 +322,50 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     const shipEntities = sortByProximity(visibleShips.map(toShipEntity), STRAIT_HORMUZ);
 
     // Event entities (apply conflict visibility toggles)
-    const airstrikeEventEntities = showEvents && showAirstrikes
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const airstrikeEventEntities =
+      showEvents && showAirstrikes
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const onGroundEventEntities = showEvents && showOnGroundToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, ON_GROUND_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const onGroundEventEntities =
+      showEvents && showOnGroundToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, ON_GROUND_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const explosionEventEntities = showEvents && showExplosionsToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, EXPLOSION_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const explosionEventEntities =
+      showEvents && showExplosionsToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, EXPLOSION_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const targetedEventEntities = showEvents && showTargetedToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const targetedEventEntities =
+      showEvents && showTargetedToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const otherEventEntities = showEvents && showOtherToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, OTHER_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const otherEventEntities =
+      showEvents && showOtherToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, OTHER_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
     const entities: CounterEntities = {
       flights: flightEntities,

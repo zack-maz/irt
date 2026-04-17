@@ -15,7 +15,6 @@ const WATER_TYPE_LABELS: Record<string, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination Plant',
-  treatment_plant: 'Treatment Plant',
 };
 
 interface WaterFacilityDetailProps {

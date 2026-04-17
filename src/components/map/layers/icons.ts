@@ -26,7 +26,6 @@ export const ICON_MAPPING: Record<string, IconEntry> = {
   sitePort: { x: 384, y: 0, width: 32, height: 32, mask: true },
   waterDam: { x: 416, y: 0, width: 32, height: 32, mask: true },
   waterReservoir: { x: 448, y: 0, width: 32, height: 32, mask: true },
-  waterTreatment: { x: 480, y: 0, width: 32, height: 32, mask: true },
   waterDesalination: { x: 512, y: 0, width: 32, height: 32, mask: true },
   triangle: { x: 544, y: 0, width: 32, height: 32, mask: true },
 };
