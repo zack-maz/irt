@@ -680,6 +680,77 @@ export function DevApiStatus() {
           <LLMPipelineSection llmStatus={llmStatus} />
         </div>
       </div>
+
+      {/* Water Filters diagnostics — Phase 27.3 D-04 (renders only when the
+          server attached filterStats, i.e. non-cached /api/water response) */}
+      <WaterFiltersSection />
+    </div>
+  );
+}
+
+/**
+ * Dev-only diagnostics for the water facility filter pipeline.
+ * Shows raw vs filtered counts per OSM facility type, rejection
+ * reason tallies, enrichment coverage, and the notability score
+ * histogram. Null-renders when filterStats is absent (cached response).
+ */
+function WaterFiltersSection() {
+  const filterStats = useWaterStore((s) => s.filterStats);
+  if (!filterStats) return null;
+
+  const totalRaw = Object.values(filterStats.rawCounts).reduce((a, b) => a + b, 0);
+  const totalKept = Object.values(filterStats.filteredCounts).reduce((a, b) => a + b, 0);
+  const keepPct = totalRaw > 0 ? Math.round((totalKept / totalRaw) * 100) : 0;
+
+  const typeKeys = Array.from(
+    new Set([...Object.keys(filterStats.rawCounts), ...Object.keys(filterStats.filteredCounts)]),
+  ).sort();
+
+  return (
+    <div className="mt-2 border-t border-white/10 pt-2">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+        Water Filters
+      </span>
+
+      {/* Raw vs filtered summary */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        {totalRaw} raw → {totalKept} kept ({keepPct}%)
+      </div>
+
+      {/* Per-type breakdown */}
+      <table className="mt-0.5 w-full text-[9px]">
+        <tbody>
+          {typeKeys.map((type) => (
+            <tr key={type}>
+              <td className="text-white/40">{type}</td>
+              <td className="text-right tabular-nums text-white/60">
+                {filterStats.filteredCounts[type] ?? 0} / {filterStats.rawCounts[type] ?? 0}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Rejections */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Rejections:</span> excl=
+        {filterStats.rejections.excluded_location} nn={filterStats.rejections.not_notable} nname=
+        {filterStats.rejections.no_name} dup={filterStats.rejections.duplicate} low=
+        {filterStats.rejections.low_score}
+      </div>
+
+      {/* Enrichment coverage */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Enriched:</span> cap=
+        {filterStats.enrichment.withCapacity} city={filterStats.enrichment.withCity} river=
+        {filterStats.enrichment.withRiver}
+      </div>
+
+      {/* Score histogram */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Scores:</span>{' '}
+        {filterStats.scoreHistogram.map((b) => `${b.bucket}:${b.count}`).join(' ')}
+      </div>
     </div>
   );
 }

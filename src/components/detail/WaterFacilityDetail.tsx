@@ -179,6 +179,67 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
         </>
       )}
 
+      {/* Capacity — D-06 enrichment (optional, only present when OSM had the tags) */}
+      {facility.capacity && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Capacity
+          </h3>
+          {facility.capacity.height !== undefined && (
+            <DetailValue label="Height" value={`${facility.capacity.height} m`} />
+          )}
+          {facility.capacity.volume !== undefined && (
+            <DetailValue
+              label="Volume"
+              value={`${(facility.capacity.volume / 1_000_000).toFixed(1)} M m³`}
+            />
+          )}
+          {facility.capacity.area !== undefined && (
+            <DetailValue label="Area" value={`${facility.capacity.area.toFixed(2)} km²`} />
+          )}
+        </>
+      )}
+
+      {/* Population Served — D-07 enrichment (nearest city within 150km) */}
+      {facility.nearestCity && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Population Served (approx)
+          </h3>
+          <DetailValue
+            label={facility.nearestCity.name}
+            value={`${(facility.nearestCity.population / 1_000_000).toFixed(1)}M people`}
+          />
+          <DetailValue label="Distance" value={`${facility.nearestCity.distanceKm} km`} />
+        </>
+      )}
+
+      {/* River System — D-08 enrichment (linked major river within 20km) */}
+      {facility.linkedRiver && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            River System
+          </h3>
+          <DetailValue
+            label={facility.linkedRiver.name}
+            value={`${facility.linkedRiver.distanceKm} km away`}
+          />
+          <p className="px-3 pb-1 text-[10px] text-text-muted">
+            Damage to this facility may impact downstream {facility.linkedRiver.name} users.
+          </p>
+        </>
+      )}
+
+      {/* Notability Score — dev-only observability hook for tuning thresholds */}
+      {import.meta.env.DEV && facility.notabilityScore !== undefined && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Notability Score (dev)
+          </h3>
+          <DetailValue label="Score" value={`${facility.notabilityScore} / 100`} />
+        </>
+      )}
+
       {/* Attack Status */}
       {attack.isAttacked && (
         <>

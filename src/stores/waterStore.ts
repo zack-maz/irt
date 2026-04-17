@@ -13,6 +13,29 @@ export interface PrecipitationData {
   updatedAt: number;
 }
 
+/**
+ * Water filter diagnostics from /api/water response envelope (Phase 27.3 D-04/REV-4).
+ * Populated only on non-cached responses; null when served from Redis/dev file cache.
+ * Schema mirrors server/schemas/cacheResponse.ts `waterFilterStatsSchema`.
+ */
+export interface WaterFilterStats {
+  rawCounts: Record<string, number>;
+  filteredCounts: Record<string, number>;
+  rejections: {
+    excluded_location: number;
+    not_notable: number;
+    no_name: number;
+    duplicate: number;
+    low_score: number;
+  };
+  enrichment: {
+    withCapacity: number;
+    withCity: number;
+    withRiver: number;
+  };
+  scoreHistogram: { bucket: string; count: number }[];
+}
+
 export interface FetchRecord {
   ok: boolean;
   durationMs: number;
@@ -26,6 +49,8 @@ interface WaterState {
   lastError: string | null;
   nextPollAt: number | null;
   recentFetches: FetchRecord[];
+  /** Server-reported filter diagnostics (null when response served from cache) */
+  filterStats: WaterFilterStats | null;
   /** Precipitation-specific observability */
   precipStatus: WaterConnectionStatus;
   precipLastFetchAt: number | null;
@@ -36,6 +61,7 @@ interface WaterState {
   /** Raw precipitation array for direct coordinate lookup (e.g. weather tooltip) */
   rawPrecipData: PrecipitationData[];
   setWaterData: (response: CacheResponse<WaterFacility[]>) => void;
+  setFilterStats: (stats: WaterFilterStats | null) => void;
   updatePrecipitation: (data: PrecipitationData[]) => void;
   setError: (message?: string) => void;
   setLoading: () => void;
@@ -56,6 +82,7 @@ export const useWaterStore = create<WaterState>()((set) => ({
   lastError: null,
   nextPollAt: null,
   recentFetches: [],
+  filterStats: null,
   precipStatus: 'idle',
   precipLastFetchAt: null,
   precipLastError: null,
@@ -70,6 +97,8 @@ export const useWaterStore = create<WaterState>()((set) => ({
       connectionStatus: response.stale ? 'stale' : 'connected',
       lastError: null,
     }),
+
+  setFilterStats: (filterStats) => set({ filterStats }),
 
   updatePrecipitation: (data) =>
     set((state) => {
