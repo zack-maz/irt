@@ -5,6 +5,7 @@ import { useLayerStore } from '@/stores/layerStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { stressToRGBA } from '@/lib/waterStress';
+import { haversineKm } from '@/lib/geo';
 import { getIconAtlasForLayer, ICON_MAPPING } from '@/components/map/layers/icons';
 import riversGeoJson from '@/data/rivers.json';
 import type { WaterFacility, WaterFacilityType } from '../../server/types';
@@ -15,11 +16,17 @@ const WATER_ICON_MAP: Record<WaterFacilityType, string> = {
   dam: 'waterDam',
   reservoir: 'waterReservoir',
   desalination: 'waterDesalination',
-  treatment_plant: 'waterTreatment',
 };
 
-/** Event types that indicate facility destruction */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion']);
+/**
+ * Event types that indicate facility damage or imminent threat (REV-5).
+ * Expanded from ['airstrike', 'explosion'] to also include 'targeted' (precision strikes
+ * on infrastructure) and 'on_ground' (ground combat near facilities).
+ */
+const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion', 'targeted']);
+const COMBAT_EVENT_TYPES = new Set(['on_ground']);
+/** Combined attack-relevant event types for the destroyed/attacked check. */
+const ATTACK_EVENT_TYPES = new Set([...DESTRUCTIVE_EVENT_TYPES, ...COMBAT_EVENT_TYPES]);
 
 interface RiverFeature {
   type: 'Feature';
@@ -132,6 +139,8 @@ export function useWaterLayers(): WaterLayerGroup {
   const showLowStress = useFilterStore((s) => s.showLowStress);
   const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
   const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
+  const proximityPin = useFilterStore((s) => s.proximityPin);
+  const proximityRadiusKm = useFilterStore((s) => s.proximityRadiusKm);
 
   return useMemo(() => {
     if (!isActive || !showWater)
@@ -146,6 +155,13 @@ export function useWaterLayers(): WaterLayerGroup {
       filteredFacilities = filteredFacilities.filter((f) => f.label.toLowerCase().includes(q));
     }
 
+    // Proximity filter — match entityPassesFilters behavior for flights/ships/events
+    if (proximityPin) {
+      filteredFacilities = filteredFacilities.filter(
+        (f) => haversineKm(proximityPin.lat, proximityPin.lng, f.lat, f.lng) <= proximityRadiusKm,
+      );
+    }
+
     // Stress level filter based on compositeHealth
     filteredFacilities = filteredFacilities.filter((f) => {
       const h = f.stress.compositeHealth;
@@ -155,9 +171,22 @@ export function useWaterLayers(): WaterLayerGroup {
     });
 
     // Pre-compute destroyed set (O(facilities * destructiveEvents))
+    // REV-5: use combined ATTACK_EVENT_TYPES so 'targeted' and 'on_ground' also count.
     const destructiveEvents = events.filter(
-      (e) => DESTRUCTIVE_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
+      (e) => ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
     );
+
+    if (import.meta.env.DEV) {
+      // Log once per render so we can see what's happening with attacked detection (REV-5)
+      console.debug('[useWaterLayers] attack detection:', {
+        totalEvents: events.length,
+        destructiveEvents: destructiveEvents.length,
+        eventTypes: Array.from(new Set(events.map((e) => e.type))),
+        facilities: filteredFacilities.length,
+        dateEnd: new Date(dateEnd).toISOString(),
+      });
+    }
+
     const destroyedIds = new Set<string>();
     const COARSE_DEG = 0.05;
     for (const f of filteredFacilities) {
@@ -263,5 +292,7 @@ export function useWaterLayers(): WaterLayerGroup {
     showLowStress,
     showHealthyWater,
     showAttackedWater,
+    proximityPin,
+    proximityRadiusKm,
   ]);
 }
