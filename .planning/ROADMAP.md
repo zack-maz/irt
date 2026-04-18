@@ -138,6 +138,13 @@ Plans:
 - [x] 27.3-04-PLAN.md — Gap closure: UAT Test 3 "Dam near unknown" — server filter tightening (no_city rejection bucket) + client getWaterFacilityDisplayName helper
 - [x] 27.3-05-PLAN.md — Gap closure: UAT re-run tests 6/7/8 — scope no_city to reservoirs only (+ priority-country named exemption), name-based dam reclassification (Hub Dam), getWaterFacilityDisplayName generic-token sentinel, DevApiStatus cached-response placeholder
 
+### Phase 27.3.1: Water Facility Retry and Cleanup (INSERTED)
+
+**Goal:** Verify + calibrate Package A filter counts (~100–500 dams / ~100–500 reservoirs / ~13 desal, every facility significant with a real OSM name), persist water facilities to a committed JSON snapshot so cold-starts don't depend on Overpass availability, audit sites for the same pattern, and clean up `overpass-water.ts` accumulated complexity from Plans 01–05 + two debug rounds. Architecture must scale to many concurrent users — Overpass never on the request path synchronously.
+**Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
+**Requirements:** R-01 through R-07 (from 27.3.1-CONTEXT.md)
+**Plans:** 0 plans (not planned yet)
+
 ### Phase 27.4: LLM Enrichment Improvements
 
 **Goal:** Further improve the LLM event enrichment pipeline — batch size tuning, prompt enrichment with news article context, better extraction quality, and richer output fields.
