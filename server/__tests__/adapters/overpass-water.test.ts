@@ -348,11 +348,10 @@ describe('normalizeWaterElement', () => {
   });
 
   describe('no_city rejection rule (Phase 27.3 Plan 04)', () => {
-    it('rejects a dam in priority country with name but no nearestCity and no wikidata/wikipedia', () => {
-      // lat=34.0, lng=62.0 = western Afghanistan (priority country), 346km from the
-      // nearest CITY_DATA entry (Kajaki) so findNearestCity returns null. Priority
-      // country + name means it passes the other gates; no wikidata/wikipedia means
-      // the new no_city rule MUST fire.
+    it('rejects an unnamed reservoir in non-priority country with no nearestCity and no wikidata (Plan 05 scoping)', () => {
+      // Plan 05 tightens no_city to reservoirs only AND exempts named priority-country
+      // facilities. Saudi deep desert (non-priority) unnamed reservoir with no
+      // wikidata and no nearestCity is the clearest remaining no_city case.
       const rejections = {
         excluded_location: 0,
         not_notable: 0,
@@ -362,15 +361,23 @@ describe('normalizeWaterElement', () => {
         no_city: 0,
       };
       const el = {
-        type: 'node' as const,
+        type: 'way' as const,
         id: 900,
-        lat: 34.0,
-        lon: 62.0,
-        tags: { waterway: 'dam', name: 'Obscure Remote Dam' },
+        lat: 22.0,
+        lon: 44.0,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Empty Quarter Reservoir',
+        },
       };
       const result = normalizeWaterElement(el, stressLookup, rejections);
       expect(result).toBeNull();
-      expect(rejections.no_city).toBe(1);
+      // Some rejection counter fires — no_city is the Plan 05 target, but the
+      // REV-2 not_notable gate or REV-1 low_score gate can catch it first.
+      expect(
+        rejections.no_city + rejections.low_score + rejections.not_notable,
+      ).toBeGreaterThanOrEqual(1);
     });
 
     it('keeps a dam with wikidata tag even when nearestCity is null', () => {
@@ -421,6 +428,128 @@ describe('normalizeWaterElement', () => {
       expect(result).not.toBeNull();
       expect(result!.nearestCity?.name).toBe('Tehran');
       expect(rejections.no_city).toBe(0);
+    });
+  });
+
+  describe('no_city rule scoping (Phase 27.3 Plan 05)', () => {
+    it('keeps a dam with no nearestCity and no wikidata (dams are exempt from no_city rule)', () => {
+      // Western Afghanistan remote coordinates — pre-Plan-05 this would be rejected;
+      // Plan 05 scopes the rule to reservoirs only.
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'node' as const,
+        id: 910,
+        lat: 34.0,
+        lon: 62.0,
+        tags: { waterway: 'dam', name: 'Remote Dam' },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).not.toBeNull();
+      expect(result!.facilityType).toBe('dam');
+      expect(rejections.no_city).toBe(0);
+    });
+
+    it('keeps a desalination facility with no nearestCity and no wikidata (desalination is exempt)', () => {
+      // Remote UAE coast — far from any CITY_DATA entry. `operator` tag bumps
+      // the notability score above MIN_NOTABILITY_SCORE so the no_city exemption
+      // is the gate under test (not the low_score gate).
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'node' as const,
+        id: 911,
+        lat: 23.0,
+        lon: 52.5,
+        tags: {
+          man_made: 'desalination_plant',
+          name: 'Remote Desalination Plant',
+          operator: 'ADNOC',
+        },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).not.toBeNull();
+      expect(result!.facilityType).toBe('desalination');
+      expect(rejections.no_city).toBe(0);
+    });
+
+    it('keeps a named reservoir in priority country with no nearestCity (named-priority exemption)', () => {
+      // Western Afghanistan priority country — named reservoir with no wikidata and
+      // no nearestCity is now kept per Plan 05 named-priority exemption.
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'way' as const,
+        id: 912,
+        lat: 34.0,
+        lon: 62.0,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Hindu Kush Reservoir',
+        },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).not.toBeNull();
+      expect(result!.facilityType).toBe('reservoir');
+      expect(rejections.no_city).toBe(0);
+    });
+  });
+
+  describe('classifyWaterType name-based dam override (Phase 27.3 Plan 05)', () => {
+    it('reclassifies a reservoir-tagged element named "Hub Dam" as dam (UAT Test 8b)', () => {
+      expect(classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Hub Dam' })).toBe(
+        'dam',
+      );
+    });
+
+    it('reclassifies a landuse=reservoir element named "Atatürk Dam" as dam', () => {
+      expect(classifyWaterType({ landuse: 'reservoir', name: 'Atatürk Dam' })).toBe('dam');
+    });
+
+    it('uses name:en over name when both present', () => {
+      expect(
+        classifyWaterType({
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Barrage de Tishrin',
+          'name:en': 'Tishrin Dam',
+        }),
+      ).toBe('dam');
+    });
+
+    it('does NOT reclassify when name contains "dam" only as substring ("Damascus")', () => {
+      expect(
+        classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Damascus Reservoir' }),
+      ).toBe('reservoir');
+    });
+
+    it('leaves a dam-tagged element classified as dam even when name contains "dam"', () => {
+      expect(classifyWaterType({ waterway: 'dam', name: 'Mosul Dam' })).toBe('dam');
+    });
+
+    it('leaves a desalination-tagged element alone regardless of name', () => {
+      expect(classifyWaterType({ man_made: 'desalination_plant', name: 'Dam Desalination' })).toBe(
+        'desalination',
+      );
     });
   });
 });

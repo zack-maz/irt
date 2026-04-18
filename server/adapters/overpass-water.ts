@@ -303,17 +303,37 @@ function toTitleCase(str: string): string {
 }
 
 /**
+ * Word-bounded, case-insensitive match for the token "dam" in a name — used to
+ * reclassify misclassified-reservoir facilities whose OSM name is ground truth
+ * (e.g. "Hub Dam" tagged as natural=water/water=reservoir). Phase 27.3 Plan 05 /
+ * UAT Test 8b. One-directional: reservoir → dam only.
+ */
+const DAM_IN_NAME_RE = /\bdam\b/i;
+
+/**
  * Classify OSM tags into a WaterFacilityType.
  * Returns null if tags don't match any water infrastructure.
  */
 export function classifyWaterType(tags: Record<string, string>): WaterFacilityType | null {
-  if (tags['waterway'] === 'dam') return 'dam';
-  if (tags['man_made'] === 'dam') return 'dam';
-  if (tags['natural'] === 'water' && tags['water'] === 'reservoir') return 'reservoir';
-  if (tags['landuse'] === 'reservoir') return 'reservoir';
-  if (tags['man_made'] === 'desalination_plant') return 'desalination';
-  if (tags['water_works'] === 'desalination') return 'desalination';
-  return null;
+  let result: WaterFacilityType | null = null;
+  if (tags['waterway'] === 'dam') result = 'dam';
+  else if (tags['man_made'] === 'dam') result = 'dam';
+  else if (tags['natural'] === 'water' && tags['water'] === 'reservoir') result = 'reservoir';
+  else if (tags['landuse'] === 'reservoir') result = 'reservoir';
+  else if (tags['man_made'] === 'desalination_plant') result = 'desalination';
+  else if (tags['water_works'] === 'desalination') result = 'desalination';
+
+  // Phase 27.3 Plan 05 / UAT Test 8b: name-based override for reservoir → dam.
+  // An OSM element tagged reservoir but named "<Something> Dam" is almost always
+  // a dam whose mapper only tagged the impounded water surface. One-directional.
+  if (result === 'reservoir') {
+    const name = tags['name:en'] ?? tags['name'] ?? '';
+    if (DAM_IN_NAME_RE.test(name)) {
+      return 'dam';
+    }
+  }
+
+  return result;
 }
 
 export const FACILITY_TYPE_LABELS: Record<WaterFacilityType, string> = {
@@ -500,16 +520,18 @@ export function normalizeWaterElement(
   const nearestCity = findNearestCity(lat, lon);
   const linkedRiver = linkRiver(lat, lon);
 
-  // Phase 27.3 UAT Test 3: a facility with NO nearestCity within 150km AND no
-  // wikidata/wikipedia reference is "low-information" — the reverse-geocode
-  // path would produce a "<Type> near Unknown" label and the facility adds noise
-  // rather than intelligence. Wikidata/wikipedia facilities are kept (e.g. remote
-  // Himalayan dams that are notable on their own terms).
+  // Phase 27.3 UAT Test 3 (Plan 04) / Plan 05: a RESERVOIR with NO nearestCity
+  // within 150km AND no wikidata/wikipedia reference is low-information noise.
+  // Plan 05 scopes the rule to reservoirs only (Test 7 gap fix — dams and
+  // desalination were being starved) AND exempts named priority-country
+  // facilities (conflict-zone reservoirs are intelligence-relevant even without
+  // a CITY_DATA city within 150km).
   const hasWikiRef =
     !!el.tags.wikidata ||
     !!el.tags.wikipedia ||
     Object.keys(el.tags).some((k) => k.startsWith('wikipedia:'));
-  if (!nearestCity && !hasWikiRef) {
+  const isNamedInPriorityCountry = inPriority && hasName(el.tags);
+  if (facilityType === 'reservoir' && !nearestCity && !hasWikiRef && !isNamedInPriorityCountry) {
     if (rejections) rejections.no_city++;
     return null;
   }
