@@ -736,7 +736,7 @@ function WaterFiltersSection() {
         <span className="font-bold text-white/40">Rejections:</span> excl=
         {filterStats.rejections.excluded_location} nn={filterStats.rejections.not_notable} nname=
         {filterStats.rejections.no_name} dup={filterStats.rejections.duplicate} low=
-        {filterStats.rejections.low_score}
+        {filterStats.rejections.low_score} nocity={filterStats.rejections.no_city}
       </div>
 
       {/* Enrichment coverage */}

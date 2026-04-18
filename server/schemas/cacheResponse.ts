@@ -137,6 +137,7 @@ const waterFilterStatsSchema = z
       no_name: z.number(),
       duplicate: z.number(),
       low_score: z.number(),
+      no_city: z.number(),
     }),
     enrichment: z.object({
       withCapacity: z.number(),

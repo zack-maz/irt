@@ -61,8 +61,11 @@ async function labelUnnamedFacilities(facilities: WaterFacility[]): Promise<Wate
 
     if (cached) {
       const location = cached.data;
-      const place = location.city ?? location.country ?? 'Unknown';
-      f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+      const place = location.city ?? location.country;
+      if (place) {
+        f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+      }
+      // else: keep the generic type label intact — never write "near Unknown" (Phase 27.3 Plan 04 / UAT Test 3)
       continue;
     }
 
@@ -70,8 +73,11 @@ async function labelUnnamedFacilities(facilities: WaterFacility[]): Promise<Wate
     try {
       const geo = await reverseGeocode(f.lat, f.lng);
       await cacheSetSafe(cacheKey, geo, GEOCODE_REDIS_TTL_SEC);
-      const place = geo.city ?? geo.country ?? 'Unknown';
-      f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+      const place = geo.city ?? geo.country;
+      if (place) {
+        f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
+      }
+      // else: keep the generic type label intact (Phase 27.3 Plan 04 / UAT Test 3)
     } catch (err) {
       log.warn({ err, facilityId: f.id }, 'reverse geocode failed for unnamed facility');
     }

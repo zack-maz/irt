@@ -26,6 +26,7 @@ const emptyStats = {
     no_name: 0,
     duplicate: 0,
     low_score: 0,
+    no_city: 0,
   },
   enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
   scoreHistogram: [] as { bucket: string; count: number }[],

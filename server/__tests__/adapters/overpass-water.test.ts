@@ -337,13 +337,90 @@ describe('normalizeWaterElement', () => {
       const el = {
         type: 'node' as const,
         id: 402,
-        lat: 32.4,
-        lon: 53.7, // Iran (priority)
+        lat: 32.6,
+        lon: 51.7, // Iran (priority), near Isfahan so no_city rule doesn't reject
         tags: { man_made: 'desalination_plant', 'name:en': 'Isfahan Desalination Plant' },
       };
       const result = normalizeWaterElement(el, stressLookup);
       expect(result).not.toBeNull();
       expect(result!.label).toBe('Isfahan Desalination Plant');
+    });
+  });
+
+  describe('no_city rejection rule (Phase 27.3 Plan 04)', () => {
+    it('rejects a dam in priority country with name but no nearestCity and no wikidata/wikipedia', () => {
+      // lat=34.0, lng=62.0 = western Afghanistan (priority country), 346km from the
+      // nearest CITY_DATA entry (Kajaki) so findNearestCity returns null. Priority
+      // country + name means it passes the other gates; no wikidata/wikipedia means
+      // the new no_city rule MUST fire.
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'node' as const,
+        id: 900,
+        lat: 34.0,
+        lon: 62.0,
+        tags: { waterway: 'dam', name: 'Obscure Remote Dam' },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).toBeNull();
+      expect(rejections.no_city).toBe(1);
+    });
+
+    it('keeps a dam with wikidata tag even when nearestCity is null', () => {
+      // Same remote Afghanistan coords, but this dam has wikidata so it's notable
+      // on its own terms even without a nearby city.
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'node' as const,
+        id: 901,
+        lat: 34.0,
+        lon: 62.0,
+        tags: {
+          waterway: 'dam',
+          name: 'Remote Wikidata Dam',
+          wikidata: 'Q12345',
+        },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).not.toBeNull();
+      expect(result!.label).toBe('Remote Wikidata Dam');
+      expect(rejections.no_city).toBe(0);
+    });
+
+    it('keeps a dam near a CITY_DATA entry (Tehran) — nearestCity resolves', () => {
+      const rejections = {
+        excluded_location: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
+      const el = {
+        type: 'node' as const,
+        id: 902,
+        lat: 35.7,
+        lon: 51.4,
+        tags: { waterway: 'dam', name: 'Near Tehran Dam' },
+      };
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).not.toBeNull();
+      expect(result!.nearestCity?.name).toBe('Tehran');
+      expect(rejections.no_city).toBe(0);
     });
   });
 });

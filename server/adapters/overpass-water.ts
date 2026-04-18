@@ -434,6 +434,8 @@ export interface WaterFilterStats {
     no_name: number;
     duplicate: number;
     low_score: number;
+    /** Rejected for failing the "notability via city proximity" check: no wikidata, no wikipedia, and no nearestCity within 150km. See Phase 27.3 Plan 04 / UAT Test 3. */
+    no_city: number;
   };
   enrichment: {
     withCapacity: number;
@@ -497,6 +499,20 @@ export function normalizeWaterElement(
   const capacity = extractCapacityTags(el.tags);
   const nearestCity = findNearestCity(lat, lon);
   const linkedRiver = linkRiver(lat, lon);
+
+  // Phase 27.3 UAT Test 3: a facility with NO nearestCity within 150km AND no
+  // wikidata/wikipedia reference is "low-information" — the reverse-geocode
+  // path would produce a "<Type> near Unknown" label and the facility adds noise
+  // rather than intelligence. Wikidata/wikipedia facilities are kept (e.g. remote
+  // Himalayan dams that are notable on their own terms).
+  const hasWikiRef =
+    !!el.tags.wikidata ||
+    !!el.tags.wikipedia ||
+    Object.keys(el.tags).some((k) => k.startsWith('wikipedia:'));
+  if (!nearestCity && !hasWikiRef) {
+    if (rejections) rejections.no_city++;
+    return null;
+  }
 
   return {
     id: `water-${el.id}`,
@@ -577,7 +593,14 @@ export async function fetchWaterFacilities(): Promise<{
   const stats: WaterFilterStats = {
     rawCounts: {},
     filteredCounts: {},
-    rejections: { excluded_location: 0, not_notable: 0, no_name: 0, duplicate: 0, low_score: 0 },
+    rejections: {
+      excluded_location: 0,
+      not_notable: 0,
+      no_name: 0,
+      duplicate: 0,
+      low_score: 0,
+      no_city: 0,
+    },
     enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
     scoreHistogram: [],
   };

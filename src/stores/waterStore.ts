@@ -27,6 +27,8 @@ export interface WaterFilterStats {
     no_name: number;
     duplicate: number;
     low_score: number;
+    /** Rejected because no nearby city (150km) AND no wikidata/wikipedia ref. Phase 27.3 Plan 04. */
+    no_city: number;
   };
   enrichment: {
     withCapacity: number;
