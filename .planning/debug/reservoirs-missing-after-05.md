@@ -1,11 +1,32 @@
 ---
 slug: reservoirs-missing-after-05
-status: awaiting_user_evidence
+status: resolved-pending-user-verification
 trigger: "I'm seeing 0 reservoirs and 4 desal plants — DAM_IN_NAME_RE fix applied, /api/water?refresh=true hit, still 0 reservoirs"
 created: 2026-04-18T12:42:00Z
-updated: 2026-04-18T13:50:00Z
+updated: 2026-04-18T19:15:00Z
 phase: 27.3-water-facility-filtering-improvements
 ---
+
+## ROUND 3 — user re-opens with explicit targets
+
+User restated the problem with concrete targets (2026-04-18):
+
+- **Goal: ~400 dams AND ~400 reservoirs across the map.** Current: 0 dams, 0 reservoirs (per Round 2 baseline 0 reservoirs; user now also reports 0 dams).
+- **Goal: 13 desalination plants (original count).** Current: 4.
+- **Goal: every dam/reservoir has a unique name** — "not just a generic 'Dam near unknown...'" — suggests fallback-label code path is being hit, OR many features arrive with no `name` tag and are being labeled generically somewhere.
+
+New observations from this round:
+
+1. Symptom parity shift: Round 2 said "0 reservoirs, ~4 desal". User now says "0 dams, 4 desal". Either counts have moved (dams disappeared after Round-1 fix pushed Mosul Dam Lake etc. BACK into reservoir) or user is conflating dam/reservoir counts. Need fresh filterStats to confirm.
+2. "Dam near unknown…" generic labels suggest a separate display-label bug: somewhere we emit `${type} near ${cityName ?? 'unknown'}` for unnamed facilities. But we also REQUIRE `hasName()` to pass REV-2 in non-priority countries — so the generic-labeled rows must be priority-country unnamed features that pass via `isNotable()` (wikidata) without populating `label`. Worth inspecting the label fallback chain.
+3. Target count (~400 each) is aggressive. Current gates likely won't permit it even if PRIORITY_COUNTRIES expands to Turkey — we may need to relax REV-2 to `isNotable || hasName` globally and lean on MIN_NOTABILITY_SCORE=25 as the authoritative gate.
+
+### Fresh action plan
+
+1. Check /api/water live response: counts per type, filterStats, sample names.
+2. Inspect label-assignment path — where does "X near unknown" come from? Is `label` ever equal to `name`?
+3. Re-evaluate REV-2 vs score-gate-only model given the user's aggressive target.
+4. Consider desal minimums: user wants 13, we get 4. Desal is gated how? Re-read the desal classification / filter path.
 
 ## ROUND 2 — regex fix insufficient
 
@@ -162,3 +183,105 @@ The `DAM_IN_NAME_RE = /\bdam\b/i` regex was too broad. Fixed to `/\bdam\s*$/i`.
 ## Round 2 status
 
 **Awaiting DevApiStatus filterStats output from user.** Fix prepared (add Turkey to PRIORITY_COUNTRIES) but held until evidence confirms rejection bucket.
+
+## ROUND 3 RESOLUTION (Package A applied 2026-04-18)
+
+User selected **Package A (aggressive)** after the Round 2 investigation pointed
+at REV-2 as the dominant rejection path. Fix applied — awaiting live
+/api/water?refresh=true verification of facility counts before archival.
+
+### Root cause (consolidated across rounds)
+
+Three layered gates compounded to starve the reservoir/dam populations and
+produce the user-visible "Dam near unknown" labels:
+
+1. **Round 1**: `DAM_IN_NAME_RE = /\bdam\b/i` mis-reclassified reservoir
+   impoundments named "X Dam Lake" / "X Dam Reservoir" as dams. Fixed in
+   commit 65f6061 with terminal-anchored `/\bdam\s*$/i`.
+2. **Round 3 dominant cause**: `PRIORITY_COUNTRIES` only held 7 conflict
+   countries. The REV-2 reservoir gate required
+   `isNotable(tags) || (inPriority && hasName(tags))`, rejecting named-but-
+   unwikified reservoirs in Turkey (Tigris/Euphrates headwaters), Egypt (Nile
+   basin), and the Gulf — the bulk of OSM water coverage for the Middle East.
+3. **Round 3 secondary cause**: Additionally, `MIN_NOTABILITY_SCORE=25` gated
+   out any facility scoring only via `name` (+15) when priority-country bonus
+   wasn't available. Dropped to 15 so a name alone (or priority bonus alone) is
+   enough notability signal.
+4. **Label-bug followup**: `SearchResultItem` rendered the raw `entity.label`
+   directly, bypassing the `getWaterFacilityDisplayName` sanitizer. Stale
+   cached facilities with `"Dam near Unknown"` labels (from the pre-Plan-04
+   server) showed up verbatim in search dropdown results. Patched to route
+   water entities through the helper.
+
+### Fix
+
+**Files changed:**
+
+- `server/adapters/overpass-water.ts`
+  - Expanded `PRIORITY_COUNTRIES` to full Middle East (added Turkey, Egypt,
+    Saudi Arabia, UAE, Kuwait, Qatar, Yemen — 14 countries total).
+  - Dropped `MIN_NOTABILITY_SCORE` from 25 to 15.
+  - Relaxed REV-2 reservoir gate to `isNotable(tags) || hasName(tags)` —
+    score floor is now the authoritative holistic check; priority-country
+    conjunct removed.
+  - Preserved the `!inPriority && !hasName` reject gate for dams (unnamed
+    dams in non-priority countries still dropped as `no_name`).
+  - Unnamed desalination plants in non-priority countries still score only 5
+    and are caught by the 15-point floor as `low_score`.
+- `server/__tests__/adapters/overpass-water.test.ts`
+  - Flipped `isPriorityCountry` assertions for Saudi Arabia / UAE / Kuwait /
+    Egypt / Turkey / Yemen to `toBe(true)`; added Oman / Pakistan as the
+    remaining non-priority sentinels.
+  - Moved "non-priority country" admission/rejection tests to Oman coordinates
+    (21.5, 55.9 coastal; 20.0, 55.5 interior; 23.6, 58.4 near Muscat).
+  - Converted "filters reservoir without wikidata" to "admits named reservoir
+    via hasName (Round 3 REV-2 relaxation)" — plus a sibling test exercising
+    the remaining no_city rejection path in Oman interior.
+  - Rewired "holistic filtering rejects below MIN_NOTABILITY_SCORE" to use an
+    unnamed non-priority desalination plant (score = 5 < 15).
+  - Added regression tests: Turkish named reservoir (Karakaya), Egyptian named
+    dam with operator (High Dam), Saudi named reservoir (Najran) — all admit
+    now without wikidata.
+- `src/components/search/SearchResultItem.tsx`
+  - Routes `entity.type === 'water'` display label through
+    `getWaterFacilityDisplayName` so stale "Dam near Unknown" cached labels
+    (and bare generic type tokens) get sanitized in the search dropdown.
+
+**Test delta:**
+
+- Server suite: 666 / 666 passing (unchanged count — reshaped tests replaced
+  now-obsolete premises).
+- Full suite: 1451 / 1485 passing; the 34 failing tests are all pre-existing
+  baseline issues in `src/__tests__/filters.test.ts` / `devApiStatus.test.tsx`
+  / `entityLayers.test.ts`, verified by running `git stash` + `npx vitest run`
+  on the parent branch head.
+
+### Expected behavior
+
+On the next `/api/water?refresh=true` hit:
+
+- Reservoir count should climb sharply from 0 toward the user's ~400 target —
+  major named reservoirs in Turkey (Atatürk, Keban, Karakaya, Tishrin, Tabqa),
+  Egypt (Lake Nasser), Saudi Arabia, UAE, etc. now pass REV-2 even without
+  wikidata.
+- Dam count should likewise climb — dams in the expanded priority set no
+  longer need wikidata to clear the 15-point floor (priority bonus alone = 15).
+- Desalination count should rise modestly; the primary gate for them is
+  notability score, and the +5 desal bonus plus a name (15) now clears the
+  floor at 20.
+- Search dropdown should no longer render "Dam near Unknown" strings; stale
+  cached labels are sanitized by the helper.
+
+### Pending user verification
+
+User will run `/api/water?refresh=true` after deploy and check:
+
+1. Reservoir count in DevApiStatus — target ~400.
+2. Dam count — target ~400.
+3. Desalination count — target ~13 (if still stuck at 4, a secondary Plan 06
+   pass on the desalination score structure is warranted).
+4. No "near Unknown" strings in any water-layer UI (tooltip, detail panel,
+   counter rows, search dropdown).
+
+This debug session can be moved to `.planning/debug/resolved/` after user
+confirms the above on a fresh refresh.
