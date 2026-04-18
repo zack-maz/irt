@@ -22,6 +22,17 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
 const NEAR_UNKNOWN_RE = /\bnear\s+unknown\s*$/i;
 
 /**
+ * Case-insensitive whole-string match for the four bare generic type tokens
+ * that `extractLabel` in server/adapters/overpass-water.ts emits when an OSM
+ * element has no `name` / `name:en` / `operator` tag. Phase 27.3 Plan 05 /
+ * UAT Test 8a: a label of exactly "Reservoir" is not a useful display name,
+ * so treat it as equivalent to an empty label and fall through to the
+ * river/city/coord fallback chain. Matching is WHOLE-STRING (trimmed), NOT
+ * substring — so "Mosul Dam" is preserved, but "Dam" alone is a sentinel.
+ */
+const GENERIC_TYPE_RE = /^(dam|reservoir|desalination(?:\s+plant)?)$/i;
+
+/**
  * Single source of truth for a water facility's UI display name.
  *
  * Fallback chain (first non-sentinel match wins):
@@ -41,7 +52,11 @@ export function getWaterFacilityDisplayName(facility: WaterFacility): string {
   const typeLabel = WATER_TYPE_LABELS[facility.facilityType];
 
   const raw = facility.label?.trim();
-  if (raw && !NEAR_UNKNOWN_RE.test(raw)) {
+  // Sentinel check: legacy "... near Unknown" from pre-Plan-04 caches, AND
+  // bare generic type tokens ("Dam" / "Reservoir" / "Desalination" /
+  // "Desalination Plant") from extractLabel when no OSM name exists. Either
+  // sentinel falls through to the river/city/coord chain.
+  if (raw && !NEAR_UNKNOWN_RE.test(raw) && !GENERIC_TYPE_RE.test(raw)) {
     return raw;
   }
 

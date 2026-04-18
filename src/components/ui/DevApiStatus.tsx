@@ -696,7 +696,23 @@ export function DevApiStatus() {
  */
 function WaterFiltersSection() {
   const filterStats = useWaterStore((s) => s.filterStats);
-  if (!filterStats) return null;
+
+  // Phase 27.3 Plan 05 / UAT Test 6: cached /api/water responses don't carry
+  // filterStats, so the full diagnostics panel can't render. Show a compact
+  // placeholder row instead of null-rendering — otherwise the user sees
+  // nothing at all and thinks the Water Filters section is broken.
+  if (!filterStats) {
+    return (
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+          Water Filters
+        </span>
+        <div className="mt-0.5 text-[9px] italic text-white/40">
+          cached — hit /api/water?refresh=true to see counts
+        </div>
+      </div>
+    );
+  }
 
   const totalRaw = Object.values(filterStats.rawCounts).reduce((a, b) => a + b, 0);
   const totalKept = Object.values(filterStats.filteredCounts).reduce((a, b) => a + b, 0);
