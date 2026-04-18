@@ -551,6 +551,46 @@ describe('normalizeWaterElement', () => {
         'desalination',
       );
     });
+
+    // ---- Regression tests for the reservoirs-missing-after-05 bug ----
+    // Pre-fix `/\bdam\b/i` incorrectly reclassified reservoir impoundments
+    // named after the dam that created them (e.g. "Mosul Dam Lake") as dams,
+    // draining the reservoir population to zero. Fix: terminal-anchored
+    // `/\bdam\s*$/i` so only "X Dam" (trailing token) reclassifies.
+
+    it('does NOT reclassify "Mosul Dam Lake" (impoundment named after the dam)', () => {
+      expect(
+        classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Mosul Dam Lake' }),
+      ).toBe('reservoir');
+    });
+
+    it('does NOT reclassify "Tabqa Dam Reservoir" (impoundment suffix)', () => {
+      expect(
+        classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Tabqa Dam Reservoir' }),
+      ).toBe('reservoir');
+    });
+
+    it('does NOT reclassify "Atatürk Dam Reservoir" (landuse impoundment suffix)', () => {
+      expect(classifyWaterType({ landuse: 'reservoir', name: 'Atatürk Dam Reservoir' })).toBe(
+        'reservoir',
+      );
+    });
+
+    it('does NOT reclassify "Karkheh Dam Water Supply" (dam-adjacent compound noun)', () => {
+      expect(
+        classifyWaterType({
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Karkheh Dam Water Supply',
+        }),
+      ).toBe('reservoir');
+    });
+
+    it('reclassifies "Hub Dam " with trailing whitespace (terminal anchor tolerates trim)', () => {
+      expect(classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Hub Dam ' })).toBe(
+        'dam',
+      );
+    });
   });
 });
 
