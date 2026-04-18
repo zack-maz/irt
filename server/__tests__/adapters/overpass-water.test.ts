@@ -84,20 +84,40 @@ describe('isPriorityCountry', () => {
     expect(isPriorityCountry(35.0, 38.0)).toBe(true);
   });
 
-  it('returns false for coords near Saudi Arabia (23.9, 45.1)', () => {
-    expect(isPriorityCountry(23.9, 45.1)).toBe(false);
+  // Round 3 (reservoirs-missing-after-05): PRIORITY_COUNTRIES expanded to the
+  // full Middle East. Saudi Arabia, UAE, Kuwait, Qatar, Egypt, Turkey, and
+  // Yemen are all now priority; assertions flipped accordingly.
+  it('returns true for coords near Saudi Arabia (23.9, 45.1) — Round 3 expansion', () => {
+    expect(isPriorityCountry(23.9, 45.1)).toBe(true);
   });
 
-  it('returns false for coords near UAE (23.4, 53.8)', () => {
-    expect(isPriorityCountry(23.4, 53.8)).toBe(false);
+  it('returns true for coords near UAE (23.4, 53.8) — Round 3 expansion', () => {
+    expect(isPriorityCountry(23.4, 53.8)).toBe(true);
   });
 
-  it('returns false for coords near Kuwait (29.3, 47.5)', () => {
-    expect(isPriorityCountry(29.3, 47.5)).toBe(false);
+  it('returns true for coords near Kuwait (29.3, 47.5) — Round 3 expansion', () => {
+    expect(isPriorityCountry(29.3, 47.5)).toBe(true);
   });
 
-  it('returns false for coords near Egypt (26.8, 30.8)', () => {
-    expect(isPriorityCountry(26.8, 30.8)).toBe(false);
+  it('returns true for coords near Egypt (26.8, 30.8) — Round 3 expansion', () => {
+    expect(isPriorityCountry(26.8, 30.8)).toBe(true);
+  });
+
+  it('returns true for coords near Turkey SE (37.9, 40.2) — Round 3 expansion', () => {
+    expect(isPriorityCountry(37.9, 40.2)).toBe(true);
+  });
+
+  it('returns true for coords near Yemen (15.6, 48.5) — Round 3 expansion', () => {
+    expect(isPriorityCountry(15.6, 48.5)).toBe(true);
+  });
+
+  // Non-priority countries still within the Middle East bbox
+  it('returns false for coords near Oman (21.5, 55.9)', () => {
+    expect(isPriorityCountry(21.5, 55.9)).toBe(false);
+  });
+
+  it('returns false for coords near Pakistan (30.4, 69.3)', () => {
+    expect(isPriorityCountry(30.4, 69.3)).toBe(false);
   });
 });
 
@@ -228,46 +248,67 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    // Non-priority country: Saudi Arabia (23.9, 45.1)
-    it('filters dam without name in non-priority country', () => {
+    // Non-priority country: Oman (21.5, 55.9) — Round 3 moved here since Saudi
+    // Arabia joined PRIORITY_COUNTRIES.
+    it('filters dam without name in non-priority country (Oman)', () => {
       const el = {
         type: 'node' as const,
         id: 300,
-        lat: 23.9,
-        lon: 45.1,
+        lat: 21.5,
+        lon: 55.9,
         tags: { waterway: 'dam' },
       };
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    it('keeps dam with wikidata in non-priority country', () => {
+    it('keeps dam with wikidata in non-priority country (Oman)', () => {
       const el = {
         type: 'node' as const,
         id: 301,
-        lat: 23.9,
-        lon: 45.1,
-        tags: { waterway: 'dam', name: 'Notable Saudi Dam', wikidata: 'Q12345' },
+        lat: 21.5,
+        lon: 55.9,
+        tags: { waterway: 'dam', name: 'Notable Omani Dam', wikidata: 'Q12345' },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('filters reservoir without wikidata/wikipedia in non-priority country', () => {
+    // Round 3: REV-2 now admits any named reservoir (`isNotable || hasName`).
+    // A named non-priority-country reservoir with no nearestCity within 150km
+    // and no wiki ref still gets rejected, but now via the no_city gate (not
+    // REV-2 not_notable). Oman deep-interior coordinates place the element
+    // outside any CITY_DATA 150km radius, so the assertion holds.
+    it('filters named reservoir in non-priority country when no nearestCity and no wiki (no_city)', () => {
       const el = {
         type: 'node' as const,
         id: 302,
-        lat: 23.9,
-        lon: 45.1,
-        tags: { natural: 'water', water: 'reservoir', name: 'Saudi Reservoir' },
+        lat: 20.0,
+        lon: 55.5, // Oman interior — no CITY_DATA entry within 150km
+        tags: { natural: 'water', water: 'reservoir', name: 'Omani Reservoir' },
       };
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    it('keeps reservoir with wikipedia in non-priority country', () => {
+    // Round 3 regression: named reservoir admits via hasName even without a wiki
+    // ref, so long as it clears the holistic score floor and the no_city gate.
+    it('admits named reservoir in non-priority country via hasName (Round 3 REV-2 relaxation)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 312,
+        // Near Muscat (23.588, 58.3829) so nearestCity enrichment resolves and
+        // no_city does not fire.
+        lat: 23.6,
+        lon: 58.4,
+        tags: { natural: 'water', water: 'reservoir', name: 'Muscat Hills Reservoir' },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('keeps reservoir with wikipedia in non-priority country (Oman)', () => {
       const el = {
         type: 'node' as const,
         id: 303,
-        lat: 23.9,
-        lon: 45.1,
+        lat: 23.6,
+        lon: 58.4,
         tags: {
           natural: 'water',
           water: 'reservoir',
@@ -278,29 +319,69 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('keeps desalination in non-priority country when score >= 25 (wikidata gives +40)', () => {
+    it('keeps desalination in non-priority country when score >= 15 (Round 3 floor) — Oman with wikidata', () => {
       const el = {
         type: 'node' as const,
         id: 305,
-        lat: 23.9,
-        lon: 45.1,
-        tags: { man_made: 'desalination_plant', name: 'Saudi Desalination', wikidata: 'Q99' },
+        lat: 23.6,
+        lon: 58.4,
+        tags: { man_made: 'desalination_plant', name: 'Omani Desalination', wikidata: 'Q99' },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('keeps reservoir with wikipedia:en in non-priority country', () => {
+    it('keeps reservoir with wikipedia:en in Egypt (now priority as of Round 3)', () => {
       const el = {
         type: 'node' as const,
         id: 306,
         lat: 26.8,
-        lon: 30.8, // Egypt (non-priority)
+        lon: 30.8, // Egypt — now priority
         tags: {
           natural: 'water',
           water: 'reservoir',
           name: 'Aswan Reservoir',
           'wikipedia:en': 'Lake Nasser',
         },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    // Round 3 regression tests: Turkish/Egyptian named reservoirs/dams without
+    // wikidata should now admit via the expanded priority set.
+    it('admits a Turkish named reservoir without wikidata (Round 3 regression)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 320,
+        // SE Turkey (within 600km of Diyarbakir so isExcludedLocation doesn't fire)
+        lat: 37.9,
+        lon: 40.2,
+        tags: { natural: 'water', water: 'reservoir', name: 'Karakaya Baraj Gölü' },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('admits an Egyptian named dam with operator but no wikidata (Round 3 regression)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 321,
+        lat: 26.8,
+        lon: 30.8, // Egypt — now priority
+        tags: {
+          waterway: 'dam',
+          name: 'High Dam',
+          operator: 'Egyptian Ministry of Water Resources',
+        },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('admits a Saudi named reservoir without wikidata (Round 3 priority expansion)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 322,
+        lat: 23.9,
+        lon: 45.1, // Saudi Arabia — now priority
+        tags: { natural: 'water', water: 'reservoir', name: 'Najran Reservoir' },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
@@ -348,10 +429,12 @@ describe('normalizeWaterElement', () => {
   });
 
   describe('no_city rejection rule (Phase 27.3 Plan 04)', () => {
-    it('rejects an unnamed reservoir in non-priority country with no nearestCity and no wikidata (Plan 05 scoping)', () => {
+    it('rejects a named reservoir in non-priority country with no nearestCity and no wikidata (Plan 05 scoping)', () => {
       // Plan 05 tightens no_city to reservoirs only AND exempts named priority-country
-      // facilities. Saudi deep desert (non-priority) unnamed reservoir with no
-      // wikidata and no nearestCity is the clearest remaining no_city case.
+      // facilities. Round 3 moved Saudi Arabia into PRIORITY_COUNTRIES, so the
+      // non-priority deep-interior case shifts to Oman (21.5, 55.9) / Oman
+      // interior (20.0, 55.5). Muscat is the only Omani CITY_DATA entry and
+      // sits ~400km away, so nearestCity does not resolve.
       const rejections = {
         excluded_location: 0,
         not_notable: 0,
@@ -363,18 +446,18 @@ describe('normalizeWaterElement', () => {
       const el = {
         type: 'way' as const,
         id: 900,
-        lat: 22.0,
-        lon: 44.0,
+        lat: 20.0,
+        lon: 55.5, // Oman interior, non-priority
         tags: {
           natural: 'water',
           water: 'reservoir',
-          name: 'Empty Quarter Reservoir',
+          name: 'Omani Interior Reservoir',
         },
       };
       const result = normalizeWaterElement(el, stressLookup, rejections);
       expect(result).toBeNull();
-      // Some rejection counter fires — no_city is the Plan 05 target, but the
-      // REV-2 not_notable gate or REV-1 low_score gate can catch it first.
+      // The Plan 05 target is no_city; under Round 3 relaxation REV-2 admits
+      // (hasName), score clears MIN=15 (name-only = 15), and no_city fires.
       expect(
         rejections.no_city + rejections.low_score + rejections.not_notable,
       ).toBeGreaterThanOrEqual(1);
@@ -707,13 +790,19 @@ describe('reservoir filtering (REV-2 wikidata fallback)', () => {
 });
 
 describe('holistic filtering (REV-1)', () => {
-  it('rejects facility with score below MIN_NOTABILITY_SCORE', () => {
+  // Round 3 (reservoirs-missing-after-05) — MIN_NOTABILITY_SCORE dropped from
+  // 25 to 15 and PRIORITY_COUNTRIES expanded to include Saudi Arabia. The old
+  // test used an unnamed Saudi dam which now scores 15 (priority bonus) and
+  // passes the floor; reshaped here to a case that genuinely lands in the
+  // low_score rejection bucket: an unnamed desalination plant in a non-priority
+  // country scores only 5 (desalination bonus) and is rejected.
+  it('rejects facility with score below MIN_NOTABILITY_SCORE (unnamed desalination in Oman)', () => {
     const el = {
       type: 'node' as const,
       id: 800,
-      lat: 24.0, // Saudi Arabia, non-priority
-      lon: 47.0,
-      tags: { waterway: 'dam' }, // No name, no wikidata, no operator
+      lat: 21.5,
+      lon: 55.9, // Oman, non-priority
+      tags: { man_made: 'desalination_plant' }, // No name/wikidata/operator — score = 5 (desal only)
     };
     expect(normalizeWaterElement(el, stressLookup)).toBeNull();
   });

@@ -54,7 +54,17 @@ const COUNTRY_CENTROIDS_FULL: [string, number, number][] = [
   ['Yemen', 15.6, 48.5],
 ];
 
-/** Countries where all facility types are kept (conflict zones with strategic water infrastructure) */
+/**
+ * Countries where all facility types are kept (conflict zones with strategic water infrastructure).
+ *
+ * Phase 27.3 Round 3 (reservoirs-missing-after-05) — expanded to the full Middle
+ * East so that named dams/reservoirs from Turkey (Tigris/Euphrates headwaters),
+ * Egypt (Nile basin, Aswan Dam), and the Gulf states (Saudi Arabia, UAE, Kuwait,
+ * Qatar, Yemen) admit via REV-2 without requiring a wikidata tag. User target
+ * is ~400 dams and ~400 reservoirs across the map; keeping priority set tight
+ * to only the original 7 starved non-wiki features (bulk of OSM water coverage
+ * in the region lives in Turkey/Egypt/Saudi Arabia).
+ */
 const PRIORITY_COUNTRIES = new Set([
   'Israel',
   'Jordan',
@@ -63,6 +73,14 @@ const PRIORITY_COUNTRIES = new Set([
   'Iraq',
   'Iran',
   'Afghanistan',
+  // Added Round 3 (2026-04-18): major Middle East water infrastructure holders.
+  'Turkey',
+  'Egypt',
+  'Saudi Arabia',
+  'United Arab Emirates',
+  'Kuwait',
+  'Qatar',
+  'Yemen',
 ]);
 
 /**
@@ -475,7 +493,20 @@ export interface WaterFilterStats {
 
 // ---------- Normalization ----------
 
-const MIN_NOTABILITY_SCORE = 25;
+/**
+ * Minimum holistic notability score required to admit a facility (0–100 scale,
+ * see computeNotabilityScore).
+ *
+ * Phase 27.3 Round 3 (reservoirs-missing-after-05) — dropped from 25 to 15. At
+ * 25 any facility that lacked a wiki ref AND a priority bonus was rejected
+ * (a bare named facility scores 15 from name alone), starving the Turkish,
+ * Egyptian, and Saudi populations. With PRIORITY_COUNTRIES now covering those
+ * countries the floor can relax: priority bonus (+15) alone now admits, and a
+ * named facility in a non-priority-but-Middle-East country (e.g. Pakistan,
+ * Sudan) still has a viable path. The hasName floor at line ~516 preserves the
+ * spam-dam rejection for unnamed non-priority dams.
+ */
+const MIN_NOTABILITY_SCORE = 15;
 
 /**
  * Normalize an Overpass element into a WaterFacility.
@@ -503,9 +534,17 @@ export function normalizeWaterElement(
   const inPriority = isPriorityCountry(lat, lon);
   const score = computeNotabilityScore(el.tags, facilityType, inPriority);
 
-  // REV-2: Reservoir wikidata fallback — wikidata OR (named AND priority country)
+  // REV-2: Reservoir notability — wikidata OR any name (any script).
+  //
+  // Phase 27.3 Round 3 (reservoirs-missing-after-05): dropped the
+  // `inPriority` conjunct. With PRIORITY_COUNTRIES now covering the full
+  // Middle East (Turkey, Egypt, Saudi Arabia, UAE, Kuwait, Qatar, Yemen added),
+  // the gate relies on the score floor (MIN_NOTABILITY_SCORE=15) as the
+  // authoritative holistic check. A named reservoir anywhere in the bbox that
+  // clears the score floor is admitted; unnamed-and-unwiki reservoirs are still
+  // rejected here as not_notable.
   if (facilityType === 'reservoir') {
-    const passes = isNotable(el.tags) || (inPriority && hasName(el.tags));
+    const passes = isNotable(el.tags) || hasName(el.tags);
     if (!passes) {
       if (rejections) rejections.not_notable++;
       return null;
@@ -576,7 +615,11 @@ async function fetchFacilityType(
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'iran-conflict-monitor/1.0 (contact: zackmaz.zam@gmail.com)',
+          Accept: 'application/json',
+        },
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
