@@ -6,6 +6,7 @@ import { useWaterStore } from '@/stores/waterStore';
 import { useLayerStore } from '@/stores/layerStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { haversineKm } from '@/lib/geo';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 import type { WaterFacility } from '../../server/types';
 
 const PROXIMITY_THRESHOLD_KM = 5;
@@ -77,7 +78,7 @@ function waterToSiteLike(facilities: WaterFacility[]): SiteEntity[] {
     siteType: w.facilityType as unknown as SiteEntity['siteType'],
     lat: w.lat,
     lng: w.lng,
-    label: w.label,
+    label: getWaterFacilityDisplayName(w),
     operator: w.operator,
     osmId: w.osmId,
   }));

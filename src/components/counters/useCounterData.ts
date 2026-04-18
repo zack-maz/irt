@@ -9,6 +9,7 @@ import { computeAttackStatus } from '@/lib/attackStatus';
 import { haversineKm } from '@/lib/geo';
 import { classifySeverity } from '@/lib/severity';
 import { healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type {
@@ -138,18 +139,12 @@ function toSiteEntity(s: SiteEntity, attackCount: number): CounterEntity {
   return { id: s.id, label: s.label, metric, lat: s.lat, lng: s.lng, type: s.siteType };
 }
 
-const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
-  dam: 'Dam',
-  reservoir: 'Reservoir',
-  desalination: 'Desalination',
-};
-
 function toWaterEntity(w: WaterFacility, isAttacked: boolean): CounterEntity {
   const score = isAttacked ? 0 : healthToScore(w.stress.compositeHealth);
   const metric = `${score}/10 ${scoreToLabel(score)}`;
   return {
     id: w.id,
-    label: w.label || WATER_TYPE_LABELS[w.facilityType],
+    label: getWaterFacilityDisplayName(w),
     metric,
     lat: w.lat,
     lng: w.lng,

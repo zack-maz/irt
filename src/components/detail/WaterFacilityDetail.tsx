@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { WaterFacility } from '../../../server/types';
 import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
@@ -96,7 +97,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
         <div className="relative -mx-3 -mt-1 mb-2 overflow-hidden rounded-b-lg">
           <img
             src={imageUrl}
-            alt={facility.label}
+            alt={getWaterFacilityDisplayName(facility)}
             onError={() => setImgError(true)}
             className="h-36 w-full object-cover"
           />

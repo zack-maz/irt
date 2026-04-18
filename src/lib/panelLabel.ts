@@ -14,6 +14,7 @@ import { useShipStore } from '@/stores/shipStore';
 import { useEventStore } from '@/stores/eventStore';
 import { useSiteStore } from '@/stores/siteStore';
 import { useWaterStore } from '@/stores/waterStore';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 
 /** Broader entity union supported by the detail panel + breadcrumb. */
 export type AnyDetailEntity = MapEntity | SiteEntity | WaterFacility;
@@ -42,7 +43,7 @@ export function getEntityName(entity: AnyDetailEntity): string {
       return (entity as SiteEntity).label || 'Unknown Site';
     }
     case 'water': {
-      return (entity as WaterFacility).label || 'Unknown Facility';
+      return getWaterFacilityDisplayName(entity as WaterFacility);
     }
     default: {
       if (isConflictEventType(entity.type)) {
