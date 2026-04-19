@@ -122,6 +122,26 @@ export function hasName(tags: Record<string, string>): boolean {
   return false;
 }
 
+/**
+ * Phase 27.3.1 R-03 / D-06: capacity data signals a documented, notable
+ * facility even when OSM has no wikidata/wikipedia ref. Any of the four
+ * tags counts (non-empty trimmed string value); the normalize helper later
+ * parses numbers via extractCapacityTags, so we only check presence here.
+ *
+ * Used inside the D-06 compound admission gate:
+ *   admit = hasName(tags) AND (isNotable(tags) || isPriorityCountry(lat,lng) || hasCapacityData(tags))
+ *
+ * Exported for Plan 06's planned consolidation into computeAdmissionDecision.
+ */
+export function hasCapacityData(tags: Record<string, string>): boolean {
+  return !!(
+    tags['height']?.trim() ||
+    tags['volume']?.trim() ||
+    tags['capacity']?.trim() ||
+    tags['area']?.trim()
+  );
+}
+
 /** Countries to fully exclude */
 const EXCLUDED_COUNTRIES = new Set(['Uzbekistan', 'Tajikistan', 'Kyrgyzstan', 'Kazakhstan']);
 
@@ -497,14 +517,19 @@ export interface WaterFilterStats {
  * Minimum holistic notability score required to admit a facility (0–100 scale,
  * see computeNotabilityScore).
  *
- * Phase 27.3 Round 3 (reservoirs-missing-after-05) — dropped from 25 to 15. At
- * 25 any facility that lacked a wiki ref AND a priority bonus was rejected
- * (a bare named facility scores 15 from name alone), starving the Turkish,
- * Egyptian, and Saudi populations. With PRIORITY_COUNTRIES now covering those
- * countries the floor can relax: priority bonus (+15) alone now admits, and a
- * named facility in a non-priority-but-Middle-East country (e.g. Pakistan,
- * Sudan) still has a viable path. The hasName floor at line ~516 preserves the
- * spam-dam rejection for unnamed non-priority dams.
+ * Phase 27.3.1 R-03 / D-08: DEMOTED TO SECONDARY GATE. The primary admission
+ * logic is the D-06 compound gate in normalizeWaterElement:
+ *   hasName(tags) AND (isNotable(tags) || isPriorityCountry(lat,lng) || hasCapacityData(tags))
+ *
+ * MIN_NOTABILITY_SCORE now runs AFTER the compound gate as a coarse floor.
+ * Redundant on paper — any facility clearing the D-06 gate will also score
+ * ≥15 (name alone contributes 15) — but retained so any future regression
+ * surfaces as a `low_score` rejection rather than a silent admission.
+ *
+ * Phase 27.3 Round 3 history (superseded): dropped from 25 to 15 when
+ * PRIORITY_COUNTRIES expanded to cover the full ME so priority bonus (+15)
+ * alone would admit. Plan 02 now enforces the compound gate directly, so the
+ * score floor is no longer the authoritative check.
  */
 const MIN_NOTABILITY_SCORE = 15;
 
@@ -534,30 +559,38 @@ export function normalizeWaterElement(
   const inPriority = isPriorityCountry(lat, lon);
   const score = computeNotabilityScore(el.tags, facilityType, inPriority);
 
-  // REV-2: Reservoir notability — wikidata OR any name (any script).
+  // Phase 27.3.1 R-03 / D-05..D-08: hardened admission gate.
   //
-  // Phase 27.3 Round 3 (reservoirs-missing-after-05): dropped the
-  // `inPriority` conjunct. With PRIORITY_COUNTRIES now covering the full
-  // Middle East (Turkey, Egypt, Saudi Arabia, UAE, Kuwait, Qatar, Yemen added),
-  // the gate relies on the score floor (MIN_NOTABILITY_SCORE=15) as the
-  // authoritative holistic check. A named reservoir anywhere in the bbox that
-  // clears the score floor is admitted; unnamed-and-unwiki reservoirs are still
-  // rejected here as not_notable.
-  if (facilityType === 'reservoir') {
-    const passes = isNotable(el.tags) || hasName(el.tags);
-    if (!passes) {
-      if (rejections) rejections.not_notable++;
-      return null;
-    }
-  }
-
-  // Dams (non-priority): require name
-  if (facilityType === 'dam' && !inPriority && !hasName(el.tags)) {
+  // D-05: hasName is mandatory for ALL facility types. No exceptions. A
+  // facility without an OSM name / name:en / operator tag (or a wikidata /
+  // wikipedia ref via isNotable) cannot be "officially recognized with a
+  // name" — user directive in
+  // .planning/phases/27.3.1-water-facility-retry-and-cleanup/27.3.1-CONTEXT.md
+  // `## Specifics`.
+  //
+  // D-07: the old `dam && !inPriority && !hasName` rejection is widened to
+  // ALL countries — priority-country dams no longer get the unnamed-admission
+  // path. The same hasName check applies to reservoirs and desalination.
+  if (!hasName(el.tags)) {
     if (rejections) rejections.no_name++;
     return null;
   }
 
-  // REV-1: Holistic notability cutoff bypasses miniscule facilities
+  // Phase 27.3.1 R-03 / D-06: compound admission formula.
+  //   admit = hasName(tags) AND (isNotable(tags) || isPriorityCountry(lat,lng) || hasCapacityData(tags))
+  // hasName is already confirmed true above. The second clause tightens what
+  // debug-round-3 Package A relaxed: a bare name alone no longer admits a
+  // non-priority reservoir. We need a second notability signal.
+  const passesCompound = isNotable(el.tags) || inPriority || hasCapacityData(el.tags);
+  if (!passesCompound) {
+    if (rejections) rejections.not_notable++;
+    return null;
+  }
+
+  // Phase 27.3.1 R-03 / D-08: MIN_NOTABILITY_SCORE demoted to secondary gate.
+  // Redundant on paper (a facility clearing the compound gate above will also
+  // score ≥15), but kept so regressions surface as low_score rather than
+  // silent admission.
   if (score < MIN_NOTABILITY_SCORE) {
     if (rejections) rejections.low_score++;
     return null;

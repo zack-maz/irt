@@ -289,9 +289,13 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    // Round 3 regression: named reservoir admits via hasName even without a wiki
-    // ref, so long as it clears the holistic score floor and the no_city gate.
-    it('admits named reservoir in non-priority country via hasName (Round 3 REV-2 relaxation)', () => {
+    // Phase 27.3.1 R-03 / D-06 REVERSAL: Round 3's Package A relaxation
+    // (`isNotable || hasName` for reservoirs) admitted bare-named reservoirs
+    // in non-priority countries on hasName alone. Plan 02's compound gate
+    // restores a second-signal requirement — named-only is no longer enough
+    // outside priority countries. This assertion flipped from `.not.toBeNull`
+    // to `.toBeNull` with the D-06 gate landing.
+    it('rejects named reservoir in non-priority country without wiki/capacity (Phase 27.3.1 D-06 reversal)', () => {
       const el = {
         type: 'node' as const,
         id: 312,
@@ -301,7 +305,8 @@ describe('normalizeWaterElement', () => {
         lon: 58.4,
         tags: { natural: 'water', water: 'reservoir', name: 'Muscat Hills Reservoir' },
       };
-      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+      // No wiki, no capacity, Oman is non-priority — compound gate rejects.
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
     it('keeps reservoir with wikipedia in non-priority country (Oman)', () => {
