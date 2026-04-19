@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: Executing Phase 27.3.1
-last_updated: '2026-04-19T03:12:07.885Z'
+status: Ready to execute
+last_updated: '2026-04-19T05:47:43.048Z'
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 29
-  completed_plans: 20
-  percent: 69
+  completed_plans: 21
+  percent: 72
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 27.3.1 (water-facility-retry-and-cleanup) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Phase 27.3.1: Plan 02 COMPLETE (R-03 admission gate hardened — D-05 hasName mandatory all types, D-06 compound gate `hasName AND (isNotable OR isPriorityCountry OR hasCapacityData)`, D-07 unnamed-dam rejection extended to priority countries, D-08 MIN_NOTABILITY_SCORE demoted to secondary, D-10 generic-type fallback audited and kept for non-Latin-only names)
 Phase 27.3.1: Plan 01 COMPLETE (R-01 gate passed — dams=4588, reservoirs=892, desalination=63 on first post-recovery refresh; low_score=0 confirms MIN_NOTABILITY_SCORE was non-binding)
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
