@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: Ready to execute
-last_updated: '2026-04-19T05:47:43.048Z'
+last_updated: '2026-04-19T06:55:05.239Z'
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 29
-  completed_plans: 21
-  percent: 72
+  completed_plans: 22
+  percent: 76
 ---
 
 # Project State
@@ -23,7 +23,9 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 27.3.1 (water-facility-retry-and-cleanup) — EXECUTING
-Plan: 3 of 8
+Plan: 5 of 8
+Phase 27.3.1: Plan 04 COMPLETE (R-02 calibration — D-06 compound tightened from 1-of-3 OR to 2-of-3 signal-count + per-type desalination exemption (hasName-only admits); final counts dams=515 / reservoirs=73 / desalination=15; outcome=single_tune; CALIBRATION.md committed; 27.3 truths 1-25 not regressed; 706/706 server tests pass)
+Phase 27.3.1: Plan 03 COMPLETE (R-08 observability — WaterFilterStats extended with byCountry, byTypeRejections, overpass[], source, generatedAt; .strict() Zod schema; nearestCountryName exported helper; buildEmptyFilterStats route stub; DevApiStatus Water Filters panel renders 4 new blocks)
 Phase 27.3.1: Plan 02 COMPLETE (R-03 admission gate hardened — D-05 hasName mandatory all types, D-06 compound gate `hasName AND (isNotable OR isPriorityCountry OR hasCapacityData)`, D-07 unnamed-dam rejection extended to priority countries, D-08 MIN_NOTABILITY_SCORE demoted to secondary, D-10 generic-type fallback audited and kept for non-Latin-only names)
 Phase 27.3.1: Plan 01 COMPLETE (R-01 gate passed — dams=4588, reservoirs=892, desalination=63 on first post-recovery refresh; low_score=0 confirms MIN_NOTABILITY_SCORE was non-binding)
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
@@ -242,6 +244,10 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 - Admission gate restructured from three scattered branches (REV-2 reservoir + dam-only no-name + score floor) into a single three-stage unified gate: D-05 hasName mandatory → D-06 `isNotable OR isPriorityCountry OR hasCapacityData` → D-08 MIN_NOTABILITY_SCORE secondary floor; Round 3 Package A's bare-name-in-non-priority reservoir relaxation explicitly reverted (27.3.1-02, R-03)
 - MIN_NOTABILITY_SCORE kept at 15 but demoted to secondary guard (D-08) — redundant in practice since D-06 clearance implies score≥15, but retained so regressions surface as low_score++ rather than silent admission (27.3.1-02, R-03)
 - GENERIC_TYPE_RE fallback in src/lib/waterLabel.ts audited per D-10 and KEPT (not deleted): still reachable via the non-Latin-only OSM name path (hasName accepts any script, extractLabel's isLatin guard drops non-Latin names for display → bare-type fallback); inline comment now names the reach path and stamps the audit date, regression test proves the fallback chain handles the case (27.3.1-02, R-03)
+- R-02 calibration tightened D-06 compound from 1-of-3 OR (`isNotable || inPriority || hasCapacityData`) to 2-of-3 signal-count (`signalCount = [...].filter(Boolean).length; if (signalCount < 2) reject`) with per-type exemption for desalination — closes the priority-country single-OR floodgate (Run 1 had Turkey 509 / Saudi Arabia 262 / Iran 234 admits via `isPriorityCountry` alone). Final post-calibration counts: dams=515, reservoirs=73, desalination=15. Branch 2b-(ii) over Branch 2b-(i) chosen because MIN_NOTABILITY_SCORE bump would lack per-type granularity and would slice desalination further. Outcome: single_tune. (27.3.1-04, R-02)
+- Desalination exemption added to D-06 compound: `if (facilityType !== 'desalination') { 2-of-3 check }` — desal sparse OSM coverage (~63 raw) means name+type combination carries enough notability signal alone. Preserves D-05 hasName floor (regression test "still rejects unnamed desalination" proves it). Established the per-type exemption pattern as the prototype for Plan 06's planned `computeAdmissionDecision` consolidation. (27.3.1-04, R-02)
+- MIN_NOTABILITY_SCORE confirmed redundant in production data — `low_score: 0` in both Run 1 and Run 2 of the calibration. Plan 06 cleanup (D-22) decision: drop the secondary floor or keep as defense-in-depth sentinel. Compound gate fully subsumes the score floor for non-desal types; desal exemption skips both gates (only D-05 hasName applies). (27.3.1-04, R-02 → R-06)
+- Reservoirs at 73 admit count (below 300 floor) accepted per CONTEXT.md D-04 calibration philosophy ("err high not low — willing to go below 400 for those entities" + "Target is the ceiling, not the floor — UNDER-pulling is fine if every facility has a real name + notability signal"). All 73 clear D-05 hasName + 2-of-3 compound; quality > count. (27.3.1-04, R-02)
 
 ## Pending Todos
 
