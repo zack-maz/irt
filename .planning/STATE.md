@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: Executing Phase 27.3.1
-last_updated: '2026-04-19T02:31:59.216Z'
+last_updated: '2026-04-19T03:12:07.885Z'
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 29
-  completed_plans: 18
-  percent: 62
+  completed_plans: 20
+  percent: 69
 ---
 
 # Project State
@@ -22,8 +22,10 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 27.3.1 (Water Facility Retry and Cleanup) — EXECUTING
-Plan: 1 of 8
+Phase: 27.3.1 (water-facility-retry-and-cleanup) — EXECUTING
+Plan: 2 of 8
+Phase 27.3.1: Plan 02 COMPLETE (R-03 admission gate hardened — D-05 hasName mandatory all types, D-06 compound gate `hasName AND (isNotable OR isPriorityCountry OR hasCapacityData)`, D-07 unnamed-dam rejection extended to priority countries, D-08 MIN_NOTABILITY_SCORE demoted to secondary, D-10 generic-type fallback audited and kept for non-Latin-only names)
+Phase 27.3.1: Plan 01 COMPLETE (R-01 gate passed — dams=4588, reservoirs=892, desalination=63 on first post-recovery refresh; low_score=0 confirms MIN_NOTABILITY_SCORE was non-binding)
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
 Phase 27.3: Plan 03 COMPLETE (gap closure — G-01 water route test fixture fix + WR-01 shared WATER_ATTACK_EVENT_TYPES constant across useWaterLayers/WaterFacilityDetail/useCounterData)
@@ -236,6 +238,10 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 - Proximity pin filter added to useWaterLayers — water facilities were the only entity type not honoring the pin (parity with flights/ships/events/sites via entityPassesFilters pattern) (27.3-02)
 - WATER_ATTACK_EVENT_TYPES extracted to `src/lib/waterAttackEvents.ts` as single source of truth shared by useWaterLayers (map), WaterFacilityDetail (panel isDestroyed), useCounterData (counter score); the REV-5 expansion now reaches all three consumers so a facility near a `targeted` or `on_ground` event shows attacked/destroyed across map + detail + counter dropdown (27.3-03, WR-01)
 - Water route test emptyStats fixture added: a well-formed WaterFilterStats stub (5 required sub-fields, all zero) replaces the `stats: {}` literal that violated waterFilterStatsSchema under NODE_ENV=test — chosen over `stats: undefined` so future tests have a reference payload; mock return type narrowed from `stats: unknown` to `stats: typeof emptyStats` (27.3-03, G-01/WR-02, IN-03)
+- hasCapacityData(tags) exported from overpass-water.ts — returns true when any of height|volume|capacity|area tags has a non-empty trimmed value; used inside the D-06 compound admission gate and exported for Plan 06's computeAdmissionDecision consolidation (27.3.1-02, R-03)
+- Admission gate restructured from three scattered branches (REV-2 reservoir + dam-only no-name + score floor) into a single three-stage unified gate: D-05 hasName mandatory → D-06 `isNotable OR isPriorityCountry OR hasCapacityData` → D-08 MIN_NOTABILITY_SCORE secondary floor; Round 3 Package A's bare-name-in-non-priority reservoir relaxation explicitly reverted (27.3.1-02, R-03)
+- MIN_NOTABILITY_SCORE kept at 15 but demoted to secondary guard (D-08) — redundant in practice since D-06 clearance implies score≥15, but retained so regressions surface as low_score++ rather than silent admission (27.3.1-02, R-03)
+- GENERIC_TYPE_RE fallback in src/lib/waterLabel.ts audited per D-10 and KEPT (not deleted): still reachable via the non-Latin-only OSM name path (hasName accepts any script, extractLabel's isLatin guard drops non-Latin names for display → bare-type fallback); inline comment now names the reach path and stamps the audit date, regression test proves the fallback chain handles the case (27.3.1-02, R-03)
 
 ## Pending Todos
 
