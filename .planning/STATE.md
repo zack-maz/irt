@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
 status: Ready to execute
-last_updated: '2026-04-19T08:13:41.922Z'
+last_updated: '2026-04-19T08:56:33.227Z'
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 29
-  completed_plans: 24
-  percent: 83
+  completed_plans: 25
+  percent: 86
 ---
 
 # Project State
@@ -23,7 +23,8 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 27.3.1 (water-facility-retry-and-cleanup) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
+Phase 27.3.1: Plan 07 COMPLETE (R-05 sites snapshot parity — src/data/sites.json committed with 720 sites (airbase=284, port=232, oil=99, naval=60, nuclear=45, 152 KB, sorted by id, 6dp coord rounding); server/lib/sitesSnapshot.ts loader mirrors waterSnapshot exactly with in-module cache + graceful fallthrough + defensive source='snapshot' override; three-tier sites route Redis → snapshot → Overpass (refresh-gate only); R-07 invariant documented inline; SiteFilterStats interface + strict Zod schema + siteStore.filterStats + useSiteFetch forwarding — Plan 08 UI consumer ready; scripts/refresh-sites.ts + npm run refresh:sites with atomic tempfile+rename write + security scrub; preemptive loadSitesSnapshot vi.mock added to redis-death.test.ts; desalination confirmed removed from SiteType (CLAUDE.md §26); end-to-end verified: cold → source=snapshot, warm → source=redis; 773/773 server tests pass (+35), tsc clean, client baseline 34 failures unchanged)
 Phase 27.3.1: Plan 06 COMPLETE (R-06 adapter cleanup — computeAdmissionDecision pure-function helper extracted from scattered rejection branches in normalizeWaterElement (D-20); WaterFilterStats field-usage audit inline — all 10 fields live in DevApiStatus, no pruning (D-22); DAM_IN_NAME_RE comment trimmed to 5 lines linking debug doc (D-21); fetchWaterFacilities JSDoc expanded with "fail loud, serve snapshot" contract tied to R-04 snapshot tier (D-23); 4 atomic commits per concern (D-24); 19 new unit tests in the Phase 27.3.1 R-06 describe block covering all reachable decision paths + exemptions + ordering; 138/138 adapter, 738/738 server, tsc clean — zero behavior change; line count 975 → 1031, explanation density over brevity)
 Phase 27.3.1: Plan 05 COMPLETE (R-04 committed snapshot + R-07 multi-user tier — src/data/water-facilities.json committed with 602 facilities (516 dams + 71 reservoirs + 15 desal, 337 KB, sorted by id, 6dp coord rounding); server/lib/waterSnapshot.ts loader with in-module cache + graceful fallthrough; labelUnnamedFacilities extracted to server/lib/waterLabeling.ts; route tier Redis → devFileCache → snapshot → Overpass (refresh-gate only); R-07 invariant documented inline; npm run refresh:water via scripts/refresh-water-facilities.ts with atomic tempfile+rename write; end-to-end verified: cold → source=snapshot, second → source=redis, refresh=true → source=overpass; 719/719 server tests pass)
 Phase 27.3.1: Plan 04 COMPLETE (R-02 calibration — D-06 compound tightened from 1-of-3 OR to 2-of-3 signal-count + per-type desalination exemption (hasName-only admits); final counts dams=515 / reservoirs=73 / desalination=15; outcome=single_tune; CALIBRATION.md committed; 27.3 truths 1-25 not regressed; 706/706 server tests pass)

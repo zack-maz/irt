@@ -143,7 +143,7 @@ Plans:
 **Goal:** Verify + calibrate Package A filter counts (~100–500 dams / ~100–500 reservoirs / ~13 desal, every facility significant with a real OSM name), persist water facilities to a committed JSON snapshot so cold-starts don't depend on Overpass availability, audit sites for the same pattern, and clean up `overpass-water.ts` accumulated complexity from Plans 01–05 + two debug rounds. Architecture must scale to many concurrent users — Overpass never on the request path synchronously.
 **Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
 **Requirements:** R-01 through R-07 (from 27.3.1-CONTEXT.md)
-**Plans:** 6/8 plans executed
+**Plans:** 7/8 plans executed
 
 ### Phase 27.4: LLM Enrichment Improvements
 
