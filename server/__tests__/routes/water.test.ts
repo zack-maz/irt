@@ -16,6 +16,10 @@ const redisStore = new Map<string, CacheEntry<unknown>>();
  * sub-fields; the Zod wrapper is `.optional()` but once present the inner
  * object must be well-formed. Serves both as a passing fixture and a
  * reference for what a fresh-fetch filterStats payload looks like.
+ *
+ * Phase 27.3.1 R-08 (Plan 03): extended with byCountry (D-28), overpass (D-29),
+ * source + generatedAt (D-30), and byTypeRejections (D-31). Schema is `.strict()`
+ * on these fields once filterStats is present, so fixtures MUST include them.
  */
 const emptyStats = {
   rawCounts: {} as Record<string, number>,
@@ -28,6 +32,28 @@ const emptyStats = {
     low_score: 0,
     no_city: 0,
   },
+  byTypeRejections: {} as Record<
+    string,
+    {
+      excluded_location: number;
+      not_notable: number;
+      no_name: number;
+      duplicate: number;
+      low_score: number;
+      no_city: number;
+    }
+  >, // Phase 27.3.1 R-08 D-31
+  byCountry: {} as Record<string, Record<string, number>>, // Phase 27.3.1 R-08 D-28
+  overpass: [] as {
+    facilityType: string;
+    mirror: string;
+    status: number;
+    durationMs: number;
+    attempts: number;
+    ok: boolean;
+  }[], // Phase 27.3.1 R-08 D-29
+  source: 'overpass' as const, // Phase 27.3.1 R-08 D-30
+  generatedAt: new Date(0).toISOString(),
   enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
   scoreHistogram: [] as { bucket: string; count: number }[],
 };

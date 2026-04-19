@@ -127,18 +127,50 @@ export const waterFacilityEntitySchema = z
   })
   .passthrough();
 
+const rejectionsSchema = z.object({
+  excluded_location: z.number(),
+  not_notable: z.number(),
+  no_name: z.number(),
+  duplicate: z.number(),
+  low_score: z.number(),
+  no_city: z.number(),
+});
+
+/** Phase 27.3.1 R-08 D-29 — Overpass fetch telemetry record. */
+const overpassFetchRecordSchema = z.object({
+  facilityType: z.string(),
+  mirror: z.string(),
+  status: z.number(),
+  durationMs: z.number(),
+  attempts: z.number(),
+  ok: z.boolean(),
+});
+
+/**
+ * Phase 27.3.1 R-08 — extended water filter stats schema. Mirrors the TS
+ * interface in `server/adapters/overpass-water.ts` (`WaterFilterStats`).
+ *
+ * The wrapper is `.strict()` on the four new R-08 fields (D-28 byCountry,
+ * D-29 overpass, D-30 source + generatedAt, D-31 byTypeRejections) so a
+ * cached response that forgets to attach them fails validation rather than
+ * silently dropping observability. The `.optional()` on the outer schema is
+ * preserved to keep Phase 27.3 truth-21 behavior — pure-cached payloads with
+ * NO `filterStats` key at all still validate.
+ */
 const waterFilterStatsSchema = z
   .object({
     rawCounts: z.record(z.string(), z.number()),
     filteredCounts: z.record(z.string(), z.number()),
-    rejections: z.object({
-      excluded_location: z.number(),
-      not_notable: z.number(),
-      no_name: z.number(),
-      duplicate: z.number(),
-      low_score: z.number(),
-      no_city: z.number(),
-    }),
+    rejections: rejectionsSchema,
+    // Phase 27.3.1 R-08 D-31
+    byTypeRejections: z.record(z.string(), rejectionsSchema),
+    // Phase 27.3.1 R-08 D-28
+    byCountry: z.record(z.string(), z.record(z.string(), z.number())),
+    // Phase 27.3.1 R-08 D-29
+    overpass: z.array(overpassFetchRecordSchema),
+    // Phase 27.3.1 R-08 D-30
+    source: z.enum(['snapshot', 'redis', 'overpass']),
+    generatedAt: z.string(),
     enrichment: z.object({
       withCapacity: z.number(),
       withCity: z.number(),
@@ -146,6 +178,7 @@ const waterFilterStatsSchema = z
     }),
     scoreHistogram: z.array(z.object({ bucket: z.string(), count: z.number() })),
   })
+  .strict()
   .optional();
 
 // ---------- Wrapped CacheResponse schemas per route ----------

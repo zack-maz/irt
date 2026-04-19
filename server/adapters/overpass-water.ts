@@ -491,9 +491,36 @@ export function computeNotabilityScore(
 
 // ---------- Filter Stats ----------
 
+/**
+ * Phase 27.3.1 R-08 D-29 — per-Overpass-fetch telemetry. One entry per
+ * facility-type query attempt (three queries total; each may hit primary +
+ * fallback URL so entry count can be up to 6 in the worst case).
+ *
+ * `mirror` is a label ('primary' | 'fallback'), NOT the raw URL — keeps
+ * internal mirror hosts out of client-observable telemetry per the threat
+ * model in 27.3.1-03-PLAN.md.
+ */
+export interface OverpassFetchRecord {
+  facilityType: string; // e.g. 'dams', 'reservoirs', 'desalination'
+  mirror: string; // 'primary' | 'fallback'
+  status: number; // HTTP status; 0 when network error before response
+  durationMs: number;
+  attempts: number; // 1 on first-try success, 2 when fallback was hit
+  ok: boolean; // final outcome — true if this attempt produced usable JSON
+}
+
+/**
+ * Phase 27.3.1 R-08 D-30 — provenance tag for the response payload. Plan 05
+ * (R-04) adds 'snapshot' as a real value when the static `src/data/water-
+ * facilities.json` cold-start tier lands. Pre-Plan-05 only 'redis' (cached
+ * response) and 'overpass' (fresh fetch) are produced by the route layer.
+ */
+export type WaterDataSource = 'snapshot' | 'redis' | 'overpass';
+
 export interface WaterFilterStats {
   rawCounts: Record<string, number>;
   filteredCounts: Record<string, number>;
+  /** Summed across all facility types — preserved for back-compat with pre-R-08 UI. */
   rejections: {
     excluded_location: number;
     not_notable: number;
@@ -503,11 +530,50 @@ export interface WaterFilterStats {
     /** Rejected for failing the "notability via city proximity" check: no wikidata, no wikipedia, and no nearestCity within 150km. See Phase 27.3 Plan 04 / UAT Test 3. */
     no_city: number;
   };
-  enrichment: {
-    withCapacity: number;
-    withCity: number;
-    withRiver: number;
-  };
+  /**
+   * Phase 27.3.1 R-08 D-31 — per-facility-type rejection breakdown. Surfaces
+   * which gate each type hits hardest instead of the summed view. Keys are
+   * the FACILITY_QUERIES labels ('dams' | 'reservoirs' | 'desalination')
+   * matching `rawCounts` / `filteredCounts`. Each sub-object carries the same
+   * six buckets as `rejections`. The summed `rejections` field is the sum of
+   * these per-type buckets — both stay in lock-step.
+   */
+  byTypeRejections: Record<
+    string,
+    {
+      excluded_location: number;
+      not_notable: number;
+      no_name: number;
+      duplicate: number;
+      low_score: number;
+      no_city: number;
+    }
+  >;
+  /**
+   * Phase 27.3.1 R-08 D-28 — per-country admission counts keyed by nearest-
+   * centroid country name. Two-level map: country → facilityType → count.
+   * Only ADMITTED (post-dedup) facilities are tallied.
+   */
+  byCountry: Record<string, Record<string, number>>;
+  /**
+   * Phase 27.3.1 R-08 D-29 — Overpass fetch telemetry, one entry per URL
+   * attempt. Empty array when data came from snapshot/redis.
+   */
+  overpass: OverpassFetchRecord[];
+  /**
+   * Phase 27.3.1 R-08 D-30 — provenance. Plan 05 populates 'snapshot';
+   * 'overpass' populated by `fetchWaterFacilities`; 'redis' populated by
+   * the route layer when serving a cached response.
+   */
+  source: WaterDataSource;
+  /**
+   * Phase 27.3.1 R-08 D-30 — ISO-8601 timestamp of when the underlying data
+   * was produced. For 'overpass' source: time of fetch completion. For
+   * 'snapshot' source: read from the snapshot's own `generatedAt`. For
+   * 'redis' source: derived from the cache entry's `lastFresh`.
+   */
+  generatedAt: string;
+  enrichment: { withCapacity: number; withCity: number; withRiver: number };
   scoreHistogram: { bucket: string; count: number }[];
 }
 

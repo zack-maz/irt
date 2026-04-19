@@ -14,13 +14,31 @@ export interface PrecipitationData {
 }
 
 /**
- * Water filter diagnostics from /api/water response envelope (Phase 27.3 D-04/REV-4).
- * Populated only on non-cached responses; null when served from Redis/dev file cache.
- * Schema mirrors server/schemas/cacheResponse.ts `waterFilterStatsSchema`.
+ * Phase 27.3.1 R-08 D-29 — per-Overpass-fetch telemetry record.
+ * Mirrors `OverpassFetchRecord` in server/adapters/overpass-water.ts. Declared
+ * locally for tier independence (per Phase 27.3 truth-12 rationale).
+ */
+export interface OverpassFetchRecord {
+  facilityType: string;
+  /** Label only ('primary' | 'fallback') — never the raw URL. */
+  mirror: string;
+  status: number;
+  durationMs: number;
+  attempts: number;
+  ok: boolean;
+}
+
+/**
+ * Water filter diagnostics from /api/water response envelope (Phase 27.3 D-04/REV-4,
+ * extended in Phase 27.3.1 R-08 D-28..D-31). Populated on every response path
+ * post-R-08 (cached responses now carry a minimal stub with source='redis').
+ * Schema mirrors server/schemas/cacheResponse.ts `waterFilterStatsSchema` —
+ * declared locally here for tier independence.
  */
 export interface WaterFilterStats {
   rawCounts: Record<string, number>;
   filteredCounts: Record<string, number>;
+  /** Summed across all facility types — preserved for back-compat. */
   rejections: {
     excluded_location: number;
     not_notable: number;
@@ -30,6 +48,26 @@ export interface WaterFilterStats {
     /** Rejected because no nearby city (150km) AND no wikidata/wikipedia ref. Phase 27.3 Plan 04. */
     no_city: number;
   };
+  /** Phase 27.3.1 R-08 D-31 — per-facility-type rejection breakdown. */
+  byTypeRejections: Record<
+    string,
+    {
+      excluded_location: number;
+      not_notable: number;
+      no_name: number;
+      duplicate: number;
+      low_score: number;
+      no_city: number;
+    }
+  >;
+  /** Phase 27.3.1 R-08 D-28 — admitted facilities keyed by nearest-centroid country → facilityType → count. */
+  byCountry: Record<string, Record<string, number>>;
+  /** Phase 27.3.1 R-08 D-29 — Overpass fetch telemetry, one entry per URL attempt. */
+  overpass: OverpassFetchRecord[];
+  /** Phase 27.3.1 R-08 D-30 — provenance tag for the response payload. */
+  source: 'snapshot' | 'redis' | 'overpass';
+  /** Phase 27.3.1 R-08 D-30 — ISO-8601 timestamp of when the underlying data was produced. */
+  generatedAt: string;
   enrichment: {
     withCapacity: number;
     withCity: number;
