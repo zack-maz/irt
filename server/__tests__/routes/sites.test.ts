@@ -245,7 +245,13 @@ describe('Sites Routes (/api/sites)', () => {
     });
 
     it('returns cached data when Redis is warm (source=redis)', async () => {
-      redisStore.set('sites:v2', { data: [sampleSite], fetchedAt: Date.now() });
+      // Phase 27.3.1 Plan 11 G4 — envelope `{ sites, filterStats }` under the
+      // bumped key sites:v3. Pre-Plan-11 the value was a bare SiteEntity[]
+      // under sites:v2.
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: emptyStats },
+        fetchedAt: Date.now(),
+      });
       const res = await fetch(`${baseUrl}/api/sites`);
       const body = await res.json();
       expect(res.ok).toBe(true);
@@ -343,8 +349,9 @@ describe('Sites Routes (/api/sites)', () => {
 
   describe('Error handling', () => {
     it('returns stale cache when upstream fetchSites fails but cache exists', async () => {
-      redisStore.set('sites:v2', {
-        data: [sampleSite],
+      // Phase 27.3.1 Plan 11 G4 — envelope shape under the bumped key.
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: emptyStats },
         fetchedAt: Date.now() - 90_000_000, // stale (>24h)
       });
       mockFetchSites.mockRejectedValue(new Error('Overpass down'));
@@ -355,6 +362,195 @@ describe('Sites Routes (/api/sites)', () => {
       expect(res.ok).toBe(true);
       expect(body.stale).toBe(true);
       expect(body.data).toHaveLength(1);
+    });
+  });
+
+  /**
+   * Phase 27.3.1 Plan 11 G4 — Redis envelope round-trip for R-05 observability.
+   *
+   * Mirrors water.test.ts Plan 11 G3 block exactly, adapted for the sites
+   * shape: `{ sites, filterStats }` under `sites:v3` (bumped from sites:v2).
+   * Pre-Plan-11 the Redis write path stored a bare SiteEntity[]; the
+   * cache-hit response then synthesized zero-tally filterStats via
+   * buildEmptyFilterStats. Post-Plan-11 the envelope round-trips through
+   * Redis so DevApiStatus renders populated byType / byCountry / overpass
+   * tallies with accurate provenance.
+   */
+  describe('Phase 27.3.1 Plan 11 — Redis envelope for R-05 observability (G4)', () => {
+    const populatedStats = {
+      ...emptyStats,
+      rawCount: 876,
+      filteredCount: 720,
+      rejections: {
+        excluded_turkey: 156,
+        no_coords: 0,
+        no_type: 0,
+        duplicate: 0,
+      },
+      byCountry: {
+        Iran: { airbase: 30, port: 5 },
+        'Saudi Arabia': { airbase: 25, oil: 40 },
+      },
+      byType: { airbase: 284, port: 232, oil: 99, naval: 60, nuclear: 45 },
+      overpass: [
+        {
+          facilityType: 'all',
+          mirror: 'primary',
+          status: 200,
+          durationMs: 12000,
+          attempts: 1,
+          ok: true,
+        },
+      ],
+      // Source='snapshot' on purpose — the cache-hit branch MUST overwrite it
+      // to 'redis' so DevApiStatus reports the serve-tier accurately even
+      // though the stats originally came from the snapshot that warmed Redis.
+      source: 'snapshot' as const,
+      generatedAt: '2026-04-19T08:00:00.000Z',
+    };
+
+    it('cache-hit response returns populated byType from cached payload', async () => {
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.filterStats.byType.airbase).toBe(284);
+      expect(body.filterStats.byType.port).toBe(232);
+      expect(body.filterStats.byType.nuclear).toBe(45);
+    });
+
+    it('cache-hit response overrides source to "redis" regardless of persisted value', async () => {
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(body.filterStats.source).toBe('redis');
+    });
+
+    it('cache-hit response overrides generatedAt to cache lastFresh ISO', async () => {
+      const lastFreshMs = Date.now() - 1000;
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: lastFreshMs,
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(body.filterStats.generatedAt).toBe(new Date(lastFreshMs).toISOString());
+    });
+
+    it('cache-hit preserves rejections.excluded_turkey + byCountry from cached payload', async () => {
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(body.filterStats.rejections.excluded_turkey).toBe(156);
+      expect(body.filterStats.byCountry.Iran.airbase).toBe(30);
+      expect(body.filterStats.byCountry['Saudi Arabia'].oil).toBe(40);
+    });
+
+    it('cache-hit preserves rawCount + filteredCount + overpass from cached payload', async () => {
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(body.filterStats.rawCount).toBe(876);
+      expect(body.filterStats.filteredCount).toBe(720);
+      expect(body.filterStats.overpass).toHaveLength(1);
+      expect(body.filterStats.overpass[0].facilityType).toBe('all');
+    });
+
+    it('fresh Overpass path stores the envelope to Redis', async () => {
+      mockFetchSites.mockResolvedValue({
+        sites: [sampleSite],
+        stats: { ...emptyStats, source: 'overpass' as const },
+      });
+
+      const res = await fetch(`${baseUrl}/api/sites?refresh=true`);
+      expect(res.ok).toBe(true);
+
+      const stored = redisStore.get('sites:v3');
+      expect(stored).toBeDefined();
+      expect(stored!.data).toMatchObject({
+        sites: expect.any(Array),
+        filterStats: expect.objectContaining({ source: 'overpass' }),
+      });
+      expect((stored!.data as { sites: unknown[] }).sites).toHaveLength(1);
+    });
+
+    it('snapshot tier path stores the envelope to Redis (snapshot warm path)', async () => {
+      mockLoadSitesSnapshot.mockReturnValue({
+        generatedAt: '2026-04-19T08:00:00.000Z',
+        sites: [snapshotSite],
+        stats: { ...populatedStats, source: 'snapshot' as const },
+      });
+
+      await fetch(`${baseUrl}/api/sites`);
+
+      const stored = redisStore.get('sites:v3');
+      expect(stored).toBeDefined();
+      expect(stored!.data).toMatchObject({
+        sites: expect.any(Array),
+        filterStats: expect.objectContaining({
+          source: 'snapshot',
+          byType: expect.any(Object),
+        }),
+      });
+    });
+
+    it('error path with stale cached payload returns stats from cache with source=redis', async () => {
+      redisStore.set('sites:v3', {
+        data: { sites: [sampleSite], filterStats: populatedStats },
+        fetchedAt: Date.now() - 90_000_000, // stale (>24h)
+      });
+      mockFetchSites.mockRejectedValue(new Error('Overpass down'));
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.stale).toBe(true);
+      expect(body.filterStats.source).toBe('redis');
+      expect(body.filterStats.byType.airbase).toBe(284);
+      expect(body.filterStats.rejections.excluded_turkey).toBe(156);
+    });
+
+    it('error path WITHOUT cache still throws AppError (502) — unchanged', async () => {
+      mockFetchSites.mockRejectedValue(new Error('Overpass down'));
+
+      const res = await fetch(`${baseUrl}/api/sites`);
+      expect(res.status).toBe(502);
+    });
+
+    it('Redis key is sites:v3 (regression guard for operator grep)', async () => {
+      mockFetchSites.mockResolvedValue({
+        sites: [sampleSite],
+        stats: { ...emptyStats, source: 'overpass' as const },
+      });
+
+      await fetch(`${baseUrl}/api/sites?refresh=true`);
+
+      // v3 key must exist; old v2 key must not.
+      expect(redisStore.has('sites:v3')).toBe(true);
+      expect(redisStore.has('sites:v2')).toBe(false);
     });
   });
 });
