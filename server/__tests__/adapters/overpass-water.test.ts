@@ -977,3 +977,196 @@ describe('normalized facility includes notabilityScore', () => {
     expect(result?.notabilityScore).toBeGreaterThanOrEqual(70);
   });
 });
+
+// ---------- Phase 27.3.1 R-08 stats population tests ----------
+
+import { vi, beforeEach, afterEach } from 'vitest';
+import { fetchWaterFacilities, nearestCountryName } from '../../adapters/overpass-water.js';
+
+/**
+ * Build an Overpass-style success response for a single facility-type query.
+ * Each fixture element is a minimal valid OSM tag set that will admit through
+ * the D-05/D-06 compound gate (named + priority country) so byCountry tallies
+ * non-zero entries.
+ */
+function overpassSuccess(elements: unknown[]): Response {
+  return new Response(JSON.stringify({ elements }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function overpassError(status: number): Response {
+  return new Response('upstream error', { status });
+}
+
+describe('Phase 27.3.1 R-08 — nearestCountryName helper', () => {
+  it('returns "Iran" for Tehran coordinates', () => {
+    expect(nearestCountryName(35.7, 51.4)).toBe('Iran');
+  });
+  it('returns "Turkey" for Ankara coordinates', () => {
+    expect(nearestCountryName(39.9, 32.9)).toBe('Turkey');
+  });
+  it('returns "Saudi Arabia" for Riyadh coordinates', () => {
+    expect(nearestCountryName(24.7, 46.7)).toBe('Saudi Arabia');
+  });
+  it('returns "Iraq" for Baghdad coordinates', () => {
+    expect(nearestCountryName(33.3, 44.4)).toBe('Iraq');
+  });
+});
+
+describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // Iran-area dam with name + capacity → admits through D-05/D-06.
+  const iranDam = {
+    type: 'node',
+    id: 1001,
+    lat: 35.7,
+    lon: 51.4,
+    tags: { waterway: 'dam', name: 'Tehran Test Dam', volume: '1000000' },
+  };
+  // Turkey-area reservoir with name → admits via priority country branch.
+  const turkeyReservoir = {
+    type: 'node',
+    id: 1002,
+    lat: 37.9,
+    lon: 40.2,
+    tags: { natural: 'water', water: 'reservoir', name: 'SE Turkey Reservoir' },
+  };
+  // Iran-area unnamed dam → rejected by D-05 (no_name) → byTypeRejections increments.
+  const unnamedIranDam = {
+    type: 'node',
+    id: 1003,
+    lat: 35.7,
+    lon: 51.4,
+    tags: { waterway: 'dam' },
+  };
+  // Saudi-area named reservoir without notability signal → in priority branch admits.
+  const saudiReservoir = {
+    type: 'node',
+    id: 1004,
+    lat: 24.7,
+    lon: 46.7,
+    tags: { natural: 'water', water: 'reservoir', name: 'Riyadh Test Reservoir' },
+  };
+  // Iran desalination with name, near Tehran for nearestCity resolution.
+  const iranDesal = {
+    type: 'node',
+    id: 1005,
+    lat: 35.7,
+    lon: 51.4,
+    tags: { man_made: 'desalination_plant', name: 'Tehran Desal' },
+  };
+  // Reservoir without name → no_name rejection (counts toward reservoirs bucket).
+  const unnamedReservoir = {
+    type: 'node',
+    id: 1006,
+    lat: 35.7,
+    lon: 51.4,
+    tags: { natural: 'water', water: 'reservoir' },
+  };
+
+  it('source is "overpass" and generatedAt is ISO 8601 after a successful fetch', async () => {
+    fetchMock
+      .mockResolvedValueOnce(overpassSuccess([iranDam])) // dams
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir])) // reservoirs
+      .mockResolvedValueOnce(overpassSuccess([iranDesal])); // desalination
+
+    const { stats } = await fetchWaterFacilities();
+    expect(stats.source).toBe('overpass');
+    // Round-trip through Date → ISO succeeds for valid ISO strings.
+    expect(() => new Date(stats.generatedAt).toISOString()).not.toThrow();
+    expect(stats.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('overpass[] records one entry per query on primary success', async () => {
+    fetchMock
+      .mockResolvedValueOnce(overpassSuccess([iranDam]))
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir]))
+      .mockResolvedValueOnce(overpassSuccess([iranDesal]));
+
+    const { stats } = await fetchWaterFacilities();
+    expect(stats.overpass.length).toBe(3);
+    expect(stats.overpass.every((r) => r.mirror === 'primary')).toBe(true);
+    expect(stats.overpass.every((r) => r.ok === true)).toBe(true);
+    expect(stats.overpass.every((r) => r.attempts === 1)).toBe(true);
+    expect(stats.overpass.every((r) => r.status === 200)).toBe(true);
+    expect(stats.overpass.every((r) => typeof r.durationMs === 'number')).toBe(true);
+  });
+
+  it('overpass[] records fallback attempt when primary fails', async () => {
+    fetchMock
+      // dams: primary fails 503, fallback succeeds
+      .mockResolvedValueOnce(overpassError(503))
+      .mockResolvedValueOnce(overpassSuccess([iranDam]))
+      // reservoirs: primary success
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir]))
+      // desalination: primary success
+      .mockResolvedValueOnce(overpassSuccess([iranDesal]));
+
+    const { stats } = await fetchWaterFacilities();
+    const damsRecords = stats.overpass.filter((r) => r.facilityType === 'dams');
+    expect(damsRecords.length).toBe(2);
+    expect(damsRecords[0]).toMatchObject({ mirror: 'primary', ok: false, attempts: 1 });
+    expect(damsRecords[1]).toMatchObject({ mirror: 'fallback', ok: true, attempts: 2 });
+    // Other types still produce one primary-success entry each
+    expect(stats.overpass.filter((r) => r.facilityType === 'reservoirs').length).toBe(1);
+    expect(stats.overpass.filter((r) => r.facilityType === 'desalination').length).toBe(1);
+  });
+
+  it('byCountry tallies admitted facilities per country', async () => {
+    // 1 Iran dam + 1 Turkey reservoir + 1 Saudi reservoir + 1 Iran desal
+    fetchMock
+      .mockResolvedValueOnce(overpassSuccess([iranDam]))
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir, saudiReservoir]))
+      .mockResolvedValueOnce(overpassSuccess([iranDesal]));
+
+    const { stats } = await fetchWaterFacilities();
+    expect(stats.byCountry.Iran).toEqual(expect.objectContaining({ dam: 1, desalination: 1 }));
+    expect(stats.byCountry.Turkey).toEqual(expect.objectContaining({ reservoir: 1 }));
+    expect(stats.byCountry['Saudi Arabia']).toEqual(expect.objectContaining({ reservoir: 1 }));
+  });
+
+  it('byTypeRejections increments per-query buckets in lock-step with summed rejections', async () => {
+    // dams query: 1 admitted (iranDam) + 1 unnamed (unnamedIranDam → no_name)
+    // reservoirs query: 1 admitted (turkeyReservoir) + 1 unnamed (unnamedReservoir → no_name)
+    // desalination query: 1 admitted (iranDesal)
+    fetchMock
+      .mockResolvedValueOnce(overpassSuccess([iranDam, unnamedIranDam]))
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir, unnamedReservoir]))
+      .mockResolvedValueOnce(overpassSuccess([iranDesal]));
+
+    const { stats } = await fetchWaterFacilities();
+    expect(stats.byTypeRejections.dams?.no_name).toBe(1);
+    expect(stats.byTypeRejections.reservoirs?.no_name).toBe(1);
+    // Summed rejections matches per-type sum
+    expect(stats.rejections.no_name).toBe(2);
+  });
+
+  it('byTypeRejections initializes a bucket for every facility-type query', async () => {
+    fetchMock
+      .mockResolvedValueOnce(overpassSuccess([iranDam]))
+      .mockResolvedValueOnce(overpassSuccess([turkeyReservoir]))
+      .mockResolvedValueOnce(overpassSuccess([iranDesal]));
+
+    const { stats } = await fetchWaterFacilities();
+    // Every FACILITY_QUERIES label gets its own per-type bucket, even when zero rejections.
+    expect(Object.keys(stats.byTypeRejections).sort()).toEqual([
+      'dams',
+      'desalination',
+      'reservoirs',
+    ]);
+    expect(stats.byTypeRejections.dams?.excluded_location).toBe(0);
+    expect(stats.byTypeRejections.dams?.no_name).toBe(0);
+  });
+});
