@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-19T07:47:27.465Z",
+  "generatedAt": "2026-04-19T22:33:22.751Z",
   "facilities": [
     {
       "id": "water-1000096845",
@@ -65,91 +65,6 @@
         "distanceKm": 53,
         "population": 7600000
       }
-    },
-    {
-      "id": "water-100521743",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.580881,
-      "lng": 34.988551,
-      "label": "ÇOrum Barajı",
-      "osmId": 100521743,
-      "stress": {
-        "bws_raw": 0.0092880950302441,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.15,
-        "gtd_score": -1,
-        "sev_score": 1.94,
-        "iav_score": 1.95,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-1005649824",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.573625,
-      "lng": 39.16314,
-      "label": "TadıM Barajı",
-      "osmId": 1005649824,
-      "stress": {
-        "bws_raw": 1.5021042488622676,
-        "bws_score": 4.91,
-        "bws_label": "Extremely High",
-        "drr_score": 3.06,
-        "gtd_score": 1.07,
-        "sev_score": 1.33,
-        "iav_score": 1.55,
-        "compositeHealth": 0.13416407864998744
-      },
-      "notabilityScore": 70,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 119,
-        "population": 1100000
-      }
-    },
-    {
-      "id": "water-100772436",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.919965,
-      "lng": 36.788399,
-      "label": "KıLdıR Barajı",
-      "osmId": 100772436,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-100802835",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.832938,
-      "lng": 37.062077,
-      "label": "DöRteylüL Barajı",
-      "osmId": 100802835,
-      "stress": {
-        "bws_raw": 0.1835010183836,
-        "bws_score": 1.88,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.39,
-        "gtd_score": -1,
-        "sev_score": 1.7,
-        "iav_score": 1.64,
-        "compositeHealth": 0.7899367063252599
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-1009557862",
@@ -229,31 +144,6 @@
       }
     },
     {
-      "id": "water-1028112",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.144724,
-      "lng": 33.715548,
-      "label": "Hirfanlı Dam",
-      "osmId": 1028112,
-      "stress": {
-        "bws_raw": 0.3110728605784204,
-        "bws_score": 2.64,
-        "bws_label": "Medium-High",
-        "drr_score": 2.77,
-        "gtd_score": -1,
-        "sev_score": 0.73,
-        "iav_score": 1.01,
-        "compositeHealth": 0.6870225614927067
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Ankara",
-        "distanceKm": 114,
-        "population": 5700000
-      }
-    },
-    {
       "id": "water-1033315625",
       "type": "water",
       "facilityType": "dam",
@@ -284,7 +174,7 @@
       "facilityType": "reservoir",
       "lat": 29.31338,
       "lng": 47.677967,
-      "label": "Reservoir near Kuwait",
+      "label": "Reservoir",
       "osmId": 1034916762,
       "stress": {
         "bws_raw": 1,
@@ -352,26 +242,6 @@
       }
     },
     {
-      "id": "water-105867510",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.880376,
-      "lng": 38.167281,
-      "label": "İMranlı Barajı",
-      "osmId": 105867510,
-      "stress": {
-        "bws_raw": 0.5766776517043395,
-        "bws_score": 3.53,
-        "bws_label": "High",
-        "drr_score": 2.87,
-        "gtd_score": 1.07,
-        "sev_score": 1.39,
-        "iav_score": 1.71,
-        "compositeHealth": 0.5422176684690384
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-1059349800",
       "type": "water",
       "facilityType": "dam",
@@ -390,26 +260,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-107155190",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.675868,
-      "lng": 36.291938,
-      "label": "BahçEcik Dam",
-      "osmId": 107155190,
-      "stress": {
-        "bws_raw": 0.1635291354950104,
-        "bws_score": 1.71,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.92,
-        "gtd_score": -1,
-        "sev_score": 0.9,
-        "iav_score": 1.72,
-        "compositeHealth": 0.8111719916269299
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-107601965",
@@ -442,7 +292,7 @@
       "facilityType": "dam",
       "lat": 21.725044,
       "lng": 39.828073,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 1093394402,
       "stress": {
         "bws_raw": 1,
@@ -510,26 +360,6 @@
       "notabilityScore": 75
     },
     {
-      "id": "water-1097951771",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.847881,
-      "lng": 39.72424,
-      "label": "TurnaçAyıRı Dam",
-      "osmId": 1097951771,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-11009910",
       "type": "water",
       "facilityType": "dam",
@@ -555,37 +385,12 @@
       }
     },
     {
-      "id": "water-1103056",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 38.495635,
-      "lng": 38.712038,
-      "label": "Karakaya Reservoir",
-      "osmId": 1103056,
-      "stress": {
-        "bws_raw": 0.0954506617325552,
-        "bws_score": 0.93,
-        "bws_label": "Low",
-        "drr_score": 3.05,
-        "gtd_score": -1,
-        "sev_score": 1.26,
-        "iav_score": 1.39,
-        "compositeHealth": 0.9022194854911969
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 148,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-11059360",
       "type": "water",
       "facilityType": "dam",
       "lat": 19.696304,
       "lng": 42.487453,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 11059360,
       "stress": {
         "bws_raw": 1,
@@ -671,26 +476,6 @@
         "compositeHealth": 0.8508818954473059
       },
       "notabilityScore": 70
-    },
-    {
-      "id": "water-1139094",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 40.193483,
-      "lng": 38.299778,
-      "label": "KıLıçKaya Reservoir",
-      "osmId": 1139094,
-      "stress": {
-        "bws_raw": 0.0036153465377047,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.06,
-        "gtd_score": -1,
-        "sev_score": 1.92,
-        "iav_score": 1.91,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-1142386",
@@ -1049,26 +834,6 @@
       }
     },
     {
-      "id": "water-1169387937",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.91378,
-      "lng": 36.113461,
-      "label": "FıNdıCak Dam",
-      "osmId": 1169387937,
-      "stress": {
-        "bws_raw": 0.4565542659581401,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.64,
-        "gtd_score": 1.07,
-        "sev_score": 0.97,
-        "iav_score": 1.41,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 35
-    },
-    {
       "id": "water-120292104",
       "type": "water",
       "facilityType": "dam",
@@ -1094,7 +859,7 @@
       "facilityType": "dam",
       "lat": 32.230232,
       "lng": 52.144063,
-      "label": "Dam near Iran",
+      "label": "Dam",
       "osmId": 1206045700,
       "stress": {
         "bws_raw": 1,
@@ -1189,26 +954,6 @@
       "notabilityScore": 75
     },
     {
-      "id": "water-1224893",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 41.288795,
-      "lng": 35.424904,
-      "label": "AltıNkaya Reservoir",
-      "osmId": 1224893,
-      "stress": {
-        "bws_raw": 0.1978975904616756,
-        "bws_score": 1.98,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.04,
-        "gtd_score": -1,
-        "sev_score": 2.23,
-        "iav_score": 1.87,
-        "compositeHealth": 0.7771743691090179
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-1225740",
       "type": "water",
       "facilityType": "reservoir",
@@ -1293,7 +1038,7 @@
       "facilityType": "dam",
       "lat": 30.922671,
       "lng": 47.27175,
-      "label": "Dam near Al-Midainah District",
+      "label": "Dam",
       "osmId": 1227611833,
       "stress": {
         "bws_raw": 1,
@@ -1368,26 +1113,6 @@
         "distanceKm": 86,
         "population": 3400000
       }
-    },
-    {
-      "id": "water-1244038239",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.205575,
-      "lng": 34.737008,
-      "label": "Doyduk Dam",
-      "osmId": 1244038239,
-      "stress": {
-        "bws_raw": 1.0659570877864164,
-        "bws_score": 4.41,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.8,
-        "iav_score": 1.45,
-        "compositeHealth": 0.34351128074635334
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-1244230073",
@@ -1736,7 +1461,7 @@
       "facilityType": "dam",
       "lat": 25.126558,
       "lng": 45.371731,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 1268617697,
       "stress": {
         "bws_raw": 1,
@@ -1882,57 +1607,6 @@
       }
     },
     {
-      "id": "water-128531806",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.373138,
-      "lng": 36.461213,
-      "label": "Berke Dam",
-      "osmId": 128531806,
-      "stress": {
-        "bws_raw": 0.1835010183836,
-        "bws_score": 1.88,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.39,
-        "gtd_score": -1,
-        "sev_score": 1.7,
-        "iav_score": 1.64,
-        "compositeHealth": 0.7899367063252599
-      },
-      "notabilityScore": 85,
-      "capacity": {
-        "height": 201
-      },
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 143,
-        "population": 2100000
-      }
-    },
-    {
-      "id": "water-128531818",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.500767,
-      "lng": 36.596464,
-      "label": "Sir Dam",
-      "osmId": 128531818,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 45,
-      "capacity": {
-        "height": 116
-      }
-    },
-    {
       "id": "water-1287451150",
       "type": "water",
       "facilityType": "dam",
@@ -2011,72 +1685,12 @@
       }
     },
     {
-      "id": "water-129021841",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.377696,
-      "lng": 36.494714,
-      "label": "Maksutlu Baraji",
-      "osmId": 129021841,
-      "stress": {
-        "bws_raw": 0.012238266570507,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.5,
-        "gtd_score": 1.07,
-        "sev_score": 1.28,
-        "iav_score": 1.37,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-129093517",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.449767,
-      "lng": 36.953699,
-      "label": "Karacalar Dam",
-      "osmId": 129093517,
-      "stress": {
-        "bws_raw": 1.0659570877864164,
-        "bws_score": 4.41,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.8,
-        "iav_score": 1.45,
-        "compositeHealth": 0.34351128074635334
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-129122742",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.330729,
-      "lng": 36.66537,
-      "label": "Gazibey Barajı",
-      "osmId": 129122742,
-      "stress": {
-        "bws_raw": 0.0059877196712131,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.73,
-        "gtd_score": 1.07,
-        "sev_score": 0.5,
-        "iav_score": 0.85,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-1294867412",
       "type": "water",
       "facilityType": "dam",
       "lat": 36.327775,
       "lng": 44.171383,
-      "label": "Dam near Iraq",
+      "label": "Dam",
       "osmId": 1294867412,
       "stress": {
         "bws_raw": 1,
@@ -2100,32 +1714,12 @@
       }
     },
     {
-      "id": "water-130108026",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.228794,
-      "lng": 38.075301,
-      "label": "ÇAmlıGöZe Dam",
-      "osmId": 130108026,
-      "stress": {
-        "bws_raw": 0.012238266570507,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.5,
-        "gtd_score": 1.07,
-        "sev_score": 1.28,
-        "iav_score": 1.37,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-13046471331",
       "type": "water",
       "facilityType": "dam",
       "lat": 30.936485,
       "lng": 46.542263,
-      "label": "Dam near Iraq",
+      "label": "Dam",
       "osmId": 13046471331,
       "stress": {
         "bws_raw": 1,
@@ -2492,30 +2086,6 @@
       }
     },
     {
-      "id": "water-1376571001",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.071624,
-      "lng": 36.820566,
-      "label": "SalıPazarı Barajı",
-      "operator": "ICC Grup",
-      "osmId": 1376571001,
-      "stress": {
-        "bws_raw": 0.0036153465377047,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.06,
-        "gtd_score": -1,
-        "sev_score": 1.92,
-        "iav_score": 1.91,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 50,
-      "capacity": {
-        "height": 62.25
-      }
-    },
-    {
       "id": "water-13827222",
       "type": "water",
       "facilityType": "dam",
@@ -2772,7 +2342,7 @@
       "facilityType": "dam",
       "lat": 32.070054,
       "lng": 47.608648,
-      "label": "Dam near Iraq",
+      "label": "Dam",
       "osmId": 1421814086,
       "stress": {
         "bws_raw": 1,
@@ -2813,26 +2383,6 @@
         "distanceKm": 10,
         "population": 950000
       }
-    },
-    {
-      "id": "water-144856760",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 37.81674,
-      "lng": 38.401763,
-      "label": "GöZebaşı GöLeti",
-      "osmId": 144856760,
-      "stress": {
-        "bws_raw": 1.434770123746893,
-        "bws_score": 4.84,
-        "bws_label": "Extremely High",
-        "drr_score": 3.23,
-        "gtd_score": 1.07,
-        "sev_score": 1.15,
-        "iav_score": 1.29,
-        "compositeHealth": 0.17888543819998326
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-144867360",
@@ -2885,126 +2435,6 @@
       }
     },
     {
-      "id": "water-149845570",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.620178,
-      "lng": 34.489566,
-      "label": "Tatlarin Barajı",
-      "osmId": 149845570,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-149860938",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.813396,
-      "lng": 34.721737,
-      "label": "Ayhanlar Barajı",
-      "osmId": 149860938,
-      "stress": {
-        "bws_raw": 0.0770690457338054,
-        "bws_score": 0.62,
-        "bws_label": "Low",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 2.13,
-        "iav_score": 1.71,
-        "compositeHealth": 0.9359487165438072
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-15003940",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 39.300007,
-      "lng": 36.422071,
-      "label": "YapıAltıN Baraj GöLü",
-      "osmId": 15003940,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-150063253",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.047669,
-      "lng": 34.636822,
-      "label": "Gebere Barajı",
-      "osmId": 150063253,
-      "stress": {
-        "bws_raw": 1.0659570877864164,
-        "bws_score": 4.41,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.8,
-        "iav_score": 1.45,
-        "compositeHealth": 0.34351128074635334
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-150063254",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.152079,
-      "lng": 34.581791,
-      "label": "Murtaza Barajı",
-      "osmId": 150063254,
-      "stress": {
-        "bws_raw": 0.2926815864933456,
-        "bws_score": 2.55,
-        "bws_label": "Medium-High",
-        "drr_score": 2.8,
-        "gtd_score": -1,
-        "sev_score": 1.14,
-        "iav_score": 1.26,
-        "compositeHealth": 0.7
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-150103248",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.009006,
-      "lng": 34.759347,
-      "label": "GüMüşLer Barajı",
-      "osmId": 150103248,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-150358721",
       "type": "water",
       "facilityType": "dam",
@@ -3028,86 +2458,6 @@
         "distanceKm": 12,
         "population": 800000
       }
-    },
-    {
-      "id": "water-15106763",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.876646,
-      "lng": 35.264823,
-      "label": "Keltepe Barajı",
-      "osmId": 15106763,
-      "stress": {
-        "bws_raw": 0.6549357423857614,
-        "bws_score": 3.71,
-        "bws_label": "High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 1.12,
-        "iav_score": 1.01,
-        "compositeHealth": 0.5079370039680118
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-152437658",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.764573,
-      "lng": 34.086749,
-      "label": "BozkıR Dam",
-      "osmId": 152437658,
-      "stress": {
-        "bws_raw": 0.3608351919773527,
-        "bws_score": 2.85,
-        "bws_label": "Medium-High",
-        "drr_score": 3.32,
-        "gtd_score": 1.07,
-        "sev_score": 1.13,
-        "iav_score": 1.14,
-        "compositeHealth": 0.6557438524302001
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-152507566",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.81585,
-      "lng": 34.169407,
-      "label": "KüLtepe Barajı",
-      "osmId": 152507566,
-      "stress": {
-        "bws_raw": 0.1978975904616756,
-        "bws_score": 1.98,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.04,
-        "gtd_score": -1,
-        "sev_score": 2.23,
-        "iav_score": 1.87,
-        "compositeHealth": 0.7771743691090179
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-1526723",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 38.699205,
-      "lng": 36.337022,
-      "label": "BahçEcik ReservoıR",
-      "osmId": 1526723,
-      "stress": {
-        "bws_raw": 0.4557753204821296,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.08,
-        "iav_score": 1.33,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-152735562",
@@ -3213,51 +2563,6 @@
       }
     },
     {
-      "id": "water-158172",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 37.754317,
-      "lng": 36.864837,
-      "label": "Menzelet Reservoir",
-      "osmId": 158172,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-158417416",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.147842,
-      "lng": 36.458703,
-      "label": "Kalecik Dam",
-      "osmId": 158417416,
-      "stress": {
-        "bws_raw": 1.0659570877864164,
-        "bws_score": 4.41,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.8,
-        "iav_score": 1.45,
-        "compositeHealth": 0.34351128074635334
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 121,
-        "population": 2100000
-      }
-    },
-    {
       "id": "water-165379490",
       "type": "water",
       "facilityType": "reservoir",
@@ -3287,299 +2592,6 @@
       }
     },
     {
-      "id": "water-168327059",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 38.928896,
-      "lng": 34.629572,
-      "label": "Kumtepe GöLeti",
-      "osmId": 168327059,
-      "stress": {
-        "bws_raw": 0.8472364830861474,
-        "bws_score": 4.08,
-        "bws_label": "Extremely High",
-        "drr_score": 2.92,
-        "gtd_score": -1,
-        "sev_score": 1.86,
-        "iav_score": 1.71,
-        "compositeHealth": 0.42895221179054427
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-168673354",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.980779,
-      "lng": 34.390506,
-      "label": "Altunhisar Barajı",
-      "osmId": 168673354,
-      "stress": {
-        "bws_raw": 0.2127627784313221,
-        "bws_score": 2.09,
-        "bws_label": "Medium-High",
-        "drr_score": 3.41,
-        "gtd_score": -1,
-        "sev_score": 1.24,
-        "iav_score": 1.85,
-        "compositeHealth": 0.7628892449104261
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-168851315",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.169769,
-      "lng": 35.148052,
-      "label": "Kovalı Barajı",
-      "osmId": 168851315,
-      "stress": {
-        "bws_raw": 2.1240526531793407,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 2.89,
-        "gtd_score": -1,
-        "sev_score": 1.12,
-        "iav_score": 0.92,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-168912339",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.904581,
-      "lng": 35.269569,
-      "label": "Yamula Dam",
-      "osmId": 168912339,
-      "stress": {
-        "bws_raw": 0.0161332787618154,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.25,
-        "gtd_score": -1,
-        "sev_score": 1.19,
-        "iav_score": 1.31,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 85,
-      "capacity": {
-        "height": 120
-      }
-    },
-    {
-      "id": "water-169414190",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.128167,
-      "lng": 36.285979,
-      "label": "Artova Barajı",
-      "osmId": 169414190,
-      "stress": {
-        "bws_raw": 0.1293926143441177,
-        "bws_score": 1.37,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.83,
-        "gtd_score": 1.07,
-        "sev_score": 1.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.8520563361656317
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-169425132",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.183116,
-      "lng": 35.948551,
-      "label": "BelpıNar Barajı",
-      "osmId": 169425132,
-      "stress": {
-        "bws_raw": 0.0036153465377047,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.06,
-        "gtd_score": -1,
-        "sev_score": 1.92,
-        "iav_score": 1.91,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-169425134",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.176,
-      "lng": 35.87128,
-      "label": "Boztepe Barajı",
-      "osmId": 169425134,
-      "stress": {
-        "bws_raw": 0.421695863281448,
-        "bws_score": 3.08,
-        "bws_label": "High",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 0.91,
-        "iav_score": 1.27,
-        "compositeHealth": 0.6196773353931867
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-169679574",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.614034,
-      "lng": 35.68761,
-      "label": "BağLıCa Barajı",
-      "osmId": 169679574,
-      "stress": {
-        "bws_raw": 0.0177926340102544,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.99,
-        "gtd_score": -1,
-        "sev_score": 1.27,
-        "iav_score": 1.43,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-169818820",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 40.443535,
-      "lng": 35.669378,
-      "label": "Gediksaray GöLeti",
-      "osmId": 169818820,
-      "stress": {
-        "bws_raw": 0.013274783264662,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.36,
-        "gtd_score": -1,
-        "sev_score": 1.12,
-        "iav_score": 1.65,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-169818933",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.442786,
-      "lng": 35.663419,
-      "label": "Gediksaray Barajı",
-      "osmId": 169818933,
-      "stress": {
-        "bws_raw": 1.434770123746893,
-        "bws_score": 4.84,
-        "bws_label": "Extremely High",
-        "drr_score": 3.23,
-        "gtd_score": 1.07,
-        "sev_score": 1.15,
-        "iav_score": 1.29,
-        "compositeHealth": 0.17888543819998326
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-170350063",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.324305,
-      "lng": 34.11898,
-      "label": "ÇOğUn Barajı",
-      "osmId": 170350063,
-      "stress": {
-        "bws_raw": 2.0940914026838944,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 3.1,
-        "gtd_score": 1.07,
-        "sev_score": 1.31,
-        "iav_score": 1.31,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 70,
-      "nearestCity": {
-        "name": "Ankara",
-        "distanceKm": 127,
-        "population": 5700000
-      }
-    },
-    {
-      "id": "water-171078719",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.126723,
-      "lng": 37.780565,
-      "label": "Polat Barajı",
-      "osmId": 171078719,
-      "stress": {
-        "bws_raw": 1.453096448175224,
-        "bws_score": 4.86,
-        "bws_label": "Extremely High",
-        "drr_score": 2.91,
-        "gtd_score": 1.07,
-        "sev_score": 1.98,
-        "iav_score": 1.73,
-        "compositeHealth": 0.16733200530681486
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-171637684",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.255643,
-      "lng": 35.41788,
-      "label": "Uzunlu Dam",
-      "osmId": 171637684,
-      "stress": {
-        "bws_raw": 0.0295425408723065,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.18,
-        "gtd_score": 1.07,
-        "sev_score": 1.09,
-        "iav_score": 1.71,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-172034736",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.225808,
-      "lng": 39.134856,
-      "label": "Karakaya Dam",
-      "osmId": 172034736,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 102,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-172474593",
       "type": "water",
       "facilityType": "dam",
@@ -3598,69 +2610,6 @@
         "compositeHealth": 1
       },
       "notabilityScore": 60
-    },
-    {
-      "id": "water-172628745",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.242465,
-      "lng": 39.116812,
-      "label": "Koruluk Dam",
-      "osmId": 172628745,
-      "stress": {
-        "bws_raw": 0.1752204242782633,
-        "bws_score": 1.81,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.63,
-        "gtd_score": 1.07,
-        "sev_score": 2.44,
-        "iav_score": 1.83,
-        "compositeHealth": 0.7987490219086343
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-172662461",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.065447,
-      "lng": 38.585112,
-      "label": "GöLova Barajı",
-      "osmId": 172662461,
-      "stress": {
-        "bws_raw": 0.0025500489329161,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.57,
-        "gtd_score": -1,
-        "sev_score": 0.75,
-        "iav_score": 1.15,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-172824819",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.681973,
-      "lng": 39.127242,
-      "label": "KüRtüN Dam",
-      "osmId": 172824819,
-      "stress": {
-        "bws_raw": 1.2845996410718037,
-        "bws_score": 4.68,
-        "bws_label": "Extremely High",
-        "drr_score": 3.22,
-        "gtd_score": 1.07,
-        "sev_score": 0.82,
-        "iav_score": 1.45,
-        "compositeHealth": 0.25298221281347044
-      },
-      "notabilityScore": 85,
-      "capacity": {
-        "height": 133
-      }
     },
     {
       "id": "water-172955482",
@@ -3685,82 +2634,6 @@
         "name": "Amman",
         "distanceKm": 30,
         "population": 4000000
-      }
-    },
-    {
-      "id": "water-174135775",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.982591,
-      "lng": 39.530722,
-      "label": "UzunçAyıR Dam",
-      "osmId": 174135775,
-      "stress": {
-        "bws_raw": 0.2130000017578466,
-        "bws_score": 2.09,
-        "bws_label": "Medium-High",
-        "drr_score": 2.19,
-        "gtd_score": 1.07,
-        "sev_score": 1.59,
-        "iav_score": 3.24,
-        "compositeHealth": 0.7628892449104261
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 134,
-        "population": 1100000
-      }
-    },
-    {
-      "id": "water-174287714",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.861843,
-      "lng": 39.817778,
-      "label": "Tatar Barajı",
-      "operator": "Limak Enerji & Bilgin Enerji",
-      "osmId": 174287714,
-      "stress": {
-        "bws_raw": 0.8824322977070526,
-        "bws_score": 4.14,
-        "bws_label": "Extremely High",
-        "drr_score": 3.53,
-        "gtd_score": -1,
-        "sev_score": 1.32,
-        "iav_score": 1.46,
-        "compositeHealth": 0.41472882706655445
-      },
-      "notabilityScore": 40,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 111,
-        "population": 1100000
-      }
-    },
-    {
-      "id": "water-174287782",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.443151,
-      "lng": 39.519023,
-      "label": "IşıKtepe Dam",
-      "osmId": 174287782,
-      "stress": {
-        "bws_raw": 0.0059877196712131,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.73,
-        "gtd_score": 1.07,
-        "sev_score": 0.5,
-        "iav_score": 0.85,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 86,
-        "population": 1100000
       }
     },
     {
@@ -3857,86 +2730,6 @@
       }
     },
     {
-      "id": "water-175867653",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.332994,
-      "lng": 33.726397,
-      "label": "Ayrancı Dam",
-      "osmId": 175867653,
-      "stress": {
-        "bws_raw": 2.0940914026838944,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 3.1,
-        "gtd_score": 1.07,
-        "sev_score": 1.31,
-        "iav_score": 1.31,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-176019674",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.68247,
-      "lng": 34.339905,
-      "label": "YalıNtaş Dam",
-      "osmId": 176019674,
-      "stress": {
-        "bws_raw": 0.6982694829490631,
-        "bws_score": 3.8,
-        "bws_label": "High",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 1.37,
-        "iav_score": 1.4,
-        "compositeHealth": 0.4898979485566356
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-176167099",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.303406,
-      "lng": 33.434802,
-      "label": "EşMekaya Barajı",
-      "osmId": 176167099,
-      "stress": {
-        "bws_raw": 0.1939502693315026,
-        "bws_score": 1.96,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.4,
-        "gtd_score": -1,
-        "sev_score": 1.71,
-        "iav_score": 1.72,
-        "compositeHealth": 0.7797435475847171
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-177201521",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.889355,
-      "lng": 35.732901,
-      "label": "SarıMsaklı Barajı",
-      "osmId": 177201521,
-      "stress": {
-        "bws_raw": 0.0161332787618154,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.25,
-        "gtd_score": -1,
-        "sev_score": 1.19,
-        "iav_score": 1.31,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-177666298",
       "type": "water",
       "facilityType": "reservoir",
@@ -3987,51 +2780,6 @@
         "name": "Idlib",
         "distanceKm": 52,
         "population": 165000
-      }
-    },
-    {
-      "id": "water-179303036",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.425186,
-      "lng": 36.88134,
-      "label": "AtaköY Barajı",
-      "osmId": 179303036,
-      "stress": {
-        "bws_raw": 0.478836684084983,
-        "bws_score": 3.26,
-        "bws_label": "High",
-        "drr_score": 2.65,
-        "gtd_score": 1.07,
-        "sev_score": 1.36,
-        "iav_score": 1.42,
-        "compositeHealth": 0.5899152481501051
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-179390",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 38.906465,
-      "lng": 39.185223,
-      "label": "Keban Reservoir",
-      "osmId": 179390,
-      "stress": {
-        "bws_raw": 0.0989162486220254,
-        "bws_score": 0.98,
-        "bws_label": "Low",
-        "drr_score": 3.31,
-        "gtd_score": 1.07,
-        "sev_score": 1.33,
-        "iav_score": 1.34,
-        "compositeHealth": 0.8966604708583958
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 143,
-        "population": 1100000
       }
     },
     {
@@ -4122,31 +2870,6 @@
       "notabilityScore": 75
     },
     {
-      "id": "water-180812900",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.911188,
-      "lng": 33.659637,
-      "label": "PeçEnek Dam",
-      "osmId": 180812900,
-      "stress": {
-        "bws_raw": 0.1939502693315026,
-        "bws_score": 1.96,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.4,
-        "gtd_score": -1,
-        "sev_score": 1.71,
-        "iav_score": 1.72,
-        "compositeHealth": 0.7797435475847171
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Ankara",
-        "distanceKm": 133,
-        "population": 5700000
-      }
-    },
-    {
       "id": "water-181306735",
       "type": "water",
       "facilityType": "dam",
@@ -4165,56 +2888,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 75
-    },
-    {
-      "id": "water-182391216",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.678444,
-      "lng": 39.065814,
-      "label": "CipköY Dam",
-      "osmId": 182391216,
-      "stress": {
-        "bws_raw": 0.0989162486220254,
-        "bws_score": 0.98,
-        "bws_label": "Low",
-        "drr_score": 3.31,
-        "gtd_score": 1.07,
-        "sev_score": 1.33,
-        "iav_score": 1.34,
-        "compositeHealth": 0.8966604708583958
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 132,
-        "population": 1100000
-      }
-    },
-    {
-      "id": "water-182568273",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.95809,
-      "lng": 40.059165,
-      "label": "Kalecik Dam",
-      "osmId": 182568273,
-      "stress": {
-        "bws_raw": 0.0228896328144414,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.29,
-        "gtd_score": -1,
-        "sev_score": 2,
-        "iav_score": 1.66,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 117,
-        "population": 1100000
-      }
     },
     {
       "id": "water-183834576",
@@ -4312,46 +2985,6 @@
       "notabilityScore": 55
     },
     {
-      "id": "water-186188719",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.782559,
-      "lng": 35.564431,
-      "label": "YedikıR Barajı",
-      "osmId": 186188719,
-      "stress": {
-        "bws_raw": 0.421695863281448,
-        "bws_score": 3.08,
-        "bws_label": "High",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 0.91,
-        "iav_score": 1.27,
-        "compositeHealth": 0.6196773353931867
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-186188728",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.907873,
-      "lng": 35.465952,
-      "label": "HıRka Barajı",
-      "osmId": 186188728,
-      "stress": {
-        "bws_raw": 0.169039266230605,
-        "bws_score": 1.76,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 1.18,
-        "iav_score": 1.79,
-        "compositeHealth": 0.8049844718999243
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-186383743",
       "type": "water",
       "facilityType": "dam",
@@ -4370,71 +3003,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 55
-    },
-    {
-      "id": "water-186532401",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.602305,
-      "lng": 37.739783,
-      "label": "Topcam Dam",
-      "operator": "EÜAŞ (Elektrik ÜRetim Anonim ŞIrketi)",
-      "osmId": 186532401,
-      "stress": {
-        "bws_raw": 0.1978975904616756,
-        "bws_score": 1.98,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.04,
-        "gtd_score": -1,
-        "sev_score": 2.23,
-        "iav_score": 1.87,
-        "compositeHealth": 0.7771743691090179
-      },
-      "notabilityScore": 95,
-      "capacity": {
-        "height": 122,
-        "volume": 132
-      }
-    },
-    {
-      "id": "water-188856423",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.461863,
-      "lng": 35.842215,
-      "label": "Derbent Dam",
-      "osmId": 188856423,
-      "stress": {
-        "bws_raw": 0.0177926340102544,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.99,
-        "gtd_score": -1,
-        "sev_score": 1.27,
-        "iav_score": 1.43,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-190296954",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.761402,
-      "lng": 36.732793,
-      "label": "SuçAtı Barajı",
-      "osmId": 190296954,
-      "stress": {
-        "bws_raw": 0.4557753204821296,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.08,
-        "iav_score": 1.33,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-19127954",
@@ -4523,52 +3091,6 @@
       "notabilityScore": 55
     },
     {
-      "id": "water-194678738",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.129543,
-      "lng": 40.087365,
-      "label": "ÖZlüCe Dam",
-      "osmId": 194678738,
-      "stress": {
-        "bws_raw": 0.1137389953521402,
-        "bws_score": 1.19,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.2,
-        "gtd_score": 1.07,
-        "sev_score": 1.17,
-        "iav_score": 1.16,
-        "compositeHealth": 0.8729261137118078
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 136,
-        "population": 1100000
-      }
-    },
-    {
-      "id": "water-194740056",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.039289,
-      "lng": 35.331999,
-      "label": "Seyhan Barajı",
-      "operator": "DSİ",
-      "osmId": 194740056,
-      "stress": {
-        "bws_raw": 0.0272296455144673,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.71,
-        "gtd_score": 1.07,
-        "sev_score": 0.82,
-        "iav_score": 1.13,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 80
-    },
-    {
       "id": "water-194822713",
       "type": "water",
       "facilityType": "dam",
@@ -4596,46 +3118,6 @@
         "distanceKm": 106,
         "population": 3400000
       }
-    },
-    {
-      "id": "water-194921456",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.518344,
-      "lng": 35.830721,
-      "label": "Kozan Dam",
-      "osmId": 194921456,
-      "stress": {
-        "bws_raw": 0.0601286690189256,
-        "bws_score": 0.27,
-        "bws_label": "Low",
-        "drr_score": 3.1,
-        "gtd_score": -1,
-        "sev_score": 1.1,
-        "iav_score": 1.39,
-        "compositeHealth": 0.9726253132630263
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-195166884",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.693875,
-      "lng": 38.146579,
-      "label": "ÇAmgazi Barajı",
-      "osmId": 195166884,
-      "stress": {
-        "bws_raw": 0.1137389953521402,
-        "bws_score": 1.19,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.2,
-        "gtd_score": 1.07,
-        "sev_score": 1.17,
-        "iav_score": 1.16,
-        "compositeHealth": 0.8729261137118078
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-195608478",
@@ -4668,29 +3150,6 @@
       }
     },
     {
-      "id": "water-195795704",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.044424,
-      "lng": 35.549584,
-      "label": "SüReyyabey Barajı",
-      "osmId": 195795704,
-      "stress": {
-        "bws_raw": 0.478836684084983,
-        "bws_score": 3.26,
-        "bws_label": "High",
-        "drr_score": 2.65,
-        "gtd_score": 1.07,
-        "sev_score": 1.36,
-        "iav_score": 1.42,
-        "compositeHealth": 0.5899152481501051
-      },
-      "notabilityScore": 80,
-      "capacity": {
-        "height": 103
-      }
-    },
-    {
       "id": "water-19754263",
       "type": "water",
       "facilityType": "dam",
@@ -4714,26 +3173,6 @@
         "distanceKm": 48,
         "population": 4400000
       }
-    },
-    {
-      "id": "water-199506653",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.363782,
-      "lng": 35.725162,
-      "label": "AltıNkaya Dam",
-      "osmId": 199506653,
-      "stress": {
-        "bws_raw": 0.0177926340102544,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.99,
-        "gtd_score": -1,
-        "sev_score": 1.27,
-        "iav_score": 1.43,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-200286894",
@@ -4804,29 +3243,6 @@
       }
     },
     {
-      "id": "water-204556006",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.401215,
-      "lng": 35.445593,
-      "label": "YedigöZe Dam",
-      "osmId": 204556006,
-      "stress": {
-        "bws_raw": 0.1293926143441177,
-        "bws_score": 1.37,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.83,
-        "gtd_score": 1.07,
-        "sev_score": 1.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.8520563361656317
-      },
-      "notabilityScore": 85,
-      "capacity": {
-        "height": 130
-      }
-    },
-    {
       "id": "water-205608156",
       "type": "water",
       "facilityType": "reservoir",
@@ -4852,46 +3268,6 @@
       }
     },
     {
-      "id": "water-208086839",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.919395,
-      "lng": 34.607878,
-      "label": "Akkaya Dam",
-      "osmId": 208086839,
-      "stress": {
-        "bws_raw": 1.0659570877864164,
-        "bws_score": 4.41,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.8,
-        "iav_score": 1.45,
-        "compositeHealth": 0.34351128074635334
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-208126806",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.986667,
-      "lng": 34.580236,
-      "label": "Koyunlu Barajı",
-      "osmId": 208126806,
-      "stress": {
-        "bws_raw": 0.2900491447368006,
-        "bws_score": 2.54,
-        "bws_label": "Medium-High",
-        "drr_score": 3,
-        "gtd_score": -1,
-        "sev_score": 0.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.7014271166700072
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-209325265",
       "type": "water",
       "facilityType": "dam",
@@ -4910,26 +3286,6 @@
         "compositeHealth": 0.7745966692414834
       },
       "notabilityScore": 60
-    },
-    {
-      "id": "water-210642950",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.051232,
-      "lng": 36.0229,
-      "label": "Dutluca Barajı",
-      "osmId": 210642950,
-      "stress": {
-        "bws_raw": 0.1293926143441177,
-        "bws_score": 1.37,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.83,
-        "gtd_score": 1.07,
-        "sev_score": 1.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.8520563361656317
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-211058310",
@@ -4968,126 +3324,6 @@
         "sev_score": 0.68,
         "iav_score": 2.31,
         "compositeHealth": 0
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-211082171",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.034332,
-      "lng": 37.879446,
-      "label": "SüRgü Dam",
-      "osmId": 211082171,
-      "stress": {
-        "bws_raw": 0.0092880950302441,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.15,
-        "gtd_score": -1,
-        "sev_score": 1.94,
-        "iav_score": 1.95,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-213160207",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.075133,
-      "lng": 36.671403,
-      "label": "Suat UğUrlu Dam",
-      "osmId": 213160207,
-      "stress": {
-        "bws_raw": 0.1505683452590043,
-        "bws_score": 1.59,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.72,
-        "gtd_score": -1,
-        "sev_score": 1.32,
-        "iav_score": 1.03,
-        "compositeHealth": 0.825832912882503
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-213194665",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.109828,
-      "lng": 36.63428,
-      "label": "ÇAkmak Dam",
-      "osmId": 213194665,
-      "stress": {
-        "bws_raw": 0.0070235757491777,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.17,
-        "iav_score": 2.46,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-214150867",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.392206,
-      "lng": 34.666524,
-      "label": "Yenihayat Barajı",
-      "osmId": 214150867,
-      "stress": {
-        "bws_raw": 0.0931344284922832,
-        "bws_score": 0.9,
-        "bws_label": "Low",
-        "drr_score": 3.13,
-        "gtd_score": -1,
-        "sev_score": 1.15,
-        "iav_score": 1.29,
-        "compositeHealth": 0.9055385138137417
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-219673766",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.920401,
-      "lng": 35.19416,
-      "label": "SarayöZü Dam",
-      "osmId": 219673766,
-      "stress": {
-        "bws_raw": 0.1752204242782633,
-        "bws_score": 1.81,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.63,
-        "gtd_score": 1.07,
-        "sev_score": 2.44,
-        "iav_score": 1.83,
-        "compositeHealth": 0.7987490219086343
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-220884644",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.107978,
-      "lng": 36.74006,
-      "label": "Adatepe Dam",
-      "osmId": 220884644,
-      "stress": {
-        "bws_raw": 0.0059877196712131,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.73,
-        "gtd_score": 1.07,
-        "sev_score": 0.5,
-        "iav_score": 0.85,
-        "compositeHealth": 1
       },
       "notabilityScore": 75
     },
@@ -5132,136 +3368,6 @@
       "notabilityScore": 60
     },
     {
-      "id": "water-221363709",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.559085,
-      "lng": 33.91027,
-      "label": "Karaova Barajı",
-      "osmId": 221363709,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 70,
-      "nearestCity": {
-        "name": "Ankara",
-        "distanceKm": 99,
-        "population": 5700000
-      }
-    },
-    {
-      "id": "water-221426533",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.144176,
-      "lng": 37.981011,
-      "label": "Mursal Dam",
-      "osmId": 221426533,
-      "stress": {
-        "bws_raw": 0.6053565524423132,
-        "bws_score": 3.6,
-        "bws_label": "High",
-        "drr_score": 2.85,
-        "gtd_score": -1,
-        "sev_score": 2.1,
-        "iav_score": 1.88,
-        "compositeHealth": 0.5291502622129182
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-221430126",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.13973,
-      "lng": 33.910363,
-      "label": "SıDdıKlı Barajı",
-      "osmId": 221430126,
-      "stress": {
-        "bws_raw": 0.4557753204821296,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.08,
-        "iav_score": 1.33,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 70,
-      "nearestCity": {
-        "name": "Ankara",
-        "distanceKm": 126,
-        "population": 5700000
-      }
-    },
-    {
-      "id": "water-221449694",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.504319,
-      "lng": 35.717613,
-      "label": "Yahyasaray Barajı",
-      "osmId": 221449694,
-      "stress": {
-        "bws_raw": 1.2845996410718037,
-        "bws_score": 4.68,
-        "bws_label": "Extremely High",
-        "drr_score": 3.22,
-        "gtd_score": 1.07,
-        "sev_score": 0.82,
-        "iav_score": 1.45,
-        "compositeHealth": 0.25298221281347044
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-221450735",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.013288,
-      "lng": 34.660897,
-      "label": "YeşIlburç Barajı",
-      "osmId": 221450735,
-      "stress": {
-        "bws_raw": 0.2130000017578466,
-        "bws_score": 2.09,
-        "bws_label": "Medium-High",
-        "drr_score": 2.19,
-        "gtd_score": 1.07,
-        "sev_score": 1.59,
-        "iav_score": 3.24,
-        "compositeHealth": 0.7628892449104261
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-221452770",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.061083,
-      "lng": 36.099587,
-      "label": "Alpu Barajı",
-      "osmId": 221452770,
-      "stress": {
-        "bws_raw": 0.1752204242782633,
-        "bws_score": 1.81,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.63,
-        "gtd_score": 1.07,
-        "sev_score": 2.44,
-        "iav_score": 1.83,
-        "compositeHealth": 0.7987490219086343
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-221454591",
       "type": "water",
       "facilityType": "dam",
@@ -5300,232 +3406,6 @@
         "compositeHealth": 1
       },
       "notabilityScore": 55
-    },
-    {
-      "id": "water-221467559",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.02138,
-      "lng": 36.757653,
-      "label": "AltıNoluk Barajı",
-      "osmId": 221467559,
-      "stress": {
-        "bws_raw": 1.2751553229126051,
-        "bws_score": 4.67,
-        "bws_label": "Extremely High",
-        "drr_score": 3.39,
-        "gtd_score": 1.07,
-        "sev_score": 0.88,
-        "iav_score": 1.45,
-        "compositeHealth": 0.25690465157330267
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-221518660",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.635693,
-      "lng": 39.231164,
-      "label": "Torul Dam",
-      "osmId": 221518660,
-      "stress": {
-        "bws_raw": 0.0736395365163714,
-        "bws_score": 0.56,
-        "bws_label": "Low",
-        "drr_score": 2.94,
-        "gtd_score": 1.07,
-        "sev_score": 1.24,
-        "iav_score": 1.51,
-        "compositeHealth": 0.9423375191511797
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-221642936",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.388087,
-      "lng": 38.572005,
-      "label": "Toplukonak Barajı",
-      "osmId": 221642936,
-      "stress": {
-        "bws_raw": 0.0131709105962478,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.32,
-        "gtd_score": 1.07,
-        "sev_score": 1.21,
-        "iav_score": 1.68,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-221689318",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.577706,
-      "lng": 37.136708,
-      "label": "Ayvalı Dam",
-      "osmId": 221689318,
-      "stress": {
-        "bws_raw": 0.0328993707238694,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.35,
-        "gtd_score": 1.07,
-        "sev_score": 1.23,
-        "iav_score": 1.13,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 85,
-      "capacity": {
-        "height": 843.55
-      }
-    },
-    {
-      "id": "water-221696883",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.676147,
-      "lng": 36.849885,
-      "label": "Menzelet Barajı",
-      "osmId": 221696883,
-      "stress": {
-        "bws_raw": 0.2926815864933456,
-        "bws_score": 2.55,
-        "bws_label": "Medium-High",
-        "drr_score": 2.8,
-        "gtd_score": -1,
-        "sev_score": 1.14,
-        "iav_score": 1.26,
-        "compositeHealth": 0.7
-      },
-      "notabilityScore": 80,
-      "capacity": {
-        "height": 136
-      }
-    },
-    {
-      "id": "water-221788428",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.068004,
-      "lng": 38.312647,
-      "label": "ÇAt Dam",
-      "osmId": 221788428,
-      "stress": {
-        "bws_raw": 0.8472364830861474,
-        "bws_score": 4.08,
-        "bws_label": "Extremely High",
-        "drr_score": 3,
-        "gtd_score": 1.07,
-        "sev_score": 1.86,
-        "iav_score": 1.71,
-        "compositeHealth": 0.42895221179054427
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-221868157",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.507281,
-      "lng": 36.02225,
-      "label": "Mehmetli Dam",
-      "osmId": 221868157,
-      "stress": {
-        "bws_raw": 1.5021042488622676,
-        "bws_score": 4.91,
-        "bws_label": "Extremely High",
-        "drr_score": 3.06,
-        "gtd_score": 1.07,
-        "sev_score": 1.33,
-        "iav_score": 1.55,
-        "compositeHealth": 0.13416407864998744
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-221877079",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.60915,
-      "lng": 35.042988,
-      "label": "GelingüLlü Dam",
-      "osmId": 221877079,
-      "stress": {
-        "bws_raw": 0.013274783264662,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.36,
-        "gtd_score": -1,
-        "sev_score": 1.12,
-        "iav_score": 1.65,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-222975503",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.429308,
-      "lng": 35.492044,
-      "label": "Baraklı Barajı",
-      "osmId": 222975503,
-      "stress": {
-        "bws_raw": 0.1939502693315026,
-        "bws_score": 1.96,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.4,
-        "gtd_score": -1,
-        "sev_score": 1.71,
-        "iav_score": 1.72,
-        "compositeHealth": 0.7797435475847171
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-223059380",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.579696,
-      "lng": 34.864538,
-      "label": "HüYüKkışLa Barajı",
-      "osmId": 223059380,
-      "stress": {
-        "bws_raw": 0.6982694829490631,
-        "bws_score": 3.8,
-        "bws_label": "High",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 1.37,
-        "iav_score": 1.4,
-        "compositeHealth": 0.4898979485566356
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-223141424",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.423288,
-      "lng": 34.66074,
-      "label": "GüListan Barajı",
-      "osmId": 223141424,
-      "stress": {
-        "bws_raw": 0.0092880950302441,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.15,
-        "gtd_score": -1,
-        "sev_score": 1.94,
-        "iav_score": 1.95,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-226850923",
@@ -5573,29 +3453,6 @@
       "notabilityScore": 60
     },
     {
-      "id": "water-227976567",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.688518,
-      "lng": 37.227448,
-      "label": "DSİ Merk Barajı",
-      "osmId": 227976567,
-      "stress": {
-        "bws_raw": 0.4557753204821296,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.08,
-        "iav_score": 1.33,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 40,
-      "capacity": {
-        "height": 1447.5
-      }
-    },
-    {
       "id": "water-228843948",
       "type": "water",
       "facilityType": "dam",
@@ -5641,26 +3498,6 @@
       }
     },
     {
-      "id": "water-229709962",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.680394,
-      "lng": 38.144145,
-      "label": "Boztepe Barajı",
-      "osmId": 229709962,
-      "stress": {
-        "bws_raw": 0.0025500489329161,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.57,
-        "gtd_score": -1,
-        "sev_score": 0.75,
-        "iav_score": 1.15,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-231370418",
       "type": "water",
       "facilityType": "dam",
@@ -5684,66 +3521,6 @@
         "distanceKm": 99,
         "population": 2100000
       }
-    },
-    {
-      "id": "water-232565444",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.016086,
-      "lng": 37.401668,
-      "label": "Pusat ÖZen Dam",
-      "osmId": 232565444,
-      "stress": {
-        "bws_raw": 0.0070235757491777,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.86,
-        "gtd_score": 1.07,
-        "sev_score": 1.17,
-        "iav_score": 2.46,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-232701125",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.058889,
-      "lng": 35.600314,
-      "label": "VezirköPrü Barajı",
-      "osmId": 232701125,
-      "stress": {
-        "bws_raw": 0.169039266230605,
-        "bws_score": 1.76,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 1.18,
-        "iav_score": 1.79,
-        "compositeHealth": 0.8049844718999243
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-242100520",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.998859,
-      "lng": 34.378759,
-      "label": "Aksaklı Barajı",
-      "osmId": 242100520,
-      "stress": {
-        "bws_raw": 0.007812846899941,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.24,
-        "gtd_score": 1.07,
-        "sev_score": 1.28,
-        "iav_score": 1.65,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-24540601",
@@ -5931,51 +3708,6 @@
       }
     },
     {
-      "id": "water-2624072",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 37.520125,
-      "lng": 35.849095,
-      "label": "Kozan Reservoir",
-      "osmId": 2624072,
-      "stress": {
-        "bws_raw": 0.0778849507645939,
-        "bws_score": 0.64,
-        "bws_label": "Low",
-        "drr_score": 3.43,
-        "gtd_score": -1,
-        "sev_score": 1.26,
-        "iav_score": 1.4,
-        "compositeHealth": 0.9338094023943002
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-263053265",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.029982,
-      "lng": 38.55621,
-      "label": "SıRıMtaş Barajı",
-      "osmId": 263053265,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 70,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 147,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-274295756",
       "type": "water",
       "facilityType": "dam",
@@ -5998,31 +3730,6 @@
         "name": "Diyarbakir",
         "distanceKm": 89,
         "population": 1100000
-      }
-    },
-    {
-      "id": "water-274577409",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.468672,
-      "lng": 37.239427,
-      "label": "Kartalkaya Dam",
-      "osmId": 274577409,
-      "stress": {
-        "bws_raw": 0.0601286690189256,
-        "bws_score": 0.27,
-        "bws_label": "Low",
-        "drr_score": 3.1,
-        "gtd_score": -1,
-        "sev_score": 1.1,
-        "iav_score": 1.39,
-        "compositeHealth": 0.9726253132630263
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 141,
-        "population": 2100000
       }
     },
     {
@@ -6161,26 +3868,6 @@
       }
     },
     {
-      "id": "water-278276766",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.108367,
-      "lng": 35.057481,
-      "label": "Fehimli Dam",
-      "osmId": 278276766,
-      "stress": {
-        "bws_raw": 0.1293926143441177,
-        "bws_score": 1.37,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.83,
-        "gtd_score": 1.07,
-        "sev_score": 1.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.8520563361656317
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-2791251",
       "type": "water",
       "facilityType": "reservoir",
@@ -6287,32 +3974,12 @@
       "notabilityScore": 75
     },
     {
-      "id": "water-282437658",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.09857,
-      "lng": 34.943409,
-      "label": "KoçHisar Barajı",
-      "osmId": 282437658,
-      "stress": {
-        "bws_raw": 0.6822075292917827,
-        "bws_score": 3.77,
-        "bws_label": "High",
-        "drr_score": 2.46,
-        "gtd_score": -1,
-        "sev_score": 1.11,
-        "iav_score": 1.94,
-        "compositeHealth": 0.49598387070548977
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-28428982",
       "type": "water",
       "facilityType": "reservoir",
       "lat": 30.835141,
       "lng": 61.689078,
-      "label": "Reservoir near Zehak RD",
+      "label": "Reservoir",
       "osmId": 28428982,
       "stress": {
         "bws_raw": 1.0376247036608977,
@@ -6350,46 +4017,6 @@
         "distanceKm": 1,
         "population": 15000
       }
-    },
-    {
-      "id": "water-28431893",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.808031,
-      "lng": 38.756703,
-      "label": "Keban Dam",
-      "osmId": 28431893,
-      "stress": {
-        "bws_raw": 0.169039266230605,
-        "bws_score": 1.76,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 1.18,
-        "iav_score": 1.79,
-        "compositeHealth": 0.8049844718999243
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-284412463",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.328228,
-      "lng": 36.803643,
-      "label": "Deliilyas Barajı",
-      "osmId": 284412463,
-      "stress": {
-        "bws_raw": 0.1635291354950104,
-        "bws_score": 1.71,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.92,
-        "gtd_score": -1,
-        "sev_score": 0.9,
-        "iav_score": 1.72,
-        "compositeHealth": 0.8111719916269299
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-2874388",
@@ -6688,31 +4315,6 @@
       }
     },
     {
-      "id": "water-300023323",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.34909,
-      "lng": 36.784133,
-      "label": "KıZıLeniş Dam",
-      "osmId": 300023323,
-      "stress": {
-        "bws_raw": 0.1978975904616756,
-        "bws_score": 1.98,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.04,
-        "gtd_score": -1,
-        "sev_score": 2.23,
-        "iav_score": 1.87,
-        "compositeHealth": 0.7771743691090179
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 131,
-        "population": 2100000
-      }
-    },
-    {
       "id": "water-304952779",
       "type": "water",
       "facilityType": "dam",
@@ -6788,26 +4390,6 @@
       }
     },
     {
-      "id": "water-305571316",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.847961,
-      "lng": 35.841452,
-      "label": "DerinöZ Barajı",
-      "osmId": 305571316,
-      "stress": {
-        "bws_raw": 2.326536430428292,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 0.83,
-        "iav_score": 1.35,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-30995463",
       "type": "water",
       "facilityType": "dam",
@@ -6846,26 +4428,6 @@
         "compositeHealth": 0.7615773105863908
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-313351",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 37.079028,
-      "lng": 35.295007,
-      "label": "Seyhan Reservoir",
-      "osmId": 313351,
-      "stress": {
-        "bws_raw": 1,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 3.38,
-        "gtd_score": 1.07,
-        "sev_score": 0.89,
-        "iav_score": 1.89,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-315325143",
@@ -7076,7 +4638,7 @@
       "facilityType": "dam",
       "lat": 27.244115,
       "lng": 41.404323,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 328052840,
       "stress": {
         "bws_raw": -1,
@@ -7089,26 +4651,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-331581116",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.704742,
-      "lng": 35.723133,
-      "label": "Menge Dam",
-      "osmId": 331581116,
-      "stress": {
-        "bws_raw": 0.5353114941315318,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 2.73,
-        "gtd_score": -1,
-        "sev_score": 1.11,
-        "iav_score": 1.3,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-332096539",
@@ -7277,26 +4819,6 @@
         "sev_score": 1.67,
         "iav_score": 2.45,
         "compositeHealth": 0.42190046219457966
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-346957104",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.745486,
-      "lng": 35.865151,
-      "label": "Feke 2 Dam",
-      "osmId": 346957104,
-      "stress": {
-        "bws_raw": 0.2127627784313221,
-        "bws_score": 2.09,
-        "bws_label": "Medium-High",
-        "drr_score": 3.41,
-        "gtd_score": -1,
-        "sev_score": 1.24,
-        "iav_score": 1.85,
-        "compositeHealth": 0.7628892449104261
       },
       "notabilityScore": 75
     },
@@ -8538,51 +6060,6 @@
       }
     },
     {
-      "id": "water-397040367",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.933472,
-      "lng": 36.97019,
-      "label": "SarıGüZel Barajı",
-      "osmId": 397040367,
-      "stress": {
-        "bws_raw": 0.0036153465377047,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.06,
-        "gtd_score": -1,
-        "sev_score": 1.92,
-        "iav_score": 1.91,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-397126",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 37.332752,
-      "lng": 36.315952,
-      "label": "Aslantaş Reservoir",
-      "osmId": 397126,
-      "stress": {
-        "bws_raw": 0.6822075292917827,
-        "bws_score": 3.77,
-        "bws_label": "High",
-        "drr_score": 2.46,
-        "gtd_score": -1,
-        "sev_score": 1.11,
-        "iav_score": 1.94,
-        "compositeHealth": 0.49598387070548977
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 145,
-        "population": 2100000
-      }
-    },
-    {
       "id": "water-403097488",
       "type": "water",
       "facilityType": "reservoir",
@@ -9057,7 +6534,7 @@
       "facilityType": "dam",
       "lat": 29.249667,
       "lng": 56.964839,
-      "label": "Dam near دهستان جواران",
+      "label": "Dam",
       "osmId": 453004347,
       "stress": {
         "bws_raw": 0.0045263198331525,
@@ -9077,7 +6554,7 @@
       "facilityType": "dam",
       "lat": 29.251845,
       "lng": 56.963535,
-      "label": "Dam near دهستان جواران",
+      "label": "Dam",
       "osmId": 453004349,
       "stress": {
         "bws_raw": 0.2835634142595079,
@@ -9097,7 +6574,7 @@
       "facilityType": "dam",
       "lat": 35.546128,
       "lng": 44.472878,
-      "label": "Dam near Kirkuk",
+      "label": "Dam",
       "osmId": 460069264,
       "stress": {
         "bws_raw": 0.008780945552171,
@@ -9122,7 +6599,7 @@
       "facilityType": "dam",
       "lat": 33.328006,
       "lng": 55.048874,
-      "label": "Dam near دهستان نخلستان",
+      "label": "Dam",
       "osmId": 460321330,
       "stress": {
         "bws_raw": 1,
@@ -9142,7 +6619,7 @@
       "facilityType": "dam",
       "lat": 33.514547,
       "lng": 54.782441,
-      "label": "Dam near دهستان نخلستان",
+      "label": "Dam",
       "osmId": 460323352,
       "stress": {
         "bws_raw": 1,
@@ -9162,7 +6639,7 @@
       "facilityType": "dam",
       "lat": 29.451644,
       "lng": 57.08051,
-      "label": "Dam near دهستان شیرینک",
+      "label": "Dam",
       "osmId": 467571237,
       "stress": {
         "bws_raw": 0.2181280415850707,
@@ -9202,7 +6679,7 @@
       "facilityType": "dam",
       "lat": 30.642089,
       "lng": 52.081594,
-      "label": "Dam near Sedeh RD",
+      "label": "Dam",
       "osmId": 470719793,
       "stress": {
         "bws_raw": 1,
@@ -9255,7 +6732,7 @@
       "facilityType": "dam",
       "lat": 27.529988,
       "lng": 56.89825,
-      "label": "Dam near دهستان شمیل",
+      "label": "Dam",
       "osmId": 482243261,
       "stress": {
         "bws_raw": 1,
@@ -9275,7 +6752,7 @@
       "facilityType": "dam",
       "lat": 27.711332,
       "lng": 55.996567,
-      "label": "Dam near دهستان فین",
+      "label": "Dam",
       "osmId": 492574105,
       "stress": {
         "bws_raw": 1,
@@ -9308,46 +6785,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 55
-    },
-    {
-      "id": "water-496267962",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.645707,
-      "lng": 38.878232,
-      "label": "GöKçEbel Barajı",
-      "osmId": 496267962,
-      "stress": {
-        "bws_raw": 0.6549357423857614,
-        "bws_score": 3.71,
-        "bws_label": "High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 1.12,
-        "iav_score": 1.01,
-        "compositeHealth": 0.5079370039680118
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-496675966",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.602889,
-      "lng": 34.633888,
-      "label": "Handere Barajı",
-      "osmId": 496675966,
-      "stress": {
-        "bws_raw": 0.1137389953521402,
-        "bws_score": 1.19,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.2,
-        "gtd_score": 1.07,
-        "sev_score": 1.17,
-        "iav_score": 1.16,
-        "compositeHealth": 0.8729261137118078
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-497697728",
@@ -9398,7 +6835,7 @@
       "facilityType": "dam",
       "lat": 28.098817,
       "lng": 56.3221,
-      "label": "Dam near دهستان فارغان",
+      "label": "Dam",
       "osmId": 499060720,
       "stress": {
         "bws_raw": 10.090659047056237,
@@ -9411,26 +6848,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-504427200",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.69831,
-      "lng": 38.923628,
-      "label": "YaşMaklı Barajı",
-      "osmId": 504427200,
-      "stress": {
-        "bws_raw": 0.0601286690189256,
-        "bws_score": 0.27,
-        "bws_label": "Low",
-        "drr_score": 3.1,
-        "gtd_score": -1,
-        "sev_score": 1.1,
-        "iav_score": 1.39,
-        "compositeHealth": 0.9726253132630263
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-5047035",
@@ -9518,26 +6935,6 @@
       }
     },
     {
-      "id": "water-509633276",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.104287,
-      "lng": 36.566208,
-      "label": "GüZelce Dam",
-      "osmId": 509633276,
-      "stress": {
-        "bws_raw": 0.0272296455144673,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.71,
-        "gtd_score": 1.07,
-        "sev_score": 0.82,
-        "iav_score": 1.13,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-513391452",
       "type": "water",
       "facilityType": "reservoir",
@@ -9565,46 +6962,6 @@
         "distanceKm": 105,
         "population": 3400000
       }
-    },
-    {
-      "id": "water-5148049",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 38.825722,
-      "lng": 34.720785,
-      "label": "Ayhan Baraj GöLü",
-      "osmId": 5148049,
-      "stress": {
-        "bws_raw": 0.1006434195840302,
-        "bws_score": 1.01,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.73,
-        "gtd_score": -1,
-        "sev_score": 1.83,
-        "iav_score": 1.59,
-        "compositeHealth": 0.8933084573650918
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-518610841",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.405967,
-      "lng": 34.586476,
-      "label": "LaloğLu Barajı",
-      "osmId": 518610841,
-      "stress": {
-        "bws_raw": 0.478836684084983,
-        "bws_score": 3.26,
-        "bws_label": "High",
-        "drr_score": 2.65,
-        "gtd_score": 1.07,
-        "sev_score": 1.36,
-        "iav_score": 1.42,
-        "compositeHealth": 0.5899152481501051
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-520299669",
@@ -9645,46 +7002,6 @@
         "compositeHealth": 0.8508818954473059
       },
       "notabilityScore": 75
-    },
-    {
-      "id": "water-538289099",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.185009,
-      "lng": 35.396862,
-      "label": "AğCaşAr Barajı",
-      "osmId": 538289099,
-      "stress": {
-        "bws_raw": 0.7564062950112999,
-        "bws_score": 3.92,
-        "bws_label": "High",
-        "drr_score": 2.99,
-        "gtd_score": -1,
-        "sev_score": 1.64,
-        "iav_score": 1.46,
-        "compositeHealth": 0.46475800154489
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-538292879",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.24325,
-      "lng": 35.646321,
-      "label": "GüMüşöRen Dam",
-      "osmId": 538292879,
-      "stress": {
-        "bws_raw": 0.4135600390657485,
-        "bws_score": 3.05,
-        "bws_label": "High",
-        "drr_score": 3.08,
-        "gtd_score": -1,
-        "sev_score": 1.86,
-        "iav_score": 1.65,
-        "compositeHealth": 0.6244997998398398
-      },
-      "notabilityScore": 35
     },
     {
       "id": "water-544588565",
@@ -9787,26 +7104,6 @@
       }
     },
     {
-      "id": "water-556342045",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.69194,
-      "lng": 35.858415,
-      "label": "Ziyaret Barajı",
-      "osmId": 556342045,
-      "stress": {
-        "bws_raw": 0.1293926143441177,
-        "bws_score": 1.37,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.83,
-        "gtd_score": 1.07,
-        "sev_score": 1.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.8520563361656317
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-558265596",
       "type": "water",
       "facilityType": "dam",
@@ -9847,26 +7144,6 @@
       "notabilityScore": 70
     },
     {
-      "id": "water-575201630",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.723661,
-      "lng": 36.693829,
-      "label": "YıLdıZeli ÇAğLayan Barajı",
-      "osmId": 575201630,
-      "stress": {
-        "bws_raw": 0.1835010183836,
-        "bws_score": 1.88,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.39,
-        "gtd_score": -1,
-        "sev_score": 1.7,
-        "iav_score": 1.64,
-        "compositeHealth": 0.7899367063252599
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-575626550",
       "type": "water",
       "facilityType": "dam",
@@ -9892,7 +7169,7 @@
       "facilityType": "dam",
       "lat": 24.016706,
       "lng": 39.05086,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 584944297,
       "stress": {
         "bws_raw": 1,
@@ -9917,7 +7194,7 @@
       "facilityType": "dam",
       "lat": 25.164224,
       "lng": 40.329778,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 587125240,
       "stress": {
         "bws_raw": 1,
@@ -9942,7 +7219,7 @@
       "facilityType": "dam",
       "lat": 25.917725,
       "lng": 40.759667,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 587350922,
       "stress": {
         "bws_raw": 1,
@@ -10136,26 +7413,6 @@
       "notabilityScore": 70
     },
     {
-      "id": "water-62084076",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.5536,
-      "lng": 34.922197,
-      "label": "Damsa Barajı",
-      "osmId": 62084076,
-      "stress": {
-        "bws_raw": 0.0332408056416507,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.27,
-        "gtd_score": -1,
-        "sev_score": 1.11,
-        "iav_score": 1.65,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-621714390",
       "type": "water",
       "facilityType": "dam",
@@ -10210,7 +7467,7 @@
       "facilityType": "dam",
       "lat": 25.493156,
       "lng": 42.809784,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 622107576,
       "stress": {
         "bws_raw": -1,
@@ -10327,35 +7584,6 @@
       }
     },
     {
-      "id": "water-642217396",
-      "type": "water",
-      "facilityType": "reservoir",
-      "lat": 32.652713,
-      "lng": 35.542789,
-      "label": "Reservoir",
-      "osmId": 642217396,
-      "stress": {
-        "bws_raw": 1.6847678633686702,
-        "bws_score": 5,
-        "bws_label": "Extremely High",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 2.17,
-        "iav_score": 1.63,
-        "compositeHealth": 0
-      },
-      "notabilityScore": 55,
-      "nearestCity": {
-        "name": "Haifa",
-        "distanceKm": 54,
-        "population": 300000
-      },
-      "linkedRiver": {
-        "name": "Jordan",
-        "distanceKm": 8
-      }
-    },
-    {
       "id": "water-646486900",
       "type": "water",
       "facilityType": "dam",
@@ -10449,7 +7677,7 @@
       "facilityType": "dam",
       "lat": 32.592412,
       "lng": 48.278745,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 665174817,
       "stress": {
         "bws_raw": 1,
@@ -10469,7 +7697,7 @@
       "facilityType": "dam",
       "lat": 27.172811,
       "lng": 57.527055,
-      "label": "Dam near دهستان نورآباد",
+      "label": "Dam",
       "osmId": 665553306,
       "stress": {
         "bws_raw": 1,
@@ -10482,26 +7710,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-668316241",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.318214,
-      "lng": 35.028925,
-      "label": "AkköY Barajı",
-      "osmId": 668316241,
-      "stress": {
-        "bws_raw": 0.0228896328144414,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.29,
-        "gtd_score": -1,
-        "sev_score": 2,
-        "iav_score": 1.66,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-671199520",
@@ -10527,26 +7735,6 @@
         "distanceKm": 63,
         "population": 2200000
       }
-    },
-    {
-      "id": "water-675967263",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.93738,
-      "lng": 36.646278,
-      "label": "Hasan UğUrlu Dam",
-      "osmId": 675967263,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-68405184",
@@ -10576,66 +7764,6 @@
         "name": "Jordan",
         "distanceKm": 18
       }
-    },
-    {
-      "id": "water-685073021",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.336194,
-      "lng": 38.209631,
-      "label": "Beylerderesi Barajı",
-      "osmId": 685073021,
-      "stress": {
-        "bws_raw": 0.0436784305908991,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.72,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.34,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-687325559",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.013071,
-      "lng": 37.113938,
-      "label": "Kandil Barajı",
-      "osmId": 687325559,
-      "stress": {
-        "bws_raw": 0.478836684084983,
-        "bws_score": 3.26,
-        "bws_label": "High",
-        "drr_score": 2.65,
-        "gtd_score": 1.07,
-        "sev_score": 1.36,
-        "iav_score": 1.42,
-        "compositeHealth": 0.5899152481501051
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-687800305",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.448296,
-      "lng": 38.523771,
-      "label": "BağışTaş 1 Barajı",
-      "osmId": 687800305,
-      "stress": {
-        "bws_raw": 0.0295425408723065,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.18,
-        "gtd_score": 1.07,
-        "sev_score": 1.09,
-        "iav_score": 1.71,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-692019969",
@@ -10735,31 +7863,6 @@
         "name": "Beirut",
         "distanceKm": 46,
         "population": 2400000
-      }
-    },
-    {
-      "id": "water-705149213",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 30.989885,
-      "lng": 34.891427,
-      "label": "Dam",
-      "osmId": 705149213,
-      "stress": {
-        "bws_raw": 0.0042844076252592,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": -1,
-        "gtd_score": 1.41,
-        "sev_score": 3.01,
-        "iav_score": 2.89,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 55,
-      "nearestCity": {
-        "name": "Gaza City",
-        "distanceKm": 70,
-        "population": 600000
       }
     },
     {
@@ -10878,31 +7981,6 @@
       "notabilityScore": 60
     },
     {
-      "id": "water-722502345",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.492632,
-      "lng": 37.622348,
-      "label": "ArdıL Dam",
-      "osmId": 722502345,
-      "stress": {
-        "bws_raw": 0.2926815864933456,
-        "bws_score": 2.55,
-        "bws_label": "Medium-High",
-        "drr_score": 2.8,
-        "gtd_score": -1,
-        "sev_score": 1.14,
-        "iav_score": 1.26,
-        "compositeHealth": 0.7
-      },
-      "notabilityScore": 35,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 150,
-        "population": 2100000
-      }
-    },
-    {
       "id": "water-724728899",
       "type": "water",
       "facilityType": "dam",
@@ -10921,46 +7999,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 70
-    },
-    {
-      "id": "water-733941131",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.4597,
-      "lng": 36.02963,
-      "label": "19 MayıS Barajı",
-      "osmId": 733941131,
-      "stress": {
-        "bws_raw": 0.1635291354950104,
-        "bws_score": 1.71,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.92,
-        "gtd_score": -1,
-        "sev_score": 0.9,
-        "iav_score": 1.72,
-        "compositeHealth": 0.8111719916269299
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-737851722",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.937748,
-      "lng": 34.937929,
-      "label": "SarıMbey Barajı",
-      "osmId": 737851722,
-      "stress": {
-        "bws_raw": 0.0436784305908991,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.72,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.34,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-73909637",
@@ -11096,7 +8134,7 @@
       "facilityType": "dam",
       "lat": 32.657704,
       "lng": 48.243611,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 753701400,
       "stress": {
         "bws_raw": 1,
@@ -11116,7 +8154,7 @@
       "facilityType": "dam",
       "lat": 32.59595,
       "lng": 48.279608,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 754257321,
       "stress": {
         "bws_raw": 1,
@@ -11136,7 +8174,7 @@
       "facilityType": "dam",
       "lat": 32.673164,
       "lng": 48.239837,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 754267651,
       "stress": {
         "bws_raw": 1,
@@ -11156,7 +8194,7 @@
       "facilityType": "dam",
       "lat": 32.672105,
       "lng": 48.2505,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 754824710,
       "stress": {
         "bws_raw": 1,
@@ -11176,7 +8214,7 @@
       "facilityType": "dam",
       "lat": 32.661339,
       "lng": 48.250145,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 755423949,
       "stress": {
         "bws_raw": 1,
@@ -11191,37 +8229,12 @@
       "notabilityScore": 30
     },
     {
-      "id": "water-755705826",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.084689,
-      "lng": 39.895247,
-      "label": "Pembelik Dam",
-      "osmId": 755705826,
-      "stress": {
-        "bws_raw": 1.2845996410718037,
-        "bws_score": 4.68,
-        "bws_label": "Extremely High",
-        "drr_score": 3.22,
-        "gtd_score": 1.07,
-        "sev_score": 0.82,
-        "iav_score": 1.45,
-        "compositeHealth": 0.25298221281347044
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 133,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-756825439",
       "type": "water",
       "facilityType": "dam",
       "lat": 32.665208,
       "lng": 48.242463,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 756825439,
       "stress": {
         "bws_raw": 1,
@@ -11241,7 +8254,7 @@
       "facilityType": "dam",
       "lat": 32.672931,
       "lng": 48.236258,
-      "label": "Dam near دهستان حسینیه",
+      "label": "Dam",
       "osmId": 756825574,
       "stress": {
         "bws_raw": 1,
@@ -11355,7 +8368,7 @@
       "facilityType": "dam",
       "lat": 25.697595,
       "lng": 45.435376,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 774537881,
       "stress": {
         "bws_raw": 1,
@@ -11375,7 +8388,7 @@
       "facilityType": "dam",
       "lat": 23.991355,
       "lng": 43.332604,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 774539937,
       "stress": {
         "bws_raw": 1,
@@ -11390,12 +8403,32 @@
       "notabilityScore": 30
     },
     {
+      "id": "water-774540970",
+      "type": "water",
+      "facilityType": "dam",
+      "lat": 24.157707,
+      "lng": 43.449863,
+      "label": "Dam",
+      "osmId": 774540970,
+      "stress": {
+        "bws_raw": -1,
+        "bws_score": 5,
+        "bws_label": "Extremely High",
+        "drr_score": -1,
+        "gtd_score": -1,
+        "sev_score": 1.72,
+        "iav_score": 5,
+        "compositeHealth": 0
+      },
+      "notabilityScore": 25
+    },
+    {
       "id": "water-775471653",
       "type": "water",
       "facilityType": "dam",
       "lat": 23.832494,
       "lng": 45.203042,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 775471653,
       "stress": {
         "bws_raw": 1,
@@ -11408,32 +8441,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-781589693",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.751,
-      "lng": 40.136522,
-      "label": "Beyhan I Dam",
-      "operator": "Cengiz Enerji & ÖZaltıN Enerji",
-      "osmId": 781589693,
-      "stress": {
-        "bws_raw": 0.3608351919773527,
-        "bws_score": 2.85,
-        "bws_label": "Medium-High",
-        "drr_score": 3.32,
-        "gtd_score": 1.07,
-        "sev_score": 1.13,
-        "iav_score": 1.14,
-        "compositeHealth": 0.6557438524302001
-      },
-      "notabilityScore": 85,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 93,
-        "population": 1100000
-      }
     },
     {
       "id": "water-781647455",
@@ -11485,26 +8492,6 @@
       }
     },
     {
-      "id": "water-782593973",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 41.339321,
-      "lng": 35.001949,
-      "label": "Boyabat Barajı",
-      "osmId": 782593973,
-      "stress": {
-        "bws_raw": 0.8824322977070526,
-        "bws_score": 4.14,
-        "bws_label": "Extremely High",
-        "drr_score": 3.53,
-        "gtd_score": -1,
-        "sev_score": 1.32,
-        "iav_score": 1.46,
-        "compositeHealth": 0.41472882706655445
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-782602055",
       "type": "water",
       "facilityType": "dam",
@@ -11553,46 +8540,6 @@
       }
     },
     {
-      "id": "water-782630144",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.562013,
-      "lng": 35.528768,
-      "label": "KavşAk Bendi Dam",
-      "osmId": 782630144,
-      "stress": {
-        "bws_raw": 0.7564062950112999,
-        "bws_score": 3.92,
-        "bws_label": "High",
-        "drr_score": 2.99,
-        "gtd_score": -1,
-        "sev_score": 1.64,
-        "iav_score": 1.46,
-        "compositeHealth": 0.46475800154489
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-783404434",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.659884,
-      "lng": 36.702146,
-      "label": "TepekışLa Barajı",
-      "osmId": 783404434,
-      "stress": {
-        "bws_raw": 0.0511049530347245,
-        "bws_score": 0.03,
-        "bws_label": "Low",
-        "drr_score": 2.03,
-        "gtd_score": 1.07,
-        "sev_score": 2.01,
-        "iav_score": 1.66,
-        "compositeHealth": 0.9969954864491614
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-783723049",
       "type": "water",
       "facilityType": "dam",
@@ -11619,26 +8566,6 @@
         "distanceKm": 110,
         "population": 1100000
       }
-    },
-    {
-      "id": "water-784887093",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.581108,
-      "lng": 36.147364,
-      "label": "AydıNca Barajı",
-      "osmId": 784887093,
-      "stress": {
-        "bws_raw": 0.0770690457338054,
-        "bws_score": 0.62,
-        "bws_label": "Low",
-        "drr_score": 2.77,
-        "gtd_score": 1.07,
-        "sev_score": 2.13,
-        "iav_score": 1.71,
-        "compositeHealth": 0.9359487165438072
-      },
-      "notabilityScore": 30
     },
     {
       "id": "water-786929214",
@@ -11694,31 +8621,6 @@
       }
     },
     {
-      "id": "water-787273627",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.672257,
-      "lng": 39.961381,
-      "label": "Hamzabey Barajı",
-      "osmId": 787273627,
-      "stress": {
-        "bws_raw": 0.5350844275391349,
-        "bws_score": 3.42,
-        "bws_label": "High",
-        "drr_score": 3.21,
-        "gtd_score": 1.07,
-        "sev_score": 1.3,
-        "iav_score": 1.27,
-        "compositeHealth": 0.5621387729022079
-      },
-      "notabilityScore": 30,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 87,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-788280035",
       "type": "water",
       "facilityType": "dam",
@@ -11748,7 +8650,7 @@
       "facilityType": "dam",
       "lat": 25.609166,
       "lng": 45.510179,
-      "label": "Dam near Saudi Arabia",
+      "label": "Dam",
       "osmId": 789804752,
       "stress": {
         "bws_raw": -1,
@@ -11999,106 +8901,6 @@
       "notabilityScore": 70
     },
     {
-      "id": "water-81864707",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.044858,
-      "lng": 38.622552,
-      "label": "GöLova Barajı",
-      "osmId": 81864707,
-      "stress": {
-        "bws_raw": 0.0025500489329161,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.57,
-        "gtd_score": -1,
-        "sev_score": 0.75,
-        "iav_score": 1.15,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
-      "id": "water-82082866",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.298553,
-      "lng": 35.049098,
-      "label": "Nergizlik Barajı",
-      "osmId": 82082866,
-      "stress": {
-        "bws_raw": 0.1517067630655694,
-        "bws_score": 1.6,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 0.67,
-        "iav_score": 1.54,
-        "compositeHealth": 0.824621125123532
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-82086495",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.197792,
-      "lng": 35.280582,
-      "label": "ÇAtalan Dam",
-      "osmId": 82086495,
-      "stress": {
-        "bws_raw": 0.0328993707238694,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.35,
-        "gtd_score": 1.07,
-        "sev_score": 1.23,
-        "iav_score": 1.13,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-82090543",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.401855,
-      "lng": 34.131711,
-      "label": "Mamasun Barajı",
-      "osmId": 82090543,
-      "stress": {
-        "bws_raw": 0.4135600390657485,
-        "bws_score": 3.05,
-        "bws_label": "High",
-        "drr_score": 3.08,
-        "gtd_score": -1,
-        "sev_score": 1.86,
-        "iav_score": 1.65,
-        "compositeHealth": 0.6244997998398398
-      },
-      "notabilityScore": 70
-    },
-    {
-      "id": "water-82118148",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.319031,
-      "lng": 38.051711,
-      "label": "Sultansuyu Barajı",
-      "osmId": 82118148,
-      "stress": {
-        "bws_raw": 0.6053565524423132,
-        "bws_score": 3.6,
-        "bws_label": "High",
-        "drr_score": 2.85,
-        "gtd_score": -1,
-        "sev_score": 2.1,
-        "iav_score": 1.88,
-        "compositeHealth": 0.5291502622129182
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-822827920",
       "type": "water",
       "facilityType": "dam",
@@ -12212,26 +9014,6 @@
       "notabilityScore": 30
     },
     {
-      "id": "water-83075240",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.445948,
-      "lng": 34.156742,
-      "label": "Ivriz Dam",
-      "osmId": 83075240,
-      "stress": {
-        "bws_raw": 1.1572375964715516,
-        "bws_score": 4.53,
-        "bws_label": "Extremely High",
-        "drr_score": 2.94,
-        "gtd_score": 1.07,
-        "sev_score": 1.55,
-        "iav_score": 1.54,
-        "compositeHealth": 0.3065941943351178
-      },
-      "notabilityScore": 75
-    },
-    {
       "id": "water-8344701",
       "type": "water",
       "facilityType": "dam",
@@ -12275,26 +9057,6 @@
         "distanceKm": 36,
         "population": 1000000
       }
-    },
-    {
-      "id": "water-841326420",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.962999,
-      "lng": 38.314913,
-      "label": "KoçAli Dam",
-      "osmId": 841326420,
-      "stress": {
-        "bws_raw": 0.0228896328144414,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 2.29,
-        "gtd_score": -1,
-        "sev_score": 2,
-        "iav_score": 1.66,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 35
     },
     {
       "id": "water-849385356",
@@ -12875,26 +9637,6 @@
       "notabilityScore": 30
     },
     {
-      "id": "water-90146156",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.108122,
-      "lng": 34.838544,
-      "label": "Alaca Barajı",
-      "osmId": 90146156,
-      "stress": {
-        "bws_raw": 0.4565542659581401,
-        "bws_score": 3.19,
-        "bws_label": "High",
-        "drr_score": 2.64,
-        "gtd_score": 1.07,
-        "sev_score": 0.97,
-        "iav_score": 1.41,
-        "compositeHealth": 0.6016643582596529
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-903011992",
       "type": "water",
       "facilityType": "dam",
@@ -12920,26 +9662,6 @@
       }
     },
     {
-      "id": "water-90345283",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.371611,
-      "lng": 34.801922,
-      "label": "Hatap Barajı",
-      "osmId": 90345283,
-      "stress": {
-        "bws_raw": 0.0736395365163714,
-        "bws_score": 0.56,
-        "bws_label": "Low",
-        "drr_score": 2.94,
-        "gtd_score": 1.07,
-        "sev_score": 1.24,
-        "iav_score": 1.51,
-        "compositeHealth": 0.9423375191511797
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-903463171",
       "type": "water",
       "facilityType": "dam",
@@ -12961,26 +9683,6 @@
       "capacity": {
         "height": 16
       }
-    },
-    {
-      "id": "water-90506446",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.77067,
-      "lng": 34.789389,
-      "label": "Obruk Barajı",
-      "osmId": 90506446,
-      "stress": {
-        "bws_raw": 0.1517067630655694,
-        "bws_score": 1.6,
-        "bws_label": "Low-Medium",
-        "drr_score": 3.39,
-        "gtd_score": -1,
-        "sev_score": 0.67,
-        "iav_score": 1.54,
-        "compositeHealth": 0.824621125123532
-      },
-      "notabilityScore": 70
     },
     {
       "id": "water-905544122",
@@ -13113,26 +9815,6 @@
       "notabilityScore": 30
     },
     {
-      "id": "water-90875575",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.297785,
-      "lng": 36.415358,
-      "label": "YapıAltıN Barajı",
-      "osmId": 90875575,
-      "stress": {
-        "bws_raw": 0.6822075292917827,
-        "bws_score": 3.77,
-        "bws_label": "High",
-        "drr_score": 2.46,
-        "gtd_score": -1,
-        "sev_score": 1.11,
-        "iav_score": 1.94,
-        "compositeHealth": 0.49598387070548977
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-910733174",
       "type": "water",
       "facilityType": "reservoir",
@@ -13174,51 +9856,6 @@
       "capacity": {
         "height": 67
       }
-    },
-    {
-      "id": "water-91252425",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.272117,
-      "lng": 36.27137,
-      "label": "Aslantaş Dam",
-      "osmId": 91252425,
-      "stress": {
-        "bws_raw": 0.6549357423857614,
-        "bws_score": 3.71,
-        "bws_label": "High",
-        "drr_score": 3.3,
-        "gtd_score": 1.07,
-        "sev_score": 1.12,
-        "iav_score": 1.01,
-        "compositeHealth": 0.5079370039680118
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Aleppo",
-        "distanceKm": 142,
-        "population": 2100000
-      }
-    },
-    {
-      "id": "water-91374281",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.626191,
-      "lng": 36.802353,
-      "label": "KıLavuzlu Dam",
-      "osmId": 91374281,
-      "stress": {
-        "bws_raw": 0.0931344284922832,
-        "bws_score": 0.9,
-        "bws_label": "Low",
-        "drr_score": 3.13,
-        "gtd_score": -1,
-        "sev_score": 1.15,
-        "iav_score": 1.29,
-        "compositeHealth": 0.9055385138137417
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-91847872",
@@ -13398,31 +10035,6 @@
       }
     },
     {
-      "id": "water-92996880",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.022265,
-      "lng": 39.891099,
-      "label": "Seyrantepe Dam",
-      "osmId": 92996880,
-      "stress": {
-        "bws_raw": 0.2900491447368006,
-        "bws_score": 2.54,
-        "bws_label": "Medium-High",
-        "drr_score": 3,
-        "gtd_score": -1,
-        "sev_score": 0.94,
-        "iav_score": 1.6,
-        "compositeHealth": 0.7014271166700072
-      },
-      "notabilityScore": 75,
-      "nearestCity": {
-        "name": "Diyarbakir",
-        "distanceKm": 127,
-        "population": 1100000
-      }
-    },
-    {
       "id": "water-93292618",
       "type": "water",
       "facilityType": "dam",
@@ -13445,49 +10057,6 @@
         "name": "Diyarbakir",
         "distanceKm": 32,
         "population": 1100000
-      }
-    },
-    {
-      "id": "water-9346572",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.407644,
-      "lng": 36.902122,
-      "label": "Almus Dam",
-      "osmId": 9346572,
-      "stress": {
-        "bws_raw": 0.5766776517043395,
-        "bws_score": 3.53,
-        "bws_label": "High",
-        "drr_score": 2.87,
-        "gtd_score": 1.07,
-        "sev_score": 1.39,
-        "iav_score": 1.71,
-        "compositeHealth": 0.5422176684690384
-      },
-      "notabilityScore": 75
-    },
-    {
-      "id": "water-958249809",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.759993,
-      "lng": 37.289813,
-      "label": "DSİ ÇAğLayancerit",
-      "osmId": 958249809,
-      "stress": {
-        "bws_raw": 0.5766776517043395,
-        "bws_score": 3.53,
-        "bws_label": "High",
-        "drr_score": 2.87,
-        "gtd_score": 1.07,
-        "sev_score": 1.39,
-        "iav_score": 1.71,
-        "compositeHealth": 0.5422176684690384
-      },
-      "notabilityScore": 40,
-      "capacity": {
-        "height": 1161
       }
     },
     {
@@ -13851,26 +10420,6 @@
       }
     },
     {
-      "id": "water-971344664",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 38.510735,
-      "lng": 38.063025,
-      "label": "Medik Barajı",
-      "osmId": 971344664,
-      "stress": {
-        "bws_raw": 0.3535648184258919,
-        "bws_score": 2.82,
-        "bws_label": "Medium-High",
-        "drr_score": 2.59,
-        "gtd_score": 1.07,
-        "sev_score": 1.69,
-        "iav_score": 1.59,
-        "compositeHealth": 0.6603029607687672
-      },
-      "notabilityScore": 70
-    },
-    {
       "id": "water-974337425",
       "type": "water",
       "facilityType": "dam",
@@ -13916,26 +10465,6 @@
       }
     },
     {
-      "id": "water-979666829",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 39.438946,
-      "lng": 35.144349,
-      "label": "Dam",
-      "osmId": 979666829,
-      "stress": {
-        "bws_raw": 0.1006434195840302,
-        "bws_score": 1.01,
-        "bws_label": "Low-Medium",
-        "drr_score": 2.73,
-        "gtd_score": -1,
-        "sev_score": 1.83,
-        "iav_score": 1.59,
-        "compositeHealth": 0.8933084573650918
-      },
-      "notabilityScore": 55
-    },
-    {
       "id": "water-979776888",
       "type": "water",
       "facilityType": "dam",
@@ -13954,26 +10483,6 @@
         "compositeHealth": 0
       },
       "notabilityScore": 30
-    },
-    {
-      "id": "water-983632484",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 40.020814,
-      "lng": 34.909208,
-      "label": "Sincan Dam",
-      "osmId": 983632484,
-      "stress": {
-        "bws_raw": 0.2926815864933456,
-        "bws_score": 2.55,
-        "bws_label": "Medium-High",
-        "drr_score": 2.8,
-        "gtd_score": -1,
-        "sev_score": 1.14,
-        "iav_score": 1.26,
-        "compositeHealth": 0.7
-      },
-      "notabilityScore": 75
     },
     {
       "id": "water-988867507",
@@ -14054,26 +10563,6 @@
       }
     },
     {
-      "id": "water-99191456",
-      "type": "water",
-      "facilityType": "dam",
-      "lat": 37.73933,
-      "lng": 34.791569,
-      "label": "Postallı Barajı",
-      "osmId": 99191456,
-      "stress": {
-        "bws_raw": 0.0131709105962478,
-        "bws_score": 0,
-        "bws_label": "Low",
-        "drr_score": 3.32,
-        "gtd_score": 1.07,
-        "sev_score": 1.21,
-        "iav_score": 1.68,
-        "compositeHealth": 1
-      },
-      "notabilityScore": 30
-    },
-    {
       "id": "water-997210758",
       "type": "water",
       "facilityType": "dam",
@@ -14125,19 +10614,20 @@
   ],
   "stats": {
     "rawCounts": {
-      "dams": 8699,
-      "reservoirs": 15355,
+      "dams": 8700,
+      "reservoirs": 15356,
       "desalination": 63
     },
     "filteredCounts": {
-      "dams": 515,
-      "reservoirs": 73,
+      "dams": 365,
+      "reservoirs": 57,
       "desalination": 15
     },
     "rejections": {
       "excluded_location": 2423,
-      "not_notable": 2166,
-      "no_name": 18925,
+      "excluded_turkey": 1662,
+      "not_notable": 1828,
+      "no_name": 17769,
       "duplicate": 1,
       "low_score": 0,
       "no_city": 0
@@ -14145,22 +10635,25 @@
     "byTypeRejections": {
       "dams": {
         "excluded_location": 1146,
-        "not_notable": 1103,
-        "no_name": 5935,
+        "excluded_turkey": 822,
+        "not_notable": 1033,
+        "no_name": 5334,
         "duplicate": 0,
         "low_score": 0,
         "no_city": 0
       },
       "reservoirs": {
         "excluded_location": 1277,
-        "not_notable": 1063,
-        "no_name": 12942,
+        "excluded_turkey": 840,
+        "not_notable": 795,
+        "no_name": 12387,
         "duplicate": 0,
         "low_score": 0,
         "no_city": 0
       },
       "desalination": {
         "excluded_location": 0,
+        "excluded_turkey": 0,
         "not_notable": 0,
         "no_name": 48,
         "duplicate": 0,
@@ -14170,7 +10663,7 @@
     },
     "byCountry": {
       "Israel": {
-        "dam": 3,
+        "dam": 2,
         "reservoir": 8
       },
       "Iran": {
@@ -14194,10 +10687,6 @@
         "dam": 4,
         "reservoir": 1
       },
-      "Turkey": {
-        "dam": 151,
-        "reservoir": 14
-      },
       "Cyprus": {
         "dam": 8,
         "desalination": 4
@@ -14212,7 +10701,7 @@
       },
       "Lebanon": {
         "dam": 7,
-        "reservoir": 13
+        "reservoir": 12
       },
       "Yemen": {
         "dam": 1
@@ -14229,7 +10718,7 @@
         "desalination": 1
       },
       "Saudi Arabia": {
-        "dam": 67,
+        "dam": 68,
         "desalination": 1
       },
       "Georgia": {
@@ -14266,7 +10755,7 @@
         "facilityType": "dams",
         "mirror": "primary",
         "status": 200,
-        "durationMs": 10666,
+        "durationMs": 9838,
         "attempts": 1,
         "ok": true
       },
@@ -14274,54 +10763,46 @@
         "facilityType": "reservoirs",
         "mirror": "primary",
         "status": 200,
-        "durationMs": 29171,
+        "durationMs": 28514,
         "attempts": 1,
         "ok": true
       },
       {
         "facilityType": "desalination",
         "mirror": "primary",
-        "status": 429,
-        "durationMs": 8336,
-        "attempts": 1,
-        "ok": false
-      },
-      {
-        "facilityType": "desalination",
-        "mirror": "fallback",
         "status": 200,
-        "durationMs": 1557,
-        "attempts": 2,
+        "durationMs": 472,
+        "attempts": 1,
         "ok": true
       }
     ],
     "source": "snapshot",
-    "generatedAt": "2026-04-19T07:47:27.465Z",
+    "generatedAt": "2026-04-19T22:33:22.751Z",
     "enrichment": {
-      "withCapacity": 123,
-      "withCity": 304,
-      "withRiver": 28
+      "withCapacity": 111,
+      "withCity": 275,
+      "withRiver": 27
     },
     "scoreHistogram": [
       {
         "bucket": "25-39",
-        "count": 154
+        "count": 126
       },
       {
         "bucket": "40-54",
-        "count": 85
+        "count": 80
       },
       {
         "bucket": "55-69",
-        "count": 30
+        "count": 27
       },
       {
         "bucket": "70-84",
-        "count": 304
+        "count": 181
       },
       {
         "bucket": "85-100",
-        "count": 24
+        "count": 17
       }
     ]
   }
