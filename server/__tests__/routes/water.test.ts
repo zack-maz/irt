@@ -525,7 +525,9 @@ describe('Water Routes (/api/water)', () => {
     });
 
     it('cache-hit response overrides generatedAt to cache lastFresh ISO', async () => {
-      const lastFreshMs = 1_700_000_000_000;
+      // Use a fresh lastFresh so the cache entry is NOT stale; the route's
+      // cache-hit branch is what we're testing.
+      const lastFreshMs = Date.now() - 1000;
       redisStore.set('water:facilities:v2', {
         data: { facilities: [sampleFacility], filterStats: populatedStats },
         fetchedAt: lastFreshMs,

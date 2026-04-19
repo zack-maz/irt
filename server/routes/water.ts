@@ -13,7 +13,7 @@ import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'water' });
-import { fetchWaterFacilities } from '../adapters/overpass-water.js';
+import { fetchWaterFacilities, type WaterFilterStats } from '../adapters/overpass-water.js';
 import { saveDevWaterCache, loadDevWaterCache } from '../cache/devFileCache.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
 import { loadWaterSnapshot } from '../lib/waterSnapshot.js';
@@ -30,58 +30,50 @@ import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
 
 /**
+ * Phase 27.3.1 Plan 11 G3 — Redis envelope shape.
+ *
+ * Pre-Plan-11: FACILITIES_KEY stored a bare WaterFacility[] and the
+ * filterStats envelope was lost on cache writeback. Every cache-hit response
+ * then synthesized zero-tally stats via buildEmptyFilterStats — DevApiStatus
+ * rendered all-zeros for byCountry / byTypeRejections / Overpass health
+ * ~10s after cold-start (as soon as Redis warmed from the snapshot).
+ *
+ * Post-Plan-11 the Redis value carries BOTH the facilities and the
+ * filterStats so R-08 observability survives the Redis round trip. The
+ * cache-hit response spreads `cached.data.filterStats` and overwrites
+ * `source: 'redis'` + `generatedAt: ISO(lastFresh)` — the underlying tallies
+ * round-trip unchanged; only the provenance header reports the serve tier.
+ *
+ * Rollout: FACILITIES_KEY bumped from 'water:facilities' to
+ * 'water:facilities:v2' to force a cold-fill on deploy. The old key becomes
+ * orphaned and expires via its 72h hard Redis TTL. No runtime shape-guard
+ * code required — the bump guarantees pre-bump payloads are never read by
+ * post-bump code.
+ */
+type WaterCachePayload = {
+  facilities: WaterFacility[];
+  filterStats: WaterFilterStats;
+};
+
+/**
  * Phase 27.3.1 R-08 D-30 — minimal filterStats stub for response paths that
- * don't have a fresh fetchWaterFacilities() result to attach (cached hits,
- * dev file cache fallback, error-with-cache fallback, error-without-cache).
+ * don't have a fresh fetchWaterFacilities() result to attach (error-without-
+ * cache fallback, dev file cache fallback when dev cache lacks stats).
  *
  * Schema requires every R-08 field to be present once filterStats is set
  * (waterFilterStatsSchema is .strict()), so all five tally surfaces are
  * zero-initialized here. Provenance fields (source, generatedAt) carry the
  * real value.
+ *
+ * Plan 11 note: this helper is NO LONGER invoked on Redis cache-hit branches
+ * — those now spread the cached envelope's filterStats instead. It's
+ * retained for the error-without-cache path and the dev-file-cache
+ * fallback where no real stats are available.
  */
 function buildEmptyFilterStats(
   source: 'snapshot' | 'redis' | 'overpass',
   generatedAt: string,
-): {
-  rawCounts: Record<string, number>;
-  filteredCounts: Record<string, number>;
-  rejections: {
-    excluded_location: number;
-    /** Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket. */
-    excluded_turkey: number;
-    not_notable: number;
-    no_name: number;
-    duplicate: number;
-    low_score: number;
-    no_city: number;
-  };
-  byTypeRejections: Record<
-    string,
-    {
-      excluded_location: number;
-      /** Phase 27.3.1 Plan 10 (G2) — per-type Turkey country-exclusion bucket. */
-      excluded_turkey: number;
-      not_notable: number;
-      no_name: number;
-      duplicate: number;
-      low_score: number;
-      no_city: number;
-    }
-  >;
-  byCountry: Record<string, Record<string, number>>;
-  overpass: {
-    facilityType: string;
-    mirror: string;
-    status: number;
-    durationMs: number;
-    attempts: number;
-    ok: boolean;
-  }[];
-  source: 'snapshot' | 'redis' | 'overpass';
-  generatedAt: string;
-  enrichment: { withCapacity: number; withCity: number; withRiver: number };
-  scoreHistogram: { bucket: string; count: number }[];
-} {
+): WaterFilterStats {
   return {
     rawCounts: {},
     filteredCounts: {},
@@ -112,8 +104,13 @@ const waterQuerySchema = z.object({
     .transform((v) => v === 'true'),
 });
 
-/** Redis key for cached water facilities */
-const FACILITIES_KEY = 'water:facilities';
+/**
+ * Phase 27.3.1 Plan 11 G3 — Redis key bumped from 'water:facilities' to
+ * 'water:facilities:v2' so post-deploy reads cold-miss and write the new
+ * envelope shape from scratch. The old key orphans and expires naturally
+ * under its 72h hard Redis TTL.
+ */
+const FACILITIES_KEY = 'water:facilities:v2';
 
 /** Redis key for cached precipitation data */
 const PRECIP_KEY = 'water:precip';
@@ -153,21 +150,28 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   const isCron = req.headers['user-agent']?.includes('vercel-cron');
   const { refresh } = res.locals.validatedQuery as z.infer<typeof waterQuerySchema>;
   const forceRefresh = refresh && (isCron || process.env.NODE_ENV !== 'production');
-  const cached = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
+  const cached = await cacheGetSafe<WaterCachePayload>(FACILITIES_KEY, WATER_CACHE_TTL);
   log.info(
-    { cacheHit: !!cached, count: cached?.data.length, stale: cached?.stale },
+    { cacheHit: !!cached, count: cached?.data.facilities.length, stale: cached?.stale },
     'cache result',
   );
 
   if (cached && !cached.stale && !forceRefresh) {
-    // Phase 27.3.1 R-08 D-30 — attach a minimal filterStats stub with
-    // source='redis' and generatedAt derived from the cache entry's
-    // lastFresh, so the DevApiStatus provenance header always renders.
-    // Cached payloads don't carry the original byCountry/overpass tallies —
-    // those require a fresh fetch; tally fields stay empty here.
+    // Phase 27.3.1 Plan 11 G3 — spread the cached filterStats envelope and
+    // override provenance. The cached stats originally came from whichever
+    // tier warmed Redis (usually snapshot); the byCountry / byTypeRejections /
+    // overpass / rejections tallies round-trip unchanged. `source='redis'`
+    // reports the SERVE tier to DevApiStatus, not the origin tier.
+    const payload = cached.data;
     return sendValidated(res, waterResponseSchema, {
-      ...cached,
-      filterStats: buildEmptyFilterStats('redis', new Date(cached.lastFresh).toISOString()),
+      data: payload.facilities,
+      stale: cached.stale,
+      lastFresh: cached.lastFresh,
+      filterStats: {
+        ...payload.filterStats,
+        source: 'redis' as const,
+        generatedAt: new Date(cached.lastFresh).toISOString(),
+      },
     });
   }
 
@@ -178,10 +182,18 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   if (!forceRefresh) {
     const devCached = loadDevWaterCache<{ facilities: WaterFacility[]; stats: unknown }>();
     if (devCached) {
-      // Plan 10: labelUnnamedFacilities removed. Post-G1 hasName tightening
-      // no admitted facility has a generic "Dam"/"Reservoir" label that
-      // needs reverse-geocoding — the labeler was dead code.
-      await cacheSetSafe(FACILITIES_KEY, devCached.facilities, WATER_REDIS_TTL_SEC);
+      // Plan 11 G3: persist the envelope shape so a subsequent Redis hit
+      // carries real stats. The dev file cache stores `{facilities, stats}`;
+      // if `stats` is absent (pre-Plan-03 dev caches) fall back to an empty
+      // snapshot-sourced stub so the envelope shape is still well-formed.
+      const devFilterStats: WaterFilterStats =
+        (devCached.stats as WaterFilterStats | undefined) ??
+        buildEmptyFilterStats('snapshot', new Date().toISOString());
+      await cacheSetSafe(
+        FACILITIES_KEY,
+        { facilities: devCached.facilities, filterStats: devFilterStats },
+        WATER_REDIS_TTL_SEC,
+      );
       // Phase 27.3.1 R-04 D-13 — dev file cache shadows the snapshot; both
       // are the same tier semantically (cold-start floor). Report
       // source='snapshot' so DevApiStatus doesn't mislead the operator into
@@ -190,7 +202,11 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
         data: devCached.facilities,
         stale: false,
         lastFresh: Date.now(),
-        filterStats: buildEmptyFilterStats('snapshot', new Date().toISOString()),
+        filterStats: {
+          ...devFilterStats,
+          source: 'snapshot' as const,
+          generatedAt: new Date().toISOString(),
+        },
       });
     }
   }
@@ -208,10 +224,18 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   //   label needing reverse-geocoding. Client-side GENERIC_TYPE_RE
   //   in src/lib/waterLabel.ts handles the residual non-Latin-only
   //   display fallback.
+  //
+  //   Plan 11 G3: store the snapshot's `stats` alongside facilities so the
+  //   first cache-hit post-snapshot-warm has real byCountry / byTypeRejections /
+  //   overpass data instead of synthesized zeros.
   if (!forceRefresh) {
     const snapshot = loadWaterSnapshot();
     if (snapshot) {
-      await cacheSetSafe(FACILITIES_KEY, snapshot.facilities, WATER_REDIS_TTL_SEC);
+      await cacheSetSafe(
+        FACILITIES_KEY,
+        { facilities: snapshot.facilities, filterStats: snapshot.stats },
+        WATER_REDIS_TTL_SEC,
+      );
       log.info(
         { count: snapshot.facilities.length, generatedAt: snapshot.generatedAt },
         'serving water facilities from committed snapshot; Overpass untouched',
@@ -231,7 +255,9 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
     // rewrite. Saves the reverse-geocoder pass + Nominatim rate-limit
     // sleep entirely.
     const { facilities, stats: filterStats } = await fetchWaterFacilities();
-    await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
+    // Plan 11 G3: persist the full envelope so DevApiStatus observability
+    // survives the Redis round trip.
+    await cacheSetSafe(FACILITIES_KEY, { facilities, filterStats }, WATER_REDIS_TTL_SEC);
     saveDevWaterCache({ facilities, stats: filterStats });
     // REV-4 wiring: include filterStats in non-cached response so DevApiStatus can render diagnostics.
     // Phase 27.3.1 R-08: filterStats already carries source='overpass' + generatedAt (set by
@@ -245,13 +271,20 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   } catch (err) {
     log.error({ err }, 'Overpass error');
     if (cached) {
-      // Phase 27.3.1 R-08 D-30 — serving stale cache after upstream error;
-      // source='redis' to match the cached-hit branch.
+      // Phase 27.3.1 Plan 11 G3 — serving stale cache after upstream error.
+      // Spread the cached filterStats envelope so DevApiStatus renders real
+      // tallies on error-degraded responses too (pre-Plan-11 this was
+      // buildEmptyFilterStats, which zeroed R-08 observability under stress).
+      const payload = cached.data;
       sendValidated(res, waterResponseSchema, {
-        data: cached.data,
+        data: payload.facilities,
         stale: true,
         lastFresh: cached.lastFresh,
-        filterStats: buildEmptyFilterStats('redis', new Date(cached.lastFresh).toISOString()),
+        filterStats: {
+          ...payload.filterStats,
+          source: 'redis' as const,
+          generatedAt: new Date(cached.lastFresh).toISOString(),
+        },
       });
     } else {
       log.warn('Overpass failed, returning empty');
@@ -260,6 +293,8 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
       // overpass[] telemetry from the partial fetch isn't available here
       // because fetchWaterFacilities throws before stats are returned;
       // accepted gap — the snapshot tier above makes this branch rare.
+      // This is the sole remaining buildEmptyFilterStats call site post-Plan-11
+      // on the response path — legitimate because no real stats exist.
       sendValidated(res, waterResponseSchema, {
         data: [],
         stale: true,
@@ -286,15 +321,25 @@ waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) =>
   try {
     // Load facilities from cache (or fetch if needed)
     let facilities: WaterFacility[] = [];
-    const cachedFacilities = await cacheGetSafe<WaterFacility[]>(FACILITIES_KEY, WATER_CACHE_TTL);
+    const cachedFacilities = await cacheGetSafe<WaterCachePayload>(FACILITIES_KEY, WATER_CACHE_TTL);
     if (cachedFacilities) {
-      facilities = cachedFacilities.data;
+      // Phase 27.3.1 Plan 11 G3 — unwrap `.facilities` from the envelope.
+      // Pre-Plan-11 `cachedFacilities.data` was a bare WaterFacility[];
+      // post-envelope it's `{ facilities, filterStats }`.
+      facilities = cachedFacilities.data.facilities;
     } else {
       // Plan 10 (G1): labelUnnamedFacilities removed — no admitted
       // facility has a generic label to rewrite post-hasName tightening.
-      const { facilities: freshFacilities } = await fetchWaterFacilities();
+      const { facilities: freshFacilities, stats: freshStats } = await fetchWaterFacilities();
       facilities = freshFacilities;
-      await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
+      // Plan 11 G3: precip-side facilities fetch also writes the envelope so
+      // a subsequent /api/water cache hit sees real stats (otherwise a precip
+      // fetch could warm Redis with stats=empty, defeating the main fix).
+      await cacheSetSafe(
+        FACILITIES_KEY,
+        { facilities, filterStats: freshStats },
+        WATER_REDIS_TTL_SEC,
+      );
     }
 
     // Extract coordinates and fetch precipitation
