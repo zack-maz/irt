@@ -89,6 +89,76 @@ async function labelUnnamedFacilities(facilities: WaterFacility[]): Promise<Wate
   return facilities;
 }
 
+/**
+ * Phase 27.3.1 R-08 D-30 — minimal filterStats stub for response paths that
+ * don't have a fresh fetchWaterFacilities() result to attach (cached hits,
+ * dev file cache fallback, error-with-cache fallback, error-without-cache).
+ *
+ * Schema requires every R-08 field to be present once filterStats is set
+ * (waterFilterStatsSchema is .strict()), so all five tally surfaces are
+ * zero-initialized here. Provenance fields (source, generatedAt) carry the
+ * real value.
+ */
+function buildEmptyFilterStats(
+  source: 'snapshot' | 'redis' | 'overpass',
+  generatedAt: string,
+): {
+  rawCounts: Record<string, number>;
+  filteredCounts: Record<string, number>;
+  rejections: {
+    excluded_location: number;
+    not_notable: number;
+    no_name: number;
+    duplicate: number;
+    low_score: number;
+    no_city: number;
+  };
+  byTypeRejections: Record<
+    string,
+    {
+      excluded_location: number;
+      not_notable: number;
+      no_name: number;
+      duplicate: number;
+      low_score: number;
+      no_city: number;
+    }
+  >;
+  byCountry: Record<string, Record<string, number>>;
+  overpass: {
+    facilityType: string;
+    mirror: string;
+    status: number;
+    durationMs: number;
+    attempts: number;
+    ok: boolean;
+  }[];
+  source: 'snapshot' | 'redis' | 'overpass';
+  generatedAt: string;
+  enrichment: { withCapacity: number; withCity: number; withRiver: number };
+  scoreHistogram: { bucket: string; count: number }[];
+} {
+  return {
+    rawCounts: {},
+    filteredCounts: {},
+    rejections: {
+      excluded_location: 0,
+      not_notable: 0,
+      no_name: 0,
+      duplicate: 0,
+      low_score: 0,
+      no_city: 0,
+    },
+    byTypeRejections: {},
+    byCountry: {},
+    overpass: [],
+    source,
+    generatedAt,
+    enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
+    scoreHistogram: [],
+  };
+}
+
 /** Zod schema for /api/water and /api/water/precip query params */
 const waterQuerySchema = z.object({
   refresh: z
@@ -127,7 +197,15 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   );
 
   if (cached && !cached.stale && !forceRefresh) {
-    return sendValidated(res, waterResponseSchema, cached);
+    // Phase 27.3.1 R-08 D-30 — attach a minimal filterStats stub with
+    // source='redis' and generatedAt derived from the cache entry's
+    // lastFresh, so the DevApiStatus provenance header always renders.
+    // Cached payloads don't carry the original byCountry/overpass tallies —
+    // those require a fresh fetch; tally fields stay empty here.
+    return sendValidated(res, waterResponseSchema, {
+      ...cached,
+      filterStats: buildEmptyFilterStats('redis', new Date(cached.lastFresh).toISOString()),
+    });
   }
 
   // REV-4: Dev file cache fallback before Overpass call
@@ -136,10 +214,15 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
     if (devCached) {
       const labeled = await labelUnnamedFacilities(devCached.facilities);
       await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
+      // Phase 27.3.1 R-08 D-30: dev file cache currently reports source='redis'.
+      // Plan 05 (R-04) will add 'snapshot' as a distinct source tier between dev
+      // file cache and Overpass; at that point, re-audit this branch — dev file
+      // cache is closer to the snapshot tier semantically than the Redis tier.
       return sendValidated(res, waterResponseSchema, {
         data: labeled,
         stale: false,
         lastFresh: Date.now(),
+        filterStats: buildEmptyFilterStats('redis', new Date().toISOString()),
       });
     }
   }
@@ -149,7 +232,9 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
     const facilities = await labelUnnamedFacilities(raw);
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     saveDevWaterCache({ facilities, stats: filterStats });
-    // REV-4 wiring: include filterStats in non-cached response so DevApiStatus can render diagnostics
+    // REV-4 wiring: include filterStats in non-cached response so DevApiStatus can render diagnostics.
+    // Phase 27.3.1 R-08: filterStats already carries source='overpass' + generatedAt (set by
+    // fetchWaterFacilities), plus byCountry/overpass/byTypeRejections tallies.
     sendValidated(res, waterResponseSchema, {
       data: facilities,
       stale: false,
@@ -159,14 +244,28 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   } catch (err) {
     log.error({ err }, 'Overpass error');
     if (cached) {
+      // Phase 27.3.1 R-08 D-30 — serving stale cache after upstream error;
+      // source='redis' to match the cached-hit branch.
       sendValidated(res, waterResponseSchema, {
         data: cached.data,
         stale: true,
         lastFresh: cached.lastFresh,
+        filterStats: buildEmptyFilterStats('redis', new Date(cached.lastFresh).toISOString()),
       });
     } else {
       log.warn('Overpass failed, returning empty');
-      sendValidated(res, waterResponseSchema, { data: [], stale: true, lastFresh: 0 });
+      // Phase 27.3.1 R-08 D-30 — no cache and Overpass failed; report
+      // source='overpass' (attempted but failed) with current timestamp.
+      // overpass[] telemetry from the partial fetch isn't available here
+      // because fetchWaterFacilities throws before stats are returned;
+      // accepted gap — Plan 05 adds the snapshot tier so this branch
+      // becomes much rarer.
+      sendValidated(res, waterResponseSchema, {
+        data: [],
+        stale: true,
+        lastFresh: 0,
+        filterStats: buildEmptyFilterStats('overpass', new Date().toISOString()),
+      });
     }
   }
 });

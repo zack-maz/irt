@@ -118,6 +118,23 @@ function formatDuration(ms: number | null | undefined): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+/**
+ * Phase 27.3.1 R-08 D-30 — relative time helper for the WaterFiltersSection
+ * provenance header. Renders "Xs ago" / "Xm ago" / "Xh ago" / "Xd ago".
+ * Defensive: returns "--" for invalid/empty ISO strings rather than NaN.
+ */
+function relativeTime(iso: string): string {
+  if (!iso) return '--';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '--';
+  const delta = Date.now() - t;
+  if (delta < 0) return 'just now';
+  if (delta < 60_000) return `${Math.round(delta / 1000)}s ago`;
+  if (delta < 3_600_000) return `${Math.round(delta / 60_000)}m ago`;
+  if (delta < 86_400_000) return `${Math.round(delta / 3_600_000)}h ago`;
+  return `${Math.round(delta / 86_400_000)}d ago`;
+}
+
 /* ---------- LLM Pipeline Section ---------- */
 
 const PIPELINE_STAGES = ['grouping', 'llm-processing', 'geocoding', 'done'] as const;
@@ -690,26 +707,35 @@ export function DevApiStatus() {
 
 /**
  * Dev-only diagnostics for the water facility filter pipeline.
- * Shows raw vs filtered counts per OSM facility type, rejection
- * reason tallies, enrichment coverage, and the notability score
- * histogram. Null-renders when filterStats is absent (cached response).
+ *
+ * Phase 27.3 D-04 baseline: raw vs filtered counts per OSM facility type,
+ * rejection reason tallies, enrichment coverage, score histogram.
+ *
+ * Phase 27.3.1 R-08 expansion (D-28..D-31):
+ *   - Provenance header (source + generatedAt relative time)
+ *   - Per-country admission table (top 12 countries)
+ *   - Per-type rejection breakdown (alongside the summed totals)
+ *   - Overpass health attempt rows (mirror, status, duration, ok)
+ *
+ * Block layout: provenance → raw/kept summary → per-type counts → byCountry →
+ * per-type rejections → total rejections → enrichment → overpass health →
+ * score histogram.
  */
 function WaterFiltersSection() {
   const filterStats = useWaterStore((s) => s.filterStats);
 
-  // Phase 27.3 Plan 05 / UAT Test 6: cached /api/water responses don't carry
-  // filterStats, so the full diagnostics panel can't render. Show a compact
-  // placeholder row instead of null-rendering — otherwise the user sees
-  // nothing at all and thinks the Water Filters section is broken.
+  // Phase 27.3 Plan 05 / UAT Test 6 — truth 21 regression guard. Kept as
+  // defensive fallback. Post-R-08 D-30, all response paths attach
+  // filterStats (cached, dev-cache, fresh, error-with-cache, error-without-
+  // cache), so this branch only fires for a brief moment during the first
+  // fetch after page load (before useWaterFetch resolves).
   if (!filterStats) {
     return (
       <div className="mt-2 border-t border-white/10 pt-2">
         <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
           Water Filters
         </span>
-        <div className="mt-0.5 text-[9px] italic text-white/40">
-          cached — hit /api/water?refresh=true to see counts
-        </div>
+        <div className="mt-0.5 text-[9px] italic text-white/40">loading filter stats…</div>
       </div>
     );
   }
@@ -722,11 +748,28 @@ function WaterFiltersSection() {
     new Set([...Object.keys(filterStats.rawCounts), ...Object.keys(filterStats.filteredCounts)]),
   ).sort();
 
+  // Phase 27.3.1 R-08 D-28 — top 12 countries by total admitted facilities.
+  // Cap prevents arbitrary render blowup if byCountry ever grows beyond the
+  // 29-centroid table (T-27.3.1.03-04 mitigation).
+  const byCountrySorted = Object.entries(filterStats.byCountry)
+    .sort(
+      ([, a], [, b]) =>
+        Object.values(b).reduce((s, n) => s + n, 0) - Object.values(a).reduce((s, n) => s + n, 0),
+    )
+    .slice(0, 12);
+
   return (
     <div className="mt-2 border-t border-white/10 pt-2">
       <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
         Water Filters
       </span>
+
+      {/* Phase 27.3.1 R-08 D-30 — provenance header */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Source:</span> {filterStats.source} ·{' '}
+        <span className="font-bold text-white/40">Generated:</span>{' '}
+        {relativeTime(filterStats.generatedAt)}
+      </div>
 
       {/* Raw vs filtered summary */}
       <div className="mt-0.5 text-[9px] text-white/60">
@@ -747,9 +790,48 @@ function WaterFiltersSection() {
         </tbody>
       </table>
 
-      {/* Rejections */}
+      {/* Phase 27.3.1 R-08 D-28 — per-country admission table */}
+      {byCountrySorted.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Country
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {byCountrySorted.map(([country, perType]) => (
+                <tr key={country}>
+                  <td className="text-white/40">{country}</td>
+                  <td className="text-right tabular-nums text-white/60">
+                    {Object.entries(perType)
+                      .map(([t, n]) => `${t}=${n}`)
+                      .join(' ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {/* Phase 27.3.1 R-08 D-31 — per-type rejection breakdown */}
+      {Object.keys(filterStats.byTypeRejections).length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Rejections by Type
+          </div>
+          {Object.entries(filterStats.byTypeRejections).map(([type, buckets]) => (
+            <div key={type} className="text-[9px] text-white/60">
+              <span className="text-white/40">{type}:</span> excl={buckets.excluded_location} nn=
+              {buckets.not_notable} nname={buckets.no_name} dup={buckets.duplicate} low=
+              {buckets.low_score} nocity={buckets.no_city}
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* Total rejections (back-compat + quick-scan view) */}
       <div className="mt-0.5 text-[9px] text-white/60">
-        <span className="font-bold text-white/40">Rejections:</span> excl=
+        <span className="font-bold text-white/40">Total rejections:</span> excl=
         {filterStats.rejections.excluded_location} nn={filterStats.rejections.not_notable} nname=
         {filterStats.rejections.no_name} dup={filterStats.rejections.duplicate} low=
         {filterStats.rejections.low_score} nocity={filterStats.rejections.no_city}
@@ -761,6 +843,21 @@ function WaterFiltersSection() {
         {filterStats.enrichment.withCapacity} city={filterStats.enrichment.withCity} river=
         {filterStats.enrichment.withRiver}
       </div>
+
+      {/* Phase 27.3.1 R-08 D-29 — Overpass health rows */}
+      {filterStats.overpass.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Overpass Health
+          </div>
+          {filterStats.overpass.map((rec, i) => (
+            <div key={i} className={`text-[9px] ${rec.ok ? 'text-white/60' : 'text-red-400'}`}>
+              {rec.facilityType} · {rec.mirror} · status={rec.status} · {rec.durationMs}ms ·
+              attempts={rec.attempts} {rec.ok ? 'OK' : 'FAIL'}
+            </div>
+          ))}
+        </>
+      )}
 
       {/* Score histogram */}
       <div className="mt-0.5 text-[9px] text-white/60">
