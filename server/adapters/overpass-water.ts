@@ -84,10 +84,17 @@ const PRIORITY_COUNTRIES = new Set([
 ]);
 
 /**
- * Returns true if coordinates fall within a priority country (conflict zone).
- * Priority countries keep all facility types; non-priority apply notability filters.
+ * Phase 27.3.1 R-08 D-28 — return the nearest centroid country name for a
+ * given coordinate. Used as the lookup key for `WaterFilterStats.byCountry`
+ * and as the shared backend for `isPriorityCountry` / `isExcludedLocation`.
+ *
+ * Note: nearest-centroid is approximate — a coordinate equidistant from two
+ * country centroids may attribute to the neighbor. For per-country admission
+ * tallies in DevApiStatus, this is acceptable (the goal is "which country
+ * dominates", not legal sovereignty). The 29-entry centroid table caps the
+ * worst-case mis-attribution to one neighbor over.
  */
-export function isPriorityCountry(lat: number, lng: number): boolean {
+export function nearestCountryName(lat: number, lng: number): string {
   let minDist = Infinity;
   let nearest = '';
   for (const [name, clat, clng] of COUNTRY_CENTROIDS_FULL) {
@@ -97,7 +104,15 @@ export function isPriorityCountry(lat: number, lng: number): boolean {
       nearest = name;
     }
   }
-  return PRIORITY_COUNTRIES.has(nearest);
+  return nearest;
+}
+
+/**
+ * Returns true if coordinates fall within a priority country (conflict zone).
+ * Priority countries keep all facility types; non-priority apply notability filters.
+ */
+export function isPriorityCountry(lat: number, lng: number): boolean {
+  return PRIORITY_COUNTRIES.has(nearestCountryName(lat, lng));
 }
 
 /**
@@ -171,17 +186,8 @@ function isExcludedLocation(lat: number, lng: number): boolean {
     if (distFromSE > 600) return true;
   }
 
-  // Check if nearest centroid is an excluded country (using full centroid set for accuracy)
-  let minDist = Infinity;
-  let nearest = '';
-  for (const [name, clat, clng] of COUNTRY_CENTROIDS_FULL) {
-    const d = haversine(lat, lng, clat, clng);
-    if (d < minDist) {
-      minDist = d;
-      nearest = name;
-    }
-  }
-  if (EXCLUDED_COUNTRIES.has(nearest)) return true;
+  // Phase 27.3.1 R-08: use shared nearestCountryName helper.
+  if (EXCLUDED_COUNTRIES.has(nearestCountryName(lat, lng))) return true;
 
   return false;
 }
@@ -603,11 +609,20 @@ const MIN_NOTABILITY_SCORE = 15;
  * Normalize an Overpass element into a WaterFacility.
  * Applies holistic filtering (REV-1), reservoir wikidata fallback (REV-2),
  * and enrichment pipeline (D-06/D-07/D-08).
+ *
+ * Phase 27.3.1 R-08 D-31: takes an optional `byTypeBucket` that mirrors the
+ * summed `rejections` counters per facility-type query. Both objects are
+ * incremented in lock-step at every rejection site. The bucket is keyed by
+ * the FACILITY_QUERIES label of the CALLING query (not the classified type
+ * of the element) — so a reservoir-tagged "Hub Dam" reclassified to dam by
+ * `classifyWaterType` still counts toward the reservoirs query bucket if it
+ * came in via the reservoirs Overpass query.
  */
 export function normalizeWaterElement(
   el: OverpassElement,
   stressLookup: (lat: number, lng: number) => WaterStressIndicators,
   rejections?: WaterFilterStats['rejections'],
+  byTypeBucket?: WaterFilterStats['byTypeRejections'][string],
 ): WaterFacility | null {
   if (!el.tags) return null;
   const facilityType = classifyWaterType(el.tags);
@@ -619,6 +634,7 @@ export function normalizeWaterElement(
 
   if (isExcludedLocation(lat, lon)) {
     if (rejections) rejections.excluded_location++;
+    if (byTypeBucket) byTypeBucket.excluded_location++;
     return null;
   }
 
@@ -639,6 +655,7 @@ export function normalizeWaterElement(
   // path. The same hasName check applies to reservoirs and desalination.
   if (!hasName(el.tags)) {
     if (rejections) rejections.no_name++;
+    if (byTypeBucket) byTypeBucket.no_name++;
     return null;
   }
 
@@ -650,6 +667,7 @@ export function normalizeWaterElement(
   const passesCompound = isNotable(el.tags) || inPriority || hasCapacityData(el.tags);
   if (!passesCompound) {
     if (rejections) rejections.not_notable++;
+    if (byTypeBucket) byTypeBucket.not_notable++;
     return null;
   }
 
@@ -659,6 +677,7 @@ export function normalizeWaterElement(
   // silent admission.
   if (score < MIN_NOTABILITY_SCORE) {
     if (rejections) rejections.low_score++;
+    if (byTypeBucket) byTypeBucket.low_score++;
     return null;
   }
 
@@ -679,6 +698,7 @@ export function normalizeWaterElement(
   const isNamedInPriorityCountry = inPriority && hasName(el.tags);
   if (facilityType === 'reservoir' && !nearestCity && !hasWikiRef && !isNamedInPriorityCountry) {
     if (rejections) rejections.no_city++;
+    if (byTypeBucket) byTypeBucket.no_city++;
     return null;
   }
 
@@ -704,13 +724,48 @@ export function normalizeWaterElement(
 
 /**
  * Fetch one facility type from Overpass, trying primary then fallback.
+ *
+ * Phase 27.3.1 R-08 D-29: records per-attempt telemetry into stats.overpass[]
+ * (mirror label, HTTP status, duration, attempts so far, ok outcome) so
+ * DevApiStatus can render Overpass health without a log dive.
+ *
+ * Phase 27.3.1 R-08 D-31: initializes a per-facility-type rejection bucket
+ * in stats.byTypeRejections[entry.label] before the first network call so
+ * the bucket exists in the response even when zero rejections fire. The
+ * bucket is then passed to normalizeWaterElement for dual-write.
+ *
+ * Contract: fail-loud, serve-snapshot. No exponential backoff or circuit
+ * breaker — Plan 05 (R-04) takes Overpass off the request path entirely
+ * via a committed JSON snapshot, so retry sophistication here is overkill.
  */
 async function fetchFacilityType(
   entry: { label: string; nwr: string },
   stats: WaterFilterStats,
 ): Promise<WaterFacility[]> {
   const query = buildQuery(entry.nwr);
-  for (const url of [OVERPASS_URL, OVERPASS_FALLBACK]) {
+
+  // Phase 27.3.1 R-08 D-31: per-type rejection bucket, six counters mirroring
+  // the summed `rejections` shape. Initialized to zeros so the bucket key
+  // exists in the response even when every facility admits.
+  const typeBucket = {
+    excluded_location: 0,
+    not_notable: 0,
+    no_name: 0,
+    duplicate: 0,
+    low_score: 0,
+    no_city: 0,
+  };
+  stats.byTypeRejections[entry.label] = typeBucket;
+
+  let attempts = 0;
+  const mirrors: [string, string][] = [
+    ['primary', OVERPASS_URL],
+    ['fallback', OVERPASS_FALLBACK],
+  ];
+  for (const [mirrorLabel, url] of mirrors) {
+    attempts++;
+    const start = Date.now();
+    let statusCode = 0;
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -722,11 +777,20 @@ async function fetchFacilityType(
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
+      statusCode = res.status;
       if (!res.ok) {
         log.warn(
           { facilityType: entry.label, url, status: res.status },
           'Overpass returned error status',
         );
+        stats.overpass.push({
+          facilityType: entry.label,
+          mirror: mirrorLabel,
+          status: statusCode,
+          durationMs: Date.now() - start,
+          attempts,
+          ok: false,
+        });
         continue;
       }
       const json = (await res.json()) as { elements: OverpassElement[] };
@@ -734,11 +798,20 @@ async function fetchFacilityType(
 
       const facilities: WaterFacility[] = [];
       for (const el of json.elements) {
-        const facility = normalizeWaterElement(el, assignBasinStress, stats.rejections);
+        const facility = normalizeWaterElement(el, assignBasinStress, stats.rejections, typeBucket);
         if (facility) facilities.push(facility);
       }
       stats.filteredCounts[entry.label] =
         (stats.filteredCounts[entry.label] ?? 0) + facilities.length;
+
+      stats.overpass.push({
+        facilityType: entry.label,
+        mirror: mirrorLabel,
+        status: statusCode,
+        durationMs: Date.now() - start,
+        attempts,
+        ok: true,
+      });
 
       log.info(
         { facilityType: entry.label, raw: json.elements.length, kept: facilities.length },
@@ -747,6 +820,14 @@ async function fetchFacilityType(
       return facilities;
     } catch (err) {
       log.warn({ err, facilityType: entry.label, url }, 'Overpass request failed');
+      stats.overpass.push({
+        facilityType: entry.label,
+        mirror: mirrorLabel,
+        status: statusCode,
+        durationMs: Date.now() - start,
+        attempts,
+        ok: false,
+      });
     }
   }
   log.warn({ facilityType: entry.label }, 'all URLs failed, skipping');
@@ -773,6 +854,18 @@ export async function fetchWaterFacilities(): Promise<{
       low_score: 0,
       no_city: 0,
     },
+    // Phase 27.3.1 R-08 D-31 — populated per-query inside fetchFacilityType.
+    byTypeRejections: {},
+    // Phase 27.3.1 R-08 D-28 — populated after dedup (see byCountry tally below).
+    byCountry: {},
+    // Phase 27.3.1 R-08 D-29 — populated per-attempt inside fetchFacilityType.
+    overpass: [],
+    // Phase 27.3.1 R-08 D-30 — provenance. The route layer overwrites this to
+    // 'redis' when serving from cache; Plan 05 will set 'snapshot' from the
+    // committed JSON tier.
+    source: 'overpass',
+    // Phase 27.3.1 R-08 D-30 — initial stamp; refreshed at fetch completion below.
+    generatedAt: new Date().toISOString(),
     enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
     scoreHistogram: [],
   };
@@ -813,11 +906,18 @@ export async function fetchWaterFacilities(): Promise<{
     else stats.rejections.duplicate++;
   }
 
-  // Tally enrichment coverage
+  // Phase 27.3.1 R-08 D-28 — per-country admission counts keyed by nearest
+  // centroid name. Tallied AFTER dedup so duplicates do not double-count.
+  // Run in the same loop as enrichment to avoid a second pass over deduped.
   for (const f of deduped) {
     if (f.capacity) stats.enrichment.withCapacity++;
     if (f.nearestCity) stats.enrichment.withCity++;
     if (f.linkedRiver) stats.enrichment.withRiver++;
+
+    const country = nearestCountryName(f.lat, f.lng);
+    const entry = stats.byCountry[country] ?? {};
+    entry[f.facilityType] = (entry[f.facilityType] ?? 0) + 1;
+    stats.byCountry[country] = entry;
   }
 
   // Score histogram
@@ -833,6 +933,11 @@ export async function fetchWaterFacilities(): Promise<{
     count: deduped.filter((f) => (f.notabilityScore ?? 0) >= lo && (f.notabilityScore ?? 0) < hi)
       .length,
   }));
+
+  // Phase 27.3.1 R-08 D-30 — refresh generatedAt to reflect completion time
+  // (not the start of the fetch). Aligns with "when the underlying data was
+  // produced" in the docstring.
+  stats.generatedAt = new Date().toISOString();
 
   log.info(
     { total: deduped.length, succeeded, totalQueries: FACILITY_QUERIES.length, stats },

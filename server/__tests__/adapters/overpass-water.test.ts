@@ -1036,12 +1036,19 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     tags: { waterway: 'dam', name: 'Tehran Test Dam', volume: '1000000' },
   };
   // Turkey-area reservoir with name → admits via priority country branch.
+  // Coords (39.5, 40.0) chosen so:
+  //  - nearest-centroid resolves to Turkey (39.0, 35.2) at ~417km
+  //  - distFromSE (Diyarbakir 37.9, 40.2) is ~179km, well under the 600km
+  //    western-Turkey exclusion cap
+  // Diyarbakir SE Turkey coords (37.9, 40.2) resolve to Syria via nearest
+  // centroid even though Turkey is the priority hit — keeping the test honest
+  // about how attribution works.
   const turkeyReservoir = {
     type: 'node',
     id: 1002,
-    lat: 37.9,
-    lon: 40.2,
-    tags: { natural: 'water', water: 'reservoir', name: 'SE Turkey Reservoir' },
+    lat: 39.5,
+    lon: 40.0,
+    tags: { natural: 'water', water: 'reservoir', name: 'East Turkey Test Reservoir' },
   };
   // Iran-area unnamed dam → rejected by D-05 (no_name) → byTypeRejections increments.
   const unnamedIranDam = {
