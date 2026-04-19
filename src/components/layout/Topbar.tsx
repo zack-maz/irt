@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { StatusDropdown } from '@/components/layout/StatusDropdown';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -7,6 +8,15 @@ import { useUIStore } from '@/stores/uiStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useLayerStore } from '@/stores/layerStore';
+import { useFlightStore } from '@/stores/flightStore';
+import { useShipStore } from '@/stores/shipStore';
+import { useEventStore } from '@/stores/eventStore';
+import { useSiteStore } from '@/stores/siteStore';
+import { useNewsStore } from '@/stores/newsStore';
+import { useMarketStore } from '@/stores/marketStore';
+import { useWeatherStore } from '@/stores/weatherStore';
+import { useWaterStore } from '@/stores/waterStore';
+import { effectiveStatus } from '@/lib/apiStatus';
 import { INITIAL_VIEW_STATE } from '@/components/map/constants';
 
 function ResetButton() {
@@ -63,6 +73,106 @@ function ResetButton() {
   );
 }
 
+/**
+ * Phase 27.3.1 Plan 12 G6 — dev-only DevApiStatus trigger badge.
+ *
+ * Renders in the Topbar right cluster between ResetButton and
+ * NotificationBell. Production builds tree-shake the inner component via
+ * the `if (!import.meta.env.DEV) return null;` guard in the thin wrapper —
+ * Vite's DCE removes the conditional branch + the lazy-imported hook
+ * subtree at build time, so there is no runtime cost in production.
+ *
+ * Split into two components (wrapper + inner) because the hooks in the
+ * inner component must be called unconditionally per the rules-of-hooks;
+ * the DEV check lives in the wrapper instead of before the hooks.
+ *
+ * Badge shows "API ~" (all healthy) or "API !" (red — at least one
+ * connection in error/stuck/empty state) matching the pre-Plan-12
+ * collapsed overlay behavior.
+ */
+function DevApiStatusTriggerInner() {
+  const openDevApiStatus = useUIStore((s) => s.openDevApiStatus);
+
+  const flights = useFlightStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.flightCount,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const ships = useShipStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.shipCount,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const events = useEventStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.eventCount,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const sites = useSiteStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.siteCount,
+      lastFetch: null as number | null,
+    })),
+  );
+  const news = useNewsStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.clusterCount,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const markets = useMarketStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.quotes.length,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const weather = useWeatherStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.grid.length,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+  const water = useWaterStore(
+    useShallow((s) => ({
+      status: s.connectionStatus,
+      count: s.facilities.length,
+      lastFetch: s.lastFetchAt,
+    })),
+  );
+
+  const hasIssue = [flights, ships, events, sites, news, markets, weather, water].some((r) => {
+    const eff = effectiveStatus(r.status, r.count, r.lastFetch);
+    return eff === 'error' || eff === 'stuck' || eff === 'empty';
+  });
+
+  return (
+    <button
+      data-testid="dev-api-status-trigger"
+      onClick={openDevApiStatus}
+      className="rounded-md px-2 py-1 font-mono text-[10px] transition-colors hover:bg-white/5"
+      style={{ color: hasIssue ? '#ef4444' : 'rgba(255,255,255,0.4)' }}
+      title="Dev API Status"
+    >
+      API {hasIssue ? '!' : '~'}
+    </button>
+  );
+}
+
+function DevApiStatusTrigger() {
+  if (!import.meta.env.DEV) return null;
+  return <DevApiStatusTriggerInner />;
+}
+
 export function Topbar() {
   return (
     <header
@@ -96,9 +206,10 @@ export function Topbar() {
         </kbd>
       </button>
 
-      {/* Right: Reset + Notification bell */}
+      {/* Right: Reset + DevApiStatus trigger (dev-only) + Notification bell */}
       <div className="flex items-center gap-1">
         <ResetButton />
+        <DevApiStatusTrigger />
         <NotificationBell />
       </div>
 
