@@ -701,6 +701,11 @@ export function DevApiStatus() {
       {/* Water Filters diagnostics — Phase 27.3 D-04 (renders only when the
           server attached filterStats, i.e. non-cached /api/water response) */}
       <WaterFiltersSection />
+
+      {/* Sites Filters diagnostics — Phase 27.3.1 R-05 D-19 (parity with water;
+          renders when the sites response envelope carries filterStats, which
+          post-Plan-07 is every tier: snapshot / redis / overpass) */}
+      <SitesFiltersSection />
     </div>
   );
 }
@@ -864,6 +869,144 @@ function WaterFiltersSection() {
         <span className="font-bold text-white/40">Scores:</span>{' '}
         {filterStats.scoreHistogram.map((b) => `${b.bucket}:${b.count}`).join(' ')}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Phase 27.3.1 R-05 D-19 — Dev-only diagnostics for the sites pipeline.
+ *
+ * Mirrors WaterFiltersSection layout: provenance header (source +
+ * generatedAt), raw/kept summary, per-type counts, per-country top-12 table,
+ * rejection bucket row, Overpass health rows. Null-renders a placeholder
+ * when filterStats is absent (cached or pre-fetch state — matches water
+ * truth-21 regression guard pattern).
+ *
+ * Intentional asymmetries vs WaterFiltersSection (see Plan 07 SUMMARY
+ * §"R-05 Observability Asymmetry"):
+ *   - 4 rejection buckets (excluded_turkey / no_coords / no_type / duplicate)
+ *     vs water's 6 — sites adapter is simpler (single Overpass query, no
+ *     compound admission gate, no scoring, no nearestCity requirement).
+ *     Do NOT invent placeholder buckets (no_name / not_notable / low_score /
+ *     no_city) — they would always be zero and are misleading.
+ *   - No per-type rejection split (sites has one combined query across all 5
+ *     types; water has per-type queries with per-type rejection tallies).
+ *
+ * Per-country table is capped at top-12 (same T-27.3.1.03-04 DoS mitigation
+ * as water — `.slice(0, 12)`).
+ */
+function SitesFiltersSection() {
+  const filterStats = useSiteStore((s) => s.filterStats);
+
+  if (!filterStats) {
+    return (
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+          Sites Filters
+        </span>
+        <div className="mt-0.5 text-[9px] italic text-white/40">loading filter stats…</div>
+      </div>
+    );
+  }
+
+  const keepPct =
+    filterStats.rawCount > 0
+      ? Math.round((filterStats.filteredCount / filterStats.rawCount) * 100)
+      : 0;
+
+  // Per-type entries sorted by count desc for at-a-glance scannability
+  const typeEntries = Object.entries(filterStats.byType).sort(([, a], [, b]) => b - a);
+
+  // Top 12 countries by total admitted sites (DoS cap matches water D-28)
+  const byCountrySorted = Object.entries(filterStats.byCountry)
+    .sort(
+      ([, a], [, b]) =>
+        Object.values(b).reduce((s, n) => s + n, 0) - Object.values(a).reduce((s, n) => s + n, 0),
+    )
+    .slice(0, 12);
+
+  return (
+    <div className="mt-2 border-t border-white/10 pt-2">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+        Sites Filters
+      </span>
+
+      {/* Phase 27.3.1 R-05 D-30 parity — provenance header */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Source:</span> {filterStats.source} ·{' '}
+        <span className="font-bold text-white/40">Generated:</span>{' '}
+        {relativeTime(filterStats.generatedAt)}
+      </div>
+
+      {/* Raw vs filtered summary */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        {filterStats.rawCount} raw → {filterStats.filteredCount} kept ({keepPct}%)
+      </div>
+
+      {/* Per-type breakdown */}
+      {typeEntries.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Type
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {typeEntries.map(([type, count]) => (
+                <tr key={type}>
+                  <td className="text-white/40">{type}</td>
+                  <td className="text-right tabular-nums text-white/60">{count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {/* Phase 27.3.1 R-05 D-28 parity — per-country admission table */}
+      {byCountrySorted.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Country
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {byCountrySorted.map(([country, perType]) => (
+                <tr key={country}>
+                  <td className="text-white/40">{country}</td>
+                  <td className="text-right tabular-nums text-white/60">
+                    {Object.entries(perType)
+                      .map(([t, n]) => `${t}=${n}`)
+                      .join(' ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {/* Rejections — 4 buckets only (sites adapter register; see JSDoc above) */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Rejections:</span> turkey=
+        {filterStats.rejections.excluded_turkey} nocoords=
+        {filterStats.rejections.no_coords} notype={filterStats.rejections.no_type} dup=
+        {filterStats.rejections.duplicate}
+      </div>
+
+      {/* Phase 27.3.1 R-05 D-29 parity — Overpass health rows */}
+      {filterStats.overpass.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Overpass Health
+          </div>
+          {filterStats.overpass.map((rec, i) => (
+            <div key={i} className={`text-[9px] ${rec.ok ? 'text-white/60' : 'text-red-400'}`}>
+              {rec.facilityType} · {rec.mirror} · status={rec.status} · {rec.durationMs}ms ·
+              attempts={rec.attempts} {rec.ok ? 'OK' : 'FAIL'}
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
