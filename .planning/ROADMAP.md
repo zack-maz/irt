@@ -143,7 +143,14 @@ Plans:
 **Goal:** Verify + calibrate Package A filter counts (~100–500 dams / ~100–500 reservoirs / ~13 desal, every facility significant with a real OSM name), persist water facilities to a committed JSON snapshot so cold-starts don't depend on Overpass availability, audit sites for the same pattern, and clean up `overpass-water.ts` accumulated complexity from Plans 01–05 + two debug rounds. Architecture must scale to many concurrent users — Overpass never on the request path synchronously.
 **Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
 **Requirements:** R-01 through R-07 (from 27.3.1-CONTEXT.md)
-**Plans:** 8/8 plans complete
+**Plans:** 12 plans (8/8 initial shipped; 4 gap-closure plans 09-12 authored 2026-04-18 post-UAT to close G1-G6 + G7 data-reality note)
+
+**Gap-closure plans (27.3.1-UAT.md → 27.3.1-DIAGNOSIS.md):**
+
+- [ ] 27.3.1-09-PLAN.md — G5: npm script .env loading (wave 1; unblocks refresh:water)
+- [ ] 27.3.1-10-PLAN.md — G1+G2: hasName tightening + drop Turkey from PRIORITY_COUNTRIES + excluded_turkey bucket + delete waterLabeling.ts + regenerate snapshot (wave 2)
+- [ ] 27.3.1-11-PLAN.md — G3+G4: Redis envelope persistence (water:facilities:v2 + sites:v3 key bump) so R-08 observability survives cache writes (wave 2, parallel with Plan 10)
+- [ ] 27.3.1-12-PLAN.md — G6+G7: DevApiStatus top-bar modal restructure + G7 data-reality closeout note (wave 3)
 
 ### Phase 27.4: LLM Enrichment Improvements
 
