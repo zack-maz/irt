@@ -24,11 +24,23 @@ const NEAR_UNKNOWN_RE = /\bnear\s+unknown\s*$/i;
 /**
  * Case-insensitive whole-string match for the four bare generic type tokens
  * that `extractLabel` in server/adapters/overpass-water.ts emits when an OSM
- * element has no `name` / `name:en` / `operator` tag. Phase 27.3 Plan 05 /
- * UAT Test 8a: a label of exactly "Reservoir" is not a useful display name,
- * so treat it as equivalent to an empty label and fall through to the
- * river/city/coord fallback chain. Matching is WHOLE-STRING (trimmed), NOT
- * substring — so "Mosul Dam" is preserved, but "Dam" alone is a sentinel.
+ * element has ONLY non-Latin name / name:en / operator tags (e.g. a
+ * Persian- or Arabic-only named facility). Phase 27.3.1 R-03 D-05 made
+ * `hasName(tags)` a mandatory admission requirement — but hasName accepts
+ * any script, while `extractLabel`'s isLatin guard drops non-Latin names
+ * for display. The resulting bare-type label ("Dam" / "Reservoir" /
+ * "Desalination Plant") is still valid data (the facility has a real name
+ * in OSM, just not in Latin script) but is not a useful UI display name,
+ * so we fall through to river/city/coord here.
+ *
+ * Sentinel is WHOLE-STRING (trimmed), NOT substring — "Mosul Dam" is a real
+ * label; "Dam" alone is the sentinel.
+ *
+ * Audited 2026-04-18 per Phase 27.3.1 R-03 D-10: confirmed reachable via
+ * the non-Latin-only-name path; kept. If a future phase either (a) adds a
+ * transliteration step to extractLabel or (b) tightens hasName to require
+ * a Latin-script tag, this fallback becomes unreachable and should be
+ * removed. See src/lib/__tests__/waterLabel.test.ts `D-10 audit:` case.
  */
 const GENERIC_TYPE_RE = /^(dam|reservoir|desalination(?:\s+plant)?)$/i;
 

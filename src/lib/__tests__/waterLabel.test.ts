@@ -106,4 +106,22 @@ describe('getWaterFacilityDisplayName — generic-type sentinel (Phase 27.3 Plan
     });
     expect(getWaterFacilityDisplayName(f)).toBe('Dam on Euphrates');
   });
+
+  it('D-10 audit: non-Latin-only OSM name path produces bare-type label, sentinel catches it', () => {
+    // Simulates a facility admitted by hasName() (non-Latin script accepted)
+    // but rendered as a bare type token by extractLabel's isLatin guard.
+    // Sentinel must fall through to the coordinate fallback since linkedRiver
+    // and nearestCity are both absent in this simulation. Confirms the
+    // generic-type fallback chain is still reachable under Phase 27.3.1 R-03
+    // D-05 (hasName mandatory), so the fallback path is retained, not deleted.
+    const f = makeFacility({
+      facilityType: 'dam',
+      label: 'Dam', // bare generic emitted by extractLabel for non-Latin-only name
+      lat: 35.0,
+      lng: 51.0,
+    });
+    const result = getWaterFacilityDisplayName(f);
+    expect(result).not.toBe('Dam');
+    expect(result).toContain('°'); // coordinate fallback
+  });
 });
