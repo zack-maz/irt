@@ -4,19 +4,27 @@
  * facilities snapshot (`src/data/water-facilities.json`).
  *
  * Runs the full server-side fetch pipeline (Overpass → classify → compound
- * gate → enrichment → basin stress) plus the reverse-geocode labeler, and
- * writes the resulting pre-enriched WaterFacility[] as a committed JSON
- * snapshot. The runtime route reads this file as the cold-start floor
- * (tier 3: Redis → devFileCache → snapshot → Overpass) so Overpass is
- * NEVER on a synchronous user-request path in production (R-07 invariant).
+ * gate → enrichment → basin stress) and writes the resulting pre-enriched
+ * WaterFacility[] as a committed JSON snapshot. The runtime route reads
+ * this file as the cold-start floor (tier 3: Redis → devFileCache →
+ * snapshot → Overpass) so Overpass is NEVER on a synchronous user-request
+ * path in production (R-07 invariant).
  *
  * Usage:  npm run refresh:water
  *
  * Intended cadence: run when you want fresh data. Commit the diff for
  * review before merging. NOT run as part of CI — Overpass rate limits
- * and reverse-geocode's 1 req/s pace make a fresh refresh take several
- * minutes (first run; subsequent runs mostly hit the 30-day geocode
- * Redis cache).
+ * make a fresh refresh take ~45–90 seconds.
+ *
+ * Phase 27.3.1 Plan 10 (G1 follow-up): the `labelUnnamedFacilities`
+ * reverse-geocoding step has been REMOVED from this pipeline. Post-G1
+ * `hasName(tags)` tightening rejects all wikidata-only unnamed
+ * facilities into the `no_name` bucket, so nothing reaches the generic
+ * "Dam"/"Reservoir" fallback the labeler was designed to rewrite. This
+ * cuts ~2–3 minutes from the previous refresh runtime (139 unnamed
+ * facilities × ~1.05s Nominatim rate limit). The non-Latin-only-name
+ * edge case is handled client-side by GENERIC_TYPE_RE in
+ * src/lib/waterLabel.ts.
  *
  * Model: mirrors scripts/extract-rivers.ts / scripts/extract-aqueduct-basins.ts.
  */
@@ -25,7 +33,6 @@ import { writeFileSync, renameSync, mkdirSync, unlinkSync, existsSync } from 'no
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchWaterFacilities } from '../server/adapters/overpass-water.js';
-import { labelUnnamedFacilities } from '../server/lib/waterLabeling.js';
 import type { WaterFacility } from '../server/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -48,7 +55,7 @@ async function main(): Promise<void> {
 
   const start = Date.now();
 
-  console.log('[1/3] Fetching from Overpass (3 queries: dams, reservoirs, desalination)...');
+  console.log('[1/2] Fetching from Overpass (3 queries: dams, reservoirs, desalination)...');
   const { facilities: raw, stats } = await fetchWaterFacilities();
   const fetchMs = Date.now() - start;
   console.log(`  → ${raw.length} facilities admitted (Overpass fetch: ${fetchMs}ms)`);
@@ -57,19 +64,16 @@ async function main(): Promise<void> {
     console.log(`    ${type}: ${count} kept / ${rawCount} raw`);
   }
 
-  console.log('');
-  console.log('[2/3] Reverse-geocoding unnamed facilities (~1 req/s rate limit)...');
-  const geoStart = Date.now();
-  const labeled = await labelUnnamedFacilities(raw);
-  console.log(`  → labeling pass complete (${Date.now() - geoStart}ms)`);
-
   // R-04 security guard (T-27.3.1.05-01 mitigation): drop the operator field
   // if it happens to contain an email pattern. OSM's operator tag is normally
   // a company name, but untrusted user input means we can't rule out edge
   // cases — the snapshot is committed to a public repo, so scrubbing is
   // cheap insurance.
+  //
+  // Phase 27.3.1 Plan 10: the intermediate `labelUnnamedFacilities` step has
+  // been removed; the scrub now operates directly on `raw`.
   let scrubbed = 0;
-  for (const f of labeled) {
+  for (const f of raw) {
     if (f.operator && /@[\w.]+/.test(f.operator)) {
       console.warn(`  ⚠ dropping operator with email pattern on ${f.id}: ${f.operator}`);
       delete f.operator;
@@ -79,13 +83,13 @@ async function main(): Promise<void> {
   if (scrubbed > 0) console.log(`  → scrubbed ${scrubbed} operator field(s) with email patterns`);
 
   console.log('');
-  console.log('[3/3] Writing snapshot...');
+  console.log('[2/2] Writing snapshot...');
 
   // Sort facilities by id for deterministic diff order. Round lat/lng to
   // 6dp to keep diff noise low. Use a generated-at timestamp consistent
   // across the top level and the stats sub-object.
   const generatedAt = new Date().toISOString();
-  const sortedFacilities: WaterFacility[] = [...labeled]
+  const sortedFacilities: WaterFacility[] = [...raw]
     .map((f) => ({ ...f, lat: roundCoord(f.lat), lng: roundCoord(f.lng) }))
     .sort((a, b) => a.id.localeCompare(b.id));
 

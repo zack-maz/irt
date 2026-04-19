@@ -102,8 +102,39 @@ vi.mock('../../adapters/yahoo-finance.js', () => ({
 vi.mock('../../adapters/open-meteo.js', () => ({
   fetchWeather: vi.fn(async () => []),
 }));
+// Phase 27.3.1 Plan 10 (G1 follow-up): the route now consumes
+// fetchWaterFacilities() as `{ facilities, stats }`. Previously the chaos
+// mock returned `[]` and relied on the subsequent `labelUnnamedFacilities`
+// call to throw (which was caught by the route's error branch). Plan 10
+// removed labelUnnamedFacilities entirely — we now return a structurally
+// valid empty shape so the route's happy path completes into a 200 with
+// empty data (cacheSetSafe still fires the 2s safe-timeout under Redis
+// death, but gracefully; sendValidated validates the empty payload which
+// is schema-valid).
 vi.mock('../../adapters/overpass-water.js', () => ({
-  fetchWaterFacilities: vi.fn(async () => []),
+  fetchWaterFacilities: vi.fn(async () => ({
+    facilities: [],
+    stats: {
+      rawCounts: {},
+      filteredCounts: {},
+      rejections: {
+        excluded_location: 0,
+        excluded_turkey: 0, // Phase 27.3.1 Plan 10 (G2)
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      },
+      byTypeRejections: {},
+      byCountry: {},
+      overpass: [],
+      source: 'overpass' as const,
+      generatedAt: new Date(0).toISOString(),
+      enrichment: { withCapacity: 0, withCity: 0, withRiver: 0 },
+      scoreHistogram: [],
+    },
+  })),
   FACILITY_TYPE_LABELS: {
     dam: 'Dam',
     reservoir: 'Reservoir',
@@ -114,11 +145,16 @@ vi.mock('../../adapters/overpass-water.js', () => ({
 // Phase 27.3.1 R-04 — suppress the snapshot tier under Redis death so the
 // chaos test continues to exercise the cache-miss → Overpass-mock → respond
 // path it was designed for. (With the snapshot present, the route would
-// load 602 facilities and call labelUnnamedFacilities, which makes Redis
-// geocode-cache reads — each one hitting the 2000ms safe-timeout wrapper
-// under Redis death, blowing past the test's 10s timeout. Mocking the
-// loader to null preserves the test's intent: prove that Redis-dead →
-// no HTTP 500.)
+// load 602 facilities and then call `cacheSetSafe` which hits the 2000ms
+// safe-timeout wrapper under Redis death, blowing past the test's 10s
+// timeout. Mocking the loader to null preserves the test's intent: prove
+// that Redis-dead → no HTTP 500.)
+//
+// Phase 27.3.1 Plan 10 note: pre-Plan-10 the snapshot-serve branch also
+// ran `labelUnnamedFacilities` per facility (which added its OWN Redis
+// geocode-cache reads, compounding the timeout problem). Plan 10 removed
+// that call entirely; the loadWaterSnapshot mock is still needed to keep
+// the test on its cache-miss path, but the severity is lower now.
 vi.mock('../../lib/waterSnapshot.js', () => ({
   loadWaterSnapshot: vi.fn(() => null),
   __resetSnapshotCacheForTests: vi.fn(),

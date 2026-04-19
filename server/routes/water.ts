@@ -1,3 +1,12 @@
+// Phase 27.3.1 Plan 10 (G1 followup / D-10 final resolution): the previous
+// `labelUnnamedFacilities` reverse-geocoder (server/lib/waterLabeling.ts) has
+// been DELETED. Post-G1 the hasName tightening in overpass-water.ts rejects
+// all wikidata-only facilities into `no_name`, so nothing reaches the generic
+// "Dam"/"Reservoir"/"Desalination Plant" fallback that the labeler was
+// designed to rewrite as "Type near City". The residual non-Latin-only-name
+// case is handled client-side by GENERIC_TYPE_RE in src/lib/waterLabel.ts,
+// falling through to a coordinate-based label (D-10 audit outcome in
+// 27.3.1-02-SUMMARY).
 import { Router } from 'express';
 import { z } from 'zod';
 import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
@@ -7,7 +16,6 @@ const log = logger.child({ module: 'water' });
 import { fetchWaterFacilities } from '../adapters/overpass-water.js';
 import { saveDevWaterCache, loadDevWaterCache } from '../cache/devFileCache.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
-import { labelUnnamedFacilities } from '../lib/waterLabeling.js';
 import { loadWaterSnapshot } from '../lib/waterSnapshot.js';
 import {
   WATER_CACHE_TTL,
@@ -170,14 +178,16 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   if (!forceRefresh) {
     const devCached = loadDevWaterCache<{ facilities: WaterFacility[]; stats: unknown }>();
     if (devCached) {
-      const labeled = await labelUnnamedFacilities(devCached.facilities);
-      await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
+      // Plan 10: labelUnnamedFacilities removed. Post-G1 hasName tightening
+      // no admitted facility has a generic "Dam"/"Reservoir" label that
+      // needs reverse-geocoding — the labeler was dead code.
+      await cacheSetSafe(FACILITIES_KEY, devCached.facilities, WATER_REDIS_TTL_SEC);
       // Phase 27.3.1 R-04 D-13 — dev file cache shadows the snapshot; both
       // are the same tier semantically (cold-start floor). Report
       // source='snapshot' so DevApiStatus doesn't mislead the operator into
       // thinking Redis served it when it actually came from disk.
       return sendValidated(res, waterResponseSchema, {
-        data: labeled,
+        data: devCached.facilities,
         stale: false,
         lastFresh: Date.now(),
         filterStats: buildEmptyFilterStats('snapshot', new Date().toISOString()),
@@ -192,24 +202,22 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   //   mechanism that takes Overpass off the user-request path entirely
   //   (R-07 invariant).
   //
-  //   `labelUnnamedFacilities` still runs here as a safety net: in the
-  //   rare case a snapshot facility somehow retained a generic "Dam"
-  //   label (non-Latin OSM name that hit the extractLabel sentinel AND
-  //   no geocode cache during refresh), this gives it a "Dam near
-  //   {city}" label at the moment of serve. Normal operation: the
-  //   refresh script already reverse-geocoded everything, so this is
-  //   a near-no-op.
+  //   Plan 10 (G1 / D-10 final resolution): the previous post-load
+  //   `labelUnnamedFacilities` call has been removed. Post-G1
+  //   hasName tightening no admitted facility has a generic "Dam"
+  //   label needing reverse-geocoding. Client-side GENERIC_TYPE_RE
+  //   in src/lib/waterLabel.ts handles the residual non-Latin-only
+  //   display fallback.
   if (!forceRefresh) {
     const snapshot = loadWaterSnapshot();
     if (snapshot) {
-      const labeled = await labelUnnamedFacilities(snapshot.facilities);
-      await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
+      await cacheSetSafe(FACILITIES_KEY, snapshot.facilities, WATER_REDIS_TTL_SEC);
       log.info(
-        { count: labeled.length, generatedAt: snapshot.generatedAt },
+        { count: snapshot.facilities.length, generatedAt: snapshot.generatedAt },
         'serving water facilities from committed snapshot; Overpass untouched',
       );
       return sendValidated(res, waterResponseSchema, {
-        data: labeled,
+        data: snapshot.facilities,
         stale: false,
         lastFresh: Date.now(),
         filterStats: snapshot.stats, // source='snapshot' already set inside loadWaterSnapshot
@@ -218,8 +226,11 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   }
 
   try {
-    const { facilities: raw, stats: filterStats } = await fetchWaterFacilities();
-    const facilities = await labelUnnamedFacilities(raw);
+    // Plan 10 (G1): labelUnnamedFacilities removed — post-hasName
+    // tightening no admitted facility has a generic-type label to
+    // rewrite. Saves the reverse-geocoder pass + Nominatim rate-limit
+    // sleep entirely.
+    const { facilities, stats: filterStats } = await fetchWaterFacilities();
     await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     saveDevWaterCache({ facilities, stats: filterStats });
     // REV-4 wiring: include filterStats in non-cached response so DevApiStatus can render diagnostics.
@@ -279,8 +290,10 @@ waterRouter.get('/precip', validateQuery(waterQuerySchema), async (_req, res) =>
     if (cachedFacilities) {
       facilities = cachedFacilities.data;
     } else {
-      const { facilities: rawFacilities } = await fetchWaterFacilities();
-      facilities = await labelUnnamedFacilities(rawFacilities);
+      // Plan 10 (G1): labelUnnamedFacilities removed — no admitted
+      // facility has a generic label to rewrite post-hasName tightening.
+      const { facilities: freshFacilities } = await fetchWaterFacilities();
+      facilities = freshFacilities;
       await cacheSetSafe(FACILITIES_KEY, facilities, WATER_REDIS_TTL_SEC);
     }
 

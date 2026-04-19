@@ -14,10 +14,14 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
 
 /**
  * Case-insensitive regex matching the pre-fix "near Unknown" sentinel that
- * labelUnnamedFacilities used to emit (server/routes/water.ts). Phase 27.3
- * Plan 04 Task 1 removed the origin; this pattern exists so that any stale
- * cached facility still carrying the sentinel in its `label` field gets
- * sanitized at read time.
+ * the (now-deleted) `labelUnnamedFacilities` reverse-geocoder used to emit.
+ * Phase 27.3 Plan 04 Task 1 removed the origin; Phase 27.3.1 Plan 10
+ * (G1 / D-10 final resolution) deleted `server/lib/waterLabeling.ts`
+ * entirely — the tightened hasName gate in overpass-water.ts now rejects
+ * the wikidata-only admissions that produced generic labels, so the
+ * labeler has no remaining work to do. This pattern is retained purely
+ * so any stale cached facility still carrying the sentinel in its
+ * `label` field gets sanitized at read time.
  */
 const NEAR_UNKNOWN_RE = /\bnear\s+unknown\s*$/i;
 
