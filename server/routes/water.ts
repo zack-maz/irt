@@ -4,10 +4,11 @@ import { cacheGetSafe, cacheSetSafe } from '../cache/redis.js';
 import { logger } from '../lib/logger.js';
 
 const log = logger.child({ module: 'water' });
-import { fetchWaterFacilities, FACILITY_TYPE_LABELS } from '../adapters/overpass-water.js';
+import { fetchWaterFacilities } from '../adapters/overpass-water.js';
 import { saveDevWaterCache, loadDevWaterCache } from '../cache/devFileCache.js';
-import { reverseGeocode } from '../adapters/nominatim.js';
 import { fetchPrecipitation } from '../adapters/open-meteo-precip.js';
+import { labelUnnamedFacilities } from '../lib/waterLabeling.js';
+import { loadWaterSnapshot } from '../lib/waterSnapshot.js';
 import {
   WATER_CACHE_TTL,
   WATER_REDIS_TTL_SEC,
@@ -19,75 +20,6 @@ import { sendValidated } from '../middleware/validateResponse.js';
 import { waterResponseSchema } from '../schemas/cacheResponse.js';
 import type { WaterFacility } from '../types.js';
 import type { PrecipitationData } from '../adapters/open-meteo-precip.js';
-
-/** Redis cache key prefix for reverse geocode results (shared with geocode route) */
-const GEOCODE_CACHE_PREFIX = 'geocode:';
-/** 30-day logical TTL for geocode cache */
-const GEOCODE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-/** 90-day hard Redis TTL for geocode cache */
-const GEOCODE_REDIS_TTL_SEC = 90 * 24 * 60 * 60;
-
-/** Known generic type labels produced by extractLabel when no OSM name exists */
-const GENERIC_LABELS = new Set(Object.values(FACILITY_TYPE_LABELS));
-
-/** Max unnamed facilities to reverse geocode per cold cache run */
-const MAX_GEOCODE_COUNT = 500;
-
-/**
- * Reverse-geocode unnamed facilities to produce "Type near City" labels.
- * Uses Redis cache (30-day TTL) so only the first cold-cache run is slow.
- * Respects Nominatim 1 req/s rate limit for uncached calls.
- */
-async function labelUnnamedFacilities(facilities: WaterFacility[]): Promise<WaterFacility[]> {
-  const unnamed = facilities.filter((f) => GENERIC_LABELS.has(f.label));
-  if (unnamed.length === 0) return facilities;
-
-  const toGeocode = unnamed.slice(0, MAX_GEOCODE_COUNT);
-  log.info(
-    { unnamed: unnamed.length, geocoding: toGeocode.length },
-    'reverse geocoding unnamed water facilities',
-  );
-
-  for (const f of toGeocode) {
-    const qLat = Math.round(f.lat * 100) / 100;
-    const qLon = Math.round(f.lng * 100) / 100;
-    const cacheKey = `${GEOCODE_CACHE_PREFIX}${qLat},${qLon}`;
-
-    // Check Redis cache first (avoids Nominatim call + rate limit delay)
-    const cached = await cacheGetSafe<{ city?: string; country?: string; display?: string }>(
-      cacheKey,
-      GEOCODE_TTL_MS,
-    );
-
-    if (cached) {
-      const location = cached.data;
-      const place = location.city ?? location.country;
-      if (place) {
-        f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
-      }
-      // else: keep the generic type label intact — never write "near Unknown" (Phase 27.3 Plan 04 / UAT Test 3)
-      continue;
-    }
-
-    // Cache miss — call Nominatim with rate limit delay
-    try {
-      const geo = await reverseGeocode(f.lat, f.lng);
-      await cacheSetSafe(cacheKey, geo, GEOCODE_REDIS_TTL_SEC);
-      const place = geo.city ?? geo.country;
-      if (place) {
-        f.label = `${FACILITY_TYPE_LABELS[f.facilityType]} near ${place}`;
-      }
-      // else: keep the generic type label intact (Phase 27.3 Plan 04 / UAT Test 3)
-    } catch (err) {
-      log.warn({ err, facilityId: f.id }, 'reverse geocode failed for unnamed facility');
-    }
-
-    // 1 req/s rate limit for Nominatim (only for uncached calls)
-    await new Promise((resolve) => setTimeout(resolve, 1050));
-  }
-
-  return facilities;
-}
 
 /**
  * Phase 27.3.1 R-08 D-30 — minimal filterStats stub for response paths that
@@ -178,12 +110,30 @@ export const waterRouter = Router();
 /**
  * GET /api/water
  * Returns water infrastructure facilities with WRI stress indicators.
- * Cache-first with 24h logical TTL.
  *
- * ?refresh=true triggers a forced cache refresh. In production, only Vercel cron
- * (identified by user-agent) can trigger this. In dev, it always works.
- * The Vercel function timeout (60s maxDuration) provides the hard cap in production;
- * in local dev, the 90s per-query Overpass timeout handles it.
+ * Phase 27.3.1 R-07 multi-user-resilience invariant:
+ *   Redis is the canonical source of truth for user requests.
+ *   The dev file cache (local dev convenience) and the committed snapshot
+ *   (production cold-start floor) sit behind Redis.
+ *   The Overpass API is NEVER on a synchronous user-request path in
+ *   production — cold-start misses are served from the snapshot, which
+ *   populates Redis on the first hit. From that point on, Overpass is
+ *   reachable only via `npm run refresh:water` (a manual developer action)
+ *   or a legacy `?refresh=true` query param (dev + Vercel cron only; see
+ *   forceRefresh gate below).
+ *   See Phase 27.3.1 R-04 / R-07 and CONTEXT.md D-13, D-25 through D-27.
+ *
+ * Tier order on a standard GET (forceRefresh=false):
+ *   1. Redis (24h logical TTL)
+ *   2. Dev file cache (local-only, NODE_ENV=development — gitignored)
+ *   3. Committed snapshot (src/data/water-facilities.json — R-04)
+ *   4. Overpass API (only when all three above miss AND forceRefresh-gated
+ *      callers are permitted; in production, users cannot trigger this)
+ *
+ * ?refresh=true triggers a forced cache refresh. In production, only Vercel
+ * cron (identified by user-agent) can trigger this. In dev, it always works.
+ * The Vercel function timeout (60s maxDuration) provides the hard cap in
+ * production; in local dev, the 90s per-query Overpass timeout handles it.
  */
 waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
   log.info('GET /api/water hit');
@@ -208,21 +158,56 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
     });
   }
 
-  // REV-4: Dev file cache fallback before Overpass call
+  // Tier 2 — Dev file cache fallback before snapshot / Overpass call.
+  // Dev-only (gitignored, ephemeral) — shadows the snapshot for local
+  // iteration speed. In production NODE_ENV this branch always returns null
+  // via loadDevWaterCache's isDev guard, so the snapshot tier below fires.
   if (!forceRefresh) {
     const devCached = loadDevWaterCache<{ facilities: WaterFacility[]; stats: unknown }>();
     if (devCached) {
       const labeled = await labelUnnamedFacilities(devCached.facilities);
       await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
-      // Phase 27.3.1 R-08 D-30: dev file cache currently reports source='redis'.
-      // Plan 05 (R-04) will add 'snapshot' as a distinct source tier between dev
-      // file cache and Overpass; at that point, re-audit this branch — dev file
-      // cache is closer to the snapshot tier semantically than the Redis tier.
+      // Phase 27.3.1 R-04 D-13 — dev file cache shadows the snapshot; both
+      // are the same tier semantically (cold-start floor). Report
+      // source='snapshot' so DevApiStatus doesn't mislead the operator into
+      // thinking Redis served it when it actually came from disk.
       return sendValidated(res, waterResponseSchema, {
         data: labeled,
         stale: false,
         lastFresh: Date.now(),
-        filterStats: buildEmptyFilterStats('redis', new Date().toISOString()),
+        filterStats: buildEmptyFilterStats('snapshot', new Date().toISOString()),
+      });
+    }
+  }
+
+  // Tier 3 — Committed JSON snapshot (R-04 D-11 through D-15).
+  //   The snapshot is the production cold-start floor. Reads once per
+  //   process lifetime (in-module cache inside loadWaterSnapshot), then
+  //   populates Redis so subsequent requests hit Tier 1. This is the
+  //   mechanism that takes Overpass off the user-request path entirely
+  //   (R-07 invariant).
+  //
+  //   `labelUnnamedFacilities` still runs here as a safety net: in the
+  //   rare case a snapshot facility somehow retained a generic "Dam"
+  //   label (non-Latin OSM name that hit the extractLabel sentinel AND
+  //   no geocode cache during refresh), this gives it a "Dam near
+  //   {city}" label at the moment of serve. Normal operation: the
+  //   refresh script already reverse-geocoded everything, so this is
+  //   a near-no-op.
+  if (!forceRefresh) {
+    const snapshot = loadWaterSnapshot();
+    if (snapshot) {
+      const labeled = await labelUnnamedFacilities(snapshot.facilities);
+      await cacheSetSafe(FACILITIES_KEY, labeled, WATER_REDIS_TTL_SEC);
+      log.info(
+        { count: labeled.length, generatedAt: snapshot.generatedAt },
+        'serving water facilities from committed snapshot; Overpass untouched',
+      );
+      return sendValidated(res, waterResponseSchema, {
+        data: labeled,
+        stale: false,
+        lastFresh: Date.now(),
+        filterStats: snapshot.stats, // source='snapshot' already set inside loadWaterSnapshot
       });
     }
   }
@@ -258,8 +243,7 @@ waterRouter.get('/', validateQuery(waterQuerySchema), async (req, res) => {
       // source='overpass' (attempted but failed) with current timestamp.
       // overpass[] telemetry from the partial fetch isn't available here
       // because fetchWaterFacilities throws before stats are returned;
-      // accepted gap — Plan 05 adds the snapshot tier so this branch
-      // becomes much rarer.
+      // accepted gap — the snapshot tier above makes this branch rare.
       sendValidated(res, waterResponseSchema, {
         data: [],
         stale: true,

@@ -151,6 +151,16 @@ vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: (...args: unknown[]) => mockFetchPrecipitation(...args),
 }));
 
+// Phase 27.3.1 R-04 — mock the snapshot loader so the route's tier 3 can be
+// exercised without a real src/data/water-facilities.json on disk. Defaults
+// to null (snapshot absent) so existing tests fall through to Overpass as
+// before; tier-specific tests below override per-test.
+const mockLoadWaterSnapshot = vi.fn<() => unknown>(() => null);
+vi.mock('../../lib/waterSnapshot.js', () => ({
+  loadWaterSnapshot: () => mockLoadWaterSnapshot(),
+  __resetSnapshotCacheForTests: vi.fn(),
+}));
+
 // Mock Redis cache module with in-memory store
 const _mockCacheGet = vi.fn(
   async <T>(key: string, logicalTtlMs: number): Promise<CacheResponse<T> | null> => {
@@ -208,6 +218,9 @@ describe('Water Routes (/api/water)', () => {
     mockFetchPrecipitation.mockClear();
     mockFetchWaterFacilities.mockResolvedValue({ facilities: [], stats: emptyStats });
     mockFetchPrecipitation.mockResolvedValue([]);
+    // Phase 27.3.1 R-04 — default snapshot-absent; per-test overrides below.
+    mockLoadWaterSnapshot.mockReset();
+    mockLoadWaterSnapshot.mockReturnValue(null);
 
     vi.resetModules();
     const { createApp } = await import('../../index.js');
@@ -291,6 +304,121 @@ describe('Water Routes (/api/water)', () => {
       expect(body.stale).toBe(true);
       expect(body.data).toEqual([]);
       expect(body.lastFresh).toBe(0);
+    });
+  });
+
+  /**
+   * Phase 27.3.1 R-04 — committed JSON snapshot tier.
+   *
+   * Verifies the new tier slots between dev file cache and Overpass:
+   *   Redis → devFileCache (dev only) → snapshot → Overpass
+   *
+   * The R-07 invariant ("Overpass never on a user request path") is tested
+   * by asserting `fetchWaterFacilities` is NOT called when the snapshot is
+   * present and Redis + devFileCache miss.
+   */
+  describe('R-04 snapshot tier', () => {
+    const snapshotFacility: WaterFacility = {
+      id: 'water-99001',
+      type: 'water',
+      facilityType: 'dam',
+      lat: 35.84,
+      lng: 38.55,
+      label: 'Tabqa Dam',
+      osmId: 99001,
+      stress: {
+        bws_raw: 4.3,
+        bws_score: 4.3,
+        bws_label: 'Extremely High',
+        drr_score: 3.8,
+        gtd_score: 3.5,
+        sev_score: 3.2,
+        iav_score: 2.8,
+        compositeHealth: 0.2,
+      },
+    };
+
+    const snapshotStats = {
+      ...emptyStats,
+      filteredCounts: { dams: 515, reservoirs: 73, desalination: 15 },
+      source: 'snapshot' as const,
+      generatedAt: '2026-04-19T07:00:00.000Z',
+    };
+
+    it("serves snapshot with source='snapshot' when Redis is cold and dev cache is empty", async () => {
+      mockLoadWaterSnapshot.mockReturnValue({
+        generatedAt: '2026-04-19T07:00:00.000Z',
+        facilities: [snapshotFacility],
+        stats: snapshotStats,
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.stale).toBe(false);
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]).toMatchObject({ id: 'water-99001', label: 'Tabqa Dam' });
+      expect(body.filterStats.source).toBe('snapshot');
+      expect(body.filterStats.generatedAt).toBe('2026-04-19T07:00:00.000Z');
+      // R-07: Overpass must NOT be called
+      expect(mockFetchWaterFacilities).not.toHaveBeenCalled();
+    });
+
+    it('populates Redis from the snapshot so subsequent hits serve source=redis', async () => {
+      mockLoadWaterSnapshot.mockReturnValue({
+        generatedAt: '2026-04-19T07:00:00.000Z',
+        facilities: [snapshotFacility],
+        stats: snapshotStats,
+      });
+
+      // First hit — should populate Redis from snapshot
+      const res1 = await fetch(`${baseUrl}/api/water`);
+      const body1 = await res1.json();
+      expect(body1.filterStats.source).toBe('snapshot');
+
+      // Second hit — Redis is now warm
+      const res2 = await fetch(`${baseUrl}/api/water`);
+      const body2 = await res2.json();
+      expect(body2.filterStats.source).toBe('redis');
+      expect(body2.data).toHaveLength(1);
+      expect(mockFetchWaterFacilities).not.toHaveBeenCalled();
+    });
+
+    it('falls through to Overpass when snapshot is absent (existing behavior preserved)', async () => {
+      mockLoadWaterSnapshot.mockReturnValue(null);
+      mockFetchWaterFacilities.mockResolvedValue({
+        facilities: [sampleFacility],
+        stats: emptyStats,
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.data).toHaveLength(1);
+      expect(mockFetchWaterFacilities).toHaveBeenCalledTimes(1);
+    });
+
+    it('refresh=true bypasses the snapshot tier and hits Overpass', async () => {
+      mockLoadWaterSnapshot.mockReturnValue({
+        generatedAt: '2026-04-19T07:00:00.000Z',
+        facilities: [snapshotFacility],
+        stats: snapshotStats,
+      });
+      mockFetchWaterFacilities.mockResolvedValue({
+        facilities: [sampleFacility],
+        stats: { ...emptyStats, source: 'overpass' as const },
+      });
+
+      const res = await fetch(`${baseUrl}/api/water?refresh=true`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(mockFetchWaterFacilities).toHaveBeenCalledTimes(1);
+      expect(body.filterStats.source).toBe('overpass');
+      // Snapshot loader should NOT have been consulted on a forced refresh
+      expect(mockLoadWaterSnapshot).not.toHaveBeenCalled();
     });
   });
 
