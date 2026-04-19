@@ -11,6 +11,7 @@ import {
   findNearestCity,
   linkRiver,
   computeNotabilityScore,
+  computeAdmissionDecision,
   RIVER_BBOXES,
 } from '../../adapters/overpass-water.js';
 import type { WaterStressIndicators } from '../../types.js';
@@ -1396,5 +1397,320 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     ]);
     expect(stats.byTypeRejections.dams?.excluded_location).toBe(0);
     expect(stats.byTypeRejections.dams?.no_name).toBe(0);
+  });
+});
+
+// ---------- Phase 27.3.1 R-06 D-20 — computeAdmissionDecision unit tests ----------
+//
+// Pure-function tests for the extracted admission helper. These call the
+// decision function directly (bypassing normalizeWaterElement) to prove the
+// decision ordering, bucket mapping, and desalination exemption match the
+// pre-refactor scattered-branch behavior exactly. Serve as an observability
+// contract: any future regression in the admission logic surfaces here
+// before it shows up in normalizeWaterElement / fetchWaterFacilities tests.
+
+describe('Phase 27.3.1 R-06 — computeAdmissionDecision', () => {
+  // Helpers to build a nearestCity result in the admit-path tests without
+  // duplicating findNearestCity plumbing.
+  const withCity = (name: string, distanceKm = 50, population = 1_000_000) => ({
+    name,
+    distanceKm,
+    population,
+  });
+
+  it('rejects excluded location (western Turkey) with excluded_location bucket', () => {
+    // Istanbul (41.0, 28.9) — >600km from Diyarbakir, excluded by isExcludedLocation.
+    const d = computeAdmissionDecision(
+      { name: 'Ataturk Dam', waterway: 'dam' },
+      41.0,
+      28.9,
+      'dam',
+      false,
+      50,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'excluded_location' });
+  });
+
+  it('excluded_location fires even when hasName / wiki / capacity all present', () => {
+    // Confirms ordering: excluded_location is the first gate.
+    const d = computeAdmissionDecision(
+      { name: 'X', waterway: 'dam', wikidata: 'Q1', height: '50' },
+      41.0,
+      28.9,
+      'dam',
+      false,
+      80,
+      withCity('Istanbul'),
+    );
+    expect(d.verdict).toBe('reject');
+    if (d.verdict === 'reject') expect(d.bucket).toBe('excluded_location');
+  });
+
+  it('rejects unnamed facility with no_name bucket', () => {
+    // Iran priority-country dam with no name — hasName gate.
+    const d = computeAdmissionDecision({ waterway: 'dam' }, 35.7, 51.4, 'dam', true, 15, null);
+    expect(d).toEqual({ verdict: 'reject', bucket: 'no_name' });
+  });
+
+  it('no_name fires even for desalination (D-05 hasName applies to all types)', () => {
+    // Desal is exempt from compound but NOT from hasName.
+    const d = computeAdmissionDecision(
+      { man_made: 'desalination_plant', capacity: '500000' },
+      24.4,
+      54.4,
+      'desalination',
+      true,
+      20,
+      withCity('Abu Dhabi'),
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'no_name' });
+  });
+
+  it('rejects named non-priority non-wiki non-capacity dam with not_notable bucket (2-of-3 compound)', () => {
+    // Oman (non-priority) + hasName + no wiki + no capacity = 1 signal → not_notable.
+    const d = computeAdmissionDecision(
+      { name: 'Local Dam', waterway: 'dam' },
+      21.5,
+      55.9,
+      'dam',
+      false,
+      15,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'not_notable' });
+  });
+
+  it('rejects named reservoir with only priority signal (Plan 04 floodgate closed)', () => {
+    // Priority alone = 1 signal under 2-of-3; canonical R-02 regression lock.
+    const d = computeAdmissionDecision(
+      { name: 'Iraqi Reservoir', natural: 'water', water: 'reservoir' },
+      33.2,
+      43.7,
+      'reservoir',
+      true,
+      30,
+      withCity('Baghdad'),
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'not_notable' });
+  });
+
+  it('desalination exemption: admits named desal with only priority signal (Plan 04 Branch 2c)', () => {
+    // The 2-of-3 compound check is skipped entirely for facilityType='desalination'.
+    const d = computeAdmissionDecision(
+      { name: 'Jeddah Desal', man_made: 'desalination_plant' },
+      21.5,
+      39.1,
+      'desalination',
+      true,
+      20,
+      withCity('Jeddah'),
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('desalination exemption: admits named desal even in non-priority country with no other signals', () => {
+    // Bahrain (nearest-centroid non-priority) + hasName alone is sufficient for desal.
+    const d = computeAdmissionDecision(
+      { name: 'Bahrain Desal', man_made: 'desalination_plant' },
+      26.18,
+      50.21,
+      'desalination',
+      false,
+      15,
+      withCity('Manama', 20, 600_000),
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('rejects low score with low_score bucket (secondary floor past compound gate)', () => {
+    // Fabricated: compound satisfied via isNotable (wikidata) + priority = 2 signals,
+    // but score injected below MIN_NOTABILITY_SCORE. Real scorer never produces
+    // this — it's a regression lock on the secondary gate.
+    const d = computeAdmissionDecision(
+      { name: 'X', wikidata: 'Q1', waterway: 'dam' },
+      35.7,
+      51.4,
+      'dam',
+      true,
+      10,
+      withCity('Tehran'),
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'low_score' });
+  });
+
+  // Note on the no_city verdict path under the Plan 04 2-of-3 gate:
+  //   The compound gate requires two of (isNotable, inPriority, hasCapacityData).
+  //   `no_city` only fires when !hasWikiRef && !isNamedInPriorityCountry for a
+  //   reservoir with no nearestCity. Under 2-of-3:
+  //     - non-priority + hasCapacityData alone = 1 signal → rejects not_notable
+  //     - priority + hasCapacityData = 2 signals, but isNamedInPriorityCountry=true
+  //       (we passed no_name, hasName was required), exempting no_city
+  //     - isNotable=true → hasWikiRef=true, exempting no_city
+  //   So the no_city branch is effectively unreachable from the compound-gate
+  //   path post-Plan-04. It is retained as a defense-in-depth sentinel — a
+  //   regression that re-introduces a no_city-reachable admission path would
+  //   surface here as the bucket firing. The exemption tests below prove the
+  //   branch is correctly bypassed in every reachable case.
+
+  it('no_city is bypassed for named priority-country reservoirs (Plan 27.3-05 exemption)', () => {
+    // Priority country + named reservoir + capacity (2nd signal) = past compound.
+    // No nearestCity, no wiki, but isNamedInPriorityCountry=true → exempt → admit.
+    const d = computeAdmissionDecision(
+      { name: 'Remote Iranian Reservoir', natural: 'water', water: 'reservoir', height: '60' },
+      30.0,
+      55.0,
+      'reservoir',
+      true,
+      30,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('no_city rule is scoped to reservoir only (Plan 27.3-05 scoping) — dams with no city admit', () => {
+    // Dam + priority + capacity (2nd signal) = past compound. No nearestCity, no
+    // wiki — but facilityType='dam' means the reservoir-scoped no_city gate
+    // does not apply.
+    const d = computeAdmissionDecision(
+      { name: 'Remote Dam', waterway: 'dam', height: '40' },
+      30.0,
+      55.0,
+      'dam',
+      true,
+      40,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('no_city rule is scoped to reservoir only — desalination with no city admits via desal exemption', () => {
+    // Desalination + priority + no city = admits via desalination exemption,
+    // confirming no_city is reservoir-only (not just "not dam").
+    const d = computeAdmissionDecision(
+      { name: 'Remote Desal', man_made: 'desalination_plant' },
+      23.0,
+      52.5,
+      'desalination',
+      true,
+      20,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('no_city is bypassed for named priority-country reservoirs (Plan 27.3-05 exemption)', () => {
+    // Priority country + named reservoir + capacity (2nd signal) = past compound.
+    // No nearestCity, no wiki, but isNamedInPriorityCountry=true → exempt → admit.
+    const d = computeAdmissionDecision(
+      { name: 'Remote Iranian Reservoir', natural: 'water', water: 'reservoir', height: '60' },
+      30.0,
+      55.0,
+      'reservoir',
+      true,
+      30,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('no_city is bypassed for wiki-backed reservoirs (hasWikiRef exemption)', () => {
+    // Non-priority + wikidata (isNotable 1st signal) + hasCapacityData (2nd) = 2-of-3.
+    // No nearestCity but hasWikiRef=true → exempt → admit.
+    const d = computeAdmissionDecision(
+      {
+        name: 'Wiki-Backed Reservoir',
+        natural: 'water',
+        water: 'reservoir',
+        wikidata: 'Q99',
+        volume: '1000000',
+      },
+      30.0,
+      68.0,
+      'reservoir',
+      false,
+      70,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('admits a fully-qualified facility (Mosul Dam class)', () => {
+    // Priority + wiki + capacity + nearestCity — all gates clear.
+    const d = computeAdmissionDecision(
+      { name: 'Mosul Dam', waterway: 'dam', wikidata: 'Q1', height: '131' },
+      36.6,
+      42.8,
+      'dam',
+      true,
+      90,
+      withCity('Mosul', 50, 1_800_000),
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('admits a 2-of-3 dam (priority + capacity, no wiki)', () => {
+    // Exercises the R-02 admit path that Plan 04 preserved.
+    const d = computeAdmissionDecision(
+      { name: 'Near Tehran Dam', waterway: 'dam', height: '85' },
+      35.7,
+      51.4,
+      'dam',
+      true,
+      40,
+      withCity('Tehran', 30, 9_000_000),
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('admits a 2-of-3 reservoir (wiki + capacity in non-priority country)', () => {
+    // Pakistan non-priority; wikipedia via isNotable + capacity = 2-of-3.
+    const d = computeAdmissionDecision(
+      {
+        name: 'Notable Reservoir',
+        natural: 'water',
+        water: 'reservoir',
+        wikipedia: 'en:Reservoir',
+        volume: '1000000',
+      },
+      25.0,
+      67.2,
+      'reservoir',
+      false,
+      65,
+      withCity('Karachi', 40, 16_000_000),
+    );
+    expect(d).toEqual({ verdict: 'admit' });
+  });
+
+  it('decision ordering: no_name takes precedence over not_notable / low_score / no_city', () => {
+    // Unnamed reservoir with no signals, low score, no city — all downstream gates
+    // would reject, but no_name should fire first.
+    const d = computeAdmissionDecision(
+      { natural: 'water', water: 'reservoir' },
+      30.0,
+      68.0,
+      'reservoir',
+      false,
+      5,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'no_name' });
+  });
+
+  it('decision ordering: not_notable takes precedence over low_score / no_city', () => {
+    // Named + no signals (non-priority, no wiki, no capacity) = 0 signals.
+    // Score 10 would fail low_score, no city would fail no_city — but 2-of-3
+    // should reject first with not_notable.
+    const d = computeAdmissionDecision(
+      { name: 'X', natural: 'water', water: 'reservoir' },
+      30.0,
+      68.0,
+      'reservoir',
+      false,
+      10,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'not_notable' });
   });
 });

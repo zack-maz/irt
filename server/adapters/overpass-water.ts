@@ -635,9 +635,98 @@ export interface WaterFilterStats {
 const MIN_NOTABILITY_SCORE = 15;
 
 /**
+ * Structured admission verdict. Callers inspect `verdict` and, on reject,
+ * increment the rejection bucket named by `bucket`. On admit, callers use
+ * the same tuple of inputs (score, facilityType, coords, tags) to build
+ * the WaterFacility — no second classification pass.
+ */
+export type AdmissionVerdict =
+  | { verdict: 'admit' }
+  | { verdict: 'reject'; bucket: keyof WaterFilterStats['rejections'] };
+
+/**
+ * Per-facility admission decision — Phase 27.3.1 R-06 D-20 consolidation.
+ *
+ * Subsumes the previously-scattered rejection branches in normalizeWaterElement
+ * into one ordered, short-circuiting decision function. The five reject
+ * branches below reproduce the exact semantics present after Plan 02 (R-03
+ * admission gate) + Plan 04 (R-02 2-of-3 compound + desalination exemption)
+ * landed — this is a pure refactor, not a rule change.
+ *
+ * Decision order (first-match-wins, same as pre-refactor scattered branches):
+ *   1. excluded_location — isExcludedLocation(coords)
+ *   2. no_name           — !hasName(tags)                        [R-03 D-05 / D-07]
+ *   3. not_notable       — 2-of-3 compound gate fails            [R-02 Plan 04]
+ *                          (exempted for desalination, Plan 04 Branch 2c)
+ *   4. low_score         — score < MIN_NOTABILITY_SCORE          [R-03 D-08]
+ *   5. no_city           — reservoir + no city + no wiki + not priority-named
+ *                          [Plan 27.3-04 / Plan 27.3-05 scoping]
+ *   6. admit
+ *
+ * `duplicate` bucket is NOT decided here — it is produced post-normalization
+ * in fetchWaterFacilities during spatial dedup, so this helper never returns
+ * { bucket: 'duplicate' }.
+ *
+ * Exported for Plan 03 / future observability tests to call directly without
+ * going through the full normalizeWaterElement path.
+ */
+export function computeAdmissionDecision(
+  tags: Record<string, string>,
+  lat: number,
+  lng: number,
+  facilityType: WaterFacilityType,
+  inPriority: boolean,
+  score: number,
+  nearestCity: ReturnType<typeof findNearestCity>,
+): AdmissionVerdict {
+  // 1. Geographic exclusion (western Turkey, Central Asian non-ME states).
+  if (isExcludedLocation(lat, lng)) {
+    return { verdict: 'reject', bucket: 'excluded_location' };
+  }
+
+  // 2. R-03 D-05 / D-07: hasName is mandatory for ALL facility types,
+  //    ALL countries (no priority-country bypass).
+  if (!hasName(tags)) {
+    return { verdict: 'reject', bucket: 'no_name' };
+  }
+
+  // 3. R-02 Plan 04: compound 2-of-3 gate, EXEMPTED for desalination.
+  //    (Desal OSM coverage in ME is sparse — name+type carries enough signal.)
+  if (facilityType !== 'desalination') {
+    const signalCount = [isNotable(tags), inPriority, hasCapacityData(tags)].filter(Boolean).length;
+    if (signalCount < 2) {
+      return { verdict: 'reject', bucket: 'not_notable' };
+    }
+  }
+
+  // 4. R-03 D-08: MIN_NOTABILITY_SCORE secondary floor. Redundant in practice
+  //    (low_score=0 in both R-02 refresh runs) but kept as defense-in-depth.
+  if (score < MIN_NOTABILITY_SCORE) {
+    return { verdict: 'reject', bucket: 'low_score' };
+  }
+
+  // 5. Plan 27.3-04 / Plan 27.3-05: reservoir no_city rule. Scoped to
+  //    reservoirs only; exempts named-in-priority and wiki-backed entries.
+  const hasWikiRef =
+    !!tags.wikidata ||
+    !!tags.wikipedia ||
+    Object.keys(tags).some((k) => k.startsWith('wikipedia:'));
+  const isNamedInPriorityCountry = inPriority && hasName(tags);
+  if (facilityType === 'reservoir' && !nearestCity && !hasWikiRef && !isNamedInPriorityCountry) {
+    return { verdict: 'reject', bucket: 'no_city' };
+  }
+
+  return { verdict: 'admit' };
+}
+
+/**
  * Normalize an Overpass element into a WaterFacility.
  * Applies holistic filtering (REV-1), reservoir wikidata fallback (REV-2),
  * and enrichment pipeline (D-06/D-07/D-08).
+ *
+ * Phase 27.3.1 R-06 D-20: admission logic consolidated into
+ * `computeAdmissionDecision`. Control flow reads top-to-bottom:
+ *   classify → coords → score → admission decision → (reject | build).
  *
  * Phase 27.3.1 R-08 D-31: takes an optional `byTypeBucket` that mirrors the
  * summed `rejections` counters per facility-type query. Both objects are
@@ -661,102 +750,27 @@ export function normalizeWaterElement(
   const lon = el.lon ?? el.center?.lon;
   if (lat === undefined || lon === undefined) return null;
 
-  if (isExcludedLocation(lat, lon)) {
-    if (rejections) rejections.excluded_location++;
-    if (byTypeBucket) byTypeBucket.excluded_location++;
-    return null;
-  }
-
   const inPriority = isPriorityCountry(lat, lon);
   const score = computeNotabilityScore(el.tags, facilityType, inPriority);
+  const nearestCity = findNearestCity(lat, lon);
 
-  // Phase 27.3.1 R-03 / D-05..D-08: hardened admission gate.
-  //
-  // D-05: hasName is mandatory for ALL facility types. No exceptions. A
-  // facility without an OSM name / name:en / operator tag (or a wikidata /
-  // wikipedia ref via isNotable) cannot be "officially recognized with a
-  // name" — user directive in
-  // .planning/phases/27.3.1-water-facility-retry-and-cleanup/27.3.1-CONTEXT.md
-  // `## Specifics`.
-  //
-  // D-07: the old `dam && !inPriority && !hasName` rejection is widened to
-  // ALL countries — priority-country dams no longer get the unnamed-admission
-  // path. The same hasName check applies to reservoirs and desalination.
-  if (!hasName(el.tags)) {
-    if (rejections) rejections.no_name++;
-    if (byTypeBucket) byTypeBucket.no_name++;
-    return null;
-  }
-
-  // Phase 27.3.1 R-02 calibration (Plan 04, R-02 / D-04): compound gate
-  // tightened to require TWO of the three notability signals
-  // (isNotable, isPriorityCountry, hasCapacityData), with an exemption for
-  // desalination plants.
-  //
-  // Why this change:
-  //   The first post-R-03 refresh produced 1316 dams (target 300-500) and
-  //   830 reservoirs (target 300-500) — both above the user's target band
-  //   even after D-05 hasName became mandatory. The byCountry distribution
-  //   (Turkey 509, Saudi Arabia 262, Iran 234, Iraq 177, UAE 175) showed
-  //   the priority-country branch was the floodgate: any named facility in
-  //   the 14-country priority set admitted via isPriorityCountry alone, and
-  //   most OSM facilities in those countries are name-only with no wikidata
-  //   and no capacity tags. Branch 2b-(ii) of Plan 04: replace the
-  //   one-of-three OR with a two-of-three count to require an actual
-  //   notability signal beyond geographic location.
-  //
-  // Desalination exemption (Branch 2c of Plan 04):
-  //   Pre-calibration desalination admit count was 6 — already 4 below the
-  //   10-25 target band — and tightening the compound gate would drop it
-  //   further. Desal OSM coverage in the Middle East is sparse (63 raw
-  //   elements total), so the name+desalination type combination carries
-  //   enough notability signal on its own. Named desalination plants
-  //   admit anywhere in the bbox once hasName is satisfied above.
-  //
-  // See .planning/phases/27.3.1-water-facility-retry-and-cleanup/27.3.1-R02-CALIBRATION.md
-  // for the iteration log + rejection bucket evidence.
-  if (facilityType !== 'desalination') {
-    const signalCount = [isNotable(el.tags), inPriority, hasCapacityData(el.tags)].filter(
-      Boolean,
-    ).length;
-    if (signalCount < 2) {
-      if (rejections) rejections.not_notable++;
-      if (byTypeBucket) byTypeBucket.not_notable++;
-      return null;
-    }
-  }
-  // hasName already confirmed above is the desalination admission gate.
-
-  // Phase 27.3.1 R-03 / D-08: MIN_NOTABILITY_SCORE demoted to secondary gate.
-  // Redundant on paper (a facility clearing the compound gate above will also
-  // score ≥15), but kept so regressions surface as low_score rather than
-  // silent admission.
-  if (score < MIN_NOTABILITY_SCORE) {
-    if (rejections) rejections.low_score++;
-    if (byTypeBucket) byTypeBucket.low_score++;
+  const decision = computeAdmissionDecision(
+    el.tags,
+    lat,
+    lon,
+    facilityType,
+    inPriority,
+    score,
+    nearestCity,
+  );
+  if (decision.verdict === 'reject') {
+    if (rejections) rejections[decision.bucket]++;
+    if (byTypeBucket) byTypeBucket[decision.bucket]++;
     return null;
   }
 
   const capacity = extractCapacityTags(el.tags);
-  const nearestCity = findNearestCity(lat, lon);
   const linkedRiver = linkRiver(lat, lon);
-
-  // Phase 27.3 UAT Test 3 (Plan 04) / Plan 05: a RESERVOIR with NO nearestCity
-  // within 150km AND no wikidata/wikipedia reference is low-information noise.
-  // Plan 05 scopes the rule to reservoirs only (Test 7 gap fix — dams and
-  // desalination were being starved) AND exempts named priority-country
-  // facilities (conflict-zone reservoirs are intelligence-relevant even without
-  // a CITY_DATA city within 150km).
-  const hasWikiRef =
-    !!el.tags.wikidata ||
-    !!el.tags.wikipedia ||
-    Object.keys(el.tags).some((k) => k.startsWith('wikipedia:'));
-  const isNamedInPriorityCountry = inPriority && hasName(el.tags);
-  if (facilityType === 'reservoir' && !nearestCity && !hasWikiRef && !isNamedInPriorityCountry) {
-    if (rejections) rejections.no_city++;
-    if (byTypeBucket) byTypeBucket.no_city++;
-    return null;
-  }
 
   return {
     id: `water-${el.id}`,
