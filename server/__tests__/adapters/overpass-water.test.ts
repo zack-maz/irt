@@ -5,6 +5,7 @@ import {
   normalizeWaterElement,
   isPriorityCountry,
   isNotable,
+  hasCapacityData,
   FACILITY_TYPE_LABELS,
   extractCapacityTags,
   findNearestCity,
@@ -673,6 +674,156 @@ describe('normalizeWaterElement', () => {
       expect(classifyWaterType({ natural: 'water', water: 'reservoir', name: 'Hub Dam ' })).toBe(
         'dam',
       );
+    });
+  });
+
+  // Phase 27.3.1 R-03 — hasName mandatory + D-06 compound admission gate.
+  // These tests cover D-05 (hasName is mandatory with no exceptions),
+  // D-06 (hasName AND (isNotable || isPriorityCountry || hasCapacityData)),
+  // and D-07 (unnamed-dam rejection extended to ALL countries — previously
+  // only non-priority).
+  describe('Phase 27.3.1 R-03 — hasName + compound gate', () => {
+    const emptyRejections = () => ({
+      excluded_location: 0,
+      not_notable: 0,
+      no_name: 0,
+      duplicate: 0,
+      low_score: 0,
+      no_city: 0,
+    });
+
+    it('hasCapacityData returns true for height', () => {
+      expect(hasCapacityData({ height: '85' })).toBe(true);
+    });
+    it('hasCapacityData returns true for volume', () => {
+      expect(hasCapacityData({ volume: '1000000' })).toBe(true);
+    });
+    it('hasCapacityData returns true for capacity', () => {
+      expect(hasCapacityData({ capacity: '500000' })).toBe(true);
+    });
+    it('hasCapacityData returns true for area', () => {
+      expect(hasCapacityData({ area: '50000' })).toBe(true);
+    });
+    it('hasCapacityData returns false when all four keys absent', () => {
+      expect(hasCapacityData({ name: 'X' })).toBe(false);
+    });
+    it('hasCapacityData returns false for empty string values', () => {
+      expect(hasCapacityData({ height: '', volume: '  ' })).toBe(false);
+    });
+
+    it('D-05/D-07: rejects unnamed dam in priority country (was admitted pre-R-03)', () => {
+      // Tehran-area dam with no name, no wiki, no capacity — priority country
+      // path previously admitted unnamed dams here. Plan 02 closes that hole.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 1,
+        lat: 35.7,
+        lon: 51.4,
+        tags: { waterway: 'dam' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.no_name).toBe(1);
+    });
+
+    it('D-05: rejects unnamed desalination in priority country even with capacity', () => {
+      // hasName is AND — capacity alone cannot substitute for a name.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 2,
+        lat: 24.4,
+        lon: 54.4,
+        tags: { man_made: 'desalination_plant', capacity: '500000' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.no_name).toBe(1);
+    });
+
+    it('D-06: admits named reservoir in non-priority country via hasCapacityData', () => {
+      // Pakistan is non-priority post-Package-A expansion; large volume tag
+      // supplies the second notability signal so the reservoir admits.
+      // Placed near Karachi (24.8607, 67.0011) so nearestCity resolves and
+      // the no_city gate does not fire.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 3,
+        lat: 25.0,
+        lon: 67.2,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Large Volume Reservoir',
+          volume: '10000000',
+        },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('D-06: admits named reservoir in priority country without wikidata or capacity', () => {
+      // Iran, named, no wiki, no capacity — priority branch satisfies compound.
+      // Near Tehran so nearestCity resolves.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 4,
+        lat: 35.6,
+        lon: 51.4,
+        tags: { natural: 'water', water: 'reservoir', name: 'Local Reservoir' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('D-06: rejects named reservoir in non-priority country without wiki/capacity (Package A relaxation reverted)', () => {
+      // Pakistan non-priority, near Karachi so no_city does not mask the test,
+      // but no wiki and no capacity — compound gate rejects via not_notable.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 5,
+        lat: 25.0,
+        lon: 67.2,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Nameless-ish Local Reservoir',
+        },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.not_notable).toBe(1);
+    });
+
+    it('D-06: admits named desalination in priority country via priority branch', () => {
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 6,
+        lat: 24.4,
+        lon: 54.4, // Abu Dhabi (UAE priority) — nearestCity resolves
+        tags: { man_made: 'desalination_plant', name: 'Local Desal' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('truth 22 regression guard: priority-country-named reservoir still passes no_city rule', () => {
+      // Remote Iranian coords far from any CITY_DATA city — named-priority
+      // exemption (Plan 05) must still trigger so no_city does not fire.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 7,
+        lat: 30.0,
+        lon: 55.0,
+        tags: { natural: 'water', water: 'reservoir', name: 'Remote Iranian Reservoir' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('truth 23 regression guard: Hub Dam reclassification preserved', () => {
+      // classifyWaterType tag-then-name override — "Hub Dam" tagged
+      // landuse=reservoir reclassifies to dam.
+      expect(classifyWaterType({ landuse: 'reservoir', name: 'Hub Dam' })).toBe('dam');
     });
   });
 });
