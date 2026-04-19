@@ -38,7 +38,7 @@ sitesRouter.get('/', validateQuery(sitesQuerySchema), async (_req, res) => {
   }
 
   try {
-    const sites = await fetchSites();
+    const { sites } = await fetchSites();
     await cacheSetSafe(SITES_KEY, sites, REDIS_TTL_SEC);
     res.json({ data: sites, stale: false, lastFresh: Date.now() });
   } catch (err) {

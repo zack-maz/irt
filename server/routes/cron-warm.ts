@@ -28,7 +28,7 @@ cronWarmRouter.get('/', async (_req, res) => {
 
   const results = await Promise.allSettled([
     (async () => {
-      const sites = await fetchSites();
+      const { sites } = await fetchSites();
       await cacheSetSafe(SITES_KEY, sites, SITES_REDIS_TTL_SEC);
       return sites.length;
     })(),
