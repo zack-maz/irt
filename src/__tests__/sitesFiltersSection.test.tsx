@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useSiteStore, type SiteFilterStats } from '@/stores/siteStore';
 import { useFlightStore } from '@/stores/flightStore';
@@ -8,6 +8,7 @@ import { useNewsStore } from '@/stores/newsStore';
 import { useMarketStore } from '@/stores/marketStore';
 import { useWeatherStore } from '@/stores/weatherStore';
 import { useWaterStore } from '@/stores/waterStore';
+import { useUIStore } from '@/stores/uiStore';
 
 // Mock useLLMStatusPolling (same pattern as devApiStatus.test.tsx)
 const mockLLMStatus = { stage: 'idle' as const, lastRun: null };
@@ -123,15 +124,26 @@ function resetAllStoresForSitesSection(filterStats: SiteFilterStats | null) {
   });
 }
 
-/** Expand the collapsed "API ~" button so section renders */
-function expandPanel() {
-  const btn = screen.getByText(/^API/);
-  fireEvent.click(btn);
+/**
+ * Phase 27.3.1 Plan 12 G6 — DevApiStatus is a modal with Sites as its own
+ * tab. Set both flags via uiStore.setState BEFORE render() so the component
+ * mounts with the Sites tab visible in one pass (no re-render race).
+ */
+function openAndSelectSitesTab() {
+  useUIStore.setState({
+    isDevApiStatusOpen: true,
+    activeDevApiStatusTab: 'sites',
+  });
 }
 
 describe('SitesFiltersSection (Phase 27.3.1 R-05 D-19)', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // Reset UI store to closed + overview tab so tests start from a clean slate
+    useUIStore.setState({
+      isDevApiStatusOpen: false,
+      activeDevApiStatusTab: 'overview',
+    });
     Object.assign(mockLLMStatus, { stage: 'idle', lastRun: null });
   });
 
@@ -141,30 +153,24 @@ describe('SitesFiltersSection (Phase 27.3.1 R-05 D-19)', () => {
 
   it('renders the null-safe placeholder when siteStore.filterStats is null', () => {
     resetAllStoresForSitesSection(null);
+    openAndSelectSitesTab();
     render(<DevApiStatus />);
-    expandPanel();
 
-    // Placeholder label present
-    const sitesHeadings = screen.getAllByText('Sites Filters');
-    expect(sitesHeadings.length).toBeGreaterThanOrEqual(1);
-    // Both water + sites render the same placeholder string when their
-    // respective store's filterStats is null, so expect >= 1 occurrence
-    // (in this test both are null → 2 occurrences).
-    const loadingRows = screen.getAllByText(/loading filter stats…/);
-    expect(loadingRows.length).toBeGreaterThanOrEqual(1);
+    // Sites Filters heading present in the Sites tab body
+    expect(screen.getByText('Sites Filters')).toBeInTheDocument();
+    // Placeholder "loading filter stats…" renders because siteStore.filterStats is null
+    expect(screen.getByText(/loading filter stats…/)).toBeInTheDocument();
   });
 
   it('renders all 6 blocks when filterStats is populated (provenance, raw/kept, byType, byCountry, rejections, Overpass health)', () => {
     resetAllStoresForSitesSection(makeSiteFilterStats());
+    openAndSelectSitesTab();
     render(<DevApiStatus />);
-    expandPanel();
 
-    // Sites Filters heading present (in addition to the water one)
-    expect(screen.getAllByText('Sites Filters').length).toBeGreaterThanOrEqual(1);
+    // Sites Filters heading present
+    expect(screen.getByText('Sites Filters')).toBeInTheDocument();
 
-    // Block 1: Provenance header (source) — "snapshot" appears at least once
-    // (in the sites section — water might or might not have it depending on
-    // that store's filterStats, which we did not populate in this test)
+    // Block 1: Provenance header (source) — "snapshot"
     expect(screen.getByText(/snapshot/)).toBeInTheDocument();
 
     // Block 2: Raw/kept summary
@@ -172,71 +178,68 @@ describe('SitesFiltersSection (Phase 27.3.1 R-05 D-19)', () => {
     expect(screen.getByText(/\(82%\)/)).toBeInTheDocument(); // 720/876 = 82%
 
     // Block 3: By Type header + at least one of the 5 types rendered
-    // (sites-specific By Type heading only appears when filterStats is populated)
-    expect(screen.getAllByText('By Type').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('By Type')).toBeInTheDocument();
     expect(screen.getByText('airbase')).toBeInTheDocument();
     // airbase count = 284 (highest, so sorted first)
     expect(screen.getByText('284')).toBeInTheDocument();
 
-    // Block 4: By Country header (shared with water, but at least 1 instance)
-    expect(screen.getAllByText('By Country').length).toBeGreaterThanOrEqual(1);
+    // Block 4: By Country header
+    expect(screen.getByText('By Country')).toBeInTheDocument();
     expect(screen.getByText('United Arab Emirates')).toBeInTheDocument();
 
     // Block 5: Rejections row — 4 buckets, sites-specific
-    // Using within-range regex to tolerate whitespace from JSX splits
     const rejectionsLine = screen.getByText(/turkey=156.*nocoords=0.*notype=0.*dup=0/);
     expect(rejectionsLine).toBeInTheDocument();
 
     // Block 6: Overpass Health
-    expect(screen.getAllByText('Overpass Health').length).toBeGreaterThanOrEqual(1);
-    // One telemetry row: sites · primary · status=200 · 17524ms · attempts=1 OK
+    expect(screen.getByText('Overpass Health')).toBeInTheDocument();
     expect(
       screen.getByText(/sites.*primary.*status=200.*17524ms.*attempts=1.*OK/),
     ).toBeInTheDocument();
   });
 
-  it('keeps WaterFiltersSection unchanged — water placeholder still renders when water filterStats absent', () => {
-    resetAllStoresForSitesSection(makeSiteFilterStats());
+  it('Plan 11 Redis envelope round-trip: populated siteStore.filterStats renders the full byType + byCountry tables', () => {
+    // Regression test for Plan 11 — confirms that when the Redis envelope
+    // round-trips populated filterStats into siteStore (as it does post-deploy
+    // on a warm sites:v3 key), the Sites tab renders the populated tables.
+    // This is the UAT Test 5 regression check (was failing when Redis echoed
+    // empty stats pre-Plan-11).
+    resetAllStoresForSitesSection(makeSiteFilterStats({ source: 'redis' }));
+    openAndSelectSitesTab();
     render(<DevApiStatus />);
-    expandPanel();
-
-    // Water placeholder: "Water Filters" heading + "loading filter stats…"
-    // This proves the water section null-safe path (truth-21 guard) still
-    // works — i.e. adding SitesFiltersSection did not accidentally trip the
-    // water branch.
-    expect(screen.getByText('Water Filters')).toBeInTheDocument();
-
-    // Both sections render placeholders when their store's filterStats is
-    // null — we have only populated sites' filterStats, so water should
-    // render its placeholder.
-    const loadingRows = screen.getAllByText(/loading filter stats…/);
-    expect(loadingRows.length).toBeGreaterThanOrEqual(1);
+    // source=redis in provenance header proves the envelope round-trip path
+    expect(screen.getByText(/redis/)).toBeInTheDocument();
+    // byType populated: all 5 sites types should appear
+    expect(screen.getByText('airbase')).toBeInTheDocument();
+    expect(screen.getByText('port')).toBeInTheDocument();
+    expect(screen.getByText('oil')).toBeInTheDocument();
+    expect(screen.getByText('naval')).toBeInTheDocument();
+    expect(screen.getByText('nuclear')).toBeInTheDocument();
+    // byCountry populated: 3 countries from the fixture
+    expect(screen.getByText('United Arab Emirates')).toBeInTheDocument();
+    expect(screen.getByText('Israel')).toBeInTheDocument();
+    expect(screen.getByText('Kuwait')).toBeInTheDocument();
   });
 
   it('tolerates an empty overpass array (no Overpass Health block rendered)', () => {
     resetAllStoresForSitesSection(makeSiteFilterStats({ overpass: [] }));
+    openAndSelectSitesTab();
     render(<DevApiStatus />);
-    expandPanel();
 
     // Sites section still renders otherwise (heading present)
-    expect(screen.getAllByText('Sites Filters').length).toBeGreaterThanOrEqual(1);
-    // Overpass Health heading should NOT be visible under the sites section
-    // (water store still has no filterStats so water also won't render its
-    // Overpass block — but since water filterStats is null here, the
-    // heading does not appear at all)
+    expect(screen.getByText('Sites Filters')).toBeInTheDocument();
+    // Overpass Health heading should NOT be visible
     expect(screen.queryByText('Overpass Health')).toBeNull();
   });
 
   it('does not render a Rejections by Type block for sites (asymmetry with water byTypeRejections)', () => {
     resetAllStoresForSitesSection(makeSiteFilterStats());
+    openAndSelectSitesTab();
     render(<DevApiStatus />);
-    expandPanel();
 
     // Sites section intentionally omits a "Rejections by Type" block because
     // the sites adapter uses a single combined Overpass query rather than
-    // per-type queries (see JSDoc on SitesFiltersSection). When only sites
-    // filterStats is populated (water is null), the "Rejections by Type"
-    // heading should not appear anywhere.
+    // per-type queries.
     expect(screen.queryByText('Rejections by Type')).toBeNull();
   });
 });

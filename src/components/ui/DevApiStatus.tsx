@@ -8,11 +8,10 @@ import { useNewsStore } from '@/stores/newsStore';
 import { useMarketStore } from '@/stores/marketStore';
 import { useWeatherStore } from '@/stores/weatherStore';
 import { useWaterStore } from '@/stores/waterStore';
+import { useUIStore } from '@/stores/uiStore';
 import { useLLMStatusPolling } from '@/hooks/useLLMStatusPolling';
 import type { LLMStatus } from '@/hooks/useLLMStatusPolling';
-
-/** Stuck threshold: no update in 2 minutes while still 'loading' */
-const STUCK_THRESHOLD_MS = 120_000;
+import { effectiveStatus } from '@/lib/apiStatus';
 
 interface FetchEntry {
   ok: boolean;
@@ -34,14 +33,6 @@ interface ApiRow {
 }
 
 /* ---------- Helpers ---------- */
-
-function effectiveStatus(status: string, count: number, lastFetch: number | null): string {
-  if (status === 'loading' && lastFetch && Date.now() - lastFetch > STUCK_THRESHOLD_MS)
-    return 'stuck';
-  if (status === 'loading' && !lastFetch) return 'init';
-  if (status === 'connected' && count === 0) return 'empty';
-  return status;
-}
 
 function statusColor(eff: string): string {
   switch (eff) {
@@ -299,13 +290,191 @@ function LLMPipelineSection({ llmStatus }: { llmStatus: LLMStatus }) {
   );
 }
 
+/* ---------- Tab Button (Plan 12 G6) ---------- */
+
+function TabButton({
+  active,
+  onClick,
+  indicator,
+  testid,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  indicator?: 'red';
+  testid: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      role="tab"
+      aria-selected={active}
+      data-testid={testid}
+      onClick={onClick}
+      className={`flex items-center gap-1 rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${
+        active ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white/80'
+      }`}
+    >
+      {children}
+      {indicator === 'red' && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+    </button>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+/* ---------- Overview Tab (API table + LLM Pipeline, Plan 12 G6) ---------- */
+
+function DevApiStatusOverviewTab({
+  rows,
+  llmStatus,
+  expandedRow,
+  setExpandedRow,
+}: {
+  rows: ApiRow[];
+  llmStatus: LLMStatus;
+  expandedRow: string | null;
+  setExpandedRow: (s: string | null) => void;
+}) {
+  return (
+    <>
+      {/* Table */}
+      <table className="w-full">
+        <thead>
+          <tr className="text-white/40">
+            <th className="pr-1 text-left font-normal">Source</th>
+            <th className="pr-1 text-left font-normal">St</th>
+            <th className="pr-1 text-right font-normal">Cnt</th>
+            <th className="pr-1 text-right font-normal">Avg</th>
+            <th className="pr-1 text-right font-normal">Rate</th>
+            <th className="pr-1 text-right font-normal">Next</th>
+            <th className="pr-1 text-right font-normal">Age</th>
+            <th className="text-center font-normal">Err</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const eff = effectiveStatus(r.status, r.count, r.lastFetch);
+            const color = statusColor(eff);
+            const isExpanded = expandedRow === r.name;
+            return (
+              <tr
+                key={r.name}
+                className="cursor-pointer hover:bg-white/5"
+                onClick={() => setExpandedRow(isExpanded ? null : r.name)}
+              >
+                <td className="pr-1">{r.name}</td>
+                <td className="pr-1 whitespace-nowrap">
+                  <span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />{' '}
+                  <span style={{ color }} className="text-[9px]">
+                    {statusLabel(eff)}
+                  </span>
+                </td>
+                <td className="pr-1 text-right">{r.count}</td>
+                <td className="pr-1 text-right text-white/50">
+                  {avgResponseTime(r.recentFetches)}
+                </td>
+                <td className="pr-1 text-right text-white/50">{successRate(r.recentFetches)}</td>
+                <td className="pr-1 text-right text-white/50">
+                  {formatCountdown(r.nextPollAt, r.isOneShot, r.status)}
+                </td>
+                <td className="pr-1 text-right">{formatAge(r.lastFetch)}</td>
+                <td className="text-center">
+                  {r.lastError ? (
+                    <span
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
+                      title={r.lastError}
+                    />
+                  ) : (
+                    ''
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Expanded error / quality detail */}
+      {expandedRow &&
+        (() => {
+          const row = rows.find((r) => r.name === expandedRow);
+          if (!row) return null;
+          return (
+            <div className="mt-1 rounded border border-white/5 bg-white/5 p-1.5">
+              {row.quality && (
+                <div className="text-[9px] text-white/50">
+                  <span className="font-bold text-white/40">Quality:</span> {row.quality}
+                </div>
+              )}
+              {row.lastError && (
+                <div className="mt-0.5 text-[9px] text-red-400">
+                  <span className="font-bold">Error:</span> {row.lastError}
+                </div>
+              )}
+              {row.note && (
+                <div className="mt-0.5 text-[9px] text-white/40">
+                  <span className="font-bold">Note:</span> {row.note}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+      {/* LLM Pipeline Progress */}
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+          LLM Pipeline
+        </span>
+        <div className="mt-0.5 text-[9px]">
+          <LLMPipelineSection llmStatus={llmStatus} />
+        </div>
+      </div>
+    </>
+  );
+}
+
 /* ---------- Main Component ---------- */
 
 /**
- * Dev-only API status overlay. Shows connection status, data counts,
+ * Dev-only API status modal. Shows connection status, data counts,
  * response times, success rates, poll countdowns, error indicators,
  * data quality metrics, LLM pipeline progress, and copy diagnostics.
- * Only renders when import.meta.env.DEV is true.
+ *
+ * Phase 27.3.1 Plan 12 G6 — refactored from a fixed bottom-left overlay
+ * into a centered modal at z-index var(--z-modal). Open state lives in
+ * uiStore.isDevApiStatusOpen; the Topbar DevApiStatusTrigger opens it.
+ *
+ * Modal has a sticky tab bar with three tabs:
+ *   - Overview: API source table + LLM Pipeline
+ *   - Water:    WaterFiltersSection (R-08 observability)
+ *   - Sites:    SitesFiltersSection (R-05 observability)
+ *
+ * Escape closes the modal FIRST (capture-phase listener) before bubbling
+ * to nav-stack / detail-panel / search Escape handlers.
+ *
+ * Only renders visible UI when import.meta.env.DEV is true AND the modal
+ * is open. When closed, returns null — AppShell's wrapper is harmless.
  */
 export function DevApiStatus() {
   // Tick every 2s to update ages and countdowns
@@ -315,7 +484,6 @@ export function DevApiStatus() {
     return () => clearInterval(id);
   }, []);
 
-  const [collapsed, setCollapsed] = useState(true);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
 
@@ -548,164 +716,124 @@ export function DevApiStatus() {
     }
   };
 
-  if (collapsed) {
-    return (
-      <button
-        onClick={() => setCollapsed(false)}
-        className="fixed bottom-2 left-2 z-[9999] rounded px-2 py-1 font-mono text-[10px] text-white/70 hover:text-white"
-        style={{ backgroundColor: hasIssue ? 'rgba(239,68,68,0.8)' : 'rgba(0,0,0,0.5)' }}
-      >
-        API {hasIssue ? '!' : '~'}
-      </button>
-    );
-  }
+  // Phase 27.3.1 Plan 12 G6 — uiStore-backed modal state
+  const isOpen = useUIStore((s) => s.isDevApiStatusOpen);
+  const activeTab = useUIStore((s) => s.activeDevApiStatusTab);
+  const setTab = useUIStore((s) => s.setDevApiStatusTab);
+  const close = useUIStore((s) => s.closeDevApiStatus);
+
+  // Escape key — capture-phase so DevApiStatus closes BEFORE nav-stack pop /
+  // detail panel close / search modal close (Plan 12 G6 priority contract).
+  // Gated on isOpen so the listener is only active while the modal is visible
+  // (T-27.3.1.12-03 mitigation: listener cleanup on unmount or close).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        close();
+      }
+    };
+    window.addEventListener('keydown', onKey, { capture: true });
+    return () => window.removeEventListener('keydown', onKey, { capture: true });
+  }, [isOpen, close]);
+
+  if (!isOpen) return null;
 
   return (
     <div
-      className="fixed bottom-2 left-2 z-[9999] rounded-md border border-white/10 bg-black/85 p-2 font-mono text-[10px] text-white/80 backdrop-blur-sm"
-      style={{ minWidth: 420 }}
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 'var(--z-modal)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Dev API Status"
+      data-testid="dev-api-status-modal"
     >
-      {/* Header */}
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-white/50">
-          API Status
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => void copyDiagnostics()}
-            className="text-white/40 hover:text-white"
-            title="Copy diagnostics JSON"
-            data-testid="copy-diagnostics"
-          >
-            {copyFeedback ? (
-              <span className="text-green-400">Copied!</span>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            )}
-          </button>
-          <button onClick={() => setCollapsed(true)} className="text-white/40 hover:text-white">
-            x
-          </button>
+      {/* Backdrop — click to close (T-27.3.1.12-04 mitigation: only backdrop
+          clicks close; inner container stops propagation) */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={close}
+        data-testid="dev-api-status-backdrop"
+      />
+
+      {/* Modal container */}
+      <div
+        className="relative flex w-[min(92vw,960px)] max-h-[85vh] flex-col rounded-lg border border-white/10 bg-black/85 font-mono text-[10px] text-white/80 shadow-xl backdrop-blur-sm"
+        onClick={(e) => e.stopPropagation()}
+        data-testid="dev-api-status-container"
+      >
+        {/* Sticky header with tabs */}
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-black/85 px-4 py-3 backdrop-blur-sm">
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+            API Status
+          </h2>
+
+          <div className="flex items-center gap-1" role="tablist">
+            <TabButton
+              active={activeTab === 'overview'}
+              onClick={() => setTab('overview')}
+              indicator={hasIssue ? 'red' : undefined}
+              testid="tab-overview"
+            >
+              Overview
+            </TabButton>
+            <TabButton
+              active={activeTab === 'water'}
+              onClick={() => setTab('water')}
+              testid="tab-water"
+            >
+              Water
+            </TabButton>
+            <TabButton
+              active={activeTab === 'sites'}
+              onClick={() => setTab('sites')}
+              testid="tab-sites"
+            >
+              Sites
+            </TabButton>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void copyDiagnostics()}
+              className="text-white/40 hover:text-white"
+              title="Copy diagnostics JSON"
+              data-testid="copy-diagnostics"
+            >
+              {copyFeedback ? (
+                <span className="text-[10px] text-green-400">Copied!</span>
+              ) : (
+                <CopyIcon />
+              )}
+            </button>
+            <button
+              onClick={close}
+              className="text-white/40 hover:text-white"
+              aria-label="Close dev API status"
+              data-testid="dev-api-status-close"
+            >
+              ×
+            </button>
+          </div>
+        </header>
+
+        {/* Scrollable body — Plan 12 G6 fix: max-h-[85vh] + overflow-y-auto so
+            populated byCountry tables + Overpass Health + per-type rejection
+            buckets all fit without overflowing the viewport */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          {activeTab === 'overview' && (
+            <DevApiStatusOverviewTab
+              rows={rows}
+              llmStatus={llmStatus}
+              expandedRow={expandedRow}
+              setExpandedRow={setExpandedRow}
+            />
+          )}
+          {activeTab === 'water' && <WaterFiltersSection />}
+          {activeTab === 'sites' && <SitesFiltersSection />}
         </div>
       </div>
-
-      {/* Table */}
-      <table className="w-full">
-        <thead>
-          <tr className="text-white/40">
-            <th className="pr-1 text-left font-normal">Source</th>
-            <th className="pr-1 text-left font-normal">St</th>
-            <th className="pr-1 text-right font-normal">Cnt</th>
-            <th className="pr-1 text-right font-normal">Avg</th>
-            <th className="pr-1 text-right font-normal">Rate</th>
-            <th className="pr-1 text-right font-normal">Next</th>
-            <th className="pr-1 text-right font-normal">Age</th>
-            <th className="text-center font-normal">Err</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => {
-            const eff = effectiveStatus(r.status, r.count, r.lastFetch);
-            const color = statusColor(eff);
-            const isExpanded = expandedRow === r.name;
-            return (
-              <tr
-                key={r.name}
-                className="cursor-pointer hover:bg-white/5"
-                onClick={() => setExpandedRow(isExpanded ? null : r.name)}
-              >
-                <td className="pr-1">{r.name}</td>
-                <td className="pr-1 whitespace-nowrap">
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />{' '}
-                  <span style={{ color }} className="text-[9px]">
-                    {statusLabel(eff)}
-                  </span>
-                </td>
-                <td className="pr-1 text-right">{r.count}</td>
-                <td className="pr-1 text-right text-white/50">
-                  {avgResponseTime(r.recentFetches)}
-                </td>
-                <td className="pr-1 text-right text-white/50">{successRate(r.recentFetches)}</td>
-                <td className="pr-1 text-right text-white/50">
-                  {formatCountdown(r.nextPollAt, r.isOneShot, r.status)}
-                </td>
-                <td className="pr-1 text-right">{formatAge(r.lastFetch)}</td>
-                <td className="text-center">
-                  {r.lastError ? (
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
-                      title={r.lastError}
-                    />
-                  ) : (
-                    ''
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {/* Expanded error / quality detail */}
-      {expandedRow &&
-        (() => {
-          const row = rows.find((r) => r.name === expandedRow);
-          if (!row) return null;
-          return (
-            <div className="mt-1 rounded border border-white/5 bg-white/5 p-1.5">
-              {row.quality && (
-                <div className="text-[9px] text-white/50">
-                  <span className="font-bold text-white/40">Quality:</span> {row.quality}
-                </div>
-              )}
-              {row.lastError && (
-                <div className="mt-0.5 text-[9px] text-red-400">
-                  <span className="font-bold">Error:</span> {row.lastError}
-                </div>
-              )}
-              {row.note && (
-                <div className="mt-0.5 text-[9px] text-white/40">
-                  <span className="font-bold">Note:</span> {row.note}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-      {/* LLM Pipeline Progress */}
-      <div className="mt-2 border-t border-white/10 pt-2">
-        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
-          LLM Pipeline
-        </span>
-        <div className="mt-0.5 text-[9px]">
-          <LLMPipelineSection llmStatus={llmStatus} />
-        </div>
-      </div>
-
-      {/* Water Filters diagnostics — Phase 27.3 D-04 (renders only when the
-          server attached filterStats, i.e. non-cached /api/water response) */}
-      <WaterFiltersSection />
-
-      {/* Sites Filters diagnostics — Phase 27.3.1 R-05 D-19 (parity with water;
-          renders when the sites response envelope carries filterStats, which
-          post-Plan-07 is every tier: snapshot / redis / overpass) */}
-      <SitesFiltersSection />
     </div>
   );
 }
