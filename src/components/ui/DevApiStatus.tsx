@@ -818,7 +818,8 @@ function WaterFiltersSection() {
         </>
       )}
 
-      {/* Phase 27.3.1 R-08 D-31 — per-type rejection breakdown */}
+      {/* Phase 27.3.1 R-08 D-31 — per-type rejection breakdown
+          Phase 27.3.1 Plan 10 (G2) — added `turkey=` bucket display. */}
       {Object.keys(filterStats.byTypeRejections).length > 0 && (
         <>
           <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
@@ -826,20 +827,22 @@ function WaterFiltersSection() {
           </div>
           {Object.entries(filterStats.byTypeRejections).map(([type, buckets]) => (
             <div key={type} className="text-[9px] text-white/60">
-              <span className="text-white/40">{type}:</span> excl={buckets.excluded_location} nn=
-              {buckets.not_notable} nname={buckets.no_name} dup={buckets.duplicate} low=
-              {buckets.low_score} nocity={buckets.no_city}
+              <span className="text-white/40">{type}:</span> excl={buckets.excluded_location}{' '}
+              turkey={buckets.excluded_turkey} nn={buckets.not_notable} nname={buckets.no_name} dup=
+              {buckets.duplicate} low={buckets.low_score} nocity={buckets.no_city}
             </div>
           ))}
         </>
       )}
 
-      {/* Total rejections (back-compat + quick-scan view) */}
+      {/* Total rejections (back-compat + quick-scan view).
+          Phase 27.3.1 Plan 10 (G2) — added `turkey=` summed bucket. */}
       <div className="mt-0.5 text-[9px] text-white/60">
         <span className="font-bold text-white/40">Total rejections:</span> excl=
-        {filterStats.rejections.excluded_location} nn={filterStats.rejections.not_notable} nname=
-        {filterStats.rejections.no_name} dup={filterStats.rejections.duplicate} low=
-        {filterStats.rejections.low_score} nocity={filterStats.rejections.no_city}
+        {filterStats.rejections.excluded_location} turkey={filterStats.rejections.excluded_turkey}{' '}
+        nn={filterStats.rejections.not_notable} nname={filterStats.rejections.no_name} dup=
+        {filterStats.rejections.duplicate} low={filterStats.rejections.low_score} nocity=
+        {filterStats.rejections.no_city}
       </div>
 
       {/* Enrichment coverage */}

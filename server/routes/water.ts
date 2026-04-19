@@ -39,6 +39,8 @@ function buildEmptyFilterStats(
   filteredCounts: Record<string, number>;
   rejections: {
     excluded_location: number;
+    /** Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket. */
+    excluded_turkey: number;
     not_notable: number;
     no_name: number;
     duplicate: number;
@@ -49,6 +51,8 @@ function buildEmptyFilterStats(
     string,
     {
       excluded_location: number;
+      /** Phase 27.3.1 Plan 10 (G2) — per-type Turkey country-exclusion bucket. */
+      excluded_turkey: number;
       not_notable: number;
       no_name: number;
       duplicate: number;
@@ -75,6 +79,7 @@ function buildEmptyFilterStats(
     filteredCounts: {},
     rejections: {
       excluded_location: 0,
+      excluded_turkey: 0,
       not_notable: 0,
       no_name: 0,
       duplicate: 0,

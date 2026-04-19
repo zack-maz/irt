@@ -127,14 +127,25 @@ export const waterFacilityEntitySchema = z
   })
   .passthrough();
 
-const rejectionsSchema = z.object({
-  excluded_location: z.number(),
-  not_notable: z.number(),
-  no_name: z.number(),
-  duplicate: z.number(),
-  low_score: z.number(),
-  no_city: z.number(),
-});
+/**
+ * Phase 27.3.1 Plan 10 (G2) — `excluded_turkey` added as a required bucket
+ * alongside the six pre-existing ones. The shape is used both in
+ * `rejections` (summed) and as the inner value of `byTypeRejections`.
+ * `.strict()` rejects unknown bucket names — only the explicitly-listed
+ * seven keys are accepted, so a bucket-name typo or a future rename surfaces
+ * as a validation failure rather than silent data loss.
+ */
+const rejectionsSchema = z
+  .object({
+    excluded_location: z.number(),
+    excluded_turkey: z.number(),
+    not_notable: z.number(),
+    no_name: z.number(),
+    duplicate: z.number(),
+    low_score: z.number(),
+    no_city: z.number(),
+  })
+  .strict();
 
 /** Phase 27.3.1 R-08 D-29 — Overpass fetch telemetry record. */
 const overpassFetchRecordSchema = z.object({

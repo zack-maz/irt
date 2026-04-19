@@ -41,6 +41,8 @@ export interface WaterFilterStats {
   /** Summed across all facility types — preserved for back-compat. */
   rejections: {
     excluded_location: number;
+    /** Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket. Mirrors `WaterFilterStats.rejections.excluded_turkey` in server/adapters/overpass-water.ts. */
+    excluded_turkey: number;
     not_notable: number;
     no_name: number;
     duplicate: number;
@@ -48,11 +50,13 @@ export interface WaterFilterStats {
     /** Rejected because no nearby city (150km) AND no wikidata/wikipedia ref. Phase 27.3 Plan 04. */
     no_city: number;
   };
-  /** Phase 27.3.1 R-08 D-31 — per-facility-type rejection breakdown. */
+  /** Phase 27.3.1 R-08 D-31 — per-facility-type rejection breakdown (Plan 10 G2 added excluded_turkey). */
   byTypeRejections: Record<
     string,
     {
       excluded_location: number;
+      /** Phase 27.3.1 Plan 10 (G2) — per-type Turkey country-exclusion bucket. */
+      excluded_turkey: number;
       not_notable: number;
       no_name: number;
       duplicate: number;

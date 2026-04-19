@@ -5,6 +5,7 @@ import {
   normalizeWaterElement,
   isPriorityCountry,
   isNotable,
+  hasName,
   hasCapacityData,
   FACILITY_TYPE_LABELS,
   extractCapacityTags,
@@ -105,8 +106,19 @@ describe('isPriorityCountry', () => {
     expect(isPriorityCountry(26.8, 30.8)).toBe(true);
   });
 
-  it('returns true for coords near Turkey SE (37.9, 40.2) — Round 3 expansion', () => {
-    expect(isPriorityCountry(37.9, 40.2)).toBe(true);
+  // Phase 27.3.1 Plan 10 (G2): Turkey removed from PRIORITY_COUNTRIES.
+  // The assertion flipped from Round 3's `.toBe(true)`. Coord (39.5, 40.0)
+  // is inside the 600km-from-Diyarbakir carve-out AND its nearest centroid
+  // is Turkey (39.0, 35.2). Under Round 3's Turkey-in-priority set this
+  // was true; under Plan 10 it is false. This is the primary source of
+  // truth that Turkey is NOT in PRIORITY_COUNTRIES.
+  //
+  // Note: the pre-Plan-10 fixture used (37.9, 40.2) — that coordinate's
+  // nearest centroid actually resolves to Syria (378km) not Turkey
+  // (~430km), so it was a latent bug in the Round 3 test. Plan 10 fixes
+  // the fixture to a coordinate whose attribution is unambiguously Turkey.
+  it('returns false for eastern-central Turkey coord (39.5, 40.0) — Plan 10 G2 removed Turkey', () => {
+    expect(isPriorityCountry(39.5, 40.0)).toBe(false);
   });
 
   it('returns true for coords near Yemen (15.6, 48.5) — Round 3 expansion', () => {
@@ -396,13 +408,36 @@ describe('normalizeWaterElement', () => {
     // tests below now expect a SECOND signal alongside the priority-country
     // bonus to admit; the bare-name-in-priority versions are kept as
     // regression locks proving the new gate fires.
-    it('admits Turkish named reservoir with wikidata (Round 3 priority + R-02 2-of-3)', () => {
+    // Phase 27.3.1 Plan 10 (G2): rewritten from pre-Plan-10 admit case.
+    // Pre-Plan-10 a named Turkish reservoir with wikidata admitted via
+    // Round 3's priority-country expansion. Plan 10 drops Turkey from
+    // PRIORITY_COUNTRIES AND adds the `excluded_turkey` reject branch so
+    // coordinates that resolve to Turkey via nearest-centroid (and that slip
+    // past the geographic isExcludedLocation 600km rule) now always reject.
+    //
+    // Coord (39.5, 40.0) chosen because nearest-centroid is Turkey
+    // (39.0, 35.2) at 417km; (37.9, 40.2) in the old test actually
+    // resolves to Syria — the 600km-from-Diyarbakir geographic band
+    // DOES include coordinates whose nearest centroid is a neighbor
+    // (Syria here), so we need a coord that falls strictly inside
+    // Turkey by centroid to exercise the new branch.
+    it('Plan 10 G2 regression: Turkish named reservoir with wikidata rejects via excluded_turkey', () => {
+      const rejections = {
+        excluded_location: 0,
+        excluded_turkey: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
       const el = {
         type: 'node' as const,
         id: 320,
-        // SE Turkey (within 600km of Diyarbakir so isExcludedLocation doesn't fire)
-        lat: 37.9,
-        lon: 40.2,
+        // Eastern-central Turkey (nearest centroid = Turkey; distFromSE
+        // Diyarbakir ~179km so isExcludedLocation does not fire).
+        lat: 39.5,
+        lon: 40.0,
         tags: {
           natural: 'water',
           water: 'reservoir',
@@ -410,18 +445,35 @@ describe('normalizeWaterElement', () => {
           wikidata: 'Q1234567',
         },
       };
-      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.excluded_turkey).toBe(1);
+      // Not routed to not_notable / no_name — the Turkey branch fires first.
+      expect(rejections.not_notable).toBe(0);
+      expect(rejections.no_name).toBe(0);
     });
 
-    it('rejects bare-named Turkish reservoir (Phase 27.3.1 R-02 regression lock)', () => {
+    it('Plan 10 G2: bare-named Turkish reservoir rejects via excluded_turkey (bucket changed from not_notable)', () => {
+      const rejections = {
+        excluded_location: 0,
+        excluded_turkey: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
       const el = {
         type: 'node' as const,
-        id: 320,
-        lat: 37.9,
-        lon: 40.2,
+        id: 321,
+        lat: 39.5,
+        lon: 40.0,
         tags: { natural: 'water', water: 'reservoir', name: 'Karakaya Baraj Gölü' },
       };
-      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      // Pre-Plan-10 this hit not_notable (R-02 2-of-3 regression lock).
+      // Plan 10 moves Turkey ahead of the compound gate so excluded_turkey fires.
+      expect(rejections.excluded_turkey).toBe(1);
+      expect(rejections.not_notable).toBe(0);
     });
 
     it('admits Egyptian named dam with capacity (operator alone is not a notability signal)', () => {
@@ -489,17 +541,32 @@ describe('normalizeWaterElement', () => {
   });
 
   describe('unnamed facility labeling', () => {
-    it('produces generic type label when OSM name tag is absent (wikidata provides notability)', () => {
+    // Phase 27.3.1 Plan 10 (G1): rewritten from pre-Plan-10 admit case.
+    // Pre-Plan-10 hasName shortcut via isNotable let a wikidata-only element
+    // admit with a bare "Dam" fallback label — UAT Test 2 called those out
+    // as noise ("Dam near X" after the reverse-geocoder). Plan 10 tightens
+    // hasName to require real name/name:en/operator, so this element now
+    // lands in the no_name bucket.
+    it('Plan 10 G1 regression: wikidata-only element (no name tag) rejects with no_name bucket', () => {
+      const rejections = {
+        excluded_location: 0,
+        excluded_turkey: 0,
+        not_notable: 0,
+        no_name: 0,
+        duplicate: 0,
+        low_score: 0,
+        no_city: 0,
+      };
       const el = {
         type: 'node' as const,
         id: 400,
         lat: 33.2,
         lon: 43.7, // Iraq (priority)
-        tags: { waterway: 'dam', wikidata: 'Q999' }, // wikidata (+40) + priority (+15) = 55 >= 25
+        tags: { waterway: 'dam', wikidata: 'Q999' }, // wikidata only — no name/name:en/operator
       };
-      const result = normalizeWaterElement(el, stressLookup);
-      expect(result).not.toBeNull();
-      expect(result!.label).toBe('Dam');
+      const result = normalizeWaterElement(el, stressLookup, rejections);
+      expect(result).toBeNull();
+      expect(rejections.no_name).toBe(1);
     });
 
     it('produces named label when OSM name tag exists', () => {
@@ -1247,13 +1314,15 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     lon: 51.4,
     tags: { waterway: 'dam', name: 'Tehran Test Dam', volume: '1000000' },
   };
-  // Turkey-area reservoir with name + capacity → admits via priority + capacity.
+  // Turkey-area reservoir with name + capacity.
   // Coords (39.5, 40.0) chosen so:
   //  - nearest-centroid resolves to Turkey (39.0, 35.2) at ~417km
   //  - distFromSE (Diyarbakir 37.9, 40.2) is ~179km, well under the 600km
   //    western-Turkey exclusion cap
-  // Phase 27.3.1 R-02: capacity supplies the 2nd compound signal alongside
-  // isPriorityCountry so byCountry.Turkey records the admit.
+  // Phase 27.3.1 Plan 10 (G2): Turkey now rejects via the `excluded_turkey`
+  // bucket in computeAdmissionDecision — the branch fires BEFORE the hasName
+  // + compound-gate checks. Used below as the regression-lock fixture that
+  // proves Turkey admits are blocked and the bucket is populated.
   const turkeyReservoir = {
     type: 'node',
     id: 1002,
@@ -1353,8 +1422,13 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     expect(stats.overpass.filter((r) => r.facilityType === 'desalination').length).toBe(1);
   });
 
-  it('byCountry tallies admitted facilities per country', async () => {
-    // 1 Iran dam + 1 Turkey reservoir + 1 Saudi reservoir + 1 Iran desal
+  it('byCountry tallies admitted facilities per country (Turkey excluded via Plan 10 G2)', async () => {
+    // 1 Iran dam + 1 Turkey reservoir + 1 Saudi reservoir + 1 Iran desal.
+    // Phase 27.3.1 Plan 10 G2: turkeyReservoir is the regression-lock fixture.
+    // It passes through the Overpass mock, gets normalized, then rejects via
+    // the excluded_turkey branch in computeAdmissionDecision — byCountry
+    // should NOT include a Turkey entry, and the excluded_turkey bucket
+    // should register the reject.
     fetchMock
       .mockResolvedValueOnce(overpassSuccess([iranDam]))
       .mockResolvedValueOnce(overpassSuccess([turkeyReservoir, saudiReservoir]))
@@ -1362,8 +1436,12 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
 
     const { stats } = await fetchWaterFacilities();
     expect(stats.byCountry.Iran).toEqual(expect.objectContaining({ dam: 1, desalination: 1 }));
-    expect(stats.byCountry.Turkey).toEqual(expect.objectContaining({ reservoir: 1 }));
     expect(stats.byCountry['Saudi Arabia']).toEqual(expect.objectContaining({ reservoir: 1 }));
+    // Plan 10 G2: Turkey must not appear in byCountry admits.
+    expect(stats.byCountry.Turkey).toBeUndefined();
+    // excluded_turkey fires on the Turkish reservoir.
+    expect(stats.rejections.excluded_turkey).toBe(1);
+    expect(stats.byTypeRejections.reservoirs?.excluded_turkey).toBe(1);
   });
 
   it('byTypeRejections increments per-query buckets in lock-step with summed rejections', async () => {
@@ -1712,5 +1790,225 @@ describe('Phase 27.3.1 R-06 — computeAdmissionDecision', () => {
       null,
     );
     expect(d).toEqual({ verdict: 'reject', bucket: 'not_notable' });
+  });
+});
+
+// ---------- Phase 27.3.1 Plan 10 — G1 + G2 gap closure ----------
+//
+// Plan 10 closes two UAT gaps:
+//   - G1: hasName tightened to require real name/name:en/operator (wikidata
+//     shortcut removed) so "Dam near X" generic labels disappear.
+//   - G2: Turkey removed from PRIORITY_COUNTRIES and a new excluded_turkey
+//     reject branch added to computeAdmissionDecision, evaluated AFTER the
+//     existing geographic excluded_location guard.
+//
+// Tests below cover: direct hasName behavior (1-6), PRIORITY_COUNTRIES
+// membership (7), excluded_turkey reject (8), decision ordering (9), and
+// regression checks on pre-Plan-10 admit paths (10-11) plus an end-to-end
+// fetchWaterFacilities integration test (12).
+
+describe('Phase 27.3.1 Plan 10 — G1 + G2 gap closure', () => {
+  const mockStress: WaterStressIndicators = {
+    bws_raw: 3.5,
+    bws_score: 3.5,
+    bws_label: 'High',
+    drr_score: 2.0,
+    gtd_score: 1.5,
+    sev_score: 2.5,
+    iav_score: 3.0,
+    compositeHealth: 0.5,
+  };
+  const stressLookup = () => mockStress;
+
+  // ---------- hasName tightening (G1) ----------
+
+  it('Test 1 (G1): hasName rejects wikidata-only element', () => {
+    // Pre-Plan-10 this returned true via the isNotable shortcut.
+    expect(hasName({ wikidata: 'Q123' })).toBe(false);
+  });
+
+  it('Test 2 (G1): hasName rejects wikipedia-only element', () => {
+    expect(hasName({ wikipedia: 'en:Foo' })).toBe(false);
+  });
+
+  it('Test 2b (G1): hasName rejects wikipedia:en-only element', () => {
+    // Pre-Plan-10 Object.keys().some(k => k.startsWith('wikipedia:')) admitted.
+    expect(hasName({ 'wikipedia:en': 'Foo Dam' })).toBe(false);
+  });
+
+  it('Test 3 (G1): hasName accepts real name tag', () => {
+    expect(hasName({ name: 'Mosul Dam' })).toBe(true);
+  });
+
+  it('Test 4 (G1): hasName accepts name:en tag', () => {
+    expect(hasName({ 'name:en': 'Foo Dam' })).toBe(true);
+  });
+
+  it('Test 5 (G1): hasName accepts operator tag alone (primary motivation for keeping operator as a valid admission signal)', () => {
+    expect(hasName({ operator: 'Generic Water Co' })).toBe(true);
+  });
+
+  it('Test 6 (G1): hasName rejects whitespace-only name', () => {
+    expect(hasName({ name: '   ' })).toBe(false);
+    expect(hasName({ 'name:en': '\t' })).toBe(false);
+    expect(hasName({ operator: '  ' })).toBe(false);
+  });
+
+  // ---------- PRIORITY_COUNTRIES membership (G2) ----------
+
+  it('Test 7 (G2): Turkey-central coord (39.5, 40.0) is NOT a priority country (Plan 10 removed Turkey)', () => {
+    // This coordinate is inside the 600km Diyarbakir radius (distFromSE ~179km)
+    // so isExcludedLocation does NOT fire — the only reason this facility would
+    // have admitted pre-Plan-10 was priority country membership. That's now
+    // gone; the excluded_turkey branch catches it instead.
+    expect(isPriorityCountry(39.5, 40.0)).toBe(false);
+    // The Iraq/Iran/Saudi priority-country set still holds. Spot-check one.
+    expect(isPriorityCountry(33.2, 43.7)).toBe(true);
+  });
+
+  // ---------- excluded_turkey reject branch (G2) ----------
+
+  it('Test 8 (G2): Turkish coordinate rejects via excluded_turkey bucket (NOT no_name, NOT not_notable)', () => {
+    // Wiki-backed named reservoir in Turkey — pre-Plan-10 the old hasName +
+    // 2-of-3 compound gate (priority + isNotable) admitted. Plan 10's Turkey
+    // branch catches it first, so the bucket is `excluded_turkey`.
+    const d = computeAdmissionDecision(
+      {
+        natural: 'water',
+        water: 'reservoir',
+        name: 'Karakaya Dam Reservoir',
+        wikidata: 'Q123',
+      },
+      39.5,
+      40.0,
+      'reservoir',
+      false, // inPriority is false because Plan 10 removed Turkey
+      70,
+      null,
+    );
+    expect(d).toEqual({ verdict: 'reject', bucket: 'excluded_turkey' });
+  });
+
+  // ---------- Decision ordering (G2 after excluded_location) ----------
+
+  it('Test 9 (G2): decision order — excluded_location fires BEFORE excluded_turkey for western Turkey', () => {
+    // Istanbul (41.0, 29.0) is in the western-Turkey band caught by the
+    // 600km-from-Diyarbakir rule — isExcludedLocation fires. The bucket
+    // should stay `excluded_location`, not `excluded_turkey`, so the
+    // semantic split is preserved (geographic vs country-attribution).
+    const d = computeAdmissionDecision(
+      { natural: 'water', water: 'reservoir', name: 'Istanbul Reservoir' },
+      41.0,
+      29.0,
+      'reservoir',
+      false,
+      50,
+      null,
+    );
+    expect(d.verdict).toBe('reject');
+    if (d.verdict === 'reject') expect(d.bucket).toBe('excluded_location');
+  });
+
+  // ---------- Regression checks on pre-Plan-10 admit paths ----------
+
+  it('Test 10: Iranian named reservoir with capacity still admits (R-02 2-of-3 unchanged)', () => {
+    // Plan 10's changes target Turkey and the wikidata-only shortcut only.
+    // An Iran priority + name + capacity admit must still pass.
+    const el = {
+      type: 'node' as const,
+      id: 4001,
+      lat: 35.6,
+      lon: 51.4,
+      tags: {
+        natural: 'water',
+        water: 'reservoir',
+        name: 'Tehran Test Reservoir',
+        volume: '8000000',
+      },
+    };
+    expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+  });
+
+  it('Test 11: Saudi named desalination still admits via desalination exemption (Plan 04 unchanged)', () => {
+    const el = {
+      type: 'node' as const,
+      id: 4002,
+      lat: 24.4,
+      lon: 54.4,
+      tags: { man_made: 'desalination_plant', name: 'Abu Dhabi Desal' },
+    };
+    expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+  });
+
+  // ---------- End-to-end fetchWaterFacilities integration (G2) ----------
+
+  describe('Test 12 (G2): end-to-end Overpass → fetchWaterFacilities', () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('mock Overpass response with one Turkish wiki-backed reservoir → stats.rejections.excluded_turkey = 1 and facility absent from returned array', async () => {
+      const turkishAdmit = {
+        type: 'node',
+        id: 99_901,
+        lat: 39.5,
+        lon: 40.0,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Pre-Plan-10 Admitted Turkish Dam',
+          wikidata: 'Q1234567',
+          volume: '5000000',
+        },
+      };
+      const iraqiAdmit = {
+        type: 'node',
+        id: 99_902,
+        lat: 33.2,
+        lon: 43.7,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Iraqi Reservoir',
+          volume: '2000000',
+        },
+      };
+      fetchMock
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ elements: [] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        ) // dams
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ elements: [turkishAdmit, iraqiAdmit] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        ) // reservoirs
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ elements: [] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        ); // desalination
+
+      const { facilities, stats } = await fetchWaterFacilities();
+      // Turkish facility absent; Iraqi admits.
+      expect(facilities.find((f) => f.id === 'water-99901')).toBeUndefined();
+      expect(facilities.find((f) => f.id === 'water-99902')).toBeDefined();
+      // Bucket fired once on the reservoirs query.
+      expect(stats.rejections.excluded_turkey).toBe(1);
+      expect(stats.byTypeRejections.reservoirs?.excluded_turkey).toBe(1);
+      // And Turkey is absent from byCountry admits.
+      expect(stats.byCountry.Turkey).toBeUndefined();
+    });
   });
 });

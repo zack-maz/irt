@@ -58,12 +58,23 @@ const COUNTRY_CENTROIDS_FULL: [string, number, number][] = [
  * Countries where all facility types are kept (conflict zones with strategic water infrastructure).
  *
  * Phase 27.3 Round 3 (reservoirs-missing-after-05) — expanded to the full Middle
- * East so that named dams/reservoirs from Turkey (Tigris/Euphrates headwaters),
- * Egypt (Nile basin, Aswan Dam), and the Gulf states (Saudi Arabia, UAE, Kuwait,
- * Qatar, Yemen) admit via REV-2 without requiring a wikidata tag. User target
- * is ~400 dams and ~400 reservoirs across the map; keeping priority set tight
- * to only the original 7 starved non-wiki features (bulk of OSM water coverage
- * in the region lives in Turkey/Egypt/Saudi Arabia).
+ * East so that named dams/reservoirs from Egypt (Nile basin, Aswan Dam) and
+ * the Gulf states (Saudi Arabia, UAE, Kuwait, Qatar, Yemen) admit via REV-2
+ * without requiring a wikidata tag. User target is ~400 dams and ~400
+ * reservoirs across the map.
+ *
+ * Phase 27.3.1 Plan 10 (G2 gap closure): Turkey REMOVED after UAT showed 165
+ * of 602 admits (27%) concentrated in Turkey — more than the whole conflict
+ * core (177 across Iran+Iraq+Syria+Lebanon+Israel+Yemen combined). The new
+ * `excluded_turkey` reject branch in `computeAdmissionDecision` catches any
+ * Turkey country-attribution that slipped past the existing geographic
+ * `isExcludedLocation` guard (which only catches western/central Turkey via
+ * the 600km-from-Diyarbakir rule).
+ *
+ * Note: this plan ONLY removes Turkey. No additions. DIAGNOSIS §G2 also
+ * floated adding Pakistan as a parallel expansion — that is out of scope for
+ * G1+G2 (UAT evidence was strictly about Turkey over-representation). Revisit
+ * Pakistan in a future follow-up if post-regen coverage looks thin.
  */
 const PRIORITY_COUNTRIES = new Set([
   'Israel',
@@ -74,7 +85,6 @@ const PRIORITY_COUNTRIES = new Set([
   'Iran',
   'Afghanistan',
   // Added Round 3 (2026-04-18): major Middle East water infrastructure holders.
-  'Turkey',
   'Egypt',
   'Saudi Arabia',
   'United Arab Emirates',
@@ -127,13 +137,25 @@ export function isNotable(tags: Record<string, string>): boolean {
 }
 
 /**
- * Relaxed notability: any name tag at all (any script). Used for dams
- * where volume is lower and named = significant.
+ * Phase 27.3.1 R-03 / D-05 (Plan 10 gap closure G1): real-name requirement.
+ * An OSM element is admitted only when it carries `name`, `name:en`, or
+ * `operator` with a non-empty trimmed string.
+ *
+ * The old `isNotable(tags)` shortcut (wikidata / wikipedia / `wikipedia:*`
+ * keys) is REMOVED — UAT G1 confirmed wikidata-only elements cleared this
+ * gate but then lacked a Latin-script name downstream, producing "Dam near
+ * X" generic labels from the reverse-geocode labeler. Those facilities now
+ * land in the `no_name` rejection bucket instead (DIAGNOSIS §G1: ~139
+ * admits pre-Plan-10 came in via this wikidata-only path).
+ *
+ * isNotable remains a separate signal used inside the D-06 compound gate
+ * (isNotable OR isPriorityCountry OR hasCapacityData, 2-of-3) — it just
+ * no longer grants hasName the way it used to.
  */
 export function hasName(tags: Record<string, string>): boolean {
-  if (isNotable(tags)) return true;
   if (tags['name']?.trim()) return true;
   if (tags['name:en']?.trim()) return true;
+  if (tags['operator']?.trim()) return true;
   return false;
 }
 
@@ -550,6 +572,15 @@ export interface WaterFilterStats {
   /** Summed across all facility types — preserved for back-compat with pre-R-08 UI. */
   rejections: {
     excluded_location: number;
+    /**
+     * Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket. Mirrors
+     * the sites adapter `excluded_turkey` bucket (overpass.ts). Counts
+     * facilities that slipped past the geographic `excluded_location` rule
+     * but nearest-centroid to Turkey. Kept semantically distinct from
+     * `excluded_location`: the former is "geographic 600km-from-Diyarbakir",
+     * this is "country attribution".
+     */
+    excluded_turkey: number;
     not_notable: number;
     no_name: number;
     duplicate: number;
@@ -562,13 +593,16 @@ export interface WaterFilterStats {
    * which gate each type hits hardest instead of the summed view. Keys are
    * the FACILITY_QUERIES labels ('dams' | 'reservoirs' | 'desalination')
    * matching `rawCounts` / `filteredCounts`. Each sub-object carries the same
-   * six buckets as `rejections`. The summed `rejections` field is the sum of
-   * these per-type buckets — both stay in lock-step.
+   * seven buckets as `rejections` (Plan 10 added excluded_turkey). The summed
+   * `rejections` field is the sum of these per-type buckets — both stay in
+   * lock-step.
    */
   byTypeRejections: Record<
     string,
     {
       excluded_location: number;
+      /** Phase 27.3.1 Plan 10 (G2) — per-type Turkey country-exclusion bucket. */
+      excluded_turkey: number;
       not_notable: number;
       no_name: number;
       duplicate: number;
@@ -640,20 +674,25 @@ export type AdmissionVerdict =
  * Per-facility admission decision — Phase 27.3.1 R-06 D-20 consolidation.
  *
  * Subsumes the previously-scattered rejection branches in normalizeWaterElement
- * into one ordered, short-circuiting decision function. The five reject
- * branches below reproduce the exact semantics present after Plan 02 (R-03
- * admission gate) + Plan 04 (R-02 2-of-3 compound + desalination exemption)
- * landed — this is a pure refactor, not a rule change.
+ * into one ordered, short-circuiting decision function. The reject branches
+ * below reproduce the exact semantics present after Plan 02 (R-03 admission
+ * gate) + Plan 04 (R-02 2-of-3 compound + desalination exemption) + Plan 10
+ * (G1 hasName tightening + G2 Turkey country-exclusion) landed.
  *
  * Decision order (first-match-wins, same as pre-refactor scattered branches):
- *   1. excluded_location — isExcludedLocation(coords)
- *   2. no_name           — !hasName(tags)                        [R-03 D-05 / D-07]
- *   3. not_notable       — 2-of-3 compound gate fails            [R-02 Plan 04]
+ *   1. excluded_location — isExcludedLocation(coords)             [geographic]
+ *   2. excluded_turkey   — nearestCountryName === 'Turkey'        [Plan 10 G2]
+ *                          (only reachable if excluded_location missed — eastern
+ *                          Turkey that escapes the 600km-from-Diyarbakir rule)
+ *   3. no_name           — !hasName(tags)                         [R-03 D-05 / D-07]
+ *                          (Plan 10 G1: hasName no longer shortcuts on
+ *                          wikidata — must be a real name/name:en/operator)
+ *   4. not_notable       — 2-of-3 compound gate fails             [R-02 Plan 04]
  *                          (exempted for desalination, Plan 04 Branch 2c)
- *   4. low_score         — score < MIN_NOTABILITY_SCORE          [R-03 D-08]
- *   5. no_city           — reservoir + no city + no wiki + not priority-named
+ *   5. low_score         — score < MIN_NOTABILITY_SCORE           [R-03 D-08]
+ *   6. no_city           — reservoir + no city + no wiki + not priority-named
  *                          [Plan 27.3-04 / Plan 27.3-05 scoping]
- *   6. admit
+ *   7. admit
  *
  * `duplicate` bucket is NOT decided here — it is produced post-normalization
  * in fetchWaterFacilities during spatial dedup, so this helper never returns
@@ -671,18 +710,32 @@ export function computeAdmissionDecision(
   score: number,
   nearestCity: ReturnType<typeof findNearestCity>,
 ): AdmissionVerdict {
-  // 1. Geographic exclusion (western Turkey, Central Asian non-ME states).
+  // 1. Geographic exclusion (western Turkey 600km-from-Diyarbakir rule,
+  //    Central Asian non-ME states).
   if (isExcludedLocation(lat, lng)) {
     return { verdict: 'reject', bucket: 'excluded_location' };
   }
 
-  // 2. R-03 D-05 / D-07: hasName is mandatory for ALL facility types,
-  //    ALL countries (no priority-country bypass).
+  // 2. Phase 27.3.1 Plan 10 G2 — Turkey country-exclusion bucket. Mirrors
+  //    the sites adapter `excluded_turkey` bucket (overpass.ts). Only
+  //    reachable for coordinates that slipped past the geographic rule
+  //    above (i.e. eastern Turkey inside the 600km radius of Diyarbakir
+  //    that the SE-Turkey conflict-zone carve-out was designed to keep).
+  //    UAT showed 165 Turkey admits pre-Plan-10 — DevApiStatus now surfaces
+  //    the rejection count explicitly rather than scattering across
+  //    not_notable / no_name.
+  if (nearestCountryName(lat, lng) === 'Turkey') {
+    return { verdict: 'reject', bucket: 'excluded_turkey' };
+  }
+
+  // 3. R-03 D-05 / D-07: hasName is mandatory for ALL facility types,
+  //    ALL countries (no priority-country bypass). Plan 10 G1 removed the
+  //    wikidata shortcut — hasName requires real name/name:en/operator.
   if (!hasName(tags)) {
     return { verdict: 'reject', bucket: 'no_name' };
   }
 
-  // 3. R-02 Plan 04: compound 2-of-3 gate, EXEMPTED for desalination.
+  // 4. R-02 Plan 04: compound 2-of-3 gate, EXEMPTED for desalination.
   //    (Desal OSM coverage in ME is sparse — name+type carries enough signal.)
   if (facilityType !== 'desalination') {
     const signalCount = [isNotable(tags), inPriority, hasCapacityData(tags)].filter(Boolean).length;
@@ -691,13 +744,13 @@ export function computeAdmissionDecision(
     }
   }
 
-  // 4. R-03 D-08: MIN_NOTABILITY_SCORE secondary floor. Redundant in practice
+  // 5. R-03 D-08: MIN_NOTABILITY_SCORE secondary floor. Redundant in practice
   //    (low_score=0 in both R-02 refresh runs) but kept as defense-in-depth.
   if (score < MIN_NOTABILITY_SCORE) {
     return { verdict: 'reject', bucket: 'low_score' };
   }
 
-  // 5. Plan 27.3-04 / Plan 27.3-05: reservoir no_city rule. Scoped to
+  // 6. Plan 27.3-04 / Plan 27.3-05: reservoir no_city rule. Scoped to
   //    reservoirs only; exempts named-in-priority and wiki-backed entries.
   const hasWikiRef =
     !!tags.wikidata ||
@@ -806,11 +859,13 @@ async function fetchFacilityType(
 ): Promise<WaterFacility[]> {
   const query = buildQuery(entry.nwr);
 
-  // Phase 27.3.1 R-08 D-31: per-type rejection bucket, six counters mirroring
-  // the summed `rejections` shape. Initialized to zeros so the bucket key
-  // exists in the response even when every facility admits.
+  // Phase 27.3.1 R-08 D-31 / Plan 10 G2: per-type rejection bucket, seven
+  // counters mirroring the summed `rejections` shape (Plan 10 added
+  // excluded_turkey). Initialized to zeros so the bucket key exists in the
+  // response even when every facility admits.
   const typeBucket = {
     excluded_location: 0,
+    excluded_turkey: 0,
     not_notable: 0,
     no_name: 0,
     duplicate: 0,
@@ -931,6 +986,8 @@ export async function fetchWaterFacilities(): Promise<{
     filteredCounts: {},
     rejections: {
       excluded_location: 0,
+      // Phase 27.3.1 Plan 10 (G2) — new Turkey country-exclusion bucket.
+      excluded_turkey: 0,
       not_notable: 0,
       no_name: 0,
       duplicate: 0,

@@ -26,6 +26,8 @@ const emptyStats = {
   filteredCounts: {} as Record<string, number>,
   rejections: {
     excluded_location: 0,
+    // Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket.
+    excluded_turkey: 0,
     not_notable: 0,
     no_name: 0,
     duplicate: 0,
@@ -36,13 +38,14 @@ const emptyStats = {
     string,
     {
       excluded_location: number;
+      excluded_turkey: number; // Phase 27.3.1 Plan 10 (G2)
       not_notable: number;
       no_name: number;
       duplicate: number;
       low_score: number;
       no_city: number;
     }
-  >, // Phase 27.3.1 R-08 D-31
+  >, // Phase 27.3.1 R-08 D-31 (Plan 10 G2 added excluded_turkey)
   byCountry: {} as Record<string, Record<string, number>>, // Phase 27.3.1 R-08 D-28
   overpass: [] as {
     facilityType: string;
