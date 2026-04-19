@@ -347,18 +347,10 @@ function toTitleCase(str: string): string {
 }
 
 /**
- * Terminal-anchored, case-insensitive match for "dam" as the last word of a name.
- * Used to reclassify misclassified-reservoir facilities whose OSM name is ground
- * truth (e.g. "Hub Dam" tagged as natural=water/water=reservoir).
- *
- * Phase 27.3 Plan 05 / UAT Test 8b introduced a broader `/\bdam\b/i` that matched
- * "dam" anywhere in the name. That over-matched reservoir impoundments named after
- * their dam ("Mosul Dam Lake", "Tabqa Dam Reservoir", "Atatürk Dam Reservoir"),
- * draining the reservoir population to zero. The terminal `\s*$` anchor preserves
- * the intended "X Dam" reclassifications while keeping "X Dam Lake" / "X Dam
- * Reservoir" / any other trailing noun out. One-directional: reservoir → dam only.
- *
- * See .planning/debug/reservoirs-missing-after-05.md for the full analysis.
+ * Reclassify reservoir-tagged OSM elements named "X Dam" as dams (tag-wrong
+ * but name ground-truth). Terminal-anchored to avoid over-matching "X Dam
+ * Lake" / "X Dam Reservoir". One-directional: reservoir → dam only.
+ * Detail: .planning/debug/reservoirs-missing-after-05.md (2026-04-18 Round 1 fix).
  */
 const DAM_IN_NAME_RE = /\bdam\s*$/i;
 
