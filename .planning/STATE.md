@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: Ready to execute
-last_updated: '2026-04-19T08:56:33.227Z'
+status: Phase complete — ready for verification
+last_updated: '2026-04-19T09:06:39.434Z'
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 29
-  completed_plans: 25
-  percent: 86
+  completed_plans: 26
+  percent: 90
 ---
 
 # Project State
@@ -22,8 +22,9 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 27.3.1 (water-facility-retry-and-cleanup) — EXECUTING
+Phase: 27.3.1 (water-facility-retry-and-cleanup) — READY FOR VERIFICATION (8/8 plans complete)
 Plan: 8 of 8
+Phase 27.3.1: Plan 08 COMPLETE (R-05 UI layer — SitesFiltersSection added to DevApiStatus.tsx below WaterFiltersSection; 6 observability blocks mirror water exactly: provenance header (source + relativeTime generatedAt), raw/kept summary, per-type byType counts sorted desc, top-12 byCountry table with DoS cap, 4-bucket rejections row (excluded_turkey/no_coords/no_type/duplicate — NO synthetic water-style placeholders per Plan 07 handoff), Overpass Health rows; intentional asymmetries documented in JSDoc: no byTypeRejections split (sites adapter uses one combined Overpass query across 5 types), no score histogram, no enrichment coverage — sites is simpler by design; null-safe placeholder mirrors water truth-21 regression guard; reused module-scope relativeTime helper from Plan 03 (no duplication, no hoist); useSiteStore((s) => s.filterStats) selector per CLAUDE.md convention; +143 lines in DevApiStatus.tsx (869 → 1012); 5 regression tests in new src/**tests**/sitesFiltersSection.test.tsx cover null + populated + asymmetry paths; 791/825 client pass (was 786/820 pre-Plan-08 — exactly +5 new tests, 34 pre-existing failures unchanged), 773/773 server pass, tsc clean; R-05 complete end-to-end — Plan 07 data layer + Plan 08 UI layer)
 Phase 27.3.1: Plan 07 COMPLETE (R-05 sites snapshot parity — src/data/sites.json committed with 720 sites (airbase=284, port=232, oil=99, naval=60, nuclear=45, 152 KB, sorted by id, 6dp coord rounding); server/lib/sitesSnapshot.ts loader mirrors waterSnapshot exactly with in-module cache + graceful fallthrough + defensive source='snapshot' override; three-tier sites route Redis → snapshot → Overpass (refresh-gate only); R-07 invariant documented inline; SiteFilterStats interface + strict Zod schema + siteStore.filterStats + useSiteFetch forwarding — Plan 08 UI consumer ready; scripts/refresh-sites.ts + npm run refresh:sites with atomic tempfile+rename write + security scrub; preemptive loadSitesSnapshot vi.mock added to redis-death.test.ts; desalination confirmed removed from SiteType (CLAUDE.md §26); end-to-end verified: cold → source=snapshot, warm → source=redis; 773/773 server tests pass (+35), tsc clean, client baseline 34 failures unchanged)
 Phase 27.3.1: Plan 06 COMPLETE (R-06 adapter cleanup — computeAdmissionDecision pure-function helper extracted from scattered rejection branches in normalizeWaterElement (D-20); WaterFilterStats field-usage audit inline — all 10 fields live in DevApiStatus, no pruning (D-22); DAM_IN_NAME_RE comment trimmed to 5 lines linking debug doc (D-21); fetchWaterFacilities JSDoc expanded with "fail loud, serve snapshot" contract tied to R-04 snapshot tier (D-23); 4 atomic commits per concern (D-24); 19 new unit tests in the Phase 27.3.1 R-06 describe block covering all reachable decision paths + exemptions + ordering; 138/138 adapter, 738/738 server, tsc clean — zero behavior change; line count 975 → 1031, explanation density over brevity)
 Phase 27.3.1: Plan 05 COMPLETE (R-04 committed snapshot + R-07 multi-user tier — src/data/water-facilities.json committed with 602 facilities (516 dams + 71 reservoirs + 15 desal, 337 KB, sorted by id, 6dp coord rounding); server/lib/waterSnapshot.ts loader with in-module cache + graceful fallthrough; labelUnnamedFacilities extracted to server/lib/waterLabeling.ts; route tier Redis → devFileCache → snapshot → Overpass (refresh-gate only); R-07 invariant documented inline; npm run refresh:water via scripts/refresh-water-facilities.ts with atomic tempfile+rename write; end-to-end verified: cold → source=snapshot, second → source=redis, refresh=true → source=overpass; 719/719 server tests pass)
@@ -256,6 +257,8 @@ _Phase 26.2 was scrapped and renumbered to Phase 27 under v1.4 on 2026-04-08. Or
 - `labelUnnamedFacilities` extracted from `server/routes/water.ts` into `server/lib/waterLabeling.ts` so refresh script + route share the identical pipeline. Preserves Phase 27.3 truth-19 ("never writes 'Unknown'") by sharing the exact function instead of re-implementing. (27.3.1-05, R-04)
 - Plan 03's TODO flipped in water route: dev file cache branch now reports `source='snapshot'` (was `'redis'`). Dev file cache semantically shadows the snapshot tier — they're both cold-start floor, just ephemeral vs committed. (27.3.1-05, R-08 D-30 refinement)
 - Redis-death chaos test updated to mock `loadWaterSnapshot → null`. Pre-Plan-05 the test passed because there was no snapshot tier; with a real 602-facility snapshot on disk, under Redis death `labelUnnamedFacilities` would trigger 134 consecutive 2000ms safe-timeout waits blowing past the 10s test timeout. Mocking preserves the test's original intent (prove no HTTP 500). (27.3.1-05)
+- SitesFiltersSection mirrors WaterFiltersSection layout in DevApiStatus.tsx with intentional 4-bucket rejection asymmetry (excluded_turkey / no_coords / no_type / duplicate) — no synthetic water-style buckets (no_name, not_notable, low_score, no_city) per Plan 07 handoff guidance. Sites has genuinely narrower rejection surface because the adapter uses a single combined Overpass query across 5 types with no compound admission gate, no scoring, and no nearestCity requirement. No per-type byTypeRejections split for the same reason (per-type would require restructuring fetchSites). Module-scope `relativeTime` helper from Plan 03 reused without duplication — confirmed hoisted correctly at import time. (27.3.1-08, R-05 UI layer)
+- Phase 27.3.1 Plan 08 chose a dedicated test file `src/__tests__/sitesFiltersSection.test.tsx` rather than extending the pre-existing failing `devApiStatus.test.tsx` — keeps sites section regression surface independent of the stale `parsed.sources.length === 8` assertion (current rows array has 9 entries including Precip; that failure is pre-existing baseline per deferred-items.md and not fixed by Plan 08). (27.3.1-08)
 
 ## Pending Todos
 
