@@ -900,6 +900,27 @@ async function fetchFacilityType(
  * Fetch water infrastructure facilities from Overpass API.
  * Returns facilities with enrichment fields and filter stats.
  * Uses bbox queries (one per facility type, sequential) instead of country-area unions.
+ *
+ * Failure contract (Phase 27.3.1 R-06 D-23) — fail loud, serve snapshot:
+ *   Each facility-type query tries primary then fallback Overpass mirror
+ *   (see fetchFacilityType). If a specific type fails on BOTH mirrors, that
+ *   type contributes zero facilities but the function continues. If ALL three
+ *   queries fail against both mirrors (succeeded=0), this throws.
+ *
+ *   No circuit breaker, no exponential backoff, no request-level retry
+ *   beyond the two-mirror fallback. This is intentional: Phase 27.3.1 R-04
+ *   (committed src/data/water-facilities.json snapshot) means a cold
+ *   user request never reaches this function synchronously — the water
+ *   route serves Redis → devFileCache → snapshot before trying Overpass,
+ *   and only explicit refresh paths (`npm run refresh:water` or `?refresh=true`
+ *   with the dev/cron gate) invoke this.
+ *
+ *   Both surviving call sites benefit from failing loud: the refresh
+ *   script surfaces the error to the developer (who re-runs it); the
+ *   ?refresh=true route leaves the pre-existing Redis entry intact when
+ *   the caller catches and falls through to the stale read. Silent
+ *   partial-success with exotic retry would mask upstream outages that
+ *   R-04's snapshot architecture was designed to paper over.
  */
 export async function fetchWaterFacilities(): Promise<{
   facilities: WaterFacility[];
