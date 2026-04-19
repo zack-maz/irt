@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: GDELT Redo & Performance
-status: Ready to plan
-last_updated: '2026-04-18T19:42:34.936Z'
+status: Executing Phase 27.3.1
+last_updated: '2026-04-19T02:31:59.216Z'
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 2
-  total_plans: 21
+  total_plans: 29
   completed_plans: 18
-  percent: 86
+  percent: 62
 ---
 
 # Project State
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 27.4
-Plan: Not started
+Phase: 27.3.1 (Water Facility Retry and Cleanup) — EXECUTING
+Plan: 1 of 8
 Milestone: v1.3 Data Quality & Layers — CLOSING (all primary phases shipped; 26.2 GDELT-redo and 27 Performance moved to v1.4 on 2026-04-08)
 Milestone: v1.4 GDELT Redo & Performance — PLANNED (Phase 27 = GDELT redo, was 26.2; Phase 28 = Performance & Load Testing, was 27)
 Phase 27.3: Plan 03 COMPLETE (gap closure — G-01 water route test fixture fix + WR-01 shared WATER_ATTACK_EVENT_TYPES constant across useWaterLayers/WaterFacilityDetail/useCounterData)
