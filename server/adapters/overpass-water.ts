@@ -498,6 +498,35 @@ export function computeNotabilityScore(
 // ---------- Filter Stats ----------
 
 /**
+ * WaterFilterStats — field usage audit (Phase 27.3.1 R-06 D-22).
+ * Last audited: 2026-04-18.
+ *
+ * Field              UI consumer (src/components/ui/DevApiStatus.tsx)
+ * ─────────────────  ───────────────────────────────────────────────
+ * rawCounts          WaterFiltersSection per-type table (line ~786) + totalRaw summary (line ~743)
+ * filteredCounts     WaterFiltersSection per-type table (line ~786) + totalKept summary (line ~744)
+ * rejections         "Total rejections" summary row (line ~834)
+ * byTypeRejections   "Rejections by Type" block (line ~817-828) — R-08 D-31
+ * byCountry          "By Country" table (line ~754, byCountrySorted) — R-08 D-28
+ * overpass           "Overpass Health" block (line ~848-860) — R-08 D-29
+ * source             Provenance header "Source:" (line ~769) — R-08 D-30
+ * generatedAt        Provenance header relative-time (line ~771) — R-08 D-30
+ * enrichment         "Enriched:" row (line ~841-844) — Phase 27.3-02 D-04
+ * scoreHistogram     "Scores:" row (line ~863-865) — Phase 27.3-01 D-04
+ *
+ * All fields are live. No pruning needed in R-06 D-22.
+ *
+ * Rationale for keeping enrichment + scoreHistogram (legacy pre-R-08 fields):
+ * - enrichment: shows D-06/D-07/D-08 enrichment coverage — useful to spot
+ *   Nominatim/city-data regressions (e.g. a sudden drop in `withCity` would
+ *   hint at CITY_DATA coverage gap).
+ * - scoreHistogram: future calibration (e.g. adjusting MIN_NOTABILITY_SCORE)
+ *   needs the score distribution to reason about cutoffs. R-02 (Plan 04)
+ *   used byTypeRejections.not_notable over scoreHistogram for the 2-of-3
+ *   decision, but the histogram remains the authoritative score-cutoff view.
+ */
+
+/**
  * Phase 27.3.1 R-08 D-29 — per-Overpass-fetch telemetry. One entry per
  * facility-type query attempt (three queries total; each may hit primary +
  * fallback URL so entry count can be up to 6 in the worst case).
