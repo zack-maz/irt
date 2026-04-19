@@ -181,10 +181,63 @@ const waterFilterStatsSchema = z
   .strict()
   .optional();
 
+// ---------- Sites schemas (Phase 27.3.1 R-05) ----------
+//
+// Sites mirror the water observability contract (R-08 D-28..D-31 applied to
+// R-05 D-19). The `siteFilterStatsSchema` is the site-side parity of
+// `waterFilterStatsSchema` with a narrower rejections bucket set (4 buckets
+// specific to fetchSites: excluded_turkey, no_coords, no_type, duplicate).
+
+/** Minimal site entity shape for response validation */
+export const siteEntitySchema = z
+  .object({
+    id: z.string(),
+    type: z.literal('site'),
+    siteType: z.enum(['nuclear', 'naval', 'oil', 'airbase', 'port']),
+    lat: z.number(),
+    lng: z.number(),
+    label: z.string(),
+    operator: z.string().optional(),
+    wikidata: z.string().optional(),
+    osmId: z.number(),
+  })
+  .passthrough();
+
+const siteRejectionsSchema = z.object({
+  excluded_turkey: z.number(),
+  no_coords: z.number(),
+  no_type: z.number(),
+  duplicate: z.number(),
+});
+
+/**
+ * Phase 27.3.1 R-05 — site filter stats schema. Mirrors SiteFilterStats in
+ * server/adapters/overpass.ts. `.strict()` guards against missing R-05 fields
+ * once filterStats is present (same rationale as waterFilterStatsSchema).
+ * Outer `.optional()` preserves back-compat with any response path that
+ * doesn't attach filterStats.
+ */
+const siteFilterStatsSchema = z
+  .object({
+    rawCount: z.number(),
+    filteredCount: z.number(),
+    rejections: siteRejectionsSchema,
+    byCountry: z.record(z.string(), z.record(z.string(), z.number())),
+    byType: z.record(z.string(), z.number()),
+    overpass: z.array(overpassFetchRecordSchema),
+    source: z.enum(['snapshot', 'redis', 'overpass']),
+    generatedAt: z.string(),
+  })
+  .strict()
+  .optional();
+
 // ---------- Wrapped CacheResponse schemas per route ----------
 
 export const flightsResponseSchema = cacheResponseSchema(z.array(flightEntitySchema));
 export const eventsResponseSchema = cacheResponseSchema(z.array(conflictEventEntitySchema));
 export const waterResponseSchema = cacheResponseSchema(z.array(waterFacilityEntitySchema)).extend({
   filterStats: waterFilterStatsSchema,
+});
+export const sitesResponseSchema = cacheResponseSchema(z.array(siteEntitySchema)).extend({
+  filterStats: siteFilterStatsSchema,
 });

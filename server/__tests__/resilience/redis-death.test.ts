@@ -73,7 +73,23 @@ vi.mock('../../adapters/gdelt.js', () => ({
   backfillEvents: vi.fn(async () => []),
 }));
 vi.mock('../../adapters/acled.js', () => ({ fetchEvents: vi.fn(async () => []) }));
-vi.mock('../../adapters/overpass.js', () => ({ fetchSites: vi.fn(async () => []) }));
+// Phase 27.3.1 R-05 — fetchSites now returns { sites, stats }. Chaos test
+// only needs an empty shape so the route handler can run its error/empty path.
+vi.mock('../../adapters/overpass.js', () => ({
+  fetchSites: vi.fn(async () => ({
+    sites: [],
+    stats: {
+      rawCount: 0,
+      filteredCount: 0,
+      rejections: { excluded_turkey: 0, no_coords: 0, no_type: 0, duplicate: 0 },
+      byCountry: {},
+      byType: {},
+      overpass: [],
+      source: 'overpass',
+      generatedAt: new Date(0).toISOString(),
+    },
+  })),
+}));
 vi.mock('../../adapters/gdelt-doc.js', () => ({ fetchGdeltArticles: vi.fn(async () => []) }));
 vi.mock('../../adapters/rss.js', () => ({
   fetchAllRssFeeds: vi.fn(async () => []),
@@ -106,6 +122,16 @@ vi.mock('../../adapters/overpass-water.js', () => ({
 vi.mock('../../lib/waterSnapshot.js', () => ({
   loadWaterSnapshot: vi.fn(() => null),
   __resetSnapshotCacheForTests: vi.fn(),
+}));
+// Phase 27.3.1 R-05 — same preemptive mock as waterSnapshot above. With a
+// real 300–800 site snapshot on disk under simulated Redis death, the route
+// would load the snapshot → call cacheSetSafe → hit the safe-timeout wrapper
+// (2000ms per call under Redis death) and blow past the 10s test timeout.
+// Mocking to null preserves the test's intent: prove that Redis-dead →
+// no HTTP 500 on any route.
+vi.mock('../../lib/sitesSnapshot.js', () => ({
+  loadSitesSnapshot: vi.fn(() => null),
+  __resetSitesSnapshotCacheForTests: vi.fn(),
 }));
 vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: vi.fn(async () => []),
