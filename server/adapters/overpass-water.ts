@@ -659,17 +659,44 @@ export function normalizeWaterElement(
     return null;
   }
 
-  // Phase 27.3.1 R-03 / D-06: compound admission formula.
-  //   admit = hasName(tags) AND (isNotable(tags) || isPriorityCountry(lat,lng) || hasCapacityData(tags))
-  // hasName is already confirmed true above. The second clause tightens what
-  // debug-round-3 Package A relaxed: a bare name alone no longer admits a
-  // non-priority reservoir. We need a second notability signal.
-  const passesCompound = isNotable(el.tags) || inPriority || hasCapacityData(el.tags);
-  if (!passesCompound) {
-    if (rejections) rejections.not_notable++;
-    if (byTypeBucket) byTypeBucket.not_notable++;
-    return null;
+  // Phase 27.3.1 R-02 calibration (Plan 04, R-02 / D-04): compound gate
+  // tightened to require TWO of the three notability signals
+  // (isNotable, isPriorityCountry, hasCapacityData), with an exemption for
+  // desalination plants.
+  //
+  // Why this change:
+  //   The first post-R-03 refresh produced 1316 dams (target 300-500) and
+  //   830 reservoirs (target 300-500) — both above the user's target band
+  //   even after D-05 hasName became mandatory. The byCountry distribution
+  //   (Turkey 509, Saudi Arabia 262, Iran 234, Iraq 177, UAE 175) showed
+  //   the priority-country branch was the floodgate: any named facility in
+  //   the 14-country priority set admitted via isPriorityCountry alone, and
+  //   most OSM facilities in those countries are name-only with no wikidata
+  //   and no capacity tags. Branch 2b-(ii) of Plan 04: replace the
+  //   one-of-three OR with a two-of-three count to require an actual
+  //   notability signal beyond geographic location.
+  //
+  // Desalination exemption (Branch 2c of Plan 04):
+  //   Pre-calibration desalination admit count was 6 — already 4 below the
+  //   10-25 target band — and tightening the compound gate would drop it
+  //   further. Desal OSM coverage in the Middle East is sparse (63 raw
+  //   elements total), so the name+desalination type combination carries
+  //   enough notability signal on its own. Named desalination plants
+  //   admit anywhere in the bbox once hasName is satisfied above.
+  //
+  // See .planning/phases/27.3.1-water-facility-retry-and-cleanup/27.3.1-R02-CALIBRATION.md
+  // for the iteration log + rejection bucket evidence.
+  if (facilityType !== 'desalination') {
+    const signalCount = [isNotable(el.tags), inPriority, hasCapacityData(el.tags)].filter(
+      Boolean,
+    ).length;
+    if (signalCount < 2) {
+      if (rejections) rejections.not_notable++;
+      if (byTypeBucket) byTypeBucket.not_notable++;
+      return null;
+    }
   }
+  // hasName already confirmed above is the desalination admission gate.
 
   // Phase 27.3.1 R-03 / D-08: MIN_NOTABILITY_SCORE demoted to secondary gate.
   // Redundant on paper (a facility clearing the compound gate above will also

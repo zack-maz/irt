@@ -237,8 +237,24 @@ describe('normalizeWaterElement', () => {
   // ---------- Tiered country filtering tests ----------
 
   describe('tiered country filtering', () => {
-    // Priority country: Iraq (33.2, 43.7) — keeps all facility types
-    it('keeps dam in priority country (Iraq)', () => {
+    // Priority country: Iraq (33.2, 43.7) — Phase 27.3.1 R-02 calibration
+    // (Plan 04) tightens compound gate to TWO of (isNotable, isPriorityCountry,
+    // hasCapacityData). Name-only in a priority country was admitting via the
+    // single-signal OR; under the 2-of-3 rule the priority-country branch is
+    // necessary but no longer sufficient on its own. A name-only Iraqi dam
+    // now needs a second signal (wikidata, capacity, or operator-via-isNotable).
+    it('keeps dam in priority country with wikidata (Iraq) — 2-of-3 admits via isNotable+priority', () => {
+      const el = {
+        type: 'node' as const,
+        id: 200,
+        lat: 33.2,
+        lon: 43.7,
+        tags: { waterway: 'dam', name: 'Iraqi Dam', wikidata: 'Q777' },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('rejects name-only dam in priority country (Iraq) — Phase 27.3.1 R-02 single-signal floodgate closed', () => {
       const el = {
         type: 'node' as const,
         id: 200,
@@ -246,7 +262,8 @@ describe('normalizeWaterElement', () => {
         lon: 43.7,
         tags: { waterway: 'dam', name: 'Iraqi Dam' },
       };
-      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+      // Name + priority alone = 1 signal; needs 2 of (isNotable, isPriorityCountry, hasCapacityData).
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
     // Non-priority country: Oman (21.5, 55.9) — Round 3 moved here since Saudi
@@ -262,15 +279,30 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    it('keeps dam with wikidata in non-priority country (Oman)', () => {
+    it('keeps dam with wikidata + capacity in non-priority country (Oman) — Phase 27.3.1 R-02 2-of-3', () => {
+      // Non-priority + wikidata + capacity = 2 of 3 signals; R-02 calibration
+      // requires two notability signals so a wikidata-only admission in non-
+      // priority countries (one signal) no longer admits.
       const el = {
         type: 'node' as const,
         id: 301,
         lat: 21.5,
         lon: 55.9,
-        tags: { waterway: 'dam', name: 'Notable Omani Dam', wikidata: 'Q12345' },
+        tags: { waterway: 'dam', name: 'Notable Omani Dam', wikidata: 'Q12345', volume: '500000' },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('rejects wikidata-only dam in non-priority country (Oman) — Phase 27.3.1 R-02 single-signal closed', () => {
+      const el = {
+        type: 'node' as const,
+        id: 301,
+        lat: 21.5,
+        lon: 55.9,
+        tags: { waterway: 'dam', name: 'Wikidata-only Omani Dam', wikidata: 'Q12345' },
+      };
+      // wikidata alone = 1 signal in non-priority country → not_notable.
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
     // Round 3: REV-2 now admits any named reservoir (`isNotable || hasName`).
@@ -309,7 +341,10 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    it('keeps reservoir with wikipedia in non-priority country (Oman)', () => {
+    it('keeps reservoir with wikipedia + capacity in non-priority country (Oman) — Phase 27.3.1 R-02 2-of-3', () => {
+      // wikipedia (isNotable) + capacity = 2 of 3 signals; R-02 calibration
+      // requires two notability signals — wikipedia alone in a non-priority
+      // country no longer admits.
       const el = {
         type: 'node' as const,
         id: 303,
@@ -320,6 +355,7 @@ describe('normalizeWaterElement', () => {
           water: 'reservoir',
           name: 'Notable Reservoir',
           wikipedia: 'en:Reservoir',
+          volume: '1000000',
         },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
@@ -352,44 +388,102 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    // Round 3 regression tests: Turkish/Egyptian named reservoirs/dams without
-    // wikidata should now admit via the expanded priority set.
-    it('admits a Turkish named reservoir without wikidata (Round 3 regression)', () => {
+    // Phase 27.3.1 R-02 calibration (Plan 04): Round 3's pure-name-in-priority
+    // admission path is the floodgate that produced 1316 dams + 830 reservoirs
+    // post-R-03 hardening. R-02 closes it by requiring TWO of three signals
+    // (isNotable, isPriorityCountry, hasCapacityData). Round 3 regression
+    // tests below now expect a SECOND signal alongside the priority-country
+    // bonus to admit; the bare-name-in-priority versions are kept as
+    // regression locks proving the new gate fires.
+    it('admits Turkish named reservoir with wikidata (Round 3 priority + R-02 2-of-3)', () => {
       const el = {
         type: 'node' as const,
         id: 320,
         // SE Turkey (within 600km of Diyarbakir so isExcludedLocation doesn't fire)
         lat: 37.9,
         lon: 40.2,
-        tags: { natural: 'water', water: 'reservoir', name: 'Karakaya Baraj Gölü' },
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Karakaya Baraj Gölü',
+          wikidata: 'Q1234567',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
     });
 
-    it('admits an Egyptian named dam with operator but no wikidata (Round 3 regression)', () => {
+    it('rejects bare-named Turkish reservoir (Phase 27.3.1 R-02 regression lock)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 320,
+        lat: 37.9,
+        lon: 40.2,
+        tags: { natural: 'water', water: 'reservoir', name: 'Karakaya Baraj Gölü' },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
+    });
+
+    it('admits Egyptian named dam with capacity (operator alone is not a notability signal)', () => {
+      // Phase 27.3.1 R-02: hasCapacityData (height) supplies the second signal
+      // alongside isPriorityCountry. Pre-R-02 the operator-only Egypt entry
+      // admitted via single-signal OR.
       const el = {
         type: 'node' as const,
         id: 321,
         lat: 26.8,
-        lon: 30.8, // Egypt — now priority
+        lon: 30.8, // Egypt — priority
+        tags: {
+          waterway: 'dam',
+          name: 'High Dam',
+          operator: 'Egyptian Ministry of Water Resources',
+          height: '111',
+        },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('rejects Egyptian named dam with only operator (Phase 27.3.1 R-02 regression lock)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 321,
+        lat: 26.8,
+        lon: 30.8,
         tags: {
           waterway: 'dam',
           name: 'High Dam',
           operator: 'Egyptian Ministry of Water Resources',
         },
       };
-      expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+      // operator is not part of isNotable / isPriorityCountry / hasCapacityData;
+      // priority alone = 1 signal → rejected.
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
 
-    it('admits a Saudi named reservoir without wikidata (Round 3 priority expansion)', () => {
+    it('admits Saudi named reservoir with capacity (Phase 27.3.1 R-02 2-of-3)', () => {
       const el = {
         type: 'node' as const,
         id: 322,
         lat: 23.9,
-        lon: 45.1, // Saudi Arabia — now priority
-        tags: { natural: 'water', water: 'reservoir', name: 'Najran Reservoir' },
+        lon: 45.1, // Saudi Arabia — priority
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Najran Reservoir',
+          volume: '50000000',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
+    });
+
+    it('rejects bare-named Saudi reservoir (Phase 27.3.1 R-02 regression lock)', () => {
+      const el = {
+        type: 'node' as const,
+        id: 322,
+        lat: 23.9,
+        lon: 45.1,
+        tags: { natural: 'water', water: 'reservoir', name: 'Najran Reservoir' },
+      };
+      expect(normalizeWaterElement(el, stressLookup)).toBeNull();
     });
   });
 
@@ -413,7 +507,8 @@ describe('normalizeWaterElement', () => {
         id: 401,
         lat: 33.2,
         lon: 43.7,
-        tags: { waterway: 'dam', name: 'Haditha Dam' },
+        // wikidata + priority country = 2 of 3 signals (Phase 27.3.1 R-02).
+        tags: { waterway: 'dam', name: 'Haditha Dam', wikidata: 'Q12345' },
       };
       const result = normalizeWaterElement(el, stressLookup);
       expect(result).not.toBeNull();
@@ -511,7 +606,8 @@ describe('normalizeWaterElement', () => {
         id: 902,
         lat: 35.7,
         lon: 51.4,
-        tags: { waterway: 'dam', name: 'Near Tehran Dam' },
+        // Phase 27.3.1 R-02: capacity supplies the 2nd signal alongside isPriorityCountry.
+        tags: { waterway: 'dam', name: 'Near Tehran Dam', height: '85' },
       };
       const result = normalizeWaterElement(el, stressLookup, rejections);
       expect(result).not.toBeNull();
@@ -521,9 +617,13 @@ describe('normalizeWaterElement', () => {
   });
 
   describe('no_city rule scoping (Phase 27.3 Plan 05)', () => {
-    it('keeps a dam with no nearestCity and no wikidata (dams are exempt from no_city rule)', () => {
+    it('keeps a dam with no nearestCity and capacity (dams are exempt from no_city rule)', () => {
       // Western Afghanistan remote coordinates — pre-Plan-05 this would be rejected;
       // Plan 05 scopes the rule to reservoirs only.
+      // Phase 27.3.1 R-02 calibration: name+priority alone is 1 signal under
+      // the new 2-of-3 compound; capacity adds the second signal so the test
+      // still validates the no_city scoping (the gate under test) rather than
+      // tripping on the upstream compound gate.
       const rejections = {
         excluded_location: 0,
         not_notable: 0,
@@ -537,7 +637,7 @@ describe('normalizeWaterElement', () => {
         id: 910,
         lat: 34.0,
         lon: 62.0,
-        tags: { waterway: 'dam', name: 'Remote Dam' },
+        tags: { waterway: 'dam', name: 'Remote Dam', height: '40' },
       };
       const result = normalizeWaterElement(el, stressLookup, rejections);
       expect(result).not.toBeNull();
@@ -575,8 +675,12 @@ describe('normalizeWaterElement', () => {
     });
 
     it('keeps a named reservoir in priority country with no nearestCity (named-priority exemption)', () => {
-      // Western Afghanistan priority country — named reservoir with no wikidata and
-      // no nearestCity is now kept per Plan 05 named-priority exemption.
+      // Western Afghanistan priority country — named reservoir per Plan 05
+      // named-priority no_city exemption.
+      // Phase 27.3.1 R-02 calibration: capacity adds the 2nd signal so the
+      // upstream compound gate clears and this test isolates the no_city
+      // named-priority exemption (the gate under test) rather than the
+      // compound gate.
       const rejections = {
         excluded_location: 0,
         not_notable: 0,
@@ -594,6 +698,7 @@ describe('normalizeWaterElement', () => {
           natural: 'water',
           water: 'reservoir',
           name: 'Hindu Kush Reservoir',
+          volume: '5000000',
         },
       };
       const result = normalizeWaterElement(el, stressLookup, rejections);
@@ -745,11 +850,12 @@ describe('normalizeWaterElement', () => {
       expect(rejections.no_name).toBe(1);
     });
 
-    it('D-06: admits named reservoir in non-priority country via hasCapacityData', () => {
-      // Pakistan is non-priority post-Package-A expansion; large volume tag
-      // supplies the second notability signal so the reservoir admits.
-      // Placed near Karachi (24.8607, 67.0011) so nearestCity resolves and
-      // the no_city gate does not fire.
+    it('D-06: admits named reservoir in non-priority country with wikidata + capacity (Phase 27.3.1 R-02 2-of-3)', () => {
+      // Pakistan is non-priority. Phase 27.3.1 R-02 calibration tightened the
+      // compound gate to require TWO of (isNotable, isPriorityCountry,
+      // hasCapacityData). hasCapacityData alone in a non-priority country
+      // (the Plan 02 admit-case) no longer admits — needs wikidata as the
+      // second signal. Placed near Karachi so nearestCity resolves.
       const rejections = emptyRejections();
       const el = {
         type: 'node' as const,
@@ -761,23 +867,63 @@ describe('normalizeWaterElement', () => {
           water: 'reservoir',
           name: 'Large Volume Reservoir',
           volume: '10000000',
+          wikidata: 'Q12345',
         },
       };
       expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
     });
 
-    it('D-06: admits named reservoir in priority country without wikidata or capacity', () => {
-      // Iran, named, no wiki, no capacity — priority branch satisfies compound.
-      // Near Tehran so nearestCity resolves.
+    it('rejects named reservoir in non-priority country with capacity-only (Phase 27.3.1 R-02 single-signal closed)', () => {
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 3,
+        lat: 25.0,
+        lon: 67.2,
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Capacity-only Reservoir',
+          volume: '10000000',
+        },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.not_notable).toBe(1);
+    });
+
+    it('D-06: admits named reservoir in priority country with capacity (Phase 27.3.1 R-02 2-of-3)', () => {
+      // Iran (priority) + named + capacity = 2 of 3 signals.
+      // Phase 27.3.1 R-02: priority alone is no longer sufficient; the second
+      // notability signal closes the priority-country flood (Iran 234 admits
+      // pre-R-02). Near Tehran so nearestCity resolves.
       const rejections = emptyRejections();
       const el = {
         type: 'node' as const,
         id: 4,
         lat: 35.6,
         lon: 51.4,
-        tags: { natural: 'water', water: 'reservoir', name: 'Local Reservoir' },
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Local Reservoir',
+          volume: '8000000',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('rejects named reservoir in priority country WITHOUT a second signal (Phase 27.3.1 R-02 regression lock)', () => {
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 4,
+        lat: 35.6,
+        lon: 51.4,
+        tags: { natural: 'water', water: 'reservoir', name: 'Bare-Name Reservoir' },
+      };
+      // Priority alone = 1 signal; rejected as not_notable.
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.not_notable).toBe(1);
     });
 
     it('D-06: rejects named reservoir in non-priority country without wiki/capacity (Package A relaxation reverted)', () => {
@@ -811,16 +957,73 @@ describe('normalizeWaterElement', () => {
       expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
     });
 
-    it('truth 22 regression guard: priority-country-named reservoir still passes no_city rule', () => {
+    // Phase 27.3.1 R-02 calibration / Branch 2c — desalination exemption
+    // tests. The R-02 calibration tightened the compound gate to 2-of-3
+    // signals BUT exempted desalination because the post-R-03 admit count
+    // was 6 (target 10-25). Sparse OSM coverage (~63 raw elements) makes
+    // the name+type combination sufficient. These tests prove the exemption
+    // admits a named desal anywhere in the bbox once hasName is satisfied.
+    it('R-02 desalination exemption: admits named desalination in non-priority country with no wiki / no capacity', () => {
+      // Bahrain (Khobar coords) actually resolves to Bahrain via nearest-centroid,
+      // which is NOT in PRIORITY_COUNTRIES. Pre-R-02, this admitted via the
+      // single-signal compound (hasCapacityData was the only signal). Now via
+      // the R-02 desalination exemption: hasName is sufficient.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 8,
+        lat: 26.18,
+        lon: 50.21, // Khobar P&D — nearest centroid is Bahrain (non-priority)
+        tags: { man_made: 'desalination_plant', name: 'Bahrain Desal' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+      expect(rejections.not_notable).toBe(0);
+    });
+
+    it('R-02 desalination exemption: admits named desalination in non-priority country with operator-only signal', () => {
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 9,
+        lat: 21.5,
+        lon: 39.117, // Jeddah — Saudi Arabia is priority but desal exemption applies anyway
+        tags: { man_made: 'desalination_plant', name: 'Some Desal Plant', operator: 'SWCC' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
+    });
+
+    it('R-02 desalination exemption: still rejects unnamed desalination (D-05 hasName remains mandatory)', () => {
+      // Exemption only bypasses the compound gate — D-05 hasName floor stays.
+      const rejections = emptyRejections();
+      const el = {
+        type: 'node' as const,
+        id: 10,
+        lat: 26.18,
+        lon: 50.21,
+        tags: { man_made: 'desalination_plant', capacity: '500000' },
+      };
+      expect(normalizeWaterElement(el, stressLookup, rejections)).toBeNull();
+      expect(rejections.no_name).toBe(1);
+    });
+
+    it('truth 22 regression guard: priority-country-named reservoir with capacity still passes no_city rule', () => {
       // Remote Iranian coords far from any CITY_DATA city — named-priority
       // exemption (Plan 05) must still trigger so no_city does not fire.
+      // Phase 27.3.1 R-02: capacity adds the 2nd compound signal so the test
+      // exercises the no_city rule (Plan 05 / D-09) rather than tripping on
+      // the upstream compound gate.
       const rejections = emptyRejections();
       const el = {
         type: 'node' as const,
         id: 7,
         lat: 30.0,
         lon: 55.0,
-        tags: { natural: 'water', water: 'reservoir', name: 'Remote Iranian Reservoir' },
+        tags: {
+          natural: 'water',
+          water: 'reservoir',
+          name: 'Remote Iranian Reservoir',
+          height: '60',
+        },
       };
       expect(normalizeWaterElement(el, stressLookup, rejections)).not.toBeNull();
     });
@@ -923,13 +1126,21 @@ describe('linkRiver with bbox optimization (REV-3)', () => {
 });
 
 describe('reservoir filtering (REV-2 wikidata fallback)', () => {
-  it('keeps named reservoir in priority country without wikidata', () => {
+  it('keeps named reservoir in priority country with capacity (Phase 27.3.1 R-02 2-of-3)', () => {
+    // REV-2's pure-name-in-priority admission was tightened by R-02 to require
+    // a second signal alongside isPriorityCountry. Capacity supplies it here
+    // so the REV-2 fallback (no wikidata) still admits via the compound gate.
     const el = {
       type: 'node' as const,
       id: 700,
       lat: 33.2,
       lon: 43.7,
-      tags: { natural: 'water', water: 'reservoir', name: 'Tharthar Lake' },
+      tags: {
+        natural: 'water',
+        water: 'reservoir',
+        name: 'Tharthar Lake',
+        area: '2710000000',
+      },
     };
     expect(normalizeWaterElement(el, stressLookup)).not.toBeNull();
   });
@@ -1035,20 +1246,24 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     lon: 51.4,
     tags: { waterway: 'dam', name: 'Tehran Test Dam', volume: '1000000' },
   };
-  // Turkey-area reservoir with name → admits via priority country branch.
+  // Turkey-area reservoir with name + capacity → admits via priority + capacity.
   // Coords (39.5, 40.0) chosen so:
   //  - nearest-centroid resolves to Turkey (39.0, 35.2) at ~417km
   //  - distFromSE (Diyarbakir 37.9, 40.2) is ~179km, well under the 600km
   //    western-Turkey exclusion cap
-  // Diyarbakir SE Turkey coords (37.9, 40.2) resolve to Syria via nearest
-  // centroid even though Turkey is the priority hit — keeping the test honest
-  // about how attribution works.
+  // Phase 27.3.1 R-02: capacity supplies the 2nd compound signal alongside
+  // isPriorityCountry so byCountry.Turkey records the admit.
   const turkeyReservoir = {
     type: 'node',
     id: 1002,
     lat: 39.5,
     lon: 40.0,
-    tags: { natural: 'water', water: 'reservoir', name: 'East Turkey Test Reservoir' },
+    tags: {
+      natural: 'water',
+      water: 'reservoir',
+      name: 'East Turkey Test Reservoir',
+      volume: '5000000',
+    },
   };
   // Iran-area unnamed dam → rejected by D-05 (no_name) → byTypeRejections increments.
   const unnamedIranDam = {
@@ -1058,13 +1273,19 @@ describe('Phase 27.3.1 R-08 — fetchWaterFacilities stats population', () => {
     lon: 51.4,
     tags: { waterway: 'dam' },
   };
-  // Saudi-area named reservoir without notability signal → in priority branch admits.
+  // Saudi-area named reservoir with capacity → priority + capacity = 2 of 3
+  // (Phase 27.3.1 R-02 calibration; bare-name no longer admits in priority).
   const saudiReservoir = {
     type: 'node',
     id: 1004,
     lat: 24.7,
     lon: 46.7,
-    tags: { natural: 'water', water: 'reservoir', name: 'Riyadh Test Reservoir' },
+    tags: {
+      natural: 'water',
+      water: 'reservoir',
+      name: 'Riyadh Test Reservoir',
+      area: '1000000',
+    },
   };
   // Iran desalination with name, near Tehran for nearestCity resolution.
   const iranDesal = {
