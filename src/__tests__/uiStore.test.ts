@@ -123,6 +123,61 @@ describe('uiStore', () => {
     expect(localStorageMock.setItem).toHaveBeenCalledWith('markets-collapsed', 'true');
   });
 
+  describe('Phase 27.3.1 Plan 12 — DevApiStatus modal state (G6)', () => {
+    beforeEach(() => {
+      // Reset modal state between tests
+      useUIStore.setState({
+        isDevApiStatusOpen: false,
+        activeDevApiStatusTab: 'overview',
+      });
+    });
+
+    it('isDevApiStatusOpen defaults to false', () => {
+      expect(useUIStore.getState().isDevApiStatusOpen).toBe(false);
+    });
+
+    it('activeDevApiStatusTab defaults to overview', () => {
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('overview');
+    });
+
+    it('openDevApiStatus sets isDevApiStatusOpen to true', () => {
+      useUIStore.getState().openDevApiStatus();
+      expect(useUIStore.getState().isDevApiStatusOpen).toBe(true);
+    });
+
+    it('closeDevApiStatus sets isDevApiStatusOpen to false', () => {
+      useUIStore.setState({ isDevApiStatusOpen: true });
+      useUIStore.getState().closeDevApiStatus();
+      expect(useUIStore.getState().isDevApiStatusOpen).toBe(false);
+    });
+
+    it('setDevApiStatusTab("water") sets active tab to water', () => {
+      useUIStore.getState().setDevApiStatusTab('water');
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('water');
+    });
+
+    it('setDevApiStatusTab("sites") sets active tab to sites', () => {
+      useUIStore.getState().setDevApiStatusTab('sites');
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('sites');
+    });
+
+    it('tab choice persists across open/close cycle (session persistence)', () => {
+      useUIStore.getState().openDevApiStatus();
+      useUIStore.getState().setDevApiStatusTab('water');
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('water');
+
+      // Close the modal — tab selection should survive
+      useUIStore.getState().closeDevApiStatus();
+      expect(useUIStore.getState().isDevApiStatusOpen).toBe(false);
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('water');
+
+      // Re-open the modal — still on water tab
+      useUIStore.getState().openDevApiStatus();
+      expect(useUIStore.getState().isDevApiStatusOpen).toBe(true);
+      expect(useUIStore.getState().activeDevApiStatusTab).toBe('water');
+    });
+  });
+
   describe('navigation stack', () => {
     beforeEach(() => {
       useUIStore.setState({
