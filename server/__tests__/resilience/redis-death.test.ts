@@ -95,6 +95,18 @@ vi.mock('../../adapters/overpass-water.js', () => ({
     treatment_plant: 'Treatment Plant',
   },
 }));
+// Phase 27.3.1 R-04 — suppress the snapshot tier under Redis death so the
+// chaos test continues to exercise the cache-miss → Overpass-mock → respond
+// path it was designed for. (With the snapshot present, the route would
+// load 602 facilities and call labelUnnamedFacilities, which makes Redis
+// geocode-cache reads — each one hitting the 2000ms safe-timeout wrapper
+// under Redis death, blowing past the test's 10s timeout. Mocking the
+// loader to null preserves the test's intent: prove that Redis-dead →
+// no HTTP 500.)
+vi.mock('../../lib/waterSnapshot.js', () => ({
+  loadWaterSnapshot: vi.fn(() => null),
+  __resetSnapshotCacheForTests: vi.fn(),
+}));
 vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: vi.fn(async () => []),
 }));
