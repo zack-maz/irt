@@ -267,8 +267,11 @@ describe('Water Routes (/api/water)', () => {
     });
 
     it('returns cached data when cache is fresh (does not call fetchWaterFacilities)', async () => {
-      redisStore.set('water:facilities', {
-        data: [sampleFacility],
+      // Phase 27.3.1 Plan 11 G3 — Redis key bumped to water:facilities:v2 and
+      // payload is now the envelope `{ facilities, filterStats }`, not a bare
+      // array.
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: emptyStats },
         fetchedAt: Date.now(),
       });
 
@@ -282,8 +285,9 @@ describe('Water Routes (/api/water)', () => {
     });
 
     it('returns stale cache when upstream fails but cache exists', async () => {
-      redisStore.set('water:facilities', {
-        data: [sampleFacility],
+      // Phase 27.3.1 Plan 11 G3 — envelope shape under the bumped key.
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: emptyStats },
         fetchedAt: Date.now() - 90_000_000, // stale (>24h)
       });
 
@@ -425,11 +429,265 @@ describe('Water Routes (/api/water)', () => {
     });
   });
 
+  /**
+   * Phase 27.3.1 Plan 11 G3 — Redis envelope round-trip for R-08 observability.
+   *
+   * Pre-Plan-11 the Redis write path stored a bare WaterFacility[] and the
+   * cache-hit response synthesized zero-filterStats via buildEmptyFilterStats.
+   * Post-Plan-11 both the facilities AND the filterStats travel together
+   * inside a `{ facilities, filterStats }` envelope under the bumped key
+   * `water:facilities:v2`. Cache-hit responses spread the cached filterStats
+   * and overwrite `source: 'redis'` + `generatedAt: ISO(lastFresh)` so
+   * DevApiStatus renders populated byCountry / byTypeRejections / overpass
+   * tallies with accurate provenance.
+   */
+  describe('Phase 27.3.1 Plan 11 — Redis envelope for R-08 observability (G3)', () => {
+    const populatedStats = {
+      ...emptyStats,
+      rawCounts: { dams: 8699, reservoirs: 15355, desalination: 63 },
+      filteredCounts: { dams: 370, reservoirs: 52, desalination: 15 },
+      rejections: {
+        excluded_location: 42,
+        excluded_turkey: 165,
+        not_notable: 1100,
+        no_name: 139,
+        duplicate: 87,
+        low_score: 0,
+        no_city: 12,
+      },
+      byTypeRejections: {
+        dams: {
+          excluded_location: 30,
+          excluded_turkey: 100,
+          not_notable: 700,
+          no_name: 90,
+          duplicate: 50,
+          low_score: 0,
+          no_city: 6,
+        },
+        reservoirs: {
+          excluded_location: 12,
+          excluded_turkey: 65,
+          not_notable: 400,
+          no_name: 49,
+          duplicate: 37,
+          low_score: 0,
+          no_city: 6,
+        },
+      },
+      byCountry: {
+        Iran: { dam: 51, reservoir: 6 },
+        Iraq: { dam: 46, reservoir: 11 },
+        'Saudi Arabia': { dam: 67, desalination: 1 },
+      },
+      overpass: [
+        {
+          facilityType: 'dams',
+          mirror: 'primary',
+          status: 200,
+          durationMs: 18000,
+          attempts: 1,
+          ok: true,
+        },
+      ],
+      // Source='snapshot' on purpose — the cache-hit branch MUST overwrite it
+      // to 'redis' so DevApiStatus reports the serve-tier accurately even
+      // though the stats originally came from the snapshot that warmed Redis.
+      source: 'snapshot' as const,
+      generatedAt: '2026-04-19T07:47:27.465Z',
+    };
+
+    it('cache-hit response returns populated byCountry from cached payload', async () => {
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.filterStats.byCountry.Iran.dam).toBe(51);
+      expect(body.filterStats.byCountry.Iraq.reservoir).toBe(11);
+      expect(body.filterStats.byCountry['Saudi Arabia'].desalination).toBe(1);
+    });
+
+    it('cache-hit response overrides source to "redis" regardless of persisted value', async () => {
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(body.filterStats.source).toBe('redis');
+    });
+
+    it('cache-hit response overrides generatedAt to cache lastFresh ISO', async () => {
+      const lastFreshMs = 1_700_000_000_000;
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: lastFreshMs,
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(body.filterStats.generatedAt).toBe(new Date(lastFreshMs).toISOString());
+    });
+
+    it('cache-hit preserves rejections counts from cached payload', async () => {
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(body.filterStats.rejections.no_name).toBe(139);
+      expect(body.filterStats.rejections.excluded_turkey).toBe(165);
+      expect(body.filterStats.rejections.not_notable).toBe(1100);
+    });
+
+    it('cache-hit preserves byTypeRejections + overpass[] from cached payload', async () => {
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: Date.now(),
+      });
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(body.filterStats.byTypeRejections.dams.no_name).toBe(90);
+      expect(body.filterStats.overpass).toHaveLength(1);
+      expect(body.filterStats.overpass[0].facilityType).toBe('dams');
+      expect(body.filterStats.overpass[0].ok).toBe(true);
+    });
+
+    it('fresh Overpass path stores the envelope to Redis', async () => {
+      mockFetchWaterFacilities.mockResolvedValue({
+        facilities: [sampleFacility],
+        stats: { ...emptyStats, source: 'overpass' as const },
+      });
+
+      // Force a refresh so we hit the Overpass branch unambiguously.
+      const res = await fetch(`${baseUrl}/api/water?refresh=true`);
+      expect(res.ok).toBe(true);
+
+      // Inspect what the in-memory Redis mock received.
+      const stored = redisStore.get('water:facilities:v2');
+      expect(stored).toBeDefined();
+      expect(stored!.data).toMatchObject({
+        facilities: expect.any(Array),
+        filterStats: expect.objectContaining({ source: 'overpass' }),
+      });
+      expect((stored!.data as { facilities: unknown[] }).facilities).toHaveLength(1);
+    });
+
+    it('snapshot tier path stores the envelope to Redis (snapshot warm path)', async () => {
+      mockLoadWaterSnapshot.mockReturnValue({
+        generatedAt: '2026-04-19T07:00:00.000Z',
+        facilities: [sampleFacility],
+        stats: { ...populatedStats, source: 'snapshot' as const },
+      });
+
+      await fetch(`${baseUrl}/api/water`);
+
+      const stored = redisStore.get('water:facilities:v2');
+      expect(stored).toBeDefined();
+      expect(stored!.data).toMatchObject({
+        facilities: expect.any(Array),
+        filterStats: expect.objectContaining({
+          // Snapshot warms Redis with the snapshot's own stats; the route's
+          // cache-hit branch is responsible for overriding source to 'redis'
+          // on subsequent reads (covered by the source-override test above).
+          source: 'snapshot',
+          byCountry: expect.any(Object),
+        }),
+      });
+    });
+
+    it('error path with stale cached payload returns stats from cache with source=redis', async () => {
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: populatedStats },
+        fetchedAt: Date.now() - 90_000_000, // stale (>24h)
+      });
+      mockFetchWaterFacilities.mockRejectedValue(new Error('Overpass down'));
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.stale).toBe(true);
+      expect(body.filterStats.source).toBe('redis');
+      expect(body.filterStats.byCountry.Iran).toBeDefined();
+      expect(body.filterStats.rejections.no_name).toBe(139);
+    });
+
+    it('error path WITHOUT cache returns buildEmptyFilterStats with source=overpass', async () => {
+      mockFetchWaterFacilities.mockRejectedValue(new Error('Overpass down'));
+
+      const res = await fetch(`${baseUrl}/api/water`);
+      const body = await res.json();
+
+      expect(res.ok).toBe(true);
+      expect(body.stale).toBe(true);
+      expect(body.filterStats.source).toBe('overpass');
+      expect(body.filterStats.byCountry).toEqual({});
+    });
+
+    it('Redis key is water:facilities:v2 (regression guard for operator grep)', async () => {
+      mockFetchWaterFacilities.mockResolvedValue({
+        facilities: [sampleFacility],
+        stats: { ...emptyStats, source: 'overpass' as const },
+      });
+
+      // Force refresh path so cacheSetSafe fires with a known payload.
+      await fetch(`${baseUrl}/api/water?refresh=true`);
+
+      // v2 key must exist; old key must not.
+      expect(redisStore.has('water:facilities:v2')).toBe(true);
+      expect(redisStore.has('water:facilities')).toBe(false);
+    });
+
+    it('/api/water/precip unwraps .facilities from cached envelope', async () => {
+      const f2: WaterFacility = {
+        ...sampleFacility,
+        id: 'water-22222',
+        osmId: 22222,
+        lat: 32.1,
+        lng: 45.6,
+      };
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility, f2], filterStats: emptyStats },
+        fetchedAt: Date.now(),
+      });
+      mockFetchPrecipitation.mockResolvedValue([
+        { lat: 33.3, lng: 44.4, last30DaysMm: 15.2, anomalyRatio: 0.8, updatedAt: Date.now() },
+        { lat: 32.1, lng: 45.6, last30DaysMm: 9.3, anomalyRatio: 0.5, updatedAt: Date.now() },
+      ]);
+
+      const res = await fetch(`${baseUrl}/api/water/precip`);
+      expect(res.ok).toBe(true);
+
+      // fetchPrecipitation should have received the two coordinate tuples
+      // unwrapped from the envelope — NOT a bare object like `{facilities:...}`.
+      expect(mockFetchPrecipitation).toHaveBeenCalledTimes(1);
+      const locations = mockFetchPrecipitation.mock.calls[0]![0] as { lat: number; lng: number }[];
+      expect(locations).toHaveLength(2);
+      expect(locations[0]).toMatchObject({ lat: 33.3, lng: 44.4 });
+      expect(locations[1]).toMatchObject({ lat: 32.1, lng: 45.6 });
+    });
+  });
+
   describe('GET /api/water/precip', () => {
     it('returns precipitation data for cached facilities', async () => {
-      // Pre-populate facility cache
-      redisStore.set('water:facilities', {
-        data: [sampleFacility],
+      // Phase 27.3.1 Plan 11 G3 — envelope shape under the bumped key so the
+      // precip handler's cached-facilities read unwraps .facilities correctly.
+      redisStore.set('water:facilities:v2', {
+        data: { facilities: [sampleFacility], filterStats: emptyStats },
         fetchedAt: Date.now(),
       });
 
