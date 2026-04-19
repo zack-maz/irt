@@ -1,0 +1,6907 @@
+{
+  "generatedAt": "2026-04-19T08:28:47.786Z",
+  "sites": [
+    {
+      "id": "site-10016553",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.032912,
+      "lng": 55.046596,
+      "label": "Jebel Ali Container Terminal 4",
+      "osmId": 10016553
+    },
+    {
+      "id": "site-100637462",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 38.085873,
+      "lng": 48.089808,
+      "label": "Oil Refinery",
+      "osmId": 100637462
+    },
+    {
+      "id": "site-10074609974",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.119119,
+      "lng": 36.712108,
+      "label": "Hamah Airport",
+      "osmId": 10074609974
+    },
+    {
+      "id": "site-10082848628",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.049134,
+      "lng": 40.584121,
+      "label": "Green Village Airstrip",
+      "osmId": 10082848628
+    },
+    {
+      "id": "site-1014283960",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.942592,
+      "lng": 42.125068,
+      "label": "Oil Refinery",
+      "osmId": 1014283960
+    },
+    {
+      "id": "site-10246197264",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.691332,
+      "lng": 50.740024,
+      "label": "Port",
+      "osmId": 10246197264
+    },
+    {
+      "id": "site-102652273",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.941126,
+      "lng": 44.637118,
+      "label": "As Suwayrah Airbase",
+      "osmId": 102652273
+    },
+    {
+      "id": "site-102927099",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 38.012903,
+      "lng": 58.192166,
+      "label": "Ak Depe Airfield",
+      "wikidata": "Q12691722",
+      "osmId": 102927099
+    },
+    {
+      "id": "site-1030746722",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.531667,
+      "lng": 44.341722,
+      "label": "Harir Air Base",
+      "wikidata": "Q61392014",
+      "osmId": 1030746722
+    },
+    {
+      "id": "site-103450154",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 28.82967,
+      "lng": 50.885602,
+      "label": "Nuclear Facility",
+      "osmId": 103450154
+    },
+    {
+      "id": "site-1039449364",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.259824,
+      "lng": 70.197155,
+      "label": "Rajanpur Airport",
+      "osmId": 1039449364
+    },
+    {
+      "id": "site-1042023279",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 39.648132,
+      "lng": 48.99543,
+      "label": "ÇUxanlı Aerodromu",
+      "osmId": 1042023279
+    },
+    {
+      "id": "site-1042032632",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.194401,
+      "lng": 33.4128,
+      "label": "Bir Hasanah",
+      "wikidata": "Q18192195",
+      "osmId": 1042032632
+    },
+    {
+      "id": "site-1042045294",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.848534,
+      "lng": 39.310894,
+      "label": "H3 Highway Strip",
+      "osmId": 1042045294
+    },
+    {
+      "id": "site-1042045297",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.443481,
+      "lng": 44.595091,
+      "label": "Injanah Air Field",
+      "osmId": 1042045297
+    },
+    {
+      "id": "site-1042045331",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.098795,
+      "lng": 51.03422,
+      "label": "Ahmadi Military Air Field",
+      "osmId": 1042045331
+    },
+    {
+      "id": "site-1042045332",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.375799,
+      "lng": 51.067501,
+      "label": "Darrahi Military Air Field",
+      "osmId": 1042045332
+    },
+    {
+      "id": "site-1042045346",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.389401,
+      "lng": 53.671398,
+      "label": "Semnan New Airport",
+      "wikidata": "Q12694945",
+      "osmId": 1042045346
+    },
+    {
+      "id": "site-1042045381",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.730668,
+      "lng": 38.978312,
+      "label": "Wadi El Murbah Highway Strip",
+      "osmId": 1042045381
+    },
+    {
+      "id": "site-1042051943",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.984001,
+      "lng": 50.806198,
+      "label": "Kushke Nosrat Airport",
+      "osmId": 1042051943
+    },
+    {
+      "id": "site-1042053005",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.758101,
+      "lng": 72.282501,
+      "label": "Rafiqui Air Base",
+      "osmId": 1042053005
+    },
+    {
+      "id": "site-1042053031",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.874201,
+      "lng": 67.1185,
+      "label": "Faisal Air Base",
+      "osmId": 1042053031
+    },
+    {
+      "id": "site-1042053048",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.048599,
+      "lng": 72.665001,
+      "label": "Mushaf Air Base",
+      "operator": "Pakistan Air Force",
+      "wikidata": "Q3694556",
+      "osmId": 1042053048
+    },
+    {
+      "id": "site-1042053381",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.524015,
+      "lng": 37.627557,
+      "label": "Tiyas Air Base",
+      "osmId": 1042053381
+    },
+    {
+      "id": "site-1042053410",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 13.175277,
+      "lng": 44.764822,
+      "label": "Al Anad Air Base",
+      "osmId": 1042053410
+    },
+    {
+      "id": "site-1042088813",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.663092,
+      "lng": 62.553035,
+      "label": "Galaymor Airfield",
+      "wikidata": "Q12693239",
+      "osmId": 1042088813
+    },
+    {
+      "id": "site-104386572",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.080752,
+      "lng": 36.562025,
+      "label": "Khalkhalah Air Base",
+      "osmId": 104386572
+    },
+    {
+      "id": "site-1044667363",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.110182,
+      "lng": 50.579129,
+      "label": "Riffa Airbase",
+      "wikidata": "Q117598964",
+      "osmId": 1044667363
+    },
+    {
+      "id": "site-1049097394",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.07782,
+      "lng": 73.790339,
+      "label": "Chandar",
+      "operator": "Pakistan Air Force",
+      "wikidata": "Q1836206",
+      "osmId": 1049097394
+    },
+    {
+      "id": "site-105204581",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.342212,
+      "lng": 32.262111,
+      "label": "Faid Airfield",
+      "osmId": 105204581
+    },
+    {
+      "id": "site-105569271",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.421305,
+      "lng": 32.338289,
+      "label": "Matar Difarsuwar",
+      "osmId": 105569271
+    },
+    {
+      "id": "site-105569559",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.240079,
+      "lng": 32.491798,
+      "label": "Kibrit Airfield",
+      "operator": "Egyptian Air Force",
+      "osmId": 105569559
+    },
+    {
+      "id": "site-105569827",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.572152,
+      "lng": 32.095719,
+      "label": "Abu Suwayr Air Base",
+      "operator": "Military",
+      "wikidata": "Q4670373",
+      "osmId": 105569827
+    },
+    {
+      "id": "site-105569850",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.599333,
+      "lng": 32.235717,
+      "label": "Al Ismailiyah Airport",
+      "osmId": 105569850
+    },
+    {
+      "id": "site-10660866",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.435683,
+      "lng": 48.39309,
+      "label": "Vahdati AFB",
+      "wikidata": "Q3434394",
+      "osmId": 10660866
+    },
+    {
+      "id": "site-10689006",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.410279,
+      "lng": 35.949629,
+      "label": "Khmeimim Air Base",
+      "wikidata": "Q21582584",
+      "osmId": 10689006
+    },
+    {
+      "id": "site-1078236454",
+      "type": "site",
+      "siteType": "port",
+      "lat": 23.565275,
+      "lng": 57.790194,
+      "label": "Khazaen Dry Port",
+      "osmId": 1078236454
+    },
+    {
+      "id": "site-1079440444",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.18279,
+      "lng": 52.569186,
+      "label": "Mugharrag Port",
+      "osmId": 1079440444
+    },
+    {
+      "id": "site-1079452939",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.796626,
+      "lng": 54.693308,
+      "label": "Khalifa Port Logistics Terminal",
+      "osmId": 1079452939
+    },
+    {
+      "id": "site-1079456651",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.784935,
+      "lng": 54.714766,
+      "label": "Khalifa Port CFS",
+      "osmId": 1079456651
+    },
+    {
+      "id": "site-1079459994",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.799874,
+      "lng": 54.661008,
+      "label": "Khalifa Port General Cargo",
+      "osmId": 1079459994
+    },
+    {
+      "id": "site-1079832161",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.818442,
+      "lng": 54.660583,
+      "label": "CSP Abu Dhabi Terminal",
+      "osmId": 1079832161
+    },
+    {
+      "id": "site-10836437176",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.171844,
+      "lng": 52.224801,
+      "label": "Port",
+      "osmId": 10836437176
+    },
+    {
+      "id": "site-1084312088",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.567558,
+      "lng": 44.330494,
+      "label": "Kirkuk II Refinery",
+      "operator": "Al Barham Group Companies",
+      "osmId": 1084312088
+    },
+    {
+      "id": "site-1087940634",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.0482,
+      "lng": 28.495842,
+      "label": "El Dabaa Nuclear Power Plant",
+      "wikidata": "Q30083718",
+      "osmId": 1087940634
+    },
+    {
+      "id": "site-1090208123",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.404066,
+      "lng": 72.057827,
+      "label": "Air Base",
+      "osmId": 1090208123
+    },
+    {
+      "id": "site-10956822395",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 29.49024,
+      "lng": 55.655696,
+      "label": "Naval Base",
+      "osmId": 10956822395
+    },
+    {
+      "id": "site-10956851688",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 29.492159,
+      "lng": 55.655813,
+      "label": "Naval Base",
+      "osmId": 10956851688
+    },
+    {
+      "id": "site-1098681992",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.024519,
+      "lng": 36.142977,
+      "label": "Zarqa Airfield",
+      "osmId": 1098681992
+    },
+    {
+      "id": "site-11026300",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.964355,
+      "lng": 49.697045,
+      "label": "King Abdulaziz Naval Base",
+      "osmId": 11026300
+    },
+    {
+      "id": "site-1106099699",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.107252,
+      "lng": 45.25164,
+      "label": "Air Base",
+      "osmId": 1106099699
+    },
+    {
+      "id": "site-1106937547",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.022173,
+      "lng": 49.668075,
+      "label": "Jubail Commercial Port",
+      "osmId": 1106937547
+    },
+    {
+      "id": "site-11109361181",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 40.574599,
+      "lng": 49.78863,
+      "label": "Haydar'ıN Test Alanı",
+      "osmId": 11109361181
+    },
+    {
+      "id": "site-1112234798",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 34.822115,
+      "lng": 44.679095,
+      "label": "Al Zawari Refinery",
+      "osmId": 1112234798
+    },
+    {
+      "id": "site-11175557497",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.932428,
+      "lng": 33.893479,
+      "label": "Al Kunisa",
+      "osmId": 11175557497
+    },
+    {
+      "id": "site-11175575",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.782028,
+      "lng": 42.866721,
+      "label": "New Port Of Tadjoura",
+      "osmId": 11175575
+    },
+    {
+      "id": "site-11175929",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.784162,
+      "lng": 42.882039,
+      "label": "Port",
+      "osmId": 11175929
+    },
+    {
+      "id": "site-11199579",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.535381,
+      "lng": 42.521377,
+      "label": "Port MinéRalier Du Ghoubet",
+      "osmId": 11199579
+    },
+    {
+      "id": "site-1120081214",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 25.28607,
+      "lng": 55.407249,
+      "label": "Naval Base",
+      "osmId": 1120081214
+    },
+    {
+      "id": "site-1121922765",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.898151,
+      "lng": 34.322641,
+      "label": "Multinational Force And Observers South Camp Heliport",
+      "osmId": 1121922765
+    },
+    {
+      "id": "site-112321226",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.348816,
+      "lng": 47.518801,
+      "label": "Ali Al Salem Air Base",
+      "wikidata": "Q4115518",
+      "osmId": 112321226
+    },
+    {
+      "id": "site-1132227456",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.055506,
+      "lng": 29.669655,
+      "label": "Sidi Kerir Tanker Facility",
+      "operator": "Arab Petroleum Pipelines CO (SUMED)",
+      "osmId": 1132227456
+    },
+    {
+      "id": "site-1132242406",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.242124,
+      "lng": 32.312185,
+      "label": "Hussein Basin",
+      "osmId": 1132242406
+    },
+    {
+      "id": "site-1132242407",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.241554,
+      "lng": 32.302016,
+      "label": "Port",
+      "osmId": 1132242407
+    },
+    {
+      "id": "site-1132242409",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.235619,
+      "lng": 32.301447,
+      "label": "Port",
+      "osmId": 1132242409
+    },
+    {
+      "id": "site-1132242415",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.270472,
+      "lng": 32.318043,
+      "label": "Port",
+      "osmId": 1132242415
+    },
+    {
+      "id": "site-1132242420",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.254735,
+      "lng": 32.309232,
+      "label": "Port Said",
+      "osmId": 1132242420
+    },
+    {
+      "id": "site-1132242421",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.254652,
+      "lng": 32.302599,
+      "label": "Sherif Basin",
+      "osmId": 1132242421
+    },
+    {
+      "id": "site-1132242425",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.258619,
+      "lng": 32.308951,
+      "label": "Naval Basin",
+      "osmId": 1132242425
+    },
+    {
+      "id": "site-1132242429",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.233877,
+      "lng": 32.308344,
+      "label": "Salt Basin",
+      "osmId": 1132242429
+    },
+    {
+      "id": "site-1132242431",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.250737,
+      "lng": 32.311359,
+      "label": "Ismail Basin",
+      "osmId": 1132242431
+    },
+    {
+      "id": "site-1135530100",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.186102,
+      "lng": 56.367193,
+      "label": "Port Of Fujairah",
+      "wikidata": "Q12246913",
+      "osmId": 1135530100
+    },
+    {
+      "id": "site-1135530101",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.178691,
+      "lng": 56.357536,
+      "label": "Fujairah Port Terminals",
+      "osmId": 1135530101
+    },
+    {
+      "id": "site-1136914983",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.048115,
+      "lng": 49.574448,
+      "label": "Tasnee",
+      "osmId": 1136914983
+    },
+    {
+      "id": "site-1136915141",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.054686,
+      "lng": 49.582959,
+      "label": "Sharq",
+      "osmId": 1136915141
+    },
+    {
+      "id": "site-11371066632",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.050848,
+      "lng": 28.489051,
+      "label": "El Dabaa 4",
+      "osmId": 11371066632
+    },
+    {
+      "id": "site-11371066633",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.049772,
+      "lng": 28.492978,
+      "label": "El Dabaa 3",
+      "osmId": 11371066633
+    },
+    {
+      "id": "site-11377384",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 38.353339,
+      "lng": 38.253608,
+      "label": "Tulga Army Air Base",
+      "wikidata": "Q97237152",
+      "osmId": 11377384
+    },
+    {
+      "id": "site-1143908364",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.455202,
+      "lng": 35.821023,
+      "label": "Port Of Tripoli",
+      "osmId": 1143908364
+    },
+    {
+      "id": "site-114553427",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 28.731217,
+      "lng": 33.223759,
+      "label": "Wadi Feran Refinery",
+      "operator": "EGPC",
+      "osmId": 114553427
+    },
+    {
+      "id": "site-114715741",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.005649,
+      "lng": 35.424638,
+      "label": "Incirlik Air Base",
+      "wikidata": "Q1083424",
+      "osmId": 114715741
+    },
+    {
+      "id": "site-1155793753",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.414895,
+      "lng": 31.683019,
+      "label": "Bilbeis Airfield",
+      "osmId": 1155793753
+    },
+    {
+      "id": "site-1156362863",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 21.686896,
+      "lng": 39.18885,
+      "label": "King Abdullah Air Base",
+      "osmId": 1156362863
+    },
+    {
+      "id": "site-1159050225",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 32.351898,
+      "lng": 44.085885,
+      "label": "Karbala Refinery",
+      "wikidata": "Q56377061",
+      "osmId": 1159050225
+    },
+    {
+      "id": "site-1164235212",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.510773,
+      "lng": 52.691566,
+      "label": "Port",
+      "osmId": 1164235212
+    },
+    {
+      "id": "site-1172850274",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.694102,
+      "lng": 73.097866,
+      "label": "Pakistani Army",
+      "operator": "Pakistani Army",
+      "osmId": 1172850274
+    },
+    {
+      "id": "site-1174112385",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.257709,
+      "lng": 44.216409,
+      "label": "Mohammed Alaa Airbase",
+      "osmId": 1174112385
+    },
+    {
+      "id": "site-1174715856",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.277914,
+      "lng": 44.494163,
+      "label": "Rasheed Air Base",
+      "operator": "Iraqi Air Force",
+      "wikidata": "Q7294835",
+      "osmId": 1174715856
+    },
+    {
+      "id": "site-1177120704",
+      "type": "site",
+      "siteType": "port",
+      "lat": 22.002567,
+      "lng": 34.610639,
+      "label": "Suhein Dry Port",
+      "osmId": 1177120704
+    },
+    {
+      "id": "site-1180078596",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.113831,
+      "lng": 56.306998,
+      "label": "Air Base",
+      "osmId": 1180078596
+    },
+    {
+      "id": "site-1180213938",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.815884,
+      "lng": 54.675577,
+      "label": "Port",
+      "osmId": 1180213938
+    },
+    {
+      "id": "site-11870048341",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.889356,
+      "lng": 42.530603,
+      "label": "Jazan Seaport",
+      "osmId": 11870048341
+    },
+    {
+      "id": "site-11870248497",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.899167,
+      "lng": 49.859764,
+      "label": "Mina' Ra'S Al Ghar",
+      "osmId": 11870248497
+    },
+    {
+      "id": "site-11870275388",
+      "type": "site",
+      "siteType": "port",
+      "lat": 28.109074,
+      "lng": 48.621641,
+      "label": "Ras Mishab Port",
+      "osmId": 11870275388
+    },
+    {
+      "id": "site-11870275570",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.179579,
+      "lng": 50.213298,
+      "label": "Mina' Al `Aziziyah",
+      "osmId": 11870275570
+    },
+    {
+      "id": "site-11870738405",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.088213,
+      "lng": 49.692982,
+      "label": "Al Jubayl Industrial Port",
+      "osmId": 11870738405
+    },
+    {
+      "id": "site-11871539020",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.024754,
+      "lng": 49.684426,
+      "label": "Al Jubayl Commercial Port",
+      "osmId": 11871539020
+    },
+    {
+      "id": "site-11871651888",
+      "type": "site",
+      "siteType": "port",
+      "lat": 22.345774,
+      "lng": 39.091092,
+      "label": "Mina' Al Qadimah",
+      "osmId": 11871651888
+    },
+    {
+      "id": "site-11871651902",
+      "type": "site",
+      "siteType": "port",
+      "lat": 17.695107,
+      "lng": 42.011063,
+      "label": "Mina' Ash Shuqayq",
+      "osmId": 11871651902
+    },
+    {
+      "id": "site-1188486155",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.024889,
+      "lng": 52.168378,
+      "label": "Port",
+      "osmId": 1188486155
+    },
+    {
+      "id": "site-1189441954",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 17.029558,
+      "lng": 54.085872,
+      "label": "RAFO Salalah",
+      "osmId": 1189441954
+    },
+    {
+      "id": "site-119555738",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 38.05793,
+      "lng": 46.154862,
+      "label": "Tabriz Oil Refining Company",
+      "osmId": 119555738
+    },
+    {
+      "id": "site-1197319037",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 40.57475,
+      "lng": 49.788878,
+      "label": "Haydar'ıN Test Alanı",
+      "osmId": 1197319037
+    },
+    {
+      "id": "site-1203075969",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.191565,
+      "lng": 47.877606,
+      "label": "Khor Al Zubair Port",
+      "wikidata": "Q11000695",
+      "osmId": 1203075969
+    },
+    {
+      "id": "site-1211072696",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.648714,
+      "lng": 32.350915,
+      "label": "Port",
+      "osmId": 1211072696
+    },
+    {
+      "id": "site-1216211436",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.467413,
+      "lng": 46.665256,
+      "label": "King Salman Airbase Project",
+      "osmId": 1216211436
+    },
+    {
+      "id": "site-1218225976",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.051418,
+      "lng": 55.507883,
+      "label": "Oghab 44 Airfield",
+      "wikidata": "Q116766432",
+      "osmId": 1218225976
+    },
+    {
+      "id": "site-1224748180",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 15.366,
+      "lng": 42.61059,
+      "label": "Kamaran Island",
+      "wikidata": "Q12693249",
+      "osmId": 1224748180
+    },
+    {
+      "id": "site-12293440861",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.593255,
+      "lng": 36.178058,
+      "label": "İSkenderun BalıKçı BarıNağı",
+      "osmId": 12293440861
+    },
+    {
+      "id": "site-1236249737",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.923721,
+      "lng": 36.006954,
+      "label": "SöNmez Port",
+      "osmId": 1236249737
+    },
+    {
+      "id": "site-1236349890",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.605556,
+      "lng": 47.079722,
+      "label": "Ad Dibdibah",
+      "osmId": 1236349890
+    },
+    {
+      "id": "site-1236415381",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.545526,
+      "lng": 46.603661,
+      "label": "Air Base",
+      "osmId": 1236415381
+    },
+    {
+      "id": "site-1236695030",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.098687,
+      "lng": 38.885033,
+      "label": "Istabl Antar Station",
+      "osmId": 1236695030
+    },
+    {
+      "id": "site-1236744779",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.316667,
+      "lng": 37.324722,
+      "label": "Air Base",
+      "osmId": 1236744779
+    },
+    {
+      "id": "site-1236744918",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.266111,
+      "lng": 37.268056,
+      "label": "Guriat Southwest",
+      "osmId": 1236744918
+    },
+    {
+      "id": "site-12382309326",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.038302,
+      "lng": 30.886354,
+      "label": "Sheikh Zayed City Military Airstrip",
+      "osmId": 12382309326
+    },
+    {
+      "id": "site-1240951184",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 16.958148,
+      "lng": 54.809837,
+      "label": "Sultan Qaboos Naval Base",
+      "osmId": 1240951184
+    },
+    {
+      "id": "site-1248917461",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.258052,
+      "lng": 35.657697,
+      "label": "Port",
+      "osmId": 1248917461
+    },
+    {
+      "id": "site-124917073",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.565759,
+      "lng": 36.574589,
+      "label": "Al Qusayr Air Base",
+      "wikidata": "Q11824206",
+      "osmId": 124917073
+    },
+    {
+      "id": "site-1250776164",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.236633,
+      "lng": 67.03772,
+      "label": "Air Base",
+      "osmId": 1250776164
+    },
+    {
+      "id": "site-125240056",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.000856,
+      "lng": 49.269804,
+      "label": "Shahid Asyaee Airport",
+      "osmId": 125240056
+    },
+    {
+      "id": "site-12541188",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.045475,
+      "lng": 72.667877,
+      "label": "Mushaf Air Base",
+      "operator": "Pakistan Air Force",
+      "wikidata": "Q3694556",
+      "osmId": 12541188
+    },
+    {
+      "id": "site-1255981986",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.510534,
+      "lng": 43.237755,
+      "label": "JETEE PETROLIER",
+      "operator": "CONSTRUCTION",
+      "osmId": 1255981986
+    },
+    {
+      "id": "site-127971123",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.596723,
+      "lng": 43.105418,
+      "label": "Port",
+      "osmId": 127971123
+    },
+    {
+      "id": "site-12864175",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.353752,
+      "lng": 47.920169,
+      "label": "Port",
+      "osmId": 12864175
+    },
+    {
+      "id": "site-1287652753",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.204302,
+      "lng": 50.61656,
+      "label": "United Kingdom Naval Support Facility",
+      "operator": "Royal Navy",
+      "osmId": 1287652753
+    },
+    {
+      "id": "site-12927915",
+      "type": "site",
+      "siteType": "port",
+      "lat": 33.902981,
+      "lng": 35.526683,
+      "label": "Port Of Beirut",
+      "wikidata": "Q2975999",
+      "osmId": 12927915
+    },
+    {
+      "id": "site-1293009002",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 24.845003,
+      "lng": 66.788919,
+      "label": "KANUPP 1",
+      "osmId": 1293009002
+    },
+    {
+      "id": "site-12968784",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.89806,
+      "lng": 41.996219,
+      "label": "Rumeilan Air Base",
+      "operator": "USAF/YPG",
+      "wikidata": "Q23701416",
+      "osmId": 12968784
+    },
+    {
+      "id": "site-129693533",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 37.879002,
+      "lng": 41.136976,
+      "label": "TüPraş Batman Oil Refinery",
+      "wikidata": "Q25472342",
+      "osmId": 129693533
+    },
+    {
+      "id": "site-1303931592",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.812068,
+      "lng": 54.653311,
+      "label": "Khalifa Port",
+      "osmId": 1303931592
+    },
+    {
+      "id": "site-1305250289",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.926948,
+      "lng": 51.574563,
+      "label": "Port",
+      "osmId": 1305250289
+    },
+    {
+      "id": "site-130546424",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.678024,
+      "lng": 43.549635,
+      "label": "COB Speicher",
+      "operator": "Iraqi Air Force",
+      "wikidata": "Q5013269",
+      "osmId": 130546424
+    },
+    {
+      "id": "site-130632355",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.764413,
+      "lng": 43.123015,
+      "label": "Qayyarah Airbase",
+      "osmId": 130632355
+    },
+    {
+      "id": "site-130676518",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.923639,
+      "lng": 44.488075,
+      "label": "Tuz Khurmatu Air Base",
+      "osmId": 130676518
+    },
+    {
+      "id": "site-130676592",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.167627,
+      "lng": 44.756273,
+      "label": "Salum Air Base",
+      "osmId": 130676592
+    },
+    {
+      "id": "site-130676602",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.128765,
+      "lng": 43.715589,
+      "label": "Al Fathah Air Base",
+      "osmId": 130676602
+    },
+    {
+      "id": "site-130808542",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.559788,
+      "lng": 38.315943,
+      "label": "Palmyra Airport",
+      "wikidata": "Q3496771",
+      "osmId": 130808542
+    },
+    {
+      "id": "site-130921205",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.864837,
+      "lng": 48.276329,
+      "label": "Mohammed Al Ahmad Kuwait Naval Base",
+      "wikidata": "Q6448859",
+      "osmId": 130921205
+    },
+    {
+      "id": "site-130922169",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.389074,
+      "lng": 48.516908,
+      "label": "Ras Al Khafji",
+      "wikidata": "Q2875840",
+      "osmId": 130922169
+    },
+    {
+      "id": "site-130922539",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.078495,
+      "lng": 48.611967,
+      "label": "Ras Mishab",
+      "wikidata": "Q2875896",
+      "osmId": 130922539
+    },
+    {
+      "id": "site-131119082",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.521497,
+      "lng": 37.041377,
+      "label": "Minaq Air Base",
+      "osmId": 131119082
+    },
+    {
+      "id": "site-131120814",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.764883,
+      "lng": 38.567189,
+      "label": "Tabqa Military Airbase",
+      "operator": "ISIS",
+      "osmId": 131120814
+    },
+    {
+      "id": "site-131124276",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.688834,
+      "lng": 37.217915,
+      "label": "Saiqal Air Base",
+      "osmId": 131124276
+    },
+    {
+      "id": "site-13112442350",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.183228,
+      "lng": 44.370786,
+      "label": "Nuclear Facility",
+      "osmId": 13112442350
+    },
+    {
+      "id": "site-131147382",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.161102,
+      "lng": 37.150947,
+      "label": "Prince Hassan Air Base",
+      "operator": "Royal Jordanian Air Force",
+      "wikidata": "Q7244055",
+      "osmId": 131147382
+    },
+    {
+      "id": "site-1311524687",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.632329,
+      "lng": 72.698775,
+      "label": "Air Base",
+      "osmId": 1311524687
+    },
+    {
+      "id": "site-1315862113",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.619675,
+      "lng": 56.27486,
+      "label": "Port",
+      "osmId": 1315862113
+    },
+    {
+      "id": "site-131678150",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.949897,
+      "lng": 38.293334,
+      "label": "Saudi Aramco",
+      "wikidata": "Q22689997",
+      "osmId": 131678150
+    },
+    {
+      "id": "site-1317472731",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.823445,
+      "lng": 38.414694,
+      "label": "Al Muajjiz Crude Oil Terminal",
+      "osmId": 1317472731
+    },
+    {
+      "id": "site-1320833076",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.103082,
+      "lng": 32.892799,
+      "label": "Port",
+      "osmId": 1320833076
+    },
+    {
+      "id": "site-1323035743",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.594847,
+      "lng": 31.667498,
+      "label": "Az Zaqaziq",
+      "osmId": 1323035743
+    },
+    {
+      "id": "site-1337603633",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 24.793449,
+      "lng": 67.373697,
+      "label": "Engro Polymer And Chemicals Limited (EPCL)",
+      "osmId": 1337603633
+    },
+    {
+      "id": "site-1341074720",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.284199,
+      "lng": 49.485718,
+      "label": "Air Base",
+      "osmId": 1341074720
+    },
+    {
+      "id": "site-13418317",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.06465,
+      "lng": 51.605004,
+      "label": "Qatar Economic Canal",
+      "osmId": 13418317
+    },
+    {
+      "id": "site-13418320",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 25.031243,
+      "lng": 51.637985,
+      "label": "Qatar Emiri Naval Forces Base",
+      "operator": "Military",
+      "osmId": 13418320
+    },
+    {
+      "id": "site-13418321",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.01704,
+      "lng": 51.624761,
+      "label": "New Doha Port",
+      "osmId": 13418321
+    },
+    {
+      "id": "site-1341938236",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.134217,
+      "lng": 31.412166,
+      "label": "East Cairo Air Base",
+      "osmId": 1341938236
+    },
+    {
+      "id": "site-13421232057",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.359593,
+      "lng": 49.935479,
+      "label": "Baku",
+      "osmId": 13421232057
+    },
+    {
+      "id": "site-13423331778",
+      "type": "site",
+      "siteType": "port",
+      "lat": 37.482248,
+      "lng": 49.471006,
+      "label": "Bandar E Anzali",
+      "osmId": 13423331778
+    },
+    {
+      "id": "site-13423334262",
+      "type": "site",
+      "siteType": "port",
+      "lat": 38.407498,
+      "lng": 48.882551,
+      "label": "Astara",
+      "osmId": 13423334262
+    },
+    {
+      "id": "site-13441913994",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.309759,
+      "lng": 50.587149,
+      "label": "Chilov (Zhiloy)",
+      "osmId": 13441913994
+    },
+    {
+      "id": "site-13442767041",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.655755,
+      "lng": 51.506395,
+      "label": "Nowshahr Port",
+      "osmId": 13442767041
+    },
+    {
+      "id": "site-13443769548",
+      "type": "site",
+      "siteType": "port",
+      "lat": 37.469579,
+      "lng": 49.643912,
+      "label": "Caspian Port",
+      "osmId": 13443769548
+    },
+    {
+      "id": "site-13444582624",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.655755,
+      "lng": 51.506395,
+      "label": "Nowshahr Port",
+      "osmId": 13444582624
+    },
+    {
+      "id": "site-13444682768",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.848788,
+      "lng": 53.275452,
+      "label": "Necka Port",
+      "osmId": 13444682768
+    },
+    {
+      "id": "site-13444695480",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.713895,
+      "lng": 52.65187,
+      "label": "Babolsar Port",
+      "osmId": 13444695480
+    },
+    {
+      "id": "site-13444717415",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.854961,
+      "lng": 53.36537,
+      "label": "Amirabad Port",
+      "osmId": 13444717415
+    },
+    {
+      "id": "site-13445334719",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.004398,
+      "lng": 53.015106,
+      "label": "Turkmenbashi",
+      "osmId": 13445334719
+    },
+    {
+      "id": "site-13445334720",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.002487,
+      "lng": 53.03637,
+      "label": "Turkmenbashi",
+      "osmId": 13445334720
+    },
+    {
+      "id": "site-13445344113",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.99638,
+      "lng": 53.065231,
+      "label": "Turkmenbashi",
+      "osmId": 13445344113
+    },
+    {
+      "id": "site-13446989364",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.716753,
+      "lng": 52.844968,
+      "label": "Karshi Port",
+      "osmId": 13446989364
+    },
+    {
+      "id": "site-1344793045",
+      "type": "site",
+      "siteType": "port",
+      "lat": 35.263774,
+      "lng": 35.925622,
+      "label": "Port",
+      "osmId": 1344793045
+    },
+    {
+      "id": "site-13448624166",
+      "type": "site",
+      "siteType": "port",
+      "lat": 41.524299,
+      "lng": 52.573893,
+      "label": "Garabogaz Port",
+      "osmId": 13448624166
+    },
+    {
+      "id": "site-13448636574",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.179619,
+      "lng": 52.75889,
+      "label": "Kiyanly Port",
+      "osmId": 13448636574
+    },
+    {
+      "id": "site-13448672713",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.155557,
+      "lng": 52.764308,
+      "label": "Kiyanly Port",
+      "osmId": 13448672713
+    },
+    {
+      "id": "site-13448703109",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.412225,
+      "lng": 53.102803,
+      "label": "Hazar Port",
+      "osmId": 13448703109
+    },
+    {
+      "id": "site-13448711392",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.357396,
+      "lng": 53.221207,
+      "label": "Aladzha Port",
+      "osmId": 13448711392
+    },
+    {
+      "id": "site-13449471308",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.794941,
+      "lng": 53.013457,
+      "label": "Gyzylsuw Port",
+      "osmId": 13449471308
+    },
+    {
+      "id": "site-1346137201",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.979509,
+      "lng": 56.061633,
+      "label": "Saqr Port",
+      "osmId": 1346137201
+    },
+    {
+      "id": "site-1353235013",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.958136,
+      "lng": 55.621748,
+      "label": "Port",
+      "osmId": 1353235013
+    },
+    {
+      "id": "site-135517234",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.067274,
+      "lng": 47.574485,
+      "label": "Prince Sultan Air Base",
+      "osmId": 135517234
+    },
+    {
+      "id": "site-135770999",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 40.119575,
+      "lng": 44.463655,
+      "label": "Erebuni Airport",
+      "wikidata": "Q2460414",
+      "osmId": 135770999
+    },
+    {
+      "id": "site-13579528",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.94275,
+      "lng": 42.123078,
+      "label": "Oil Refinery",
+      "osmId": 13579528
+    },
+    {
+      "id": "site-13586452803",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.911294,
+      "lng": 59.273899,
+      "label": "Air Base",
+      "osmId": 13586452803
+    },
+    {
+      "id": "site-1359255731",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.382017,
+      "lng": 54.469639,
+      "label": "MAUSAFFAH PORT",
+      "osmId": 1359255731
+    },
+    {
+      "id": "site-1359874554",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.035754,
+      "lng": 51.836016,
+      "label": "Air Base",
+      "osmId": 1359874554
+    },
+    {
+      "id": "site-13601671",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.309652,
+      "lng": 30.073282,
+      "label": "Port",
+      "osmId": 13601671
+    },
+    {
+      "id": "site-13601892",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 31.221126,
+      "lng": 32.368195,
+      "label": "Eastern Port Said Naval Base",
+      "osmId": 13601892
+    },
+    {
+      "id": "site-13601998",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 23.95611,
+      "lng": 35.567305,
+      "label": "Berenice Naval Base",
+      "osmId": 13601998
+    },
+    {
+      "id": "site-1363185686",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.081079,
+      "lng": 49.666134,
+      "label": "King Fahd Industrial Port",
+      "osmId": 1363185686
+    },
+    {
+      "id": "site-13650709",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.309326,
+      "lng": 30.07394,
+      "label": "Port",
+      "osmId": 13650709
+    },
+    {
+      "id": "site-13650710",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.292146,
+      "lng": 30.084843,
+      "label": "Port",
+      "osmId": 13650710
+    },
+    {
+      "id": "site-13650713",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 31.289374,
+      "lng": 30.083048,
+      "label": "Naval Base",
+      "osmId": 13650713
+    },
+    {
+      "id": "site-13651335",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.179664,
+      "lng": 29.867752,
+      "label": "Port Of Alexandria",
+      "osmId": 13651335
+    },
+    {
+      "id": "site-13651337",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 31.192426,
+      "lng": 29.85684,
+      "label": "Alexandria Naval Base",
+      "osmId": 13651337
+    },
+    {
+      "id": "site-1374032140",
+      "type": "site",
+      "siteType": "port",
+      "lat": 23.690399,
+      "lng": 58.179214,
+      "label": "Al Seeb Port",
+      "osmId": 1374032140
+    },
+    {
+      "id": "site-1376727109",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.148057,
+      "lng": 56.14548,
+      "label": "Bukha Port",
+      "osmId": 1376727109
+    },
+    {
+      "id": "site-1377081226",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.018416,
+      "lng": 44.619527,
+      "label": "Oil Company",
+      "osmId": 1377081226
+    },
+    {
+      "id": "site-1380907419",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419796,
+      "lng": 48.526402,
+      "label": "Naval Base",
+      "osmId": 1380907419
+    },
+    {
+      "id": "site-1380907420",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419613,
+      "lng": 48.526,
+      "label": "Naval Base",
+      "osmId": 1380907420
+    },
+    {
+      "id": "site-1380907421",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419827,
+      "lng": 48.525846,
+      "label": "Naval Base",
+      "osmId": 1380907421
+    },
+    {
+      "id": "site-1380907422",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419592,
+      "lng": 48.525436,
+      "label": "Naval Base",
+      "osmId": 1380907422
+    },
+    {
+      "id": "site-1380907423",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419377,
+      "lng": 48.525616,
+      "label": "Naval Base",
+      "osmId": 1380907423
+    },
+    {
+      "id": "site-1380907424",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419162,
+      "lng": 48.525217,
+      "label": "Naval Base",
+      "osmId": 1380907424
+    },
+    {
+      "id": "site-1380907425",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.418997,
+      "lng": 48.525279,
+      "label": "Naval Base",
+      "osmId": 1380907425
+    },
+    {
+      "id": "site-1380907426",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.418816,
+      "lng": 48.525493,
+      "label": "Naval Base",
+      "osmId": 1380907426
+    },
+    {
+      "id": "site-1380907427",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.419218,
+      "lng": 48.525386,
+      "label": "Naval Base",
+      "osmId": 1380907427
+    },
+    {
+      "id": "site-1380907428",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.420065,
+      "lng": 48.526259,
+      "label": "Naval Base",
+      "osmId": 1380907428
+    },
+    {
+      "id": "site-1382276149",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.795835,
+      "lng": 45.011036,
+      "label": "Port",
+      "osmId": 1382276149
+    },
+    {
+      "id": "site-1382816602",
+      "type": "site",
+      "siteType": "port",
+      "lat": 32.790416,
+      "lng": 35.542976,
+      "label": "Lido Harbour",
+      "osmId": 1382816602
+    },
+    {
+      "id": "site-1385819761",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.246487,
+      "lng": 45.25512,
+      "label": "Samawa Refinery",
+      "operator": "Midland Refineries Company",
+      "osmId": 1385819761
+    },
+    {
+      "id": "site-1391855898",
+      "type": "site",
+      "siteType": "port",
+      "lat": 41.662851,
+      "lng": 44.909452,
+      "label": "Tbilisi Dry Port",
+      "osmId": 1391855898
+    },
+    {
+      "id": "site-1393666744",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.470999,
+      "lng": 47.67649,
+      "label": "The New Shuaiba Refinery (Fluid Catalytic Cracking)",
+      "osmId": 1393666744
+    },
+    {
+      "id": "site-1393666767",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.468375,
+      "lng": 47.688087,
+      "label": "Oil Refinery",
+      "osmId": 1393666767
+    },
+    {
+      "id": "site-1396234178",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.980683,
+      "lng": 43.76957,
+      "label": "Kalak Refinery",
+      "osmId": 1396234178
+    },
+    {
+      "id": "site-1396234716",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.13026,
+      "lng": 43.784977,
+      "label": "Lanaz Refinery",
+      "operator": "Lanaz Company",
+      "osmId": 1396234716
+    },
+    {
+      "id": "site-14033394",
+      "type": "site",
+      "siteType": "port",
+      "lat": 37.466488,
+      "lng": 49.644744,
+      "label": "Port",
+      "osmId": 14033394
+    },
+    {
+      "id": "site-1417478223",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 23.07558,
+      "lng": 57.64324,
+      "label": "Saiq Airport",
+      "wikidata": "Q18210923",
+      "osmId": 1417478223
+    },
+    {
+      "id": "site-1420049543",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.134378,
+      "lng": 47.650546,
+      "label": "Air Base",
+      "osmId": 1420049543
+    },
+    {
+      "id": "site-1420056133",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.227246,
+      "lng": 47.475779,
+      "label": "Air Base",
+      "osmId": 1420056133
+    },
+    {
+      "id": "site-1424094993",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.424311,
+      "lng": 47.442341,
+      "label": "Oil Refinery",
+      "osmId": 1424094993
+    },
+    {
+      "id": "site-1424218792",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.671793,
+      "lng": 46.710547,
+      "label": "Oil Refinery",
+      "osmId": 1424218792
+    },
+    {
+      "id": "site-142952109",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.282972,
+      "lng": 36.464009,
+      "label": "Marj Ruhayyil Air Base",
+      "osmId": 142952109
+    },
+    {
+      "id": "site-143033442",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.291791,
+      "lng": 40.161998,
+      "label": "Air Base",
+      "osmId": 143033442
+    },
+    {
+      "id": "site-143055851",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.080088,
+      "lng": 38.069026,
+      "label": "Yanbu Commercial Port",
+      "osmId": 143055851
+    },
+    {
+      "id": "site-143669214",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.159553,
+      "lng": 56.172317,
+      "label": "Havadarya Air Base",
+      "osmId": 143669214
+    },
+    {
+      "id": "site-143671164",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.702336,
+      "lng": 55.949795,
+      "label": "Air Base",
+      "osmId": 143671164
+    },
+    {
+      "id": "site-14374024",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.244196,
+      "lng": 32.301127,
+      "label": "Port Said West",
+      "osmId": 14374024
+    },
+    {
+      "id": "site-14374467",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.207145,
+      "lng": 32.357381,
+      "label": "SCCT",
+      "osmId": 14374467
+    },
+    {
+      "id": "site-1438278978",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.869474,
+      "lng": 40.707301,
+      "label": "Kahara",
+      "osmId": 1438278978
+    },
+    {
+      "id": "site-1438279952",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.733611,
+      "lng": 40.709435,
+      "label": "Saliniya",
+      "osmId": 1438279952
+    },
+    {
+      "id": "site-1438319304",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.304106,
+      "lng": 41.686856,
+      "label": "Air Base",
+      "osmId": 1438319304
+    },
+    {
+      "id": "site-1438521307",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.072585,
+      "lng": 42.33895,
+      "label": "K3",
+      "osmId": 1438521307
+    },
+    {
+      "id": "site-143991199",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.920306,
+      "lng": 36.869666,
+      "label": "An Nasiriya Air Base",
+      "osmId": 143991199
+    },
+    {
+      "id": "site-1441121053",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.044578,
+      "lng": 48.160299,
+      "label": "Shuaiba Port",
+      "osmId": 1441121053
+    },
+    {
+      "id": "site-1441121059",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.86323,
+      "lng": 48.285321,
+      "label": "Ras Al Qulayah Naval Base",
+      "osmId": 1441121059
+    },
+    {
+      "id": "site-1442629928",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.263436,
+      "lng": 46.532331,
+      "label": "Air Base",
+      "osmId": 1442629928
+    },
+    {
+      "id": "site-1443465045",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 13.967249,
+      "lng": 42.769482,
+      "label": "Air Base",
+      "osmId": 1443465045
+    },
+    {
+      "id": "site-1449918496",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.919384,
+      "lng": 47.433761,
+      "label": "Maysan Refinery",
+      "operator": "South Refineries Company",
+      "osmId": 1449918496
+    },
+    {
+      "id": "site-1449999447",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.531059,
+      "lng": 44.333807,
+      "label": "Kirkuk Refinery",
+      "operator": "North Refineries Company",
+      "osmId": 1449999447
+    },
+    {
+      "id": "site-1450114966",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 32.230312,
+      "lng": 44.254306,
+      "label": "Najaf Refinery",
+      "operator": "Midland Refineries Company",
+      "osmId": 1450114966
+    },
+    {
+      "id": "site-1450116091",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 34.070217,
+      "lng": 42.362243,
+      "label": "Haditha Refinery",
+      "operator": "North Refineries Company",
+      "osmId": 1450116091
+    },
+    {
+      "id": "site-145290476",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.414321,
+      "lng": 33.155513,
+      "label": "Bir Gifgafa Airfield",
+      "wikidata": "Q597588",
+      "osmId": 145290476
+    },
+    {
+      "id": "site-1453048884",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.890705,
+      "lng": 42.533113,
+      "label": "Jazan Port",
+      "osmId": 1453048884
+    },
+    {
+      "id": "site-1453058290",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.655198,
+      "lng": 50.144151,
+      "label": "Ras Tanura Port",
+      "osmId": 1453058290
+    },
+    {
+      "id": "site-1454938876",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.70925,
+      "lng": 36.484858,
+      "label": "Air Base",
+      "osmId": 1454938876
+    },
+    {
+      "id": "site-1461909917",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.242758,
+      "lng": 55.145549,
+      "label": "Lesser Tunb Airport",
+      "wikidata": "Q108441583",
+      "osmId": 1461909917
+    },
+    {
+      "id": "site-146420619",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 29.73389,
+      "lng": 52.659035,
+      "label": "Shiraz Oil Refinery",
+      "operator": "Shiraz Oil Refining Company",
+      "wikidata": "Q17070429",
+      "osmId": 146420619
+    },
+    {
+      "id": "site-1466899211",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.579313,
+      "lng": 31.129169,
+      "label": "Quwaysina Airport",
+      "osmId": 1466899211
+    },
+    {
+      "id": "site-1467550038",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.460381,
+      "lng": 44.422798,
+      "label": "North Oil Company",
+      "osmId": 1467550038
+    },
+    {
+      "id": "site-1484436885",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.201338,
+      "lng": 50.616894,
+      "label": "Naval Base",
+      "osmId": 1484436885
+    },
+    {
+      "id": "site-150895887",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.937564,
+      "lng": 34.933393,
+      "label": "Ovda Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q573524",
+      "osmId": 150895887
+    },
+    {
+      "id": "site-15093459",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.838374,
+      "lng": 66.97626,
+      "label": "Karachi International Container Terminal",
+      "osmId": 15093459
+    },
+    {
+      "id": "site-15093659",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.769406,
+      "lng": 67.330482,
+      "label": "Qasim International Container Terminal",
+      "osmId": 15093659
+    },
+    {
+      "id": "site-152252311",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.573089,
+      "lng": 69.196937,
+      "label": "APN 10",
+      "osmId": 152252311
+    },
+    {
+      "id": "site-156582232",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.335632,
+      "lng": 36.143759,
+      "label": "King Faisal Airbase",
+      "wikidata": "Q86659984",
+      "osmId": 156582232
+    },
+    {
+      "id": "site-156583577",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.999964,
+      "lng": 36.221495,
+      "label": "King Abdullah II Air Base",
+      "wikidata": "Q115803997",
+      "osmId": 156583577
+    },
+    {
+      "id": "site-156588723",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.538196,
+      "lng": 38.194698,
+      "label": "H 4 Air Base",
+      "wikidata": "Q3914634",
+      "osmId": 156588723
+    },
+    {
+      "id": "site-15685569",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.681336,
+      "lng": 54.080511,
+      "label": "Port",
+      "osmId": 15685569
+    },
+    {
+      "id": "site-1589742199",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.947895,
+      "lng": 56.284035,
+      "label": "Bahman Port",
+      "operator": "Qeshm Free Zone",
+      "osmId": 1589742199
+    },
+    {
+      "id": "site-1589742393",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.969275,
+      "lng": 56.264977,
+      "label": "Port",
+      "osmId": 1589742393
+    },
+    {
+      "id": "site-15921864",
+      "type": "site",
+      "siteType": "port",
+      "lat": 14.836054,
+      "lng": 42.937419,
+      "label": "Port",
+      "osmId": 15921864
+    },
+    {
+      "id": "site-160479740",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.913436,
+      "lng": 35.87405,
+      "label": "Tartus Port",
+      "wikidata": "Q104727179",
+      "osmId": 160479740
+    },
+    {
+      "id": "site-160523254",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.645474,
+      "lng": 55.11115,
+      "label": "Air Basy Airfield",
+      "osmId": 160523254
+    },
+    {
+      "id": "site-16143555",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.205941,
+      "lng": 44.515107,
+      "label": "Nuclear Facility",
+      "osmId": 16143555
+    },
+    {
+      "id": "site-16166977",
+      "type": "site",
+      "siteType": "port",
+      "lat": 15.820787,
+      "lng": 52.197283,
+      "label": "Nishtun Port",
+      "osmId": 16166977
+    },
+    {
+      "id": "site-166254432",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.587442,
+      "lng": 55.579977,
+      "label": "AHMED BIN RASHID PORT",
+      "osmId": 166254432
+    },
+    {
+      "id": "site-166382875",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.592533,
+      "lng": 55.578347,
+      "label": "AHMED BIN RASHID PORT",
+      "osmId": 166382875
+    },
+    {
+      "id": "site-166809993",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.353497,
+      "lng": 56.368912,
+      "label": "Khorfakkan Port",
+      "osmId": 166809993
+    },
+    {
+      "id": "site-167041583",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 25.251946,
+      "lng": 56.36736,
+      "label": "Fujairah Naval Base",
+      "osmId": 167041583
+    },
+    {
+      "id": "site-172852873",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 12.784574,
+      "lng": 44.835221,
+      "label": "Air Base",
+      "osmId": 172852873
+    },
+    {
+      "id": "site-17371159",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 21.430322,
+      "lng": 39.174734,
+      "label": "Naval Base",
+      "osmId": 17371159
+    },
+    {
+      "id": "site-17522822",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 29.544453,
+      "lng": 34.949981,
+      "label": "Eilat Naval Base",
+      "wikidata": "Q13934028",
+      "osmId": 17522822
+    },
+    {
+      "id": "site-176050715",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.032769,
+      "lng": 50.525182,
+      "label": "Sakhir Air Base",
+      "wikidata": "Q12243553",
+      "osmId": 176050715
+    },
+    {
+      "id": "site-176976419",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.717415,
+      "lng": 55.973059,
+      "label": "Naval Base",
+      "osmId": 176976419
+    },
+    {
+      "id": "site-17728131",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 24.845538,
+      "lng": 66.788879,
+      "label": "Karachi Nuclear Power Plant 1",
+      "wikidata": "Q1274134",
+      "osmId": 17728131
+    },
+    {
+      "id": "site-178153148",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.200665,
+      "lng": 48.658912,
+      "label": "Nojeh Airbase",
+      "wikidata": "Q5644465",
+      "osmId": 178153148
+    },
+    {
+      "id": "site-178241619",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.921124,
+      "lng": 51.562288,
+      "label": "Esfahan Hesa Airport",
+      "wikidata": "Q12692994",
+      "osmId": 178241619
+    },
+    {
+      "id": "site-178242477",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.762762,
+      "lng": 51.87409,
+      "label": "Isfahan Shahid Beheshti International Airport",
+      "operator": "Military Of Iran",
+      "wikidata": "Q1151889",
+      "osmId": 178242477
+    },
+    {
+      "id": "site-1787285830",
+      "type": "site",
+      "siteType": "port",
+      "lat": 21.46549,
+      "lng": 39.149482,
+      "label": "Jeddah Islamic Port",
+      "osmId": 1787285830
+    },
+    {
+      "id": "site-179095437",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.155222,
+      "lng": 29.860231,
+      "label": "Oil Refinery",
+      "osmId": 179095437
+    },
+    {
+      "id": "site-179097004",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.140069,
+      "lng": 29.792269,
+      "label": "Port",
+      "osmId": 179097004
+    },
+    {
+      "id": "site-18018195",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.353054,
+      "lng": 47.951432,
+      "label": "Shuwaikh",
+      "osmId": 18018195
+    },
+    {
+      "id": "site-18018216",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.351286,
+      "lng": 47.923683,
+      "label": "Shuwaikh Port",
+      "osmId": 18018216
+    },
+    {
+      "id": "site-18018360",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.351685,
+      "lng": 47.911677,
+      "label": "Free Zone Phaze 2",
+      "osmId": 18018360
+    },
+    {
+      "id": "site-18023222",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.053464,
+      "lng": 48.132752,
+      "label": "Shuaiba",
+      "osmId": 18023222
+    },
+    {
+      "id": "site-18023540",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.003926,
+      "lng": 48.14724,
+      "label": "Mina Abdullah Refinery (MAB)",
+      "osmId": 18023540
+    },
+    {
+      "id": "site-180833472",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 23.817446,
+      "lng": 57.527829,
+      "label": "Said Bin Sultan Naval Base",
+      "osmId": 180833472
+    },
+    {
+      "id": "site-18091793",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.034958,
+      "lng": 48.144906,
+      "label": "East Shuaiba Industrial",
+      "osmId": 18091793
+    },
+    {
+      "id": "site-1809842106",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.23669,
+      "lng": 67.039665,
+      "label": "PAF Khalid Airbase",
+      "osmId": 1809842106
+    },
+    {
+      "id": "site-1812866968",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.873343,
+      "lng": 55.011016,
+      "label": "Port",
+      "osmId": 1812866968
+    },
+    {
+      "id": "site-1813055301",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.24838,
+      "lng": 55.297208,
+      "label": "Port",
+      "osmId": 1813055301
+    },
+    {
+      "id": "site-18432564",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.845562,
+      "lng": 34.650191,
+      "label": "Southern Seaport",
+      "operator": "HCT",
+      "wikidata": "Q20502320",
+      "osmId": 18432564
+    },
+    {
+      "id": "site-18432567",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.833538,
+      "lng": 34.658528,
+      "label": "Port",
+      "wikidata": "Q126009542",
+      "osmId": 18432567
+    },
+    {
+      "id": "site-18432568",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.845826,
+      "lng": 34.684867,
+      "label": "Oil Refinery",
+      "wikidata": "Q4804772",
+      "osmId": 18432568
+    },
+    {
+      "id": "site-18457252",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.116191,
+      "lng": 42.084312,
+      "label": "Rahiba Airport",
+      "osmId": 18457252
+    },
+    {
+      "id": "site-18471647",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.986529,
+      "lng": 55.065893,
+      "label": "Jebel Ali North Free Zone",
+      "osmId": 18471647
+    },
+    {
+      "id": "site-1858703",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.52789,
+      "lng": 54.376544,
+      "label": "Mina Zayed",
+      "wikidata": "Q3180182",
+      "osmId": 1858703
+    },
+    {
+      "id": "site-187976295",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.020269,
+      "lng": 72.207648,
+      "label": "Khushab I",
+      "osmId": 187976295
+    },
+    {
+      "id": "site-187976339",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.992709,
+      "lng": 72.198916,
+      "label": "Heavy Water Production Plant",
+      "osmId": 187976339
+    },
+    {
+      "id": "site-187976341",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.020363,
+      "lng": 72.206303,
+      "label": "Khushab Nuclear Complex",
+      "osmId": 187976341
+    },
+    {
+      "id": "site-190520030",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 40.407596,
+      "lng": 50.204203,
+      "label": "Baku Kala Air Base",
+      "wikidata": "Q2902243",
+      "osmId": 190520030
+    },
+    {
+      "id": "site-19057920",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.806511,
+      "lng": 44.995112,
+      "label": "Port",
+      "osmId": 19057920
+    },
+    {
+      "id": "site-19125716",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.825564,
+      "lng": 36.781076,
+      "label": "Muwaffaq Salti Air Base",
+      "wikidata": "Q2886524",
+      "osmId": 19125716
+    },
+    {
+      "id": "site-19135758",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.205847,
+      "lng": 56.249666,
+      "label": "Khasab Port",
+      "osmId": 19135758
+    },
+    {
+      "id": "site-192528760",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.237513,
+      "lng": 74.131144,
+      "label": "Pakistan Military Airfield Rahwali",
+      "osmId": 192528760
+    },
+    {
+      "id": "site-19260597",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.652692,
+      "lng": 56.271433,
+      "label": "Dibba Port",
+      "osmId": 19260597
+    },
+    {
+      "id": "site-19755497",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.048443,
+      "lng": 43.998138,
+      "label": "United Refinery",
+      "operator": "Sahand Alias",
+      "osmId": 19755497
+    },
+    {
+      "id": "site-198528557",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 34.369421,
+      "lng": 49.240419,
+      "label": "Arak IR 40 Heavy Water Reactor",
+      "wikidata": "Q5973356",
+      "osmId": 198528557
+    },
+    {
+      "id": "site-198529397",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 34.373331,
+      "lng": 49.240844,
+      "label": "IR 40 Reactor",
+      "osmId": 198529397
+    },
+    {
+      "id": "site-201702393",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.472849,
+      "lng": 35.921237,
+      "label": "Air Base",
+      "osmId": 201702393
+    },
+    {
+      "id": "site-203470198",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.34933,
+      "lng": 48.280254,
+      "label": "Abadan Oil Refinery",
+      "osmId": 203470198
+    },
+    {
+      "id": "site-203574525",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.454199,
+      "lng": 47.664033,
+      "label": "Basra Refinery",
+      "operator": "South Refineries Company",
+      "wikidata": "Q114297944",
+      "osmId": 203574525
+    },
+    {
+      "id": "site-203574530",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.357676,
+      "lng": 47.62982,
+      "label": "Oil Refinery",
+      "wikidata": "Q114300820",
+      "osmId": 203574530
+    },
+    {
+      "id": "site-2038460483",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.240674,
+      "lng": 55.1557,
+      "label": "Port",
+      "osmId": 2038460483
+    },
+    {
+      "id": "site-204050440",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.47861,
+      "lng": 36.225655,
+      "label": "Mezzeh Military Airport",
+      "wikidata": "Q12693935",
+      "osmId": 204050440
+    },
+    {
+      "id": "site-208533786",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.759257,
+      "lng": 34.730665,
+      "label": "Hatzor Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q2629807",
+      "osmId": 208533786
+    },
+    {
+      "id": "site-2109558996",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.301846,
+      "lng": 55.3339,
+      "label": "Al Hamriya Port",
+      "osmId": 2109558996
+    },
+    {
+      "id": "site-2138765828",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.441105,
+      "lng": 48.151642,
+      "label": "Port Of Khoramshahr",
+      "osmId": 2138765828
+    },
+    {
+      "id": "site-218370116",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.341125,
+      "lng": 51.602457,
+      "label": "Air Base",
+      "osmId": 218370116
+    },
+    {
+      "id": "site-219038931",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.001284,
+      "lng": 35.14454,
+      "label": "Nuclear Facility",
+      "osmId": 219038931
+    },
+    {
+      "id": "site-223375163",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.0564,
+      "lng": 72.948629,
+      "label": "Bhagatanwala",
+      "osmId": 223375163
+    },
+    {
+      "id": "site-228884464",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.617322,
+      "lng": 73.097304,
+      "label": "PAF BASE Nur Khan",
+      "operator": "Pakistan Air Force",
+      "osmId": 228884464
+    },
+    {
+      "id": "site-230099290",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 33.547716,
+      "lng": 73.076617,
+      "label": "Attock Oil Refinery",
+      "osmId": 230099290
+    },
+    {
+      "id": "site-230637019",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.56034,
+      "lng": 73.033122,
+      "label": "Qasim Airport",
+      "osmId": 230637019
+    },
+    {
+      "id": "site-234766091",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.908345,
+      "lng": 72.774841,
+      "label": "PAF Base Murid",
+      "wikidata": "Q7118086",
+      "osmId": 234766091
+    },
+    {
+      "id": "site-2352603",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.023123,
+      "lng": 55.368517,
+      "label": "Al Minhad Air Base",
+      "wikidata": "Q1934988",
+      "osmId": 2352603
+    },
+    {
+      "id": "site-235548839",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.933533,
+      "lng": 46.090552,
+      "label": "Ali Air Base",
+      "operator": "Iraqi Air Force",
+      "wikidata": "Q4062227",
+      "osmId": 235548839
+    },
+    {
+      "id": "site-238845270",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.501597,
+      "lng": 42.623531,
+      "label": "Wailiya Oil Refinery",
+      "osmId": 238845270
+    },
+    {
+      "id": "site-239172610",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.208448,
+      "lng": 33.653189,
+      "label": "Tur Sinai Airport",
+      "wikidata": "Q18208126",
+      "osmId": 239172610
+    },
+    {
+      "id": "site-23978948",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.250525,
+      "lng": 59.628076,
+      "label": "Air Base",
+      "osmId": 23978948
+    },
+    {
+      "id": "site-243045263",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.809495,
+      "lng": 54.648418,
+      "label": "Khalifa Port Container Terminal",
+      "operator": "Abu Dhabi Terminals",
+      "osmId": 243045263
+    },
+    {
+      "id": "site-243045268",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.799823,
+      "lng": 54.646096,
+      "label": "Port",
+      "osmId": 243045268
+    },
+    {
+      "id": "site-245502219",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.16985,
+      "lng": 70.936829,
+      "label": "PARCO Refinery",
+      "osmId": 245502219
+    },
+    {
+      "id": "site-245526659",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.11717,
+      "lng": 51.318176,
+      "label": "Al Udeid Air Base",
+      "operator": "Qatar Emiri Air Force",
+      "wikidata": "Q542588",
+      "osmId": 245526659
+    },
+    {
+      "id": "site-245548500",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 24.847485,
+      "lng": 67.125551,
+      "label": "National Refinery",
+      "osmId": 245548500
+    },
+    {
+      "id": "site-246157354",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 39.416117,
+      "lng": 62.847748,
+      "label": "Seydi Oil Refinery",
+      "osmId": 246157354
+    },
+    {
+      "id": "site-2488246044",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.287566,
+      "lng": 42.408756,
+      "label": "Matar Faruq Al Askari",
+      "wikidata": "Q7679911",
+      "osmId": 2488246044
+    },
+    {
+      "id": "site-250328479",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.869581,
+      "lng": 48.76896,
+      "label": "Saudi Aramco Tanajib Airport",
+      "wikidata": "Q2875943",
+      "osmId": 250328479
+    },
+    {
+      "id": "site-255681448",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.219047,
+      "lng": 35.967899,
+      "label": "Baniyas Refinery",
+      "wikidata": "Q114316894",
+      "osmId": 255681448
+    },
+    {
+      "id": "site-256498339",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.332433,
+      "lng": 43.592315,
+      "label": "Al Taqaddum Air Base",
+      "wikidata": "Q4703278",
+      "osmId": 256498339
+    },
+    {
+      "id": "site-2597085",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.48537,
+      "lng": 36.475637,
+      "label": "Air Base",
+      "osmId": 2597085
+    },
+    {
+      "id": "site-265479798",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.110105,
+      "lng": 63.57903,
+      "label": "AmyderýA GurluşYk",
+      "osmId": 265479798
+    },
+    {
+      "id": "site-265528939",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.107748,
+      "lng": 63.582421,
+      "label": "DerýAýOllary",
+      "osmId": 265528939
+    },
+    {
+      "id": "site-265826932",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 40.006292,
+      "lng": 53.056759,
+      "label": "Naval Base",
+      "osmId": 265826932
+    },
+    {
+      "id": "site-26608859",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.865116,
+      "lng": 35.219242,
+      "label": "Atarot Airport",
+      "operator": "Israel Defense Forces",
+      "wikidata": "Q573379",
+      "osmId": 26608859
+    },
+    {
+      "id": "site-268847308",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.83584,
+      "lng": 30.935295,
+      "label": "Birma Air Base",
+      "osmId": 268847308
+    },
+    {
+      "id": "site-2690212",
+      "type": "site",
+      "siteType": "port",
+      "lat": 32.819314,
+      "lng": 35.012595,
+      "label": "Haifa Port",
+      "operator": "Israeli Ports And Railways Authority",
+      "wikidata": "Q1376739",
+      "osmId": 2690212
+    },
+    {
+      "id": "site-269474988",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.313739,
+      "lng": 43.752286,
+      "label": "Erbil, Kalak Refinery",
+      "osmId": 269474988
+    },
+    {
+      "id": "site-270122963",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.570244,
+      "lng": 71.439988,
+      "label": "Kohat Airbase",
+      "operator": "Pakistan Air Force",
+      "wikidata": "Q3696007",
+      "osmId": 270122963
+    },
+    {
+      "id": "site-271460904",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 40.633913,
+      "lng": 47.137947,
+      "label": "Yevlax Aeroportu",
+      "osmId": 271460904
+    },
+    {
+      "id": "site-271749371",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 40.024981,
+      "lng": 47.449685,
+      "label": "Air Base",
+      "osmId": 271749371
+    },
+    {
+      "id": "site-271970600",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 40.182974,
+      "lng": 44.147877,
+      "label": "Armenian NPP",
+      "wikidata": "Q946058",
+      "osmId": 271970600
+    },
+    {
+      "id": "site-276379238",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.654395,
+      "lng": 32.351027,
+      "label": "Port",
+      "osmId": 276379238
+    },
+    {
+      "id": "site-277505336",
+      "type": "site",
+      "siteType": "port",
+      "lat": 32.162092,
+      "lng": 34.793921,
+      "label": "Herzliya Marina",
+      "wikidata": "Q7060578",
+      "osmId": 277505336
+    },
+    {
+      "id": "site-281382361",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.933498,
+      "lng": 47.782103,
+      "label": "Ahmed Al Jaber Air Base",
+      "wikidata": "Q4582023",
+      "osmId": 281382361
+    },
+    {
+      "id": "site-281426636",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.846574,
+      "lng": 65.16015,
+      "label": "Shamsi Airfield",
+      "operator": "Government Of Pakistan",
+      "wikidata": "Q775164",
+      "osmId": 281426636
+    },
+    {
+      "id": "site-283071773",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.51924,
+      "lng": 44.559618,
+      "label": "Diwaniyah Refinery",
+      "operator": "Midland Refineries Company",
+      "osmId": 283071773
+    },
+    {
+      "id": "site-28654027",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.208161,
+      "lng": 50.615135,
+      "label": "Naval Support Activity Bahrain",
+      "wikidata": "Q6981953",
+      "osmId": 28654027
+    },
+    {
+      "id": "site-2877181",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 23.658836,
+      "lng": 53.813083,
+      "label": "Liwa Air Base",
+      "wikidata": "Q60747438",
+      "osmId": 2877181
+    },
+    {
+      "id": "site-287909762",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.008537,
+      "lng": 43.501978,
+      "label": "Al Samoud Refinery",
+      "osmId": 287909762
+    },
+    {
+      "id": "site-28830035",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.142491,
+      "lng": 31.299071,
+      "label": "Mostorod",
+      "operator": "EGPC",
+      "osmId": 28830035
+    },
+    {
+      "id": "site-289333551",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.4012,
+      "lng": 39.128958,
+      "label": "Ruwayshid Air Base",
+      "osmId": 289333551
+    },
+    {
+      "id": "site-289418291",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 26.112067,
+      "lng": 50.608015,
+      "label": "Bahrain Oil Refinery",
+      "wikidata": "Q114318873",
+      "osmId": 289418291
+    },
+    {
+      "id": "site-289507874",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 34.911102,
+      "lng": 43.435484,
+      "label": "Al Siniyah Refinery",
+      "operator": "North Refineries Company",
+      "osmId": 289507874
+    },
+    {
+      "id": "site-292165446",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.836012,
+      "lng": 34.823105,
+      "label": "Tel Nof Airbase",
+      "wikidata": "Q1229630",
+      "osmId": 292165446
+    },
+    {
+      "id": "site-292186859",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.197957,
+      "lng": 35.030318,
+      "label": "Nevatim Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q1935038",
+      "osmId": 292186859
+    },
+    {
+      "id": "site-292211006",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.239955,
+      "lng": 34.653055,
+      "label": "Hatzerim Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q1283490",
+      "osmId": 292211006
+    },
+    {
+      "id": "site-292211011",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.666006,
+      "lng": 35.180074,
+      "label": "Ramat David Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q2629816",
+      "osmId": 292211011
+    },
+    {
+      "id": "site-292211017",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.763807,
+      "lng": 34.670709,
+      "label": "Ramon Airbase",
+      "operator": "Israeli Air Force",
+      "wikidata": "Q2361539",
+      "osmId": 292211017
+    },
+    {
+      "id": "site-292211031",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.910989,
+      "lng": 34.699673,
+      "label": "Palmachim Air Force Base",
+      "operator": "Israeli Air Force;Israel Space Agency",
+      "wikidata": "Q590092",
+      "osmId": 292211031
+    },
+    {
+      "id": "site-294797390",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 22.718832,
+      "lng": 39.019056,
+      "label": "Petro Rabigh Oil Refining And Petrochemical Complex",
+      "wikidata": "Q7178875",
+      "osmId": 294797390
+    },
+    {
+      "id": "site-2958031736",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.89923,
+      "lng": 34.702661,
+      "label": "Nuclear Facility",
+      "osmId": 2958031736
+    },
+    {
+      "id": "site-297227347",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.620952,
+      "lng": 51.687552,
+      "label": "Badr Air Base",
+      "osmId": 297227347
+    },
+    {
+      "id": "site-300803006",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 31.819615,
+      "lng": 34.63896,
+      "label": "Naval Base Ashdod",
+      "wikidata": "Q6570106",
+      "osmId": 300803006
+    },
+    {
+      "id": "site-300803742",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 32.694837,
+      "lng": 34.93214,
+      "label": "Naval Base Atlit",
+      "wikidata": "Q4816941",
+      "osmId": 300803742
+    },
+    {
+      "id": "site-300804090",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 32.834189,
+      "lng": 34.983004,
+      "label": "Naval Training Camp",
+      "wikidata": "Q12404391",
+      "osmId": 300804090
+    },
+    {
+      "id": "site-300804092",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 32.829967,
+      "lng": 34.993422,
+      "label": "Naval Base Haifa",
+      "wikidata": "Q1307527",
+      "osmId": 300804092
+    },
+    {
+      "id": "site-301690705",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 23.96749,
+      "lng": 52.234676,
+      "label": "BarāKah 1",
+      "osmId": 301690705
+    },
+    {
+      "id": "site-301690708",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 23.967179,
+      "lng": 52.23329,
+      "label": "BarāKah 2",
+      "osmId": 301690708
+    },
+    {
+      "id": "site-301690711",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 23.962245,
+      "lng": 52.231018,
+      "label": "Barakah Nuclear Power Plant",
+      "operator": "Emirates Nuclear Energy Corporation",
+      "wikidata": "Q19959586",
+      "osmId": 301690711
+    },
+    {
+      "id": "site-302704249",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.917055,
+      "lng": 49.380491,
+      "label": "Oil Refinery",
+      "osmId": 302704249
+    },
+    {
+      "id": "site-304828196",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 34.00602,
+      "lng": 49.472526,
+      "label": "Shazand Oil Refinery",
+      "osmId": 304828196
+    },
+    {
+      "id": "site-3057272986",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.520408,
+      "lng": 35.977889,
+      "label": "Al Abdeh",
+      "osmId": 3057272986
+    },
+    {
+      "id": "site-306867431",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.642043,
+      "lng": 32.339781,
+      "label": "Ain Sokhna Port",
+      "osmId": 306867431
+    },
+    {
+      "id": "site-307905371",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.524567,
+      "lng": 54.969603,
+      "label": "Sweihan Air Base",
+      "osmId": 307905371
+    },
+    {
+      "id": "site-308086388",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.459007,
+      "lng": 42.67195,
+      "label": "Kasik Refinery",
+      "operator": "North Refineries Company",
+      "osmId": 308086388
+    },
+    {
+      "id": "site-310526459",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.943116,
+      "lng": 34.595122,
+      "label": "Air Base",
+      "osmId": 310526459
+    },
+    {
+      "id": "site-313533653",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 34.354345,
+      "lng": 47.101767,
+      "label": "Kermanshah Oil Refining Company",
+      "operator": "NIOC",
+      "osmId": 313533653
+    },
+    {
+      "id": "site-313543056",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 40.180238,
+      "lng": 44.147363,
+      "label": "Metsamor Nuclear Power Plant",
+      "osmId": 313543056
+    },
+    {
+      "id": "site-314215428",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.350074,
+      "lng": 48.089196,
+      "label": "Dhow Harbour",
+      "osmId": 314215428
+    },
+    {
+      "id": "site-315588555",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.590476,
+      "lng": 47.039751,
+      "label": "Air Base",
+      "osmId": 315588555
+    },
+    {
+      "id": "site-316077289",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.283982,
+      "lng": 40.175905,
+      "label": "Deir Ez Zor Air Base",
+      "wikidata": "Q1369165",
+      "osmId": 316077289
+    },
+    {
+      "id": "site-317494344",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.534983,
+      "lng": 52.575983,
+      "label": "Oil Refinery",
+      "osmId": 317494344
+    },
+    {
+      "id": "site-319382277",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.262545,
+      "lng": 72.727637,
+      "label": "LANDING ZONE",
+      "osmId": 319382277
+    },
+    {
+      "id": "site-319636738",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.892625,
+      "lng": 40.200167,
+      "label": "Diyarbakir 8th Main Jet Base",
+      "osmId": 319636738
+    },
+    {
+      "id": "site-320784665",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.093204,
+      "lng": 31.358274,
+      "label": "Almaza AFB Airport",
+      "wikidata": "Q11824207",
+      "osmId": 320784665
+    },
+    {
+      "id": "site-326843841",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.491278,
+      "lng": 56.615133,
+      "label": "Sohar Port",
+      "wikidata": "Q15379049",
+      "osmId": 326843841
+    },
+    {
+      "id": "site-330883275",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.712724,
+      "lng": 55.801713,
+      "label": "Jazeera Port",
+      "osmId": 330883275
+    },
+    {
+      "id": "site-331484290",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 24.517947,
+      "lng": 46.870784,
+      "label": "Aramco Riyadh Refinery",
+      "wikidata": "Q22689993",
+      "osmId": 331484290
+    },
+    {
+      "id": "site-332926893",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.665057,
+      "lng": 46.925949,
+      "label": "Air Base",
+      "osmId": 332926893
+    },
+    {
+      "id": "site-3335279393",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.510427,
+      "lng": 56.628379,
+      "label": "Sohar Port And Freezone",
+      "osmId": 3335279393
+    },
+    {
+      "id": "site-336705226",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 32.468043,
+      "lng": 34.882552,
+      "label": "Naval Base",
+      "osmId": 336705226
+    },
+    {
+      "id": "site-338594651",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.799797,
+      "lng": 55.95524,
+      "label": "Port",
+      "osmId": 338594651
+    },
+    {
+      "id": "site-34392278",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.875995,
+      "lng": 55.032304,
+      "label": "Abu Musa Airport",
+      "wikidata": "Q4670277",
+      "osmId": 34392278
+    },
+    {
+      "id": "site-344593720",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.203921,
+      "lng": 44.513326,
+      "label": "Tuwaitha Nuclear Research Center",
+      "wikidata": "Q4841818",
+      "osmId": 344593720
+    },
+    {
+      "id": "site-345922560",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.590102,
+      "lng": 39.976781,
+      "label": "Air Base",
+      "osmId": 345922560
+    },
+    {
+      "id": "site-348908523",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.376844,
+      "lng": 43.561968,
+      "label": "Al Habbaniya Airbase",
+      "osmId": 348908523
+    },
+    {
+      "id": "site-350142690",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.939187,
+      "lng": 69.270968,
+      "label": "Bagram Air Base",
+      "operator": "Afghan Armed Forces",
+      "wikidata": "Q800126",
+      "osmId": 350142690
+    },
+    {
+      "id": "site-351448735",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.516205,
+      "lng": 37.631846,
+      "label": "Tiyas Air Base",
+      "osmId": 351448735
+    },
+    {
+      "id": "site-352862333",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.005133,
+      "lng": 29.844127,
+      "label": "Amerya Refinery",
+      "operator": "EGPC",
+      "osmId": 352862333
+    },
+    {
+      "id": "site-352865112",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.096743,
+      "lng": 29.867757,
+      "label": "MIDOR",
+      "operator": "EGPC",
+      "osmId": 352865112
+    },
+    {
+      "id": "site-352868107",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 29.958905,
+      "lng": 32.528923,
+      "label": "El Nasr Refinery",
+      "operator": "EGPC",
+      "osmId": 352868107
+    },
+    {
+      "id": "site-353629875",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.9704,
+      "lng": 44.27454,
+      "label": "Al Iskandariyah New Air Base",
+      "wikidata": "Q4702553",
+      "osmId": 353629875
+    },
+    {
+      "id": "site-353979497",
+      "type": "site",
+      "siteType": "port",
+      "lat": 39.97642,
+      "lng": 49.443572,
+      "label": "Baku Ferry Sea Port \\ Alat",
+      "wikidata": "Q4075924",
+      "osmId": 353979497
+    },
+    {
+      "id": "site-3540732486",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.353864,
+      "lng": 47.919227,
+      "label": "Shuwaikh Port",
+      "osmId": 3540732486
+    },
+    {
+      "id": "site-358038480",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.89353,
+      "lng": 66.940449,
+      "label": "Masroor Airbase",
+      "operator": "Pakistan Air Force",
+      "wikidata": "Q3273828",
+      "osmId": 358038480
+    },
+    {
+      "id": "site-360048210",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.021747,
+      "lng": 55.058689,
+      "label": "Jebel Ali Container Terminal 2",
+      "osmId": 360048210
+    },
+    {
+      "id": "site-364400291",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.571174,
+      "lng": 69.203597,
+      "label": "APN 9C",
+      "osmId": 364400291
+    },
+    {
+      "id": "site-364400292",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.570578,
+      "lng": 69.206782,
+      "label": "Air Base",
+      "osmId": 364400292
+    },
+    {
+      "id": "site-364638382",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.674604,
+      "lng": 45.018619,
+      "label": "Bazian Refinery",
+      "operator": "Taurus Energy",
+      "osmId": 364638382
+    },
+    {
+      "id": "site-3693064611",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 20.489011,
+      "lng": 58.790581,
+      "label": "Air Base",
+      "osmId": 3693064611
+    },
+    {
+      "id": "site-371611425",
+      "type": "site",
+      "siteType": "port",
+      "lat": 23.62879,
+      "lng": 58.566523,
+      "label": "Sultan Qaboos Port",
+      "osmId": 371611425
+    },
+    {
+      "id": "site-374062404",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.930305,
+      "lng": 28.831591,
+      "label": "Marsa Al Hamra",
+      "osmId": 374062404
+    },
+    {
+      "id": "site-379753826",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 23.966368,
+      "lng": 52.229697,
+      "label": "BarāKah 3",
+      "osmId": 379753826
+    },
+    {
+      "id": "site-379753827",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 23.966052,
+      "lng": 52.228295,
+      "label": "BarāKah 4",
+      "osmId": 379753827
+    },
+    {
+      "id": "site-3818539751",
+      "type": "site",
+      "siteType": "port",
+      "lat": 14.753044,
+      "lng": 49.614298,
+      "label": "Port Of Shihr",
+      "osmId": 3818539751
+    },
+    {
+      "id": "site-385976357",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.034566,
+      "lng": 45.006027,
+      "label": "Air Base",
+      "osmId": 385976357
+    },
+    {
+      "id": "site-386839399",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.38706,
+      "lng": 71.466973,
+      "label": "Chamsa Nuclear Power Complex",
+      "operator": "Pakistan Atomic Energy Commission",
+      "wikidata": "Q82404",
+      "osmId": 386839399
+    },
+    {
+      "id": "site-388668142",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.921018,
+      "lng": 43.679435,
+      "label": "Air Base",
+      "osmId": 388668142
+    },
+    {
+      "id": "site-390835389",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.091535,
+      "lng": 72.153323,
+      "label": "Vehari Airport",
+      "osmId": 390835389
+    },
+    {
+      "id": "site-399507531",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 39.258346,
+      "lng": 55.552635,
+      "label": "Air Base",
+      "osmId": 399507531
+    },
+    {
+      "id": "site-401040701",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 35.738385,
+      "lng": 51.388133,
+      "label": "Tehran Research Reactor",
+      "osmId": 401040701
+    },
+    {
+      "id": "site-4020221838",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.856849,
+      "lng": 35.861612,
+      "label": "Port",
+      "osmId": 4020221838
+    },
+    {
+      "id": "site-4020221839",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.909519,
+      "lng": 35.857244,
+      "label": "Port",
+      "osmId": 4020221839
+    },
+    {
+      "id": "site-4020221840",
+      "type": "site",
+      "siteType": "port",
+      "lat": 32.823773,
+      "lng": 35.020101,
+      "label": "Dfh",
+      "osmId": 4020221840
+    },
+    {
+      "id": "site-403601261",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 24.851815,
+      "lng": 66.774991,
+      "label": "KANUPP 2&3",
+      "wikidata": "Q1274134",
+      "osmId": 403601261
+    },
+    {
+      "id": "site-403731952",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 24.909477,
+      "lng": 66.709844,
+      "label": "Byco Refinery",
+      "osmId": 403731952
+    },
+    {
+      "id": "site-4057425015",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.390317,
+      "lng": 71.464148,
+      "label": "Nuclear Facility",
+      "osmId": 4057425015
+    },
+    {
+      "id": "site-4057425016",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.39192,
+      "lng": 71.461756,
+      "label": "Pakistan Atomic Energy Commission",
+      "operator": "Pakistan Atomic Energy Commission",
+      "osmId": 4057425016
+    },
+    {
+      "id": "site-4059053629",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 24.851486,
+      "lng": 66.776088,
+      "label": "KANUPP 3",
+      "operator": "PAEC",
+      "osmId": 4059053629
+    },
+    {
+      "id": "site-4059053630",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 24.851486,
+      "lng": 66.773913,
+      "label": "KANUPP 2",
+      "operator": "PAEC",
+      "osmId": 4059053630
+    },
+    {
+      "id": "site-413012366",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.559424,
+      "lng": 50.509175,
+      "label": "Port",
+      "osmId": 413012366
+    },
+    {
+      "id": "site-41419961",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 43.105872,
+      "lng": 40.57833,
+      "label": "Bamboura Airport",
+      "wikidata": "Q2657854",
+      "osmId": 41419961
+    },
+    {
+      "id": "site-41847401",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.694905,
+      "lng": 35.18861,
+      "label": "Bethlehem Heliport",
+      "osmId": 41847401
+    },
+    {
+      "id": "site-422220116",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.069063,
+      "lng": 39.591095,
+      "label": "H3 Northwest AB",
+      "osmId": 422220116
+    },
+    {
+      "id": "site-4235761",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 33.274645,
+      "lng": 44.433511,
+      "label": "Dora Refinery",
+      "operator": "Midland Refineries Company",
+      "osmId": 4235761
+    },
+    {
+      "id": "site-426254670",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.993485,
+      "lng": 46.220501,
+      "label": "Dhi Qar Refinery",
+      "operator": "South Refineries Company",
+      "osmId": 426254670
+    },
+    {
+      "id": "site-426583006",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.605835,
+      "lng": 52.475905,
+      "label": "Portrage Terminal",
+      "osmId": 426583006
+    },
+    {
+      "id": "site-42856735",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.508773,
+      "lng": 34.99738,
+      "label": "Port",
+      "wikidata": "Q13217686",
+      "osmId": 42856735
+    },
+    {
+      "id": "site-432731563",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.351583,
+      "lng": 71.8345,
+      "label": "Bandyal Air Strip",
+      "osmId": 432731563
+    },
+    {
+      "id": "site-434711155",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 26.95455,
+      "lng": 49.499099,
+      "label": "Saudi Aramco Total Refining And Petrochemical",
+      "operator": "Saudi Aramco",
+      "osmId": 434711155
+    },
+    {
+      "id": "site-436449668",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.788737,
+      "lng": 43.280852,
+      "label": "Qayara Refinery",
+      "operator": "North Refineries Company",
+      "osmId": 436449668
+    },
+    {
+      "id": "site-440495765",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.403561,
+      "lng": 62.260404,
+      "label": "Shindand Airbase",
+      "operator": "Afghan Armed Forces",
+      "wikidata": "Q2886559",
+      "osmId": 440495765
+    },
+    {
+      "id": "site-440821907",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.727413,
+      "lng": 45.156424,
+      "label": "Piranshahr Airport",
+      "osmId": 440821907
+    },
+    {
+      "id": "site-441881441",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 22.775766,
+      "lng": 55.063245,
+      "label": "Qusahwira Air Base",
+      "osmId": 441881441
+    },
+    {
+      "id": "site-441881839",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.188291,
+      "lng": 70.986429,
+      "label": "Lal Pir Air Strip",
+      "osmId": 441881839
+    },
+    {
+      "id": "site-442443783",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.837373,
+      "lng": 46.30712,
+      "label": "Qalat Sikar Air Base",
+      "wikidata": "Q7265966",
+      "osmId": 442443783
+    },
+    {
+      "id": "site-442917425",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.904748,
+      "lng": 49.323282,
+      "label": "Oil Refinery",
+      "osmId": 442917425
+    },
+    {
+      "id": "site-442917462",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.901429,
+      "lng": 49.330278,
+      "label": "Oil Refinery",
+      "osmId": 442917462
+    },
+    {
+      "id": "site-443095104",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.824261,
+      "lng": 47.082682,
+      "label": "Amara Military Airport",
+      "osmId": 443095104
+    },
+    {
+      "id": "site-443834039",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.115655,
+      "lng": 46.37099,
+      "label": "Kut Al Hayy East Air Base",
+      "osmId": 443834039
+    },
+    {
+      "id": "site-444066568",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.479076,
+      "lng": 45.756844,
+      "label": "Air Base",
+      "osmId": 444066568
+    },
+    {
+      "id": "site-447712438",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.002666,
+      "lng": 53.022543,
+      "label": "Turkmenbashy International Seaport",
+      "operator": "TüRkmenistanyñ DeñIz We DerýA Ulaglary DöWlet Gullugy",
+      "wikidata": "Q4466116",
+      "osmId": 447712438
+    },
+    {
+      "id": "site-457386381",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.442656,
+      "lng": 60.382385,
+      "label": "Konarak Airport",
+      "osmId": 457386381
+    },
+    {
+      "id": "site-462375614",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.091642,
+      "lng": 64.065466,
+      "label": "Dwyer Airport",
+      "operator": "Marine Expeditionary Brigade",
+      "wikidata": "Q19931162",
+      "osmId": 462375614
+    },
+    {
+      "id": "site-4643630528",
+      "type": "site",
+      "siteType": "port",
+      "lat": 14.52207,
+      "lng": 49.149624,
+      "label": "Mukalla Port",
+      "osmId": 4643630528
+    },
+    {
+      "id": "site-465149076",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 36.915737,
+      "lng": 41.895289,
+      "label": "Oil Refinery",
+      "osmId": 465149076
+    },
+    {
+      "id": "site-4657226528",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.459055,
+      "lng": 53.376174,
+      "label": "Port",
+      "osmId": 4657226528
+    },
+    {
+      "id": "site-4699612983",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.697962,
+      "lng": 52.556692,
+      "label": "Fereydunkenar Port",
+      "osmId": 4699612983
+    },
+    {
+      "id": "site-4736371953",
+      "type": "site",
+      "siteType": "port",
+      "lat": 15.530502,
+      "lng": 42.743731,
+      "label": "Khawbah Port",
+      "osmId": 4736371953
+    },
+    {
+      "id": "site-4753147860",
+      "type": "site",
+      "siteType": "port",
+      "lat": 16.343494,
+      "lng": 42.778807,
+      "label": "Port Of Midi",
+      "osmId": 4753147860
+    },
+    {
+      "id": "site-475684620",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.34794,
+      "lng": 47.17047,
+      "label": "Air Base",
+      "osmId": 475684620
+    },
+    {
+      "id": "site-477385479",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.89283,
+      "lng": 45.513266,
+      "label": "Air Base",
+      "osmId": 477385479
+    },
+    {
+      "id": "site-4781524545",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.835839,
+      "lng": 31.323526,
+      "label": "Air Base",
+      "osmId": 4781524545
+    },
+    {
+      "id": "site-478692683",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.683979,
+      "lng": 69.077905,
+      "label": "Sindhri Tharparkar Airport",
+      "wikidata": "Q7522238",
+      "osmId": 478692683
+    },
+    {
+      "id": "site-479621800",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.607229,
+      "lng": 43.135807,
+      "label": "Port Of Djibouti",
+      "osmId": 479621800
+    },
+    {
+      "id": "site-480023169",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 24.80183,
+      "lng": 67.115868,
+      "label": "Pakistan Refinery Limited",
+      "operator": "Chevron",
+      "osmId": 480023169
+    },
+    {
+      "id": "site-482263625",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.646493,
+      "lng": 46.747162,
+      "label": "Riyadh Dry Port",
+      "operator": "Riyadh Shipping Company",
+      "wikidata": "Q30594331",
+      "osmId": 482263625
+    },
+    {
+      "id": "site-4836563554",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.074963,
+      "lng": 55.134945,
+      "label": "Marina Promenade (Water Bus)",
+      "operator": "RTA",
+      "osmId": 4836563554
+    },
+    {
+      "id": "site-4836563560",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.077841,
+      "lng": 55.140082,
+      "label": "Marina Mall (Water Bus)",
+      "operator": "RTA",
+      "osmId": 4836563560
+    },
+    {
+      "id": "site-4839907335",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.08539,
+      "lng": 55.147482,
+      "label": "Marina Walk (Water Bus)",
+      "operator": "RTA",
+      "osmId": 4839907335
+    },
+    {
+      "id": "site-4853684902",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.08493,
+      "lng": 55.145316,
+      "label": "Marina Terrace (Water Bus)",
+      "operator": "RTA",
+      "osmId": 4853684902
+    },
+    {
+      "id": "site-486648205",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 13.021756,
+      "lng": 43.468027,
+      "label": "Sayma Airfield",
+      "osmId": 486648205
+    },
+    {
+      "id": "site-489941810",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.163536,
+      "lng": 56.051515,
+      "label": "Bandar Abbas Oil Refinery",
+      "osmId": 489941810
+    },
+    {
+      "id": "site-489941811",
+      "type": "site",
+      "siteType": "port",
+      "lat": 27.113341,
+      "lng": 56.055968,
+      "label": "Port Of Shahid Rajaee",
+      "wikidata": "Q109558602",
+      "osmId": 489941811
+    },
+    {
+      "id": "site-495378392",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.482686,
+      "lng": 52.960644,
+      "label": "Parsian Gas Refinery",
+      "osmId": 495378392
+    },
+    {
+      "id": "site-496330219",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.024658,
+      "lng": 47.948697,
+      "label": "Um Qasir South Port (UQR)",
+      "wikidata": "Q7881645",
+      "osmId": 496330219
+    },
+    {
+      "id": "site-496330225",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.067302,
+      "lng": 47.93131,
+      "label": "Port",
+      "osmId": 496330225
+    },
+    {
+      "id": "site-498954886",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.550924,
+      "lng": 72.630797,
+      "label": "Fateh Jang Airfield",
+      "osmId": 498954886
+    },
+    {
+      "id": "site-50435861",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 15.473077,
+      "lng": 44.215129,
+      "label": "Air Base",
+      "osmId": 50435861
+    },
+    {
+      "id": "site-508831405",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.70077,
+      "lng": 51.47233,
+      "label": "Doshan Tappeh Air Base",
+      "wikidata": "Q3448848",
+      "osmId": 508831405
+    },
+    {
+      "id": "site-509338059",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.716469,
+      "lng": 50.933144,
+      "label": "Fath Airport",
+      "osmId": 509338059
+    },
+    {
+      "id": "site-5115590118",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.895918,
+      "lng": 67.097621,
+      "label": "PNS Bahadur",
+      "osmId": 5115590118
+    },
+    {
+      "id": "site-514616902",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.539959,
+      "lng": 51.422916,
+      "label": "Tehran Oil Refinery",
+      "operator": "Tehran Oil Refining Company",
+      "osmId": 514616902
+    },
+    {
+      "id": "site-5154781426",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 37.457348,
+      "lng": 49.611654,
+      "label": "Naval Base",
+      "osmId": 5154781426
+    },
+    {
+      "id": "site-5154793122",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 37.460297,
+      "lng": 49.586344,
+      "label": "Naval Base",
+      "osmId": 5154793122
+    },
+    {
+      "id": "site-51568129",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.916653,
+      "lng": 50.591361,
+      "label": "Shaikh Isa Air Base",
+      "wikidata": "Q82928",
+      "osmId": 51568129
+    },
+    {
+      "id": "site-516440723",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 28.713094,
+      "lng": 48.325537,
+      "label": "Al Zour Refinery",
+      "wikidata": "Q4705016",
+      "osmId": 516440723
+    },
+    {
+      "id": "site-5171799348",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.183635,
+      "lng": 32.869929,
+      "label": "Debarquadere",
+      "osmId": 5171799348
+    },
+    {
+      "id": "site-522984408",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.454748,
+      "lng": 44.357555,
+      "label": "Air Base",
+      "osmId": 522984408
+    },
+    {
+      "id": "site-525709337",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.488142,
+      "lng": 52.643738,
+      "label": "Oil Refinery",
+      "osmId": 525709337
+    },
+    {
+      "id": "site-525709338",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.482792,
+      "lng": 52.61242,
+      "label": "Former Asaloyeh Airfield",
+      "wikidata": "Q2447999",
+      "osmId": 525709338
+    },
+    {
+      "id": "site-525709341",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.504066,
+      "lng": 52.609388,
+      "label": "Oil Refinery",
+      "osmId": 525709341
+    },
+    {
+      "id": "site-525709349",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.493485,
+      "lng": 52.63331,
+      "label": "Oil Refinery",
+      "osmId": 525709349
+    },
+    {
+      "id": "site-525709350",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.500059,
+      "lng": 52.622338,
+      "label": "Oil Refinery",
+      "osmId": 525709350
+    },
+    {
+      "id": "site-525717121",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.519112,
+      "lng": 52.591162,
+      "label": "Oil Refinery",
+      "osmId": 525717121
+    },
+    {
+      "id": "site-525717890",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.540903,
+      "lng": 52.571296,
+      "label": "Oil Refinery",
+      "osmId": 525717890
+    },
+    {
+      "id": "site-526727786",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.776833,
+      "lng": 50.880876,
+      "label": "Naja Airport",
+      "wikidata": "Q12694105",
+      "osmId": 526727786
+    },
+    {
+      "id": "site-526891077",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.533383,
+      "lng": 51.503927,
+      "label": "Firuzabad Airport",
+      "wikidata": "Q137592734",
+      "osmId": 526891077
+    },
+    {
+      "id": "site-530975835",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.205552,
+      "lng": 55.332699,
+      "label": "Port",
+      "osmId": 530975835
+    },
+    {
+      "id": "site-535748639",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.108569,
+      "lng": 62.338852,
+      "label": "Gwadar Port",
+      "wikidata": "Q4122132",
+      "osmId": 535748639
+    },
+    {
+      "id": "site-537468947",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 32.783249,
+      "lng": 51.503352,
+      "label": "Esfahan Oil Refinery",
+      "operator": "Esfahan Oil Refining Company",
+      "osmId": 537468947
+    },
+    {
+      "id": "site-537642276",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 26.799352,
+      "lng": 53.342001,
+      "label": "Lavan Oil Refinery",
+      "operator": "Lavan Oil Refining Company",
+      "osmId": 537642276
+    },
+    {
+      "id": "site-5383541711",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.832801,
+      "lng": 66.971794,
+      "label": "PN Dockyard",
+      "osmId": 5383541711
+    },
+    {
+      "id": "site-540894266",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 18.231583,
+      "lng": 42.652068,
+      "label": "Air Base",
+      "osmId": 540894266
+    },
+    {
+      "id": "site-542120587",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.802188,
+      "lng": 66.985071,
+      "label": "SAPT Terminal",
+      "osmId": 542120587
+    },
+    {
+      "id": "site-542906657",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.823602,
+      "lng": 54.667499,
+      "label": "Khalifa Port RoRo Terminal",
+      "osmId": 542906657
+    },
+    {
+      "id": "site-544229241",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.04657,
+      "lng": 31.841453,
+      "label": "Air Base",
+      "osmId": 544229241
+    },
+    {
+      "id": "site-5450670",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.943116,
+      "lng": 34.595122,
+      "label": "Air Base",
+      "osmId": 5450670
+    },
+    {
+      "id": "site-545645104",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 21.358539,
+      "lng": 39.159563,
+      "label": "Air Base",
+      "wikidata": "Q6411568",
+      "osmId": 545645104
+    },
+    {
+      "id": "site-545695462",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.419513,
+      "lng": 55.453678,
+      "label": "HutchinsonPorts Ajman",
+      "osmId": 545695462
+    },
+    {
+      "id": "site-545697423",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.187695,
+      "lng": 50.713327,
+      "label": "Khalifa Bin Salman Port",
+      "operator": "APM Terminals Bahrain",
+      "osmId": 545697423
+    },
+    {
+      "id": "site-545704310",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.499024,
+      "lng": 50.196049,
+      "label": "HutchinsonPorts Dammam",
+      "osmId": 545704310
+    },
+    {
+      "id": "site-545910160",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 30.91549,
+      "lng": 53.43572,
+      "label": "Naval Base",
+      "osmId": 545910160
+    },
+    {
+      "id": "site-546091850",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.502103,
+      "lng": 56.617646,
+      "label": "OICT Terminal 1",
+      "osmId": 546091850
+    },
+    {
+      "id": "site-546091852",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.045402,
+      "lng": 48.153296,
+      "label": "Shuaiba Container Terminal",
+      "osmId": 546091852
+    },
+    {
+      "id": "site-546091853",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.360223,
+      "lng": 55.372044,
+      "label": "Sharjah Container Terminal",
+      "osmId": 546091853
+    },
+    {
+      "id": "site-546135278",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.059853,
+      "lng": 47.925313,
+      "label": "Basrah Gateway Terminal",
+      "osmId": 546135278
+    },
+    {
+      "id": "site-546135279",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.049207,
+      "lng": 47.931754,
+      "label": "Northern Umm Qasr Port",
+      "wikidata": "Q7881645",
+      "osmId": 546135279
+    },
+    {
+      "id": "site-546135281",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.046016,
+      "lng": 47.939601,
+      "label": "Iraq Container Terminal",
+      "osmId": 546135281
+    },
+    {
+      "id": "site-548517088",
+      "type": "site",
+      "siteType": "port",
+      "lat": 21.479056,
+      "lng": 39.162945,
+      "label": "Gulf Container Terminal",
+      "operator": "Gulftainer",
+      "osmId": 548517088
+    },
+    {
+      "id": "site-548517089",
+      "type": "site",
+      "siteType": "port",
+      "lat": 21.486766,
+      "lng": 39.157068,
+      "label": "Red Sea Gateway Terminal",
+      "osmId": 548517089
+    },
+    {
+      "id": "site-548517090",
+      "type": "site",
+      "siteType": "port",
+      "lat": 21.454658,
+      "lng": 39.159705,
+      "label": "Jeddah South Container Terminal",
+      "operator": "DP World",
+      "osmId": 548517090
+    },
+    {
+      "id": "site-5519027634",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.864108,
+      "lng": 67.088174,
+      "label": "PAF Officer Housing Scheeme",
+      "osmId": 5519027634
+    },
+    {
+      "id": "site-5534032004",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.849661,
+      "lng": 67.050629,
+      "label": "Naval Hights",
+      "osmId": 5534032004
+    },
+    {
+      "id": "site-5534257391",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.840821,
+      "lng": 67.051063,
+      "label": "Sabir SRE",
+      "osmId": 5534257391
+    },
+    {
+      "id": "site-556882938",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 27.901965,
+      "lng": 45.53247,
+      "label": "King Khaled Military City Airport",
+      "wikidata": "Q3045688",
+      "osmId": 556882938
+    },
+    {
+      "id": "site-558513951",
+      "type": "site",
+      "siteType": "port",
+      "lat": 32.825658,
+      "lng": 35.031561,
+      "label": "Hamifratz Seaport / Bayport Terminal",
+      "wikidata": "Q20502324",
+      "osmId": 558513951
+    },
+    {
+      "id": "site-558542727",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.473808,
+      "lng": 46.575845,
+      "label": "Air Base",
+      "osmId": 558542727
+    },
+    {
+      "id": "site-561322201",
+      "type": "site",
+      "siteType": "port",
+      "lat": 30.444875,
+      "lng": 49.04662,
+      "label": "Port",
+      "osmId": 561322201
+    },
+    {
+      "id": "site-5644254003",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.331991,
+      "lng": 27.209414,
+      "label": "Marsa Matruh Air Base",
+      "osmId": 5644254003
+    },
+    {
+      "id": "site-5645118362",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.003861,
+      "lng": 53.021661,
+      "label": "Ro Ro / Ro Pax Terminal",
+      "osmId": 5645118362
+    },
+    {
+      "id": "site-5645225573",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.00507,
+      "lng": 53.039734,
+      "label": "General Cargo Terminal",
+      "osmId": 5645225573
+    },
+    {
+      "id": "site-5645225580",
+      "type": "site",
+      "siteType": "port",
+      "lat": 40.004934,
+      "lng": 53.034148,
+      "label": "Dry Bulk Cargo Terminal",
+      "osmId": 5645225580
+    },
+    {
+      "id": "site-5695541992",
+      "type": "site",
+      "siteType": "port",
+      "lat": 14.83717,
+      "lng": 42.935504,
+      "label": "Hodeidah Port",
+      "osmId": 5695541992
+    },
+    {
+      "id": "site-5747730074",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.001284,
+      "lng": 72.172387,
+      "label": "Khushab IV",
+      "osmId": 5747730074
+    },
+    {
+      "id": "site-5747730075",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.008626,
+      "lng": 72.172355,
+      "label": "Khushab II",
+      "osmId": 5747730075
+    },
+    {
+      "id": "site-5747730076",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.010027,
+      "lng": 72.172414,
+      "label": "Khushab III",
+      "osmId": 5747730076
+    },
+    {
+      "id": "site-5747730077",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.386544,
+      "lng": 71.469546,
+      "label": "Nuclear Facility",
+      "osmId": 5747730077
+    },
+    {
+      "id": "site-5747730078",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.38494,
+      "lng": 71.471939,
+      "label": "Nuclear Facility",
+      "osmId": 5747730078
+    },
+    {
+      "id": "site-575550072",
+      "type": "site",
+      "siteType": "port",
+      "lat": 37.223585,
+      "lng": 67.423123,
+      "label": "Port",
+      "osmId": 575550072
+    },
+    {
+      "id": "site-5759688563",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 27.836748,
+      "lng": 52.06071,
+      "label": "Naval Base",
+      "osmId": 5759688563
+    },
+    {
+      "id": "site-5764107041",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.231445,
+      "lng": 47.979756,
+      "label": "Abdullah Al Mubarak Air Base",
+      "osmId": 5764107041
+    },
+    {
+      "id": "site-581337119",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.572926,
+      "lng": 25.595834,
+      "label": "Uthman Air Base",
+      "wikidata": "Q11824813",
+      "osmId": 581337119
+    },
+    {
+      "id": "site-582056234",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.00906,
+      "lng": 72.172006,
+      "label": "Plutonium Production 2 & 3",
+      "osmId": 582056234
+    },
+    {
+      "id": "site-582553999",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.756525,
+      "lng": 48.277256,
+      "label": "Oil Refinery",
+      "osmId": 582553999
+    },
+    {
+      "id": "site-585207620",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.94184,
+      "lng": 38.316848,
+      "label": "Luberef Refinery",
+      "operator": "Saudi ARAMCO",
+      "wikidata": "Q12237534",
+      "osmId": 585207620
+    },
+    {
+      "id": "site-585223899",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.959348,
+      "lng": 38.282743,
+      "label": "YasRef",
+      "wikidata": "Q22689997",
+      "osmId": 585223899
+    },
+    {
+      "id": "site-585223960",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.98052,
+      "lng": 38.259839,
+      "label": "Yansab",
+      "osmId": 585223960
+    },
+    {
+      "id": "site-585223969",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.975107,
+      "lng": 38.235863,
+      "label": "SAMREF",
+      "wikidata": "Q22689999",
+      "osmId": 585223969
+    },
+    {
+      "id": "site-585223970",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 23.984072,
+      "lng": 38.223975,
+      "label": "Yanpet",
+      "osmId": 585223970
+    },
+    {
+      "id": "site-5854812099",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 27.836468,
+      "lng": 52.060593,
+      "label": "Naval Base",
+      "osmId": 5854812099
+    },
+    {
+      "id": "site-58756956",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.894373,
+      "lng": 66.946526,
+      "label": "PAF Base Masroor",
+      "wikidata": "Q3273828",
+      "osmId": 58756956
+    },
+    {
+      "id": "site-5894266546",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 19.249096,
+      "lng": 57.070779,
+      "label": "Block 55 Air Strip",
+      "osmId": 5894266546
+    },
+    {
+      "id": "site-590280338",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 22.679953,
+      "lng": 54.12731,
+      "label": "Shaybah Refinery",
+      "osmId": 590280338
+    },
+    {
+      "id": "site-591216395",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.570118,
+      "lng": 51.688289,
+      "label": "Shahid Vatan Pour Air Base",
+      "wikidata": "Q12694976",
+      "osmId": 591216395
+    },
+    {
+      "id": "site-592453433",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 37.296717,
+      "lng": 62.347266,
+      "label": "Oil Refinery",
+      "osmId": 592453433
+    },
+    {
+      "id": "site-594366595",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.969425,
+      "lng": 67.227206,
+      "label": "PAF Base Faisal",
+      "osmId": 594366595
+    },
+    {
+      "id": "site-595231042",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.243568,
+      "lng": 68.038184,
+      "label": "PAF Bholari",
+      "operator": "PAF",
+      "osmId": 595231042
+    },
+    {
+      "id": "site-596256457",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 32.001357,
+      "lng": 72.172156,
+      "label": "Plutonium Production 4",
+      "osmId": 596256457
+    },
+    {
+      "id": "site-597498932",
+      "type": "site",
+      "siteType": "port",
+      "lat": 28.413298,
+      "lng": 48.52473,
+      "label": "Port",
+      "osmId": 597498932
+    },
+    {
+      "id": "site-6034694974",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.677804,
+      "lng": 51.327121,
+      "label": "Air Base",
+      "osmId": 6034694974
+    },
+    {
+      "id": "site-6046883831",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.745591,
+      "lng": 44.888227,
+      "label": "Port Of Oil Aden",
+      "osmId": 6046883831
+    },
+    {
+      "id": "site-6046883832",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.791552,
+      "lng": 44.983349,
+      "label": "Port",
+      "osmId": 6046883832
+    },
+    {
+      "id": "site-6046883833",
+      "type": "site",
+      "siteType": "port",
+      "lat": 15.181702,
+      "lng": 42.627726,
+      "label": "Port Of Ras Isa",
+      "osmId": 6046883833
+    },
+    {
+      "id": "site-6046883834",
+      "type": "site",
+      "siteType": "port",
+      "lat": 15.979168,
+      "lng": 42.82586,
+      "label": "Port",
+      "osmId": 6046883834
+    },
+    {
+      "id": "site-6046883835",
+      "type": "site",
+      "siteType": "port",
+      "lat": 15.317549,
+      "lng": 42.671413,
+      "label": "Saleef Port",
+      "osmId": 6046883835
+    },
+    {
+      "id": "site-6046883836",
+      "type": "site",
+      "siteType": "port",
+      "lat": 13.311255,
+      "lng": 43.232199,
+      "label": "Mocha Port",
+      "osmId": 6046883836
+    },
+    {
+      "id": "site-6046883837",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.803693,
+      "lng": 44.995666,
+      "label": "Aden Port",
+      "osmId": 6046883837
+    },
+    {
+      "id": "site-6046883838",
+      "type": "site",
+      "siteType": "port",
+      "lat": 12.794853,
+      "lng": 44.994416,
+      "label": "Aden Port",
+      "osmId": 6046883838
+    },
+    {
+      "id": "site-6046883839",
+      "type": "site",
+      "siteType": "port",
+      "lat": 13.977319,
+      "lng": 48.17565,
+      "label": "Balhaf Gas Export Port",
+      "operator": "Yemen LNG",
+      "osmId": 6046883839
+    },
+    {
+      "id": "site-6046883840",
+      "type": "site",
+      "siteType": "port",
+      "lat": 14.691749,
+      "lng": 49.487014,
+      "label": "Dabba Oil Export Port",
+      "operator": "PetroMasila",
+      "osmId": 6046883840
+    },
+    {
+      "id": "site-6047051",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 28.829148,
+      "lng": 50.88499,
+      "label": "Bushehr Nuclear Power Plant",
+      "wikidata": "Q204637",
+      "osmId": 6047051
+    },
+    {
+      "id": "site-614249740",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.130796,
+      "lng": 29.801847,
+      "label": "Port Of El Dekheila",
+      "osmId": 614249740
+    },
+    {
+      "id": "site-614415380",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 21.447941,
+      "lng": 39.185876,
+      "label": "Jeddah Refinery",
+      "operator": "Saudi Aramco",
+      "wikidata": "Q22689994",
+      "osmId": 614415380
+    },
+    {
+      "id": "site-615014754",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.046889,
+      "lng": 49.608306,
+      "label": "Saudi Aramco Jubail Refinery",
+      "wikidata": "Q22689992",
+      "osmId": 615014754
+    },
+    {
+      "id": "site-622299690",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 27.064378,
+      "lng": 49.571454,
+      "label": "Ibn Zahr",
+      "osmId": 622299690
+    },
+    {
+      "id": "site-62325452",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.093537,
+      "lng": 35.514983,
+      "label": "Arab Potash Refinery",
+      "osmId": 62325452
+    },
+    {
+      "id": "site-632337047",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.559303,
+      "lng": 50.508622,
+      "label": "Port",
+      "osmId": 632337047
+    },
+    {
+      "id": "site-636505366",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 14.557762,
+      "lng": 46.814773,
+      "label": "Air Base",
+      "osmId": 636505366
+    },
+    {
+      "id": "site-638596157",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 36.652756,
+      "lng": 51.497679,
+      "label": "Naval Base",
+      "osmId": 638596157
+    },
+    {
+      "id": "site-641914168",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.933078,
+      "lng": 47.485647,
+      "label": "Abdanan Airport",
+      "wikidata": "Q20449051",
+      "osmId": 641914168
+    },
+    {
+      "id": "site-6477393804",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.323858,
+      "lng": 51.446279,
+      "label": "Port",
+      "osmId": 6477393804
+    },
+    {
+      "id": "site-6485329",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 29.060964,
+      "lng": 48.131212,
+      "label": "Mina Al Ahmadi Refinery",
+      "wikidata": "Q114302189",
+      "osmId": 6485329
+    },
+    {
+      "id": "site-651215299",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 11.591162,
+      "lng": 43.063575,
+      "label": "Air Base",
+      "osmId": 651215299
+    },
+    {
+      "id": "site-654335946",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.974965,
+      "lng": 50.803075,
+      "label": "Manzarieh Airfield (Qom)",
+      "osmId": 654335946
+    },
+    {
+      "id": "site-654896968",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.153921,
+      "lng": 29.856944,
+      "label": "Oil Refinery",
+      "osmId": 654896968
+    },
+    {
+      "id": "site-654896972",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 31.152832,
+      "lng": 29.855244,
+      "label": "Oil Refinery",
+      "osmId": 654896972
+    },
+    {
+      "id": "site-662013600",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.284249,
+      "lng": 50.177074,
+      "label": "Air Base",
+      "osmId": 662013600
+    },
+    {
+      "id": "site-662625375",
+      "type": "site",
+      "siteType": "port",
+      "lat": 28.998056,
+      "lng": 50.82849,
+      "label": "Port",
+      "osmId": 662625375
+    },
+    {
+      "id": "site-664469615",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.002733,
+      "lng": 55.05946,
+      "label": "Port",
+      "osmId": 664469615
+    },
+    {
+      "id": "site-668428314",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.873581,
+      "lng": 58.44876,
+      "label": "Air Base",
+      "osmId": 668428314
+    },
+    {
+      "id": "site-670338033",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.3951,
+      "lng": 31.592545,
+      "label": "Bilbeis Airport",
+      "osmId": 670338033
+    },
+    {
+      "id": "site-671018726",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.259707,
+      "lng": 55.315423,
+      "label": "Tonb E Bozorg Airport",
+      "osmId": 671018726
+    },
+    {
+      "id": "site-676562519",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 26.692977,
+      "lng": 50.101957,
+      "label": "Saudi Aramco Ras Tanura Refinery",
+      "operator": "Saudi Aramco",
+      "wikidata": "Q16510565",
+      "osmId": 676562519
+    },
+    {
+      "id": "site-6841390788",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.469694,
+      "lng": 35.91957,
+      "label": "Air Base",
+      "osmId": 6841390788
+    },
+    {
+      "id": "site-702562974",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.974453,
+      "lng": 31.698503,
+      "label": "Wadi Abu Rish",
+      "wikidata": "Q11824823",
+      "osmId": 702562974
+    },
+    {
+      "id": "site-705379891",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.450738,
+      "lng": 36.794199,
+      "label": "Bableit Old Agricultural Airstrip/ UAV",
+      "osmId": 705379891
+    },
+    {
+      "id": "site-712635186",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.649201,
+      "lng": 38.302495,
+      "label": "Air Base",
+      "osmId": 712635186
+    },
+    {
+      "id": "site-715163287",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.304669,
+      "lng": 44.403998,
+      "label": "Washington AHP",
+      "osmId": 715163287
+    },
+    {
+      "id": "site-715163618",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.296665,
+      "lng": 44.37102,
+      "label": "Embassy Heliport",
+      "osmId": 715163618
+    },
+    {
+      "id": "site-718055566",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.666886,
+      "lng": 52.410858,
+      "label": "Harbour",
+      "osmId": 718055566
+    },
+    {
+      "id": "site-721206648",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.338156,
+      "lng": 30.304109,
+      "label": "Port",
+      "osmId": 721206648
+    },
+    {
+      "id": "site-722818042",
+      "type": "site",
+      "siteType": "port",
+      "lat": 35.523449,
+      "lng": 35.770191,
+      "label": "Port Of Latakia",
+      "wikidata": "Q7231180",
+      "osmId": 722818042
+    },
+    {
+      "id": "site-727565231",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.245917,
+      "lng": 51.57917,
+      "label": "Doha International Air Base",
+      "wikidata": "Q5288540",
+      "osmId": 727565231
+    },
+    {
+      "id": "site-728121921",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.596802,
+      "lng": 35.163886,
+      "label": "Air Base",
+      "osmId": 728121921
+    },
+    {
+      "id": "site-729743772",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.356967,
+      "lng": 47.099921,
+      "label": "Ar Rumaylah Southwest Air Base",
+      "wikidata": "Q4783079",
+      "osmId": 729743772
+    },
+    {
+      "id": "site-731165898",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.707464,
+      "lng": 40.513417,
+      "label": "Air Base",
+      "osmId": 731165898
+    },
+    {
+      "id": "site-732196868",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.549182,
+      "lng": 45.288885,
+      "label": "Air Base",
+      "osmId": 732196868
+    },
+    {
+      "id": "site-73304658",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.283375,
+      "lng": 68.45361,
+      "label": "Dr. Safdar Sarki Airport",
+      "osmId": 73304658
+    },
+    {
+      "id": "site-737280040",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.977469,
+      "lng": 50.988952,
+      "label": "Air Base",
+      "osmId": 737280040
+    },
+    {
+      "id": "site-738364629",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.755061,
+      "lng": 51.290986,
+      "label": "Air Base",
+      "osmId": 738364629
+    },
+    {
+      "id": "site-742022708",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.425874,
+      "lng": 47.639463,
+      "label": "Shuiba Military Airbase",
+      "osmId": 742022708
+    },
+    {
+      "id": "site-742052085",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.928074,
+      "lng": 39.749114,
+      "label": "H3 Airbase",
+      "osmId": 742052085
+    },
+    {
+      "id": "site-742052702",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.356959,
+      "lng": 40.596138,
+      "label": "H2 Airbase",
+      "osmId": 742052702
+    },
+    {
+      "id": "site-750184357",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.890019,
+      "lng": 54.8427,
+      "label": "Ghantoot Naval Base",
+      "osmId": 750184357
+    },
+    {
+      "id": "site-750184358",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.884919,
+      "lng": 54.848934,
+      "label": "Naval Base",
+      "osmId": 750184358
+    },
+    {
+      "id": "site-750184398",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.884615,
+      "lng": 54.843002,
+      "label": "Ghantoot Naval Airfield",
+      "osmId": 750184398
+    },
+    {
+      "id": "site-753780246",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 11.547065,
+      "lng": 43.159139,
+      "label": "Djibouti Ambouli International Airport",
+      "wikidata": "Q620706",
+      "osmId": 753780246
+    },
+    {
+      "id": "site-75503669",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 41.467805,
+      "lng": 44.786088,
+      "label": "Marneuli Air Base",
+      "osmId": 75503669
+    },
+    {
+      "id": "site-75619023",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 41.64941,
+      "lng": 44.934017,
+      "label": "Tbilisi Soganlug Air Base",
+      "osmId": 75619023
+    },
+    {
+      "id": "site-761118007",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.095502,
+      "lng": 43.266278,
+      "label": "Bamerne Airbase TAF",
+      "wikidata": "Q6029447",
+      "osmId": 761118007
+    },
+    {
+      "id": "site-764032499",
+      "type": "site",
+      "siteType": "port",
+      "lat": 26.509165,
+      "lng": 50.19011,
+      "label": "Saudi Global Ports",
+      "osmId": 764032499
+    },
+    {
+      "id": "site-766149691",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 28.683327,
+      "lng": 34.06356,
+      "label": "Saint Catherine Airport",
+      "wikidata": "Q1936042",
+      "osmId": 766149691
+    },
+    {
+      "id": "site-767202504",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.878337,
+      "lng": 67.115536,
+      "label": "Faisal Air Base",
+      "osmId": 767202504
+    },
+    {
+      "id": "site-767407573",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.113507,
+      "lng": 30.933121,
+      "label": "West Cairo Airport",
+      "osmId": 767407573
+    },
+    {
+      "id": "site-770691575",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.82464,
+      "lng": 66.976184,
+      "label": "Pakistan International Container Terminal",
+      "osmId": 770691575
+    },
+    {
+      "id": "site-7721450617",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.209046,
+      "lng": 50.62263,
+      "label": "U.S. Coast Guard Patrol Forces Southwest Asia",
+      "osmId": 7721450617
+    },
+    {
+      "id": "site-773670843",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.537226,
+      "lng": 39.482038,
+      "label": "Air Base",
+      "osmId": 773670843
+    },
+    {
+      "id": "site-775721856",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 35.878637,
+      "lng": 44.966504,
+      "label": "Dukan Refinery",
+      "operator": "Tigris Company",
+      "osmId": 775721856
+    },
+    {
+      "id": "site-777711541",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.454972,
+      "lng": 35.825625,
+      "label": "Port Of Tripoli",
+      "osmId": 777711541
+    },
+    {
+      "id": "site-777711543",
+      "type": "site",
+      "siteType": "port",
+      "lat": 34.454549,
+      "lng": 35.815287,
+      "label": "Port",
+      "osmId": 777711543
+    },
+    {
+      "id": "site-782489608",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.521223,
+      "lng": 54.395709,
+      "label": "Abu Dhabi Base",
+      "wikidata": "Q3112857",
+      "osmId": 782489608
+    },
+    {
+      "id": "site-782528892",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 25.288077,
+      "lng": 51.582156,
+      "label": "Ras Abu Aboud Navy Base",
+      "operator": "Qatari Emiri Navy",
+      "osmId": 782528892
+    },
+    {
+      "id": "site-783491892",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.637536,
+      "lng": 32.5969,
+      "label": "National Docking Area",
+      "osmId": 783491892
+    },
+    {
+      "id": "site-785369187",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 40.040629,
+      "lng": 53.324953,
+      "label": "ÝAňYajy",
+      "wikidata": "Q11824445",
+      "osmId": 785369187
+    },
+    {
+      "id": "site-785712015",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 24.487695,
+      "lng": 54.385166,
+      "label": "Abu Dhabi Naval Base",
+      "osmId": 785712015
+    },
+    {
+      "id": "site-785896009",
+      "type": "site",
+      "siteType": "port",
+      "lat": 41.526075,
+      "lng": 52.580258,
+      "label": "Garabogaz Port",
+      "osmId": 785896009
+    },
+    {
+      "id": "site-788300743",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 36.716445,
+      "lng": 37.753502,
+      "label": "Air Base",
+      "osmId": 788300743
+    },
+    {
+      "id": "site-789757313",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.655118,
+      "lng": 44.57374,
+      "label": "As Salman North Air Base",
+      "osmId": 789757313
+    },
+    {
+      "id": "site-7934241859",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.766975,
+      "lng": 35.791952,
+      "label": "Yumurtalik Limani",
+      "osmId": 7934241859
+    },
+    {
+      "id": "site-794990187",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.941893,
+      "lng": 49.704855,
+      "label": "King Abdulaziz Naval Base Airfield",
+      "osmId": 794990187
+    },
+    {
+      "id": "site-794992726",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 26.17133,
+      "lng": 50.202979,
+      "label": "Prince Nayef Naval Base",
+      "osmId": 794992726
+    },
+    {
+      "id": "site-796270632",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.483898,
+      "lng": 51.00325,
+      "label": "Tamim Airbase",
+      "osmId": 796270632
+    },
+    {
+      "id": "site-79799753",
+      "type": "site",
+      "siteType": "port",
+      "lat": 11.608299,
+      "lng": 43.136845,
+      "label": "Port",
+      "osmId": 79799753
+    },
+    {
+      "id": "site-798098473",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 19.735339,
+      "lng": 57.660851,
+      "label": "Duqm Refinery",
+      "wikidata": "Q111710552",
+      "osmId": 798098473
+    },
+    {
+      "id": "site-802668926",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.966667,
+      "lng": 36.9,
+      "label": "Al Unab",
+      "osmId": 802668926
+    },
+    {
+      "id": "site-802945777",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 31.083333,
+      "lng": 36.016667,
+      "label": "Al Manzil",
+      "osmId": 802945777
+    },
+    {
+      "id": "site-820454499",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 11.553295,
+      "lng": 43.145287,
+      "label": "Japan Self Defense Force Base Djibouti",
+      "osmId": 820454499
+    },
+    {
+      "id": "site-824135123",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.877371,
+      "lng": 35.943745,
+      "label": "Botas (Ceyhan) Oil Terminal",
+      "operator": "BOTAŞ Petrol İşLetme MüDüRlüğü",
+      "osmId": 824135123
+    },
+    {
+      "id": "site-82693406",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.940967,
+      "lng": 44.365402,
+      "label": "Balad Air Base",
+      "operator": "Iraqi Air Force",
+      "wikidata": "Q1529746",
+      "osmId": 82693406
+    },
+    {
+      "id": "site-82693423",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.799389,
+      "lng": 42.435611,
+      "label": "Ayn Al Asad Airbase",
+      "operator": "Iraqi Air Force",
+      "wikidata": "Q4703502",
+      "osmId": 82693423
+    },
+    {
+      "id": "site-8274211867",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 17.583792,
+      "lng": 43.980482,
+      "label": "Air Base",
+      "osmId": 8274211867
+    },
+    {
+      "id": "site-829469127",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 11.601869,
+      "lng": 43.137333,
+      "label": "Naval Base",
+      "osmId": 829469127
+    },
+    {
+      "id": "site-82994029",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.534363,
+      "lng": 44.269074,
+      "label": "Camp Taji",
+      "operator": "Iraqi Security Forces",
+      "wikidata": "Q5027625",
+      "osmId": 82994029
+    },
+    {
+      "id": "site-830254420",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 34.078638,
+      "lng": 44.587102,
+      "label": "Camp Ashraf HP",
+      "osmId": 830254420
+    },
+    {
+      "id": "site-830649345",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.148218,
+      "lng": 43.492075,
+      "label": "Matar Al Mahattah Qadim",
+      "osmId": 830649345
+    },
+    {
+      "id": "site-831098048",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.731743,
+      "lng": 45.230803,
+      "label": "Caldwell",
+      "osmId": 831098048
+    },
+    {
+      "id": "site-846566255",
+      "type": "site",
+      "siteType": "port",
+      "lat": 36.600229,
+      "lng": 36.186808,
+      "label": "Port Of Iskenderun",
+      "operator": "TCDD Liman İşLetmesi MüDüRlüğü İSkenderun",
+      "osmId": 846566255
+    },
+    {
+      "id": "site-850080526",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.020124,
+      "lng": 47.923408,
+      "label": "Air Base",
+      "osmId": 850080526
+    },
+    {
+      "id": "site-850217285",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.215364,
+      "lng": 47.483269,
+      "label": "Air Base",
+      "osmId": 850217285
+    },
+    {
+      "id": "site-850217287",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 30.227271,
+      "lng": 47.474134,
+      "label": "Air Base",
+      "osmId": 850217287
+    },
+    {
+      "id": "site-850597808",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 30.00778,
+      "lng": 47.949579,
+      "label": "Umm Qasr Naval Base",
+      "osmId": 850597808
+    },
+    {
+      "id": "site-858329223",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.141502,
+      "lng": 42.578822,
+      "label": "Ibrahim Khalil Helicopter Base",
+      "osmId": 858329223
+    },
+    {
+      "id": "site-859888812",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.844095,
+      "lng": 66.780943,
+      "label": "Port",
+      "osmId": 859888812
+    },
+    {
+      "id": "site-86096191",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 38.773409,
+      "lng": 35.497924,
+      "label": "Kayseri Erkilet Airport",
+      "operator": "DHMI",
+      "wikidata": "Q1431698",
+      "osmId": 86096191
+    },
+    {
+      "id": "site-8625983990",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.513828,
+      "lng": 54.002966,
+      "label": "Air Base",
+      "osmId": 8625983990
+    },
+    {
+      "id": "site-87104164",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.203524,
+      "lng": 44.5119,
+      "label": "Nuclear Facility",
+      "osmId": 87104164
+    },
+    {
+      "id": "site-871971858",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.440994,
+      "lng": 54.518908,
+      "label": "Air Base",
+      "osmId": 871971858
+    },
+    {
+      "id": "site-8722031272",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.7232,
+      "lng": 51.830905,
+      "label": "Air Base",
+      "osmId": 8722031272
+    },
+    {
+      "id": "site-873088129",
+      "type": "site",
+      "siteType": "port",
+      "lat": 37.474143,
+      "lng": 49.469827,
+      "label": "Port",
+      "osmId": 873088129
+    },
+    {
+      "id": "site-8735547235",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 12.664826,
+      "lng": 43.407796,
+      "label": "Parim",
+      "osmId": 8735547235
+    },
+    {
+      "id": "site-8763664615",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.203187,
+      "lng": 44.518471,
+      "label": "Baghdad Nuclear Reactor",
+      "osmId": 8763664615
+    },
+    {
+      "id": "site-897032071",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 25.099132,
+      "lng": 62.358618,
+      "label": "PNS Akram",
+      "osmId": 897032071
+    },
+    {
+      "id": "site-899264339",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 17.282771,
+      "lng": 42.384296,
+      "label": "Jazan Refinery",
+      "wikidata": "Q114302480",
+      "osmId": 899264339
+    },
+    {
+      "id": "site-901594457",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.018983,
+      "lng": 55.294134,
+      "label": "Air Base",
+      "osmId": 901594457
+    },
+    {
+      "id": "site-902926418",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.979204,
+      "lng": 46.691346,
+      "label": "SAUDIA CARGO",
+      "osmId": 902926418
+    },
+    {
+      "id": "site-907011754",
+      "type": "site",
+      "siteType": "port",
+      "lat": 23.782667,
+      "lng": 57.649507,
+      "label": "Mussanah Port",
+      "osmId": 907011754
+    },
+    {
+      "id": "site-9082933",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.327171,
+      "lng": 30.076061,
+      "label": "Abu Quir Naval Port",
+      "osmId": 9082933
+    },
+    {
+      "id": "site-9083718",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 28.909077,
+      "lng": 50.856948,
+      "label": "Naval Base",
+      "osmId": 9083718
+    },
+    {
+      "id": "site-9130497",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 25.655228,
+      "lng": 57.799061,
+      "label": "Jask Airport",
+      "wikidata": "Q20455239",
+      "osmId": 9130497
+    },
+    {
+      "id": "site-914508042",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.994404,
+      "lng": 55.069493,
+      "label": "Jebel Ali Container Terminal 1",
+      "wikidata": "Q509588",
+      "osmId": 914508042
+    },
+    {
+      "id": "site-914508043",
+      "type": "site",
+      "siteType": "port",
+      "lat": 24.988906,
+      "lng": 55.04949,
+      "label": "Jebel Ali Container Terminal 3",
+      "osmId": 914508043
+    },
+    {
+      "id": "site-915585345",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 26.257671,
+      "lng": 50.150207,
+      "label": "King Abdulaziz Air Base",
+      "wikidata": "Q1658031",
+      "osmId": 915585345
+    },
+    {
+      "id": "site-915846114",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 21.486219,
+      "lng": 40.539105,
+      "label": "Ta'If International Airport",
+      "operator": "Military Of Saudi Arabia",
+      "wikidata": "Q2876136",
+      "osmId": 915846114
+    },
+    {
+      "id": "site-915846117",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 21.490708,
+      "lng": 40.540415,
+      "label": "Air Base",
+      "osmId": 915846117
+    },
+    {
+      "id": "site-917288361",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 21.458069,
+      "lng": 40.531427,
+      "label": "King Fahad Air Base",
+      "wikidata": "Q7675935",
+      "osmId": 917288361
+    },
+    {
+      "id": "site-92878376",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 29.955602,
+      "lng": 32.509681,
+      "label": "El Nasr Refinery",
+      "operator": "EGPC",
+      "osmId": 92878376
+    },
+    {
+      "id": "site-93332563",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 37.927955,
+      "lng": 41.119367,
+      "label": "14. İNsansıZ UçAk Sistemleri ÜS Komutanlığı Askeri Havaalanı",
+      "osmId": 93332563
+    },
+    {
+      "id": "site-93576233",
+      "type": "site",
+      "siteType": "port",
+      "lat": 29.533366,
+      "lng": 34.940967,
+      "label": "Port Of Eilat",
+      "operator": "Israeli Ports And Railways Authority",
+      "wikidata": "Q2915417",
+      "osmId": 93576233
+    },
+    {
+      "id": "site-93895219",
+      "type": "site",
+      "siteType": "port",
+      "lat": 31.457485,
+      "lng": 31.757511,
+      "label": "Port",
+      "osmId": 93895219
+    },
+    {
+      "id": "site-94071581",
+      "type": "site",
+      "siteType": "oil",
+      "lat": 30.793166,
+      "lng": 30.963058,
+      "label": "Tanta Refinery",
+      "operator": "EGPC",
+      "osmId": 94071581
+    },
+    {
+      "id": "site-942059547",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.207897,
+      "lng": 44.512481,
+      "label": "Building 3",
+      "osmId": 942059547
+    },
+    {
+      "id": "site-946729653",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.203204,
+      "lng": 44.518471,
+      "label": "Nuclear Facility",
+      "osmId": 946729653
+    },
+    {
+      "id": "site-946729670",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 33.20477,
+      "lng": 44.515177,
+      "label": "Nuclear Facility",
+      "osmId": 946729670
+    },
+    {
+      "id": "site-94808446",
+      "type": "site",
+      "siteType": "port",
+      "lat": 33.273727,
+      "lng": 35.197449,
+      "label": "Port De Tyr",
+      "osmId": 94808446
+    },
+    {
+      "id": "site-9501187377",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 35.341686,
+      "lng": 75.52238,
+      "label": "PAF Base Qadri",
+      "osmId": 9501187377
+    },
+    {
+      "id": "site-961586997",
+      "type": "site",
+      "siteType": "naval",
+      "lat": 31.493303,
+      "lng": 26.572586,
+      "label": "3rd Of July Naval Base",
+      "wikidata": "Q107411674",
+      "osmId": 961586997
+    },
+    {
+      "id": "site-962626112",
+      "type": "site",
+      "siteType": "port",
+      "lat": 33.334334,
+      "lng": 35.244502,
+      "label": "Port",
+      "osmId": 962626112
+    },
+    {
+      "id": "site-978253492",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 29.697252,
+      "lng": 47.434531,
+      "label": "Udairi Landing Zone",
+      "wikidata": "Q20463847",
+      "osmId": 978253492
+    },
+    {
+      "id": "site-979724403",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.745704,
+      "lng": 39.60653,
+      "label": "H3 Southwest Air Base",
+      "osmId": 979724403
+    },
+    {
+      "id": "site-996547805",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 24.840834,
+      "lng": 68.835991,
+      "label": "Talhar Airport",
+      "osmId": 996547805
+    },
+    {
+      "id": "site-9968070060",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.046132,
+      "lng": 28.504731,
+      "label": "El Dabaa 1",
+      "osmId": 9968070060
+    },
+    {
+      "id": "site-9968070061",
+      "type": "site",
+      "siteType": "nuclear",
+      "lat": 31.047258,
+      "lng": 28.500965,
+      "label": "El Dabaa 2",
+      "osmId": 9968070061
+    },
+    {
+      "id": "site-996814128",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 14.555389,
+      "lng": 46.822576,
+      "label": "Ataq International Airport",
+      "wikidata": "Q2584031",
+      "osmId": 996814128
+    },
+    {
+      "id": "site-998670550",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 32.603532,
+      "lng": 65.868375,
+      "label": "Tarin Kowt Airport, Tereen",
+      "wikidata": "Q2736618",
+      "osmId": 998670550
+    },
+    {
+      "id": "site-998672836",
+      "type": "site",
+      "siteType": "airbase",
+      "lat": 33.8644,
+      "lng": 72.404352,
+      "label": "Minhas",
+      "wikidata": "Q3696026",
+      "osmId": 998672836
+    },
+    {
+      "id": "site-99983246",
+      "type": "site",
+      "siteType": "port",
+      "lat": 25.171888,
+      "lng": 56.354335,
+      "label": "Port",
+      "osmId": 99983246
+    }
+  ],
+  "stats": {
+    "rawCount": 876,
+    "filteredCount": 720,
+    "rejections": {
+      "excluded_turkey": 156,
+      "no_coords": 0,
+      "no_type": 0,
+      "duplicate": 0
+    },
+    "byCountry": {
+      "Israel": {
+        "airbase": 29,
+        "port": 28,
+        "nuclear": 2,
+        "oil": 11,
+        "naval": 6
+      },
+      "Iran": {
+        "airbase": 17,
+        "port": 3,
+        "naval": 3,
+        "oil": 4,
+        "nuclear": 3
+      },
+      "Pakistan": {
+        "airbase": 26,
+        "nuclear": 18,
+        "naval": 4,
+        "oil": 5,
+        "port": 5
+      },
+      "Jordan": {
+        "airbase": 12
+      },
+      "Turkey": {
+        "port": 3,
+        "airbase": 3
+      },
+      "Djibouti": {
+        "naval": 1,
+        "airbase": 9,
+        "port": 14
+      },
+      "Syria": {
+        "port": 2,
+        "airbase": 24,
+        "oil": 3
+      },
+      "Azerbaijan": {
+        "airbase": 4,
+        "naval": 6,
+        "port": 23,
+        "oil": 1
+      },
+      "Iraq": {
+        "airbase": 36,
+        "nuclear": 8,
+        "oil": 23
+      },
+      "Bahrain": {
+        "airbase": 10,
+        "naval": 9,
+        "port": 12,
+        "nuclear": 2,
+        "oil": 15
+      },
+      "Kuwait": {
+        "airbase": 25,
+        "port": 23,
+        "naval": 13,
+        "oil": 15
+      },
+      "Turkmenistan": {
+        "airbase": 5,
+        "port": 4,
+        "oil": 1
+      },
+      "Egypt": {
+        "port": 7,
+        "airbase": 7,
+        "nuclear": 5,
+        "oil": 1,
+        "naval": 2
+      },
+      "Lebanon": {
+        "port": 17,
+        "airbase": 11,
+        "oil": 1,
+        "naval": 3
+      },
+      "Eritrea": {
+        "airbase": 3,
+        "port": 10,
+        "oil": 1
+      },
+      "Saudi Arabia": {
+        "airbase": 11,
+        "port": 8,
+        "oil": 10,
+        "naval": 1
+      },
+      "United Arab Emirates": {
+        "port": 50,
+        "airbase": 15,
+        "naval": 7,
+        "nuclear": 5,
+        "oil": 2
+      },
+      "Oman": {
+        "airbase": 5,
+        "naval": 3,
+        "port": 5,
+        "oil": 1
+      },
+      "Yemen": {
+        "port": 9,
+        "airbase": 2
+      },
+      "Qatar": {
+        "port": 5,
+        "airbase": 6,
+        "oil": 1,
+        "naval": 2
+      },
+      "Afghanistan": {
+        "airbase": 15,
+        "oil": 1,
+        "port": 1
+      },
+      "Georgia": {
+        "airbase": 3,
+        "port": 1
+      },
+      "Armenia": {
+        "airbase": 6,
+        "oil": 2,
+        "nuclear": 2
+      },
+      "Uzbekistan": {
+        "oil": 1,
+        "port": 2
+      }
+    },
+    "byType": {
+      "airbase": 284,
+      "port": 232,
+      "naval": 60,
+      "nuclear": 45,
+      "oil": 99
+    },
+    "overpass": [
+      {
+        "facilityType": "sites",
+        "mirror": "primary",
+        "status": 200,
+        "durationMs": 17524,
+        "attempts": 1,
+        "ok": true
+      }
+    ],
+    "source": "snapshot",
+    "generatedAt": "2026-04-19T08:28:47.786Z"
+  }
+}
