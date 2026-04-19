@@ -19,6 +19,7 @@
     "knip": "knip",
     "check:env": "tsx scripts/check-env-example.ts",
     "capture:hero": "tsx scripts/capture-hero.ts",
+    "refresh:water": "tsx scripts/refresh-water-facilities.ts",
     "type-coverage": "type-coverage",
     "preview": "vite preview",
     "prepare": "husky"
