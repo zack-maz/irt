@@ -9,6 +9,8 @@ import { useMarketStore } from '@/stores/marketStore';
 import { useWeatherStore } from '@/stores/weatherStore';
 import { useWaterStore } from '@/stores/waterStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useLayerStore } from '@/stores/layerStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { useLLMStatusPolling } from '@/hooks/useLLMStatusPolling';
 import type { LLMStatus } from '@/hooks/useLLMStatusPolling';
 import { effectiveStatus } from '@/lib/apiStatus';
@@ -722,6 +724,12 @@ export function DevApiStatus() {
   const setTab = useUIStore((s) => s.setDevApiStatusTab);
   const close = useUIStore((s) => s.closeDevApiStatus);
 
+  // Phase 27.3.1 HUMAN-UAT Gap 1 — tab visibility gated on layer toggles.
+  // Water tab only when the water visualization layer is active; Sites tab
+  // only when the showSites filter toggle is on. Overview stays unconditional.
+  const showWaterTab = useLayerStore((s) => s.activeLayers.has('water'));
+  const showSitesTab = useFilterStore((s) => s.showSites);
+
   // Escape key — capture-phase so DevApiStatus closes BEFORE nav-stack pop /
   // detail panel close / search modal close (Plan 12 G6 priority contract).
   // Gated on isOpen so the listener is only active while the modal is visible
@@ -737,6 +745,13 @@ export function DevApiStatus() {
     window.addEventListener('keydown', onKey, { capture: true });
     return () => window.removeEventListener('keydown', onKey, { capture: true });
   }, [isOpen, close]);
+
+  // If the currently active tab gets hidden because the user toggled off the
+  // corresponding layer, snap back to Overview so the body does not render empty.
+  useEffect(() => {
+    if (activeTab === 'water' && !showWaterTab) setTab('overview');
+    else if (activeTab === 'sites' && !showSitesTab) setTab('overview');
+  }, [activeTab, showWaterTab, showSitesTab, setTab]);
 
   if (!isOpen) return null;
 
@@ -778,20 +793,24 @@ export function DevApiStatus() {
             >
               Overview
             </TabButton>
-            <TabButton
-              active={activeTab === 'water'}
-              onClick={() => setTab('water')}
-              testid="tab-water"
-            >
-              Water
-            </TabButton>
-            <TabButton
-              active={activeTab === 'sites'}
-              onClick={() => setTab('sites')}
-              testid="tab-sites"
-            >
-              Sites
-            </TabButton>
+            {showWaterTab && (
+              <TabButton
+                active={activeTab === 'water'}
+                onClick={() => setTab('water')}
+                testid="tab-water"
+              >
+                Water
+              </TabButton>
+            )}
+            {showSitesTab && (
+              <TabButton
+                active={activeTab === 'sites'}
+                onClick={() => setTab('sites')}
+                testid="tab-sites"
+              >
+                Sites
+              </TabButton>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -830,8 +849,8 @@ export function DevApiStatus() {
               setExpandedRow={setExpandedRow}
             />
           )}
-          {activeTab === 'water' && <WaterFiltersSection />}
-          {activeTab === 'sites' && <SitesFiltersSection />}
+          {activeTab === 'water' && showWaterTab && <WaterFiltersSection />}
+          {activeTab === 'sites' && showSitesTab && <SitesFiltersSection />}
         </div>
       </div>
     </div>

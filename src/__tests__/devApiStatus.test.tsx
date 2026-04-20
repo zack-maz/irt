@@ -9,6 +9,8 @@ import { useMarketStore } from '@/stores/marketStore';
 import { useWeatherStore } from '@/stores/weatherStore';
 import { useWaterStore } from '@/stores/waterStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useLayerStore } from '@/stores/layerStore';
+import { useFilterStore } from '@/stores/filterStore';
 import type { ConflictEventEntity } from '@/types/entities';
 
 // Mock useLLMStatusPolling
@@ -163,6 +165,11 @@ describe('DevApiStatus', () => {
       isDevApiStatusOpen: false,
       activeDevApiStatusTab: 'overview',
     });
+    // Phase 27.3.1 HUMAN-UAT Gap 1 — tab gating defaults for existing tests.
+    // The Water and Sites tabs now require their owning toggles to be ON:
+    // water layer active in layerStore, showSites true in filterStore.
+    useLayerStore.setState({ activeLayers: new Set(['water']) });
+    useFilterStore.setState({ showSites: true });
     // Reset LLM status to default
     Object.assign(mockLLMStatus, { stage: 'idle', lastRun: null });
   });
@@ -277,6 +284,53 @@ describe('DevApiStatus', () => {
     fireEvent.click(screen.getByTestId('tab-sites'));
     expect(useUIStore.getState().activeDevApiStatusTab).toBe('sites');
     expect(screen.getByText('Sites Filters')).toBeInTheDocument();
+  });
+
+  // Phase 27.3.1 HUMAN-UAT Gap 1 — tab visibility gated on layer toggles.
+  it('hides Water tab when the water layer is inactive', () => {
+    useLayerStore.setState({ activeLayers: new Set() }); // water off
+    openModal();
+    render(<DevApiStatus />);
+    expect(screen.queryByTestId('tab-water')).toBeNull();
+    expect(screen.getByTestId('tab-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-sites')).toBeInTheDocument();
+  });
+
+  it('hides Sites tab when showSites filter is off', () => {
+    useFilterStore.setState({ showSites: false });
+    openModal();
+    render(<DevApiStatus />);
+    expect(screen.queryByTestId('tab-sites')).toBeNull();
+    expect(screen.getByTestId('tab-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-water')).toBeInTheDocument();
+  });
+
+  it('redirects active Water tab back to Overview when the water layer is turned off', () => {
+    useUIStore.setState({
+      isDevApiStatusOpen: true,
+      activeDevApiStatusTab: 'water',
+    });
+    const { rerender } = render(<DevApiStatus />);
+    expect(useUIStore.getState().activeDevApiStatusTab).toBe('water');
+    act(() => {
+      useLayerStore.setState({ activeLayers: new Set() });
+    });
+    rerender(<DevApiStatus />);
+    expect(useUIStore.getState().activeDevApiStatusTab).toBe('overview');
+  });
+
+  it('redirects active Sites tab back to Overview when showSites is turned off', () => {
+    useUIStore.setState({
+      isDevApiStatusOpen: true,
+      activeDevApiStatusTab: 'sites',
+    });
+    const { rerender } = render(<DevApiStatus />);
+    expect(useUIStore.getState().activeDevApiStatusTab).toBe('sites');
+    act(() => {
+      useFilterStore.setState({ showSites: false });
+    });
+    rerender(<DevApiStatus />);
+    expect(useUIStore.getState().activeDevApiStatusTab).toBe('overview');
   });
 
   it('close button calls closeDevApiStatus', () => {
