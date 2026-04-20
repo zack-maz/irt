@@ -65,6 +65,16 @@ export interface PanelView {
 
 export type SidebarSection = 'counters' | 'layers' | 'filters';
 
+/**
+ * Phase 27.3.1 Plan 12 G6 — DevApiStatus modal tab identity.
+ *
+ * Three mutually-exclusive tabs in the centered DevApiStatus modal:
+ *   - overview: API source table + LLM Pipeline section
+ *   - water:    WaterFiltersSection (byCountry, byType, Overpass health, etc)
+ *   - sites:    SitesFiltersSection (byType, byCountry, rejections, health)
+ */
+export type DevApiStatusTab = 'overview' | 'water' | 'sites';
+
 export interface UIState {
   isDetailPanelOpen: boolean;
   isStatusCollapsed: boolean;
@@ -85,6 +95,12 @@ export interface UIState {
   expandedAlertSiteId: string | null;
   navigationStack: PanelView[];
   slideDirection: 'forward' | 'back' | null;
+  // Phase 27.3.1 Plan 12 G6 — DevApiStatus top-bar modal
+  isDevApiStatusOpen: boolean;
+  activeDevApiStatusTab: DevApiStatusTab;
+  openDevApiStatus: () => void;
+  closeDevApiStatus: () => void;
+  setDevApiStatusTab: (tab: DevApiStatusTab) => void;
   openDetailPanel: () => void;
   closeDetailPanel: () => void;
   toggleStatus: () => void;
@@ -123,5 +139,4 @@ export const WATER_TYPE_LABELS: Record<string, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination',
-  treatment_plant: 'Treatment',
 };

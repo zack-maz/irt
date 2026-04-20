@@ -6,18 +6,8 @@ import type { SiteType, WaterFacilityType } from '@/types/entities';
 export const ALL_SITE_TYPES: SiteType[] = ['nuclear', 'naval', 'oil', 'airbase', 'port'];
 const DEFAULT_SITE_TYPES: SiteType[] = ['nuclear', 'naval', 'oil', 'airbase', 'port'];
 
-export const ALL_WATER_TYPES: WaterFacilityType[] = [
-  'dam',
-  'reservoir',
-  'desalination',
-  'treatment_plant',
-];
-const DEFAULT_WATER_TYPES: WaterFacilityType[] = [
-  'dam',
-  'reservoir',
-  'desalination',
-  'treatment_plant',
-];
+export const ALL_WATER_TYPES: WaterFacilityType[] = ['dam', 'reservoir', 'desalination'];
+const DEFAULT_WATER_TYPES: WaterFacilityType[] = ['dam', 'reservoir', 'desalination'];
 
 /** Full default range for a given granularity (thumbs at both ends) */
 function defaultRange(g: Granularity): { dateStart: number; dateEnd: number } {

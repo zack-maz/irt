@@ -13,6 +13,73 @@ export interface PrecipitationData {
   updatedAt: number;
 }
 
+/**
+ * Phase 27.3.1 R-08 D-29 — per-Overpass-fetch telemetry record.
+ * Mirrors `OverpassFetchRecord` in server/adapters/overpass-water.ts. Declared
+ * locally for tier independence (per Phase 27.3 truth-12 rationale).
+ */
+export interface OverpassFetchRecord {
+  facilityType: string;
+  /** Label only ('primary' | 'fallback') — never the raw URL. */
+  mirror: string;
+  status: number;
+  durationMs: number;
+  attempts: number;
+  ok: boolean;
+}
+
+/**
+ * Water filter diagnostics from /api/water response envelope (Phase 27.3 D-04/REV-4,
+ * extended in Phase 27.3.1 R-08 D-28..D-31). Populated on every response path
+ * post-R-08 (cached responses now carry a minimal stub with source='redis').
+ * Schema mirrors server/schemas/cacheResponse.ts `waterFilterStatsSchema` —
+ * declared locally here for tier independence.
+ */
+export interface WaterFilterStats {
+  rawCounts: Record<string, number>;
+  filteredCounts: Record<string, number>;
+  /** Summed across all facility types — preserved for back-compat. */
+  rejections: {
+    excluded_location: number;
+    /** Phase 27.3.1 Plan 10 (G2) — Turkey country-exclusion bucket. Mirrors `WaterFilterStats.rejections.excluded_turkey` in server/adapters/overpass-water.ts. */
+    excluded_turkey: number;
+    not_notable: number;
+    no_name: number;
+    duplicate: number;
+    low_score: number;
+    /** Rejected because no nearby city (150km) AND no wikidata/wikipedia ref. Phase 27.3 Plan 04. */
+    no_city: number;
+  };
+  /** Phase 27.3.1 R-08 D-31 — per-facility-type rejection breakdown (Plan 10 G2 added excluded_turkey). */
+  byTypeRejections: Record<
+    string,
+    {
+      excluded_location: number;
+      /** Phase 27.3.1 Plan 10 (G2) — per-type Turkey country-exclusion bucket. */
+      excluded_turkey: number;
+      not_notable: number;
+      no_name: number;
+      duplicate: number;
+      low_score: number;
+      no_city: number;
+    }
+  >;
+  /** Phase 27.3.1 R-08 D-28 — admitted facilities keyed by nearest-centroid country → facilityType → count. */
+  byCountry: Record<string, Record<string, number>>;
+  /** Phase 27.3.1 R-08 D-29 — Overpass fetch telemetry, one entry per URL attempt. */
+  overpass: OverpassFetchRecord[];
+  /** Phase 27.3.1 R-08 D-30 — provenance tag for the response payload. */
+  source: 'snapshot' | 'redis' | 'overpass';
+  /** Phase 27.3.1 R-08 D-30 — ISO-8601 timestamp of when the underlying data was produced. */
+  generatedAt: string;
+  enrichment: {
+    withCapacity: number;
+    withCity: number;
+    withRiver: number;
+  };
+  scoreHistogram: { bucket: string; count: number }[];
+}
+
 export interface FetchRecord {
   ok: boolean;
   durationMs: number;
@@ -26,6 +93,8 @@ interface WaterState {
   lastError: string | null;
   nextPollAt: number | null;
   recentFetches: FetchRecord[];
+  /** Server-reported filter diagnostics (null when response served from cache) */
+  filterStats: WaterFilterStats | null;
   /** Precipitation-specific observability */
   precipStatus: WaterConnectionStatus;
   precipLastFetchAt: number | null;
@@ -36,6 +105,7 @@ interface WaterState {
   /** Raw precipitation array for direct coordinate lookup (e.g. weather tooltip) */
   rawPrecipData: PrecipitationData[];
   setWaterData: (response: CacheResponse<WaterFacility[]>) => void;
+  setFilterStats: (stats: WaterFilterStats | null) => void;
   updatePrecipitation: (data: PrecipitationData[]) => void;
   setError: (message?: string) => void;
   setLoading: () => void;
@@ -56,6 +126,7 @@ export const useWaterStore = create<WaterState>()((set) => ({
   lastError: null,
   nextPollAt: null,
   recentFetches: [],
+  filterStats: null,
   precipStatus: 'idle',
   precipLastFetchAt: null,
   precipLastError: null,
@@ -70,6 +141,8 @@ export const useWaterStore = create<WaterState>()((set) => ({
       connectionStatus: response.stale ? 'stale' : 'connected',
       lastError: null,
     }),
+
+  setFilterStats: (filterStats) => set({ filterStats }),
 
   updatePrecipitation: (data) =>
     set((state) => {

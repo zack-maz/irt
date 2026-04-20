@@ -8,11 +8,12 @@ import { useNewsStore } from '@/stores/newsStore';
 import { useMarketStore } from '@/stores/marketStore';
 import { useWeatherStore } from '@/stores/weatherStore';
 import { useWaterStore } from '@/stores/waterStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useLayerStore } from '@/stores/layerStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { useLLMStatusPolling } from '@/hooks/useLLMStatusPolling';
 import type { LLMStatus } from '@/hooks/useLLMStatusPolling';
-
-/** Stuck threshold: no update in 2 minutes while still 'loading' */
-const STUCK_THRESHOLD_MS = 120_000;
+import { effectiveStatus } from '@/lib/apiStatus';
 
 interface FetchEntry {
   ok: boolean;
@@ -34,14 +35,6 @@ interface ApiRow {
 }
 
 /* ---------- Helpers ---------- */
-
-function effectiveStatus(status: string, count: number, lastFetch: number | null): string {
-  if (status === 'loading' && lastFetch && Date.now() - lastFetch > STUCK_THRESHOLD_MS)
-    return 'stuck';
-  if (status === 'loading' && !lastFetch) return 'init';
-  if (status === 'connected' && count === 0) return 'empty';
-  return status;
-}
 
 function statusColor(eff: string): string {
   switch (eff) {
@@ -116,6 +109,23 @@ function formatDuration(ms: number | null | undefined): string {
   if (!ms) return '--';
   if (ms < 1000) return `${ms}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
+}
+
+/**
+ * Phase 27.3.1 R-08 D-30 — relative time helper for the WaterFiltersSection
+ * provenance header. Renders "Xs ago" / "Xm ago" / "Xh ago" / "Xd ago".
+ * Defensive: returns "--" for invalid/empty ISO strings rather than NaN.
+ */
+function relativeTime(iso: string): string {
+  if (!iso) return '--';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '--';
+  const delta = Date.now() - t;
+  if (delta < 0) return 'just now';
+  if (delta < 60_000) return `${Math.round(delta / 1000)}s ago`;
+  if (delta < 3_600_000) return `${Math.round(delta / 60_000)}m ago`;
+  if (delta < 86_400_000) return `${Math.round(delta / 3_600_000)}h ago`;
+  return `${Math.round(delta / 86_400_000)}d ago`;
 }
 
 /* ---------- LLM Pipeline Section ---------- */
@@ -282,13 +292,191 @@ function LLMPipelineSection({ llmStatus }: { llmStatus: LLMStatus }) {
   );
 }
 
+/* ---------- Tab Button (Plan 12 G6) ---------- */
+
+function TabButton({
+  active,
+  onClick,
+  indicator,
+  testid,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  indicator?: 'red';
+  testid: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      role="tab"
+      aria-selected={active}
+      data-testid={testid}
+      onClick={onClick}
+      className={`flex items-center gap-1 rounded-md px-3 py-1 text-[10px] font-medium transition-colors ${
+        active ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white/80'
+      }`}
+    >
+      {children}
+      {indicator === 'red' && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+    </button>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+/* ---------- Overview Tab (API table + LLM Pipeline, Plan 12 G6) ---------- */
+
+function DevApiStatusOverviewTab({
+  rows,
+  llmStatus,
+  expandedRow,
+  setExpandedRow,
+}: {
+  rows: ApiRow[];
+  llmStatus: LLMStatus;
+  expandedRow: string | null;
+  setExpandedRow: (s: string | null) => void;
+}) {
+  return (
+    <>
+      {/* Table */}
+      <table className="w-full">
+        <thead>
+          <tr className="text-white/40">
+            <th className="pr-1 text-left font-normal">Source</th>
+            <th className="pr-1 text-left font-normal">St</th>
+            <th className="pr-1 text-right font-normal">Cnt</th>
+            <th className="pr-1 text-right font-normal">Avg</th>
+            <th className="pr-1 text-right font-normal">Rate</th>
+            <th className="pr-1 text-right font-normal">Next</th>
+            <th className="pr-1 text-right font-normal">Age</th>
+            <th className="text-center font-normal">Err</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const eff = effectiveStatus(r.status, r.count, r.lastFetch);
+            const color = statusColor(eff);
+            const isExpanded = expandedRow === r.name;
+            return (
+              <tr
+                key={r.name}
+                className="cursor-pointer hover:bg-white/5"
+                onClick={() => setExpandedRow(isExpanded ? null : r.name)}
+              >
+                <td className="pr-1">{r.name}</td>
+                <td className="pr-1 whitespace-nowrap">
+                  <span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />{' '}
+                  <span style={{ color }} className="text-[9px]">
+                    {statusLabel(eff)}
+                  </span>
+                </td>
+                <td className="pr-1 text-right">{r.count}</td>
+                <td className="pr-1 text-right text-white/50">
+                  {avgResponseTime(r.recentFetches)}
+                </td>
+                <td className="pr-1 text-right text-white/50">{successRate(r.recentFetches)}</td>
+                <td className="pr-1 text-right text-white/50">
+                  {formatCountdown(r.nextPollAt, r.isOneShot, r.status)}
+                </td>
+                <td className="pr-1 text-right">{formatAge(r.lastFetch)}</td>
+                <td className="text-center">
+                  {r.lastError ? (
+                    <span
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
+                      title={r.lastError}
+                    />
+                  ) : (
+                    ''
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Expanded error / quality detail */}
+      {expandedRow &&
+        (() => {
+          const row = rows.find((r) => r.name === expandedRow);
+          if (!row) return null;
+          return (
+            <div className="mt-1 rounded border border-white/5 bg-white/5 p-1.5">
+              {row.quality && (
+                <div className="text-[9px] text-white/50">
+                  <span className="font-bold text-white/40">Quality:</span> {row.quality}
+                </div>
+              )}
+              {row.lastError && (
+                <div className="mt-0.5 text-[9px] text-red-400">
+                  <span className="font-bold">Error:</span> {row.lastError}
+                </div>
+              )}
+              {row.note && (
+                <div className="mt-0.5 text-[9px] text-white/40">
+                  <span className="font-bold">Note:</span> {row.note}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+      {/* LLM Pipeline Progress */}
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+          LLM Pipeline
+        </span>
+        <div className="mt-0.5 text-[9px]">
+          <LLMPipelineSection llmStatus={llmStatus} />
+        </div>
+      </div>
+    </>
+  );
+}
+
 /* ---------- Main Component ---------- */
 
 /**
- * Dev-only API status overlay. Shows connection status, data counts,
+ * Dev-only API status modal. Shows connection status, data counts,
  * response times, success rates, poll countdowns, error indicators,
  * data quality metrics, LLM pipeline progress, and copy diagnostics.
- * Only renders when import.meta.env.DEV is true.
+ *
+ * Phase 27.3.1 Plan 12 G6 — refactored from a fixed bottom-left overlay
+ * into a centered modal at z-index var(--z-modal). Open state lives in
+ * uiStore.isDevApiStatusOpen; the Topbar DevApiStatusTrigger opens it.
+ *
+ * Modal has a sticky tab bar with three tabs:
+ *   - Overview: API source table + LLM Pipeline
+ *   - Water:    WaterFiltersSection (R-08 observability)
+ *   - Sites:    SitesFiltersSection (R-05 observability)
+ *
+ * Escape closes the modal FIRST (capture-phase listener) before bubbling
+ * to nav-stack / detail-panel / search Escape handlers.
+ *
+ * Only renders visible UI when import.meta.env.DEV is true AND the modal
+ * is open. When closed, returns null — AppShell's wrapper is harmless.
  */
 export function DevApiStatus() {
   // Tick every 2s to update ages and countdowns
@@ -298,7 +486,6 @@ export function DevApiStatus() {
     return () => clearInterval(id);
   }, []);
 
-  const [collapsed, setCollapsed] = useState(true);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
 
@@ -482,7 +669,7 @@ export function DevApiStatus() {
       name: 'Water',
       ...waterRaw,
       isOneShot: true,
-      quality: `${waterRaw.count} total | ${waterByType['dam'] ?? 0} dam, ${waterByType['reservoir'] ?? 0} res, ${waterByType['desalination'] ?? 0} desal, ${waterByType['treatment_plant'] ?? 0} treat`,
+      quality: `${waterRaw.count} total | ${waterByType['dam'] ?? 0} dam, ${waterByType['reservoir'] ?? 0} res, ${waterByType['desalination'] ?? 0} desal`,
     },
     {
       name: 'Precip',
@@ -531,155 +718,445 @@ export function DevApiStatus() {
     }
   };
 
-  if (collapsed) {
-    return (
-      <button
-        onClick={() => setCollapsed(false)}
-        className="fixed bottom-2 left-2 z-[9999] rounded px-2 py-1 font-mono text-[10px] text-white/70 hover:text-white"
-        style={{ backgroundColor: hasIssue ? 'rgba(239,68,68,0.8)' : 'rgba(0,0,0,0.5)' }}
-      >
-        API {hasIssue ? '!' : '~'}
-      </button>
-    );
-  }
+  // Phase 27.3.1 Plan 12 G6 — uiStore-backed modal state
+  const isOpen = useUIStore((s) => s.isDevApiStatusOpen);
+  const activeTab = useUIStore((s) => s.activeDevApiStatusTab);
+  const setTab = useUIStore((s) => s.setDevApiStatusTab);
+  const close = useUIStore((s) => s.closeDevApiStatus);
+
+  // Phase 27.3.1 HUMAN-UAT Gap 1 — tab visibility gated on layer toggles.
+  // Water tab only when the water visualization layer is active; Sites tab
+  // only when the showSites filter toggle is on. Overview stays unconditional.
+  const showWaterTab = useLayerStore((s) => s.activeLayers.has('water'));
+  const showSitesTab = useFilterStore((s) => s.showSites);
+
+  // Escape key — capture-phase so DevApiStatus closes BEFORE nav-stack pop /
+  // detail panel close / search modal close (Plan 12 G6 priority contract).
+  // Gated on isOpen so the listener is only active while the modal is visible
+  // (T-27.3.1.12-03 mitigation: listener cleanup on unmount or close).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        close();
+      }
+    };
+    window.addEventListener('keydown', onKey, { capture: true });
+    return () => window.removeEventListener('keydown', onKey, { capture: true });
+  }, [isOpen, close]);
+
+  // If the currently active tab gets hidden because the user toggled off the
+  // corresponding layer, snap back to Overview so the body does not render empty.
+  useEffect(() => {
+    if (activeTab === 'water' && !showWaterTab) setTab('overview');
+    else if (activeTab === 'sites' && !showSitesTab) setTab('overview');
+  }, [activeTab, showWaterTab, showSitesTab, setTab]);
+
+  if (!isOpen) return null;
 
   return (
     <div
-      className="fixed bottom-2 left-2 z-[9999] rounded-md border border-white/10 bg-black/85 p-2 font-mono text-[10px] text-white/80 backdrop-blur-sm"
-      style={{ minWidth: 420 }}
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 'var(--z-modal)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Dev API Status"
+      data-testid="dev-api-status-modal"
     >
-      {/* Header */}
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-white/50">
-          API Status
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => void copyDiagnostics()}
-            className="text-white/40 hover:text-white"
-            title="Copy diagnostics JSON"
-            data-testid="copy-diagnostics"
-          >
-            {copyFeedback ? (
-              <span className="text-green-400">Copied!</span>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+      {/* Backdrop — click to close (T-27.3.1.12-04 mitigation: only backdrop
+          clicks close; inner container stops propagation) */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={close}
+        data-testid="dev-api-status-backdrop"
+      />
+
+      {/* Modal container */}
+      <div
+        className="relative flex w-[min(92vw,960px)] max-h-[85vh] flex-col rounded-lg border border-white/10 bg-black/85 font-mono text-[10px] text-white/80 shadow-xl backdrop-blur-sm"
+        onClick={(e) => e.stopPropagation()}
+        data-testid="dev-api-status-container"
+      >
+        {/* Sticky header with tabs */}
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-black/85 px-4 py-3 backdrop-blur-sm">
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+            API Status
+          </h2>
+
+          <div className="flex items-center gap-1" role="tablist">
+            <TabButton
+              active={activeTab === 'overview'}
+              onClick={() => setTab('overview')}
+              indicator={hasIssue ? 'red' : undefined}
+              testid="tab-overview"
+            >
+              Overview
+            </TabButton>
+            {showWaterTab && (
+              <TabButton
+                active={activeTab === 'water'}
+                onClick={() => setTab('water')}
+                testid="tab-water"
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
+                Water
+              </TabButton>
             )}
-          </button>
-          <button onClick={() => setCollapsed(true)} className="text-white/40 hover:text-white">
-            x
-          </button>
+            {showSitesTab && (
+              <TabButton
+                active={activeTab === 'sites'}
+                onClick={() => setTab('sites')}
+                testid="tab-sites"
+              >
+                Sites
+              </TabButton>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void copyDiagnostics()}
+              className="text-white/40 hover:text-white"
+              title="Copy diagnostics JSON"
+              data-testid="copy-diagnostics"
+            >
+              {copyFeedback ? (
+                <span className="text-[10px] text-green-400">Copied!</span>
+              ) : (
+                <CopyIcon />
+              )}
+            </button>
+            <button
+              onClick={close}
+              className="text-white/40 hover:text-white"
+              aria-label="Close dev API status"
+              data-testid="dev-api-status-close"
+            >
+              ×
+            </button>
+          </div>
+        </header>
+
+        {/* Scrollable body — Plan 12 G6 fix: max-h-[85vh] + overflow-y-auto so
+            populated byCountry tables + Overpass Health + per-type rejection
+            buckets all fit without overflowing the viewport */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          {activeTab === 'overview' && (
+            <DevApiStatusOverviewTab
+              rows={rows}
+              llmStatus={llmStatus}
+              expandedRow={expandedRow}
+              setExpandedRow={setExpandedRow}
+            />
+          )}
+          {activeTab === 'water' && showWaterTab && <WaterFiltersSection />}
+          {activeTab === 'sites' && showSitesTab && <SitesFiltersSection />}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Table */}
-      <table className="w-full">
-        <thead>
-          <tr className="text-white/40">
-            <th className="pr-1 text-left font-normal">Source</th>
-            <th className="pr-1 text-left font-normal">St</th>
-            <th className="pr-1 text-right font-normal">Cnt</th>
-            <th className="pr-1 text-right font-normal">Avg</th>
-            <th className="pr-1 text-right font-normal">Rate</th>
-            <th className="pr-1 text-right font-normal">Next</th>
-            <th className="pr-1 text-right font-normal">Age</th>
-            <th className="text-center font-normal">Err</th>
-          </tr>
-        </thead>
+/**
+ * Dev-only diagnostics for the water facility filter pipeline.
+ *
+ * Phase 27.3 D-04 baseline: raw vs filtered counts per OSM facility type,
+ * rejection reason tallies, enrichment coverage, score histogram.
+ *
+ * Phase 27.3.1 R-08 expansion (D-28..D-31):
+ *   - Provenance header (source + generatedAt relative time)
+ *   - Per-country admission table (top 12 countries)
+ *   - Per-type rejection breakdown (alongside the summed totals)
+ *   - Overpass health attempt rows (mirror, status, duration, ok)
+ *
+ * Block layout: provenance → raw/kept summary → per-type counts → byCountry →
+ * per-type rejections → total rejections → enrichment → overpass health →
+ * score histogram.
+ */
+function WaterFiltersSection() {
+  const filterStats = useWaterStore((s) => s.filterStats);
+
+  // Phase 27.3 Plan 05 / UAT Test 6 — truth 21 regression guard. Kept as
+  // defensive fallback. Post-R-08 D-30, all response paths attach
+  // filterStats (cached, dev-cache, fresh, error-with-cache, error-without-
+  // cache), so this branch only fires for a brief moment during the first
+  // fetch after page load (before useWaterFetch resolves).
+  if (!filterStats) {
+    return (
+      <div className="mt-2 border-t border-white/10 pt-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+          Water Filters
+        </span>
+        <div className="mt-0.5 text-[9px] italic text-white/40">loading filter stats…</div>
+      </div>
+    );
+  }
+
+  const totalRaw = Object.values(filterStats.rawCounts).reduce((a, b) => a + b, 0);
+  const totalKept = Object.values(filterStats.filteredCounts).reduce((a, b) => a + b, 0);
+  const keepPct = totalRaw > 0 ? Math.round((totalKept / totalRaw) * 100) : 0;
+
+  const typeKeys = Array.from(
+    new Set([...Object.keys(filterStats.rawCounts), ...Object.keys(filterStats.filteredCounts)]),
+  ).sort();
+
+  // Phase 27.3.1 R-08 D-28 — top 12 countries by total admitted facilities.
+  // Cap prevents arbitrary render blowup if byCountry ever grows beyond the
+  // 29-centroid table (T-27.3.1.03-04 mitigation).
+  const byCountrySorted = Object.entries(filterStats.byCountry)
+    .sort(
+      ([, a], [, b]) =>
+        Object.values(b).reduce((s, n) => s + n, 0) - Object.values(a).reduce((s, n) => s + n, 0),
+    )
+    .slice(0, 12);
+
+  return (
+    <div className="mt-2 border-t border-white/10 pt-2">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+        Water Filters
+      </span>
+
+      {/* Phase 27.3.1 R-08 D-30 — provenance header */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Source:</span> {filterStats.source} ·{' '}
+        <span className="font-bold text-white/40">Generated:</span>{' '}
+        {relativeTime(filterStats.generatedAt)}
+      </div>
+
+      {/* Raw vs filtered summary */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        {totalRaw} raw → {totalKept} kept ({keepPct}%)
+      </div>
+
+      {/* Per-type breakdown */}
+      <table className="mt-0.5 w-full text-[9px]">
         <tbody>
-          {rows.map((r) => {
-            const eff = effectiveStatus(r.status, r.count, r.lastFetch);
-            const color = statusColor(eff);
-            const isExpanded = expandedRow === r.name;
-            return (
-              <tr
-                key={r.name}
-                className="cursor-pointer hover:bg-white/5"
-                onClick={() => setExpandedRow(isExpanded ? null : r.name)}
-              >
-                <td className="pr-1">{r.name}</td>
-                <td className="pr-1 whitespace-nowrap">
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />{' '}
-                  <span style={{ color }} className="text-[9px]">
-                    {statusLabel(eff)}
-                  </span>
-                </td>
-                <td className="pr-1 text-right">{r.count}</td>
-                <td className="pr-1 text-right text-white/50">
-                  {avgResponseTime(r.recentFetches)}
-                </td>
-                <td className="pr-1 text-right text-white/50">{successRate(r.recentFetches)}</td>
-                <td className="pr-1 text-right text-white/50">
-                  {formatCountdown(r.nextPollAt, r.isOneShot, r.status)}
-                </td>
-                <td className="pr-1 text-right">{formatAge(r.lastFetch)}</td>
-                <td className="text-center">
-                  {r.lastError ? (
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
-                      title={r.lastError}
-                    />
-                  ) : (
-                    ''
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+          {typeKeys.map((type) => (
+            <tr key={type}>
+              <td className="text-white/40">{type}</td>
+              <td className="text-right tabular-nums text-white/60">
+                {filterStats.filteredCounts[type] ?? 0} / {filterStats.rawCounts[type] ?? 0}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      {/* Expanded error / quality detail */}
-      {expandedRow &&
-        (() => {
-          const row = rows.find((r) => r.name === expandedRow);
-          if (!row) return null;
-          return (
-            <div className="mt-1 rounded border border-white/5 bg-white/5 p-1.5">
-              {row.quality && (
-                <div className="text-[9px] text-white/50">
-                  <span className="font-bold text-white/40">Quality:</span> {row.quality}
-                </div>
-              )}
-              {row.lastError && (
-                <div className="mt-0.5 text-[9px] text-red-400">
-                  <span className="font-bold">Error:</span> {row.lastError}
-                </div>
-              )}
-              {row.note && (
-                <div className="mt-0.5 text-[9px] text-white/40">
-                  <span className="font-bold">Note:</span> {row.note}
-                </div>
-              )}
-            </div>
-          );
-        })()}
+      {/* Phase 27.3.1 R-08 D-28 — per-country admission table */}
+      {byCountrySorted.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Country
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {byCountrySorted.map(([country, perType]) => (
+                <tr key={country}>
+                  <td className="text-white/40">{country}</td>
+                  <td className="text-right tabular-nums text-white/60">
+                    {Object.entries(perType)
+                      .map(([t, n]) => `${t}=${n}`)
+                      .join(' ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
 
-      {/* LLM Pipeline Progress */}
+      {/* Phase 27.3.1 R-08 D-31 — per-type rejection breakdown
+          Phase 27.3.1 Plan 10 (G2) — added `turkey=` bucket display. */}
+      {Object.keys(filterStats.byTypeRejections).length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Rejections by Type
+          </div>
+          {Object.entries(filterStats.byTypeRejections).map(([type, buckets]) => (
+            <div key={type} className="text-[9px] text-white/60">
+              <span className="text-white/40">{type}:</span> excl={buckets.excluded_location}{' '}
+              turkey={buckets.excluded_turkey} nn={buckets.not_notable} nname={buckets.no_name} dup=
+              {buckets.duplicate} low={buckets.low_score} nocity={buckets.no_city}
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* Total rejections (back-compat + quick-scan view).
+          Phase 27.3.1 Plan 10 (G2) — added `turkey=` summed bucket. */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Total rejections:</span> excl=
+        {filterStats.rejections.excluded_location} turkey={filterStats.rejections.excluded_turkey}{' '}
+        nn={filterStats.rejections.not_notable} nname={filterStats.rejections.no_name} dup=
+        {filterStats.rejections.duplicate} low={filterStats.rejections.low_score} nocity=
+        {filterStats.rejections.no_city}
+      </div>
+
+      {/* Enrichment coverage */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Enriched:</span> cap=
+        {filterStats.enrichment.withCapacity} city={filterStats.enrichment.withCity} river=
+        {filterStats.enrichment.withRiver}
+      </div>
+
+      {/* Phase 27.3.1 R-08 D-29 — Overpass health rows */}
+      {filterStats.overpass.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Overpass Health
+          </div>
+          {filterStats.overpass.map((rec, i) => (
+            <div key={i} className={`text-[9px] ${rec.ok ? 'text-white/60' : 'text-red-400'}`}>
+              {rec.facilityType} · {rec.mirror} · status={rec.status} · {rec.durationMs}ms ·
+              attempts={rec.attempts} {rec.ok ? 'OK' : 'FAIL'}
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* Score histogram */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Scores:</span>{' '}
+        {filterStats.scoreHistogram.map((b) => `${b.bucket}:${b.count}`).join(' ')}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Phase 27.3.1 R-05 D-19 — Dev-only diagnostics for the sites pipeline.
+ *
+ * Mirrors WaterFiltersSection layout: provenance header (source +
+ * generatedAt), raw/kept summary, per-type counts, per-country top-12 table,
+ * rejection bucket row, Overpass health rows. Null-renders a placeholder
+ * when filterStats is absent (cached or pre-fetch state — matches water
+ * truth-21 regression guard pattern).
+ *
+ * Intentional asymmetries vs WaterFiltersSection (see Plan 07 SUMMARY
+ * §"R-05 Observability Asymmetry"):
+ *   - 4 rejection buckets (excluded_turkey / no_coords / no_type / duplicate)
+ *     vs water's 6 — sites adapter is simpler (single Overpass query, no
+ *     compound admission gate, no scoring, no nearestCity requirement).
+ *     Do NOT invent placeholder buckets (no_name / not_notable / low_score /
+ *     no_city) — they would always be zero and are misleading.
+ *   - No per-type rejection split (sites has one combined query across all 5
+ *     types; water has per-type queries with per-type rejection tallies).
+ *
+ * Per-country table is capped at top-12 (same T-27.3.1.03-04 DoS mitigation
+ * as water — `.slice(0, 12)`).
+ */
+function SitesFiltersSection() {
+  const filterStats = useSiteStore((s) => s.filterStats);
+
+  if (!filterStats) {
+    return (
       <div className="mt-2 border-t border-white/10 pt-2">
         <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
-          LLM Pipeline
+          Sites Filters
         </span>
-        <div className="mt-0.5 text-[9px]">
-          <LLMPipelineSection llmStatus={llmStatus} />
-        </div>
+        <div className="mt-0.5 text-[9px] italic text-white/40">loading filter stats…</div>
       </div>
+    );
+  }
+
+  const keepPct =
+    filterStats.rawCount > 0
+      ? Math.round((filterStats.filteredCount / filterStats.rawCount) * 100)
+      : 0;
+
+  // Per-type entries sorted by count desc for at-a-glance scannability
+  const typeEntries = Object.entries(filterStats.byType).sort(([, a], [, b]) => b - a);
+
+  // Top 12 countries by total admitted sites (DoS cap matches water D-28)
+  const byCountrySorted = Object.entries(filterStats.byCountry)
+    .sort(
+      ([, a], [, b]) =>
+        Object.values(b).reduce((s, n) => s + n, 0) - Object.values(a).reduce((s, n) => s + n, 0),
+    )
+    .slice(0, 12);
+
+  return (
+    <div className="mt-2 border-t border-white/10 pt-2">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+        Sites Filters
+      </span>
+
+      {/* Phase 27.3.1 R-05 D-30 parity — provenance header */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Source:</span> {filterStats.source} ·{' '}
+        <span className="font-bold text-white/40">Generated:</span>{' '}
+        {relativeTime(filterStats.generatedAt)}
+      </div>
+
+      {/* Raw vs filtered summary */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        {filterStats.rawCount} raw → {filterStats.filteredCount} kept ({keepPct}%)
+      </div>
+
+      {/* Per-type breakdown */}
+      {typeEntries.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Type
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {typeEntries.map(([type, count]) => (
+                <tr key={type}>
+                  <td className="text-white/40">{type}</td>
+                  <td className="text-right tabular-nums text-white/60">{count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {/* Phase 27.3.1 R-05 D-28 parity — per-country admission table */}
+      {byCountrySorted.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            By Country
+          </div>
+          <table className="mt-0.5 w-full text-[9px]">
+            <tbody>
+              {byCountrySorted.map(([country, perType]) => (
+                <tr key={country}>
+                  <td className="text-white/40">{country}</td>
+                  <td className="text-right tabular-nums text-white/60">
+                    {Object.entries(perType)
+                      .map(([t, n]) => `${t}=${n}`)
+                      .join(' ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {/* Rejections — 4 buckets only (sites adapter register; see JSDoc above) */}
+      <div className="mt-0.5 text-[9px] text-white/60">
+        <span className="font-bold text-white/40">Rejections:</span> turkey=
+        {filterStats.rejections.excluded_turkey} nocoords=
+        {filterStats.rejections.no_coords} notype={filterStats.rejections.no_type} dup=
+        {filterStats.rejections.duplicate}
+      </div>
+
+      {/* Phase 27.3.1 R-05 D-29 parity — Overpass health rows */}
+      {filterStats.overpass.length > 0 && (
+        <>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            Overpass Health
+          </div>
+          {filterStats.overpass.map((rec, i) => (
+            <div key={i} className={`text-[9px] ${rec.ok ? 'text-white/60' : 'text-red-400'}`}>
+              {rec.facilityType} · {rec.mirror} · status={rec.status} · {rec.durationMs}ms ·
+              attempts={rec.attempts} {rec.ok ? 'OK' : 'FAIL'}
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

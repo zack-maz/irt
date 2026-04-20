@@ -199,6 +199,17 @@ vi.mock('../../adapters/open-meteo-precip.js', () => ({
   fetchPrecipitation: vi.fn(async () => []),
 }));
 
+// Mock dev file cache — prevent tests from writing fixture events to
+// .dev-cache/llm-events.json, which the dev server reads on startup and
+// would serve on every /api/events request until the file is deleted or
+// MAX_AGE_MS (48h) elapses. Mirror of the same mock in water.test.ts.
+vi.mock('../../cache/devFileCache.js', () => ({
+  saveDevLLMCache: vi.fn(),
+  loadDevLLMCache: vi.fn(() => null),
+  saveDevWaterCache: vi.fn(),
+  loadDevWaterCache: vi.fn(() => null),
+}));
+
 // Mock Redis cache module with in-memory store
 const mockRedisGet = vi.fn(async (key: string) => rawRedisStore.get(key) ?? null);
 const mockRedisSet = vi.fn(async (key: string, value: unknown, _opts?: unknown) => {

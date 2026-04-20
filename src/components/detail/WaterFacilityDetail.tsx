@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { WaterFacility } from '../../../server/types';
 import { stressToRGBA, bwsScoreToLabel, healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
+import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { useEventStore } from '@/stores/eventStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -15,7 +17,6 @@ const WATER_TYPE_LABELS: Record<string, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination Plant',
-  treatment_plant: 'Treatment Plant',
 };
 
 interface WaterFacilityDetailProps {
@@ -36,9 +37,6 @@ function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Event types that mark a facility as "destroyed" (score 0) */
-const DESTRUCTIVE_EVENT_TYPES = new Set(['airstrike', 'explosion']);
-
 function computeWaterAttackStatus(
   facility: WaterFacility,
   events: ConflictEventEntity[],
@@ -50,7 +48,9 @@ function computeWaterAttackStatus(
       return false;
     return haversineDistanceKm(facility.lat, facility.lng, e.lat, e.lng) <= ATTACK_RADIUS_KM;
   });
-  const isDestroyed = attacks.some((e) => DESTRUCTIVE_EVENT_TYPES.has(e.type));
+  // REV-5: use shared WATER_ATTACK_EVENT_TYPES so 'targeted' and 'on_ground'
+  // also mark the facility as destroyed (matches useWaterLayers map coloring).
+  const isDestroyed = attacks.some((e) => WATER_ATTACK_EVENT_TYPES.has(e.type));
   return {
     isAttacked: attacks.length > 0,
     isDestroyed,
@@ -97,7 +97,7 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
         <div className="relative -mx-3 -mt-1 mb-2 overflow-hidden rounded-b-lg">
           <img
             src={imageUrl}
-            alt={facility.label}
+            alt={getWaterFacilityDisplayName(facility)}
             onError={() => setImgError(true)}
             className="h-36 w-full object-cover"
           />
@@ -177,6 +177,67 @@ export function WaterFacilityDetail({ facility }: WaterFacilityDetailProps) {
               <span className="text-[10px] text-text-muted">Updated {precipAge}s ago</span>
             </div>
           )}
+        </>
+      )}
+
+      {/* Capacity — D-06 enrichment (optional, only present when OSM had the tags) */}
+      {facility.capacity && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Capacity
+          </h3>
+          {facility.capacity.height !== undefined && (
+            <DetailValue label="Height" value={`${facility.capacity.height} m`} />
+          )}
+          {facility.capacity.volume !== undefined && (
+            <DetailValue
+              label="Volume"
+              value={`${(facility.capacity.volume / 1_000_000).toFixed(1)} M m³`}
+            />
+          )}
+          {facility.capacity.area !== undefined && (
+            <DetailValue label="Area" value={`${facility.capacity.area.toFixed(2)} km²`} />
+          )}
+        </>
+      )}
+
+      {/* Population Served — D-07 enrichment (nearest city within 150km) */}
+      {facility.nearestCity && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Population Served (approx)
+          </h3>
+          <DetailValue
+            label={facility.nearestCity.name}
+            value={`${(facility.nearestCity.population / 1_000_000).toFixed(1)}M people`}
+          />
+          <DetailValue label="Distance" value={`${facility.nearestCity.distanceKm} km`} />
+        </>
+      )}
+
+      {/* River System — D-08 enrichment (linked major river within 20km) */}
+      {facility.linkedRiver && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            River System
+          </h3>
+          <DetailValue
+            label={facility.linkedRiver.name}
+            value={`${facility.linkedRiver.distanceKm} km away`}
+          />
+          <p className="px-3 pb-1 text-[10px] text-text-muted">
+            Damage to this facility may impact downstream {facility.linkedRiver.name} users.
+          </p>
+        </>
+      )}
+
+      {/* Notability Score — dev-only observability hook for tuning thresholds */}
+      {import.meta.env.DEV && facility.notabilityScore !== undefined && (
+        <>
+          <h3 className="text-[10px] uppercase tracking-wider text-text-muted mb-1 mt-3">
+            Notability Score (dev)
+          </h3>
+          <DetailValue label="Score" value={`${facility.notabilityScore} / 100`} />
         </>
       )}
 

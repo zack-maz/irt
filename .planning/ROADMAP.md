@@ -125,10 +125,42 @@ Plans:
 
 ### Phase 27.3: Water Facility Filtering Improvements
 
-**Goal:** Improve the filtering and selection of water facilities pulled from Overpass — refine query criteria, reduce noise, ensure we're pulling the right facility types and data fields.
+**Goal:** Fix dam filtering (union tags + relaxed notability), reduce reservoir noise to 50-200 via HOLISTIC filter (wikidata OR wikipedia OR (named AND priority country)), remove treatment_plant type entirely, enrich facilities with capacity/population/river data via bbox-pre-filtered pipeline, preload facility data via dev file cache, fix the invisible-attacked-water-sites bug, and add dev filter diagnostics. Make the water layer Palantir-grade using only free/public APIs.
 **Depends on:** Phase 27.2
-**Requirements:** TBD
-**Plans:** 0 plans
+**Requirements:** D-01 through D-08 (from 27.3-CONTEXT.md)
+**Plans:** 5/5 plans complete
+
+Plans:
+
+- [x] 27.3-01-PLAN.md — Server-side: types, union dam query, holistic reservoir filter, bbox-pre-filtered enrichment (capacity/city/river), dev file cache, filter stats, tests
+- [x] 27.3-02-PLAN.md — Client-side: treatment_plant removal cascade, Capacity + Watershed detail sections, Water Filters diagnostics in DevApiStatus, attacked-water-sites bug fix in useWaterLayers
+- [x] 27.3-03-PLAN.md — Gap closure: water route test mock emptyStats fixture (G-01/WR-02), WATER_ATTACK_EVENT_TYPES shared constant across 3 consumers (WR-01 REV-5 consistency)
+- [x] 27.3-04-PLAN.md — Gap closure: UAT Test 3 "Dam near unknown" — server filter tightening (no_city rejection bucket) + client getWaterFacilityDisplayName helper
+- [x] 27.3-05-PLAN.md — Gap closure: UAT re-run tests 6/7/8 — scope no_city to reservoirs only (+ priority-country named exemption), name-based dam reclassification (Hub Dam), getWaterFacilityDisplayName generic-token sentinel, DevApiStatus cached-response placeholder
+
+### Phase 27.3.1: Water Facility Retry and Cleanup (INSERTED) — COMPLETE (2026-04-19)
+
+**Goal:** Verify + calibrate Package A filter counts (~100–500 dams / ~100–500 reservoirs / ~13 desal, every facility significant with a real OSM name), persist water facilities to a committed JSON snapshot so cold-starts don't depend on Overpass availability, audit sites for the same pattern, and clean up `overpass-water.ts` accumulated complexity from Plans 01–05 + two debug rounds. Architecture must scale to many concurrent users — Overpass never on the request path synchronously.
+**Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
+**Requirements:** R-01 through R-08 (from 27.3.1-CONTEXT.md)
+**Plans:** 12/12 complete (8/8 initial shipped; 4 gap-closure plans 09-12 shipped 2026-04-19 closing all 7 UAT gaps G1-G7)
+**Verification:** 10/10 must-have truths code-verified; HUMAN-UAT.md 3/3 pass (Gap 1 resolved inline via commit 9705893 — Water/Sites tabs gated on layer toggles); Gap 2 queued as Phase 27.3.2 below
+
+**Gap-closure plans (27.3.1-UAT.md → 27.3.1-DIAGNOSIS.md):**
+
+- [x] 27.3.1-09-PLAN.md — G5: npm script .env loading (wave 1; unblocks refresh:water)
+- [x] 27.3.1-10-PLAN.md — G1+G2: hasName tightening + drop Turkey from PRIORITY_COUNTRIES + excluded_turkey bucket + delete waterLabeling.ts + regenerate snapshot (wave 2); snapshot 602 → 436 facilities
+- [x] 27.3.1-11-PLAN.md — G3+G4: Redis envelope persistence (water:facilities:v2 + sites:v3 key bump) so R-08 observability survives cache writes (wave 3)
+- [x] 27.3.1-12-PLAN.md — G6+G7: DevApiStatus top-bar modal restructure + G7 data-reality closeout note (wave 4)
+
+### Phase 27.3.2: Water Facility Admission Tightening — Drop City/Coord Fallbacks
+
+**Goal:** Tighten water facility admission so the snapshot contains only real-named or river-resolved facilities. Drop any OSM element whose (`name` / `name:en` / `operator` / river-match) chain all return empty — currently such elements are admitted with a city-fallback ("Dam near Mosul") or coord-fallback ("Dam at 36.12°N, 43.00°E") label derived client-side. After this phase, the `GENERIC_TYPE_RE` client-side sentinel fallback in `src/lib/waterLabel.ts` becomes effectively unreachable and can be kept only as a safety net.
+**Depends on:** Phase 27.3.1 merged to main
+**Requirements:** TBD — forward-looking tightening queued from 27.3.1-HUMAN-UAT.md Gap 2 (severity: minor, scope_change classification)
+**Plans:** 0 plans (to author)
+**Source:** 27.3.1-HUMAN-UAT.md → Gap 2. User feedback: "I want to remove city and coord fallbacks and just drop those facilities."
+**Expected impact:** Snapshot admission count drops below current 436 by removing the subset of the 137 bare-label facilities that resolve only to city/coord rather than to a river. Adds a new rejection bucket (e.g. `no_resolved_name`) to `WaterFilterStats.rejections`.
 
 ### Phase 27.4: LLM Enrichment Improvements
 

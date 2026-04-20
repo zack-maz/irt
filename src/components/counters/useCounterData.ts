@@ -9,6 +9,8 @@ import { computeAttackStatus } from '@/lib/attackStatus';
 import { haversineKm } from '@/lib/geo';
 import { classifySeverity } from '@/lib/severity';
 import { healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
+import { WATER_ATTACK_EVENT_TYPES } from '@/lib/waterAttackEvents';
 import { CONFLICT_TOGGLE_GROUPS, EVENT_TYPE_LABELS } from '@/types/ui';
 import type {
   FlightEntity,
@@ -32,7 +34,6 @@ export interface WaterCounts {
   dam: number;
   reservoir: number;
   desalination: number;
-  treatment_plant: number;
   total: number;
 }
 
@@ -138,19 +139,12 @@ function toSiteEntity(s: SiteEntity, attackCount: number): CounterEntity {
   return { id: s.id, label: s.label, metric, lat: s.lat, lng: s.lng, type: s.siteType };
 }
 
-const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
-  dam: 'Dam',
-  reservoir: 'Reservoir',
-  desalination: 'Desalination',
-  treatment_plant: 'Treatment Plant',
-};
-
 function toWaterEntity(w: WaterFacility, isAttacked: boolean): CounterEntity {
   const score = isAttacked ? 0 : healthToScore(w.stress.compositeHealth);
   const metric = `${score}/10 ${scoreToLabel(score)}`;
   return {
     id: w.id,
-    label: w.label || WATER_TYPE_LABELS[w.facilityType],
+    label: getWaterFacilityDisplayName(w),
     metric,
     lat: w.lat,
     lng: w.lng,
@@ -194,6 +188,16 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
   const waterFacilities = useWaterStore((s) => s.facilities);
   const isWaterLayerActive = useLayerStore((s) => s.activeLayers.has('water'));
 
+  // Water facility filter selectors (must mirror useWaterLayers so counters and map agree).
+  const showWater = useFilterStore((s) => s.showWater);
+  const enabledWaterTypes = useFilterStore((s) => s.enabledWaterTypes);
+  const waterNameFilter = useFilterStore((s) => s.waterNameFilter);
+  const showHighStress = useFilterStore((s) => s.showHighStress);
+  const showMediumStress = useFilterStore((s) => s.showMediumStress);
+  const showLowStress = useFilterStore((s) => s.showLowStress);
+  const showHealthyWater = useFilterStore((s) => s.showHealthyWater);
+  const showAttackedWater = useFilterStore((s) => s.showAttackedWater);
+
   return useMemo(() => {
     // Apply independent flight visibility toggles (matching useEntityLayers)
     const visibleFlights = filteredFlights.filter((f: FlightEntity) => {
@@ -219,11 +223,18 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     });
 
     // Apply conflict visibility toggles (master gate + sub-toggles)
-    const airstrikes = showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
-    const onGroundCount = showEvents && showOnGroundToggle ? countByGroup(severityFilteredEvents, ON_GROUND_TYPES) : 0;
-    const explosionsCount = showEvents && showExplosionsToggle ? countByGroup(severityFilteredEvents, EXPLOSION_TYPES) : 0;
-    const targeted = showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
-    const otherCount = showEvents && showOtherToggle ? countByGroup(severityFilteredEvents, OTHER_TYPES) : 0;
+    const airstrikes =
+      showEvents && showAirstrikes ? countByGroup(severityFilteredEvents, AIRSTRIKE_TYPES) : 0;
+    const onGroundCount =
+      showEvents && showOnGroundToggle ? countByGroup(severityFilteredEvents, ON_GROUND_TYPES) : 0;
+    const explosionsCount =
+      showEvents && showExplosionsToggle
+        ? countByGroup(severityFilteredEvents, EXPLOSION_TYPES)
+        : 0;
+    const targeted =
+      showEvents && showTargetedToggle ? countByGroup(severityFilteredEvents, TARGETED_TYPES) : 0;
+    const otherCount =
+      showEvents && showOtherToggle ? countByGroup(severityFilteredEvents, OTHER_TYPES) : 0;
 
     // Sites: per-type counts + entity collection with proximity filtering
     const siteCounts: SiteCounts = { nuclear: 0, naval: 0, oil: 0, airbase: 0, port: 0, total: 0 };
@@ -267,24 +278,47 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
       dam: 0,
       reservoir: 0,
       desalination: 0,
-      treatment_plant: 0,
       total: 0,
     };
     const waterEntities: Record<WaterFacilityType, CounterEntity[]> = {
       dam: [],
       reservoir: [],
       desalination: [],
-      treatment_plant: [],
     };
 
-    if (isWaterLayerActive) {
-      // Pre-compute destroyed set (destructive events within 5km)
-      const DESTRUCTIVE = new Set(['airstrike', 'explosion']);
+    if (isWaterLayerActive && showWater) {
+      // Apply the same filters useWaterLayers applies, in the same order, so
+      // counters match what the map is rendering. Drift between these two
+      // paths is a recurring bug (WR-01 family) — keep them in lock-step.
+      let visibleWater = waterFacilities.filter((f) => enabledWaterTypes.includes(f.facilityType));
+
+      if (waterNameFilter) {
+        const q = waterNameFilter.toLowerCase();
+        visibleWater = visibleWater.filter((f) => f.label.toLowerCase().includes(q));
+      }
+
+      if (proximityPin) {
+        visibleWater = visibleWater.filter(
+          (f) => haversineKm(proximityPin.lat, proximityPin.lng, f.lat, f.lng) <= proximityRadiusKm,
+        );
+      }
+
+      // Stress level filter based on compositeHealth (thresholds must match useWaterLayers).
+      visibleWater = visibleWater.filter((f) => {
+        const h = f.stress.compositeHealth;
+        if (h <= 0.33) return showHighStress;
+        if (h <= 0.66) return showMediumStress;
+        return showLowStress;
+      });
+
+      // Pre-compute destroyed set (REV-5 attack events within 5km) from the
+      // already-narrowed visibleWater list. Shared WATER_ATTACK_EVENT_TYPES
+      // keeps this in lock-step with map + detail panel.
       const destructive = allEvents.filter(
-        (e) => DESTRUCTIVE.has(e.type) && e.timestamp <= dateEnd,
+        (e) => WATER_ATTACK_EVENT_TYPES.has(e.type) && e.timestamp <= dateEnd,
       );
       const destroyedWater = new Set<string>();
-      for (const wf of waterFacilities) {
+      for (const wf of visibleWater) {
         for (const e of destructive) {
           if (Math.abs(e.lat - wf.lat) > 0.05 || Math.abs(e.lng - wf.lng) > 0.05) continue;
           if (haversineKm(wf.lat, wf.lng, e.lat, e.lng) <= 5) {
@@ -294,7 +328,15 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
         }
       }
 
-      for (const wf of waterFacilities) {
+      // Healthy/attacked visibility filter (must run after destroyedWater is computed).
+      if (!showAttackedWater || !showHealthyWater) {
+        visibleWater = visibleWater.filter((f) => {
+          const isAttacked = destroyedWater.has(f.id);
+          return isAttacked ? showAttackedWater : showHealthyWater;
+        });
+      }
+
+      for (const wf of visibleWater) {
         waterCounts[wf.facilityType]++;
         waterCounts.total++;
         waterEntities[wf.facilityType].push(toWaterEntity(wf, destroyedWater.has(wf.id)));
@@ -319,45 +361,50 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     const shipEntities = sortByProximity(visibleShips.map(toShipEntity), STRAIT_HORMUZ);
 
     // Event entities (apply conflict visibility toggles)
-    const airstrikeEventEntities = showEvents && showAirstrikes
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const airstrikeEventEntities =
+      showEvents && showAirstrikes
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, AIRSTRIKE_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const onGroundEventEntities = showEvents && showOnGroundToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, ON_GROUND_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const onGroundEventEntities =
+      showEvents && showOnGroundToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, ON_GROUND_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const explosionEventEntities = showEvents && showExplosionsToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, EXPLOSION_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const explosionEventEntities =
+      showEvents && showExplosionsToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, EXPLOSION_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const targetedEventEntities = showEvents && showTargetedToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const targetedEventEntities =
+      showEvents && showTargetedToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, TARGETED_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
-    const otherEventEntities = showEvents && showOtherToggle
-      ? sortByProximity(
-          filterByGroup(severityFilteredEvents, OTHER_TYPES).map(toEventEntity),
-          TEHRAN,
-          TEL_AVIV,
-        )
-      : [];
+    const otherEventEntities =
+      showEvents && showOtherToggle
+        ? sortByProximity(
+            filterByGroup(severityFilteredEvents, OTHER_TYPES).map(toEventEntity),
+            TEHRAN,
+            TEL_AVIV,
+          )
+        : [];
 
     const entities: CounterEntities = {
       flights: flightEntities,
@@ -410,5 +457,13 @@ export function useCounterData(): CounterValues & { entities: CounterEntities } 
     showAttackedSites,
     waterFacilities,
     isWaterLayerActive,
+    showWater,
+    enabledWaterTypes,
+    waterNameFilter,
+    showHighStress,
+    showMediumStress,
+    showLowStress,
+    showHealthyWater,
+    showAttackedWater,
   ]);
 }

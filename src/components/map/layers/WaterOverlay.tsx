@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { stressToRGBA, healthToScore, scoreToLabel } from '@/lib/waterStress';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 import type { WaterFacility, WaterFacilityType } from '../../../../server/types';
 
 /** Human-readable labels for water facility types */
@@ -14,7 +15,6 @@ const WATER_TYPE_LABELS: Record<WaterFacilityType, string> = {
   dam: 'Dam',
   reservoir: 'Reservoir',
   desalination: 'Desalination Plant',
-  treatment_plant: 'Treatment Plant',
 };
 
 interface WaterTooltipProps {
@@ -37,7 +37,7 @@ export function WaterTooltip({ facility, isAttacked }: WaterTooltipProps): React
 
   return (
     <div className="space-y-1 text-xs">
-      <div className="font-semibold text-white">{facility.label}</div>
+      <div className="font-semibold text-white">{getWaterFacilityDisplayName(facility)}</div>
       <div className="text-zinc-400">{WATER_TYPE_LABELS[facility.facilityType]}</div>
       <div className="flex items-center gap-1.5">
         <span

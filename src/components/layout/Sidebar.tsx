@@ -265,15 +265,6 @@ function CountersContent() {
               selectedEntityId={selectedEntityId}
             />
             <CounterRow
-              label="Plants"
-              value={counters.water.treatment_plant}
-              entities={counters.entities.water.treatment_plant}
-              isExpanded={expandedKey === 'water-plant'}
-              onToggle={() => handleToggle('water-plant')}
-              onEntityClick={handleEntityClick}
-              selectedEntityId={selectedEntityId}
-            />
-            <CounterRow
               label="Desalination"
               value={counters.water.desalination}
               entities={counters.entities.water.desalination}

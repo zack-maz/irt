@@ -30,6 +30,14 @@ export const useUIStore = create<UIState>()((set, get) => ({
   expandedAlertSiteId: null,
   navigationStack: [],
   slideDirection: null,
+  // Phase 27.3.1 Plan 12 G6 — DevApiStatus modal state (session-scoped; no
+  // localStorage persistence by design — the modal is a dev-only diagnostic
+  // and should not resurrect across reloads)
+  isDevApiStatusOpen: false,
+  activeDevApiStatusTab: 'overview',
+  openDevApiStatus: () => set({ isDevApiStatusOpen: true }),
+  closeDevApiStatus: () => set({ isDevApiStatusOpen: false }),
+  setDevApiStatusTab: (tab) => set({ activeDevApiStatusTab: tab }),
   openDetailPanel: () => set({ isDetailPanelOpen: true }),
   closeDetailPanel: () => set({ isDetailPanelOpen: false }),
   toggleStatus: () => set((s) => ({ isStatusCollapsed: !s.isStatusCollapsed })),

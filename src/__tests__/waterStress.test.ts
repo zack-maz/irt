@@ -174,14 +174,14 @@ describe('WATER_STRESS_LEGEND_STOPS', () => {
     }
   });
 
-  it('includes Destroyed entry with black color', () => {
+  it('includes Destroyed entry with deep dark purple color', () => {
     const destroyedStop = WATER_STRESS_LEGEND_STOPS.find((s) => s.label.includes('Destroyed'));
     expect(destroyedStop).toBeDefined();
-    expect(destroyedStop!.color).toBe('#000000');
+    expect(destroyedStop!.color).toBe('#2d0a4e');
   });
 
   it('first stop is the Destroyed entry', () => {
     expect(WATER_STRESS_LEGEND_STOPS[0].label).toContain('Destroyed');
-    expect(WATER_STRESS_LEGEND_STOPS[0].color).toBe('#000000');
+    expect(WATER_STRESS_LEGEND_STOPS[0].color).toBe('#2d0a4e');
   });
 });

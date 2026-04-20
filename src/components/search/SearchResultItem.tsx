@@ -2,6 +2,7 @@ import type { MapEntity, SiteEntity } from '@/types/entities';
 import type { WaterFacility } from '../../../server/types';
 import { ENTITY_DOT_COLORS } from '@/components/map/layers/constants';
 import { EVENT_TYPE_LABELS } from '@/types/ui';
+import { getWaterFacilityDisplayName } from '@/lib/waterLabel';
 
 type SearchableEntity = MapEntity | SiteEntity | WaterFacility;
 
@@ -51,7 +52,11 @@ export function SearchResultItem({
 
       {/* Label + match info */}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-text-primary">{entity.label}</div>
+        <div className="truncate text-sm font-medium text-text-primary">
+          {entity.type === 'water'
+            ? getWaterFacilityDisplayName(entity as WaterFacility)
+            : entity.label}
+        </div>
         {matchField !== 'name' && matchField !== 'callsign' && matchField !== 'label' && (
           <div className="truncate text-xs text-text-secondary">
             {matchField}: {matchValue}

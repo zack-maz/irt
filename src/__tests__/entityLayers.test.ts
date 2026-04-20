@@ -113,10 +113,9 @@ describe('Icon Mapping', () => {
     'waterDam',
     'waterReservoir',
     'waterDesalination',
-    'waterTreatment',
     'triangle',
   ] as const;
-  it('has all 18 icon keys', () => {
+  it('has all 17 icon keys', () => {
     expect(Object.keys(ICON_MAPPING).sort()).toEqual([...expectedKeys].sort());
   });
   for (const key of expectedKeys) {

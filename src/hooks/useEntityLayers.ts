@@ -171,6 +171,7 @@ export function useEntityLayers() {
   const showOtherToggle = useFilterStore((s) => s.showOther);
   const showUnidentified = useFilterStore((s) => s.showUnidentified);
   const showGroundTraffic = useFilterStore((s) => s.showGroundTraffic);
+  const showSites = useFilterStore((s) => s.showSites);
   const showHealthySites = useFilterStore((s) => s.showHealthySites);
   const showAttackedSites = useFilterStore((s) => s.showAttackedSites);
 
@@ -269,8 +270,9 @@ export function useEntityLayers() {
     [events, eventToggleMap.targeted, showHighSeverity, showMediumSeverity, showLowSeverity],
   );
 
-  // Sites filtered by enabled types, proximity pin, and healthy/attacked toggles
+  // Sites filtered by master toggle, enabled types, proximity pin, and healthy/attacked toggles
   const visibleSites = useMemo(() => {
+    if (!showSites) return [];
     let filtered = sites.filter((s) => enabledSiteTypes.includes(s.siteType));
     if (proximityPin) {
       filtered = filtered.filter(
@@ -278,7 +280,7 @@ export function useEntityLayers() {
       );
     }
     return filtered;
-  }, [sites, enabledSiteTypes, proximityPin, proximityRadiusKm]);
+  }, [sites, showSites, enabledSiteTypes, proximityPin, proximityRadiusKm]);
 
   // Compute attack status for visible sites
   const siteAttackMap = useMemo(() => {
