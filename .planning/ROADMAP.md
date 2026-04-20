@@ -144,7 +144,7 @@ Plans:
 **Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
 **Requirements:** R-01 through R-08 (from 27.3.1-CONTEXT.md)
 **Plans:** 12/12 complete (8/8 initial shipped; 4 gap-closure plans 09-12 shipped 2026-04-19 closing all 7 UAT gaps G1-G7)
-**Verification:** 10/10 must-have truths code-verified; 3 in-browser UX items persist in `27.3.1-HUMAN-UAT.md` (status: partial) until manual sign-off
+**Verification:** 10/10 must-have truths code-verified; HUMAN-UAT.md 3/3 pass (Gap 1 resolved inline via commit 9705893 — Water/Sites tabs gated on layer toggles); Gap 2 queued as Phase 27.3.2 below
 
 **Gap-closure plans (27.3.1-UAT.md → 27.3.1-DIAGNOSIS.md):**
 
@@ -152,6 +152,15 @@ Plans:
 - [x] 27.3.1-10-PLAN.md — G1+G2: hasName tightening + drop Turkey from PRIORITY_COUNTRIES + excluded_turkey bucket + delete waterLabeling.ts + regenerate snapshot (wave 2); snapshot 602 → 436 facilities
 - [x] 27.3.1-11-PLAN.md — G3+G4: Redis envelope persistence (water:facilities:v2 + sites:v3 key bump) so R-08 observability survives cache writes (wave 3)
 - [x] 27.3.1-12-PLAN.md — G6+G7: DevApiStatus top-bar modal restructure + G7 data-reality closeout note (wave 4)
+
+### Phase 27.3.2: Water Facility Admission Tightening — Drop City/Coord Fallbacks
+
+**Goal:** Tighten water facility admission so the snapshot contains only real-named or river-resolved facilities. Drop any OSM element whose (`name` / `name:en` / `operator` / river-match) chain all return empty — currently such elements are admitted with a city-fallback ("Dam near Mosul") or coord-fallback ("Dam at 36.12°N, 43.00°E") label derived client-side. After this phase, the `GENERIC_TYPE_RE` client-side sentinel fallback in `src/lib/waterLabel.ts` becomes effectively unreachable and can be kept only as a safety net.
+**Depends on:** Phase 27.3.1 merged to main
+**Requirements:** TBD — forward-looking tightening queued from 27.3.1-HUMAN-UAT.md Gap 2 (severity: minor, scope_change classification)
+**Plans:** 0 plans (to author)
+**Source:** 27.3.1-HUMAN-UAT.md → Gap 2. User feedback: "I want to remove city and coord fallbacks and just drop those facilities."
+**Expected impact:** Snapshot admission count drops below current 436 by removing the subset of the 137 bare-label facilities that resolve only to city/coord rather than to a river. Adds a new rejection bucket (e.g. `no_resolved_name`) to `WaterFilterStats.rejections`.
 
 ### Phase 27.4: LLM Enrichment Improvements
 
