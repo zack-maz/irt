@@ -90,4 +90,4 @@ Portfolio: 564-line README with hero GIF, 10-file Mermaid architecture deep dive
 
 ---
 
-_Last updated: 2026-03-19 after v1.1 milestone start_
+_Last updated: 2026-04-19 after Phase 27.3.1 gap closure (12/12 plans; all 7 UAT gaps resolved; 3 in-browser sign-off items in HUMAN-UAT.md)_

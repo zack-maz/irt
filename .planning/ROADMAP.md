@@ -138,19 +138,20 @@ Plans:
 - [x] 27.3-04-PLAN.md — Gap closure: UAT Test 3 "Dam near unknown" — server filter tightening (no_city rejection bucket) + client getWaterFacilityDisplayName helper
 - [x] 27.3-05-PLAN.md — Gap closure: UAT re-run tests 6/7/8 — scope no_city to reservoirs only (+ priority-country named exemption), name-based dam reclassification (Hub Dam), getWaterFacilityDisplayName generic-token sentinel, DevApiStatus cached-response placeholder
 
-### Phase 27.3.1: Water Facility Retry and Cleanup (INSERTED)
+### Phase 27.3.1: Water Facility Retry and Cleanup (INSERTED) — COMPLETE (2026-04-19)
 
 **Goal:** Verify + calibrate Package A filter counts (~100–500 dams / ~100–500 reservoirs / ~13 desal, every facility significant with a real OSM name), persist water facilities to a committed JSON snapshot so cold-starts don't depend on Overpass availability, audit sites for the same pattern, and clean up `overpass-water.ts` accumulated complexity from Plans 01–05 + two debug rounds. Architecture must scale to many concurrent users — Overpass never on the request path synchronously.
 **Depends on:** Phase 27.3 (must be merged to main first) + Overpass API recovery (blocked 2026-04-18 15:15 PT)
-**Requirements:** R-01 through R-07 (from 27.3.1-CONTEXT.md)
-**Plans:** 12 plans (8/8 initial shipped; 4 gap-closure plans 09-12 authored 2026-04-18 post-UAT to close G1-G6 + G7 data-reality note)
+**Requirements:** R-01 through R-08 (from 27.3.1-CONTEXT.md)
+**Plans:** 12/12 complete (8/8 initial shipped; 4 gap-closure plans 09-12 shipped 2026-04-19 closing all 7 UAT gaps G1-G7)
+**Verification:** 10/10 must-have truths code-verified; 3 in-browser UX items persist in `27.3.1-HUMAN-UAT.md` (status: partial) until manual sign-off
 
 **Gap-closure plans (27.3.1-UAT.md → 27.3.1-DIAGNOSIS.md):**
 
-- [ ] 27.3.1-09-PLAN.md — G5: npm script .env loading (wave 1; unblocks refresh:water)
-- [ ] 27.3.1-10-PLAN.md — G1+G2: hasName tightening + drop Turkey from PRIORITY_COUNTRIES + excluded_turkey bucket + delete waterLabeling.ts + regenerate snapshot (wave 2)
-- [ ] 27.3.1-11-PLAN.md — G3+G4: Redis envelope persistence (water:facilities:v2 + sites:v3 key bump) so R-08 observability survives cache writes (wave 2, parallel with Plan 10)
-- [ ] 27.3.1-12-PLAN.md — G6+G7: DevApiStatus top-bar modal restructure + G7 data-reality closeout note (wave 3)
+- [x] 27.3.1-09-PLAN.md — G5: npm script .env loading (wave 1; unblocks refresh:water)
+- [x] 27.3.1-10-PLAN.md — G1+G2: hasName tightening + drop Turkey from PRIORITY_COUNTRIES + excluded_turkey bucket + delete waterLabeling.ts + regenerate snapshot (wave 2); snapshot 602 → 436 facilities
+- [x] 27.3.1-11-PLAN.md — G3+G4: Redis envelope persistence (water:facilities:v2 + sites:v3 key bump) so R-08 observability survives cache writes (wave 3)
+- [x] 27.3.1-12-PLAN.md — G6+G7: DevApiStatus top-bar modal restructure + G7 data-reality closeout note (wave 4)
 
 ### Phase 27.4: LLM Enrichment Improvements
 
